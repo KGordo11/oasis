@@ -104,14 +104,21 @@ async def running(
     clock = Clock(k=clock_factor)
     twitter_channel = Channel()
 
-    model_urls = create_model_urls(inference_configs["server_url"])
-    models = [
-        ModelFactory.create(
-            model_platform=ModelPlatformType.VLLM,
-            model_type=inference_configs["model_type"],
-            url=url,
-        ) for url in model_urls
-    ]
+    # Adapted for local Ollama instead of a remote VLLM GPU cluster (the
+    # original inference_configs["server_url"] pointed at the paper authors'
+    # HPC hosts). Same yaml-driven config pattern, single local model instead
+    # of a pool of remote ones.
+    models = ModelFactory.create(
+        model_platform=ModelPlatformType.OLLAMA,
+        model_type=inference_configs.get("model_type", "llama3.1:8b"),
+        url=inference_configs.get("url", "http://localhost:11434/v1"),
+        # A single local model serves every agent's requests, and (in the
+        # shielded runner) two requests per acting agent instead of one --
+        # under concurrent load a request can queue long enough to exceed
+        # the client default timeout. Generous on purpose since this is a
+        # laptop, not a GPU cluster.
+        timeout=300,
+    )
 
     infra = Platform(
         db_path,

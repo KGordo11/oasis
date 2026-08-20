@@ -660,34 +660,26 @@ raw "everyone downvoted this" cue apparently was. The paper's own results
 downstream agent actually acts on a correct Shield verdict once it's
 given one, which is what is observed here.
 
-**Real examples, unshielded** (from Simulation 2's data):
-- *"I think Christian Noboa actually plays for Ecuador, not the position
-  of goaltender"* — a real correction.
-- *"But Pierre Joxe actually worked as the mayor of Marseille"* — a
-  confident-sounding "correction" that is itself unverified/possibly
-  wrong — the same caveat Simulation 2 already flagged about its own
-  data.
+**Real examples.** Each row is a real agent comment on a false post, kept
+verbatim. "What it shows" names the one thing that comment is evidence of
+— not a verdict on the whole condition.
 
-**Real examples, shielded:**
-- *"Lettuce doesn't play jazz."* — correct, and terse; no crowd cue
-  needed.
-- *"I disagree, Ed Broadbent did indeed work with the Liberal Party of
-  Canada, not Hollywood."* — a real, independent correction.
-- *"Pierre Joxe, as a French historian, did indeed have connections to
-  Dresden."* — a false claim stated as fact, despite the Shield correctly
-  flagging the exact same post on a different turn.
-- *"I'm glad Monkey Dust is being recognized for their unique sound!"* —
-  a false post read positively with zero scrutiny — the kind of comment
-  the down-treated condition almost never produced without the shield.
+| Comment (verbatim) | Condition | What it shows |
+|---|---|---|
+| "I think Christian Noboa actually plays for Ecuador, not the position of goaltender" | Unshielded | A genuine, accurate correction |
+| "But Pierre Joxe actually worked as the mayor of Marseille" | Unshielded | A confident-sounding "correction" that is itself unverified/likely wrong — the same data-quality caveat Simulation 2 already flagged |
+| "Lettuce doesn't play jazz." | Shielded | Correct and terse — an absurd claim caught with no crowd cue at all |
+| "I disagree, Ed Broadbent did indeed work with the Liberal Party of Canada, not Hollywood." | Shielded | A genuine, independent correction made with the vote count hidden |
+| "Pierre Joxe, as a French historian, did indeed have connections to Dresden." | Shielded | The false claim stated as fact — on a *different* turn the Shield correctly flagged this exact post, but that didn't stop this agent from affirming it |
+| "I'm glad Monkey Dust is being recognized for their unique sound!" | Shielded | A false post read positively with zero scrutiny — the kind of comment the down-treated condition almost never produced *without* the shield |
 
-**In plain terms:** the Shield does what it was built to do — the raw
-vote count genuinely never reaches the agent's prompt on a successful
-Shield call, which was double-checked directly with an automated test
-that fails loudly if a vote number ever slips through. But hiding that
-signal didn't just remove herd behavior — in this run, it removed most
-of the *skepticism* Simulation 2 had measured, without reliably
-replacing it with independent accuracy. That's a real, if slightly
-unflattering, result.
+**In plain terms:** the Shield does what it was built to do. The raw vote
+count genuinely never reaches the agent's prompt on a successful Shield
+call — double-checked with an automated test that fails loudly if a vote
+number ever slips through. But hiding that signal didn't just remove herd
+behavior; in this run it also removed most of the *skepticism* Simulation
+2 had measured, without reliably replacing it with independent accuracy.
+That's a real, if slightly unflattering, result.
 
 ---
 
@@ -740,16 +732,25 @@ later runs in this section went so much faster than the first ones.
 
 ### Every individual run, laid out plainly
 
-| Condition | Unshielded (Sim 2) | Shielded, run by run | Pooled shielded |
-|---|---|---|---|
-| **Up** (+1 fake like) | 4% (1/23) | 26% (6/23), 7% (1/15) | **18%** (7/38) |
-| **Control** (no fake vote) | 11% (3/27) | 58% (11/19), 41% (12/29) | **48%** (23/48) |
-| **Down** (−1 fake dislike) | 68% (15/22) | 23% (3/13), 39% (9/23), 19% (3/16), 26% (7/27) | **28%** (22/79) |
+Every number below is *share of comments using disagreement/correction
+language* (Section 0) — not agreement. Higher means more pushback against
+the false claim. Down has four shielded runs and up/control only have two
+— that gap is real, not a typo (see Open Thread 2): down got replicated
+twice more specifically because its first two runs disagreed with each
+other, and up/control haven't been checked as hard yet.
 
-"Pooled" means: add up every disputing comment and every total comment
-across all the shielded runs of that condition, then divide — the single
-best estimate this data supports, not an average that hides how much the
-individual runs actually disagree with each other.
+| Condition | Unshielded (Sim 2) | Run 1 | Run 2 | Run 3 | Run 4 | Pooled shielded |
+|---|---|---|---|---|---|---|
+| **Up** (+1 fake like) | 4% (1/23) | 26% (6/23) | 7% (1/15) | — | — | **18%** (7/38) |
+| **Control** (no fake vote) | 11% (3/27) | 58% (11/19) | 41% (12/29) | — | — | **48%** (23/48) |
+| **Down** (−1 fake dislike) | 68% (15/22) | 23% (3/13) | 39% (9/23) | 19% (3/16) | 26% (7/27) | **28%** (22/79) |
+
+"Pooled shielded" is not an average of the per-run percentages — it adds
+up every disputing comment and every total comment across all of a
+condition's shielded runs first, then divides once. That's the single
+best estimate this data supports; the per-run columns are what show how
+much the individual runs actually disagree with each other (e.g. down's
+run 2 at 39% vs. its other three runs clustered near 19-26%).
 
 ### Down: the number got clearer, but not perfectly settled
 

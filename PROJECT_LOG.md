@@ -79,6 +79,26 @@ plausibility and strips vote-count fields before the agent sees them —
 testing whether Sim 2's pushback was genuine fact-checking or
 crowd-following.
 
+**Design origin (planned on claude.ai before any code was written):** the
+research question came from noticing OASIS agents have no equivalent of
+the paper's "user-agent-platform" paradigm — the RecSys feeds an agent
+straight, with nothing standing between platform ranking and agent
+decision. The exact interception point was verified against the real
+upstream source before writing anything: `SocialAgent.perform_action_by_llm()`
+in `oasis/social_agent/agent.py`, specifically the line
+`env_prompt = await self.env.to_text_prompt()` — that's the single moment
+the RecSys's chosen posts turn into the text an agent's LLM call reacts
+to, and nothing in the base class stands between them. The design
+deliberately touches only that prompt content, never the agent's
+tool-call response schema, specifically to avoid repeating Sim 1's
+Attempt 1 failure (editing shared files broke tool-calling entirely). An
+early version of the herd-effect design (2 puppet agents, 9 posts split
+into 3 groups of 3, single run) was floated during this planning but
+superseded once the project switched to reusing the paper's own existing
+`reddit_simulation_counterfactual.py` script instead — noted here only
+because it was a real design considered and dropped, not because it was
+built.
+
 - First full run took **4 attempts** (~4 hrs) because 3 real bugs only
   surfaced at full scale: a vote-count field that leaked through under a
   different config key, a timeout that crashed the whole run instead of
@@ -154,6 +174,123 @@ crowd-following.
    vs. skeptical population) vs. agent/human herding gap;
    `llama3.2:3b` vs `llama3.1:8b` model comparison on the identical
    experiment.
+9. **Richer agent personas via MatrAIx-Persona-8B's dataset** (surfaced
+   comparing `camel-ai/oasis` against `MatrAIx-ai/MatrAIx-Persona-8B` as
+   candidate simulators). MatrAIx itself is the wrong tool — it's a
+   persona-driven product-eval harness (Survey/Chatbot/Web/App tasks, one
+   task per persona run), with no feed, no recommender, no social graph,
+   no multi-timestep agent-to-agent loop, so it can't replace OASIS. What
+   it does have that's genuinely richer than `data/reddit/user_data_36.json`:
+   a shared schema of 1,290 categorical persona dimensions (background,
+   psychology, capability, behavior) and a released 1M-persona dataset
+   (`MatrAIx2026/MatrAIx_Persona_1M_Public_Release` on Hugging Face).
+   Idea, not yet started: sample from that dataset and map it into the
+   fields `generate_reddit_agent_graph` expects, in place of or alongside
+   the current 36-persona file, for richer personality-driven behavior.
+   **Not yet verified:** nobody has actually opened the schema/dataset
+   files to confirm field names, format, or license fit this use — only
+   the README's description has been read.
+
+## Codebase reference: what's in `examples/` and `generator/`
+
+A fuller inventory than `LEARN_OASIS.md`'s table — every script in these
+two folders was read (front to back for distinct ones; near-duplicates
+verified by diff), useful when scoping a new experiment idea rather than
+writing one from scratch.
+
+**`examples/` — demo scripts, all follow the same skeleton** (build agent
+graph → `oasis.make()` → `env.reset()` → `ManualAction`/`LLMAction` steps
+→ `env.close()`):
+
+- `quick_start.py` — two hand-built agents (Alice, Bob), no JSON needed;
+  cleanest template for hand-crafting agents.
+- `reddit_simulation_openai.py` — the same shape as the 36-agent runs
+  used throughout this project, on OpenAI instead of Ollama.
+- `twitter_interview.py` — uses `ManualAction(INTERVIEW, ...)` to pause
+  and ask an agent its opinion mid-run; `INTERVIEW` is deliberately kept
+  out of agents' own `available_actions` so it's experimenter-only. Ends
+  by reading interview answers back out of the `trace` table — a
+  ready-made template for pulling structured answers out of a run.
+- `twitter_misinforeport.py` — demos `REPORT_POST`: once a post crosses
+  `report_threshold` (2, in `platform.py`), every agent who sees it
+  afterward gets a `[Warning: This post has been reported N times]`
+  banner stapled to the content. A ready-made content-moderation
+  experiment (do warning labels change agent behavior?).
+- `group_chat_simulation.py` — group-chat create/join/post/react.
+- `custom_platform_simulation.py` — skips the Reddit/Twitter presets and
+  builds a `Platform` by hand; exposes `allow_self_rating` and
+  `show_score` directly. Needed any time an experiment wants platform
+  rules the presets don't offer.
+- `custom_prompt_simulation.py` — gives one agent a custom system-prompt
+  template with an explicit aim (the demo: "persuade people to buy the
+  GlowPod lamp"), paired with `PURCHASE_PRODUCT` and a product table that
+  counts sales — an undercover-salesman-among-normal-users pattern.
+- `different_model_simulation.py` — mixes different LLMs across agents in
+  one run (a GPT agent and a Qwen agent together).
+- `search_tools_simulation.py` / `sympy_tools_simulation.py` — bolt real
+  extra CAMEL tools (DuckDuckGo search, a math solver) onto an agent with
+  `max_iteration=5` so it can reason in multiple steps — i.e. agents that
+  can fact-check, relevant to anything herd/misinformation-related.
+- `twitter_simulation_vllm.py` — the scaling pattern in miniature: two
+  vLLM servers, round-robin scheduling.
+- `experiment/reddit_simulation_align_with_human.py` (the actual
+  Finding-3/herd-effect legacy script): two puppet agents (poster +
+  rater, both literally named "momo," bio `"None"`), real Reddit
+  posts/comments pre-tagged up/down/control fed in, and — the detail
+  worth remembering — every real LLM agent is made to pre-mute the
+  poster puppet *and* has a fake memory implanted ("He is my enemy...")
+  so no agent forms a relationship with the account that posts
+  everything. That's the paper's own anonymity control, and it's a
+  different mechanism from Sim 3's Shield (muting + false memory vs.
+  hiding vote counts) — worth knowing both exist if a future experiment
+  wants to isolate "relationship bias" from "vote-count bias"
+  specifically. `reddit_simulation_counterfactual.py` (Finding 5, the
+  script this project's Sim 2/3 actually use) is the same skeleton with
+  `init_post_score` swapped in per condition instead of real
+  up/down-tagged comments.
+- `experiment/twitter_simulation_group_polar.py` — the Helen-the-novelist
+  polarization experiment (Finding 2/4): every 10 timesteps calls
+  `perform_test()` (hard-coded in `agent.py`) and dumps answers to CSV
+  for extremity judging.
+- `experiment/twitter_simulation_large.py` — Finding 1's real-propagation
+  alignment run; the only one using each agent's real crawled 24-hour
+  activity schedule instead of a synthetic one.
+- `experiment/emall_simulation.py` — registers fake products and lets
+  agents shop; a mini consumer-behavior lab, unrelated to misinformation
+  work but there if ever needed.
+
+**`generator/` — the persona factory:**
+
+- `generator/reddit/user_generate.py` — the demographic dice-roller this
+  project's 36-agent population ultimately traces back to: hard-coded
+  probability tables for gender, 5 age buckets, all 16 MBTI types at real
+  population frequencies, countries, 16 career clusters; then two GPT-3.5
+  calls per person (pick 2-3 interests fitting the rolled demographics;
+  invent name/username/bio/backstory). Runs 100 in parallel threads.
+- `generator/twitter/gen.py` does the same at 60k+ scale; `rag.py` adds
+  retrieval — real Twitter profiles in a Chroma vector DB with BGE
+  embeddings, so generated personas are written in the style of similar
+  real profiles rather than invented from scratch; `network.py` wires
+  generated users to real "star" accounts (follow with probability 0.2
+  per matching interest topic) to produce the celebrity-hub network shape
+  real platforms have; `ba.py` is the random-edges baseline for
+  comparison.
+
+## Research framing (why this is defensible research, not disinfo tooling)
+
+Raised and worth keeping on record: the same simulation machinery can be
+used to *rehearse* a real disinformation campaign (A/B-testing phrasing
+and seed-account strategy in simulation, then deploying the winner
+against real people) or to *stress-test a defense* before it ships (does
+a warning label actually reduce resharing? does down-ranking beat
+fact-check replies? does an effect hold at scale or only look convincing
+at 36 agents?). The tell: whether the work ends with knowledge that
+protects people who were never exposed to the simulated harm, or a
+weapon aimed at people who never agreed to be targets. This project's
+work (herd-behavior measurement, the Shield as a protective
+intermediary) sits on the defensive side of that line by construction —
+worth restating explicitly if this repo or its reports are ever shared
+outside this project.
 
 ## Conventions worth keeping
 
@@ -181,3 +318,13 @@ which sim each covers, and cleaned up two tables in
 `SHIELD_EXPERIMENT_REPORT.md` (`fde088d`). This file created to hold
 future entries like this one directly in the repo, rather than only in
 the assistant's cross-session memory.
+
+Pulled in knowledge from a separate claude.ai website chat (not this
+terminal session) that had done its own read of this fork and planned
+Sim 3 before any code existed: the fuller `examples/`/`generator/`
+inventory above, the verified Shield interception point
+(`perform_action_by_llm()` / `to_text_prompt()` in `oasis/social_agent/agent.py`),
+the research-framing note, and a new open thread (MatrAIx-Persona-8B's
+persona dataset as a possible richer input for agent profiles). The
+website chat and this terminal have no shared memory of each other —
+this kind of manual copy-paste is currently the only way to bridge them.

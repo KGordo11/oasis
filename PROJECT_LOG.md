@@ -1,13 +1,55 @@
 # Project Log
 
-Running log of setup decisions, what's been run, what was found, and
-what's still open — for this fork's local-Ollama experiment work. The
-three full write-ups (`SESSION_REPORT (basic sim1).md`,
+**Purpose of this file: if you are an assistant picking this project up
+with zero prior context, this is the one file to read first.** It's
+written to make you productive immediately, not to be a narrative. Read
+"Start here," skim the sim summaries for what's already proven, check
+"Open threads" before proposing new work (it's probably already listed),
+and follow "Conventions worth keeping" — they exist because skipping them
+already cost real time once. The three full write-ups
+(`SESSION_REPORT (basic sim1).md`,
 `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md`,
-`SHIELD_EXPERIMENT_REPORT.md`) are the detailed reports; this file is the
-shorter, chronological "what happened and why" that ties them together,
-so a new session (or a new reader) doesn't have to re-derive context from
-git history or re-read all three reports cover to cover.
+`SHIELD_EXPERIMENT_REPORT.md`) have the full methodology/data/limitations
+if you need to go deeper than the summaries below — don't re-read them
+just to get oriented, only when a task needs their specific detail.
+
+## Start here
+
+```bash
+cd /Users/gordon/research/oasis
+git status                       # check for uncommitted work FIRST — has
+                                  # happened before, see 2026-08-20 below
+source oasis-env/bin/activate    # Python 3.11 venv
+ollama list                      # confirm llama3.1:8b is present
+ollama serve                     # if not already running
+```
+
+- **Repo:** this directory. Fork `origin` → `github.com/KGordo11/oasis`,
+  `upstream` → `github.com/camel-ai/oasis`, branch `main`.
+- **As of this file's last edit:** working tree clean, local `main` is
+  **5 commits ahead of `origin/main`, unpushed** (nobody's asked to push
+  yet — don't push without asking). Verify this is still true with
+  `git status` / `git log --oneline origin/main..main` — don't trust this
+  paragraph once time has passed.
+- **Model:** Ollama `llama3.1:8b` for every agent and every Shield call —
+  chosen for native tool-calling, which `llama3.2:3b` lacks. If a run
+  feels slow, check `OLLAMA_KEEP_ALIVE` before touching any experiment
+  code (see Conventions).
+- **Every experiment is a zero-diff subclass swap** —
+  `agents_generator.SocialAgent = <CustomAgent>` inside the example
+  script, never an edit to `oasis/` itself. The one exception is
+  documented below (Setup). Follow this pattern for new experiments too.
+- **To run something:** copy the pattern in `SHIELD_EXPERIMENT_REPORT.md`
+  Section 6 — smoke-test at small scale (2 rounds) before a full run (6
+  rounds), always. This is not optional; see Conventions for why.
+- **The science in one paragraph:** Sim 2 showed agents pile on
+  down-voted misinformation far more than up/neutral (68% vs. <15%
+  disagreement). Sim 3 built a "Shield" that hides vote counts and found
+  that pushback *dropped* when the vote cue was removed (68%→28% pooled,
+  p=0.0009) — meaning most of that "skepticism" was crowd-following, not
+  fact-checking — and, more surprisingly, hiding the vote count partially
+  *inverted* which condition draws the most pushback (control becomes
+  highest, not down). Full numbers in the Sim 3 section and its report.
 
 ---
 

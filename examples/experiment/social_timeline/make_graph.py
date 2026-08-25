@@ -131,6 +131,22 @@ HTML = """<title>Agent Network Formation</title>
   .minibar { height:3px; border-radius:2px; background:var(--interact);
              opacity:.75; }
 
+  .algo { border:1px solid var(--line); border-radius:8px;
+          background:var(--panel); padding:16px 18px; display:flex;
+          flex-direction:column; gap:10px; }
+  .algo h2 { font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+             font-size:17px; margin:0; font-weight:700; }
+  .algo code { font-family:"IBM Plex Mono", monospace; font-size:12.5px;
+               background:var(--panel-2); padding:2px 6px; border-radius:4px;
+               display:inline-block; }
+  .algo dl { display:grid; grid-template-columns:auto 1fr; gap:5px 14px;
+             margin:0; font-size:13.5px; }
+  .algo dt { color:var(--muted); font-family:"IBM Plex Mono", monospace;
+             font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .algo dd { margin:0; }
+  .algo ul { margin:0; padding-left:18px; font-size:13.5px; color:var(--muted); }
+  .mix { font-family:"IBM Plex Mono", monospace; font-size:11.5px;
+         color:var(--muted); }
   .note { color:var(--muted); font-size:13px; margin:0;
           border-left:2px solid var(--line); padding-left:14px;
           max-width:72ch; }
@@ -162,6 +178,32 @@ HTML = """<title>Agent Network Formation</title>
     <span><span class="swatch" style="background:var(--follow)"></span><b>Follow</b> &mdash; chosen by an agent</span>
     <span><span class="swatch" style="background:var(--interact)"></span><b>Interaction</b> &mdash; width = count</span>
     <span><b>Node size</b> &mdash; followers</span>
+  </div>
+
+  <section id="algoBox" class="algo"></section>
+
+  <div class="scroll">
+    <table id="agentTable">
+      <caption>Per-agent detail</caption>
+      <thead><tr>
+        <th>Agent</th><th class="num">Actions</th><th class="num">Posts</th>
+        <th class="num">Saw</th><th class="num">Engaged</th>
+        <th class="num">Follows</th><th class="num">Followers</th>
+        <th>Action mix</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="scroll">
+    <table id="propTable">
+      <caption>Propagation &mdash; repeated exposure preceding interaction</caption>
+      <thead><tr>
+        <th>Actor</th><th>Saw</th><th class="num">Times</th>
+        <th>Then did</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
   </div>
 
   <div class="scroll">
@@ -373,6 +415,69 @@ if (!rows.length) {
   }).join('');
 }
 
+// ---- algorithm statement -------------------------------------------------
+// The brief required the algorithm to be stated explicitly and specifically,
+// so it is rendered from the run manifest rather than described in prose.
+const A = DATA.algorithm || {}, C = DATA.config || {};
+if (A.name) {
+  const dev = (A.deviations_from_upstream || [])
+    .map(d => `<li>${d}</li>`).join('');
+  document.getElementById('algoBox').innerHTML =
+    `<h2>Algorithm</h2>` +
+    `<dl>` +
+    `<dt>Name</dt><dd>${A.name}</dd>` +
+    `<dt>Score</dt><dd><code>${A.formula || ''}</code></dd>` +
+    `<dt>Embedding</dt><dd>${A.embedding || ''}</dd>` +
+    `<dt>Feed</dt><dd>${C.refresh_rec_post_count ?? '?'} algorithmic posts ` +
+    `+ ${C.following_post_count ?? '?'} from people you follow, ranked from ` +
+    `a candidate pool of ${C.max_rec_post_len ?? '?'}</dd>` +
+    `<dt>Model</dt><dd>${C.model || ''} &middot; ` +
+    `${C.n_actions ?? '?'} available actions</dd>` +
+    `<dt>Start</dt><dd>${A.initial_follow_edges ?? 0} follow edges &mdash; ` +
+    `the network is not seeded</dd>` +
+    `</dl>` +
+    (dev ? `<div><strong>Stated deviations from upstream:</strong>` +
+           `<ul>${dev}</ul></div>` : '');
+} else {
+  document.getElementById('algoBox').remove();
+}
+
+// ---- per-agent table -----------------------------------------------------
+const agentRows = Object.values(DATA.agents)
+  .sort((a, b) => (b.total_actions || 0) - (a.total_actions || 0));
+document.querySelector('#agentTable tbody').innerHTML = agentRows.map(a => {
+  const mix = Object.entries(a.action_counts || {})
+    .sort((x, y) => y[1] - x[1])
+    .map(([k, v]) => `${k}&times;${v}`).join(', ') || '&ndash;';
+  const eng = a.engagement_rate == null ? '&ndash;'
+              : (a.engagement_rate * 100).toFixed(0) + '%';
+  return `<tr><td class="who">${a.username}</td>` +
+    `<td class="num">${a.total_actions ?? 0}</td>` +
+    `<td class="num">${a.n_posts_authored ?? 0}</td>` +
+    `<td class="num">${a.distinct_posts_seen ?? 0}</td>` +
+    `<td class="num">${eng}</td>` +
+    `<td class="num">${(a.following || []).length}</td>` +
+    `<td class="num">${(a.followers || []).length}</td>` +
+    `<td class="mix">${mix}</td></tr>`;
+}).join('');
+
+// ---- propagation ---------------------------------------------------------
+const propBody = document.querySelector('#propTable tbody');
+const prop = DATA.propagation || [];
+if (!prop.length) {
+  propBody.innerHTML =
+    '<tr><td colspan="4">No exposure-then-interaction pairs recorded.</td></tr>';
+} else {
+  propBody.innerHTML = prop.map(p => {
+    const did = Object.entries(p.interactions || {})
+      .map(([k, v]) => `${k}&times;${v}`).join(', ');
+    return `<tr><td class="who">${(byId[p.actor]||{}).username || p.actor}</td>` +
+      `<td class="who">${(byId[p.target]||{}).username || p.target}</td>` +
+      `<td class="num">${p.times_actor_saw_target}</td>` +
+      `<td class="mix">${did}</td></tr>`;
+  }).join('');
+}
+
 document.getElementById('footnote').textContent =
   'The follow graph starts empty by design: no relationships are seeded, so ' +
   'every edge shown was created by an agent choosing to follow someone. ' +
@@ -388,11 +493,27 @@ render(maxRound);
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--analysis", required=True)
+    p.add_argument("--manifest", default=None,
+                   help="run manifest JSON; supplies the algorithm statement "
+                        "and run config. Defaults to the sibling <label>.json")
     p.add_argument("--out", required=True)
     args = p.parse_args()
 
     with open(args.analysis) as fh:
         full = json.load(fh)
+
+    # The algorithm statement and run config live in the run manifest, not the
+    # analysis output. Default to the manifest sitting beside the database.
+    manifest_path = args.manifest or args.analysis.replace(
+        "_analysis.json", ".json")
+    try:
+        with open(manifest_path) as fh:
+            manifest = json.load(fh)
+        full["algorithm"] = manifest.get("algorithm")
+        full["config"] = manifest.get("config")
+        full.setdefault("tool_call_errors", manifest.get("tool_call_errors"))
+    except (OSError, json.JSONDecodeError):
+        pass
 
     # Keep the payload lean. The analysis JSON carries the complete event log,
     # exposure ledger, post bodies and comments -- thousands of rows at full
@@ -400,12 +521,13 @@ def main():
     # the artifact for no benefit, so build an explicit projection of exactly
     # what the page uses rather than deleting keys one by one and hoping.
     PER_AGENT = ("agent_id", "username", "total_actions", "n_posts_authored",
-                 "distinct_posts_seen", "exposure_events", "engagement_rate")
+                 "distinct_posts_seen", "exposure_events", "engagement_rate",
+                 "action_counts", "following", "followers",
+                 "exposure_by_source")
     data = {
         "n_agents": full.get("n_agents"),
         "n_rounds": full.get("n_rounds"),
-        "totals": {k: v for k, v in (full.get("totals") or {}).items()
-                   if k != "action_counts"},
+        "totals": full.get("totals") or {},
         "graph_by_round": full.get("graph_by_round", {}),
         "interaction_pairs": full.get("interaction_pairs", {}),
         # Only the strongest pairs are rendered; the table shows the top 40.
@@ -416,6 +538,10 @@ def main():
             k: {f: v.get(f) for f in PER_AGENT}
             for k, v in (full.get("agents") or {}).items()
         },
+        "propagation": (full.get("propagation_candidates") or [])[:20],
+        "tool_call_errors": full.get("tool_call_errors"),
+        "algorithm": full.get("algorithm"),
+        "config": full.get("config"),
     }
 
     html = HTML.replace("__DATA__", json.dumps(data, default=str))

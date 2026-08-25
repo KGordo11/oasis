@@ -29,7 +29,11 @@ is friends with user 4, user 2 posts something about user 4, user 1 sees it, and
 1 may or may not interact with user 4 later — depending on how often user 1 sees user
 4 and whether the content matches what user 1 likes.*
 
-That scenario is the acceptance test for the design.
+**This is an illustration, not a fixture.** It describes the *kind* of emergent
+multi-hop propagation the simulation must be capable of producing — friend-of-friend
+discovery driven by exposure frequency and content affinity. It may surface one round
+into a run or a hundred, between any agents, at any depth. The design must make such
+chains *possible and observable*; it must not stage them.
 
 ---
 
@@ -249,24 +253,34 @@ complete — a direct lesson from Sim 3, where one agent's timeout crashed a who
 - Records the exact algorithm name and every parameter into the run log, and asserts
   the algorithm ran (§2.3, §3.5).
 
-### 4.4 Initial social graph
+### 4.4 Initial social graph — empty by design
 
-The motivating scenario presumes pre-existing friendships, and the follow-injection
-feed path (§2.2) only matters once follows exist. `generate_twitter_agent_graph`
-would give us an empty graph (§2.7), making "before" trivially zero edges.
+**The follow graph starts at zero edges.** No seeding, no pre-wired friendships.
 
-We therefore write a generator in the experiment folder that uses the richer Reddit
-personas (`bio`, `persona`, `interested_topics` — already well-formed for embedding,
-see §5) and seeds an initial follow network.
+An earlier draft proposed seeding a homophily-weighted initial network, on the
+reasoning that the §1 scenario presumed existing friendships. That was an
+over-literal reading of an illustrative example, and it is rejected. Seeding the
+graph would be exactly the kind of world-staging that §3.3 forbids, and it would
+contaminate the most interesting available result: watching a social network
+assemble itself from nothing, purely out of agent choices.
 
-**This is world initialization, not a manual action** — it sets the starting state of
-the world the way personas do, and never scripts what any agent does. Every behavior
-after t=0 remains entirely agent-driven.
+Consequences, accepted deliberately:
 
-The seeding rule is stated explicitly as part of the algorithm: homophily-weighted
-attachment (agents are likelier to start out following others with overlapping
-`interested_topics`) plus a random component so the graph is not perfectly clustered.
-Exact parameters recorded in the run log and in the final report.
+- The "before" graph is empty. That is a legitimate and informative baseline — the
+  before/after comparison becomes *network formation*, not *network rewiring*.
+- The follow-injection feed source (§2.2) contributes nothing in early rounds and
+  grows in influence as agents choose to follow each other. The relative weight of
+  algorithmic versus social discovery therefore **shifts over the run**, which is
+  itself a measurable finding rather than a defect — and `rec_history.source` (§4.2)
+  records exactly that shift round by round.
+- Multi-hop propagation chains of the §1 kind can only appear once agents have built
+  enough graph to support them. Whether, when, and how deep they appear is an
+  empirical result.
+
+Agents are generated from the richer Reddit personas (`bio`, `persona`,
+`interested_topics` — already well-formed for embedding, see §5) rather than the
+Twitter CSV's thinner `user_char`. Only the personas are initialized; the network is
+not.
 
 ### 4.5 Analytics
 
@@ -366,18 +380,28 @@ may be rare or absent. This will be reported honestly either way, not quietly dr
 
 ---
 
-## 9. Rollout
+## 9. Rollout — staged, smallest first
 
-1. **Smoke test** — small agent count, few rounds. Verify: TwHIN loads and the
-   assertion fires correctly; `rec_history` captures real exposure; every agent gets a
-   non-empty feed; the 27-action set does not degrade tool-calling; measure per-round
-   wall-clock.
-2. **Tune** — set final agent count, round count, and feed sizing from measured
-   timings rather than guesses.
-3. **Full run** — TWHIN, all agents, many rounds.
-4. **Analysis + graph artifact.**
-5. **Optional contrast run** — hot-score, same config, to isolate what personalization
-   and the social graph actually change. Requires `reset_globals()` between runs.
+**Standing rule for this build: no full-scale runs until the small ones are clean.**
+Every stage below is a gate. Bugs get found at the cheapest scale that can expose
+them, never in a multi-hour run. Sim 3 burned roughly four full runs (~4 hours) on
+three bugs that a 20-minute smoke test would have caught; that is not repeated here.
+
+| Stage | Scale | Gate — must all pass before advancing |
+|---|---|---|
+| 0. Dependency check | No simulation at all | TwHIN-BERT downloads, loads, and embeds on CPU |
+| 1. Plumbing | Tiny (~4 agents, 2 rounds) | `rec_history` and `round_boundary` populate correctly; every agent gets a non-empty feed; algorithm assertion fires on a deliberately broken config |
+| 2. Behavior | Small (~8 agents, 3-4 rounds) | 27-action set does not degrade tool-calling vs. Sim 1's ~32/36 baseline; agents use a genuine spread of actions, not just one; follows actually get created |
+| 3. Dynamics | Moderate | Feed composition shifts as the graph grows (§4.4); per-round wall-clock measured; round count and feed sizing tuned from real timings |
+| 4. Analysis pipeline | Reuses stage 3 data | Every §4.5 output is produced and manually spot-checked against the raw database |
+| 5. Full run | Decided from stage 3 timings | Only after 0-4 are clean |
+| 6. Contrast run | Optional | Hot-score, same config. Requires `reset_globals()` between runs (§2.7) |
+
+Agent counts and round counts above are starting points, not commitments — each stage
+uses the smallest configuration that can still exercise the behavior under test.
+Sim 3's `"rank": null` bug is the cautionary case: it needed *enough* LLM calls to
+surface a rare model output, so "smallest" means smallest-that-still-exposes-the-bug,
+not trivially small.
 
 ---
 

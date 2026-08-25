@@ -253,7 +253,7 @@ function simulate(edges) {
         const a = nodes[i], b = nodes[j];
         let dx = b.x - a.x, dy = b.y - a.y;
         let d2 = dx*dx + dy*dy || 1;
-        const rep = 9000 / d2;
+        const rep = (9000 + 260 * nodes.length) / d2;
         const d = Math.sqrt(d2);
         const ux = dx/d, uy = dy/d;
         a.vx -= ux*rep; a.vy -= uy*rep;
@@ -312,6 +312,20 @@ function render(round) {
     l.setAttribute('opacity', '0.8');
     svg.appendChild(l);
   }
+  // At 36 agents every label collides, so label only the nodes that carry
+  // information -- anyone with a follower, plus the most active -- and leave
+  // the rest to hover. Below that threshold, label everything.
+  const LABEL_ALL_BELOW = 14;
+  const ranked = [...nodes].sort((a, b) =>
+    ((followerCount[b.id] || 0) - (followerCount[a.id] || 0)) ||
+    (((byId[b.id] || {}).total_actions || 0) -
+     ((byId[a.id] || {}).total_actions || 0)));
+  const labelled = new Set(
+    nodes.length <= LABEL_ALL_BELOW
+      ? nodes.map(n => n.id)
+      : ranked.filter(n => (followerCount[n.id] || 0) > 0)
+              .concat(ranked.slice(0, 6)).map(n => n.id));
+
   for (const n of nodes) {
     const g = document.createElementNS(NS, 'g');
     g.setAttribute('class', 'node');
@@ -325,11 +339,13 @@ function render(round) {
       `posts: ${a.n_posts_authored ?? 0}\nsaw ${a.distinct_posts_seen ?? 0} posts\n` +
       `followers: ${followerCount[n.id] || 0}</title>`;
     g.appendChild(c);
-    const t = document.createElementNS(NS, 'text');
-    t.setAttribute('x', n.x); t.setAttribute('y', n.y - r - 4);
-    t.setAttribute('text-anchor', 'middle');
-    t.textContent = n.name.length > 16 ? n.name.slice(0,15) + '...' : n.name;
-    g.appendChild(t);
+    if (labelled.has(n.id)) {
+      const t = document.createElementNS(NS, 'text');
+      t.setAttribute('x', n.x); t.setAttribute('y', n.y - r - 4);
+      t.setAttribute('text-anchor', 'middle');
+      t.textContent = n.name.length > 16 ? n.name.slice(0,15) + '...' : n.name;
+      g.appendChild(t);
+    }
     svg.appendChild(g);
   }
 

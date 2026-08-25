@@ -431,6 +431,59 @@ network with enough follow edges to make the before/after comparison substantial
 R-6 produced exactly one. That is the next question, and it is about scale and
 duration rather than correctness (Q-3).
 
+### 2026-08-24 — Stage 3: fixing what suppressed engagement
+
+24. Addressed all four gaps identified after stage 2.
+
+    **(a) Untested source attribution.** 100% of exposures across every run
+    were `source='recsys'`, so the `following` and `both` branches had never
+    executed once — untested code sitting directly under the "whose posts pop
+    up where" deliverable. `test_instrumentation.py` TEST 1 builds a real
+    follow edge and asserts the attribution. It passed, and `both` is now also
+    confirmed **live** in R-7.
+
+    **(b) Analyzer regression test.** TEST 2 pins the irregular trace payload
+    shapes. It immediately earned its cost by finding **B-6**: `follow`
+    records only `{"follow_id"}` with the followee absent entirely, so every
+    follow was unattributed. Surveying all relational actions showed each uses
+    a different key — `mutee_id`, `reposted_id`, `comment_id`, `followee_id`.
+    All now handled.
+
+    **(c) The follow/like problem.** Wrote `TimelineEnvironment`, changing
+    prompt *content* only (D-2; Sim 1 proved *structure* changes break
+    tool-calling). Four changes: feed first and groups last (F-14); name who
+    you follow rather than counting them (F-11); expose `author_id` per post,
+    without which `follow()` — which takes an integer — is literally
+    uncallable from a feed showing only names; and replace the double-negative
+    *"Do not limit your action in just `like` to like posts"* with positive
+    guidance (Q-8).
+
+    **(d) Duplicate posts.** Show each agent its own recent posts. Note the
+    event log revealed this was *not* only self-repetition: three **different**
+    agents had independently produced the identical "fresh cup of coffee"
+    opener, i.e. cross-agent convergence on a generic phrase.
+
+25. A 3-agent/2-round check before spending a full run produced 3 follows and
+    the first `like` of the entire build. Reading the rendered prompt in that
+    log then exposed **B-7**: the environment was keyed on camel's UUID rather
+    than `social_agent_id`, so every follow lookup silently returned nothing
+    and agents were *always* told they followed nobody. Worth noting the
+    improvement happened **despite** that bug — the gains came from feed-first
+    ordering, visible `author_id`, and the reworded guidance.
+
+26. Ran R-7, the controlled comparison against R-6. Follows 1→5, likes 0→6,
+    duplicates eliminated, action_rate held at 0.812. Agent 3 became a genuine
+    hub, followed by agents 0, 1, 2 and 6 after three exposures each — the
+    propagation mechanism this simulation was built to observe, emerging with
+    nothing staged.
+
+27. Expanded `analyze.py` with the two ledgers the micro-detail requirement
+    actually needs: an **event log** (every action with actor, target and
+    content) and an **exposure ledger** (every post shown to every agent, with
+    feed position, source, score, and whether it was acted on or ignored).
+
+28. Launched **R-8**, the full run: 36 agents, 12 rounds.
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -445,6 +498,8 @@ including failed and aborted ones.
 | R-1 | 0 | `check_deps.py`, no simulation | **PASS (but inadequate)** — TwHIN-BERT loaded (279M params, XLMRobertaTokenizerFast + BertModel, device `cpu`), embeddings non-NaN, margin `+0.0358`, Ollama reachable with `llama3.1:8b`. The margin check passed by luck; see B-1/B-2 | 29.7s total (24.6s model load incl. download) |
 | R-2 | 0 | `pooler_probe.py`, 4 texts / 2 topics, run in two fresh processes | **Exposed B-1 and B-2.** Pooler weights differ per process (`sum=-6.18` vs `+6.46`); pooler margin `+0.0069` / `+0.0008`; mean-pooled margin `+0.0475` and bit-identical across processes | ~50s for both processes |
 | R-6 | 2 | 8 agents, 4 rounds, **22 actions** (`--no-groups`) — controlled A/B against R-5, identical otherwise | **Behaviour gate PASSED.** action_rate **0.812** (26/32, vs R-5's 0.469 and Sim 1's ~0.89); 14 posts, **9 comments, 3 quote_posts, 1 follow**, 1 search, 1 do_nothing; 148 exposures (nearly 2x R-5). First genuine content engagement of the build. Confirms F-14 | 340.1s |
+| R-8 | full | 36 agents, 12 rounds, twhin-bert, 22 actions | *(running)* | — |
+| R-7 | 3 | 8 agents, 4 rounds, 22 actions, **all four fixes**, `--label stage3` | **Dynamics gate PASSED.** action_rate 0.812; **5 follow edges** (vs 1), **6 likes** (vs 0 in every prior run), 8 comments, 8/8 distinct posts (no duplicates); `source='both'` appears **live** and grows 4→5 as the graph grows; 0 agent failures | 312.7s |
 | R-5 | 2 | 8 agents, 4 rounds, 27 actions, `--label stage2` | **Behaviour gate FAILED.** 0 agent failures, instrumentation clean (77 exposures), but **action_rate 0.469** (15/32 turns) vs Sim 1's ~0.89 baseline, and the action mix was `send_to_group` 6, `create_post` 6, `create_group` 2, `join_group` 1 — **zero likes, follows, comments or reposts**. Diagnosed as F-14 | 352.7s |
 | R-4 | 1 | 4 agents, 2 rounds, twhin-bert, `--label stage1` | **Plumbing gate PASSED.** 0 agent failures; `rec_history`=12, `rec_candidates`=12, `round_boundary` correct (r0: 0 posts, r1: 4); every agent received a non-empty feed; own-posts correctly excluded; per-user scores genuinely differ. Exposed **B-3**. Action diversity was nil — see analysis below | 103.2s |
 | R-3 | 0 | `check_deps.py`, strengthened to 6 checks | **PASS, and now a real gate.** Mean-pooled margin `+0.0475`; embedding space reproduced a baseline recorded in a *different* process to within `dw=0.00004, da=0.00002`, confirming replication is sound under D-13; pooler regression guard confirms upstream still unfixed | 4.7s (model cached) |
@@ -461,6 +516,8 @@ Bugs found during this build — in our code or upstream — with how each surfa
 | B-2 | Same line | Interest-based ranking is barely discriminative — one process produced a within-vs-across-topic margin of `+0.0008`, i.e. noise | `tanh` saturation on a random projection compresses all cosines into ~0.88-0.97 | Same fix (D-13) | Stage 0 probe, 2-topic margin test |
 | B-4 | Ours — `analyze.py` | Agents showed `engagement_rate 0.0` and `acted on: []` despite having posted real comments — genuine engagement silently missing from the ledger | Trace `info` payloads are **not uniform**: `create_comment` records only `comment_id` (no `post_id`), and `quote_post` records `quoted_id` as a **string**, which an `isinstance(..., int)` check rejects | Numeric-string coercion + a `comment_id -> post_id` lookup via the comment table | R-6 analysis: comment counts and "acted on" disagreed |
 | B-5 | Ours — `make_graph.py` | Usernames rendered as `millerhospitaliâ€¦`; table text illegibly low-contrast | The HTML template is a **non-raw** Python string, so `\\u2013`-style escapes were decoded into literal non-ASCII before ever reaching the file, and mojibake appeared wherever charset was not guaranteed. Separately, `td` inherited its colour through the table instead of taking a token | Emit pure ASCII (HTML entities); set `td { color: var(--fg) }` explicitly | Browser verification before publishing |
+| B-6 | Upstream `platform.py:905` + our `analyze.py` | Every `follow` was unattributed — the interaction ledger could not say who was followed | `follow` records only `{"follow_id": ...}`; the followee appears **nowhere** in the payload. Surveyed all relational actions and found each uses a different key: `unfollow`→`followee_id`, `mute`→`mutee_id`, `repost`→`reposted_id`, comment actions→`comment_id` only | Recover followee via the follow table; add the other keys; generalise the comment lookup | `test_instrumentation.py` TEST 2 |
+| B-7 | Ours — `timeline_agent.py` | Agents were *always* told "you do not follow anyone yet", even holding follow edges; authors rendered as bare `agentN` | Keyed on `self.agent_id`, which is **camel's UUID**; the integer is `social_agent_id` (`agent.py:71`). Every lookup silently matched nothing. Separately, `sign_up` leaves `user_name` NULL and puts the handle in `name` | Use `social_agent_id`; `COALESCE(user_name, name)` | Reading the rendered prompt in the promptcheck run |
 | B-3 | Ours — `run_simulation.py` | `final_counts` all `None`, `action_tally` returned `Cannot operate on a closed cursor` | Both were computed *after* `env.close()`, which closes the DB cursor (`platform.py:143-144` on `ActionType.EXIT`) | Read them inside the `try`, before `close()` | R-4 (stage 1) |
 
 ### B-1 / B-2 in detail

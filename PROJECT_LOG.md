@@ -187,6 +187,47 @@ built.
   influenced by a post's vote count even while told to ignore it,
   potentially leaking the signal back in indirectly.
 
+## Sim 4 — social timeline (`SIM4_BUILD_LOG.md`, spec in `docs/superpowers/specs/`)
+
+**In progress, on branch `social-timeline-sim` (NOT `main`).** Turns the
+simulation into something that behaves like a real social app: agents acting
+freely over many rounds, each with a personalized timeline, instrumented finely
+enough to reconstruct what every agent saw, ignored, and did, to whom.
+
+Code lives in `examples/experiment/social_timeline/` — zero diff to `oasis/`,
+same subclassing discipline as Sim 3's `ShieldAgent`.
+
+**Four upstream bugs found that silently corrupt results.** Read these before
+trusting any recommendation output:
+
+1. **`RecsysType.TWITTER` returns random feeds.** Its scoring model is never
+   initialised on that path (`recsys.py:39` vs `:282`), so it falls through to
+   `random.random()` (`:749`) with no error. Use `twhin-bert`, never `twitter`.
+2. **TwHIN-BERT embeddings are non-deterministic.** `process_recsys_posts.py:33`
+   returns `pooler_output`, but the checkpoint has no trained pooler, so those
+   weights are randomly re-initialised **every process**. Two processes gave
+   different embedding spaces; discrimination collapsed to `+0.0008` (noise) in
+   one. Mean-pool `last_hidden_state` instead: `+0.0475`, and identical across
+   processes. Replication is impossible without this fix.
+3. **Exposure history is destroyed every round** (`platform.py:383`,
+   `DELETE FROM rec`), so "what did they see" is unrecoverable unless snapshotted.
+4. **Group chat hijacks the prompt.** `to_text_prompt()` renders `$groups_env`
+   before `$posts_env` on every turn *regardless of `available_actions`*. One
+   agent creating a group buries everyone's feed. Measured: action_rate 0.469
+   with groups vs 0.812 without.
+
+**Also worth knowing:** every table's `user_id` column actually stores
+`agent_id` (`platform.py:407`); only `user` has both. Trace `info` payloads are
+*not* uniform — `follow` records no followee at all, `quote_post` stores a
+string id, comment actions record only `comment_id`. And `SocialAgent.agent_id`
+is camel's UUID; the integer is `social_agent_id` (`agent.py:71`).
+
+**Status:** stages 0-3 green (action_rate 0.812, follow graph forms, no
+duplicate posts, `both` source attribution verified). Full 36-agent × 12-round
+run executing. Deliverables: `analyze.py` (event log + exposure ledger),
+`make_graph.py` (published artifact), `test_actions.py` /
+`test_instrumentation.py`.
+
 ## Open threads
 
 1. Push local `main` to `origin` — not done, not yet asked for.

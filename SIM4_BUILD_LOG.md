@@ -199,6 +199,34 @@ on generic text rather than social media, and it would abandon TwHIN's domain fi
 The upstream-exact path remains available behind a flag for comparison, so the cost
 of this deviation can itself be measured rather than assumed.
 
+**D-14 — Run the simulation with 22 actions; group chat off by default.**
+Forced by the R-5 vs R-6 A/B, which was identical in every respect except the
+action set:
+
+| | 27 actions (R-5) | 22 actions (R-6) |
+|---|---|---|
+| action_rate | 0.469 | **0.812** |
+| posts | 6 | 14 |
+| comments | **0** | **9** |
+| quote_post | 0 | 3 |
+| follow | 0 | 1 |
+| exposure events | 77 | 148 |
+
+Group chat was not merely adding five more tools to choose between — it was
+**hijacking the prompt** (F-14). Because `to_text_prompt()` renders `$groups_env`
+ahead of `$posts_env` on every turn *regardless of `available_actions`*, a single
+agent creating a group put a wall of group instructions above the feed in every
+other agent's prompt, and each new group message compounded it. `send_to_group`
+became the single most common action while content engagement stayed at zero.
+
+Consequence for D-4 and D-7: the headline "27 actions" is available and verified
+working (`test_actions.py`), but running with it produces a *worse* social
+simulation on an 8B model. The 5 group actions remain implemented and switchable
+via `--no-groups`; they are simply off for the primary configuration. This also
+settles D-7 empirically — emergent DMs cannot be studied without re-introducing
+the very actions that suppress feed behaviour, so that remains an honest,
+reported limitation rather than something engineered around.
+
 **D-12 — Work on a branch.**
 `social-timeline-sim`, branched from `main`. Prior sims committed directly to `main`;
 this build is large enough to warrant isolation, and `main` stays clean.
@@ -379,6 +407,30 @@ narrow but real: `grep` for the literal string that would appear in the file
 (`--no-groups`), not the transformed one (`no_groups`), before concluding an edit
 did not land.
 
+21. R-6 came back decisively (see D-14). Removing group chat nearly doubled
+    tool-calling reliability and produced the build's first real content
+    engagement. F-14 confirmed.
+22. Running the analysis on R-6 surfaced **B-4** in my own analyzer: agents showed
+    `engagement_rate 0.0` while visibly having commented. Trace payloads turned out
+    not to be uniform across action types — `create_comment` records only
+    `comment_id`, `quote_post` records `quoted_id` as a *string*. Real engagement was
+    being silently dropped from the exposure ledger. Fixed; with it fixed the
+    propagation ledger populates as designed:
+    `agent 0 saw agent 3 x3 -> create_comment x3`,
+    `agent 1 saw agent 2 x5 -> quote_post`. Repeated exposure preceding
+    interaction — the mechanism the whole simulation exists to observe.
+23. Wrote `make_graph.py` and verified the output **in a real browser** before
+    publishing, which caught **B-5** (mojibake from unicode escapes decoded by a
+    non-raw Python template string, plus a `td` colour inherited rather than
+    tokenised). Output is now pure ASCII. Published as an artifact.
+
+**Where the build stands.** Stages 0, 1 and 2 are green. The engine works, the
+instrumentation is complete and verified, the analysis produces the intended
+micro-detail, and the graph diagram renders. What is *not* yet demonstrated is a
+network with enough follow edges to make the before/after comparison substantial —
+R-6 produced exactly one. That is the next question, and it is about scale and
+duration rather than correctness (Q-3).
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -392,7 +444,7 @@ including failed and aborted ones.
 |---|---|---|---|---|
 | R-1 | 0 | `check_deps.py`, no simulation | **PASS (but inadequate)** — TwHIN-BERT loaded (279M params, XLMRobertaTokenizerFast + BertModel, device `cpu`), embeddings non-NaN, margin `+0.0358`, Ollama reachable with `llama3.1:8b`. The margin check passed by luck; see B-1/B-2 | 29.7s total (24.6s model load incl. download) |
 | R-2 | 0 | `pooler_probe.py`, 4 texts / 2 topics, run in two fresh processes | **Exposed B-1 and B-2.** Pooler weights differ per process (`sum=-6.18` vs `+6.46`); pooler margin `+0.0069` / `+0.0008`; mean-pooled margin `+0.0475` and bit-identical across processes | ~50s for both processes |
-| R-6 | 2 | 8 agents, 4 rounds, **22 actions** (`--no-groups`) — controlled A/B against R-5, identical otherwise | *(in progress)* | — |
+| R-6 | 2 | 8 agents, 4 rounds, **22 actions** (`--no-groups`) — controlled A/B against R-5, identical otherwise | **Behaviour gate PASSED.** action_rate **0.812** (26/32, vs R-5's 0.469 and Sim 1's ~0.89); 14 posts, **9 comments, 3 quote_posts, 1 follow**, 1 search, 1 do_nothing; 148 exposures (nearly 2x R-5). First genuine content engagement of the build. Confirms F-14 | 340.1s |
 | R-5 | 2 | 8 agents, 4 rounds, 27 actions, `--label stage2` | **Behaviour gate FAILED.** 0 agent failures, instrumentation clean (77 exposures), but **action_rate 0.469** (15/32 turns) vs Sim 1's ~0.89 baseline, and the action mix was `send_to_group` 6, `create_post` 6, `create_group` 2, `join_group` 1 — **zero likes, follows, comments or reposts**. Diagnosed as F-14 | 352.7s |
 | R-4 | 1 | 4 agents, 2 rounds, twhin-bert, `--label stage1` | **Plumbing gate PASSED.** 0 agent failures; `rec_history`=12, `rec_candidates`=12, `round_boundary` correct (r0: 0 posts, r1: 4); every agent received a non-empty feed; own-posts correctly excluded; per-user scores genuinely differ. Exposed **B-3**. Action diversity was nil — see analysis below | 103.2s |
 | R-3 | 0 | `check_deps.py`, strengthened to 6 checks | **PASS, and now a real gate.** Mean-pooled margin `+0.0475`; embedding space reproduced a baseline recorded in a *different* process to within `dw=0.00004, da=0.00002`, confirming replication is sound under D-13; pooler regression guard confirms upstream still unfixed | 4.7s (model cached) |
@@ -407,6 +459,8 @@ Bugs found during this build — in our code or upstream — with how each surfa
 |---|---|---|---|---|---|
 | B-1 | Upstream `process_recsys_posts.py:33` | Embedding space differs on every process launch; runs not reproducible | `outputs.pooler_output` reads a pooler whose weights TwHIN-BERT's checkpoint does not contain, so they are randomly re-initialized at every load | Mean-pool `last_hidden_state` instead (D-13) | Stage 0 probe, cross-process fingerprint |
 | B-2 | Same line | Interest-based ranking is barely discriminative — one process produced a within-vs-across-topic margin of `+0.0008`, i.e. noise | `tanh` saturation on a random projection compresses all cosines into ~0.88-0.97 | Same fix (D-13) | Stage 0 probe, 2-topic margin test |
+| B-4 | Ours — `analyze.py` | Agents showed `engagement_rate 0.0` and `acted on: []` despite having posted real comments — genuine engagement silently missing from the ledger | Trace `info` payloads are **not uniform**: `create_comment` records only `comment_id` (no `post_id`), and `quote_post` records `quoted_id` as a **string**, which an `isinstance(..., int)` check rejects | Numeric-string coercion + a `comment_id -> post_id` lookup via the comment table | R-6 analysis: comment counts and "acted on" disagreed |
+| B-5 | Ours — `make_graph.py` | Usernames rendered as `millerhospitaliâ€¦`; table text illegibly low-contrast | The HTML template is a **non-raw** Python string, so `\\u2013`-style escapes were decoded into literal non-ASCII before ever reaching the file, and mojibake appeared wherever charset was not guaranteed. Separately, `td` inherited its colour through the table instead of taking a token | Emit pure ASCII (HTML entities); set `td { color: var(--fg) }` explicitly | Browser verification before publishing |
 | B-3 | Ours — `run_simulation.py` | `final_counts` all `None`, `action_tally` returned `Cannot operate on a closed cursor` | Both were computed *after* `env.close()`, which closes the DB cursor (`platform.py:143-144` on `ActionType.EXIT`) | Read them inside the `try`, before `close()` | R-4 (stage 1) |
 
 ### B-1 / B-2 in detail
@@ -462,8 +516,9 @@ a check that can pass by luck is not a gate.
 |---|---|---|
 | Q-1 | Does TwHIN-BERT download and embed acceptably on CPU? | **Answered.** Yes — 279M params, loads in ~25s, embeds 4 texts in ~0.1s. But only usable with the D-13 mean-pooling fix; as shipped it is non-deterministic and near-non-discriminative (B-1/B-2) |
 | Q-6 | How much does the D-13 mean-pooling deviation change results vs. upstream-exact? | Measurable via the comparison flag once the engine runs |
+| Q-8 | Why do agents post but rarely like or follow? Note the prompt's closing line reads "Do not limit your action in just `like` to like posts" (`agent_environment.py:51-53`) — awkward enough that an 8B model may read it as an instruction *against* liking | Open; testable by rewording prompt content only, which D-2 permits |
 | Q-7 | Is a `+0.0475` within-vs-across margin enough dynamic range for personalization to visibly shape feeds, once multiplied by recency decay? | Stage 3 — recency may dominate content similarity |
-| Q-2 | Does the 27-action set degrade 8B tool-calling vs. Sim 1's ~32/36 baseline? | Stage 2 gate |
-| Q-3 | Do agents actually form follows, given they see only counts and never identities (F-11)? | Stage 2 gate — material to D-10 |
-| Q-4 | Do 2-member groups (de-facto DMs) emerge at all (D-7)? | Empirical, reported either way |
-| Q-5 | Does F-12's index-base conflict affect TWHIN, leaving any agent with an empty feed? | Stage 1 gate |
+| Q-2 | Does the 27-action set degrade 8B tool-calling vs. Sim 1's ~32/36 baseline? | **Answered: yes, badly.** 0.469 with 27 actions vs 0.812 with 22. Cause was not tool count alone but the group-chat prompt hijack (F-14). Resolved by D-14 |
+| Q-3 | Do agents actually form follows, given they see only counts and never identities (F-11)? | **Partially.** Exactly 1 follow in 32 agent-turns (R-6) — non-zero, so it is possible, but far too sparse for a meaningful before/after graph. The likeliest cause is F-11: agents are told only *how many* people they follow, never *who*, so a follow target must be inferred from author ids in the feed. Open, and now the build's main question |
+| Q-4 | Do 2-member groups (de-facto DMs) emerge at all (D-7)? | **Yes, but at a cost.** R-5 produced 2 groups, 3 members and 6 group messages unprompted — so they do emerge. But the same actions suppress feed engagement (F-14/D-14), so studying DMs and studying timelines are in direct tension on an 8B model. Reported, not engineered around |
+| Q-5 | Does F-12's index-base conflict affect TWHIN, leaving any agent with an empty feed? | **Answered: no.** Every agent received a non-empty feed in R-4 and R-6. Avoided by keying on `agent_id` explicitly (F-13) rather than reproducing upstream's positional indexing |

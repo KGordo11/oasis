@@ -224,6 +224,7 @@ Full detail with rationale lives in spec §2. Condensed index:
 | F-11 | Agents see only follower/following **counts**, never identities | `agent_environment.py:68-101`, both marked `# TODO` upstream |
 | F-12 | Two conflicting index bases for the `rec` matrix | `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based |
 | F-13 | Every table's `user_id` column actually stores **agent_id**; only the `user` table has both | `platform.py:407` — `user_id = agent_id`, repeated in every action |
+| F-14 | **Group chat hijacks the prompt and crowds out feed engagement** | `agent_environment.py:49-53` puts `$groups_env` *before* `$posts_env`; `:40-48` is a wall of imperatives; `:118-135` renders it every turn regardless of `available_actions`. Measured in R-5 |
 
 **Note on F-3.** This is the most consequential finding of the investigation. Had we
 selected the option whose name most suggests "the interest-based one", the run would
@@ -342,6 +343,42 @@ produced nothing emitted **no tool call at all**, rather than deliberately choos
 abstain. That is a genuine tool-calling miss. Whether it is a rate worth worrying
 about is Q-2, and needs stage 2's larger sample to answer.
 
+### 2026-08-24 — Stage 2: behaviour, and the group-chat problem
+
+16. Wrote `analyze.py`, producing the per-agent micro-detail ledger (§4.5 of the
+    spec): seen / seen-and-acted / seen-and-ignored / never-seen, pairwise exposure
+    counts, interaction matrix, and the follow graph at every round. Verified against
+    the R-4 database.
+17. Ran R-5 (8 agents, 4 rounds, 27 actions). Instrumentation was flawless — 77
+    exposure events, 0 agent failures — but the **behaviour gate failed**.
+18. Before blaming the model, wrote `test_actions.py` to call the platform's
+    engagement actions directly, with no LLM and no tool-calling involved. **All 16
+    mechanical checks pass**: like, comment, repost, follow, dislike all write their
+    rows, the follow-injection join returns a followee's post, and a third agent is
+    correctly refused entry to a 2-member group (D-7 works). So the action surface is
+    entirely functional and the absence of engagement is a **model choice**, not a
+    broken mechanism. This took seconds and removed the main competing hypothesis;
+    diagnosing it by running bigger simulations would have been slow and ambiguous.
+19. Diagnosed the likely cause as **F-14**, a feedback loop in the prompt:
+    `env_template` places `$groups_env` *before* `$posts_env`
+    (`agent_environment.py:49-53`); the group block is a wall of imperative
+    instructions (`:40-48`); and `to_text_prompt()` renders it every turn
+    **regardless of `available_actions`** (`:118-135`). So one agent creating a group
+    puts group instructions and group messages at the top of *every* agent's prompt,
+    ahead of the feed. Each new group message makes the next prompt more group-heavy
+    still. `send_to_group` was in fact the single most common action.
+20. Added `--no-groups` (22 actions) and launched R-6 as a controlled A/B against
+    R-5 — identical in every other respect — to separate two candidate causes: the
+    prompt hijack (F-14), and simple tool-count overload on an 8B model.
+
+**Two bugs of my own, both from the same careless edit.** The `--no-groups` argparse
+flag was added twice (once by a scripted replace whose success I misjudged from a
+too-narrow `grep`, once by a subsequent explicit edit), producing
+`argparse.ArgumentError: conflicting option string` and wasting one run. The lesson is
+narrow but real: `grep` for the literal string that would appear in the file
+(`--no-groups`), not the transformed one (`no_groups`), before concluding an edit
+did not land.
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -355,6 +392,8 @@ including failed and aborted ones.
 |---|---|---|---|---|
 | R-1 | 0 | `check_deps.py`, no simulation | **PASS (but inadequate)** — TwHIN-BERT loaded (279M params, XLMRobertaTokenizerFast + BertModel, device `cpu`), embeddings non-NaN, margin `+0.0358`, Ollama reachable with `llama3.1:8b`. The margin check passed by luck; see B-1/B-2 | 29.7s total (24.6s model load incl. download) |
 | R-2 | 0 | `pooler_probe.py`, 4 texts / 2 topics, run in two fresh processes | **Exposed B-1 and B-2.** Pooler weights differ per process (`sum=-6.18` vs `+6.46`); pooler margin `+0.0069` / `+0.0008`; mean-pooled margin `+0.0475` and bit-identical across processes | ~50s for both processes |
+| R-6 | 2 | 8 agents, 4 rounds, **22 actions** (`--no-groups`) — controlled A/B against R-5, identical otherwise | *(in progress)* | — |
+| R-5 | 2 | 8 agents, 4 rounds, 27 actions, `--label stage2` | **Behaviour gate FAILED.** 0 agent failures, instrumentation clean (77 exposures), but **action_rate 0.469** (15/32 turns) vs Sim 1's ~0.89 baseline, and the action mix was `send_to_group` 6, `create_post` 6, `create_group` 2, `join_group` 1 — **zero likes, follows, comments or reposts**. Diagnosed as F-14 | 352.7s |
 | R-4 | 1 | 4 agents, 2 rounds, twhin-bert, `--label stage1` | **Plumbing gate PASSED.** 0 agent failures; `rec_history`=12, `rec_candidates`=12, `round_boundary` correct (r0: 0 posts, r1: 4); every agent received a non-empty feed; own-posts correctly excluded; per-user scores genuinely differ. Exposed **B-3**. Action diversity was nil — see analysis below | 103.2s |
 | R-3 | 0 | `check_deps.py`, strengthened to 6 checks | **PASS, and now a real gate.** Mean-pooled margin `+0.0475`; embedding space reproduced a baseline recorded in a *different* process to within `dw=0.00004, da=0.00002`, confirming replication is sound under D-13; pooler regression guard confirms upstream still unfixed | 4.7s (model cached) |
 

@@ -44,8 +44,19 @@ log = logging.getLogger("social_timeline.run")
 
 # ---------------------------------------------------------------- action set
 
-def build_action_set():
-    """The 27 actions agents may take (decision D-4).
+def build_action_set(include_groups: bool = True):
+    """The action set agents may choose from (decision D-4).
+
+    `include_groups=False` drops the 5 group-chat actions, leaving 22.
+
+    Why that switch exists: `SocialEnvironment.env_template` places
+    `$groups_env` BEFORE `$posts_env`, and the group block is a wall of
+    imperative instructions ("You can join the groups you are interested...",
+    "You must make sure..."). `to_text_prompt()` renders it on every turn
+    regardless of available_actions (agent_environment.py:118-135). Once any
+    group exists, every agent's prompt opens with group instructions and group
+    messages, burying the feed -- and each new group message makes the next
+    prompt more group-heavy still. Measured in R-5; see SIM4_BUILD_LOG.md F-14.
 
     ActionType has 30 members. Excluded, with cause:
       EXIT, SIGNUP, UPDATE_REC_TABLE -- internal plumbing, not user behaviour.
@@ -73,8 +84,10 @@ def build_action_set():
         ActionType.LEAVE_GROUP, ActionType.SEND_TO_GROUP,
         ActionType.LISTEN_FROM_GROUP,
     ]
-    actions = social + group
-    assert len(actions) == 27, f"expected 27 actions, got {len(actions)}"
+    actions = social + group if include_groups else social
+    expected = 27 if include_groups else 22
+    assert len(actions) == expected, \
+        f"expected {expected} actions, got {len(actions)}"
     return actions
 
 
@@ -108,7 +121,7 @@ async def run(args):
         url=args.ollama_url,
     )
 
-    actions = build_action_set()
+    actions = build_action_set(include_groups=not args.no_groups)
     agent_graph = await generate_timeline_agents(
         profile_path=os.path.join(REPO_ROOT, args.personas),
         model=model,
@@ -317,6 +330,11 @@ def main():
     p.add_argument("--model", default="llama3.1:8b")
     p.add_argument("--ollama-url", default="http://localhost:11434/v1")
     p.add_argument("--personas", default="data/reddit/user_data_36.json")
+    p.add_argument("--no-groups", action="store_true",
+                   help="drop the 5 group-chat actions (22 instead of 27). "
+                        "Group instructions are injected into every prompt "
+                        "ahead of the feed and crowd out content engagement "
+                        "-- see finding F-14.")
     p.add_argument("--semaphore", type=int, default=4,
                    help="max concurrent LLM calls (default 4; local Ollama "
                         "serialises and high concurrency causes timeouts)")

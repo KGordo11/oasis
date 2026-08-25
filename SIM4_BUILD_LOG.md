@@ -252,6 +252,7 @@ Full detail with rationale lives in spec §2. Condensed index:
 | F-11 | Agents see only follower/following **counts**, never identities | `agent_environment.py:68-101`, both marked `# TODO` upstream |
 | F-12 | Two conflicting index bases for the `rec` matrix | `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based |
 | F-13 | Every table's `user_id` column actually stores **agent_id**; only the `user` table has both | `platform.py:407` — `user_id = agent_id`, repeated in every action |
+| F-15 | **Agents attempt actions and fumble the arguments** — 18 malformed tool calls in 5 rounds of the full run, 10 of them `follow`, mostly "unexpected keyword argument". These leave no trace row, so they were previously invisible and counted as "did nothing" | Measured by `analyze.py --log` |
 | F-14 | **Group chat hijacks the prompt and crowds out feed engagement** | `agent_environment.py:49-53` puts `$groups_env` *before* `$posts_env`; `:40-48` is a wall of imperatives; `:118-135` renders it every turn regardless of `available_actions`. Measured in R-5 |
 
 **Note on F-3.** This is the most consequential finding of the investigation. Had we
@@ -573,6 +574,7 @@ a check that can pass by luck is not a gate.
 |---|---|---|
 | Q-1 | Does TwHIN-BERT download and embed acceptably on CPU? | **Answered.** Yes — 279M params, loads in ~25s, embeds 4 texts in ~0.1s. But only usable with the D-13 mean-pooling fix; as shipped it is non-deterministic and near-non-discriminative (B-1/B-2) |
 | Q-6 | How much does the D-13 mean-pooling deviation change results vs. upstream-exact? | Measurable via the comparison flag once the engine runs |
+| Q-9 | Can the malformed-call rate (F-15) be reduced by stating each action's exact signature in the guidance rather than a prose list? 10 lost follows in 5 rounds is a material undercount of intent | Open — prompt-content change, testable as an A/B |
 | Q-8 | Why do agents post but rarely like or follow? Note the prompt's closing line reads "Do not limit your action in just `like` to like posts" (`agent_environment.py:51-53`) — awkward enough that an 8B model may read it as an instruction *against* liking | Open; testable by rewording prompt content only, which D-2 permits |
 | Q-7 | Is a `+0.0475` within-vs-across margin enough dynamic range for personalization to visibly shape feeds, once multiplied by recency decay? | Stage 3 — recency may dominate content similarity |
 | Q-2 | Does the 27-action set degrade 8B tool-calling vs. Sim 1's ~32/36 baseline? | **Answered: yes, badly.** 0.469 with 27 actions vs 0.812 with 22. Cause was not tool count alone but the group-chat prompt hijack (F-14). Resolved by D-14 |

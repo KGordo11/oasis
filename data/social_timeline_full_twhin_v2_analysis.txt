@@ -1,7 +1,7 @@
 ==========================================================================
 SIMULATION 4 ANALYSIS -- social_timeline_full_twhin_v2.db
 ==========================================================================
-agents=36  rounds=12  posts=99  chosen actions=302  exposure events=3940  follow edges=70
+agents=36  rounds=12  posts=99  chosen actions=302  exposure events=3940  follow edges=68
 
 ACTION MIX (chosen actions only; refresh/sign_up excluded)
   create_post              86
@@ -25,7 +25,10 @@ MALFORMED TOOL CALLS (attempted, wrong arguments, no effect): 106
     reason: unexpected keyword argument x102
     reason: missing required argument x4
 
-SOCIAL GRAPH: 2 edges before -> 70 edges after
+SOCIAL GRAPH: 0 edges before -> 68 edges after
+PHANTOM FOLLOWS EXCLUDED: 2 edge(s) aimed at agent ids that do not exist (bug B-10)
+  agent 20 -> id 12345 (no such agent) at round 0
+  agent 24 -> id 12345 (no such agent) at round 0
 
 --------------------------------------------------------------------------
 PER-AGENT DETAIL
@@ -315,7 +318,7 @@ PER-AGENT DETAIL
     ignored  : [1, 2, 3, 4, 6, 7, 8, 10, 11, 12, 13, 14, 17, 18, 19, 20, 23, 24, 25, 27, 29, 30, 33, 36, 41, 44, 45, 47, 53, 54, 57, 58, 59, 60, 62, 63, 68, 69, 72, 77, 80, 81, 87]
     never saw: [5, 9, 22, 26, 31, 32, 37, 38, 39, 40, 43, 46, 48, 49, 50, 51, 55, 56, 61, 64, 67, 70, 71, 73, 74, 75, 76, 78, 79, 82, 83, 84, 85, 86, 88, 89, 90, 91, 92, 93, 94, 95, 99]
   engagement rate (acted / seen): 0.085
-  follows [9, 28, 29, 32, 34, 12345] | followed by [6, 9, 12, 27, 34]
+  follows [9, 28, 29, 32, 34] | followed by [6, 9, 12, 27, 34]
   exposure to others: agent 28 x18, agent 18 x10, agent 9 x8, agent 0 x7, agent 34 x7, agent 2 x6, agent 13 x5, agent 27 x5, agent 3 x4, agent 24 x4, agent 32 x4, agent 12 x4, agent 15 x3, agent 19 x3, agent 21 x3, agent 22 x2, agent 33 x2, agent 8 x2, agent 10 x2, agent 17 x2, agent 1 x1, agent 23 x1, agent 26 x1, agent 29 x1
   acted on others: {'12345': {'follow': 1}, '22': {'create_comment': 1}, '9': {'follow': 1}, '34': {'follow': 1}, '28': {'follow': 1, 'quote_post': 2, 'like_post': 1, 'like_comment': 1}, '12': {'like_comment': 1}, '29': {'follow': 1}, '32': {'follow': 1}}
   acted on by    : {'27': {'follow': 1}, '1': {'create_comment': 1}, '6': {'follow': 1, 'like_post': 1}, '12': {'follow': 1, 'like_post': 1}, '24': {'like_post': 1}, '9': {'follow': 1, 'like_post': 2, 'quote_post': 1}, '26': {'like_post': 1}, '34': {'follow': 1, 'quote_post': 1}, '18': {'create_comment': 1}, '19': {'quote_post': 2}, '0': {'like_comment': 1}}
@@ -371,7 +374,7 @@ PER-AGENT DETAIL
     ignored  : [1, 2, 3, 7, 8, 10, 14, 16, 19, 20, 22, 24, 25, 27, 28, 29, 30, 31, 34, 35, 36, 38, 42, 47, 50, 51, 53, 59, 63, 66, 67, 68, 69, 70, 72, 86, 88]
     never saw: [4, 5, 6, 9, 12, 17, 23, 26, 32, 33, 37, 39, 40, 41, 43, 44, 45, 46, 48, 49, 52, 55, 56, 57, 58, 60, 61, 62, 64, 65, 71, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 87, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99]
   engagement rate (acted / seen): 0.119
-  follows [2, 12345] | followed by []
+  follows [2] | followed by []
   exposure to others: agent 2 x26, agent 18 x9, agent 29 x8, agent 20 x8, agent 28 x7, agent 13 x5, agent 15 x5, agent 27 x5, agent 21 x4, agent 34 x4, agent 9 x3, agent 19 x3, agent 12 x3, agent 33 x3, agent 3 x2, agent 0 x2, agent 10 x2, agent 26 x2, agent 23 x2, agent 22 x2, agent 17 x1, agent 8 x1, agent 6 x1
   acted on others: {'12345': {'follow': 1}, '28': {'create_comment': 1, 'like_post': 1}, '2': {'follow': 1}, '18': {'like_post': 1, 'create_comment': 1}, '20': {'like_post': 1}, '15': {'like_post': 1}}
   acted on by    : {'9': {'create_comment': 1}, '16': {'like_post': 1}, '21': {'like_post': 1}, '25': {'like_post': 1, 'like_comment': 1}, '11': {'like_post': 1}}

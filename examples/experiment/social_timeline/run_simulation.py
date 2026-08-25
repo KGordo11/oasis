@@ -145,6 +145,10 @@ async def run(args):
         following_post_count=args.following_post_count,
         allow_self_rating=False,
         show_score=False,
+        # Stretch the freshness curve across the run (F-16), so a
+        # round-0 post does not dominate every feed forever.
+        recency_span_rounds=(None if args.no_recency_scaling
+                             else args.rounds),
     )
 
     env = oasis.make(
@@ -187,6 +191,8 @@ async def run(args):
                 "per-(user,post) scores captured for rec_history",
             ],
             "initial_follow_edges": 0,
+            "recency_span_rounds": (None if args.no_recency_scaling
+                                   else args.rounds),
         },
         "environment": {
             "python": sys.version.split()[0],
@@ -332,6 +338,10 @@ def main():
     p.add_argument("--model", default="llama3.1:8b")
     p.add_argument("--ollama-url", default="http://localhost:11434/v1")
     p.add_argument("--personas", default="data/reddit/user_data_36.json")
+    p.add_argument("--no-recency-scaling", action="store_true",
+                   help="keep upstream's raw recency curve, which over a "
+                        "short run is nearly flat and lets round-0 posts "
+                        "dominate permanently (finding F-16)")
     p.add_argument("--no-groups", action="store_true",
                    help="drop the 5 group-chat actions (22 instead of 27). "
                         "Group instructions are injected into every prompt "

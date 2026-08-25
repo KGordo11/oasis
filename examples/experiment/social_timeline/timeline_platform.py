@@ -87,8 +87,26 @@ RECENCY_FLOOR = 1e-6
 class TimelinePlatform(Platform):
     """Personalized, fully instrumented platform. See module docstring."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, recency_span_rounds: int | None = None,
+                 **kwargs):
+        """recency_span_rounds: number of rounds over which a post should decay
+        from brand-new to stale.
+
+        Finding F-16. Upstream's curve, log((271.8 - age)/100), is calibrated
+        for ~170 timesteps. Over a 12-round run it moves only 0.9999 -> 0.9586,
+        a spread of 0.04, while cosine similarity spans ~0.25. Freshness was
+        therefore contributing about 15% of the ranking and a round-0 post was
+        never displaced: in the v2 run post #3 reached 33 agents while a
+        round-10 post reached 1. Real feeds do not behave that way.
+
+        Setting this to the run length stretches the same curve across the run
+        so age actually competes with similarity. None keeps upstream's raw
+        behaviour. Either way the choice is recorded in the run manifest.
+        """
         super().__init__(*args, **kwargs)
+        self.recency_span_rounds = recency_span_rounds
+        self._age_scale = (RECENCY_AGE_CLIFF / recency_span_rounds
+                           if recency_span_rounds else 1.0)
 
         # TWHIN keeps per-run state in module globals that persist across
         # calls and are cleared only here (finding F-7). Without this, a
@@ -116,6 +134,7 @@ class TimelinePlatform(Platform):
             "refresh_calls": 0,
             "exposures_logged": 0,
             "dm_joins_refused": 0,
+            "invalid_follow_targets": 0,
         }
 
     # ---------------------------------------------------------------- tables
@@ -187,7 +206,8 @@ class TimelinePlatform(Platform):
         return agent_ids, texts
 
     def _recency(self, age: int) -> float:
-        """Upstream's log recency decay, clamped instead of allowed to NaN."""
+        """Log recency decay, age-scaled (F-16) and clamped instead of NaN."""
+        age = age * self._age_scale
         if age >= RECENCY_AGE_CLIFF:
             self.stats["recency_clamped"] += 1
             return RECENCY_FLOOR
@@ -467,6 +487,48 @@ class TimelinePlatform(Platform):
                 "author_id, feed_position, source, score) "
                 "VALUES (?, ?, ?, ?, ?, ?, ?)", rows, commit=True)
             self.stats["exposures_logged"] += len(rows)
+
+    # --------------------------------------------------- target validation
+
+    def _agent_exists(self, agent_id) -> bool:
+        self.pl_utils._execute_db_command(
+            "SELECT 1 FROM user WHERE agent_id = ?", (agent_id, ))
+        return self.db_cursor.fetchone() is not None
+
+    async def follow(self, agent_id: int, followee_id: int):
+        """Reject follows aimed at agents that do not exist (bug B-10).
+
+        Upstream `follow()` checks for a duplicate edge but never checks that
+        the followee is real (platform.py:868-890) -- it inserts whatever
+        integer it is handed. An 8B model reliably hallucinates placeholder
+        ids, and two separate agents in the v2 run both "followed" id 12345.
+        Those phantom edges then inflate the follow count, create a node that
+        corresponds to nobody, and make round 0 look like the network started
+        with connections when it did not.
+
+        Failing loudly here also means the attempt is counted as a malformed
+        call rather than silently becoming a fake relationship in the data.
+        """
+        if not self._agent_exists(followee_id):
+            self.stats["invalid_follow_targets"] += 1
+            return {"success": False,
+                    "error": (f"No user with id {followee_id} exists. Use a "
+                              f"followee_id taken from your feed.")}
+        return await super().follow(agent_id, followee_id)
+
+    async def unfollow(self, agent_id: int, followee_id: int):
+        if not self._agent_exists(followee_id):
+            self.stats["invalid_follow_targets"] += 1
+            return {"success": False,
+                    "error": f"No user with id {followee_id} exists."}
+        return await super().unfollow(agent_id, followee_id)
+
+    async def mute(self, agent_id: int, mutee_id: int):
+        if not self._agent_exists(mutee_id):
+            self.stats["invalid_follow_targets"] += 1
+            return {"success": False,
+                    "error": f"No user with id {mutee_id} exists."}
+        return await super().mute(agent_id, mutee_id)
 
     # ------------------------------------------------------------ DM privacy
 

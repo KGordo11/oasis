@@ -252,6 +252,7 @@ Full detail with rationale lives in spec §2. Condensed index:
 | F-11 | Agents see only follower/following **counts**, never identities | `agent_environment.py:68-101`, both marked `# TODO` upstream |
 | F-12 | Two conflicting index bases for the `rec` matrix | `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based |
 | F-13 | Every table's `user_id` column actually stores **agent_id**; only the `user` table has both | `platform.py:407` — `user_id = agent_id`, repeated in every action |
+| F-16 | **Freshness barely counts over a short run.** Upstream recency `log((271.8-age)/100)` is calibrated for ~170 timesteps; across 12 rounds it moves only 0.9999→0.9586 (spread 0.04) while cosine similarity spans ~0.25. Ranking was therefore ~85% similarity, and a round-0 post was never displaced — post #3 reached 33 agents while a round-10 post reached 1 | Measured; fixed via `recency_span_rounds` |
 | F-15 | **Agents attempt actions and fumble the arguments** — 18 malformed tool calls in 5 rounds of the full run, 10 of them `follow`, mostly "unexpected keyword argument". These leave no trace row, so they were previously invisible and counted as "did nothing" | Measured by `analyze.py --log` |
 | F-14 | **Group chat hijacks the prompt and crowds out feed engagement** | `agent_environment.py:49-53` puts `$groups_env` *before* `$posts_env`; `:40-48` is a wall of imperatives; `:118-135` renders it every turn regardless of `available_actions`. Measured in R-5 |
 
@@ -531,6 +532,45 @@ duration rather than correctness (Q-3).
     clean TWHIN-vs-hot-score comparison at v1; measuring v2 needs its own
     TWHIN run against R-8.
 
+### 2026-08-25 — Depth pass: the data behind the summaries
+
+34. **Round 0 investigated after Gordon asked how anyone was connected before
+    anything happened.** The answer: they were not. Round 0 has **zero**
+    exposures and zero real edges. The "2 follows" reported were both **B-10**
+    — two agents following hallucinated id `12345`, which upstream `follow()`
+    happily inserted because it never checks the followee exists. Now rejected
+    at the platform, and segregated (never silently dropped) in analysis. Real
+    edge count for the v2 run corrects from 70 to **68**.
+
+35. **`dossier.py` extended from 540 KB to 1.2 MB / 18k lines.** The gap was
+    that summaries said "saw them 30x" without the 30 rows behind it. Added:
+    - **Section 7B, pair chronologies** — for all 888 ordered pairs, EVERY
+      exposure listed individually: round, post id, score, which route
+      delivered it, a content snippet, and what the viewer did *at that exact
+      moment* (including comment text). This is the "what did they do each
+      time" record.
+    - **Per-agent own-post ledger** — each of an agent's posts, who it was
+      shown to by name, and who engaged with it and how. This answers "which
+      of their posts were liked, and by whom".
+
+36. **F-16 found while reading that ledger.** Post #3 (round 0) reached 33
+    agents; post #85 (round 10) reached 1. Since score = similarity × recency
+    and recency only moves 0.04 across a 12-round run, freshness was
+    contributing ~15% of ranking and early posts were permanently entrenched.
+    Added `recency_span_rounds`, which stretches the same curve across the run
+    (age 0 → 1.00, age 7 → 0.37, age 15 → 0.00) so freshness competes with
+    similarity. Stated in the manifest; `--no-recency-scaling` keeps upstream.
+
+37. **Graph rebuilt for legibility** after feedback that lines could not be
+    traced and some dots were unnamed: every node labelled, arrowheads showing
+    follow direction, curved edges so reciprocal pairs separate, and
+    click-to-isolate with the person's connections spelled out beneath.
+
+38. Prompt **v3** written (not yet run at scale): feed field `author_id` →
+    `followee_id`, because the model copies feed field names into calls —
+    `follow(author_id=…)` failed 19x, `create_comment(comment_id=…)` 21x. Also
+    asks for 2-3 actions per turn, since agents averaged only 0.70.
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -568,6 +608,7 @@ Bugs found during this build — in our code or upstream — with how each surfa
 | B-5 | Ours — `make_graph.py` | Usernames rendered as `millerhospitaliâ€¦`; table text illegibly low-contrast | The HTML template is a **non-raw** Python string, so `\\u2013`-style escapes were decoded into literal non-ASCII before ever reaching the file, and mojibake appeared wherever charset was not guaranteed. Separately, `td` inherited its colour through the table instead of taking a token | Emit pure ASCII (HTML entities); set `td { color: var(--fg) }` explicitly | Browser verification before publishing |
 | B-6 | Upstream `platform.py:905` + our `analyze.py` | Every `follow` was unattributed — the interaction ledger could not say who was followed | `follow` records only `{"follow_id": ...}`; the followee appears **nowhere** in the payload. Surveyed all relational actions and found each uses a different key: `unfollow`→`followee_id`, `mute`→`mutee_id`, `repost`→`reposted_id`, comment actions→`comment_id` only | Recover followee via the follow table; add the other keys; generalise the comment lookup | `test_instrumentation.py` TEST 2 |
 | B-7 | Ours — `timeline_agent.py` | Agents were *always* told "you do not follow anyone yet", even holding follow edges; authors rendered as bare `agentN` | Keyed on `self.agent_id`, which is **camel's UUID**; the integer is `social_agent_id` (`agent.py:71`). Every lookup silently matched nothing. Separately, `sign_up` leaves `user_name` NULL and puts the handle in `name` | Use `social_agent_id`; `COALESCE(user_name, name)` | Reading the rendered prompt in the promptcheck run |
+| B-10 | Upstream `platform.py:868-890` | Agents "followed" people who do not exist; round 0 appeared to start with 2 connections when the network was genuinely empty | `follow()` checks for a duplicate edge but **never that the followee exists** — it inserts whatever integer it is handed. Two agents both followed hallucinated id `12345` | Validate the target in `TimelinePlatform.follow/unfollow/mute`; `analyze.py` segregates phantom edges instead of counting them | Gordon asking how anyone was connected at round 0 |
 | B-3 | Ours — `run_simulation.py` | `final_counts` all `None`, `action_tally` returned `Cannot operate on a closed cursor` | Both were computed *after* `env.close()`, which closes the DB cursor (`platform.py:143-144` on `ActionType.EXIT`) | Read them inside the `try`, before `close()` | R-4 (stage 1) |
 
 ### B-1 / B-2 in detail

@@ -206,18 +206,26 @@ def load_exposures(conn):
     return rows
 
 
-def load_follow_timeline(conn):
+def load_follow_timeline(conn, valid_ids=None):
     """Follow edges with the round they appeared, so the graph can be
     reconstructed at any point in time. `follow.created_at` holds the round."""
-    edges = []
+    edges, phantom = [], []
     for row in conn.execute(
             "SELECT follower_id, followee_id, created_at FROM follow"):
-        edges.append({
+        e = {
             "follower": row["follower_id"],
             "followee": row["followee_id"],
             "round": safe_int(row["created_at"]),
-        })
-    return edges
+        }
+        # Bug B-10: upstream follow() never checks the followee exists, so a
+        # hallucinated id becomes a real row. Counting those as edges inflates
+        # the network and invents a node for nobody. Segregate, never silently
+        # drop -- the count of them is itself a result.
+        if valid_ids is not None and row["followee_id"] not in valid_ids:
+            phantom.append(e)
+        else:
+            edges.append(e)
+    return edges, phantom
 
 
 def analyze(db_path):
@@ -226,7 +234,7 @@ def analyze(db_path):
     posts = load_posts(conn)
     actions = load_actions(conn, posts)
     exposures = load_exposures(conn)
-    follows = load_follow_timeline(conn)
+    follows, phantom_follows = load_follow_timeline(conn, set(agents))
 
     rounds = [r["round"] for r in conn.execute(
         "SELECT round FROM round_boundary ORDER BY round")] or [0]
@@ -326,6 +334,7 @@ def analyze(db_path):
             "follow_edges": len(follows),
             "action_counts": dict(Counter(a["action"] for a in actions)),
         },
+        "phantom_follows": phantom_follows,
         "graph_before": snapshots.get(0, []),
         "graph_after": snapshots.get(max_round, []),
         "graph_by_round": snapshots,
@@ -556,6 +565,13 @@ def render_report(data):
     add("")
     add(f"SOCIAL GRAPH: {len(data['graph_before'])} edges before -> "
         f"{len(data['graph_after'])} edges after")
+    ph = data.get("phantom_follows") or []
+    if ph:
+        add(f"PHANTOM FOLLOWS EXCLUDED: {len(ph)} edge(s) aimed at agent ids "
+            f"that do not exist (bug B-10)")
+        for e in ph:
+            add(f"  agent {e['follower']} -> id {e['followee']} (no such agent)"
+                f" at round {e['round']}")
     add("")
 
     add("-" * 74)

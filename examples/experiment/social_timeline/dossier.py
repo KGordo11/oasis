@@ -16,6 +16,9 @@ Sections
     5  Post ledger                every post, its reach, and who engaged
     6  Conversation threads       reconstructed reply structure
     7  Interaction matrix         every ordered pair, with content
+   7B  Pair chronologies          EVERY exposure one by one: which post,
+                                  which round, what score, and what the
+                                  viewer did at that exact moment
     8  Propagation                exposure preceding interaction, with scores
     9  Feed composition           algorithmic vs social share over time
    10  Failures                   malformed tool calls, unattributed actions
@@ -363,6 +366,29 @@ def s4_agents(L, data, extra, personas):
             L += [f"      <- @{name(int(src)):<24} "
                   f"{', '.join(f'{k}x{v}' for k, v in counts.items())}"]
 
+        mine = [pid for pid, p in posts.items() if p["author_id"] == aid]
+        L += ["", "    THIS AGENT'S OWN POSTS, AND WHO ENGAGED WITH EACH:"]
+        if not mine:
+            L += ["      (never posted)"]
+        for pid in mine:
+            p = posts[pid]
+            saw = {e["agent_id"] for e in data["exposures"]
+                   if e["post_id"] == pid}
+            eng = defaultdict(list)
+            for e in data["events"]:
+                if e.get("post_id") == pid and e["agent_id"] != aid:
+                    eng[e["agent_id"]].append(e["action"])
+            L += [f"      post #{pid} (round {p['round']}, likes={p['num_likes']}"
+                  f" dislikes={p['num_dislikes']} shares={p['num_shares']}):",
+                  wrap(p["content"], indent="          "),
+                  f"          shown to {len(saw)} agents: "
+                  f"{', '.join('@'+name(x) for x in sorted(saw)) or 'nobody'}"]
+            if eng:
+                L += ["          engaged: " + "; ".join(
+                    f"@{name(k)} {','.join(v)}" for k, v in eng.items())]
+            else:
+                L += ["          engaged: nobody"]
+
         L += ["", "    EXPOSURE BY AUTHOR (how often this agent saw each person):"]
         sa = sorted((a.get("saw_authors") or {}).items(),
                     key=lambda kv: -kv[1])
@@ -483,6 +509,87 @@ def s7_matrix(L, data):
     return L
 
 
+
+def s7b_pair_chronology(L, data, extra):
+    """For every pair: every exposure, in order, and what happened at each one.
+
+    "A saw B 30 times" is a summary. This is the 30 rows behind it -- which
+    post, which round, what score put it there, which route delivered it, and
+    what A actually did at that moment. This is where a claim about influence
+    either holds up or falls apart.
+    """
+    L += [RULE, "SECTION 7B -- PAIR CHRONOLOGIES (every exposure, one by one)",
+          RULE, "",
+          "    Read as: viewer -> author. Each row is ONE exposure event.",
+          "    'did' is what the viewer did to THAT post in THAT round.",
+          "    A FOLLOW line is placed in the round the edge was created.", ""]
+    agents, posts = data["agents"], data["posts"]
+    comments = extra["comments"]
+
+    def name(i):
+        a = agents.get(i) or agents.get(str(i)) or {}
+        return a.get("username", f"agent{i}" if i is not None else "?")
+
+    # (agent, round, post) -> [actions]; and (agent, round) -> follow targets
+    acted = defaultdict(list)
+    followed = defaultdict(list)
+    for e in data["events"]:
+        if e.get("post_id") is not None:
+            acted[(e["agent_id"], e["round"], e["post_id"])].append(e)
+        if e["action"] in ("follow", "unfollow", "mute") and \
+                e.get("target_agent_id") is not None:
+            followed[(e["agent_id"], e["round"])].append(e)
+
+    pairs = defaultdict(list)
+    for ex in data["exposures"]:
+        if ex.get("author_id") is None or ex["author_id"] == ex["agent_id"]:
+            continue
+        pairs[(ex["agent_id"], ex["author_id"])].append(ex)
+
+    ordered = sorted(pairs.items(), key=lambda kv: -len(kv[1]))
+    L += [f"    {len(ordered)} ordered pairs had at least one exposure.", ""]
+
+    for (viewer, author), evs in ordered:
+        inter = data["interaction_pairs"].get(f"{viewer}->{author}", {})
+        n_acts = sum(inter.values())
+        L += [SUB,
+              f"@{name(viewer)}  ->  @{name(author)}    "
+              f"saw {len(evs)}x, acted {n_acts}x"
+              f"{'  [' + ', '.join(f'{k}x{v}' for k, v in inter.items()) + ']' if inter else ''}"]
+        for ex in sorted(evs, key=lambda x: (x["round"],
+                                             x.get("feed_position") or 0)):
+            pid = ex["post_id"]
+            body = str((posts.get(pid) or {}).get("content", ""))[:52]
+            sc = ex.get("score")
+            did = acted.get((viewer, ex["round"], pid), [])
+            if did:
+                labels = []
+                for d in did:
+                    if d["action"] == "create_comment":
+                        cid = (d.get("info") or {}).get("comment_id")
+                        txt = (comments.get(cid) or {}).get("content", "")
+                        labels.append(f'COMMENTED: "{str(txt)[:46]}"')
+                    else:
+                        labels.append(d["action"].upper())
+                what = " + ".join(labels)
+            else:
+                what = "-- no action"
+            L += [f"      r{ex['round']:<3} post #{pid:<5} "
+                  f"{(f'{sc:.4f}' if isinstance(sc,(int,float)) else '  -   '):<8}"
+                  f"via {str(ex.get('source','')):<10} \"{body}\"",
+                  f"           {what}"]
+        # follow events toward this author, placed in their round
+        for (v, r), evl in followed.items():
+            if v != viewer:
+                continue
+            for e in evl:
+                if e["target_agent_id"] == author:
+                    L += [f"      r{r:<3} >>> {e['action'].upper()} "
+                          f"@{name(author)} <<<"]
+        L += [""]
+    return L
+
+
 def s8_propagation(L, data):
     L += [RULE, "SECTION 8 -- PROPAGATION", RULE, "",
           "    Repeated exposure preceding interaction. This is the mechanism the",
@@ -586,6 +693,7 @@ def main():
     L = s5_posts(L, data, extra)
     L = s6_threads(L, data, extra)
     L = s7_matrix(L, data)
+    L = s7b_pair_chronology(L, data, extra)
     L = s8_propagation(L, data)
     L = s9_feed(L, data)
     L = s10_failures(L, data)

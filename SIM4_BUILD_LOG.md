@@ -223,6 +223,7 @@ Full detail with rationale lives in spec §2. Condensed index:
 | F-10 | `generate_twitter_agent_graph` discards `following_agentid_list` | `agents_generator.py:614-649` |
 | F-11 | Agents see only follower/following **counts**, never identities | `agent_environment.py:68-101`, both marked `# TODO` upstream |
 | F-12 | Two conflicting index bases for the `rec` matrix | `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based |
+| F-13 | Every table's `user_id` column actually stores **agent_id**; only the `user` table has both | `platform.py:407` — `user_id = agent_id`, repeated in every action |
 
 **Note on F-3.** This is the most consequential finding of the investigation. Had we
 selected the option whose name most suggests "the interest-based one", the run would
@@ -251,6 +252,10 @@ Living list. Every file this build creates or modifies, and why.
 |---|---|---|
 | `docs/superpowers/specs/2026-08-24-social-timeline-design.md` | Design spec | Committed `2b82487` |
 | `SIM4_BUILD_LOG.md` | This document | In progress |
+| `examples/experiment/social_timeline/embedding.py` | Mean-pooled TwHIN-BERT embeddings (D-13). Exists because upstream's `pooler_output` path is non-deterministic and near-non-discriminative (B-1/B-2) | Working |
+| `examples/experiment/social_timeline/timeline_platform.py` | `TimelinePlatform(Platform)`: implements the ranking, creates and writes `rec_candidates` / `rec_history` / `round_boundary`, asserts the algorithm ran, enforces DM privacy | Working (R-4) |
+| `examples/experiment/social_timeline/timeline_agent.py` | `TimelineAgent` (per-agent exception isolation) and the persona→agent-graph generator, with zero initial follow edges (D-10) | Working (R-4) |
+| `examples/experiment/social_timeline/run_simulation.py` | Driver: 27-action set, all-`LLMAction` rounds, run manifest with exact config, timings, counters and action tallies | Working (R-4), B-3 fixed |
 | `examples/experiment/social_timeline/check_deps.py` | Stage 0 gate: 6 checks — torch devices, TwHIN-BERT loads, embeddings discriminate across two topics, embedding space reproduces a baseline recorded in a *different* process, upstream pooler regression guard, Ollama reachable | **Strengthened and passing** (R-3). Original 3-text single-process version passed by luck and missed B-1/B-2 |
 
 ### Modified
@@ -294,6 +299,49 @@ Living list. Every file this build creates or modifies, and why.
     capture, deviations stated. Recorded that `check_deps.py` itself needs
     strengthening — a gate that can pass by luck is not a gate.
 
+### 2026-08-24 — Stage 1: plumbing
+
+12. Wrote the four implementation modules (§5). Design points worth recording:
+    - `post.user_id`, `follow.follower_id`, `trace.user_id` and `rec.user_id` all
+      store **agent_id**, not the `user` table's primary key (`platform.py:407`,
+      `user_id = agent_id`). The `user` table alone has both columns. Upstream's rec
+      insertion works only because 0-based positional indices happen to coincide with
+      agent_id (F-12). Our code keys on `agent_id` explicitly everywhere, which
+      removes that class of off-by-one rather than reproducing it. Logged as **F-13**.
+    - `UserInfo.to_system_message()` forks on `recsys_type`: the Reddit prompt
+      includes gender/age/MBTI/country, the Twitter prompt does not
+      (`config/user.py:50-111`). We need the Twitter platform (follows, reposts) but
+      the richer persona, so the full persona is composed into the `user_profile`
+      string the Twitter prompt already renders. Prompt *structure* is untouched —
+      Sim 1 Attempt 1 proved structural changes break tool-calling outright.
+    - `env.step()` gathers agent tasks with a bare `asyncio.gather(*tasks)`
+      (`env.py:193`, no `return_exceptions=True`), so one agent raising aborts the
+      round — exactly how Sim 3 lost a run. Absorbed in `TimelineAgent`, the only
+      place available without modifying `oasis/`.
+13. Verified cheaply before spending LLM time: all modules import, the action set is
+    exactly 27, and personas compose into rich readable profiles.
+14. Ran R-4 (4 agents, 2 rounds). **Plumbing gate passed** — details in §7.
+15. Found **B-3** (counts read after the cursor closed). Fixed, and added a
+    `turns_without_action` metric so tool-calling health is measured every run
+    against Sim 1's ~89% baseline rather than eyeballed.
+
+**On the absence of action diversity in R-4.** The trace showed only `create_post`
+(6), `sign_up` (4), `refresh` (4) — no likes, follows, or comments at all. Before
+attributing this to the model, the plumbing was checked directly: **all 27 tools are
+correctly registered** on the agent (`action_tools`), with nothing requested-but-
+missing. So the tool surface is intact and the model simply chose to post.
+
+Much of that is legitimate at this scale: in round 0 no posts exist, so the feed reads
+"there are no existing posts" and posting is the only sensible action. That accounts
+for 4 of the 8 agent-turns. Only round 1 is informative, and 4 turns is far too small
+a sample to conclude anything.
+
+One real signal did surface: `do_nothing` **does** write a trace row
+(`platform.py:1332-1344`), and no such rows exist — so the two round-1 agents that
+produced nothing emitted **no tool call at all**, rather than deliberately choosing to
+abstain. That is a genuine tool-calling miss. Whether it is a rate worth worrying
+about is Q-2, and needs stage 2's larger sample to answer.
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -307,6 +355,7 @@ including failed and aborted ones.
 |---|---|---|---|---|
 | R-1 | 0 | `check_deps.py`, no simulation | **PASS (but inadequate)** — TwHIN-BERT loaded (279M params, XLMRobertaTokenizerFast + BertModel, device `cpu`), embeddings non-NaN, margin `+0.0358`, Ollama reachable with `llama3.1:8b`. The margin check passed by luck; see B-1/B-2 | 29.7s total (24.6s model load incl. download) |
 | R-2 | 0 | `pooler_probe.py`, 4 texts / 2 topics, run in two fresh processes | **Exposed B-1 and B-2.** Pooler weights differ per process (`sum=-6.18` vs `+6.46`); pooler margin `+0.0069` / `+0.0008`; mean-pooled margin `+0.0475` and bit-identical across processes | ~50s for both processes |
+| R-4 | 1 | 4 agents, 2 rounds, twhin-bert, `--label stage1` | **Plumbing gate PASSED.** 0 agent failures; `rec_history`=12, `rec_candidates`=12, `round_boundary` correct (r0: 0 posts, r1: 4); every agent received a non-empty feed; own-posts correctly excluded; per-user scores genuinely differ. Exposed **B-3**. Action diversity was nil — see analysis below | 103.2s |
 | R-3 | 0 | `check_deps.py`, strengthened to 6 checks | **PASS, and now a real gate.** Mean-pooled margin `+0.0475`; embedding space reproduced a baseline recorded in a *different* process to within `dw=0.00004, da=0.00002`, confirming replication is sound under D-13; pooler regression guard confirms upstream still unfixed | 4.7s (model cached) |
 
 ---
@@ -319,6 +368,7 @@ Bugs found during this build — in our code or upstream — with how each surfa
 |---|---|---|---|---|---|
 | B-1 | Upstream `process_recsys_posts.py:33` | Embedding space differs on every process launch; runs not reproducible | `outputs.pooler_output` reads a pooler whose weights TwHIN-BERT's checkpoint does not contain, so they are randomly re-initialized at every load | Mean-pool `last_hidden_state` instead (D-13) | Stage 0 probe, cross-process fingerprint |
 | B-2 | Same line | Interest-based ranking is barely discriminative — one process produced a within-vs-across-topic margin of `+0.0008`, i.e. noise | `tanh` saturation on a random projection compresses all cosines into ~0.88-0.97 | Same fix (D-13) | Stage 0 probe, 2-topic margin test |
+| B-3 | Ours — `run_simulation.py` | `final_counts` all `None`, `action_tally` returned `Cannot operate on a closed cursor` | Both were computed *after* `env.close()`, which closes the DB cursor (`platform.py:143-144` on `ActionType.EXIT`) | Read them inside the `try`, before `close()` | R-4 (stage 1) |
 
 ### B-1 / B-2 in detail
 

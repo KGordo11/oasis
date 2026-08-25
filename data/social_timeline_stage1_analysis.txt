@@ -1,0 +1,66 @@
+==========================================================================
+SIMULATION 4 ANALYSIS -- social_timeline_stage1.db
+==========================================================================
+agents=4  rounds=2  posts=6  chosen actions=6  exposure events=12  follow edges=0
+
+ACTION MIX (chosen actions only; refresh/sign_up excluded)
+  create_post              6
+
+SOCIAL GRAPH: 0 edges before -> 0 edges after
+
+--------------------------------------------------------------------------
+PER-AGENT DETAIL
+--------------------------------------------------------------------------
+
+[agent 0] @millerhospitality
+  bio: Passionate about hospitality & tourism. Exploring the world one destination at a time.
+  actions (1): {'create_post': 1}
+  authored 1 posts: [1]
+  saw 3 distinct posts across 3 exposure events (by source: {'recsys': 3})
+    acted on : []
+    ignored  : [2, 3, 4]
+    never saw: [5, 6]
+  engagement rate (acted / seen): 0.0
+  follows [] | followed by []
+  exposure to others: agent 1 x1, agent 3 x1, agent 2 x1
+
+[agent 1] @emma_logistics_guru
+  bio: Passionate about transportation and logistics | ENFJ | Always seeking new connections an
+  actions (2): {'create_post': 2}
+  authored 2 posts: [2, 5]
+  saw 3 distinct posts across 3 exposure events (by source: {'recsys': 3})
+    acted on : []
+    ignored  : [1, 3, 4]
+    never saw: [6]
+  engagement rate (acted / seen): 0.0
+  follows [] | followed by []
+  exposure to others: agent 0 x1, agent 3 x1, agent 2 x1
+
+[agent 2] @ryantechsavvy22
+  bio: Tech enthusiast | STEM student | Constantly seeking knowledge
+  actions (2): {'create_post': 2}
+  authored 2 posts: [4, 6]
+  saw 3 distinct posts across 3 exposure events (by source: {'recsys': 3})
+    acted on : []
+    ignored  : [1, 2, 3]
+    never saw: [5]
+  engagement rate (acted / seen): 0.0
+  follows [] | followed by []
+  exposure to others: agent 0 x1, agent 1 x1, agent 3 x1
+
+[agent 3] @biz_mind45
+  bio: Dedicated marketer with a passion for economics and business. Constantly seeking new opp
+  actions (1): {'create_post': 1}
+  authored 1 posts: [3]
+  saw 3 distinct posts across 3 exposure events (by source: {'recsys': 3})
+    acted on : []
+    ignored  : [1, 2, 4]
+    never saw: [5, 6]
+  engagement rate (acted / seen): 0.0
+  follows [] | followed by []
+  exposure to others: agent 0 x1, agent 1 x1, agent 2 x1
+
+--------------------------------------------------------------------------
+PROPAGATION CANDIDATES (repeated exposure preceding interaction)
+--------------------------------------------------------------------------
+  (none observed)

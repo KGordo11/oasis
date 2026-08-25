@@ -1,0 +1,117 @@
+{
+  "label": "stage1",
+  "started_at": "2026-08-24T21:17:37.093256",
+  "config": {
+    "agents": 4,
+    "rounds": 2,
+    "recsys": "twhin-bert",
+    "model": "llama3.1:8b",
+    "semaphore": 4,
+    "max_rec_post_len": 30,
+    "refresh_rec_post_count": 8,
+    "following_post_count": 4,
+    "personas": "data/reddit/user_data_36.json",
+    "n_actions": 27,
+    "actions": [
+      "create_post",
+      "create_comment",
+      "like_post",
+      "unlike_post",
+      "dislike_post",
+      "undo_dislike_post",
+      "like_comment",
+      "unlike_comment",
+      "dislike_comment",
+      "undo_dislike_comment",
+      "repost",
+      "quote_post",
+      "report_post",
+      "follow",
+      "unfollow",
+      "mute",
+      "unmute",
+      "search_user",
+      "search_posts",
+      "trend",
+      "refresh",
+      "do_nothing",
+      "create_group",
+      "join_group",
+      "leave_group",
+      "send_to_group",
+      "listen_from_group"
+    ]
+  },
+  "algorithm": {
+    "name": "TWHIN interest-based (TimelinePlatform implementation)",
+    "formula": "score(u,p) = cosine(embed(profile_u), embed(content_p)) * log((271.8 - age_p)/100)",
+    "embedding": "Twitter/twhin-bert-base, mean-pooled last_hidden_state",
+    "deviations_from_upstream": [
+      "mean-pooled last_hidden_state instead of pooler_output (bugs B-1/B-2: upstream pooler weights are randomly re-initialised every process, making runs unreplicable and near-non-discriminative)",
+      "per-(user,post) scores captured for rec_history"
+    ],
+    "initial_follow_edges": 0
+  },
+  "environment": {
+    "python": "3.11.15",
+    "platform": "macOS-15.8-arm64-arm-64bit",
+    "ollama_keep_alive": "(unset)"
+  },
+  "rounds": [
+    {
+      "round": 0,
+      "seconds": 59.8,
+      "cumulative_agent_failures": 0,
+      "post": 4,
+      "comment": 0,
+      "follow": 0,
+      "like": 0,
+      "dislike": 0,
+      "rec_history": 0,
+      "rec_candidates": 0,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    },
+    {
+      "round": 1,
+      "seconds": 43.3,
+      "cumulative_agent_failures": 0,
+      "post": 6,
+      "comment": 0,
+      "follow": 0,
+      "like": 0,
+      "dislike": 0,
+      "rec_history": 12,
+      "rec_candidates": 12,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    }
+  ],
+  "total_seconds": 103.2,
+  "platform_stats": {
+    "rounds_ranked": 1,
+    "recency_clamped": 0,
+    "empty_candidate_pools": 0,
+    "refresh_calls": 4,
+    "exposures_logged": 12,
+    "dm_joins_refused": 0
+  },
+  "final_counts": {
+    "post": null,
+    "comment": null,
+    "follow": null,
+    "like": null,
+    "dislike": null,
+    "rec_history": null,
+    "rec_candidates": null,
+    "chat_group": null,
+    "group_members": null,
+    "group_messages": null
+  },
+  "action_tally": {
+    "error": "Cannot operate on a closed cursor."
+  },
+  "finished_at": "2026-08-24T21:19:20.353496"
+}

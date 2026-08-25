@@ -101,7 +101,7 @@ async def run(args):
     from oasis import LLMAction
     from oasis.social_platform.channel import Channel
 
-    from timeline_agent import generate_timeline_agents
+    from timeline_agent import PROMPT_VERSION, generate_timeline_agents
     from timeline_platform import TimelinePlatform
 
     db_path = os.path.join(REPO_ROOT, "data",
@@ -169,6 +169,7 @@ async def run(args):
             "refresh_rec_post_count": args.refresh_rec_post_count,
             "following_post_count": args.following_post_count,
             "personas": args.personas,
+            "prompt_version": PROMPT_VERSION,
             "n_actions": len(actions),
             "actions": [a.value for a in actions],
         },

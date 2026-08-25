@@ -45,6 +45,12 @@ from oasis.social_platform.database import get_db_path
 
 log = logging.getLogger("social_timeline.agent")
 
+# Bumped whenever the agent-facing prompt changes, and recorded in every run
+# manifest. Runs are only comparable to each other at the same version --
+# v1 -> v2 changed the action guidance after it was found to be priming
+# malformed tool calls (see TimelineEnvironment).
+PROMPT_VERSION = 2
+
 
 class TimelineEnvironment(SocialEnvironment):
     """What the agent sees each turn. Content changed, structure preserved.
@@ -161,19 +167,36 @@ class TimelineEnvironment(SocialEnvironment):
         # --- groups, last and only when they exist (F-14) -----------------
         groups = await self.get_group_env() if self.include_groups else ""
 
-        # --- positively-phrased guidance (Q-8) ----------------------------
+        # --- guidance, v2 (Q-8 and F-15) ----------------------------------
+        # v1 phrased this as a prose list ("- follow(followee_id) to follow an
+        # author...") and repeatedly used the word "action". The full 36-agent
+        # run then produced 393 malformed calls against 260 successful ones --
+        # follow alone failed 189 times to 55 successes. The dominant error was
+        # `got an unexpected keyword argument 'action'`, i.e. the model emitting
+        # follow(action="follow", followee_id=5); others echoed the function
+        # name itself, follow(follow=...) or create_comment(create_comment=...).
+        # The word "action" in the guidance was priming the very mistake.
+        #
+        # v2 therefore drops that word entirely, shows exact signatures with
+        # real parameter names taken from agent_action.py, and says explicitly
+        # not to wrap the call or repeat the function name.
         guidance = (
-            "Choose one or more actions that fit your personality and what you "
-            "see above. All of these are useful and normal:\n"
-            "- like_post(post_id) if a post appeals to you\n"
-            "- dislike_post(post_id) if you disagree with it\n"
-            "- create_comment(post_id, content) to reply to someone\n"
-            "- follow(followee_id) to follow an author whose posts you enjoy, "
-            "so you see more of them later\n"
-            "- repost(post_id) or quote_post(post_id, content) to share\n"
-            "- create_post(content) to say something new\n"
-            "Engaging with other people's posts is usually more interesting "
-            "than only posting your own.")
+            "Call one or more of these functions directly. Use exactly these "
+            "parameter names and pass nothing else:\n"
+            "  create_post(content=\"...\")\n"
+            "  create_comment(post_id=N, content=\"...\")\n"
+            "  like_post(post_id=N)\n"
+            "  dislike_post(post_id=N)\n"
+            "  like_comment(comment_id=N)\n"
+            "  follow(followee_id=N)\n"
+            "  repost(post_id=N)\n"
+            "  quote_post(post_id=N, quote_content=\"...\")\n"
+            "N is a number you read from the feed above: use post_id for a "
+            "post, author_id for a person, comment_id for a comment. Do not "
+            "wrap the call in an extra parameter, and do not pass a parameter "
+            "named after the function itself.\n"
+            "Replying to and following other people is usually more "
+            "interesting than only posting your own thoughts.")
 
         return "\n\n".join(x for x in
                            [social, feed, own, groups, guidance] if x)

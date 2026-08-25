@@ -485,6 +485,52 @@ duration rather than correctness (Q-3).
 
 28. Launched **R-8**, the full run: 36 agents, 12 rounds.
 
+### 2026-08-25 — R-8, the full run, and what it exposed
+
+29. R-8 completed cleanly: 36 agents, 12 rounds, 105 minutes, **zero agent
+    failures**, 3581 exposure events, 10 distinct action types. The network
+    assembled itself from zero to 55 follow edges with nothing seeded, and the
+    propagation mechanism appears exactly as intended at scale —
+    `agent 31 saw agent 2 x26 -> follow + create_comment`,
+    `agent 1 saw agent 14 x16 -> like_post + follow + quote_post`. Agents 2
+    and 14 became genuine hubs purely through repeated exposure.
+
+30. **Follow growth plateaus.** Edges by round: 45, 45, 47, 50, 51, 53, 55.
+    Comments kept climbing throughout. Agents settle their network early and
+    then shift to conversation — a real dynamic, not a limitation.
+
+31. **The headline problem: 393 malformed tool calls against 260 successful
+    actions.** `follow` failed 189 times to 55 successes — a 77% failure rate,
+    meaning the follow graph is roughly a quarter of what the agents actually
+    attempted. Broken down, the dominant error is unambiguous:
+
+    | Error | Count |
+    |---|---|
+    | `follow() got an unexpected keyword argument 'action'` | 171 |
+    | `create_comment() ... 'action'` | 165 |
+    | `like_post() ... 'action'` | 92 |
+    | `follow() ... 'content'` | 36 |
+    | `follow() ... 'follow'` | 27 |
+    | `create_comment() ... 'create_comment'` | 26 |
+
+    The model emits `follow(action="follow", followee_id=5)` — wrapping the
+    call in an extra `action` parameter — or echoes the function's own name as
+    a parameter. **The v1 guidance used the word "action" repeatedly and was
+    priming the exact mistake it produced.**
+
+32. Wrote prompt **v2**: drops the word "action" entirely, lists exact
+    signatures with real parameter names taken from `agent_action.py`, and
+    states explicitly not to wrap the call or repeat the function name. Added
+    `PROMPT_VERSION`, recorded in every manifest, since runs are only
+    comparable to each other at the same prompt version.
+
+33. **v2 was deliberately NOT applied to R-9.** The contrast run had already
+    launched on v1, and changing the prompt mid-comparison would confound the
+    algorithm comparison with a prompt change — the same freezing discipline
+    Sim 3 used for `shield_agent.py` across its 3x2 grid. R-8 vs R-9 is a
+    clean TWHIN-vs-hot-score comparison at v1; measuring v2 needs its own
+    TWHIN run against R-8.
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -499,7 +545,8 @@ including failed and aborted ones.
 | R-1 | 0 | `check_deps.py`, no simulation | **PASS (but inadequate)** — TwHIN-BERT loaded (279M params, XLMRobertaTokenizerFast + BertModel, device `cpu`), embeddings non-NaN, margin `+0.0358`, Ollama reachable with `llama3.1:8b`. The margin check passed by luck; see B-1/B-2 | 29.7s total (24.6s model load incl. download) |
 | R-2 | 0 | `pooler_probe.py`, 4 texts / 2 topics, run in two fresh processes | **Exposed B-1 and B-2.** Pooler weights differ per process (`sum=-6.18` vs `+6.46`); pooler margin `+0.0069` / `+0.0008`; mean-pooled margin `+0.0475` and bit-identical across processes | ~50s for both processes |
 | R-6 | 2 | 8 agents, 4 rounds, **22 actions** (`--no-groups`) — controlled A/B against R-5, identical otherwise | **Behaviour gate PASSED.** action_rate **0.812** (26/32, vs R-5's 0.469 and Sim 1's ~0.89); 14 posts, **9 comments, 3 quote_posts, 1 follow**, 1 search, 1 do_nothing; 148 exposures (nearly 2x R-5). First genuine content engagement of the build. Confirms F-14 | 340.1s |
-| R-8 | full | 36 agents, 12 rounds, twhin-bert, 22 actions | *(running)* | — |
+| R-9 | contrast | 36 agents, 12 rounds, **reddit hot-score**, prompt v1 | *(running — auto-chained after R-8)* | — |
+| R-8 | full | 36 agents, 12 rounds, twhin-bert, 22 actions, prompt **v1** | **Completed, 0 agent failures.** 47 posts, 89 comments, 55 follows, 42 likes, 1 dislike, 3581 exposures, 10 distinct action types. action_rate 0.461. **But 393 malformed tool calls vs 260 successful actions** — see F-15 | 6277.6s (105 min) |
 | R-7 | 3 | 8 agents, 4 rounds, 22 actions, **all four fixes**, `--label stage3` | **Dynamics gate PASSED.** action_rate 0.812; **5 follow edges** (vs 1), **6 likes** (vs 0 in every prior run), 8 comments, 8/8 distinct posts (no duplicates); `source='both'` appears **live** and grows 4→5 as the graph grows; 0 agent failures | 312.7s |
 | R-5 | 2 | 8 agents, 4 rounds, 27 actions, `--label stage2` | **Behaviour gate FAILED.** 0 agent failures, instrumentation clean (77 exposures), but **action_rate 0.469** (15/32 turns) vs Sim 1's ~0.89 baseline, and the action mix was `send_to_group` 6, `create_post` 6, `create_group` 2, `join_group` 1 — **zero likes, follows, comments or reposts**. Diagnosed as F-14 | 352.7s |
 | R-4 | 1 | 4 agents, 2 rounds, twhin-bert, `--label stage1` | **Plumbing gate PASSED.** 0 agent failures; `rec_history`=12, `rec_candidates`=12, `round_boundary` correct (r0: 0 posts, r1: 4); every agent received a non-empty feed; own-posts correctly excluded; per-user scores genuinely differ. Exposed **B-3**. Action diversity was nil — see analysis below | 103.2s |

@@ -376,10 +376,31 @@ def main():
     args = p.parse_args()
 
     with open(args.analysis) as fh:
-        data = json.load(fh)
+        full = json.load(fh)
 
-    # Keep the payload lean: the page never reads post bodies.
-    data.pop("posts", None)
+    # Keep the payload lean. The analysis JSON carries the complete event log,
+    # exposure ledger, post bodies and comments -- thousands of rows at full
+    # scale -- but this page reads none of them. Embedding the lot would bloat
+    # the artifact for no benefit, so build an explicit projection of exactly
+    # what the page uses rather than deleting keys one by one and hoping.
+    PER_AGENT = ("agent_id", "username", "total_actions", "n_posts_authored",
+                 "distinct_posts_seen", "exposure_events", "engagement_rate")
+    data = {
+        "n_agents": full.get("n_agents"),
+        "n_rounds": full.get("n_rounds"),
+        "totals": {k: v for k, v in (full.get("totals") or {}).items()
+                   if k != "action_counts"},
+        "graph_by_round": full.get("graph_by_round", {}),
+        "interaction_pairs": full.get("interaction_pairs", {}),
+        # Only the strongest pairs are rendered; the table shows the top 40.
+        "exposure_pairs": dict(sorted(
+            (full.get("exposure_pairs") or {}).items(),
+            key=lambda kv: -kv[1])[:120]),
+        "agents": {
+            k: {f: v.get(f) for f in PER_AGENT}
+            for k, v in (full.get("agents") or {}).items()
+        },
+    }
 
     html = HTML.replace("__DATA__", json.dumps(data, default=str))
     with open(args.out, "w") as fh:

@@ -369,6 +369,51 @@ def find_propagation(exposure_pairs, interaction_pairs):
     return out
 
 
+def parse_tool_errors(log_path):
+    """Count tool calls the model attempted but malformed.
+
+    camel logs these as warnings and the action simply does not happen, e.g.
+
+        Error executing async tool 'create_post':
+            SocialAction.create_post() missing 1 required positional
+            argument: 'content'
+        Error executing async tool 'follow':
+            SocialAction.follow() got an unexpected keyword argument 'content'
+
+    These leave NO trace row, so without this they are indistinguishable from
+    an agent that emitted no tool call at all -- but they are a materially
+    different failure: the agent chose an action and got the arguments wrong.
+    Separating the two says whether to work on prompting (agent isn't trying)
+    or on argument guidance (agent is trying and fumbling the call).
+    """
+    import re
+    pattern = re.compile(
+        r"Error executing async tool '([a-z_]+)':\s*(.*)")
+    by_action, by_reason = Counter(), Counter()
+    try:
+        with open(log_path, errors="replace") as fh:
+            for line in fh:
+                m = pattern.search(line)
+                if not m:
+                    continue
+                by_action[m.group(1)] += 1
+                reason = m.group(2).strip()
+                if "unexpected keyword argument" in reason:
+                    kind = "unexpected keyword argument"
+                elif "missing" in reason and "required" in reason:
+                    kind = "missing required argument"
+                else:
+                    kind = reason[:60]
+                by_reason[kind] += 1
+    except OSError:
+        return None
+    return {
+        "total": sum(by_action.values()),
+        "by_action": dict(by_action.most_common()),
+        "by_reason": dict(by_reason.most_common()),
+    }
+
+
 def load_comments(conn):
     out = {}
     for row in conn.execute(
@@ -499,6 +544,15 @@ def render_report(data):
             add(f"  {action:<24} {n}")
     else:
         add("  (none)")
+    tce = data.get("tool_call_errors")
+    if tce:
+        add("")
+        add(f"MALFORMED TOOL CALLS (attempted, wrong arguments, no effect): "
+            f"{tce['total']}")
+        for act, n in tce["by_action"].items():
+            add(f"  {act:<24} {n}")
+        for reason, n in tce["by_reason"].items():
+            add(f"    reason: {reason} x{n}")
     add("")
     add(f"SOCIAL GRAPH: {len(data['graph_before'])} edges before -> "
         f"{len(data['graph_after'])} edges after")
@@ -550,11 +604,16 @@ def render_report(data):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--db", required=True)
+    p.add_argument("--log", default=None,
+                   help="run log, to count malformed tool calls the model "
+                        "attempted but got wrong (they leave no trace row)")
     p.add_argument("--out", default=None,
                    help="JSON output path (default: alongside the db)")
     args = p.parse_args()
 
     data = analyze(args.db)
+    if args.log:
+        data["tool_call_errors"] = parse_tool_errors(args.log)
     out = args.out or args.db.replace(".db", "_analysis.json")
     with open(out, "w") as fh:
         json.dump(data, fh, indent=2, default=str)

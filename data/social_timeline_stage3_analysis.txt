@@ -10,6 +10,10 @@ ACTION MIX (chosen actions only; refresh/sign_up excluded)
   like_post                3
   like_comment             3
 
+MALFORMED TOOL CALLS (attempted, wrong arguments, no effect): 3
+  like_comment             3
+    reason: unexpected keyword argument x3
+
 SOCIAL GRAPH: 0 edges before -> 5 edges after
 
 --------------------------------------------------------------------------

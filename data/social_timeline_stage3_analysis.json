@@ -2868,5 +2868,14 @@
       },
       "total_interactions": 1
     }
-  ]
+  ],
+  "tool_call_errors": {
+    "total": 3,
+    "by_action": {
+      "like_comment": 3
+    },
+    "by_reason": {
+      "unexpected keyword argument": 3
+    }
+  }
 }

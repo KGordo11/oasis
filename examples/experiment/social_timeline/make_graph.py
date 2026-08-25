@@ -96,7 +96,7 @@ HTML = """<title>Agent Network Formation</title>
   input[type=range] { flex:1; min-width:180px; accent-color:var(--follow); }
   input[type=range]:focus-visible { outline:2px solid var(--follow);
                                     outline-offset:3px; }
-  svg { display:block; width:100%; height:min(58vh,540px);
+  svg { display:block; width:100%; height:min(72vh,640px);
         background:var(--panel); }
   .node circle { stroke:var(--node-ring); stroke-width:1.5px; }
   .node text { font-family:"IBM Plex Mono", monospace; font-size:9.5px;
@@ -280,10 +280,18 @@ function edgesAt(round) {
 }
 
 function interactionEdges() {
-  return Object.entries(inter).map(([key, n]) => {
+  const all = Object.entries(inter).map(([key, n]) => {
     const [a, b] = key.split('->').map(Number);
     return { source: a, target: b, weight: n };
   }).filter(e => nodeById[e.source] && nodeById[e.target]);
+  // Above ~60 pairs every node connects to every other and the picture turns
+  // into a hairball that shows nothing. Drop one-off interactions and keep the
+  // repeated ones, which are what actually constitute a relationship.
+  const DENSE = 60;
+  if (all.length <= DENSE) return all;
+  const repeated = all.filter(e => e.weight > 1);
+  return repeated.length >= 12 ? repeated
+       : all.sort((a, b) => b.weight - a.weight).slice(0, 40);
 }
 
 function simulate(edges) {
@@ -295,7 +303,7 @@ function simulate(edges) {
         const a = nodes[i], b = nodes[j];
         let dx = b.x - a.x, dy = b.y - a.y;
         let d2 = dx*dx + dy*dy || 1;
-        const rep = (9000 + 260 * nodes.length) / d2;
+        const rep = (7000 + 150 * nodes.length) / d2;
         const d = Math.sqrt(d2);
         const ux = dx/d, uy = dy/d;
         a.vx -= ux*rep; a.vy -= uy*rep;
@@ -313,10 +321,13 @@ function simulate(edges) {
       b.vx -= ux*f; b.vy -= uy*f;
     }
     for (const n of nodes) {
-      n.vx += (W/2 - n.x) * 0.002;
-      n.vy += (H/2 - n.y) * 0.002;
-      n.x = Math.max(30, Math.min(W-30, n.x + n.vx));
-      n.y = Math.max(24, Math.min(H-24, n.y + n.vy));
+      // Centring must outweigh repulsion at scale, or 36 nodes press
+      // outward and pin flat against the viewport edges.
+      const pull = 0.004 + 0.00012 * nodes.length;
+      n.vx += (W/2 - n.x) * pull;
+      n.vy += (H/2 - n.y) * pull;
+      n.x = Math.max(70, Math.min(W-70, n.x + n.vx));
+      n.y = Math.max(40, Math.min(H-40, n.y + n.vy));
     }
   }
 }
@@ -340,7 +351,7 @@ function render(round) {
     l.setAttribute('x2', b.x); l.setAttribute('y2', b.y);
     l.setAttribute('stroke', 'var(--interact)');
     l.setAttribute('stroke-width', 1.2 + 4.5 * (e.weight / maxW));
-    l.setAttribute('opacity', '0.55');
+    l.setAttribute('opacity', interactions.length > 40 ? '0.28' : '0.55');
     svg.appendChild(l);
   }
   for (const e of follows) {

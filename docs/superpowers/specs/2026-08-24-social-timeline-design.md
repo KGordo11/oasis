@@ -414,3 +414,77 @@ not trivially small.
 - **E-commerce and interview actions** (§6).
 - **Scaling past the tuned agent count** — the 100/1000/10000 upstream configs remain
   a later thread.
+
+
+---
+
+## 11. Implementation deltas
+
+Recorded after building. The design above is left as originally written; this
+section states where reality diverged and why. Full evidence in
+`SIM4_BUILD_LOG.md`.
+
+### 11.1 The embedding path had to be replaced (D-13)
+
+§4.1 planned to delegate to upstream `rec_sys_personalized_twh` unchanged, for
+fidelity. That proved impossible. `process_recsys_posts.py:33` returns
+`outputs.pooler_output`, but TwHIN-BERT's checkpoint carries **no trained
+pooler**, so those weights are randomly re-initialised on every process launch.
+
+Measured consequences: two processes produced different embedding spaces
+(weight fingerprints `-6.18` vs `+6.46`), making replication structurally
+meaningless; and discrimination collapsed to a within-vs-across-topic margin of
+`+0.0008` in one process — noise. Mean-pooling `last_hidden_state` gives
+`+0.0475` and is bit-identical across processes.
+
+The ranking therefore lives in `TimelinePlatform`, following TWHIN's formula
+with two stated deviations: mean pooling, and per-pair score capture (which
+upstream does not expose but `rec_history` requires).
+
+### 11.2 The action set is 22, not 27 (D-14)
+
+§6 enabled all 27 actions. All 27 are implemented and verified working
+(`test_actions.py`, 16/16 mechanical checks). But running with them produces a
+*worse* social simulation on an 8B model, measured in a controlled A/B:
+
+| | 27 actions | 22 actions |
+|---|---|---|
+| action_rate | 0.469 | **0.812** |
+| comments | 0 | 9 |
+| exposure events | 77 | 148 |
+
+The cause is not tool count but a prompt hijack (F-14): `to_text_prompt()`
+renders `$groups_env` **before** `$posts_env` on every turn *regardless of
+`available_actions`*, so one agent creating a group put a wall of group
+imperatives above the feed in every other agent's prompt, compounding with each
+new group message. Group actions remain switchable via `--no-groups`; they are
+simply off by default.
+
+This also settles §7 empirically: 2-member groups **do** emerge unprompted (2
+groups, 6 messages in R-5), so DMs are observable — but only at the cost of
+suppressing the feed behaviour that is the point of the simulation. Reported as
+a limitation, as §7 committed to doing.
+
+### 11.3 A prompt-content layer was required (new)
+
+§4.3 assumed the stock environment prompt was usable. It was not: three
+properties of it actively suppressed the behaviour being studied.
+
+`TimelineEnvironment` changes prompt **content** only — never the tool-call
+schema (§3.2) — and does four things: puts the feed first; names who you follow
+instead of reporting a bare count (upstream ships both as `# TODO` stubs);
+exposes `author_id` per post, without which `follow()` is uncallable from a
+feed showing only usernames; and replaces the double-negative *"Do not limit
+your action in just `like` to like posts"* with positive guidance.
+
+Measured effect at identical scale: follow edges 1 → 5, likes 0 → 6, and
+duplicate posts eliminated (8/8 distinct, from 10/14).
+
+### 11.4 The initial graph is empty (D-10)
+
+§4.4 originally proposed seeding a homophily-weighted network. Reversed: the
+motivating scenario was an illustration, not a fixture. The graph starts at
+zero edges and self-assembles. Confirmed working — R-7 produced a genuine hub
+(agent 3, followed by four others after three exposures each) with nothing
+staged, and `rec_history.source` shows the algorithmic/social feed balance
+shifting as the graph grows, exactly as §4.4 predicted.

@@ -49,7 +49,7 @@ log = logging.getLogger("social_timeline.agent")
 # manifest. Runs are only comparable to each other at the same version --
 # v1 -> v2 changed the action guidance after it was found to be priming
 # malformed tool calls (see TimelineEnvironment).
-PROMPT_VERSION = 2
+PROMPT_VERSION = 3
 
 
 class TimelineEnvironment(SocialEnvironment):
@@ -120,9 +120,12 @@ class TimelineEnvironment(SocialEnvironment):
                 entry = {
                     "post_id": p.get("post_id"),
                     "author": author,
-                    # follow() takes an integer id, not a name, so the id has
-                    # to be visible or the action is uncallable in practice.
-                    "author_id": p.get("user_id"),
+                    # v3: named `followee_id`, not `author_id`. At v2 this key
+                    # was `author_id` and the model copied the FIELD name into
+                    # the call -- follow(author_id=5) failed 19 times. Field
+                    # names in the feed are the names the model reaches for, so
+                    # they must match the tool parameter exactly.
+                    "followee_id": p.get("user_id"),
                     "content": p.get("content"),
                     "likes": p.get("num_likes"),
                     "dislikes": p.get("num_dislikes"),
@@ -181,22 +184,27 @@ class TimelineEnvironment(SocialEnvironment):
         # real parameter names taken from agent_action.py, and says explicitly
         # not to wrap the call or repeat the function name.
         guidance = (
-            "Call one or more of these functions directly. Use exactly these "
-            "parameter names and pass nothing else:\n"
-            "  create_post(content=\"...\")\n"
-            "  create_comment(post_id=N, content=\"...\")\n"
+            "Take TWO OR THREE of these actions this turn, not just one. Copy "
+            "the id values straight out of the feed above:\n"
+            "  post_id      -> use with like_post, dislike_post, "
+            "create_comment, repost, quote_post\n"
+            "  followee_id  -> use with follow (this is the person, not the "
+            "post)\n"
+            "  comment_id   -> use with like_comment only\n"
+            "\n"
             "  like_post(post_id=N)\n"
             "  dislike_post(post_id=N)\n"
-            "  like_comment(comment_id=N)\n"
+            "  create_comment(post_id=N, content=\"your reply\")\n"
             "  follow(followee_id=N)\n"
             "  repost(post_id=N)\n"
-            "  quote_post(post_id=N, quote_content=\"...\")\n"
-            "N is a number you read from the feed above: use post_id for a "
-            "post, author_id for a person, comment_id for a comment. Do not "
-            "wrap the call in an extra parameter, and do not pass a parameter "
-            "named after the function itself.\n"
-            "Replying to and following other people is usually more "
-            "interesting than only posting your own thoughts.")
+            "  quote_post(post_id=N, quote_content=\"your take\")\n"
+            "  like_comment(comment_id=N)\n"
+            "  create_post(content=\"something new\")\n"
+            "\n"
+            "Pass only the parameters listed. Do not add extra parameters and "
+            "do not repeat the function name as a parameter.\n"
+            "Replying to and following other people is more interesting than "
+            "only posting your own thoughts.")
 
         return "\n\n".join(x for x in
                            [social, feed, own, groups, guidance] if x)

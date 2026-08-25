@@ -99,8 +99,12 @@ HTML = """<title>Agent Network Formation</title>
   svg { display:block; width:100%; height:min(72vh,640px);
         background:var(--panel); }
   .node circle { stroke:var(--node-ring); stroke-width:1.5px; }
-  .node text { font-family:"IBM Plex Mono", monospace; font-size:9.5px;
-               fill:var(--muted); pointer-events:none; }
+  .node text { font-family:"IBM Plex Mono", monospace; font-size:9px;
+               fill:var(--fg); pointer-events:none; }
+  .focusbox { font-size:13px; color:var(--muted); background:var(--panel);
+              border:1px solid var(--line); border-radius:8px;
+              padding:11px 14px; line-height:1.5; }
+  .focusbox b { color:var(--fg); font-family:"IBM Plex Mono", monospace; }
 
   .legend { display:flex; gap:22px; flex-wrap:wrap; font-size:13px;
             color:var(--muted); padding:0 2px; }
@@ -174,8 +178,10 @@ HTML = """<title>Agent Network Formation</title>
          aria-label="Force-directed graph of agents, follow edges and interactions"></svg>
   </figure>
 
+  <div class="focusbox" id="focusBox"></div>
+
   <div class="legend">
-    <span><span class="swatch" style="background:var(--follow)"></span><b>Follow</b> &mdash; chosen by an agent</span>
+    <span><span class="swatch" style="background:var(--follow)"></span><b>Follow</b> &mdash; arrow points to the person followed</span>
     <span><span class="swatch" style="background:var(--interact)"></span><b>Interaction</b> &mdash; width = count</span>
     <span><b>Node size</b> &mdash; followers</span>
   </div>
@@ -332,7 +338,11 @@ function simulate(edges) {
   }
 }
 
+let focusId = null;       // clicked node: show only its edges
+let lastRound = 0;
+
 function render(round) {
+  lastRound = round;
   const follows = edgesAt(round);
   const interactions = interactionEdges();
   simulate(follows.length ? follows : interactions);
@@ -343,63 +353,124 @@ function render(round) {
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = '';
 
+  // Arrowheads. A follow is directional -- "A follows B" is not the same fact
+  // as "B follows A" -- and without a head the diagram cannot say which.
+  const defs = document.createElementNS(NS, 'defs');
+  defs.innerHTML =
+    ['follow','interact','dim'].map(k => {
+      const col = k === 'dim' ? 'var(--line)' : `var(--${k})`;
+      return `<marker id="ar-${k}" viewBox="0 0 10 10" refX="9" refY="5"
+                markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="${col}"/></marker>`;
+    }).join('');
+  svg.appendChild(defs);
+
+  // Which edges are in focus. Null focus = everything visible.
+  const rel = e => focusId === null ||
+                   e.source === focusId || e.target === focusId;
+  const anyFocus = focusId !== null;
+
+  function edgePath(a, b, curve) {
+    // Curve edges apart so two nodes with traffic both ways stay separable,
+    // and so long edges do not lie on top of intervening nodes.
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const d = Math.sqrt(dx*dx + dy*dy) || 1;
+    const mx = (a.x + b.x) / 2 + (-dy/d) * curve;
+    const my = (a.y + b.y) / 2 + (dx/d) * curve;
+    // Stop short of the target so the arrowhead sits outside the circle.
+    const r = 9 + 3 * Math.sqrt(followerCount[b.id] || 0);
+    const ex = b.x - (dx/d) * r, ey = b.y - (dy/d) * r;
+    return `M${a.x},${a.y} Q${mx},${my} ${ex},${ey}`;
+  }
+
+  function drawEdge(a, b, kind, width, curve) {
+    const on = rel({source: a.id, target: b.id});
+    const path = document.createElementNS(NS, 'path');
+    path.setAttribute('d', edgePath(a, b, curve));
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke', on ? `var(--${kind})` : 'var(--line)');
+    path.setAttribute('stroke-width', on ? width : Math.min(width, 1));
+    path.setAttribute('opacity', on ? (anyFocus ? 0.95 : 0.6)
+                                    : (anyFocus ? 0.10 : 0.30));
+    path.setAttribute('marker-end', `url(#ar-${on ? kind : 'dim'})`);
+    svg.appendChild(path);
+  }
+
   const maxW = Math.max(1, ...interactions.map(e => e.weight));
   for (const e of interactions) {
     const a = nodeById[e.source], b = nodeById[e.target];
-    const l = document.createElementNS(NS, 'line');
-    l.setAttribute('x1', a.x); l.setAttribute('y1', a.y);
-    l.setAttribute('x2', b.x); l.setAttribute('y2', b.y);
-    l.setAttribute('stroke', 'var(--interact)');
-    l.setAttribute('stroke-width', 1.2 + 4.5 * (e.weight / maxW));
-    l.setAttribute('opacity', interactions.length > 40 ? '0.28' : '0.55');
-    svg.appendChild(l);
+    if (a && b) drawEdge(a, b, 'interact', 1 + 3.5*(e.weight/maxW), 26);
   }
   for (const e of follows) {
     const a = nodeById[e.source], b = nodeById[e.target];
-    if (!a || !b) continue;
-    const l = document.createElementNS(NS, 'line');
-    l.setAttribute('x1', a.x); l.setAttribute('y1', a.y);
-    l.setAttribute('x2', b.x); l.setAttribute('y2', b.y);
-    l.setAttribute('stroke', 'var(--follow)');
-    l.setAttribute('stroke-width', '1.6');
-    l.setAttribute('opacity', '0.8');
-    svg.appendChild(l);
+    if (a && b) drawEdge(a, b, 'follow', 1.7, -26);
   }
-  // At 36 agents every label collides, so label only the nodes that carry
-  // information -- anyone with a follower, plus the most active -- and leave
-  // the rest to hover. Below that threshold, label everything.
-  const LABEL_ALL_BELOW = 14;
-  const ranked = [...nodes].sort((a, b) =>
-    ((followerCount[b.id] || 0) - (followerCount[a.id] || 0)) ||
-    (((byId[b.id] || {}).total_actions || 0) -
-     ((byId[a.id] || {}).total_actions || 0)));
-  const labelled = new Set(
-    nodes.length <= LABEL_ALL_BELOW
-      ? nodes.map(n => n.id)
-      : ranked.filter(n => (followerCount[n.id] || 0) > 0)
-              .concat(ranked.slice(0, 6)).map(n => n.id));
 
+  // Every node is labelled. An unlabelled dot tells the reader nothing.
   for (const n of nodes) {
+    const inFocus = focusId === null || n.id === focusId ||
+      follows.some(e => (e.source===focusId && e.target===n.id) ||
+                        (e.target===focusId && e.source===n.id)) ||
+      interactions.some(e => (e.source===focusId && e.target===n.id) ||
+                             (e.target===focusId && e.source===n.id));
+
     const g = document.createElementNS(NS, 'g');
     g.setAttribute('class', 'node');
+    g.style.cursor = 'pointer';
+
+    const r = 6 + 3 * Math.sqrt(followerCount[n.id] || 0);
     const c = document.createElementNS(NS, 'circle');
-    const r = 7 + 3 * Math.sqrt(followerCount[n.id] || 0);
     c.setAttribute('cx', n.x); c.setAttribute('cy', n.y);
     c.setAttribute('r', r);
-    c.setAttribute('fill', 'var(--node)');
+    c.setAttribute('fill', n.id === focusId ? 'var(--interact)' : 'var(--node)');
+    c.setAttribute('opacity', inFocus ? 1 : 0.25);
     const a = byId[n.id] || {};
-    c.innerHTML = `<title>${n.name}\nactions: ${a.total_actions ?? 0}\n` +
-      `posts: ${a.n_posts_authored ?? 0}\nsaw ${a.distinct_posts_seen ?? 0} posts\n` +
-      `followers: ${followerCount[n.id] || 0}</title>`;
+    c.innerHTML = `<title>${n.name}
+actions: ${a.total_actions ?? 0}   posts: ${a.n_posts_authored ?? 0}
+saw ${a.distinct_posts_seen ?? 0} distinct posts
+followers here: ${followerCount[n.id] || 0}
+click to isolate this person's connections</title>`;
     g.appendChild(c);
-    if (labelled.has(n.id)) {
-      const t = document.createElementNS(NS, 'text');
-      t.setAttribute('x', n.x); t.setAttribute('y', n.y - r - 4);
-      t.setAttribute('text-anchor', 'middle');
-      t.textContent = n.name.length > 16 ? n.name.slice(0,15) + '...' : n.name;
-      g.appendChild(t);
-    }
+
+    const t = document.createElementNS(NS, 'text');
+    t.setAttribute('x', n.x); t.setAttribute('y', n.y - r - 5);
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('opacity', inFocus ? 1 : 0.22);
+    if (n.id === focusId) t.setAttribute('fill', 'var(--fg)');
+    // A stroke behind the glyphs keeps labels legible over crossing edges.
+    t.setAttribute('paint-order', 'stroke');
+    t.setAttribute('stroke', 'var(--panel)');
+    t.setAttribute('stroke-width', '3');
+    t.textContent = n.name;
+    g.appendChild(t);
+
+    g.addEventListener('click', () => {
+      focusId = (focusId === n.id) ? null : n.id;
+      render(lastRound);
+    });
     svg.appendChild(g);
+  }
+
+  // Say who is in focus and exactly where their lines go.
+  const fb = document.getElementById('focusBox');
+  if (focusId === null) {
+    fb.textContent = 'Click any person to isolate their connections. ' +
+      'Arrows point from follower to the person followed.';
+  } else {
+    const me = (byId[focusId] || {}).username || focusId;
+    const outF = follows.filter(e => e.source === focusId)
+      .map(e => (byId[e.target]||{}).username || e.target);
+    const inF = follows.filter(e => e.target === focusId)
+      .map(e => (byId[e.source]||{}).username || e.source);
+    const acted = Object.entries(DATA.interaction_pairs || {})
+      .filter(([k]) => Number(k.split('->')[0]) === focusId)
+      .map(([k, v]) => `${(byId[Number(k.split('->')[1])]||{}).username}` +
+        ` (${Object.entries(v).map(([x,y])=>x+'x'+y).join(', ')})`);
+    fb.innerHTML =
+      `<b>${me}</b> &mdash; follows: ${outF.join(', ') || 'nobody'}` +
+      ` &middot; followed by: ${inF.join(', ') || 'nobody'}` +
+      (acted.length ? `<br>acted on: ${acted.join('; ')}` : '') +
+      `<br><i>click again to clear</i>`;
   }
 
   document.getElementById('roundLabel').textContent = round;

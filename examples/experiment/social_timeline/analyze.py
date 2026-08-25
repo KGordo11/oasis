@@ -33,8 +33,30 @@ from collections import Counter, defaultdict
 AUTOMATIC = {"sign_up", "refresh"}
 
 # Where in a trace `info` payload a target post/user id may appear.
-POST_KEYS = ("post_id", "original_post_id")
-USER_KEYS = ("followee_id", "user_id", "target_id")
+#
+# Bug B-4: these payloads are NOT uniform across action types, and assuming
+# they were silently dropped real engagement from the ledger:
+#   create_comment -> {"content", "comment_id"}   -- no post_id at all; the
+#                     post is only reachable via the comment table
+#   quote_post     -> {"quoted_id": "1", ...}     -- a STRING, not an int
+#   repost         -> {"original_post_id", ...}
+# Hence the numeric-string coercion below and the comment_id back-reference.
+POST_KEYS = ("post_id", "original_post_id", "quoted_id", "quoted_post_id")
+USER_KEYS = ("followee_id", "target_id")
+
+
+def coerce_int(value):
+    """Return an int for 3 or "3", else None. Trace payloads mix both."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        try:
+            return int(value.strip())
+        except ValueError:
+            return None
+    return None
 
 
 def connect(db_path):
@@ -85,12 +107,27 @@ def safe_int(value, default=0):
         return default
 
 
+def load_comment_targets(conn):
+    """comment_id -> post_id.
+
+    Needed because a create_comment trace records only `comment_id`, so the
+    post that was actually commented on can be recovered only through the
+    comment table (bug B-4).
+    """
+    out = {}
+    for row in conn.execute("SELECT comment_id, post_id FROM comment"):
+        out[row["comment_id"]] = row["post_id"]
+    return out
+
+
 def load_actions(conn, posts):
     """Every chosen action, with its target resolved where one exists.
 
-    Targets are pulled from the trace `info` JSON generically, so this covers
-    all 27 action types rather than only the ones with dedicated tables.
+    Targets are pulled from the trace `info` JSON generically so this covers
+    all action types, with the per-action irregularities documented at
+    POST_KEYS handled explicitly.
     """
+    comment_targets = load_comment_targets(conn)
     actions = []
     for row in conn.execute(
             "SELECT user_id, created_at, action, info FROM trace "
@@ -104,10 +141,18 @@ def load_actions(conn, posts):
         if not isinstance(info, dict):
             info = {}
 
-        post_id = next((info[k] for k in POST_KEYS
-                        if isinstance(info.get(k), int)), None)
-        target_user = next((info[k] for k in USER_KEYS
-                            if isinstance(info.get(k), int)), None)
+        post_id = next(
+            (coerce_int(info[k]) for k in POST_KEYS
+             if coerce_int(info.get(k)) is not None), None)
+
+        # A comment names only its own comment_id, so the commented-on post
+        # has to be looked up (B-4).
+        if post_id is None and row["action"] == "create_comment":
+            post_id = comment_targets.get(coerce_int(info.get("comment_id")))
+
+        target_user = next(
+            (coerce_int(info[k]) for k in USER_KEYS
+             if coerce_int(info.get(k)) is not None), None)
         # Acting on a post is implicitly an interaction with its author.
         if target_user is None and post_id in posts:
             target_user = posts[post_id]["author_id"]

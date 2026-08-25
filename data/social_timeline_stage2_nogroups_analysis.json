@@ -1,0 +1,930 @@
+{
+  "database": "social_timeline_stage2_nogroups.db",
+  "n_agents": 8,
+  "n_rounds": 4,
+  "totals": {
+    "posts": 14,
+    "actions_chosen": 26,
+    "exposure_events": 148,
+    "follow_edges": 1,
+    "action_counts": {
+      "create_post": 11,
+      "create_comment": 9,
+      "do_nothing": 1,
+      "search_posts": 1,
+      "quote_post": 3,
+      "follow": 1
+    }
+  },
+  "graph_before": [],
+  "graph_after": [
+    [
+      6,
+      8
+    ]
+  ],
+  "graph_by_round": {
+    "0": [],
+    "1": [],
+    "2": [],
+    "3": [
+      [
+        6,
+        8
+      ]
+    ]
+  },
+  "agents": {
+    "0": {
+      "agent_id": 0,
+      "db_user_id": 0,
+      "username": "millerhospitality",
+      "bio": "Passionate about hospitality & tourism. Exploring the world one destination at a time.",
+      "action_counts": {
+        "create_post": 1,
+        "create_comment": 3
+      },
+      "total_actions": 4,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "create_comment"
+        ],
+        "2": [
+          "create_comment"
+        ],
+        "3": [
+          "create_comment"
+        ]
+      },
+      "posts_authored": [
+        2
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 18,
+      "distinct_posts_seen": 10,
+      "seen_and_acted": [
+        3
+      ],
+      "seen_and_ignored": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "never_seen": [
+        12,
+        13,
+        14
+      ],
+      "engagement_rate": 0.1,
+      "exposure_by_source": {
+        "recsys": 18
+      },
+      "following": [],
+      "followers": [],
+      "saw_authors": {
+        "2": 5,
+        "3": 3,
+        "6": 3,
+        "4": 2,
+        "5": 2,
+        "7": 2,
+        "1": 1
+      },
+      "interacted_with": {
+        "3": {
+          "create_comment": 3
+        }
+      },
+      "interacted_by": {
+        "5": {
+          "create_comment": 1
+        },
+        "1": {
+          "quote_post": 1
+        },
+        "3": {
+          "quote_post": 1
+        }
+      }
+    },
+    "1": {
+      "agent_id": 1,
+      "db_user_id": 1,
+      "username": "emma_logistics_guru",
+      "bio": "Passionate about transportation and logistics | ENFJ | Always seeking new connections and opportunities",
+      "action_counts": {
+        "do_nothing": 1,
+        "quote_post": 2
+      },
+      "total_actions": 3,
+      "actions_by_round": {
+        "1": [
+          "do_nothing"
+        ],
+        "2": [
+          "quote_post"
+        ],
+        "3": [
+          "quote_post"
+        ]
+      },
+      "posts_authored": [
+        9,
+        12
+      ],
+      "n_posts_authored": 2,
+      "exposure_events": 20,
+      "distinct_posts_seen": 10,
+      "seen_and_acted": [
+        1,
+        2
+      ],
+      "seen_and_ignored": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        10,
+        11
+      ],
+      "never_seen": [
+        13,
+        14
+      ],
+      "engagement_rate": 0.2,
+      "exposure_by_source": {
+        "recsys": 20
+      },
+      "following": [],
+      "followers": [],
+      "saw_authors": {
+        "2": 5,
+        "0": 3,
+        "3": 3,
+        "6": 4,
+        "4": 3,
+        "5": 1,
+        "7": 1
+      },
+      "interacted_with": {
+        "2": {
+          "quote_post": 1
+        },
+        "0": {
+          "quote_post": 1
+        }
+      },
+      "interacted_by": {}
+    },
+    "2": {
+      "agent_id": 2,
+      "db_user_id": 2,
+      "username": "ryantechsavvy22",
+      "bio": "Tech enthusiast | STEM student | Constantly seeking knowledge",
+      "action_counts": {
+        "create_post": 2,
+        "create_comment": 1
+      },
+      "total_actions": 3,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "create_post"
+        ],
+        "2": [
+          "create_comment"
+        ]
+      },
+      "posts_authored": [
+        1,
+        5
+      ],
+      "n_posts_authored": 2,
+      "exposure_events": 17,
+      "distinct_posts_seen": 9,
+      "seen_and_acted": [
+        3
+      ],
+      "seen_and_ignored": [
+        2,
+        4,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11
+      ],
+      "never_seen": [
+        12,
+        13,
+        14
+      ],
+      "engagement_rate": 0.111,
+      "exposure_by_source": {
+        "recsys": 17
+      },
+      "following": [],
+      "followers": [],
+      "saw_authors": {
+        "0": 2,
+        "3": 3,
+        "6": 4,
+        "4": 3,
+        "5": 2,
+        "7": 2,
+        "1": 1
+      },
+      "interacted_with": {
+        "3": {
+          "create_comment": 1
+        }
+      },
+      "interacted_by": {
+        "1": {
+          "quote_post": 1
+        }
+      }
+    },
+    "3": {
+      "agent_id": 3,
+      "db_user_id": 3,
+      "username": "biz_mind45",
+      "bio": "Dedicated marketer with a passion for economics and business. Constantly seeking new opportunities to grow and learn.",
+      "action_counts": {
+        "create_post": 1,
+        "create_comment": 2,
+        "quote_post": 1
+      },
+      "total_actions": 4,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "create_comment"
+        ],
+        "2": [
+          "create_comment"
+        ],
+        "3": [
+          "quote_post"
+        ]
+      },
+      "posts_authored": [
+        3,
+        13
+      ],
+      "n_posts_authored": 2,
+      "exposure_events": 18,
+      "distinct_posts_seen": 9,
+      "seen_and_acted": [
+        2,
+        4
+      ],
+      "seen_and_ignored": [
+        1,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "never_seen": [
+        11,
+        12,
+        14
+      ],
+      "engagement_rate": 0.222,
+      "exposure_by_source": {
+        "recsys": 18
+      },
+      "following": [],
+      "followers": [],
+      "saw_authors": {
+        "2": 4,
+        "0": 3,
+        "6": 3,
+        "4": 3,
+        "5": 2,
+        "7": 2,
+        "1": 1
+      },
+      "interacted_with": {
+        "6": {
+          "create_comment": 2
+        },
+        "0": {
+          "quote_post": 1
+        }
+      },
+      "interacted_by": {
+        "0": {
+          "create_comment": 3
+        },
+        "2": {
+          "create_comment": 1
+        },
+        "7": {
+          "create_comment": 2
+        }
+      }
+    },
+    "4": {
+      "agent_id": 4,
+      "db_user_id": 4,
+      "username": "JakeAgEcon",
+      "bio": "Exploring the intersections of agriculture, economics, and business \ud83c\udf3e\ud83d\udcbc | ISTJ | 23 |  #AgEcon",
+      "action_counts": {
+        "create_post": 2
+      },
+      "total_actions": 2,
+      "actions_by_round": {
+        "1": [
+          "create_post"
+        ],
+        "2": [
+          "create_post"
+        ]
+      },
+      "posts_authored": [
+        6,
+        10
+      ],
+      "n_posts_authored": 2,
+      "exposure_events": 19,
+      "distinct_posts_seen": 9,
+      "seen_and_acted": [],
+      "seen_and_ignored": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7,
+        8,
+        9,
+        11
+      ],
+      "never_seen": [
+        12,
+        13,
+        14
+      ],
+      "engagement_rate": 0.0,
+      "exposure_by_source": {
+        "recsys": 19
+      },
+      "following": [],
+      "followers": [],
+      "saw_authors": {
+        "2": 5,
+        "0": 3,
+        "3": 3,
+        "6": 3,
+        "5": 2,
+        "7": 2,
+        "1": 1
+      },
+      "interacted_with": {},
+      "interacted_by": {}
+    },
+    "5": {
+      "agent_id": 5,
+      "db_user_id": 5,
+      "username": "EcoBizExplorer",
+      "bio": "Passionate about economics and business. Let's explore the world of transportation and logistics together! \ud83d\ude9a\ud83d\udcbc",
+      "action_counts": {
+        "create_post": 2,
+        "create_comment": 1
+      },
+      "total_actions": 3,
+      "actions_by_round": {
+        "1": [
+          "create_post"
+        ],
+        "2": [
+          "create_comment"
+        ],
+        "3": [
+          "create_post"
+        ]
+      },
+      "posts_authored": [
+        7,
+        14
+      ],
+      "n_posts_authored": 2,
+      "exposure_events": 19,
+      "distinct_posts_seen": 9,
+      "seen_and_acted": [
+        2
+      ],
+      "seen_and_ignored": [
+        1,
+        3,
+        4,
+        5,
+        6,
+        8,
+        9,
+        10
+      ],
+      "never_seen": [
+        11,
+        12,
+        13
+      ],
+      "engagement_rate": 0.111,
+      "exposure_by_source": {
+        "recsys": 19
+      },
+      "following": [],
+      "followers": [],
+      "saw_authors": {
+        "2": 5,
+        "0": 2,
+        "3": 3,
+        "6": 3,
+        "4": 3,
+        "7": 2,
+        "1": 1
+      },
+      "interacted_with": {
+        "0": {
+          "create_comment": 1
+        }
+      },
+      "interacted_by": {}
+    },
+    "6": {
+      "agent_id": 6,
+      "db_user_id": 6,
+      "username": "intj_emily",
+      "bio": "Exploring the world through economics and business. Human services professional with a curious mind.",
+      "action_counts": {
+        "create_post": 2,
+        "search_posts": 1,
+        "follow": 1
+      },
+      "total_actions": 4,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "search_posts"
+        ],
+        "2": [
+          "create_post"
+        ],
+        "3": [
+          "follow"
+        ]
+      },
+      "posts_authored": [
+        4,
+        11
+      ],
+      "n_posts_authored": 2,
+      "exposure_events": 18,
+      "distinct_posts_seen": 9,
+      "seen_and_acted": [],
+      "seen_and_ignored": [
+        1,
+        2,
+        3,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10
+      ],
+      "never_seen": [
+        12,
+        13,
+        14
+      ],
+      "engagement_rate": 0.0,
+      "exposure_by_source": {
+        "recsys": 18
+      },
+      "following": [
+        8
+      ],
+      "followers": [],
+      "saw_authors": {
+        "2": 4,
+        "0": 3,
+        "3": 3,
+        "4": 3,
+        "5": 2,
+        "7": 2,
+        "1": 1
+      },
+      "interacted_with": {},
+      "interacted_by": {
+        "3": {
+          "create_comment": 2
+        }
+      }
+    },
+    "7": {
+      "agent_id": 7,
+      "db_user_id": 7,
+      "username": "sereneadvocate",
+      "bio": "Passionate about promoting social welfare and advocating for change. Lover of culture, society, and politics. Making a difference, one day at a time.",
+      "action_counts": {
+        "create_post": 1,
+        "create_comment": 2
+      },
+      "total_actions": 3,
+      "actions_by_round": {
+        "1": [
+          "create_post"
+        ],
+        "2": [
+          "create_comment"
+        ],
+        "3": [
+          "create_comment"
+        ]
+      },
+      "posts_authored": [
+        8
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 19,
+      "distinct_posts_seen": 10,
+      "seen_and_acted": [
+        3
+      ],
+      "seen_and_ignored": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        7,
+        9,
+        10,
+        11
+      ],
+      "never_seen": [
+        12,
+        13,
+        14
+      ],
+      "engagement_rate": 0.1,
+      "exposure_by_source": {
+        "recsys": 19
+      },
+      "following": [],
+      "followers": [],
+      "saw_authors": {
+        "2": 4,
+        "0": 3,
+        "3": 3,
+        "6": 3,
+        "4": 3,
+        "5": 2,
+        "1": 1
+      },
+      "interacted_with": {
+        "3": {
+          "create_comment": 2
+        }
+      },
+      "interacted_by": {}
+    }
+  },
+  "posts": {
+    "1": {
+      "post_id": 1,
+      "author_id": 2,
+      "original_post_id": null,
+      "content": "Just started my day with a fresh cup of coffee, feeling productive and ready to tackle the challenges as an ENTJ STEM student pursuing a career in Information Technology! Follow along for tech insights, business tips, and more! #STEM #IT #ENTJ",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 1
+    },
+    "2": {
+      "post_id": 2,
+      "author_id": 0,
+      "original_post_id": null,
+      "content": "Just arrived at a beautiful island, exploring its hidden gems! Looking forward to sharing my travels with you all! #travel #hospitability #foodie",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 2
+    },
+    "3": {
+      "post_id": 3,
+      "author_id": 3,
+      "original_post_id": null,
+      "content": "Sharing my latest insights on market trends as a marketing professional in the UK! What are your opinions on the recent economic shifts? #marketing #economics",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "4": {
+      "post_id": 4,
+      "author_id": 6,
+      "original_post_id": null,
+      "content": "Excited to share my thoughts on the recent economic trends! As an INTJ, I love analyzing data and discovering new insights. Stay tuned for more updates from me, intj_emily! #economics #business #intj",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "5": {
+      "post_id": 5,
+      "author_id": 2,
+      "original_post_id": null,
+      "content": "Just started my day with a fresh cup of coffee, feeling productive and ready to tackle the challenges as an ENTJ STEM student pursuing a career in Information Technology! Follow along for tech insights, business tips, and more! #STEM #IT #ENTJ",
+      "quote_content": null,
+      "round": 1,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "6": {
+      "post_id": 6,
+      "author_id": 4,
+      "original_post_id": null,
+      "content": "Just started my day with a fresh cup of coffee, feeling productive and ready to tackle the challenges as an ISTJ agriculture enthusiast pursuing a career in economics! Follow along for agricultural insights, business tips, and more! #agriculture #economics #ISTJ",
+      "quote_content": null,
+      "round": 1,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "7": {
+      "post_id": 7,
+      "author_id": 5,
+      "original_post_id": null,
+      "content": "Just started my day with a fresh cup of coffee, feeling productive and ready to tackle the challenges as an ISFJ student pursuing a career in Transportation, Distribution & Logistics! Follow along for logistics insights, business tips, and more! #Transportation #Logistics #ISFJ",
+      "quote_content": null,
+      "round": 1,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "8": {
+      "post_id": 8,
+      "author_id": 7,
+      "original_post_id": null,
+      "content": "I\u00b4m thrilled to join the discussion as a Human Services professional passionate about making a positive impact! Can we talk more about how our careers can contribute to creating meaningful change in society?",
+      "quote_content": null,
+      "round": 1,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "9": {
+      "post_id": 9,
+      "author_id": 1,
+      "original_post_id": 1,
+      "content": "Just started my day with a fresh cup of coffee, feeling productive and ready to tackle the challenges as an ENTJ STEM student pursuing a career in Information Technology! Follow along for tech insights, business tips, and more! #STEM #IT #ENTJ",
+      "quote_content": "What a wonderful post! As a logistics enthusiast myself, I completely agree that being productive and tackling challenges with a fresh cup of coffee is the key to success! #STEM #IT #ENTJ",
+      "round": 2,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "10": {
+      "post_id": 10,
+      "author_id": 4,
+      "original_post_id": null,
+      "content": "Just learned so much about crop rotation and its impact on soil health as an ISTJ agriculture enthusiast pursuing a career in economics! Share your favorite agrotech tips and learn from others. #agriculture #economics #soilhealth",
+      "quote_content": null,
+      "round": 2,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "11": {
+      "post_id": 11,
+      "author_id": 6,
+      "original_post_id": null,
+      "content": "As an INTJ with a passion for economics and human services, I\u00b4m thrilled to discuss ways our careers can create meaningful change in society! Can we start a conversation about economic trends and human services collaboration?",
+      "quote_content": null,
+      "round": 2,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "12": {
+      "post_id": 12,
+      "author_id": 1,
+      "original_post_id": 2,
+      "content": "Just arrived at a beautiful island, exploring its hidden gems! Looking forward to sharing my travels with you all! #travel #hospitability #foodie",
+      "quote_content": "Just arrived at a beautiful island, what made you choose this place? I would love to hear the story behind it",
+      "round": 3,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "13": {
+      "post_id": 13,
+      "author_id": 3,
+      "original_post_id": 2,
+      "content": "Just arrived at a beautiful island, exploring its hidden gems! Looking forward to sharing my travels with you all! #travel #hospitability #foodie",
+      "quote_content": "Great insights on economic trends, thank you for sharing!",
+      "round": 3,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "14": {
+      "post_id": 14,
+      "author_id": 5,
+      "original_post_id": null,
+      "content": "As a transportation, distribution, and logistics enthusiast, I found the post about crop rotation and soil health fascinating!",
+      "quote_content": null,
+      "round": 3,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    }
+  },
+  "exposure_pairs": {
+    "0->2": 5,
+    "1->2": 5,
+    "4->2": 5,
+    "5->2": 5,
+    "1->6": 4,
+    "2->6": 4,
+    "3->2": 4,
+    "6->2": 4,
+    "7->2": 4,
+    "0->3": 3,
+    "0->6": 3,
+    "1->0": 3,
+    "1->3": 3,
+    "2->3": 3,
+    "3->0": 3,
+    "3->6": 3,
+    "4->0": 3,
+    "4->3": 3,
+    "4->6": 3,
+    "5->3": 3,
+    "5->6": 3,
+    "6->0": 3,
+    "6->3": 3,
+    "7->0": 3,
+    "7->3": 3,
+    "7->6": 3,
+    "1->4": 3,
+    "2->4": 3,
+    "3->4": 3,
+    "5->4": 3,
+    "6->4": 3,
+    "7->4": 3,
+    "2->0": 2,
+    "5->0": 2,
+    "0->4": 2,
+    "0->5": 2,
+    "0->7": 2,
+    "2->5": 2,
+    "2->7": 2,
+    "3->5": 2,
+    "3->7": 2,
+    "4->5": 2,
+    "4->7": 2,
+    "5->7": 2,
+    "6->5": 2,
+    "6->7": 2,
+    "7->5": 2,
+    "1->5": 1,
+    "1->7": 1,
+    "0->1": 1,
+    "2->1": 1,
+    "3->1": 1,
+    "4->1": 1,
+    "5->1": 1,
+    "6->1": 1,
+    "7->1": 1
+  },
+  "interaction_pairs": {
+    "0->3": {
+      "create_comment": 3
+    },
+    "3->6": {
+      "create_comment": 2
+    },
+    "1->2": {
+      "quote_post": 1
+    },
+    "2->3": {
+      "create_comment": 1
+    },
+    "5->0": {
+      "create_comment": 1
+    },
+    "7->3": {
+      "create_comment": 2
+    },
+    "1->0": {
+      "quote_post": 1
+    },
+    "3->0": {
+      "quote_post": 1
+    }
+  },
+  "propagation_candidates": [
+    {
+      "actor": 1,
+      "target": 2,
+      "times_actor_saw_target": 5,
+      "interactions": {
+        "quote_post": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 0,
+      "target": 3,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "create_comment": 3
+      },
+      "total_interactions": 3
+    },
+    {
+      "actor": 3,
+      "target": 6,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "create_comment": 2
+      },
+      "total_interactions": 2
+    },
+    {
+      "actor": 7,
+      "target": 3,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "create_comment": 2
+      },
+      "total_interactions": 2
+    },
+    {
+      "actor": 2,
+      "target": 3,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "create_comment": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 1,
+      "target": 0,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "quote_post": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 3,
+      "target": 0,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "quote_post": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 5,
+      "target": 0,
+      "times_actor_saw_target": 2,
+      "interactions": {
+        "create_comment": 1
+      },
+      "total_interactions": 1
+    }
+  ]
+}

@@ -1,0 +1,352 @@
+==========================================================================
+SIMULATION 4 ANALYSIS -- social_timeline_stage3.db
+==========================================================================
+agents=8  rounds=4  posts=8  chosen actions=27  exposure events=168  follow edges=5
+
+ACTION MIX (chosen actions only; refresh/sign_up excluded)
+  create_post              8
+  create_comment           8
+  follow                   5
+  like_post                3
+  like_comment             3
+
+SOCIAL GRAPH: 0 edges before -> 5 edges after
+
+--------------------------------------------------------------------------
+PER-AGENT DETAIL
+--------------------------------------------------------------------------
+
+[agent 0] @millerhospitality
+  bio: Passionate about hospitality & tourism. Exploring the world one destination at a time.
+  actions (3): {'create_post': 1, 'follow': 1, 'like_comment': 1}
+  authored 1 posts: [4]
+  saw 7 distinct posts across 21 exposure events (by source: {'recsys': 19, 'both': 2})
+    acted on : [6]
+    ignored  : [1, 2, 3, 5, 7, 8]
+    never saw: []
+  engagement rate (acted / seen): 0.143
+  follows [3] | followed by []
+  exposure to others: agent 3 x3, agent 1 x3, agent 2 x3, agent 4 x3, agent 5 x3, agent 6 x3, agent 7 x3
+  acted on others: {'3': {'follow': 1}, '5': {'like_comment': 1}}
+
+[agent 1] @emma_logistics_guru
+  bio: Passionate about transportation and logistics | ENFJ | Always seeking new connections an
+  actions (3): {'create_post': 1, 'follow': 1, 'like_post': 1}
+  authored 1 posts: [2]
+  saw 7 distinct posts across 21 exposure events (by source: {'recsys': 19, 'both': 2})
+    acted on : [3]
+    ignored  : [1, 4, 5, 6, 7, 8]
+    never saw: []
+  engagement rate (acted / seen): 0.143
+  follows [3] | followed by [5]
+  exposure to others: agent 3 x3, agent 2 x3, agent 0 x3, agent 4 x3, agent 5 x3, agent 6 x3, agent 7 x3
+  acted on others: {'3': {'follow': 1}, '2': {'like_post': 1}}
+  acted on by    : {'5': {'follow': 1, 'like_post': 1}}
+
+[agent 2] @ryantechsavvy22
+  bio: Tech enthusiast | STEM student | Constantly seeking knowledge
+  actions (3): {'create_post': 1, 'follow': 1, 'create_comment': 1}
+  authored 1 posts: [3]
+  saw 7 distinct posts across 21 exposure events (by source: {'recsys': 19, 'both': 2})
+    acted on : [6]
+    ignored  : [1, 2, 4, 5, 7, 8]
+    never saw: []
+  engagement rate (acted / seen): 0.143
+  follows [3] | followed by []
+  exposure to others: agent 3 x3, agent 1 x3, agent 0 x3, agent 4 x3, agent 5 x3, agent 6 x3, agent 7 x3
+  acted on others: {'3': {'follow': 1}, '5': {'create_comment': 1}}
+  acted on by    : {'4': {'like_post': 1}, '1': {'like_post': 1}}
+
+[agent 3] @biz_mind45
+  bio: Dedicated marketer with a passion for economics and business. Constantly seeking new opp
+  actions (3): {'create_post': 1, 'create_comment': 2}
+  authored 1 posts: [1]
+  saw 7 distinct posts across 21 exposure events (by source: {'recsys': 21})
+    acted on : [6]
+    ignored  : [2, 3, 4, 5, 7, 8]
+    never saw: []
+  engagement rate (acted / seen): 0.143
+  follows [] | followed by [0, 1, 2, 6]
+  exposure to others: agent 1 x3, agent 2 x3, agent 0 x3, agent 4 x3, agent 5 x3, agent 6 x3, agent 7 x3
+  acted on others: {'5': {'create_comment': 2}}
+  acted on by    : {'0': {'follow': 1}, '1': {'follow': 1}, '2': {'follow': 1}, '6': {'follow': 1}}
+
+[agent 4] @JakeAgEcon
+  bio: Exploring the intersections of agriculture, economics, and business 🌾💼 | ISTJ | 23 |  #A
+  actions (4): {'create_post': 1, 'create_comment': 2, 'like_post': 1}
+  authored 1 posts: [5]
+  saw 7 distinct posts across 21 exposure events (by source: {'recsys': 21})
+    acted on : [3, 6]
+    ignored  : [1, 2, 4, 7, 8]
+    never saw: []
+  engagement rate (acted / seen): 0.286
+  follows [] | followed by []
+  exposure to others: agent 3 x3, agent 1 x3, agent 2 x3, agent 0 x3, agent 5 x3, agent 6 x3, agent 7 x3
+  acted on others: {'5': {'create_comment': 2}, '2': {'like_post': 1}}
+
+[agent 5] @EcoBizExplorer
+  bio: Passionate about economics and business. Let's explore the world of transportation and l
+  actions (3): {'create_post': 1, 'follow': 1, 'like_post': 1}
+  authored 1 posts: [6]
+  saw 7 distinct posts across 21 exposure events (by source: {'recsys': 19, 'both': 2})
+    acted on : [2]
+    ignored  : [1, 3, 4, 5, 7, 8]
+    never saw: []
+  engagement rate (acted / seen): 0.143
+  follows [1] | followed by []
+  exposure to others: agent 3 x3, agent 1 x3, agent 2 x3, agent 0 x3, agent 4 x3, agent 6 x3, agent 7 x3
+  acted on others: {'1': {'follow': 1, 'like_post': 1}}
+  acted on by    : {'2': {'create_comment': 1}, '3': {'create_comment': 2}, '4': {'create_comment': 2}, '6': {'create_comment': 2}, '7': {'create_comment': 1, 'like_comment': 2}, '0': {'like_comment': 1}}
+
+[agent 6] @intj_emily
+  bio: Exploring the world through economics and business. Human services professional with a c
+  actions (4): {'create_post': 1, 'create_comment': 2, 'follow': 1}
+  authored 1 posts: [7]
+  saw 7 distinct posts across 21 exposure events (by source: {'recsys': 20, 'both': 1})
+    acted on : [6]
+    ignored  : [1, 2, 3, 4, 5, 8]
+    never saw: []
+  engagement rate (acted / seen): 0.143
+  follows [3] | followed by []
+  exposure to others: agent 3 x3, agent 1 x3, agent 2 x3, agent 0 x3, agent 4 x3, agent 5 x3, agent 7 x3
+  acted on others: {'5': {'create_comment': 2}, '3': {'follow': 1}}
+
+[agent 7] @sereneadvocate
+  bio: Passionate about promoting social welfare and advocating for change. Lover of culture, s
+  actions (4): {'create_post': 1, 'create_comment': 1, 'like_comment': 2}
+  authored 1 posts: [8]
+  saw 7 distinct posts across 21 exposure events (by source: {'recsys': 21})
+    acted on : [6]
+    ignored  : [1, 2, 3, 4, 5, 7]
+    never saw: []
+  engagement rate (acted / seen): 0.143
+  follows [] | followed by []
+  exposure to others: agent 3 x3, agent 1 x3, agent 2 x3, agent 0 x3, agent 4 x3, agent 5 x3, agent 6 x3
+  acted on others: {'5': {'create_comment': 1, 'like_comment': 2}}
+
+--------------------------------------------------------------------------
+PROPAGATION CANDIDATES (repeated exposure preceding interaction)
+--------------------------------------------------------------------------
+  agent 7 saw agent 5 x3 -> {'create_comment': 1, 'like_comment': 2}
+  agent 3 saw agent 5 x3 -> {'create_comment': 2}
+  agent 4 saw agent 5 x3 -> {'create_comment': 2}
+  agent 5 saw agent 1 x3 -> {'follow': 1, 'like_post': 1}
+  agent 6 saw agent 5 x3 -> {'create_comment': 2}
+  agent 0 saw agent 3 x3 -> {'follow': 1}
+  agent 1 saw agent 3 x3 -> {'follow': 1}
+  agent 2 saw agent 3 x3 -> {'follow': 1}
+  agent 2 saw agent 5 x3 -> {'create_comment': 1}
+  agent 4 saw agent 2 x3 -> {'like_post': 1}
+  agent 6 saw agent 3 x3 -> {'follow': 1}
+  agent 0 saw agent 5 x3 -> {'like_comment': 1}
+  agent 1 saw agent 2 x3 -> {'like_post': 1}
+
+
+==============================================================================
+EVENT LOG -- every action, in order
+==============================================================================
+rnd actor                 action            target / content
+------------------------------------------------------------------------------
+r0  millerhospitality     create_post       own post#4  "Hello everyone! Excited to be on this new platform and explore …"
+r0  emma_logistics_guru   create_post       own post#2  "Just got my coffee and I am SO ready for this day! As a logisti…"
+r0  ryantechsavvy22       create_post       own post#3  "Just started my day! Excited to dive into my programming projec…"
+r0  biz_mind45            create_post       own post#1  "I'm excited to join this new social media platform as biz_mind4…"
+r0  JakeAgEcon            create_post       own post#5  "Welcome to my Twitter feed! I'm excited to connect with fellow …"
+r0  EcoBizExplorer        create_post       own post#6  "What a perfect day for discussing sustainable business practice…"
+r0  intj_emily            create_post       own post#7  "Just arrived at work in #Toronto! Excited for the day ahead as …"
+r0  sereneadvocate        create_post       own post#8  "Hello everyone! I'm excited to join this social media platform …"
+r1  millerhospitality     follow            @biz_mind45
+r1  emma_logistics_guru   follow            @biz_mind45
+r1  ryantechsavvy22       follow            @biz_mind45
+r1  ryantechsavvy22       create_comment    on post#6 by @EcoBizExplorer  "I think one innovative way to reduce waste in transportation an…"
+r1  biz_mind45            create_comment    on post#6 by @EcoBizExplorer  "Great idea for sustainable practices! Have you checked out any …"
+r1  JakeAgEcon            create_comment    on post#6 by @EcoBizExplorer  "As an agriculture enthusiast, I completely agree with the impor…"
+r1  EcoBizExplorer        follow            @emma_logistics_guru
+r1  intj_emily            create_comment    on post#6 by @EcoBizExplorer  "Great idea for sustainable practices! I think using electric or…"
+r1  sereneadvocate        create_comment    on post#6 by @EcoBizExplorer  "What a great comment! I think the idea of using electric or hyb…"
+r2  JakeAgEcon            like_post         post#3 by @ryantechsavvy22  "Just started my day! Excited to dive into my …"
+r2  intj_emily            follow            @biz_mind45
+r2  sereneadvocate        like_comment      post#6 by @EcoBizExplorer  "What a perfect day for discussing sustainable…"
+r3  millerhospitality     like_comment      post#6 by @EcoBizExplorer  "What a perfect day for discussing sustainable…"
+r3  emma_logistics_guru   like_post         post#3 by @ryantechsavvy22  "Just started my day! Excited to dive into my …"
+r3  biz_mind45            create_comment    on post#6 by @EcoBizExplorer  "I completely agree! However, have you considered the impact of …"
+r3  JakeAgEcon            create_comment    on post#6 by @EcoBizExplorer  "I think reducing waste in farming can be achieved by implementi…"
+r3  EcoBizExplorer        like_post         post#2 by @emma_logistics_guru  "Just got my coffee and I am SO ready for this…"
+r3  intj_emily            create_comment    on post#6 by @EcoBizExplorer  "Great conversation! I think electric or hybrid vehicles are a f…"
+r3  sereneadvocate        like_comment      post#6 by @EcoBizExplorer  "What a perfect day for discussing sustainable…"
+
+==============================================================================
+EXPOSURE LEDGER -- every post shown to every agent
+==============================================================================
+outcome: ACTED = they engaged with it | ignored = seen, no action
+
+rnd viewer              post   author              pos  source    score    outcome
+------------------------------------------------------------------------------
+r1  millerhospitality   #1     biz_mind45          0    recsys    0.2936   ignored
+r1  millerhospitality   #2     emma_logistics_guru 1    recsys    0.3374   ignored
+r1  millerhospitality   #3     ryantechsavvy22     2    recsys    0.2418   ignored
+r1  millerhospitality   #5     JakeAgEcon          3    recsys    0.3060   ignored
+r1  millerhospitality   #6     EcoBizExplorer      4    recsys    0.2925   ACTED
+r1  millerhospitality   #7     intj_emily          5    recsys    0.3161   ignored
+r1  millerhospitality   #8     sereneadvocate      6    recsys    0.2480   ignored
+r1  emma_logistics_guru #1     biz_mind45          0    recsys    0.8148   ignored
+r1  emma_logistics_guru #3     ryantechsavvy22     1    recsys    0.7610   ACTED
+r1  emma_logistics_guru #4     millerhospitality   2    recsys    0.8725   ignored
+r1  emma_logistics_guru #5     JakeAgEcon          3    recsys    0.8193   ignored
+r1  emma_logistics_guru #6     EcoBizExplorer      4    recsys    0.7744   ignored
+r1  emma_logistics_guru #7     intj_emily          5    recsys    0.8648   ignored
+r1  emma_logistics_guru #8     sereneadvocate      6    recsys    0.7879   ignored
+r1  ryantechsavvy22     #1     biz_mind45          0    recsys    0.8653   ignored
+r1  ryantechsavvy22     #2     emma_logistics_guru 1    recsys    0.8227   ignored
+r1  ryantechsavvy22     #4     millerhospitality   2    recsys    0.8522   ignored
+r1  ryantechsavvy22     #5     JakeAgEcon          3    recsys    0.8782   ignored
+r1  ryantechsavvy22     #6     EcoBizExplorer      4    recsys    0.8036   ACTED
+r1  ryantechsavvy22     #7     intj_emily          5    recsys    0.8900   ignored
+r1  ryantechsavvy22     #8     sereneadvocate      6    recsys    0.8460   ignored
+r1  biz_mind45          #2     emma_logistics_guru 0    recsys    0.4525   ignored
+r1  biz_mind45          #3     ryantechsavvy22     1    recsys    0.3683   ignored
+r1  biz_mind45          #4     millerhospitality   2    recsys    0.6035   ignored
+r1  biz_mind45          #5     JakeAgEcon          3    recsys    0.4455   ignored
+r1  biz_mind45          #6     EcoBizExplorer      4    recsys    0.3994   ACTED
+r1  biz_mind45          #7     intj_emily          5    recsys    0.4451   ignored
+r1  biz_mind45          #8     sereneadvocate      6    recsys    0.3796   ignored
+r1  JakeAgEcon          #1     biz_mind45          0    recsys    0.4981   ignored
+r1  JakeAgEcon          #2     emma_logistics_guru 1    recsys    0.5165   ignored
+r1  JakeAgEcon          #3     ryantechsavvy22     2    recsys    0.4464   ACTED
+r1  JakeAgEcon          #4     millerhospitality   3    recsys    0.6655   ignored
+r1  JakeAgEcon          #6     EcoBizExplorer      4    recsys    0.4918   ACTED
+r1  JakeAgEcon          #7     intj_emily          5    recsys    0.5224   ignored
+r1  JakeAgEcon          #8     sereneadvocate      6    recsys    0.4663   ignored
+r1  EcoBizExplorer      #1     biz_mind45          0    recsys    0.7751   ignored
+r1  EcoBizExplorer      #2     emma_logistics_guru 1    recsys    0.7646   ACTED
+r1  EcoBizExplorer      #3     ryantechsavvy22     2    recsys    0.7265   ignored
+r1  EcoBizExplorer      #4     millerhospitality   3    recsys    0.8652   ignored
+r1  EcoBizExplorer      #5     JakeAgEcon          4    recsys    0.8080   ignored
+r1  EcoBizExplorer      #7     intj_emily          5    recsys    0.8024   ignored
+r1  EcoBizExplorer      #8     sereneadvocate      6    recsys    0.7447   ignored
+r1  intj_emily          #1     biz_mind45          0    recsys    0.6564   ignored
+r1  intj_emily          #2     emma_logistics_guru 1    recsys    0.6764   ignored
+r1  intj_emily          #3     ryantechsavvy22     2    recsys    0.6062   ignored
+r1  intj_emily          #4     millerhospitality   3    recsys    0.7970   ignored
+r1  intj_emily          #5     JakeAgEcon          4    recsys    0.6678   ignored
+r1  intj_emily          #6     EcoBizExplorer      5    recsys    0.6189   ACTED
+r1  intj_emily          #8     sereneadvocate      6    recsys    0.6082   ignored
+r1  sereneadvocate      #1     biz_mind45          0    recsys    0.3205   ignored
+r1  sereneadvocate      #2     emma_logistics_guru 1    recsys    0.3645   ignored
+r1  sereneadvocate      #3     ryantechsavvy22     2    recsys    0.2699   ignored
+r1  sereneadvocate      #4     millerhospitality   3    recsys    0.5085   ignored
+r1  sereneadvocate      #5     JakeAgEcon          4    recsys    0.3427   ignored
+r1  sereneadvocate      #6     EcoBizExplorer      5    recsys    0.3116   ACTED
+r1  sereneadvocate      #7     intj_emily          6    recsys    0.3414   ignored
+r2  millerhospitality   #1     biz_mind45          0    both      0.2925   ignored
+r2  millerhospitality   #2     emma_logistics_guru 1    recsys    0.3361   ignored
+r2  millerhospitality   #3     ryantechsavvy22     2    recsys    0.2409   ignored
+r2  millerhospitality   #5     JakeAgEcon          3    recsys    0.3049   ignored
+r2  millerhospitality   #6     EcoBizExplorer      4    recsys    0.2914   ACTED
+r2  millerhospitality   #7     intj_emily          5    recsys    0.3149   ignored
+r2  millerhospitality   #8     sereneadvocate      6    recsys    0.2471   ignored
+r2  emma_logistics_guru #1     biz_mind45          0    both      0.8118   ignored
+r2  emma_logistics_guru #3     ryantechsavvy22     1    recsys    0.7582   ACTED
+r2  emma_logistics_guru #4     millerhospitality   2    recsys    0.8693   ignored
+r2  emma_logistics_guru #5     JakeAgEcon          3    recsys    0.8163   ignored
+r2  emma_logistics_guru #6     EcoBizExplorer      4    recsys    0.7715   ignored
+r2  emma_logistics_guru #7     intj_emily          5    recsys    0.8616   ignored
+r2  emma_logistics_guru #8     sereneadvocate      6    recsys    0.7850   ignored
+r2  ryantechsavvy22     #1     biz_mind45          0    both      0.8621   ignored
+r2  ryantechsavvy22     #2     emma_logistics_guru 1    recsys    0.8196   ignored
+r2  ryantechsavvy22     #4     millerhospitality   2    recsys    0.8490   ignored
+r2  ryantechsavvy22     #5     JakeAgEcon          3    recsys    0.8749   ignored
+r2  ryantechsavvy22     #6     EcoBizExplorer      4    recsys    0.8006   ACTED
+r2  ryantechsavvy22     #7     intj_emily          5    recsys    0.8867   ignored
+r2  ryantechsavvy22     #8     sereneadvocate      6    recsys    0.8428   ignored
+r2  biz_mind45          #2     emma_logistics_guru 0    recsys    0.4508   ignored
+r2  biz_mind45          #3     ryantechsavvy22     1    recsys    0.3669   ignored
+r2  biz_mind45          #4     millerhospitality   2    recsys    0.6013   ignored
+r2  biz_mind45          #5     JakeAgEcon          3    recsys    0.4439   ignored
+r2  biz_mind45          #6     EcoBizExplorer      4    recsys    0.3979   ACTED
+r2  biz_mind45          #7     intj_emily          5    recsys    0.4434   ignored
+r2  biz_mind45          #8     sereneadvocate      6    recsys    0.3782   ignored
+r2  JakeAgEcon          #1     biz_mind45          0    recsys    0.4963   ignored
+r2  JakeAgEcon          #2     emma_logistics_guru 1    recsys    0.5145   ignored
+r2  JakeAgEcon          #3     ryantechsavvy22     2    recsys    0.4447   ACTED
+r2  JakeAgEcon          #4     millerhospitality   3    recsys    0.6630   ignored
+r2  JakeAgEcon          #6     EcoBizExplorer      4    recsys    0.4900   ACTED
+r2  JakeAgEcon          #7     intj_emily          5    recsys    0.5204   ignored
+r2  JakeAgEcon          #8     sereneadvocate      6    recsys    0.4645   ignored
+r2  EcoBizExplorer      #1     biz_mind45          0    recsys    0.7723   ignored
+r2  EcoBizExplorer      #2     emma_logistics_guru 1    both      0.7618   ACTED
+r2  EcoBizExplorer      #3     ryantechsavvy22     2    recsys    0.7238   ignored
+r2  EcoBizExplorer      #4     millerhospitality   3    recsys    0.8620   ignored
+r2  EcoBizExplorer      #5     JakeAgEcon          4    recsys    0.8050   ignored
+r2  EcoBizExplorer      #7     intj_emily          5    recsys    0.7994   ignored
+r2  EcoBizExplorer      #8     sereneadvocate      6    recsys    0.7419   ignored
+r2  intj_emily          #1     biz_mind45          0    recsys    0.6540   ignored
+r2  intj_emily          #2     emma_logistics_guru 1    recsys    0.6739   ignored
+r2  intj_emily          #3     ryantechsavvy22     2    recsys    0.6040   ignored
+r2  intj_emily          #4     millerhospitality   3    recsys    0.7941   ignored
+r2  intj_emily          #5     JakeAgEcon          4    recsys    0.6653   ignored
+r2  intj_emily          #6     EcoBizExplorer      5    recsys    0.6166   ACTED
+r2  intj_emily          #8     sereneadvocate      6    recsys    0.6059   ignored
+r2  sereneadvocate      #1     biz_mind45          0    recsys    0.3193   ignored
+r2  sereneadvocate      #2     emma_logistics_guru 1    recsys    0.3632   ignored
+r2  sereneadvocate      #3     ryantechsavvy22     2    recsys    0.2689   ignored
+r2  sereneadvocate      #4     millerhospitality   3    recsys    0.5066   ignored
+r2  sereneadvocate      #5     JakeAgEcon          4    recsys    0.3414   ignored
+r2  sereneadvocate      #6     EcoBizExplorer      5    recsys    0.3105   ACTED
+r2  sereneadvocate      #7     intj_emily          6    recsys    0.3402   ignored
+r3  millerhospitality   #1     biz_mind45          0    both      0.2914   ignored
+r3  millerhospitality   #2     emma_logistics_guru 1    recsys    0.3348   ignored
+r3  millerhospitality   #3     ryantechsavvy22     2    recsys    0.2400   ignored
+r3  millerhospitality   #5     JakeAgEcon          3    recsys    0.3037   ignored
+r3  millerhospitality   #6     EcoBizExplorer      4    recsys    0.2903   ACTED
+r3  millerhospitality   #7     intj_emily          5    recsys    0.3137   ignored
+r3  millerhospitality   #8     sereneadvocate      6    recsys    0.2462   ignored
+r3  emma_logistics_guru #1     biz_mind45          0    both      0.8088   ignored
+r3  emma_logistics_guru #3     ryantechsavvy22     1    recsys    0.7553   ACTED
+r3  emma_logistics_guru #4     millerhospitality   2    recsys    0.8660   ignored
+r3  emma_logistics_guru #5     JakeAgEcon          3    recsys    0.8132   ignored
+r3  emma_logistics_guru #6     EcoBizExplorer      4    recsys    0.7687   ignored
+r3  emma_logistics_guru #7     intj_emily          5    recsys    0.8583   ignored
+r3  emma_logistics_guru #8     sereneadvocate      6    recsys    0.7820   ignored
+r3  ryantechsavvy22     #1     biz_mind45          0    both      0.8588   ignored
+r3  ryantechsavvy22     #2     emma_logistics_guru 1    recsys    0.8166   ignored
+r3  ryantechsavvy22     #4     millerhospitality   2    recsys    0.8459   ignored
+r3  ryantechsavvy22     #5     JakeAgEcon          3    recsys    0.8716   ignored
+r3  ryantechsavvy22     #6     EcoBizExplorer      4    recsys    0.7976   ACTED
+r3  ryantechsavvy22     #7     intj_emily          5    recsys    0.8834   ignored
+r3  ryantechsavvy22     #8     sereneadvocate      6    recsys    0.8397   ignored
+r3  biz_mind45          #2     emma_logistics_guru 0    recsys    0.4491   ignored
+r3  biz_mind45          #3     ryantechsavvy22     1    recsys    0.3656   ignored
+r3  biz_mind45          #4     millerhospitality   2    recsys    0.5990   ignored
+r3  biz_mind45          #5     JakeAgEcon          3    recsys    0.4422   ignored
+r3  biz_mind45          #6     EcoBizExplorer      4    recsys    0.3964   ACTED
+r3  biz_mind45          #7     intj_emily          5    recsys    0.4418   ignored
+r3  biz_mind45          #8     sereneadvocate      6    recsys    0.3768   ignored
+r3  JakeAgEcon          #1     biz_mind45          0    recsys    0.4944   ignored
+r3  JakeAgEcon          #2     emma_logistics_guru 1    recsys    0.5126   ignored
+r3  JakeAgEcon          #3     ryantechsavvy22     2    recsys    0.4430   ACTED
+r3  JakeAgEcon          #4     millerhospitality   3    recsys    0.6605   ignored
+r3  JakeAgEcon          #6     EcoBizExplorer      4    recsys    0.4882   ACTED
+r3  JakeAgEcon          #7     intj_emily          5    recsys    0.5185   ignored
+r3  JakeAgEcon          #8     sereneadvocate      6    recsys    0.4628   ignored
+r3  EcoBizExplorer      #1     biz_mind45          0    recsys    0.7694   ignored
+r3  EcoBizExplorer      #2     emma_logistics_guru 1    both      0.7590   ACTED
+r3  EcoBizExplorer      #3     ryantechsavvy22     2    recsys    0.7211   ignored
+r3  EcoBizExplorer      #4     millerhospitality   3    recsys    0.8588   ignored
+r3  EcoBizExplorer      #5     JakeAgEcon          4    recsys    0.8020   ignored
+r3  EcoBizExplorer      #7     intj_emily          5    recsys    0.7964   ignored
+r3  EcoBizExplorer      #8     sereneadvocate      6    recsys    0.7391   ignored
+r3  intj_emily          #1     biz_mind45          0    both      0.6515   ignored
+r3  intj_emily          #2     emma_logistics_guru 1    recsys    0.6714   ignored
+r3  intj_emily          #3     ryantechsavvy22     2    recsys    0.6017   ignored
+r3  intj_emily          #4     millerhospitality   3    recsys    0.7911   ignored
+r3  intj_emily          #5     JakeAgEcon          4    recsys    0.6628   ignored
+r3  intj_emily          #6     EcoBizExplorer      5    recsys    0.6143   ACTED
+r3  intj_emily          #8     sereneadvocate      6    recsys    0.6037   ignored
+r3  sereneadvocate      #1     biz_mind45          0    recsys    0.3181   ignored
+r3  sereneadvocate      #2     emma_logistics_guru 1    recsys    0.3618   ignored
+r3  sereneadvocate      #3     ryantechsavvy22     2    recsys    0.2679   ignored
+r3  sereneadvocate      #4     millerhospitality   3    recsys    0.5047   ignored
+r3  sereneadvocate      #5     JakeAgEcon          4    recsys    0.3401   ignored
+r3  sereneadvocate      #6     EcoBizExplorer      5    recsys    0.3093   ACTED
+r3  sereneadvocate      #7     intj_emily          6    recsys    0.3389   ignored

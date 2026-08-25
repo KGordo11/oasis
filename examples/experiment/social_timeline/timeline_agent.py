@@ -35,20 +35,166 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import sqlite3
 
 from oasis.social_agent.agent import SocialAgent
+from oasis.social_agent.agent_environment import SocialEnvironment
 from oasis.social_agent.agent_graph import AgentGraph
 from oasis.social_platform.config import UserInfo
+from oasis.social_platform.database import get_db_path
 
 log = logging.getLogger("social_timeline.agent")
+
+
+class TimelineEnvironment(SocialEnvironment):
+    """What the agent sees each turn. Content changed, structure preserved.
+
+    Three measured problems with the stock environment prompt, all of which
+    suppress exactly the behaviour this simulation exists to study:
+
+    F-14  `env_template` renders `$groups_env` BEFORE `$posts_env`, and does so
+          on every turn regardless of available_actions. Once any group exists,
+          a wall of group imperatives sits above the feed in every agent's
+          prompt. Measured effect: action_rate 0.469 vs 0.812 without groups.
+          Fixed here by putting the feed first and groups last.
+
+    F-11  `get_followers_env` / `get_follows_env` report only a COUNT -- "I have
+          3 follows" -- never WHO. Both are marked `# TODO` upstream. An agent
+          therefore has no idea who it already follows, and must reverse a
+          username out of raw feed JSON to follow anyone. Only 1 follow edge
+          appeared in 32 agent-turns. Fixed here by naming names.
+
+    Q-8   The stock closing line reads "Do not limit your action in just `like`
+          to like posts", and the user message says "don't limit your actions
+          for example to just like the posts". Both are double negatives an 8B
+          model can plausibly read as an instruction AGAINST liking -- and zero
+          likes were recorded across every run. Reworded positively here.
+
+    Also surfaces the agent's own recent posts, because agents were repeating
+    themselves verbatim (10 distinct posts out of 14 in R-6).
+
+    IMPORTANT: this changes prompt CONTENT only. The tool-call schema is
+    untouched (D-2). Sim 1 Attempt 1 proved that altering the response
+    structure breaks tool-calling outright (0/36 actions); changing what the
+    agent reads is safe and is how this project has always tuned behaviour.
+    """
+
+    def __init__(self, action, agent_id: int, include_groups: bool = False):
+        super().__init__(action)
+        self.agent_id = agent_id
+        self.include_groups = include_groups
+
+    def _query(self, sql, params=()):
+        try:
+            conn = sqlite3.connect(get_db_path())
+            rows = conn.execute(sql, params).fetchall()
+            conn.close()
+            return rows
+        except Exception:  # noqa: BLE001 - the prompt must still render
+            return []
+
+    def _usernames(self):
+        # B-7: sign_up leaves user_name NULL and puts the handle in `name`
+        # (verified in the DB), so COALESCE is required or every author
+        # renders as a bare "agentN".
+        return {r[0]: (r[1] or f"agent{r[0]}")
+                for r in self._query(
+                    "SELECT agent_id, COALESCE(user_name, name) FROM user")}
+
+    async def to_text_prompt(self, *args, **kwargs) -> str:
+        names = self._usernames()
+        me = names.get(self.agent_id, f"agent{self.agent_id}")
+
+        # --- the feed, first and named -----------------------------------
+        result = await self.action.refresh()
+        lines = []
+        if result.get("success") and result.get("posts"):
+            for p in result["posts"]:
+                author = names.get(p.get("user_id"), f"agent{p.get('user_id')}")
+                entry = {
+                    "post_id": p.get("post_id"),
+                    "author": author,
+                    # follow() takes an integer id, not a name, so the id has
+                    # to be visible or the action is uncallable in practice.
+                    "author_id": p.get("user_id"),
+                    "content": p.get("content"),
+                    "likes": p.get("num_likes"),
+                    "dislikes": p.get("num_dislikes"),
+                }
+                comments = p.get("comments") or []
+                if comments:
+                    entry["comments"] = [{
+                        "comment_id": c.get("comment_id"),
+                        "by": names.get(c.get("user_id"),
+                                        f"agent{c.get('user_id')}"),
+                        "content": c.get("content"),
+                    } for c in comments[:3]]
+                lines.append(entry)
+            feed = ("Here is your feed. Each post shows who wrote it:\n"
+                    + json.dumps(lines, indent=1))
+        else:
+            feed = ("Your feed is empty right now -- nobody you can see has "
+                    "posted yet. This is a good moment to post something "
+                    "yourself.")
+
+        # --- who you already follow, by name (F-11) -----------------------
+        following = [names.get(r[0], f"agent{r[0]}") for r in self._query(
+            "SELECT followee_id FROM follow WHERE follower_id = ?",
+            (self.agent_id, ))]
+        followers = [names.get(r[0], f"agent{r[0]}") for r in self._query(
+            "SELECT follower_id FROM follow WHERE followee_id = ?",
+            (self.agent_id, ))]
+        social = (f"You are {me}. "
+                  + (f"You follow: {', '.join(following)}. "
+                     if following else "You do not follow anyone yet. ")
+                  + (f"Following you: {', '.join(followers)}."
+                     if followers else "Nobody follows you yet."))
+
+        # --- your own recent posts, so you do not repeat yourself ---------
+        mine = [r[0] for r in self._query(
+            "SELECT content FROM post WHERE user_id = ? "
+            "ORDER BY post_id DESC LIMIT 3", (self.agent_id, ))]
+        own = ("You have not posted yet." if not mine else
+               "You already posted these -- do NOT repeat them, say something "
+               "new:\n" + "\n".join(f"- {m[:160]}" for m in mine))
+
+        # --- groups, last and only when they exist (F-14) -----------------
+        groups = await self.get_group_env() if self.include_groups else ""
+
+        # --- positively-phrased guidance (Q-8) ----------------------------
+        guidance = (
+            "Choose one or more actions that fit your personality and what you "
+            "see above. All of these are useful and normal:\n"
+            "- like_post(post_id) if a post appeals to you\n"
+            "- dislike_post(post_id) if you disagree with it\n"
+            "- create_comment(post_id, content) to reply to someone\n"
+            "- follow(followee_id) to follow an author whose posts you enjoy, "
+            "so you see more of them later\n"
+            "- repost(post_id) or quote_post(post_id, content) to share\n"
+            "- create_post(content) to say something new\n"
+            "Engaging with other people's posts is usually more interesting "
+            "than only posting your own.")
+
+        return "\n\n".join(x for x in
+                           [social, feed, own, groups, guidance] if x)
 
 
 class TimelineAgent(SocialAgent):
     """A SocialAgent whose per-round failure cannot take down the round."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, include_groups: bool = False, **kwargs):
         super().__init__(*args, **kwargs)
         self.action_failures = 0
+        # Swap in the environment that names names and leads with the feed.
+        # Reuses the SocialAction the base class already wired to the channel,
+        # so nothing about the action/tool path changes (D-2).
+        # B-7: use social_agent_id, NOT agent_id. SocialAgent stores the
+        # integer id as `social_agent_id` (agent.py:71); `agent_id` is camel's
+        # own UUID. Passing the UUID made every follow/own-post lookup silently
+        # return nothing, so agents were always told "you do not follow anyone".
+        self.env = TimelineEnvironment(self.env.action,
+                                       agent_id=self.social_agent_id,
+                                       include_groups=include_groups)
 
     async def perform_action_by_llm(self):
         try:
@@ -99,6 +245,7 @@ async def generate_timeline_agents(
     model=None,
     available_actions=None,
     limit: int | None = None,
+    include_groups: bool = False,
 ) -> AgentGraph:
     """Build the agent graph. No follow edges, no scripted actions.
 
@@ -142,6 +289,7 @@ async def generate_timeline_agents(
             recsys_type="twitter",
         )
         agent = TimelineAgent(
+            include_groups=include_groups,
             agent_id=i,
             user_info=user_info,
             agent_graph=agent_graph,

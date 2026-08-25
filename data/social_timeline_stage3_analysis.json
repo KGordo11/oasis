@@ -1,0 +1,2872 @@
+{
+  "database": "social_timeline_stage3.db",
+  "n_agents": 8,
+  "n_rounds": 4,
+  "totals": {
+    "posts": 8,
+    "actions_chosen": 27,
+    "exposure_events": 168,
+    "follow_edges": 5,
+    "action_counts": {
+      "create_post": 8,
+      "follow": 5,
+      "create_comment": 8,
+      "like_post": 3,
+      "like_comment": 3
+    }
+  },
+  "graph_before": [],
+  "graph_after": [
+    [
+      0,
+      3
+    ],
+    [
+      1,
+      3
+    ],
+    [
+      2,
+      3
+    ],
+    [
+      5,
+      1
+    ],
+    [
+      6,
+      3
+    ]
+  ],
+  "graph_by_round": {
+    "0": [],
+    "1": [
+      [
+        0,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        5,
+        1
+      ]
+    ],
+    "2": [
+      [
+        0,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        6,
+        3
+      ]
+    ],
+    "3": [
+      [
+        0,
+        3
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        2,
+        3
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        6,
+        3
+      ]
+    ]
+  },
+  "agents": {
+    "0": {
+      "agent_id": 0,
+      "db_user_id": 0,
+      "username": "millerhospitality",
+      "bio": "Passionate about hospitality & tourism. Exploring the world one destination at a time.",
+      "action_counts": {
+        "create_post": 1,
+        "follow": 1,
+        "like_comment": 1
+      },
+      "total_actions": 3,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "follow"
+        ],
+        "3": [
+          "like_comment"
+        ]
+      },
+      "posts_authored": [
+        4
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 21,
+      "distinct_posts_seen": 7,
+      "seen_and_acted": [
+        6
+      ],
+      "seen_and_ignored": [
+        1,
+        2,
+        3,
+        5,
+        7,
+        8
+      ],
+      "never_seen": [],
+      "engagement_rate": 0.143,
+      "exposure_by_source": {
+        "recsys": 19,
+        "both": 2
+      },
+      "following": [
+        3
+      ],
+      "followers": [],
+      "saw_authors": {
+        "3": 3,
+        "1": 3,
+        "2": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3
+      },
+      "interacted_with": {
+        "3": {
+          "follow": 1
+        },
+        "5": {
+          "like_comment": 1
+        }
+      },
+      "interacted_by": {}
+    },
+    "1": {
+      "agent_id": 1,
+      "db_user_id": 1,
+      "username": "emma_logistics_guru",
+      "bio": "Passionate about transportation and logistics | ENFJ | Always seeking new connections and opportunities",
+      "action_counts": {
+        "create_post": 1,
+        "follow": 1,
+        "like_post": 1
+      },
+      "total_actions": 3,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "follow"
+        ],
+        "3": [
+          "like_post"
+        ]
+      },
+      "posts_authored": [
+        2
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 21,
+      "distinct_posts_seen": 7,
+      "seen_and_acted": [
+        3
+      ],
+      "seen_and_ignored": [
+        1,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "never_seen": [],
+      "engagement_rate": 0.143,
+      "exposure_by_source": {
+        "recsys": 19,
+        "both": 2
+      },
+      "following": [
+        3
+      ],
+      "followers": [
+        5
+      ],
+      "saw_authors": {
+        "3": 3,
+        "2": 3,
+        "0": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3
+      },
+      "interacted_with": {
+        "3": {
+          "follow": 1
+        },
+        "2": {
+          "like_post": 1
+        }
+      },
+      "interacted_by": {
+        "5": {
+          "follow": 1,
+          "like_post": 1
+        }
+      }
+    },
+    "2": {
+      "agent_id": 2,
+      "db_user_id": 2,
+      "username": "ryantechsavvy22",
+      "bio": "Tech enthusiast | STEM student | Constantly seeking knowledge",
+      "action_counts": {
+        "create_post": 1,
+        "follow": 1,
+        "create_comment": 1
+      },
+      "total_actions": 3,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "create_comment",
+          "follow"
+        ]
+      },
+      "posts_authored": [
+        3
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 21,
+      "distinct_posts_seen": 7,
+      "seen_and_acted": [
+        6
+      ],
+      "seen_and_ignored": [
+        1,
+        2,
+        4,
+        5,
+        7,
+        8
+      ],
+      "never_seen": [],
+      "engagement_rate": 0.143,
+      "exposure_by_source": {
+        "recsys": 19,
+        "both": 2
+      },
+      "following": [
+        3
+      ],
+      "followers": [],
+      "saw_authors": {
+        "3": 3,
+        "1": 3,
+        "0": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3
+      },
+      "interacted_with": {
+        "3": {
+          "follow": 1
+        },
+        "5": {
+          "create_comment": 1
+        }
+      },
+      "interacted_by": {
+        "4": {
+          "like_post": 1
+        },
+        "1": {
+          "like_post": 1
+        }
+      }
+    },
+    "3": {
+      "agent_id": 3,
+      "db_user_id": 3,
+      "username": "biz_mind45",
+      "bio": "Dedicated marketer with a passion for economics and business. Constantly seeking new opportunities to grow and learn.",
+      "action_counts": {
+        "create_post": 1,
+        "create_comment": 2
+      },
+      "total_actions": 3,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "create_comment"
+        ],
+        "3": [
+          "create_comment"
+        ]
+      },
+      "posts_authored": [
+        1
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 21,
+      "distinct_posts_seen": 7,
+      "seen_and_acted": [
+        6
+      ],
+      "seen_and_ignored": [
+        2,
+        3,
+        4,
+        5,
+        7,
+        8
+      ],
+      "never_seen": [],
+      "engagement_rate": 0.143,
+      "exposure_by_source": {
+        "recsys": 21
+      },
+      "following": [],
+      "followers": [
+        0,
+        1,
+        2,
+        6
+      ],
+      "saw_authors": {
+        "1": 3,
+        "2": 3,
+        "0": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3
+      },
+      "interacted_with": {
+        "5": {
+          "create_comment": 2
+        }
+      },
+      "interacted_by": {
+        "0": {
+          "follow": 1
+        },
+        "1": {
+          "follow": 1
+        },
+        "2": {
+          "follow": 1
+        },
+        "6": {
+          "follow": 1
+        }
+      }
+    },
+    "4": {
+      "agent_id": 4,
+      "db_user_id": 4,
+      "username": "JakeAgEcon",
+      "bio": "Exploring the intersections of agriculture, economics, and business \ud83c\udf3e\ud83d\udcbc | ISTJ | 23 |  #AgEcon",
+      "action_counts": {
+        "create_post": 1,
+        "create_comment": 2,
+        "like_post": 1
+      },
+      "total_actions": 4,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "create_comment"
+        ],
+        "2": [
+          "like_post"
+        ],
+        "3": [
+          "create_comment"
+        ]
+      },
+      "posts_authored": [
+        5
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 21,
+      "distinct_posts_seen": 7,
+      "seen_and_acted": [
+        3,
+        6
+      ],
+      "seen_and_ignored": [
+        1,
+        2,
+        4,
+        7,
+        8
+      ],
+      "never_seen": [],
+      "engagement_rate": 0.286,
+      "exposure_by_source": {
+        "recsys": 21
+      },
+      "following": [],
+      "followers": [],
+      "saw_authors": {
+        "3": 3,
+        "1": 3,
+        "2": 3,
+        "0": 3,
+        "5": 3,
+        "6": 3,
+        "7": 3
+      },
+      "interacted_with": {
+        "5": {
+          "create_comment": 2
+        },
+        "2": {
+          "like_post": 1
+        }
+      },
+      "interacted_by": {}
+    },
+    "5": {
+      "agent_id": 5,
+      "db_user_id": 5,
+      "username": "EcoBizExplorer",
+      "bio": "Passionate about economics and business. Let's explore the world of transportation and logistics together! \ud83d\ude9a\ud83d\udcbc",
+      "action_counts": {
+        "create_post": 1,
+        "follow": 1,
+        "like_post": 1
+      },
+      "total_actions": 3,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "follow"
+        ],
+        "3": [
+          "like_post"
+        ]
+      },
+      "posts_authored": [
+        6
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 21,
+      "distinct_posts_seen": 7,
+      "seen_and_acted": [
+        2
+      ],
+      "seen_and_ignored": [
+        1,
+        3,
+        4,
+        5,
+        7,
+        8
+      ],
+      "never_seen": [],
+      "engagement_rate": 0.143,
+      "exposure_by_source": {
+        "recsys": 19,
+        "both": 2
+      },
+      "following": [
+        1
+      ],
+      "followers": [],
+      "saw_authors": {
+        "3": 3,
+        "1": 3,
+        "2": 3,
+        "0": 3,
+        "4": 3,
+        "6": 3,
+        "7": 3
+      },
+      "interacted_with": {
+        "1": {
+          "follow": 1,
+          "like_post": 1
+        }
+      },
+      "interacted_by": {
+        "2": {
+          "create_comment": 1
+        },
+        "3": {
+          "create_comment": 2
+        },
+        "4": {
+          "create_comment": 2
+        },
+        "6": {
+          "create_comment": 2
+        },
+        "7": {
+          "create_comment": 1,
+          "like_comment": 2
+        },
+        "0": {
+          "like_comment": 1
+        }
+      }
+    },
+    "6": {
+      "agent_id": 6,
+      "db_user_id": 6,
+      "username": "intj_emily",
+      "bio": "Exploring the world through economics and business. Human services professional with a curious mind.",
+      "action_counts": {
+        "create_post": 1,
+        "create_comment": 2,
+        "follow": 1
+      },
+      "total_actions": 4,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "create_comment"
+        ],
+        "2": [
+          "follow"
+        ],
+        "3": [
+          "create_comment"
+        ]
+      },
+      "posts_authored": [
+        7
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 21,
+      "distinct_posts_seen": 7,
+      "seen_and_acted": [
+        6
+      ],
+      "seen_and_ignored": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        8
+      ],
+      "never_seen": [],
+      "engagement_rate": 0.143,
+      "exposure_by_source": {
+        "recsys": 20,
+        "both": 1
+      },
+      "following": [
+        3
+      ],
+      "followers": [],
+      "saw_authors": {
+        "3": 3,
+        "1": 3,
+        "2": 3,
+        "0": 3,
+        "4": 3,
+        "5": 3,
+        "7": 3
+      },
+      "interacted_with": {
+        "5": {
+          "create_comment": 2
+        },
+        "3": {
+          "follow": 1
+        }
+      },
+      "interacted_by": {}
+    },
+    "7": {
+      "agent_id": 7,
+      "db_user_id": 7,
+      "username": "sereneadvocate",
+      "bio": "Passionate about promoting social welfare and advocating for change. Lover of culture, society, and politics. Making a difference, one day at a time.",
+      "action_counts": {
+        "create_post": 1,
+        "create_comment": 1,
+        "like_comment": 2
+      },
+      "total_actions": 4,
+      "actions_by_round": {
+        "0": [
+          "create_post"
+        ],
+        "1": [
+          "create_comment"
+        ],
+        "2": [
+          "like_comment"
+        ],
+        "3": [
+          "like_comment"
+        ]
+      },
+      "posts_authored": [
+        8
+      ],
+      "n_posts_authored": 1,
+      "exposure_events": 21,
+      "distinct_posts_seen": 7,
+      "seen_and_acted": [
+        6
+      ],
+      "seen_and_ignored": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        7
+      ],
+      "never_seen": [],
+      "engagement_rate": 0.143,
+      "exposure_by_source": {
+        "recsys": 21
+      },
+      "following": [],
+      "followers": [],
+      "saw_authors": {
+        "3": 3,
+        "1": 3,
+        "2": 3,
+        "0": 3,
+        "4": 3,
+        "5": 3,
+        "6": 3
+      },
+      "interacted_with": {
+        "5": {
+          "create_comment": 1,
+          "like_comment": 2
+        }
+      },
+      "interacted_by": {}
+    }
+  },
+  "posts": {
+    "1": {
+      "post_id": 1,
+      "author_id": 3,
+      "original_post_id": null,
+      "content": "I'm excited to join this new social media platform as biz_mind45! As a marketing professional, I'll be sharing insights on market trends and business news. Looking forward to connecting with like-minded individuals! #marketing #business",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "2": {
+      "post_id": 2,
+      "author_id": 1,
+      "original_post_id": null,
+      "content": "Just got my coffee and I am SO ready for this day! As a logistics enthusiast, there\u2019s nothing better than planning the perfect transportation route to ensure on-time delivery",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 1,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "3": {
+      "post_id": 3,
+      "author_id": 2,
+      "original_post_id": null,
+      "content": "Just started my day! Excited to dive into my programming projects and learn some new #techrelated stuff. What are you guys working on today?!",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 2,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "4": {
+      "post_id": 4,
+      "author_id": 0,
+      "original_post_id": null,
+      "content": "Hello everyone! Excited to be on this new platform and explore the world of social media. Looking forward to connecting with fellow professionals and enthusiasts in the hospitality & tourism industry. Stay tuned for insightful posts and travel updates! #millerhospitality #hospitability #tourism",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "5": {
+      "post_id": 5,
+      "author_id": 4,
+      "original_post_id": null,
+      "content": "Welcome to my Twitter feed! I'm excited to connect with fellow agriculture and economics enthusiasts. My name is JakeAgEcon, and I'll be sharing insights on the agricultural industry's financial aspects, innovative solutions, and sustainable practices.",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "6": {
+      "post_id": 6,
+      "author_id": 5,
+      "original_post_id": null,
+      "content": "What a perfect day for discussing sustainable business practices! What are some innovative ways we can reduce waste and increase efficiency in transportation and logistics? #EcoBiz",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "7": {
+      "post_id": 7,
+      "author_id": 6,
+      "original_post_id": null,
+      "content": "Just arrived at work in #Toronto! Excited for the day ahead as an INTJ in Human Services. Staying up-to-date on market trends and exploring new business strategies to make a larger impact. Anyone have tips?",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    },
+    "8": {
+      "post_id": 8,
+      "author_id": 7,
+      "original_post_id": null,
+      "content": "Hello everyone! I'm excited to join this social media platform and connect with all of you. I look forward to sharing my thoughts on culture, society, and politics, as well as learning from your perspectives.",
+      "quote_content": null,
+      "round": 0,
+      "num_likes": 0,
+      "num_dislikes": 0,
+      "num_shares": 0
+    }
+  },
+  "events": [
+    {
+      "agent_id": 0,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 4,
+      "target_agent_id": 0,
+      "info": {
+        "content": "Hello everyone! Excited to be on this new platform and explore the world of social media. Looking forward to connecting with fellow professionals and enthusiasts in the hospitality & tourism industry. Stay tuned for insightful posts and travel updates! #millerhospitality #hospitability #tourism",
+        "post_id": 4
+      }
+    },
+    {
+      "agent_id": 1,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 2,
+      "target_agent_id": 1,
+      "info": {
+        "content": "Just got my coffee and I am SO ready for this day! As a logistics enthusiast, there\u2019s nothing better than planning the perfect transportation route to ensure on-time delivery",
+        "post_id": 2
+      }
+    },
+    {
+      "agent_id": 2,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 3,
+      "target_agent_id": 2,
+      "info": {
+        "content": "Just started my day! Excited to dive into my programming projects and learn some new #techrelated stuff. What are you guys working on today?!",
+        "post_id": 3
+      }
+    },
+    {
+      "agent_id": 3,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 1,
+      "target_agent_id": 3,
+      "info": {
+        "content": "I'm excited to join this new social media platform as biz_mind45! As a marketing professional, I'll be sharing insights on market trends and business news. Looking forward to connecting with like-minded individuals! #marketing #business",
+        "post_id": 1
+      }
+    },
+    {
+      "agent_id": 4,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 5,
+      "target_agent_id": 4,
+      "info": {
+        "content": "Welcome to my Twitter feed! I'm excited to connect with fellow agriculture and economics enthusiasts. My name is JakeAgEcon, and I'll be sharing insights on the agricultural industry's financial aspects, innovative solutions, and sustainable practices.",
+        "post_id": 5
+      }
+    },
+    {
+      "agent_id": 5,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "content": "What a perfect day for discussing sustainable business practices! What are some innovative ways we can reduce waste and increase efficiency in transportation and logistics? #EcoBiz",
+        "post_id": 6
+      }
+    },
+    {
+      "agent_id": 6,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 7,
+      "target_agent_id": 6,
+      "info": {
+        "content": "Just arrived at work in #Toronto! Excited for the day ahead as an INTJ in Human Services. Staying up-to-date on market trends and exploring new business strategies to make a larger impact. Anyone have tips?",
+        "post_id": 7
+      }
+    },
+    {
+      "agent_id": 7,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 8,
+      "target_agent_id": 7,
+      "info": {
+        "content": "Hello everyone! I'm excited to join this social media platform and connect with all of you. I look forward to sharing my thoughts on culture, society, and politics, as well as learning from your perspectives.",
+        "post_id": 8
+      }
+    },
+    {
+      "agent_id": 0,
+      "round": 1,
+      "action": "follow",
+      "post_id": null,
+      "target_agent_id": 3,
+      "info": {
+        "follow_id": 2
+      }
+    },
+    {
+      "agent_id": 1,
+      "round": 1,
+      "action": "follow",
+      "post_id": null,
+      "target_agent_id": 3,
+      "info": {
+        "follow_id": 3
+      }
+    },
+    {
+      "agent_id": 2,
+      "round": 1,
+      "action": "follow",
+      "post_id": null,
+      "target_agent_id": 3,
+      "info": {
+        "follow_id": 1
+      }
+    },
+    {
+      "agent_id": 2,
+      "round": 1,
+      "action": "create_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "content": "I think one innovative way to reduce waste in transportation and logistics is by using electric or hybrid vehicles. Have you explored any of these options? #EcoBiz",
+        "comment_id": 2
+      }
+    },
+    {
+      "agent_id": 3,
+      "round": 1,
+      "action": "create_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "content": "Great idea for sustainable practices! Have you checked out any of the green freight companies like Carbon Zero? They're making waves in our industry!",
+        "comment_id": 1
+      }
+    },
+    {
+      "agent_id": 4,
+      "round": 1,
+      "action": "create_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "content": "As an agriculture enthusiast, I completely agree with the importance of sustainable business practices. Have you explored any innovative ways to reduce waste and increase efficiency in farming?",
+        "comment_id": 3
+      }
+    },
+    {
+      "agent_id": 5,
+      "round": 1,
+      "action": "follow",
+      "post_id": null,
+      "target_agent_id": 1,
+      "info": {
+        "follow_id": 4
+      }
+    },
+    {
+      "agent_id": 6,
+      "round": 1,
+      "action": "create_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "content": "Great idea for sustainable practices! I think using electric or hybrid vehicles could also help reduce waste and energy consumption in the logistics industry.",
+        "comment_id": 4
+      }
+    },
+    {
+      "agent_id": 7,
+      "round": 1,
+      "action": "create_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "content": "What a great comment! I think the idea of using electric or hybrid vehicles is also essential in reducing waste and increasing efficiency.",
+        "comment_id": 5
+      }
+    },
+    {
+      "agent_id": 4,
+      "round": 2,
+      "action": "like_post",
+      "post_id": 3,
+      "target_agent_id": 2,
+      "info": {
+        "post_id": 3,
+        "like_id": 1
+      }
+    },
+    {
+      "agent_id": 6,
+      "round": 2,
+      "action": "follow",
+      "post_id": null,
+      "target_agent_id": 3,
+      "info": {
+        "follow_id": 5
+      }
+    },
+    {
+      "agent_id": 7,
+      "round": 2,
+      "action": "like_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "comment_id": 1,
+        "comment_like_id": 1
+      }
+    },
+    {
+      "agent_id": 0,
+      "round": 3,
+      "action": "like_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "comment_id": 2,
+        "comment_like_id": 2
+      }
+    },
+    {
+      "agent_id": 1,
+      "round": 3,
+      "action": "like_post",
+      "post_id": 3,
+      "target_agent_id": 2,
+      "info": {
+        "post_id": 3,
+        "like_id": 2
+      }
+    },
+    {
+      "agent_id": 3,
+      "round": 3,
+      "action": "create_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "content": "I completely agree! However, have you considered the impact of digitalization on sustainable business practices? My research suggests that it can be a game-changer.",
+        "comment_id": 6
+      }
+    },
+    {
+      "agent_id": 4,
+      "round": 3,
+      "action": "create_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "content": "I think reducing waste in farming can be achieved by implementing precision agriculture practices, such as using drones to monitor crop health and adjusting fertilizer applications accordingly.",
+        "comment_id": 7
+      }
+    },
+    {
+      "agent_id": 5,
+      "round": 3,
+      "action": "like_post",
+      "post_id": 2,
+      "target_agent_id": 1,
+      "info": {
+        "post_id": 2,
+        "like_id": 3
+      }
+    },
+    {
+      "agent_id": 6,
+      "round": 3,
+      "action": "create_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "content": "Great conversation! I think electric or hybrid vehicles are a fantastic idea. Have you explored any companies using blockchain technology to optimize logistics and reduce waste? I'd love to hear about it!",
+        "comment_id": 8
+      }
+    },
+    {
+      "agent_id": 7,
+      "round": 3,
+      "action": "like_comment",
+      "post_id": 6,
+      "target_agent_id": 5,
+      "info": {
+        "comment_id": 3,
+        "comment_like_id": 3
+      }
+    }
+  ],
+  "exposures": [
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.2935635042951588
+    },
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.337355016408518
+    },
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.24178888843432705
+    },
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.3060096198828367
+    },
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.2924834045719175
+    },
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.31605763500472644
+    },
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.2480086803961276
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.8148172555808515
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7609792425040931
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.872542440085992
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8192997585004496
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.7744236635671418
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8647615061863867
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.7878839981390321
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.8652713916357255
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.8226896921562961
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8522145951462513
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8781723188688222
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.8035799431881097
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8900185604898125
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.8459624862919618
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.4524763379962404
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.3683063160753124
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.6035300953438526
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.44550547888906605
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.3993682680694438
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.4450864726385409
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.379634863939454
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.49812584133500265
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.5164662790324736
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.4463583063918178
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.6655012177714832
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.4918367098211507
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.5223847979887328
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.4662605837275744
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.7751384651321984
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7646415465519412
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.7265200829554843
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8651989495432376
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.8080332911344195
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8023881520091555
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.7446595235356835
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.6563949498519358
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.6764288105294572
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.6062321853936503
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.7970401442206203
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.667790744166686
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.6189273652083285
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.6082040947784288
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.32045454343553653
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.3645108848378268
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.269947916552991
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.5085177188811525
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.34267072214925526
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.31161081872249335
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.3414254307036358
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "both",
+      "score": 0.2924733060936129
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.33610219094898375
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.24089096410971525
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.30487320090578085
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.2913972175051296
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.31488390100773556
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.24708765781198583
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "both",
+      "score": 0.8117912925656066
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7581532161436855
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8693021047410444
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.816257148945189
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.7715477090533728
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8615500666681328
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.7849580563743691
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "both",
+      "score": 0.8620580585707884
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.8196344935035459
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8490497507246316
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8749110760076672
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.8005957118512972
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8867133245875564
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.8428208601441708
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.4507959898510921
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.3669385476792804
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.6012887832771415
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.4438510182195429
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.3978851458106017
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.4434335680202778
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.3782250250464872
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.4962759659641835
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.5145482933144866
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.44470067860173595
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.663029765359566
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.49001019021412834
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.5204448328399668
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.4645290454321312
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.7722598560807593
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "both",
+      "score": 0.7618019196000837
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.7238220265682409
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8619858855043812
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.8050325215295632
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.799408346592394
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.7418941032383892
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.6539573151209069
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.6739167766358585
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.6039808386541355
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.7940801995439973
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.6653107892075452
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.6166288727507672
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.6059454250166942
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.31926448076828007
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.3631572114237958
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.26894541886907847
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.5066292514985684
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.34139815590875294
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.3104535987370964
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.3401574890655604
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "both",
+      "score": 0.2913790596161578
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.3348447133233397
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.23998970548735252
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.30373256201939025
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.2903069970571372
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.313705808538077
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.24616321515841644
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "both",
+      "score": 0.8087540931227477
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.755316695788317
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8660497369312701
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.813203241148062
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.768661075144465
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8583267019850631
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.7820212495949406
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "both",
+      "score": 0.8588327933096541
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.8165679498613378
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8458731541616032
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8716377230449822
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.7976003990507556
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8833958152226783
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.8396675680723015
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.4491094020030115
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.36556570029500657
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.5990391484580799
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.44219041397607006
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.39639651621547695
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.44177452560621144
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.37680995094324576
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.49441922137830974
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.5126231854646109
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.443036895477111
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.6605491356060926
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.48817688811992876
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.5184976639422263
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.46279107734735503
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.7693705577769824
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "both",
+      "score": 0.7589517481496537
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.7211139513819771
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8587608902683125
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.8020206090487759
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.7964174761468468
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.7391184139970147
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "both",
+      "score": 0.6515106286248478
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.6713954147078894
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.6017211319001247
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.7911092635882567
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.6628216253340046
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.6143218452106585
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.6036783680475967
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 1,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.31806999899446176
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 2,
+      "author_id": 1,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.36179851136097474
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 3,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.2679391985710422
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 4,
+      "author_id": 0,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.5047337715956929
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 5,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.3401208641979216
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 6,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.30929208160116134
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 7,
+      "author_id": 6,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.33888483912987427
+    }
+  ],
+  "comments": {
+    "1": {
+      "comment_id": 1,
+      "post_id": 6,
+      "user_id": 3,
+      "content": "Great idea for sustainable practices! Have you checked out any of the green freight companies like Carbon Zero? They're making waves in our industry!",
+      "created_at": 1
+    },
+    "2": {
+      "comment_id": 2,
+      "post_id": 6,
+      "user_id": 2,
+      "content": "I think one innovative way to reduce waste in transportation and logistics is by using electric or hybrid vehicles. Have you explored any of these options? #EcoBiz",
+      "created_at": 1
+    },
+    "3": {
+      "comment_id": 3,
+      "post_id": 6,
+      "user_id": 4,
+      "content": "As an agriculture enthusiast, I completely agree with the importance of sustainable business practices. Have you explored any innovative ways to reduce waste and increase efficiency in farming?",
+      "created_at": 1
+    },
+    "4": {
+      "comment_id": 4,
+      "post_id": 6,
+      "user_id": 6,
+      "content": "Great idea for sustainable practices! I think using electric or hybrid vehicles could also help reduce waste and energy consumption in the logistics industry.",
+      "created_at": 1
+    },
+    "5": {
+      "comment_id": 5,
+      "post_id": 6,
+      "user_id": 7,
+      "content": "What a great comment! I think the idea of using electric or hybrid vehicles is also essential in reducing waste and increasing efficiency.",
+      "created_at": 1
+    },
+    "6": {
+      "comment_id": 6,
+      "post_id": 6,
+      "user_id": 3,
+      "content": "I completely agree! However, have you considered the impact of digitalization on sustainable business practices? My research suggests that it can be a game-changer.",
+      "created_at": 3
+    },
+    "7": {
+      "comment_id": 7,
+      "post_id": 6,
+      "user_id": 4,
+      "content": "I think reducing waste in farming can be achieved by implementing precision agriculture practices, such as using drones to monitor crop health and adjusting fertilizer applications accordingly.",
+      "created_at": 3
+    },
+    "8": {
+      "comment_id": 8,
+      "post_id": 6,
+      "user_id": 6,
+      "content": "Great conversation! I think electric or hybrid vehicles are a fantastic idea. Have you explored any companies using blockchain technology to optimize logistics and reduce waste? I'd love to hear about it!",
+      "created_at": 3
+    }
+  },
+  "exposure_pairs": {
+    "0->3": 3,
+    "0->1": 3,
+    "0->2": 3,
+    "0->4": 3,
+    "0->5": 3,
+    "0->6": 3,
+    "0->7": 3,
+    "1->3": 3,
+    "1->2": 3,
+    "1->0": 3,
+    "1->4": 3,
+    "1->5": 3,
+    "1->6": 3,
+    "1->7": 3,
+    "2->3": 3,
+    "2->1": 3,
+    "2->0": 3,
+    "2->4": 3,
+    "2->5": 3,
+    "2->6": 3,
+    "2->7": 3,
+    "3->1": 3,
+    "3->2": 3,
+    "3->0": 3,
+    "3->4": 3,
+    "3->5": 3,
+    "3->6": 3,
+    "3->7": 3,
+    "4->3": 3,
+    "4->1": 3,
+    "4->2": 3,
+    "4->0": 3,
+    "4->5": 3,
+    "4->6": 3,
+    "4->7": 3,
+    "5->3": 3,
+    "5->1": 3,
+    "5->2": 3,
+    "5->0": 3,
+    "5->4": 3,
+    "5->6": 3,
+    "5->7": 3,
+    "6->3": 3,
+    "6->1": 3,
+    "6->2": 3,
+    "6->0": 3,
+    "6->4": 3,
+    "6->5": 3,
+    "6->7": 3,
+    "7->3": 3,
+    "7->1": 3,
+    "7->2": 3,
+    "7->0": 3,
+    "7->4": 3,
+    "7->5": 3,
+    "7->6": 3
+  },
+  "interaction_pairs": {
+    "0->3": {
+      "follow": 1
+    },
+    "1->3": {
+      "follow": 1
+    },
+    "2->3": {
+      "follow": 1
+    },
+    "2->5": {
+      "create_comment": 1
+    },
+    "3->5": {
+      "create_comment": 2
+    },
+    "4->5": {
+      "create_comment": 2
+    },
+    "5->1": {
+      "follow": 1,
+      "like_post": 1
+    },
+    "6->5": {
+      "create_comment": 2
+    },
+    "7->5": {
+      "create_comment": 1,
+      "like_comment": 2
+    },
+    "4->2": {
+      "like_post": 1
+    },
+    "6->3": {
+      "follow": 1
+    },
+    "0->5": {
+      "like_comment": 1
+    },
+    "1->2": {
+      "like_post": 1
+    }
+  },
+  "propagation_candidates": [
+    {
+      "actor": 7,
+      "target": 5,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "create_comment": 1,
+        "like_comment": 2
+      },
+      "total_interactions": 3
+    },
+    {
+      "actor": 3,
+      "target": 5,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "create_comment": 2
+      },
+      "total_interactions": 2
+    },
+    {
+      "actor": 4,
+      "target": 5,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "create_comment": 2
+      },
+      "total_interactions": 2
+    },
+    {
+      "actor": 5,
+      "target": 1,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "follow": 1,
+        "like_post": 1
+      },
+      "total_interactions": 2
+    },
+    {
+      "actor": 6,
+      "target": 5,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "create_comment": 2
+      },
+      "total_interactions": 2
+    },
+    {
+      "actor": 0,
+      "target": 3,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "follow": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 1,
+      "target": 3,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "follow": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 2,
+      "target": 3,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "follow": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 2,
+      "target": 5,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "create_comment": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 4,
+      "target": 2,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "like_post": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 6,
+      "target": 3,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "follow": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 0,
+      "target": 5,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "like_comment": 1
+      },
+      "total_interactions": 1
+    },
+    {
+      "actor": 1,
+      "target": 2,
+      "times_actor_saw_target": 3,
+      "interactions": {
+        "like_post": 1
+      },
+      "total_interactions": 1
+    }
+  ]
+}

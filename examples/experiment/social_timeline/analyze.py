@@ -41,8 +41,23 @@ AUTOMATIC = {"sign_up", "refresh"}
 #   quote_post     -> {"quoted_id": "1", ...}     -- a STRING, not an int
 #   repost         -> {"original_post_id", ...}
 # Hence the numeric-string coercion below and the comment_id back-reference.
-POST_KEYS = ("post_id", "original_post_id", "quoted_id", "quoted_post_id")
-USER_KEYS = ("followee_id", "target_id")
+# NOTE: `new_post_id` is deliberately absent -- for repost/quote_post that is
+# the NEW post created, not the post acted upon. Treating it as the target
+# would attribute the interaction to the actor themselves.
+POST_KEYS = ("post_id", "original_post_id", "quoted_id", "quoted_post_id",
+             "reposted_id")
+USER_KEYS = ("followee_id", "mutee_id", "target_id")
+
+# Actions whose payload identifies a comment rather than a post. The commented
+# post is reachable only through the comment table.
+COMMENT_ACTIONS = {
+    "create_comment", "like_comment", "unlike_comment",
+    "dislike_comment", "undo_dislike_comment",
+}
+
+# `follow` records ONLY {"follow_id": ...} -- the followee appears nowhere in
+# the payload, so it has to be recovered from the follow table.
+FOLLOW_ACTIONS = {"follow"}
 
 
 def coerce_int(value):
@@ -74,7 +89,7 @@ def load_agents(conn):
         out[row["agent_id"]] = {
             "agent_id": row["agent_id"],
             "db_user_id": row["user_id"],
-            "username": row["user_name"] or row["name"],
+            "username": row["user_name"] or row["name"] or f"agent{row['agent_id']}",
             "bio": row["bio"],
         }
     return out
@@ -128,6 +143,10 @@ def load_actions(conn, posts):
     POST_KEYS handled explicitly.
     """
     comment_targets = load_comment_targets(conn)
+    follow_targets = {
+        row["follow_id"]: row["followee_id"]
+        for row in conn.execute("SELECT follow_id, followee_id FROM follow")
+    }
     actions = []
     for row in conn.execute(
             "SELECT user_id, created_at, action, info FROM trace "
@@ -145,14 +164,19 @@ def load_actions(conn, posts):
             (coerce_int(info[k]) for k in POST_KEYS
              if coerce_int(info.get(k)) is not None), None)
 
-        # A comment names only its own comment_id, so the commented-on post
-        # has to be looked up (B-4).
-        if post_id is None and row["action"] == "create_comment":
+        # Comment actions name only a comment_id, so the commented-on post has
+        # to be looked up (B-4).
+        if post_id is None and row["action"] in COMMENT_ACTIONS:
             post_id = comment_targets.get(coerce_int(info.get("comment_id")))
 
         target_user = next(
             (coerce_int(info[k]) for k in USER_KEYS
              if coerce_int(info.get(k)) is not None), None)
+
+        # `follow` carries no followee at all -- only the row id it just
+        # created (B-6). Recover the target from the follow table.
+        if target_user is None and row["action"] in FOLLOW_ACTIONS:
+            target_user = follow_targets.get(coerce_int(info.get("follow_id")))
         # Acting on a post is implicitly an interaction with its author.
         if target_user is None and post_id in posts:
             target_user = posts[post_id]["author_id"]
@@ -307,6 +331,9 @@ def analyze(db_path):
         "graph_by_round": snapshots,
         "agents": per_agent,
         "posts": posts,
+        "events": actions,
+        "exposures": exposures,
+        "comments": load_comments(conn),
         "exposure_pairs": {f"{v}->{a}": n
                            for (v, a), n in exposure_pairs.most_common()},
         "interaction_pairs": {f"{a}->{t}": dict(c)
@@ -340,6 +367,117 @@ def find_propagation(exposure_pairs, interaction_pairs):
     out.sort(key=lambda d: (-d["times_actor_saw_target"],
                             -d["total_interactions"]))
     return out
+
+
+def load_comments(conn):
+    out = {}
+    for row in conn.execute(
+            "SELECT comment_id, post_id, user_id, content, created_at "
+            "FROM comment"):
+        out[row["comment_id"]] = dict(row)
+    return out
+
+
+def excerpt(text, n=64):
+    if not text:
+        return ""
+    text = " ".join(str(text).split())
+    return text if len(text) <= n else text[:n - 1] + "…"
+
+
+def render_event_log(data):
+    """Every chosen action, in order, with actor, target and content.
+
+    This is the "what actually happened" ledger: who did what, to whom, in
+    which round, and what was said.
+    """
+    agents, posts = data["agents"], data["posts"]
+    comments = data.get("comments", {})
+
+    def who(agent_id):
+        a = agents.get(agent_id) or agents.get(str(agent_id)) or {}
+        return a.get("username") or f"agent{agent_id}"
+
+    L = ["", "=" * 78, "EVENT LOG -- every action, in order",
+         "=" * 78,
+         f"{'rnd':<4}{'actor':<22}{'action':<18}target / content", "-" * 78]
+
+    for ev in sorted(data["events"], key=lambda e: (e["round"], e["agent_id"])):
+        actor = who(ev["agent_id"])
+        act = ev["action"]
+        pid = ev.get("post_id")
+        tgt = ev.get("target_agent_id")
+        info = ev.get("info") or {}
+
+        if act == "create_post":
+            npid = info.get("post_id")
+            desc = f'own post#{npid}  "{excerpt(info.get("content"))}"'
+        elif act == "create_comment":
+            cid = info.get("comment_id")
+            c = comments.get(cid, {})
+            author = who(posts.get(pid, {}).get("author_id"))
+            desc = (f'on post#{pid} by @{author}  '
+                    f'"{excerpt(c.get("content") or info.get("content"))}"')
+        elif act in ("quote_post", "repost"):
+            author = who(posts.get(pid, {}).get("author_id"))
+            desc = f'post#{pid} by @{author}'
+            if info.get("quote_content"):
+                desc += f'  "{excerpt(info["quote_content"])}"'
+        elif act in ("follow", "unfollow", "mute", "unmute"):
+            desc = f"@{who(tgt)}" if tgt is not None else "(target unresolved)"
+        elif pid is not None:
+            author = who(posts.get(pid, {}).get("author_id"))
+            desc = (f'post#{pid} by @{author}  '
+                    f'"{excerpt(posts.get(pid, {}).get("content"), 46)}"')
+        elif act == "search_posts":
+            desc = f'query={info.get("query")!r}'
+        else:
+            desc = ""
+
+        L.append(f"r{ev['round']:<3}{actor:<22}{act:<18}{desc}")
+
+    if not data["events"]:
+        L.append("  (no chosen actions recorded)")
+    return "\n".join(L)
+
+
+def render_exposure_ledger(data):
+    """Every exposure event: who saw whose post, when, why, and what they did.
+
+    Directly answers "what posts did they see, which did they act on, and
+    which did they see and do nothing about".
+    """
+    agents, posts = data["agents"], data["posts"]
+
+    def who(agent_id):
+        a = agents.get(agent_id) or agents.get(str(agent_id)) or {}
+        return a.get("username") or f"agent{agent_id}"
+
+    L = ["", "=" * 78,
+         "EXPOSURE LEDGER -- every post shown to every agent",
+         "=" * 78,
+         "outcome: ACTED = they engaged with it | ignored = seen, no action",
+         "",
+         f"{'rnd':<4}{'viewer':<20}{'post':<7}{'author':<20}"
+         f"{'pos':<5}{'source':<10}{'score':<9}outcome",
+         "-" * 78]
+
+    for e in data["exposures"]:
+        aid = e["agent_id"]
+        acted = e["post_id"] in set(
+            (agents.get(aid) or agents.get(str(aid)) or {}
+             ).get("seen_and_acted", []))
+        score = e.get("score")
+        L.append(
+            f"r{e['round']:<3}{who(aid):<20}#{e['post_id']:<6}"
+            f"{who(e.get('author_id')):<20}"
+            f"{e.get('feed_position', ''):<5}{e.get('source', ''):<10}"
+            f"{(f'{score:.4f}' if isinstance(score, (int, float)) else '-'):<9}"
+            f"{'ACTED' if acted else 'ignored'}")
+
+    if not data["exposures"]:
+        L.append("  (no exposures recorded)")
+    return "\n".join(L)
 
 
 def render_report(data):
@@ -404,7 +542,9 @@ def render_report(data):
     else:
         add("  (none observed)")
     add("")
-    return "\n".join(L)
+    body = "\n".join(L)
+    return body + "\n" + render_event_log(data) + "\n" + \
+        render_exposure_ledger(data)
 
 
 def main():

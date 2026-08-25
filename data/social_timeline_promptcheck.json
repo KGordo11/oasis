@@ -1,0 +1,123 @@
+{
+  "label": "promptcheck",
+  "started_at": "2026-08-24T22:21:48.742140",
+  "config": {
+    "agents": 3,
+    "rounds": 2,
+    "recsys": "twhin-bert",
+    "model": "llama3.1:8b",
+    "semaphore": 4,
+    "max_rec_post_len": 30,
+    "refresh_rec_post_count": 8,
+    "following_post_count": 4,
+    "personas": "data/reddit/user_data_36.json",
+    "n_actions": 22,
+    "actions": [
+      "create_post",
+      "create_comment",
+      "like_post",
+      "unlike_post",
+      "dislike_post",
+      "undo_dislike_post",
+      "like_comment",
+      "unlike_comment",
+      "dislike_comment",
+      "undo_dislike_comment",
+      "repost",
+      "quote_post",
+      "report_post",
+      "follow",
+      "unfollow",
+      "mute",
+      "unmute",
+      "search_user",
+      "search_posts",
+      "trend",
+      "refresh",
+      "do_nothing"
+    ]
+  },
+  "algorithm": {
+    "name": "TWHIN interest-based (TimelinePlatform implementation)",
+    "formula": "score(u,p) = cosine(embed(profile_u), embed(content_p)) * log((271.8 - age_p)/100)",
+    "embedding": "Twitter/twhin-bert-base, mean-pooled last_hidden_state",
+    "deviations_from_upstream": [
+      "mean-pooled last_hidden_state instead of pooler_output (bugs B-1/B-2: upstream pooler weights are randomly re-initialised every process, making runs unreplicable and near-non-discriminative)",
+      "per-(user,post) scores captured for rec_history"
+    ],
+    "initial_follow_edges": 0
+  },
+  "environment": {
+    "python": "3.11.15",
+    "platform": "macOS-15.8-arm64-arm-64bit",
+    "ollama_keep_alive": "(unset)"
+  },
+  "rounds": [
+    {
+      "round": 0,
+      "seconds": 29.8,
+      "cumulative_agent_failures": 0,
+      "post": 3,
+      "comment": 0,
+      "follow": 0,
+      "like": 0,
+      "dislike": 0,
+      "rec_history": 0,
+      "rec_candidates": 0,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    },
+    {
+      "round": 1,
+      "seconds": 28.1,
+      "cumulative_agent_failures": 0,
+      "post": 3,
+      "comment": 1,
+      "follow": 3,
+      "like": 1,
+      "dislike": 0,
+      "rec_history": 6,
+      "rec_candidates": 6,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    }
+  ],
+  "final_counts": {
+    "post": 3,
+    "comment": 1,
+    "follow": 3,
+    "like": 1,
+    "dislike": 0,
+    "rec_history": 6,
+    "rec_candidates": 6,
+    "chat_group": 0,
+    "group_members": 0,
+    "group_messages": 0
+  },
+  "action_tally": {
+    "sign_up": 3,
+    "refresh": 3,
+    "follow": 3,
+    "create_post": 3,
+    "like_post": 1,
+    "create_comment": 1
+  },
+  "turns_without_action": {
+    "agent_turns_total": 6,
+    "turns_with_action": 6,
+    "turns_without_action": 0,
+    "action_rate": 1.0
+  },
+  "total_seconds": 57.9,
+  "platform_stats": {
+    "rounds_ranked": 1,
+    "recency_clamped": 0,
+    "empty_candidate_pools": 0,
+    "refresh_calls": 3,
+    "exposures_logged": 6,
+    "dm_joins_refused": 0
+  },
+  "finished_at": "2026-08-24T22:22:46.724854"
+}

@@ -537,7 +537,11 @@
         "7": 2,
         "1": 1
       },
-      "interacted_with": {},
+      "interacted_with": {
+        "8": {
+          "follow": 1
+        }
+      },
       "interacted_by": {
         "3": {
           "create_comment": 2
@@ -769,6 +773,1688 @@
       "num_shares": 0
     }
   },
+  "events": [
+    {
+      "agent_id": 0,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 2,
+      "target_agent_id": 0,
+      "info": {
+        "content": "Just arrived at a beautiful island, exploring its hidden gems! Looking forward to sharing my travels with you all! #travel #hospitability #foodie",
+        "post_id": 2
+      }
+    },
+    {
+      "agent_id": 2,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 1,
+      "target_agent_id": 2,
+      "info": {
+        "content": "Just started my day with a fresh cup of coffee, feeling productive and ready to tackle the challenges as an ENTJ STEM student pursuing a career in Information Technology! Follow along for tech insights, business tips, and more! #STEM #IT #ENTJ",
+        "post_id": 1
+      }
+    },
+    {
+      "agent_id": 3,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 3,
+      "target_agent_id": 3,
+      "info": {
+        "content": "Sharing my latest insights on market trends as a marketing professional in the UK! What are your opinions on the recent economic shifts? #marketing #economics",
+        "post_id": 3
+      }
+    },
+    {
+      "agent_id": 6,
+      "round": 0,
+      "action": "create_post",
+      "post_id": 4,
+      "target_agent_id": 6,
+      "info": {
+        "content": "Excited to share my thoughts on the recent economic trends! As an INTJ, I love analyzing data and discovering new insights. Stay tuned for more updates from me, intj_emily! #economics #business #intj",
+        "post_id": 4
+      }
+    },
+    {
+      "agent_id": 0,
+      "round": 1,
+      "action": "create_comment",
+      "post_id": 3,
+      "target_agent_id": 3,
+      "info": {
+        "content": "Nice post! As a hospitality professional, I completely agree with the importance of understanding market trends. Let's discuss further!",
+        "comment_id": 1
+      }
+    },
+    {
+      "agent_id": 1,
+      "round": 1,
+      "action": "do_nothing",
+      "post_id": null,
+      "target_agent_id": null,
+      "info": {}
+    },
+    {
+      "agent_id": 2,
+      "round": 1,
+      "action": "create_post",
+      "post_id": 5,
+      "target_agent_id": 2,
+      "info": {
+        "content": "Just started my day with a fresh cup of coffee, feeling productive and ready to tackle the challenges as an ENTJ STEM student pursuing a career in Information Technology! Follow along for tech insights, business tips, and more! #STEM #IT #ENTJ",
+        "post_id": 5
+      }
+    },
+    {
+      "agent_id": 3,
+      "round": 1,
+      "action": "create_comment",
+      "post_id": 4,
+      "target_agent_id": 6,
+      "info": {
+        "content": "Great insights on economic trends, thank you for sharing!",
+        "comment_id": 2
+      }
+    },
+    {
+      "agent_id": 4,
+      "round": 1,
+      "action": "create_post",
+      "post_id": 6,
+      "target_agent_id": 4,
+      "info": {
+        "content": "Just started my day with a fresh cup of coffee, feeling productive and ready to tackle the challenges as an ISTJ agriculture enthusiast pursuing a career in economics! Follow along for agricultural insights, business tips, and more! #agriculture #economics #ISTJ",
+        "post_id": 6
+      }
+    },
+    {
+      "agent_id": 5,
+      "round": 1,
+      "action": "create_post",
+      "post_id": 7,
+      "target_agent_id": 5,
+      "info": {
+        "content": "Just started my day with a fresh cup of coffee, feeling productive and ready to tackle the challenges as an ISFJ student pursuing a career in Transportation, Distribution & Logistics! Follow along for logistics insights, business tips, and more! #Transportation #Logistics #ISFJ",
+        "post_id": 7
+      }
+    },
+    {
+      "agent_id": 6,
+      "round": 1,
+      "action": "search_posts",
+      "post_id": null,
+      "target_agent_id": null,
+      "info": {
+        "query": ""
+      }
+    },
+    {
+      "agent_id": 7,
+      "round": 1,
+      "action": "create_post",
+      "post_id": 8,
+      "target_agent_id": 7,
+      "info": {
+        "content": "I\u00b4m thrilled to join the discussion as a Human Services professional passionate about making a positive impact! Can we talk more about how our careers can contribute to creating meaningful change in society?",
+        "post_id": 8
+      }
+    },
+    {
+      "agent_id": 0,
+      "round": 2,
+      "action": "create_comment",
+      "post_id": 3,
+      "target_agent_id": 3,
+      "info": {
+        "content": "Great post! As a marketing professional, I appreciate the insights on market trends. Can we discuss more about the impact of economic shifts on business?",
+        "comment_id": 4
+      }
+    },
+    {
+      "agent_id": 1,
+      "round": 2,
+      "action": "quote_post",
+      "post_id": 1,
+      "target_agent_id": 2,
+      "info": {
+        "quoted_id": "1",
+        "new_post_id": 9
+      }
+    },
+    {
+      "agent_id": 2,
+      "round": 2,
+      "action": "create_comment",
+      "post_id": 3,
+      "target_agent_id": 3,
+      "info": {
+        "content": "As an ENTJ business professional with a passion for Information Technology, I appreciate your insights on market trends. Would love to discuss this topic further!",
+        "comment_id": 5
+      }
+    },
+    {
+      "agent_id": 3,
+      "round": 2,
+      "action": "create_comment",
+      "post_id": 4,
+      "target_agent_id": 6,
+      "info": {
+        "content": "Great insights on economic trends, thank you for sharing!",
+        "comment_id": 3
+      }
+    },
+    {
+      "agent_id": 4,
+      "round": 2,
+      "action": "create_post",
+      "post_id": 10,
+      "target_agent_id": 4,
+      "info": {
+        "content": "Just learned so much about crop rotation and its impact on soil health as an ISTJ agriculture enthusiast pursuing a career in economics! Share your favorite agrotech tips and learn from others. #agriculture #economics #soilhealth",
+        "post_id": 10
+      }
+    },
+    {
+      "agent_id": 5,
+      "round": 2,
+      "action": "create_comment",
+      "post_id": 2,
+      "target_agent_id": 0,
+      "info": {
+        "content": "Just arrived at a beautiful island, what made you choose this place? I would love to hear the story behind it",
+        "comment_id": 6
+      }
+    },
+    {
+      "agent_id": 6,
+      "round": 2,
+      "action": "create_post",
+      "post_id": 11,
+      "target_agent_id": 6,
+      "info": {
+        "content": "As an INTJ with a passion for economics and human services, I\u00b4m thrilled to discuss ways our careers can create meaningful change in society! Can we start a conversation about economic trends and human services collaboration?",
+        "post_id": 11
+      }
+    },
+    {
+      "agent_id": 7,
+      "round": 2,
+      "action": "create_comment",
+      "post_id": 3,
+      "target_agent_id": 3,
+      "info": {
+        "content": "Nice discussion on market trends! As a human services professional ISFJ, I appreciate the insights on economic shifts.",
+        "comment_id": 7
+      }
+    },
+    {
+      "agent_id": 0,
+      "round": 3,
+      "action": "create_comment",
+      "post_id": 3,
+      "target_agent_id": 3,
+      "info": {
+        "content": "Great post! As a hospitality professional, I completely agree with the importance of understanding market trends. Let\u2019s discuss further!",
+        "comment_id": 8
+      }
+    },
+    {
+      "agent_id": 1,
+      "round": 3,
+      "action": "quote_post",
+      "post_id": 2,
+      "target_agent_id": 0,
+      "info": {
+        "quoted_id": 2,
+        "new_post_id": 12
+      }
+    },
+    {
+      "agent_id": 3,
+      "round": 3,
+      "action": "quote_post",
+      "post_id": 2,
+      "target_agent_id": 0,
+      "info": {
+        "quoted_id": 2,
+        "new_post_id": 13
+      }
+    },
+    {
+      "agent_id": 5,
+      "round": 3,
+      "action": "create_post",
+      "post_id": 14,
+      "target_agent_id": 5,
+      "info": {
+        "content": "As a transportation, distribution, and logistics enthusiast, I found the post about crop rotation and soil health fascinating!",
+        "post_id": 14
+      }
+    },
+    {
+      "agent_id": 6,
+      "round": 3,
+      "action": "follow",
+      "post_id": null,
+      "target_agent_id": 8,
+      "info": {
+        "follow_id": 1
+      }
+    },
+    {
+      "agent_id": 7,
+      "round": 3,
+      "action": "create_comment",
+      "post_id": 3,
+      "target_agent_id": 3,
+      "info": {
+        "content": "Great discussion on market trends! As an ISFJ Human Services Professional, I appreciate the insights on economic shifts. Looking forward to discussing further!",
+        "comment_id": 9
+      }
+    }
+  ],
+  "exposures": [
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.852095184451175
+    },
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.8273138728075957
+    },
+    {
+      "round": 1,
+      "agent_id": 0,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8597026729801598
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.795860941339705
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7455456328358446
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.7164920190984109
+    },
+    {
+      "round": 1,
+      "agent_id": 1,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.7893501192092108
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.6971396484991544
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7178785726243816
+    },
+    {
+      "round": 1,
+      "agent_id": 2,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.7812286480961482
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.8473403111395754
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7999098605221338
+    },
+    {
+      "round": 1,
+      "agent_id": 3,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.866822899369017
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.8381478252542146
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7667174875318334
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8108350187507701
+    },
+    {
+      "round": 1,
+      "agent_id": 4,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8275578007714811
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.8127767043445026
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7938007951111257
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8445375147054668
+    },
+    {
+      "round": 1,
+      "agent_id": 5,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.805185782490767
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.6733952088383811
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.6376679563986485
+    },
+    {
+      "round": 1,
+      "agent_id": 6,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.651806455838001
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.8244564479102995
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7900776872085993
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.7574409213161751
+    },
+    {
+      "round": 1,
+      "agent_id": 7,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8017020303872723
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.8489307834815618
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.8242415014703807
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.856510020302854
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.852095184451175
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.8771236305119137
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8595815996796821
+    },
+    {
+      "round": 2,
+      "agent_id": 0,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.8410205698727091
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.7929053758343387
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7427769218203538
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.7138312036386739
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.7864187327536017
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.795860941339705
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8057077218292658
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.801503052147988
+    },
+    {
+      "round": 2,
+      "agent_id": 1,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 7,
+      "source": "recsys",
+      "score": 0.7241374506578052
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.6945507013722118
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7152126079613607
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.7783274221103245
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8147775311875118
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.8442756543547524
+    },
+    {
+      "round": 2,
+      "agent_id": 2,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.7064362847371576
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.844193568203938
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7969392586639978
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8636038045151799
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8473403111395754
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.8727242578623837
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8701278620131011
+    },
+    {
+      "round": 2,
+      "agent_id": 3,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.812106139958875
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.4653633246690243
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.44112754981118635
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.43431405739282597
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.4910636507715454
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.46709797275159914
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.5395556521651107
+    },
+    {
+      "round": 2,
+      "agent_id": 4,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.4052696859415748
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.2993237724189442
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.32054345257909456
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.29140505597340743
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.3373014174372432
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.3004395058263091
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.31715872512116
+    },
+    {
+      "round": 2,
+      "agent_id": 5,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.26628003090129554
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.6708944407426741
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.6352998675555941
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.6493858612630153
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.6733952088383811
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.6964447981989141
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.7283982926501432
+    },
+    {
+      "round": 2,
+      "agent_id": 6,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.615018817424786
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.3132947329069974
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.35299512535713923
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.3171700716235649
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.3580111830515753
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.31446254325841355
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.3386634274806248
+    },
+    {
+      "round": 2,
+      "agent_id": 7,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.39901062977185814
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.8457546320172278
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.8211577213757024
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8489307834815618
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8563893966287518
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.8378972963754132
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 9,
+      "author_id": 1,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.852095184451175
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 10,
+      "author_id": 4,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.8734876906354301
+    },
+    {
+      "round": 3,
+      "agent_id": 0,
+      "post_id": 11,
+      "author_id": 6,
+      "feed_position": 7,
+      "source": "recsys",
+      "score": 0.8397226094631252
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.5484068537897617
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.49193962731656615
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.4848120320643551
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.5484070895374382
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.5504663438188743
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.5512690621287769
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 10,
+      "author_id": 4,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.558660591453386
+    },
+    {
+      "round": 3,
+      "agent_id": 1,
+      "post_id": 11,
+      "author_id": 6,
+      "feed_position": 7,
+      "source": "recsys",
+      "score": 0.4958348304706915
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.7125367436667824
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7754154228878097
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8117517156955848
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8411402925454003
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.7038128129640693
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 9,
+      "author_id": 1,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8257031644462629
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 10,
+      "author_id": 4,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.7877455268606044
+    },
+    {
+      "round": 3,
+      "agent_id": 2,
+      "post_id": 11,
+      "author_id": 6,
+      "feed_position": 7,
+      "source": "recsys",
+      "score": 0.7342905661925667
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.8410351403438525
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.7939576259530126
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.8603727560696679
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.8694832473060766
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.866896493616136
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.8090902451344372
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 9,
+      "author_id": 1,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.8473403111395754
+    },
+    {
+      "round": 3,
+      "agent_id": 3,
+      "post_id": 10,
+      "author_id": 4,
+      "feed_position": 7,
+      "source": "recsys",
+      "score": 0.8637098488912616
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.6067650713133244
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.5765253042863746
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.5864304786634632
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.6090437201043597
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.6729221489592137
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.5546933191802986
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 9,
+      "author_id": 1,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.6113139388029103
+    },
+    {
+      "round": 3,
+      "agent_id": 4,
+      "post_id": 11,
+      "author_id": 6,
+      "feed_position": 7,
+      "source": "recsys",
+      "score": 0.5881310441164467
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.2982038959147851
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.29031480619892225
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 4,
+      "author_id": 6,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.3360394530795347
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.2993237724189442
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.3159809020380016
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.26529115453707175
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 9,
+      "author_id": 1,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.3004395058263091
+    },
+    {
+      "round": 3,
+      "agent_id": 5,
+      "post_id": 10,
+      "author_id": 4,
+      "feed_position": 7,
+      "source": "recsys",
+      "score": 0.3530911311916677
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.5756744909217775
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.5838761525882596
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 5,
+      "author_id": 2,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.6085217668544318
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.6296549280722701
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.6731729207858536
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 8,
+      "author_id": 7,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.6161276248887431
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 9,
+      "author_id": 1,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.6107900399651885
+    },
+    {
+      "round": 3,
+      "agent_id": 6,
+      "post_id": 10,
+      "author_id": 4,
+      "feed_position": 7,
+      "source": "recsys",
+      "score": 0.6493355866965211
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 1,
+      "author_id": 2,
+      "feed_position": 0,
+      "source": "recsys",
+      "score": 0.31212258607941995
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 2,
+      "author_id": 0,
+      "feed_position": 1,
+      "source": "recsys",
+      "score": 0.3516744452662279
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 3,
+      "author_id": 3,
+      "feed_position": 2,
+      "source": "recsys",
+      "score": 0.3159834257779534
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 6,
+      "author_id": 4,
+      "feed_position": 3,
+      "source": "recsys",
+      "score": 0.33740574301315246
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 7,
+      "author_id": 5,
+      "feed_position": 4,
+      "source": "recsys",
+      "score": 0.3975288356639038
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 9,
+      "author_id": 1,
+      "feed_position": 5,
+      "source": "recsys",
+      "score": 0.31446254325841355
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 10,
+      "author_id": 4,
+      "feed_position": 6,
+      "source": "recsys",
+      "score": 0.3819988216157499
+    },
+    {
+      "round": 3,
+      "agent_id": 7,
+      "post_id": 11,
+      "author_id": 6,
+      "feed_position": 7,
+      "source": "recsys",
+      "score": 0.3310978306698779
+    }
+  ],
+  "comments": {
+    "1": {
+      "comment_id": 1,
+      "post_id": 3,
+      "user_id": 0,
+      "content": "Nice post! As a hospitality professional, I completely agree with the importance of understanding market trends. Let's discuss further!",
+      "created_at": 1
+    },
+    "2": {
+      "comment_id": 2,
+      "post_id": 4,
+      "user_id": 3,
+      "content": "Great insights on economic trends, thank you for sharing!",
+      "created_at": 1
+    },
+    "3": {
+      "comment_id": 3,
+      "post_id": 4,
+      "user_id": 3,
+      "content": "Great insights on economic trends, thank you for sharing!",
+      "created_at": 2
+    },
+    "4": {
+      "comment_id": 4,
+      "post_id": 3,
+      "user_id": 0,
+      "content": "Great post! As a marketing professional, I appreciate the insights on market trends. Can we discuss more about the impact of economic shifts on business?",
+      "created_at": 2
+    },
+    "5": {
+      "comment_id": 5,
+      "post_id": 3,
+      "user_id": 2,
+      "content": "As an ENTJ business professional with a passion for Information Technology, I appreciate your insights on market trends. Would love to discuss this topic further!",
+      "created_at": 2
+    },
+    "6": {
+      "comment_id": 6,
+      "post_id": 2,
+      "user_id": 5,
+      "content": "Just arrived at a beautiful island, what made you choose this place? I would love to hear the story behind it",
+      "created_at": 2
+    },
+    "7": {
+      "comment_id": 7,
+      "post_id": 3,
+      "user_id": 7,
+      "content": "Nice discussion on market trends! As a human services professional ISFJ, I appreciate the insights on economic shifts.",
+      "created_at": 2
+    },
+    "8": {
+      "comment_id": 8,
+      "post_id": 3,
+      "user_id": 0,
+      "content": "Great post! As a hospitality professional, I completely agree with the importance of understanding market trends. Let\u2019s discuss further!",
+      "created_at": 3
+    },
+    "9": {
+      "comment_id": 9,
+      "post_id": 3,
+      "user_id": 7,
+      "content": "Great discussion on market trends! As an ISFJ Human Services Professional, I appreciate the insights on economic shifts. Looking forward to discussing further!",
+      "created_at": 3
+    }
+  },
   "exposure_pairs": {
     "0->2": 5,
     "1->2": 5,
@@ -851,6 +2537,9 @@
     },
     "3->0": {
       "quote_post": 1
+    },
+    "6->8": {
+      "follow": 1
     }
   },
   "propagation_candidates": [

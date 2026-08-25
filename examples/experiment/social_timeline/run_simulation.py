@@ -127,6 +127,7 @@ async def run(args):
         model=model,
         available_actions=actions,
         limit=args.agents,
+        include_groups=not args.no_groups,
     )
     n_agents = len(list(agent_graph.get_agents()))
     log.info("built %d agents with %d available actions", n_agents,

@@ -489,11 +489,22 @@ if (!prop.length) {
   }).join('');
 }
 
+// Say plainly what the diagram is not showing. Silently dropping edges would
+// let a filtered picture pass for the whole one.
+const totalPairs = Object.keys(inter).length;
+const shownPairs = interactionEdges().length;
+const filterNote = shownPairs < totalPairs
+  ? ` The diagram draws ${shownPairs} of ${totalPairs} interacting pairs: at ` +
+    `this density nearly every node touches every other, so only repeated ` +
+    `interactions are drawn. The table below is unfiltered.`
+  : '';
+
 document.getElementById('footnote').textContent =
   'The follow graph starts empty by design: no relationships are seeded, so ' +
   'every edge shown was created by an agent choosing to follow someone. ' +
   '"Times seen" counts exposure events, not distinct posts. Seeing the ' +
-  'same author repeatedly is the mechanism that drives discovery.';
+  'same author repeatedly is the mechanism that drives discovery.' +
+  filterNote;
 
 slider.addEventListener('input', e => render(Number(e.target.value)));
 render(maxRound);

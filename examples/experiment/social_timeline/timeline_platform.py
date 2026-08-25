@@ -65,6 +65,7 @@ from __future__ import annotations
 import math
 import os
 import sys
+from datetime import datetime
 
 # These modules sit alongside this file and are imported by name, so the
 # directory must be importable regardless of the caller's cwd.
@@ -95,6 +96,16 @@ class TimelinePlatform(Platform):
         reset_globals()
 
         self._create_instrumentation_tables()
+
+        # Bug B-9: env.step() increments sandbox_clock.time_step only when
+        # platform_type is TWITTER (env.py:197-198), and a REDDIT recsys sets
+        # platform_type to REDDIT (env.py:109). A hot-score run therefore
+        # reports every round as round 0, collapsing the time dimension and
+        # silently overwriting rec_candidates through its primary key. Keep an
+        # independent counter: update_rec_table() is called exactly once per
+        # env.step(), before the actions, so this matches time_step wherever
+        # time_step is actually maintained.
+        self._round = -1
 
         # Counters surfaced at the end of a run so silent degradation shows up
         # as a number rather than as a plausible-looking result.
@@ -190,7 +201,8 @@ class TimelinePlatform(Platform):
         and the round boundary. Called once per round by env.step()."""
         from oasis.social_platform.database import fetch_table_from_db
 
-        round_no = int(self.sandbox_clock.time_step)
+        self._round += 1
+        round_no = self._round
         user_rows = fetch_table_from_db(self.db_cursor, "user")
         post_rows = fetch_table_from_db(self.db_cursor, "post")
 
@@ -205,6 +217,15 @@ class TimelinePlatform(Platform):
             # Round 0: nobody has posted yet. An empty feed here is correct,
             # not a failure -- agents bootstrap by posting.
             self.pl_utils._execute_db_command("DELETE FROM rec", commit=True)
+            return
+
+        if self.recsys_type == RecsysType.REDDIT:
+            # Bug B-8: this method originally ran the embedding ranking
+            # unconditionally, so `--recsys reddit` silently produced a second
+            # TWHIN run and the "algorithm contrast" compared TWHIN to itself.
+            # Hot-score is a genuinely different world -- one global feed, no
+            # personalisation -- and must actually be run to be contrasted.
+            await self._rank_hot_score(round_no, user_rows, post_rows)
             return
 
         agent_ids, profile_texts = self._build_profiles(user_rows, post_rows)
@@ -262,6 +283,63 @@ class TimelinePlatform(Platform):
 
         self.stats["rounds_ranked"] += 1
 
+    async def _rank_hot_score(self, round_no, user_rows, post_rows):
+        """Reddit-style hot-score ranking, the contrast condition.
+
+        Delegates the ranking itself to upstream `rec_sys_reddit` so the
+        contrast is against the real algorithm rather than a reimplementation,
+        and separately recomputes `calculate_hot_score` per post purely so the
+        score can be logged -- upstream returns only the id matrix.
+
+        The defining property, and the whole point of the contrast: hot-score
+        returns `[top_post_ids] * len(rec_matrix)` (recsys.py:257), i.e. **one
+        globally identical feed for everyone**. There is no personalisation and
+        no follow-graph injection (platform.py:280 skips it for REDDIT). Every
+        agent sees the same thing.
+        """
+        from oasis.social_platform.recsys import (calculate_hot_score,
+                                                  rec_sys_reddit)
+
+        agent_ids = [u["agent_id"] for u in user_rows]
+        matrix = rec_sys_reddit(post_rows, [[] for _ in agent_ids],
+                                self.max_rec_post_len)
+
+        scores, authors = {}, {}
+        for post in post_rows:
+            authors[post["post_id"]] = post["user_id"]
+            try:
+                created = post["created_at"]
+                dt = (datetime.strptime(created, "%Y-%m-%d %H:%M:%S.%f")
+                      if "." in str(created)
+                      else datetime.strptime(str(created), "%Y-%m-%d %H:%M:%S"))
+                scores[post["post_id"]] = calculate_hot_score(
+                    post["num_likes"], post["num_dislikes"], dt)
+            except (TypeError, ValueError):
+                scores[post["post_id"]] = None
+
+        rec_rows, candidate_rows = [], []
+        for idx, agent_id in enumerate(agent_ids):
+            feed = matrix[idx] if idx < len(matrix) else []
+            if not feed:
+                self.stats["empty_candidate_pools"] += 1
+            for rank, post_id in enumerate(feed):
+                rec_rows.append((agent_id, post_id))
+                candidate_rows.append(
+                    (round_no, agent_id, post_id, authors.get(post_id), rank,
+                     None, None, scores.get(post_id)))
+
+        self.pl_utils._execute_db_command("DELETE FROM rec", commit=True)
+        if rec_rows:
+            self.pl_utils._execute_many_db_command(
+                "INSERT INTO rec (user_id, post_id) VALUES (?, ?)",
+                rec_rows, commit=True)
+            self.pl_utils._execute_many_db_command(
+                "INSERT OR REPLACE INTO rec_candidates (round, agent_id, "
+                "post_id, author_id, rank, sim, recency, score) "
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                candidate_rows, commit=True)
+        self.stats["rounds_ranked"] += 1
+
     def _assert_algorithm_ran(self, sims):
         """Fail loudly rather than silently degrading.
 
@@ -297,7 +375,7 @@ class TimelinePlatform(Platform):
 
         from oasis.social_platform.platform import datetime  # noqa: F401
 
-        round_no = int(self.sandbox_clock.time_step)
+        round_no = max(self._round, 0)
         if self.recsys_type == RecsysType.REDDIT:
             current_time = self.sandbox_clock.time_transfer(
                 __import__("datetime").datetime.now(), self.start_time)

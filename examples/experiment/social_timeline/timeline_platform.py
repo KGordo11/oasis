@@ -88,7 +88,7 @@ class TimelinePlatform(Platform):
     """Personalized, fully instrumented platform. See module docstring."""
 
     def __init__(self, *args, recency_span_rounds: int | None = None,
-                 **kwargs):
+                 explore_slots: int = 2, **kwargs):
         """recency_span_rounds: number of rounds over which a post should decay
         from brand-new to stale.
 
@@ -105,6 +105,10 @@ class TimelinePlatform(Platform):
         """
         super().__init__(*args, **kwargs)
         self.recency_span_rounds = recency_span_rounds
+        # How many of the algorithmic feed slots are exploration rather than
+        # best-ranked content (F-17). 0 = pure exploitation, no serendipity.
+        self.explore_slots = explore_slots
+        self._feed_order = {}
         self._age_scale = (RECENCY_AGE_CLIFF / recency_span_rounds
                            if recency_span_rounds else 1.0)
 
@@ -408,10 +412,36 @@ class TimelinePlatform(Platform):
                 "SELECT post_id FROM rec WHERE user_id = ?", (user_id, ))
             rec_post_ids = [row[0] for row in self.db_cursor.fetchall()]
 
-            selected_post_ids = rec_post_ids
-            if len(selected_post_ids) >= self.refresh_rec_post_count:
-                selected_post_ids = random.sample(
-                    selected_post_ids, self.refresh_rec_post_count)
+            # Finding F-17. Upstream takes random.sample() of the candidate
+            # pool (platform.py:276-278), which discards the ranking the
+            # algorithm just spent an embedding pass computing. Measured on the
+            # v2 run: the median rank actually shown was 14 out of 30, and only
+            # 16% of shown posts came from the pool's top 5. An "interest-based
+            # feed" that shows a random draw from a shortlist is barely
+            # personalised at all.
+            #
+            # Real feeds exploit AND explore: mostly best-ranked content, with
+            # a small slice of exploration so the bubble is not airtight.
+            # That is what this does, and both parts are recorded.
+            self.pl_utils._execute_db_command(
+                "SELECT post_id FROM rec_candidates WHERE round = ? AND "
+                "agent_id = ? ORDER BY rank", (round_no, agent_id))
+            ranked = [r[0] for r in self.db_cursor.fetchall()]
+            if not ranked:
+                ranked = rec_post_ids
+
+            n = self.refresh_rec_post_count
+            n_explore = min(self.explore_slots, max(0, n - 1))
+            n_top = n - n_explore
+            top = ranked[:n_top]
+            rest = [p for p in ranked[n_top:] if p not in set(top)]
+            explore = (random.sample(rest, min(n_explore, len(rest)))
+                       if rest else [])
+            selected_post_ids = top + explore
+            # Best-ranked first: presentation order is itself a ranking signal,
+            # and previously the feed was rendered in arbitrary SQL row order.
+            self._feed_order = {pid: i
+                                for i, pid in enumerate(selected_post_ids)}
             from_recsys = set(selected_post_ids)
 
             from_following = set()
@@ -439,6 +469,10 @@ class TimelinePlatform(Platform):
             results = self.db_cursor.fetchall()
             if not results:
                 return {"success": False, "message": "No posts found."}
+            # Render best-ranked first. SQL returns rows in rowid order, which
+            # would put the agent's top match anywhere in the list.
+            order = getattr(self, "_feed_order", {}) or {}
+            results = sorted(results, key=lambda r: order.get(r[0], 10_000))
             results_with_comments = self.pl_utils._add_comments_to_posts(
                 results)
 

@@ -115,10 +115,19 @@ async def run(args):
 
     # Local Ollama. llama3.1:8b is required specifically for native
     # tool-calling -- OASIS agents act by emitting tool calls, not free text.
+    # Reproducibility. Nothing in this project had ever set a sampling
+    # temperature, so run-to-run variation came from an unstated source. It is
+    # now explicit and recorded in the manifest. Seeding Python's RNG also
+    # pins the feed's exploration slots (F-17); the model's own sampling stays
+    # stochastic, which is why replication still means repeating a run rather
+    # than expecting identical output.
+    import random as _random
+    _random.seed(args.seed)
     model = ModelFactory.create(
         model_platform=ModelPlatformType.OLLAMA,
         model_type=args.model,
         url=args.ollama_url,
+        model_config_dict={"temperature": args.temperature},
     )
 
     actions = build_action_set(include_groups=not args.no_groups)
@@ -149,6 +158,9 @@ async def run(args):
         # round-0 post does not dominate every feed forever.
         recency_span_rounds=(None if args.no_recency_scaling
                              else args.rounds),
+        # F-17: show best-ranked posts, keeping a couple of slots for
+        # exploration rather than sampling the pool at random.
+        explore_slots=args.explore_slots,
     )
 
     env = oasis.make(
@@ -174,6 +186,8 @@ async def run(args):
             "following_post_count": args.following_post_count,
             "personas": args.personas,
             "prompt_version": PROMPT_VERSION,
+            "seed": args.seed,
+            "temperature": args.temperature,
             "n_actions": len(actions),
             "actions": [a.value for a in actions],
         },
@@ -193,6 +207,7 @@ async def run(args):
             "initial_follow_edges": 0,
             "recency_span_rounds": (None if args.no_recency_scaling
                                    else args.rounds),
+            "explore_slots": args.explore_slots,
         },
         "environment": {
             "python": sys.version.split()[0],
@@ -338,6 +353,17 @@ def main():
     p.add_argument("--model", default="llama3.1:8b")
     p.add_argument("--ollama-url", default="http://localhost:11434/v1")
     p.add_argument("--personas", default="data/reddit/user_data_36.json")
+    p.add_argument("--seed", type=int, default=0,
+                   help="seeds feed exploration and any other Python RNG "
+                        "use, so that component is reproducible")
+    p.add_argument("--temperature", type=float, default=0.7,
+                   help="LLM sampling temperature. Previously unset and "
+                        "therefore unstated; now explicit and recorded")
+    p.add_argument("--explore-slots", type=int, default=2,
+                   dest="explore_slots",
+                   help="feed slots given to exploration instead of the "
+                        "top-ranked posts (default 2 of 8). 0 = pure "
+                        "exploitation (finding F-17)")
     p.add_argument("--no-recency-scaling", action="store_true",
                    help="keep upstream's raw recency curve, which over a "
                         "short run is nearly flat and lets round-0 posts "

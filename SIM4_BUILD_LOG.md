@@ -606,13 +606,20 @@ duration rather than correctness (Q-3).
 
 ### 2026-08-26 — Multi-run artifact, and making silent failures loud
 
-43. **The artifact now holds every run, not just the latest.** Previously each
+43. **The artifact accumulates runs from a baseline forward.** Previously each
     publish overwrote the last, so the history was lost and a change could not
     be traced to the run that introduced it. `make_graph.py` now discovers every
     analysed run, projects each to what the page renders, and bundles them: a
     run selector switches the graph, stats, algorithm box and all three tables,
-    and a comparison table across every run highlights the best value per
-    metric. Future runs append automatically -- no flag needed.
+    and a comparison table highlights the best value per metric. Future runs
+    append automatically -- no flag needed.
+
+    The baseline is **v4_full**, recorded in `data/.artifact_baseline` so it
+    persists between invocations. Earlier runs are excluded deliberately: they
+    used different personas, a different prompt, and a feed that discarded its
+    own ranking (F-17), so sitting them beside current runs in one comparison
+    table would invite false conclusions. Their databases are kept; only the
+    artifact filters.
 
 44. Pruned orphaned `_analysis.json` files whose databases had been deleted, so
     the artifact does not resurrect runs that no longer exist.
@@ -634,6 +641,15 @@ duration rather than correctness (Q-3).
 46. Fixed a third mojibake instance -- a literal middle dot in a JS
     `textContent` string. Entities do not decode in `textContent`, so those
     strings must be pure ASCII. The generator now emits ASCII only, verified.
+
+47. **Clarified a display confusion.** Handles like `user82` looked like agent
+    indices, prompting a reasonable "if there are 36 personalities how do we
+    have user82?". They are anonymised names carried over from the source
+    persona file, which holds 111 profiles (`user0`..`user110`); diversity
+    selection picks 36 of them, so the handles are scattered across that range.
+    There are exactly 36 agents, `agent_id` 0-35. The per-agent table now leads
+    with an explicit `#` column, node tooltips show `(agent #N)`, and the
+    footnote states the distinction.
 
 *(Entries continue as the build proceeds.)*
 

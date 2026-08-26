@@ -224,7 +224,8 @@ HTML = """<title>Agent Network Formation</title>
     <table id="agentTable">
       <caption>Per-agent detail &mdash; selected run</caption>
       <thead><tr>
-        <th>Agent</th><th class="num">Actions</th><th class="num">Posts</th>
+        <th class="num">#</th><th>Agent</th>
+        <th class="num">Actions</th><th class="num">Posts</th>
         <th class="num">Saw</th><th class="num">Engaged</th>
         <th class="num">Follows</th><th class="num">Followers</th>
         <th>Action mix</th>
@@ -540,7 +541,8 @@ function agentTable() {
       .map(([k, v]) => `${k}&times;${v}`).join(', ') || '&ndash;';
     const eng = a.engagement_rate == null ? '&ndash;'
       : (a.engagement_rate * 100).toFixed(0) + '%';
-    return `<tr><td class="who">${a.username}</td>` +
+    return `<tr><td class="num">${a.agent_id}</td>` +
+      `<td class="who">${a.username}</td>` +
       `<td class="num">${a.total_actions ?? 0}</td>` +
       `<td class="num">${a.n_posts_authored ?? 0}</td>` +
       `<td class="num">${a.distinct_posts_seen ?? 0}</td>` +
@@ -591,7 +593,11 @@ function footnote() {
     'The follow graph starts empty by design: no relationships are seeded, so ' +
     'every edge shown was created by an agent choosing to follow someone. ' +
     '"Times seen" counts exposure events, not distinct posts. Seeing the same ' +
-    'author repeatedly is the mechanism that drives discovery.' +
+    'author repeatedly is the mechanism that drives discovery. ' +
+    `Handles are anonymised names carried over from the source persona file, ` +
+    `so they are not agent indices: this run has ${DATA.summary.agents} agents, ` +
+    `numbered 0-${DATA.summary.agents - 1} in the # column, drawn from a larger ` +
+    `pool of source profiles.` +
     (shown < totalPairs
       ? ` The diagram draws ${shown} of ${totalPairs} interacting pairs: at this ` +
         `density nearly every node touches every other, so only repeated ` +
@@ -670,27 +676,56 @@ def project(analysis_path, manifest_path=None):
     }
 
 
-def discover(data_dir="data"):
-    """Every analysed run in the directory, oldest first.
+BASELINE_FILE = ".artifact_baseline"
 
-    Runs accumulate: the artifact keeps the whole history so a change in the
-    simulation can be traced to the run that introduced it, rather than each
-    publish overwriting the last.
+
+def _started(analysis_path):
+    """Run start time from its manifest; falls back to filename ordering."""
+    mp = analysis_path.replace("_analysis.json", ".json")
+    try:
+        with open(mp) as fh:
+            return json.load(fh).get("started_at", "") or ""
+    except (OSError, json.JSONDecodeError):
+        return ""
+
+
+def discover(data_dir="data", since=None):
+    """Analysed runs from the baseline forward, oldest first.
+
+    Runs accumulate from a chosen starting point rather than including every
+    run ever made: earlier runs used different personas, prompts and a feed
+    that discarded its own ranking, so putting them beside current runs in one
+    comparison table invites false conclusions. The baseline label is stored in
+    data/.artifact_baseline so it survives between invocations, and anything
+    started at or after that run is included automatically.
     """
     import glob
+
     found = sorted(glob.glob(os.path.join(
         data_dir, "social_timeline_*_analysis.json")))
-    dated = []
-    for path in found:
-        started = ""
-        mp = path.replace("_analysis.json", ".json")
-        try:
-            with open(mp) as fh:
-                started = json.load(fh).get("started_at", "")
-        except (OSError, json.JSONDecodeError):
-            pass
-        dated.append((started or os.path.basename(path), path))
-    return [p for _, p in sorted(dated)]
+    dated = [(_started(p) or os.path.basename(p), p) for p in found]
+    dated.sort()
+
+    if since is None:
+        bpath = os.path.join(data_dir, BASELINE_FILE)
+        if os.path.exists(bpath):
+            since = open(bpath).read().strip() or None
+
+    if since:
+        target = os.path.join(
+            data_dir, f"social_timeline_{since}_analysis.json")
+        cutoff = _started(target)
+        if cutoff:
+            dated = [(d, p) for d, p in dated if d >= cutoff]
+        else:
+            # No manifest for the baseline: fall back to label matching so a
+            # missing timestamp degrades to "this run onward" rather than
+            # silently including everything.
+            labels = [os.path.basename(p) for _, p in dated]
+            key = f"social_timeline_{since}_analysis.json"
+            if key in labels:
+                dated = dated[labels.index(key):]
+    return [p for _, p in dated]
 
 
 def main():
@@ -701,10 +736,26 @@ def main():
     ap.add_argument("--manifest", default=None,
                     help="only meaningful with a single --analysis file")
     ap.add_argument("--data-dir", default="data")
+    ap.add_argument("--since", default=None,
+                    help="run label to start from. Recorded as the baseline so "
+                         "later invocations keep it without repeating the flag.")
+    ap.add_argument("--set-baseline", default=None,
+                    help="record this run label as the baseline and exit")
     ap.add_argument("--out", required=True)
     args = ap.parse_args()
 
-    paths = args.analysis or discover(args.data_dir)
+    if args.set_baseline:
+        with open(os.path.join(args.data_dir, BASELINE_FILE), "w") as fh:
+            fh.write(args.set_baseline)
+        print(f"baseline set to {args.set_baseline}; "
+              f"runs from here forward will be included")
+        return
+
+    if args.since:
+        with open(os.path.join(args.data_dir, BASELINE_FILE), "w") as fh:
+            fh.write(args.since)
+
+    paths = args.analysis or discover(args.data_dir, args.since)
     if not paths:
         raise SystemExit("no analysed runs found")
 

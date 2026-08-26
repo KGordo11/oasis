@@ -75,7 +75,7 @@ from oasis.social_platform.platform import Platform
 from oasis.social_platform.recsys import reset_globals
 from oasis.social_platform.typing import ActionType, RecsysType
 
-from embedding import cosine_matrix, embed, get_embedder
+from embedding import cosine_matrix, embed_cached, get_embedder
 
 # Upstream's recency constants (recsys.py:470-472), named rather than inlined.
 RECENCY_NUMERATOR = 271.8
@@ -265,8 +265,10 @@ class TimelinePlatform(Platform):
                 ages.append(0)
         recency = [self._recency(a) for a in ages]
 
-        user_vecs = embed(profile_texts)
-        post_vecs = embed(contents)
+        # Cached: post text never changes, so re-encoding every post every
+        # round was pure waste and the main source of growing CPU load.
+        user_vecs = embed_cached(profile_texts)
+        post_vecs = embed_cached(contents)
         sims = cosine_matrix(user_vecs, post_vecs)
 
         self._assert_algorithm_ran(sims)

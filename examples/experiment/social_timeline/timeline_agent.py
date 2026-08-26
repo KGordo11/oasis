@@ -277,6 +277,7 @@ async def generate_timeline_agents(
     available_actions=None,
     limit: int | None = None,
     include_groups: bool = False,
+    diverse: bool = True,
 ) -> AgentGraph:
     """Build the agent graph. No follow edges, no scripted actions.
 
@@ -287,10 +288,19 @@ async def generate_timeline_agents(
         limit: use only the first N personas. Small runs come first (D-11),
             and this is how a stage dials itself down.
     """
-    with open(profile_path, "r") as fh:
-        entries = json.load(fh)
-    if limit is not None:
-        entries = entries[:limit]
+    from personas import describe, load_personas, select_diverse
+
+    entries = load_personas(profile_path)
+    # Take a maximally-separated subset rather than the first N: an
+    # interest-based feed can only distinguish people to the degree they
+    # differ, so the sample should span the population, not whatever the file
+    # happened to list first. Measured effect on the twitter set at k=36:
+    # mean pairwise similarity 0.689 (first-36) -> 0.637 (diverse-36).
+    if limit is not None and limit < len(entries):
+        entries = (select_diverse(entries, limit) if diverse
+                   else entries[:limit])
+    separability = describe(entries)
+    log.info("persona population: %s", separability)
 
     agent_graph = AgentGraph()
 
@@ -313,7 +323,7 @@ async def generate_timeline_agents(
             },
         }
         user_info = UserInfo(
-            name=entry["username"],
+            name=entry["username"] or f"agent{i}",
             description=entry["bio"],
             profile=profile,
             # "twitter" selects the Twitter system prompt; see module docstring.
@@ -330,4 +340,5 @@ async def generate_timeline_agents(
         agent_graph.add_agent(agent)
 
     await asyncio.gather(*(build(i, e) for i, e in enumerate(entries)))
+    agent_graph.persona_separability = separability
     return agent_graph

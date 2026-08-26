@@ -137,6 +137,7 @@ async def run(args):
         available_actions=actions,
         limit=args.agents,
         include_groups=not args.no_groups,
+        diverse=not args.no_diverse_personas,
     )
     n_agents = len(list(agent_graph.get_agents()))
     log.info("built %d agents with %d available actions", n_agents,
@@ -185,6 +186,8 @@ async def run(args):
             "refresh_rec_post_count": args.refresh_rec_post_count,
             "following_post_count": args.following_post_count,
             "personas": args.personas,
+            "persona_separability": getattr(
+                agent_graph, "persona_separability", None),
             "prompt_version": PROMPT_VERSION,
             "seed": args.seed,
             "temperature": args.temperature,
@@ -353,6 +356,9 @@ def main():
     p.add_argument("--model", default="llama3.1:8b")
     p.add_argument("--ollama-url", default="http://localhost:11434/v1")
     p.add_argument("--personas", default="data/reddit/user_data_36.json")
+    p.add_argument("--no-diverse-personas", action="store_true",
+                   help="take the first N personas instead of a "
+                        "maximally-separated subset")
     p.add_argument("--seed", type=int, default=0,
                    help="seeds feed exploration and any other Python RNG "
                         "use, so that component is reproducible")

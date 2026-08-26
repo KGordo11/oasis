@@ -55,6 +55,34 @@ def get_embedder():
     return _tokenizer, _model
 
 
+_cache: dict[str, torch.Tensor] = {}
+
+
+def embed_cached(texts: list[str], batch_size: int = 64) -> torch.Tensor:
+    """embed(), but only computes vectors for text not seen before.
+
+    A post's content never changes once written, yet the ranking pass
+    re-embedded every post in existence on every round. By round 12 of a
+    36-agent run that was ~100 unchanged posts re-encoded through a 279M
+    parameter model on CPU, every round -- the reason round time climbed from
+    299s to 640s over a single run, and the bulk of the machine's load.
+
+    Keyed on exact text, so two agents posting identical content share a
+    vector, which is correct: identical text has an identical embedding.
+    """
+    missing = [t for t in dict.fromkeys(texts) if t not in _cache]
+    if missing:
+        vecs = embed(missing, batch_size=batch_size)
+        for t, v in zip(missing, vecs):
+            _cache[t] = v
+    return torch.stack([_cache[t] for t in texts]) if texts \
+        else torch.empty(0, 768)
+
+
+def cache_stats() -> dict:
+    return {"cached_texts": len(_cache)}
+
+
 def embed(texts: list[str], batch_size: int = 64) -> torch.Tensor:
     """Embed texts as mean-pooled last_hidden_state.
 

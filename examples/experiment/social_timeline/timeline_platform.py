@@ -113,6 +113,8 @@ class TimelinePlatform(Platform):
         # best-ranked content (F-17). 0 = pure exploitation, no serendipity.
         self.explore_slots = explore_slots
         self._feed_order = {}
+        # agent_id -> ids surfaced by that agent's own searches
+        self._search_hits = {}
         self._age_scale = (RECENCY_AGE_CLIFF / recency_span_rounds
                            if recency_span_rounds else 1.0)
 
@@ -145,6 +147,7 @@ class TimelinePlatform(Platform):
             "invalid_follow_targets": 0,
             "refresh_errors": 0,
             "empty_feeds": 0,
+            "blind_actions_rejected": 0,
         }
 
     # ---------------------------------------------------------------- tables
@@ -543,6 +546,97 @@ class TimelinePlatform(Platform):
                 "VALUES (?, ?, ?, ?, ?, ?, ?)", rows, commit=True)
             self.stats["exposures_logged"] += len(rows)
 
+    # ------------------------------------------------- informed-action gate
+
+    def _has_seen_post(self, agent_id, post_id) -> bool:
+        self.pl_utils._execute_db_command(
+            "SELECT 1 FROM rec_history WHERE agent_id = ? AND post_id = ? "
+            "LIMIT 1", (agent_id, post_id))
+        return self.db_cursor.fetchone() is not None
+
+    def _knows_author(self, agent_id, author_id) -> bool:
+        self.pl_utils._execute_db_command(
+            "SELECT 1 FROM rec_history WHERE agent_id = ? AND author_id = ? "
+            "LIMIT 1", (agent_id, author_id))
+        return self.db_cursor.fetchone() is not None
+
+    def _informed(self, agent_id, *, post_id=None, author_id=None) -> bool:
+        """Has this agent actually encountered what it is trying to act on?
+
+        Finding F-19. B-10 rejects ids that do not exist, but an 8B model
+        guessing a small integer lands on a VALID agent id most of the time, so
+        that check cannot catch a valid-but-never-seen target. Measured in the
+        first v5 attempt: round 0 logged ZERO exposures and still produced 12
+        follows and 4 likes -- agent 13 "liked" post 2 having never seen it,
+        agent 2 "followed" agent 1 with no exposure to them.
+
+        Those edges carry no information: they are guesses that happened to
+        land on a real id, and they pollute exactly the graph this simulation
+        exists to measure. On a real platform you cannot like a post you have
+        never encountered.
+
+        Anything surfaced by the agent's own search counts as encountered --
+        search exists precisely to reach beyond the feed -- so this gate does
+        not close off discovery, it only rejects acting on pure invention.
+        """
+        if post_id is not None and self._has_seen_post(agent_id, post_id):
+            return True
+        if author_id is not None and self._knows_author(agent_id, author_id):
+            return True
+        found = self._search_hits.get(agent_id) or set()
+        return (post_id in found) or (author_id in found)
+
+    def _reject_blind(self, kind, target):
+        self.stats["blind_actions_rejected"] += 1
+        return {"success": False,
+                "error": (f"You have not seen {kind} {target}. You can only "
+                          f"act on posts and people that appeared in your "
+                          f"feed or in your search results.")}
+
+    async def like_post(self, agent_id: int, post_id: int):
+        if not self._informed(agent_id, post_id=post_id):
+            return self._reject_blind("post", post_id)
+        return await super().like_post(agent_id, post_id)
+
+    async def dislike_post(self, agent_id: int, post_id: int):
+        if not self._informed(agent_id, post_id=post_id):
+            return self._reject_blind("post", post_id)
+        return await super().dislike_post(agent_id, post_id)
+
+    async def repost(self, agent_id: int, post_id: int):
+        if not self._informed(agent_id, post_id=post_id):
+            return self._reject_blind("post", post_id)
+        return await super().repost(agent_id, post_id)
+
+    async def quote_post(self, agent_id: int, quote_message: tuple):
+        post_id = quote_message[0] if quote_message else None
+        if not self._informed(agent_id, post_id=post_id):
+            return self._reject_blind("post", post_id)
+        return await super().quote_post(agent_id, quote_message)
+
+    async def create_comment(self, agent_id: int, comment_message: tuple):
+        post_id = comment_message[0] if comment_message else None
+        if not self._informed(agent_id, post_id=post_id):
+            return self._reject_blind("post", post_id)
+        return await super().create_comment(agent_id, comment_message)
+
+    async def search_posts(self, agent_id: int, query: str):
+        """Search widens what an agent may act on, so its hits are recorded."""
+        result = await super().search_posts(agent_id, query)
+        for p in (result.get("posts") or []) if isinstance(result, dict) else []:
+            pid = p[0] if isinstance(p, (list, tuple)) else p.get("post_id")
+            if pid is not None:
+                self._search_hits.setdefault(agent_id, set()).add(pid)
+        return result
+
+    async def search_user(self, agent_id: int, query: str):
+        result = await super().search_user(agent_id, query)
+        for u in (result.get("users") or []) if isinstance(result, dict) else []:
+            uid = u[0] if isinstance(u, (list, tuple)) else u.get("user_id")
+            if uid is not None:
+                self._search_hits.setdefault(agent_id, set()).add(uid)
+        return result
+
     # --------------------------------------------------- target validation
 
     def _agent_exists(self, agent_id) -> bool:
@@ -569,6 +663,9 @@ class TimelinePlatform(Platform):
             return {"success": False,
                     "error": (f"No user with id {followee_id} exists. Use a "
                               f"followee_id taken from your feed.")}
+        # F-19: a real id is not the same as a known person.
+        if not self._informed(agent_id, author_id=followee_id):
+            return self._reject_blind("anything by user", followee_id)
         return await super().follow(agent_id, followee_id)
 
     async def unfollow(self, agent_id: int, followee_id: int):

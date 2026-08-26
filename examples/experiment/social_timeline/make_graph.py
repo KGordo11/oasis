@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 
 
 HTML = """<title>Agent Network Formation</title>
@@ -155,6 +156,17 @@ HTML = """<title>Agent Network Formation</title>
           border-left:2px solid var(--line); padding-left:14px;
           max-width:72ch; }
   @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
+
+  .runbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .runbar select { font-family:"IBM Plex Mono", monospace; font-size:13px;
+                   background:var(--panel); color:var(--fg);
+                   border:1px solid var(--line); border-radius:6px;
+                   padding:7px 10px; }
+  .runbar label { font-family:"IBM Plex Mono", monospace; font-size:12px;
+                  letter-spacing:.06em; text-transform:uppercase;
+                  color:var(--muted); }
+  .best { color:var(--follow); font-weight:600; }
+  tr.current td { background:var(--panel-2); }
 </style>
 
 <div class="wrap">
@@ -163,6 +175,12 @@ HTML = """<title>Agent Network Formation</title>
     <h1>Agent Network Formation</h1>
     <p class="lede" id="subtitle"></p>
   </header>
+
+  <div class="runbar">
+    <label for="runSel">Run</label>
+    <select id="runSel"></select>
+    <span class="lede" id="runMeta"></span>
+  </div>
 
   <div class="stats" id="stats"></div>
 
@@ -186,11 +204,25 @@ HTML = """<title>Agent Network Formation</title>
     <span><b>Node size</b> &mdash; followers</span>
   </div>
 
+  <div class="scroll">
+    <table id="compareTable">
+      <caption>All runs &mdash; every run is kept, so changes can be traced</caption>
+      <thead><tr>
+        <th>Run</th><th>Personas</th><th class="num">Agents</th>
+        <th class="num">Rounds</th><th class="num">Act rate</th>
+        <th class="num">Act/turn</th><th class="num">Malformed</th>
+        <th class="num">Follows</th><th class="num">Posts</th>
+        <th class="num">Exposures</th><th class="num">Separability</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
   <section id="algoBox" class="algo"></section>
 
   <div class="scroll">
     <table id="agentTable">
-      <caption>Per-agent detail</caption>
+      <caption>Per-agent detail &mdash; selected run</caption>
       <thead><tr>
         <th>Agent</th><th class="num">Actions</th><th class="num">Posts</th>
         <th class="num">Saw</th><th class="num">Engaged</th>
@@ -205,8 +237,7 @@ HTML = """<title>Agent Network Formation</title>
     <table id="propTable">
       <caption>Propagation &mdash; repeated exposure preceding interaction</caption>
       <thead><tr>
-        <th>Actor</th><th>Saw</th><th class="num">Times</th>
-        <th>Then did</th>
+        <th>Actor</th><th>Saw</th><th class="num">Times</th><th>Then did</th>
       </tr></thead>
       <tbody></tbody>
     </table>
@@ -227,62 +258,134 @@ HTML = """<title>Agent Network Formation</title>
 </div>
 
 <script>
-const DATA = __DATA__;
-
-const svg = document.getElementById('graph');
+const ALL = __DATA__;
 const NS = 'http://www.w3.org/2000/svg';
-
-const agents = Object.values(DATA.agents);
-const byId = {};
-agents.forEach(a => byId[a.agent_id] = a);
-
-// Interaction counts between pairs, used for edge thickness.
-const inter = {};
-for (const [key, counts] of Object.entries(DATA.interaction_pairs || {})) {
-  inter[key] = Object.values(counts).reduce((s, n) => s + n, 0);
-}
-const exposure = DATA.exposure_pairs || {};
-
-const rounds = Object.keys(DATA.graph_by_round || {}).map(Number).sort((a,b)=>a-b);
-const maxRound = rounds.length ? Math.max(...rounds) : 0;
-
+const svg = document.getElementById('graph');
 const slider = document.getElementById('round');
-slider.max = maxRound;
-slider.value = maxRound;
-
-const followEdgesFinal = ((DATA.graph_by_round || {})[maxRound] || []).length;
-
-document.getElementById('subtitle').textContent =
-  `The social graph starts with zero edges. Every connection below was created ` +
-  `by an agent choosing to follow someone, over ${DATA.n_rounds} rounds of an ` +
-  `interest-based feed. Scrub the round slider to watch it assemble.`;
-
-const STATS = [
-  ['Agents', DATA.n_agents],
-  ['Rounds', DATA.n_rounds],
-  ['Posts', DATA.totals.posts],
-  ['Actions', DATA.totals.actions_chosen],
-  ['Exposures', DATA.totals.exposure_events],
-  ['Follows', followEdgesFinal],
-];
-document.getElementById('stats').innerHTML = STATS.map(
-  ([k, v]) => `<div class="stat"><span class="v">${v}</span>` +
-              `<span class="k">${k}</span></div>`).join('');
-
-// Deterministic starting positions on a circle, then relaxed by the layout.
 const W = 1000, H = 560;
-const nodes = agents.map((a, i) => {
-  const t = (i / agents.length) * Math.PI * 2;
-  return { id: a.agent_id, name: a.username || ('agent ' + a.agent_id),
-           x: W/2 + Math.cos(t) * 200, y: H/2 + Math.sin(t) * 200,
-           vx: 0, vy: 0 };
-});
-const nodeById = {};
-nodes.forEach(n => nodeById[n.id] = n);
+
+let DATA, agents, byId, inter, exposure, nodes, nodeById, maxRound;
+let focusId = null, lastRound = 0;
+
+// ---------- run selector ----------
+const sel = document.getElementById('runSel');
+sel.innerHTML = ALL.order.map(k =>
+  `<option value="${k}">${k}</option>`).join('');
+sel.value = ALL.order[ALL.order.length - 1];
+sel.addEventListener('change', () => loadRun(sel.value));
+
+function fmt(x, d) { return (x === null || x === undefined) ? '-' :
+  (typeof x === 'number' ? x.toFixed(d === undefined ? 0 : d) : x); }
+
+// ---------- cross-run comparison ----------
+(function comparison() {
+  const rows = ALL.order.map(k => ALL.runs[k]);
+  const best = {};
+  ['action_rate','actions_per_turn','follow_edges','posts','exposures'].forEach(m => {
+    best[m] = Math.max(...rows.map(r => r.summary[m] || 0));
+  });
+  best.malformed = Math.min(...rows.map(r =>
+    r.summary.malformed === null ? Infinity : r.summary.malformed));
+  document.querySelector('#compareTable tbody').innerHTML = rows.map(r => {
+    const s = r.summary;
+    const hi = (v, m, d) => `<td class="num${v === best[m] ? ' best' : ''}">${fmt(v, d)}</td>`;
+    return `<tr data-run="${r.label}"><td class="who">${r.label}</td>` +
+      `<td>${s.persona_source || '-'}</td>` +
+      `<td class="num">${s.agents}</td><td class="num">${s.rounds}</td>` +
+      hi(s.action_rate, 'action_rate', 3) +
+      hi(s.actions_per_turn, 'actions_per_turn', 2) +
+      hi(s.malformed, 'malformed') +
+      hi(s.follow_edges, 'follow_edges') +
+      hi(s.posts, 'posts') +
+      hi(s.exposures, 'exposures') +
+      `<td class="num">${fmt(s.persona_similarity, 3)}</td></tr>`;
+  }).join('');
+})();
+
+// ---------- per-run load ----------
+function loadRun(label) {
+  DATA = ALL.runs[label];
+  focusId = null;
+  agents = DATA.agents;
+  byId = {};
+  Object.values(agents).forEach(a => byId[a.agent_id] = a);
+
+  inter = {};
+  for (const [k, counts] of Object.entries(DATA.interaction_pairs || {}))
+    inter[k] = Object.values(counts).reduce((s, n) => s + n, 0);
+  exposure = DATA.exposure_pairs || {};
+
+  const rounds = Object.keys(DATA.graph_by_round || {}).map(Number);
+  maxRound = rounds.length ? Math.max(...rounds) : 0;
+  slider.max = maxRound;
+  slider.value = maxRound;
+
+  nodes = Object.values(agents).map((a, i, arr) => {
+    const t = (i / arr.length) * Math.PI * 2;
+    return { id: a.agent_id, name: a.username || ('agent' + a.agent_id),
+             x: W/2 + Math.cos(t) * 200, y: H/2 + Math.sin(t) * 200,
+             vx: 0, vy: 0 };
+  });
+  nodeById = {};
+  nodes.forEach(n => nodeById[n.id] = n);
+
+  const s = DATA.summary;
+  document.getElementById('subtitle').textContent =
+    `The social graph starts with zero edges. Every connection was created by ` +
+    `an agent choosing to follow someone, over ${s.rounds} rounds of an ` +
+    `interest-based feed. Scrub the round slider to watch it assemble.`;
+  document.getElementById('runMeta').textContent =
+    `${s.agents} agents | ${s.rounds} rounds | prompt v${s.prompt_version || '?'}` +
+    ` | ${s.persona_source || 'personas ?'}` +
+    (s.minutes ? ` | ${s.minutes} min` : '');
+
+  document.getElementById('stats').innerHTML = [
+    ['Agents', s.agents], ['Rounds', s.rounds], ['Posts', s.posts],
+    ['Actions', s.actions], ['Exposures', s.exposures],
+    ['Follows', s.follow_edges],
+  ].map(([k, v]) => `<div class="stat"><span class="v">${v}</span>` +
+                    `<span class="k">${k}</span></div>`).join('');
+
+  document.querySelectorAll('#compareTable tbody tr').forEach(tr =>
+    tr.classList.toggle('current', tr.dataset.run === label));
+
+  algoBox(); agentTable(); propTable(); exposureTable(); footnote();
+  render(maxRound);
+}
+
+// ---------- layout ----------
+function simulate(edges) {
+  for (let step = 0; step < 320; step++) {
+    for (const n of nodes) { n.vx *= 0.82; n.vy *= 0.82; }
+    for (let i = 0; i < nodes.length; i++)
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = b.x - a.x, dy = b.y - a.y;
+        const d2 = dx*dx + dy*dy || 1, d = Math.sqrt(d2);
+        const rep = (7000 + 150 * nodes.length) / d2;
+        const ux = dx/d, uy = dy/d;
+        a.vx -= ux*rep; a.vy -= uy*rep; b.vx += ux*rep; b.vy += uy*rep;
+      }
+    for (const e of edges) {
+      const a = nodeById[e.source], b = nodeById[e.target];
+      if (!a || !b) continue;
+      const dx = b.x - a.x, dy = b.y - a.y;
+      const d = Math.sqrt(dx*dx + dy*dy) || 1;
+      const f = (d - 140) * 0.012, ux = dx/d, uy = dy/d;
+      a.vx += ux*f; a.vy += uy*f; b.vx -= ux*f; b.vy -= uy*f;
+    }
+    for (const n of nodes) {
+      const pull = 0.004 + 0.00012 * nodes.length;
+      n.vx += (W/2 - n.x) * pull; n.vy += (H/2 - n.y) * pull;
+      n.x = Math.max(70, Math.min(W-70, n.x + n.vx));
+      n.y = Math.max(40, Math.min(H-40, n.y + n.vy));
+    }
+  }
+}
 
 function edgesAt(round) {
-  const raw = (DATA.graph_by_round || {})[round] || [];
-  return raw.map(([a, b]) => ({ source: a, target: b }));
+  return ((DATA.graph_by_round || {})[round] || [])
+    .map(([a, b]) => ({ source: a, target: b }));
 }
 
 function interactionEdges() {
@@ -290,9 +393,6 @@ function interactionEdges() {
     const [a, b] = key.split('->').map(Number);
     return { source: a, target: b, weight: n };
   }).filter(e => nodeById[e.source] && nodeById[e.target]);
-  // Above ~60 pairs every node connects to every other and the picture turns
-  // into a hairball that shows nothing. Drop one-off interactions and keep the
-  // repeated ones, which are what actually constitute a relationship.
   const DENSE = 60;
   if (all.length <= DENSE) return all;
   const repeated = all.filter(e => e.weight > 1);
@@ -300,93 +400,37 @@ function interactionEdges() {
        : all.sort((a, b) => b.weight - a.weight).slice(0, 40);
 }
 
-function simulate(edges) {
-  // Small force-directed relaxation. Deliberately simple and dependency-free.
-  for (let step = 0; step < 320; step++) {
-    for (const n of nodes) { n.vx *= 0.82; n.vy *= 0.82; }
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        const a = nodes[i], b = nodes[j];
-        let dx = b.x - a.x, dy = b.y - a.y;
-        let d2 = dx*dx + dy*dy || 1;
-        const rep = (7000 + 150 * nodes.length) / d2;
-        const d = Math.sqrt(d2);
-        const ux = dx/d, uy = dy/d;
-        a.vx -= ux*rep; a.vy -= uy*rep;
-        b.vx += ux*rep; b.vy += uy*rep;
-      }
-    }
-    for (const e of edges) {
-      const a = nodeById[e.source], b = nodeById[e.target];
-      if (!a || !b) continue;
-      const dx = b.x - a.x, dy = b.y - a.y;
-      const d = Math.sqrt(dx*dx + dy*dy) || 1;
-      const f = (d - 140) * 0.012;
-      const ux = dx/d, uy = dy/d;
-      a.vx += ux*f; a.vy += uy*f;
-      b.vx -= ux*f; b.vy -= uy*f;
-    }
-    for (const n of nodes) {
-      // Centring must outweigh repulsion at scale, or 36 nodes press
-      // outward and pin flat against the viewport edges.
-      const pull = 0.004 + 0.00012 * nodes.length;
-      n.vx += (W/2 - n.x) * pull;
-      n.vy += (H/2 - n.y) * pull;
-      n.x = Math.max(70, Math.min(W-70, n.x + n.vx));
-      n.y = Math.max(40, Math.min(H-40, n.y + n.vy));
-    }
-  }
-}
-
-let focusId = null;       // clicked node: show only its edges
-let lastRound = 0;
-
 function render(round) {
   lastRound = round;
   const follows = edgesAt(round);
   const interactions = interactionEdges();
   simulate(follows.length ? follows : interactions);
 
-  const followerCount = {};
-  follows.forEach(e => followerCount[e.target] = (followerCount[e.target]||0)+1);
+  const fc = {};
+  follows.forEach(e => fc[e.target] = (fc[e.target] || 0) + 1);
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML = '';
-
-  // Arrowheads. A follow is directional -- "A follows B" is not the same fact
-  // as "B follows A" -- and without a head the diagram cannot say which.
   const defs = document.createElementNS(NS, 'defs');
-  defs.innerHTML =
-    ['follow','interact','dim'].map(k => {
-      const col = k === 'dim' ? 'var(--line)' : `var(--${k})`;
-      return `<marker id="ar-${k}" viewBox="0 0 10 10" refX="9" refY="5"
-                markerWidth="5" markerHeight="5" orient="auto-start-reverse">
-                <path d="M0,0 L10,5 L0,10 z" fill="${col}"/></marker>`;
-    }).join('');
+  defs.innerHTML = ['follow','interact','dim'].map(k => {
+    const col = k === 'dim' ? 'var(--line)' : `var(--${k})`;
+    return `<marker id="ar-${k}" viewBox="0 0 10 10" refX="9" refY="5"
+              markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="${col}"/></marker>`;
+  }).join('');
   svg.appendChild(defs);
 
-  // Which edges are in focus. Null focus = everything visible.
-  const rel = e => focusId === null ||
-                   e.source === focusId || e.target === focusId;
   const anyFocus = focusId !== null;
-
-  function edgePath(a, b, curve) {
-    // Curve edges apart so two nodes with traffic both ways stay separable,
-    // and so long edges do not lie on top of intervening nodes.
-    const dx = b.x - a.x, dy = b.y - a.y;
-    const d = Math.sqrt(dx*dx + dy*dy) || 1;
-    const mx = (a.x + b.x) / 2 + (-dy/d) * curve;
-    const my = (a.y + b.y) / 2 + (dx/d) * curve;
-    // Stop short of the target so the arrowhead sits outside the circle.
-    const r = 9 + 3 * Math.sqrt(followerCount[b.id] || 0);
-    const ex = b.x - (dx/d) * r, ey = b.y - (dy/d) * r;
-    return `M${a.x},${a.y} Q${mx},${my} ${ex},${ey}`;
-  }
+  const rel = e => !anyFocus || e.source === focusId || e.target === focusId;
 
   function drawEdge(a, b, kind, width, curve) {
     const on = rel({source: a.id, target: b.id});
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const d = Math.sqrt(dx*dx + dy*dy) || 1;
+    const mx = (a.x + b.x)/2 + (-dy/d)*curve, my = (a.y + b.y)/2 + (dx/d)*curve;
+    const r = 9 + 3*Math.sqrt(fc[b.id] || 0);
     const path = document.createElementNS(NS, 'path');
-    path.setAttribute('d', edgePath(a, b, curve));
+    path.setAttribute('d', `M${a.x},${a.y} Q${mx},${my} ${b.x-(dx/d)*r},${b.y-(dy/d)*r}`);
     path.setAttribute('fill', 'none');
     path.setAttribute('stroke', on ? `var(--${kind})` : 'var(--line)');
     path.setAttribute('stroke-width', on ? width : Math.min(width, 1));
@@ -406,54 +450,40 @@ function render(round) {
     if (a && b) drawEdge(a, b, 'follow', 1.7, -26);
   }
 
-  // Every node is labelled. An unlabelled dot tells the reader nothing.
   for (const n of nodes) {
-    const inFocus = focusId === null || n.id === focusId ||
-      follows.some(e => (e.source===focusId && e.target===n.id) ||
-                        (e.target===focusId && e.source===n.id)) ||
-      interactions.some(e => (e.source===focusId && e.target===n.id) ||
-                             (e.target===focusId && e.source===n.id));
-
+    const near = !anyFocus || n.id === focusId ||
+      follows.some(e => (e.source===focusId && e.target===n.id) || (e.target===focusId && e.source===n.id)) ||
+      interactions.some(e => (e.source===focusId && e.target===n.id) || (e.target===focusId && e.source===n.id));
     const g = document.createElementNS(NS, 'g');
-    g.setAttribute('class', 'node');
-    g.style.cursor = 'pointer';
-
-    const r = 6 + 3 * Math.sqrt(followerCount[n.id] || 0);
+    g.setAttribute('class', 'node'); g.style.cursor = 'pointer';
+    const r = 6 + 3*Math.sqrt(fc[n.id] || 0);
     const c = document.createElementNS(NS, 'circle');
-    c.setAttribute('cx', n.x); c.setAttribute('cy', n.y);
-    c.setAttribute('r', r);
+    c.setAttribute('cx', n.x); c.setAttribute('cy', n.y); c.setAttribute('r', r);
     c.setAttribute('fill', n.id === focusId ? 'var(--interact)' : 'var(--node)');
-    c.setAttribute('opacity', inFocus ? 1 : 0.25);
+    c.setAttribute('opacity', near ? 1 : 0.25);
     const a = byId[n.id] || {};
     c.innerHTML = `<title>${n.name}
 actions: ${a.total_actions ?? 0}   posts: ${a.n_posts_authored ?? 0}
 saw ${a.distinct_posts_seen ?? 0} distinct posts
-followers here: ${followerCount[n.id] || 0}
+followers here: ${fc[n.id] || 0}
 click to isolate this person's connections</title>`;
     g.appendChild(c);
-
     const t = document.createElementNS(NS, 'text');
     t.setAttribute('x', n.x); t.setAttribute('y', n.y - r - 5);
     t.setAttribute('text-anchor', 'middle');
-    t.setAttribute('opacity', inFocus ? 1 : 0.22);
-    if (n.id === focusId) t.setAttribute('fill', 'var(--fg)');
-    // A stroke behind the glyphs keeps labels legible over crossing edges.
+    t.setAttribute('opacity', near ? 1 : 0.22);
     t.setAttribute('paint-order', 'stroke');
-    t.setAttribute('stroke', 'var(--panel)');
-    t.setAttribute('stroke-width', '3');
-    t.textContent = n.name;
+    t.setAttribute('stroke', 'var(--panel)'); t.setAttribute('stroke-width', '3');
+    t.textContent = n.name.length > 16 ? n.name.slice(0,15) + '...' : n.name;
     g.appendChild(t);
-
     g.addEventListener('click', () => {
-      focusId = (focusId === n.id) ? null : n.id;
-      render(lastRound);
+      focusId = (focusId === n.id) ? null : n.id; render(lastRound);
     });
     svg.appendChild(g);
   }
 
-  // Say who is in focus and exactly where their lines go.
   const fb = document.getElementById('focusBox');
-  if (focusId === null) {
+  if (!anyFocus) {
     fb.textContent = 'Click any person to isolate their connections. ' +
       'Arrows point from follower to the person followed.';
   } else {
@@ -466,8 +496,7 @@ click to isolate this person's connections</title>`;
       .filter(([k]) => Number(k.split('->')[0]) === focusId)
       .map(([k, v]) => `${(byId[Number(k.split('->')[1])]||{}).username}` +
         ` (${Object.entries(v).map(([x,y])=>x+'x'+y).join(', ')})`);
-    fb.innerHTML =
-      `<b>${me}</b> &mdash; follows: ${outF.join(', ') || 'nobody'}` +
+    fb.innerHTML = `<b>${me}</b> &mdash; follows: ${outF.join(', ') || 'nobody'}` +
       ` &middot; followed by: ${inF.join(', ') || 'nobody'}` +
       (acted.length ? `<br>acted on: ${acted.join('; ')}` : '') +
       `<br><i>click again to clear</i>`;
@@ -478,169 +507,224 @@ click to isolate this person's connections</title>`;
   document.getElementById('pairCount').textContent = interactions.length;
 }
 
-const tbody = document.querySelector('#exposureTable tbody');
-const rows = Object.entries(exposure).sort((a,b) => b[1]-a[1]).slice(0, 40);
-if (!rows.length) {
-  tbody.innerHTML = '<tr><td colspan="4">No exposures recorded.</td></tr>';
-} else {
-  const maxSeen = Math.max(...rows.map(r => r[1]));
-  tbody.innerHTML = rows.map(([key, n]) => {
-    const [v, a] = key.split('->');
-    const vn = (byId[v]||{}).username || ('agent ' + v);
-    const an = (byId[a]||{}).username || ('agent ' + a);
-    const acts = inter[key] || 0;
-    const w = Math.max(3, Math.round(46 * (n / maxSeen)));
-    return `<tr><td class="who">${vn}</td><td class="who">${an}</td>` +
-           `<td class="num"><span class="bar-cell">` +
-           `<span class="minibar" style="width:${w}px"></span>${n}</span></td>` +
-           `<td class="num">${acts || '&ndash;'}</td></tr>`;
-  }).join('');
-}
-
-// ---- algorithm statement -------------------------------------------------
-// The brief required the algorithm to be stated explicitly and specifically,
-// so it is rendered from the run manifest rather than described in prose.
-const A = DATA.algorithm || {}, C = DATA.config || {};
-if (A.name) {
-  const dev = (A.deviations_from_upstream || [])
-    .map(d => `<li>${d}</li>`).join('');
-  document.getElementById('algoBox').innerHTML =
-    `<h2>Algorithm</h2>` +
-    `<dl>` +
+// ---------- tables ----------
+function algoBox() {
+  const A = DATA.algorithm || {}, C = DATA.config || {};
+  const box = document.getElementById('algoBox');
+  if (!A.name) { box.innerHTML = ''; return; }
+  const dev = (A.deviations_from_upstream || []).map(d => `<li>${d}</li>`).join('');
+  box.innerHTML = `<h2>Algorithm &mdash; ${DATA.label}</h2><dl>` +
     `<dt>Name</dt><dd>${A.name}</dd>` +
     `<dt>Score</dt><dd><code>${A.formula || ''}</code></dd>` +
     `<dt>Embedding</dt><dd>${A.embedding || ''}</dd>` +
-    `<dt>Feed</dt><dd>${C.refresh_rec_post_count ?? '?'} algorithmic posts ` +
-    `+ ${C.following_post_count ?? '?'} from people you follow, ranked from ` +
-    `a candidate pool of ${C.max_rec_post_len ?? '?'}</dd>` +
-    `<dt>Model</dt><dd>${C.model || ''} &middot; ` +
-    `${C.n_actions ?? '?'} available actions</dd>` +
-    `<dt>Start</dt><dd>${A.initial_follow_edges ?? 0} follow edges &mdash; ` +
-    `the network is not seeded</dd>` +
-    `</dl>` +
-    (dev ? `<div><strong>Stated deviations from upstream:</strong>` +
-           `<ul>${dev}</ul></div>` : '');
-} else {
-  document.getElementById('algoBox').remove();
+    `<dt>Feed</dt><dd>${C.refresh_rec_post_count ?? '?'} algorithmic posts + ` +
+    `${C.following_post_count ?? '?'} from people you follow, ranked from a pool ` +
+    `of ${C.max_rec_post_len ?? '?'}` +
+    (A.explore_slots !== undefined ? `, ${A.explore_slots} slot(s) kept for exploration` : '') +
+    `</dd><dt>Model</dt><dd>${C.model || ''} &middot; ${C.n_actions ?? '?'} actions` +
+    (C.temperature !== undefined ? ` &middot; temp ${C.temperature}` : '') +
+    (C.seed !== undefined ? ` &middot; seed ${C.seed}` : '') + `</dd>` +
+    `<dt>Personas</dt><dd>${DATA.summary.persona_source || '?'}` +
+    (DATA.summary.persona_similarity !== null && DATA.summary.persona_similarity !== undefined
+      ? ` &middot; mean pairwise similarity ${DATA.summary.persona_similarity}` +
+        ` (lower = more distinguishable)` : '') + `</dd>` +
+    `<dt>Start</dt><dd>${A.initial_follow_edges ?? 0} follow edges &mdash; not seeded</dd>` +
+    `</dl>` + (dev ? `<div><strong>Stated deviations from upstream:</strong><ul>${dev}</ul></div>` : '');
 }
 
-// ---- per-agent table -----------------------------------------------------
-const agentRows = Object.values(DATA.agents)
-  .sort((a, b) => (b.total_actions || 0) - (a.total_actions || 0));
-document.querySelector('#agentTable tbody').innerHTML = agentRows.map(a => {
-  const mix = Object.entries(a.action_counts || {})
-    .sort((x, y) => y[1] - x[1])
-    .map(([k, v]) => `${k}&times;${v}`).join(', ') || '&ndash;';
-  const eng = a.engagement_rate == null ? '&ndash;'
-              : (a.engagement_rate * 100).toFixed(0) + '%';
-  return `<tr><td class="who">${a.username}</td>` +
-    `<td class="num">${a.total_actions ?? 0}</td>` +
-    `<td class="num">${a.n_posts_authored ?? 0}</td>` +
-    `<td class="num">${a.distinct_posts_seen ?? 0}</td>` +
-    `<td class="num">${eng}</td>` +
-    `<td class="num">${(a.following || []).length}</td>` +
-    `<td class="num">${(a.followers || []).length}</td>` +
-    `<td class="mix">${mix}</td></tr>`;
-}).join('');
+function agentTable() {
+  const rows = Object.values(agents)
+    .sort((a, b) => (b.total_actions || 0) - (a.total_actions || 0));
+  document.querySelector('#agentTable tbody').innerHTML = rows.map(a => {
+    const mix = Object.entries(a.action_counts || {}).sort((x, y) => y[1]-x[1])
+      .map(([k, v]) => `${k}&times;${v}`).join(', ') || '&ndash;';
+    const eng = a.engagement_rate == null ? '&ndash;'
+      : (a.engagement_rate * 100).toFixed(0) + '%';
+    return `<tr><td class="who">${a.username}</td>` +
+      `<td class="num">${a.total_actions ?? 0}</td>` +
+      `<td class="num">${a.n_posts_authored ?? 0}</td>` +
+      `<td class="num">${a.distinct_posts_seen ?? 0}</td>` +
+      `<td class="num">${eng}</td>` +
+      `<td class="num">${(a.following || []).length}</td>` +
+      `<td class="num">${(a.followers || []).length}</td>` +
+      `<td class="mix">${mix}</td></tr>`;
+  }).join('');
+}
 
-// ---- propagation ---------------------------------------------------------
-const propBody = document.querySelector('#propTable tbody');
-const prop = DATA.propagation || [];
-if (!prop.length) {
-  propBody.innerHTML =
-    '<tr><td colspan="4">No exposure-then-interaction pairs recorded.</td></tr>';
-} else {
-  propBody.innerHTML = prop.map(p => {
+function propTable() {
+  const body = document.querySelector('#propTable tbody');
+  const prop = DATA.propagation || [];
+  body.innerHTML = prop.length ? prop.map(p => {
     const did = Object.entries(p.interactions || {})
       .map(([k, v]) => `${k}&times;${v}`).join(', ');
     return `<tr><td class="who">${(byId[p.actor]||{}).username || p.actor}</td>` +
       `<td class="who">${(byId[p.target]||{}).username || p.target}</td>` +
       `<td class="num">${p.times_actor_saw_target}</td>` +
       `<td class="mix">${did}</td></tr>`;
+  }).join('') : '<tr><td colspan="4">No exposure-then-interaction pairs.</td></tr>';
+}
+
+function exposureTable() {
+  const tbody = document.querySelector('#exposureTable tbody');
+  const rows = Object.entries(exposure).sort((a, b) => b[1]-a[1]).slice(0, 40);
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="4">No exposures recorded.</td></tr>';
+    return;
+  }
+  const maxSeen = Math.max(...rows.map(r => r[1]));
+  tbody.innerHTML = rows.map(([key, n]) => {
+    const [v, a] = key.split('->');
+    const acts = inter[key] || 0;
+    const w = Math.max(3, Math.round(46 * (n / maxSeen)));
+    return `<tr><td class="who">${(byId[v]||{}).username || ('agent'+v)}</td>` +
+      `<td class="who">${(byId[a]||{}).username || ('agent'+a)}</td>` +
+      `<td class="num"><span class="bar-cell">` +
+      `<span class="minibar" style="width:${w}px"></span>${n}</span></td>` +
+      `<td class="num">${acts || '&ndash;'}</td></tr>`;
   }).join('');
 }
 
-// Say plainly what the diagram is not showing. Silently dropping edges would
-// let a filtered picture pass for the whole one.
-const totalPairs = Object.keys(inter).length;
-const shownPairs = interactionEdges().length;
-const filterNote = shownPairs < totalPairs
-  ? ` The diagram draws ${shownPairs} of ${totalPairs} interacting pairs: at ` +
-    `this density nearly every node touches every other, so only repeated ` +
-    `interactions are drawn. The table below is unfiltered.`
-  : '';
-
-document.getElementById('footnote').textContent =
-  'The follow graph starts empty by design: no relationships are seeded, so ' +
-  'every edge shown was created by an agent choosing to follow someone. ' +
-  '"Times seen" counts exposure events, not distinct posts. Seeing the ' +
-  'same author repeatedly is the mechanism that drives discovery.' +
-  filterNote;
+function footnote() {
+  const totalPairs = Object.keys(inter).length;
+  const shown = interactionEdges().length;
+  document.getElementById('footnote').textContent =
+    'The follow graph starts empty by design: no relationships are seeded, so ' +
+    'every edge shown was created by an agent choosing to follow someone. ' +
+    '"Times seen" counts exposure events, not distinct posts. Seeing the same ' +
+    'author repeatedly is the mechanism that drives discovery.' +
+    (shown < totalPairs
+      ? ` The diagram draws ${shown} of ${totalPairs} interacting pairs: at this ` +
+        `density nearly every node touches every other, so only repeated ` +
+        `interactions are drawn. The tables are unfiltered.` : '');
+}
 
 slider.addEventListener('input', e => render(Number(e.target.value)));
-render(maxRound);
+loadRun(sel.value);
 </script>
 """
 
+PER_AGENT = ("agent_id", "username", "total_actions", "n_posts_authored",
+             "distinct_posts_seen", "exposure_events", "engagement_rate",
+             "action_counts", "following", "followers", "exposure_by_source")
 
-def main():
-    p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--analysis", required=True)
-    p.add_argument("--manifest", default=None,
-                   help="run manifest JSON; supplies the algorithm statement "
-                        "and run config. Defaults to the sibling <label>.json")
-    p.add_argument("--out", required=True)
-    args = p.parse_args()
 
-    with open(args.analysis) as fh:
+def project(analysis_path, manifest_path=None):
+    """Reduce one run's analysis + manifest to what the page renders.
+
+    The analysis JSON carries the full event log, exposure ledger, post bodies
+    and comments -- thousands of rows -- and the page reads none of them.
+    Projecting explicitly keeps the artifact small even with many runs bundled.
+    """
+    with open(analysis_path) as fh:
         full = json.load(fh)
 
-    # The algorithm statement and run config live in the run manifest, not the
-    # analysis output. Default to the manifest sitting beside the database.
-    manifest_path = args.manifest or args.analysis.replace(
-        "_analysis.json", ".json")
+    manifest = {}
+    mp = manifest_path or analysis_path.replace("_analysis.json", ".json")
     try:
-        with open(manifest_path) as fh:
+        with open(mp) as fh:
             manifest = json.load(fh)
-        full["algorithm"] = manifest.get("algorithm")
-        full["config"] = manifest.get("config")
-        full.setdefault("tool_call_errors", manifest.get("tool_call_errors"))
     except (OSError, json.JSONDecodeError):
         pass
 
-    # Keep the payload lean. The analysis JSON carries the complete event log,
-    # exposure ledger, post bodies and comments -- thousands of rows at full
-    # scale -- but this page reads none of them. Embedding the lot would bloat
-    # the artifact for no benefit, so build an explicit projection of exactly
-    # what the page uses rather than deleting keys one by one and hoping.
-    PER_AGENT = ("agent_id", "username", "total_actions", "n_posts_authored",
-                 "distinct_posts_seen", "exposure_events", "engagement_rate",
-                 "action_counts", "following", "followers",
-                 "exposure_by_source")
-    data = {
-        "n_agents": full.get("n_agents"),
-        "n_rounds": full.get("n_rounds"),
-        "totals": full.get("totals") or {},
+    label = os.path.basename(analysis_path) \
+        .replace("social_timeline_", "").replace("_analysis.json", "")
+    cfg = manifest.get("config", {}) or {}
+    totals = full.get("totals", {}) or {}
+    turns = manifest.get("turns_without_action", {}) or {}
+    tce = full.get("tool_call_errors") or {}
+    sep = cfg.get("persona_separability") or {}
+
+    n_turns = turns.get("agent_turns_total") or 0
+    actions = totals.get("actions_chosen", 0)
+
+    summary = {
+        "agents": full.get("n_agents"),
+        "rounds": full.get("n_rounds"),
+        "posts": totals.get("posts", 0),
+        "actions": actions,
+        "exposures": totals.get("exposure_events", 0),
+        "follow_edges": totals.get("follow_edges", 0),
+        "action_rate": turns.get("action_rate"),
+        "actions_per_turn": round(actions / n_turns, 2) if n_turns else None,
+        "malformed": tce.get("total"),
+        "prompt_version": cfg.get("prompt_version"),
+        "persona_source": (os.path.basename(cfg.get("personas", "")) or None),
+        "persona_similarity": sep.get("mean_similarity"),
+        "minutes": (round(manifest["total_seconds"] / 60)
+                    if manifest.get("total_seconds") else None),
+    }
+
+    return label, {
+        "label": label,
+        "summary": summary,
+        "config": cfg,
+        "algorithm": manifest.get("algorithm") or {},
         "graph_by_round": full.get("graph_by_round", {}),
         "interaction_pairs": full.get("interaction_pairs", {}),
-        # Only the strongest pairs are rendered; the table shows the top 40.
         "exposure_pairs": dict(sorted(
             (full.get("exposure_pairs") or {}).items(),
             key=lambda kv: -kv[1])[:120]),
-        "agents": {
-            k: {f: v.get(f) for f in PER_AGENT}
-            for k, v in (full.get("agents") or {}).items()
-        },
+        "agents": {k: {f: v.get(f) for f in PER_AGENT}
+                   for k, v in (full.get("agents") or {}).items()},
         "propagation": (full.get("propagation_candidates") or [])[:20],
-        "tool_call_errors": full.get("tool_call_errors"),
-        "algorithm": full.get("algorithm"),
-        "config": full.get("config"),
     }
 
-    html = HTML.replace("__DATA__", json.dumps(data, default=str))
+
+def discover(data_dir="data"):
+    """Every analysed run in the directory, oldest first.
+
+    Runs accumulate: the artifact keeps the whole history so a change in the
+    simulation can be traced to the run that introduced it, rather than each
+    publish overwriting the last.
+    """
+    import glob
+    found = sorted(glob.glob(os.path.join(
+        data_dir, "social_timeline_*_analysis.json")))
+    dated = []
+    for path in found:
+        started = ""
+        mp = path.replace("_analysis.json", ".json")
+        try:
+            with open(mp) as fh:
+                started = json.load(fh).get("started_at", "")
+        except (OSError, json.JSONDecodeError):
+            pass
+        dated.append((started or os.path.basename(path), path))
+    return [p for _, p in sorted(dated)]
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__)
+    ap.add_argument("--analysis", nargs="*", default=None,
+                    help="one or more *_analysis.json files. Omit to include "
+                         "every analysed run found in --data-dir.")
+    ap.add_argument("--manifest", default=None,
+                    help="only meaningful with a single --analysis file")
+    ap.add_argument("--data-dir", default="data")
+    ap.add_argument("--out", required=True)
+    args = ap.parse_args()
+
+    paths = args.analysis or discover(args.data_dir)
+    if not paths:
+        raise SystemExit("no analysed runs found")
+
+    runs, order = {}, []
+    for path in paths:
+        try:
+            label, payload = project(
+                path, args.manifest if len(paths) == 1 else None)
+        except (OSError, json.JSONDecodeError, KeyError) as exc:
+            print(f"  skipped {os.path.basename(path)}: {exc}")
+            continue
+        runs[label] = payload
+        order.append(label)
+
+    html = HTML.replace("__DATA__", json.dumps(
+        {"order": order, "runs": runs}, default=str))
     with open(args.out, "w") as fh:
         fh.write(html)
-    print(f"wrote {args.out} ({len(html)/1024:.0f} KB)")
+    print(f"wrote {args.out} ({len(html)/1024:.0f} KB, "
+          f"{len(order)} run(s): {', '.join(order)})")
 
 
 if __name__ == "__main__":

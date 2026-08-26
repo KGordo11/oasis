@@ -71,6 +71,8 @@ from datetime import datetime
 # directory must be importable regardless of the caller's cwd.
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
+import logging
+
 from oasis.social_platform.platform import Platform
 from oasis.social_platform.recsys import reset_globals
 from oasis.social_platform.typing import ActionType, RecsysType
@@ -82,6 +84,8 @@ RECENCY_NUMERATOR = 271.8
 RECENCY_DIVISOR = 100.0
 RECENCY_AGE_CLIFF = RECENCY_NUMERATOR - 1.0  # beyond this, log arg <= 0
 RECENCY_FLOOR = 1e-6
+
+log = logging.getLogger("social_timeline.platform")
 
 
 class TimelinePlatform(Platform):
@@ -139,6 +143,8 @@ class TimelinePlatform(Platform):
             "exposures_logged": 0,
             "dm_joins_refused": 0,
             "invalid_follow_targets": 0,
+            "refresh_errors": 0,
+            "empty_feeds": 0,
         }
 
     # ---------------------------------------------------------------- tables
@@ -460,6 +466,10 @@ class TimelinePlatform(Platform):
                 selected_post_ids = list(from_following | from_recsys)
 
             if not selected_post_ids:
+                # Legitimate in round 0 (nothing has been posted yet) and for
+                # an agent whose only visible posts are their own. Counted so
+                # it can be told apart from an actual error.
+                self.stats["empty_feeds"] += 1
                 return {"success": False, "message": "No posts found."}
 
             placeholders = ", ".join("?" for _ in selected_post_ids)
@@ -470,6 +480,7 @@ class TimelinePlatform(Platform):
                 selected_post_ids)
             results = self.db_cursor.fetchall()
             if not results:
+                self.stats["empty_feeds"] += 1
                 return {"success": False, "message": "No posts found."}
             # Render best-ranked first. SQL returns rows in rowid order, which
             # would put the agent's top match anywhere in the list.
@@ -486,7 +497,15 @@ class TimelinePlatform(Platform):
                                         action_info, current_time)
             self.stats["refresh_calls"] += 1
             return {"success": True, "posts": results_with_comments}
-        except Exception as e:
+        except Exception as e:  # noqa: BLE001
+            # Upstream swallows this into {"success": False} with no signal,
+            # which is how six agents in the v4 run ended a round with no feed
+            # despite having 30 ranked candidates waiting: the failure was
+            # invisible. A missing feed is a missing turn, so it is counted and
+            # logged rather than quietly returned.
+            self.stats["refresh_errors"] += 1
+            log.warning("refresh failed for agent %s at round %s: %s: %s",
+                        agent_id, round_no, type(e).__name__, e)
             return {"success": False, "error": str(e)}
 
     def _log_exposure(self, round_no, agent_id, results, from_recsys,

@@ -604,6 +604,37 @@ duration rather than correctness (Q-3).
     and worth a look. And this is one run: the project's own standard is to
     repeat before treating a number as real.
 
+### 2026-08-26 — Multi-run artifact, and making silent failures loud
+
+43. **The artifact now holds every run, not just the latest.** Previously each
+    publish overwrote the last, so the history was lost and a change could not
+    be traced to the run that introduced it. `make_graph.py` now discovers every
+    analysed run, projects each to what the page renders, and bundles them: a
+    run selector switches the graph, stats, algorithm box and all three tables,
+    and a comparison table across every run highlights the best value per
+    metric. Future runs append automatically -- no flag needed.
+
+44. Pruned orphaned `_analysis.json` files whose databases had been deleted, so
+    the artifact does not resurrect runs that no longer exist.
+
+45. **B-11.** Chased down the six agents that ended R-12's final round with no
+    feed. They each had 30 ranked candidates, so the ranking was fine; the
+    problem was that `refresh()` wraps its entire body in a bare
+    `except Exception: return {"success": False}` -- inherited from upstream's
+    style -- so a failure is indistinguishable from "nothing to show". Refresh
+    traces came to 476 against ~540 expected.
+
+    Rather than guess at the cause, the failure is now *visible*: exceptions are
+    logged with agent and round and counted in `refresh_errors`, while genuinely
+    empty feeds (round 0 before anyone has posted, or an agent whose only
+    visible posts are their own) are counted separately in `empty_feeds`. The
+    next run will state which of the two it was instead of leaving it to
+    inference.
+
+46. Fixed a third mojibake instance -- a literal middle dot in a JS
+    `textContent` string. Entities do not decode in `textContent`, so those
+    strings must be pure ASCII. The generator now emits ASCII only, verified.
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -642,6 +673,7 @@ Bugs found during this build — in our code or upstream — with how each surfa
 | B-5 | Ours — `make_graph.py` | Usernames rendered as `millerhospitaliâ€¦`; table text illegibly low-contrast | The HTML template is a **non-raw** Python string, so `\\u2013`-style escapes were decoded into literal non-ASCII before ever reaching the file, and mojibake appeared wherever charset was not guaranteed. Separately, `td` inherited its colour through the table instead of taking a token | Emit pure ASCII (HTML entities); set `td { color: var(--fg) }` explicitly | Browser verification before publishing |
 | B-6 | Upstream `platform.py:905` + our `analyze.py` | Every `follow` was unattributed — the interaction ledger could not say who was followed | `follow` records only `{"follow_id": ...}`; the followee appears **nowhere** in the payload. Surveyed all relational actions and found each uses a different key: `unfollow`→`followee_id`, `mute`→`mutee_id`, `repost`→`reposted_id`, comment actions→`comment_id` only | Recover followee via the follow table; add the other keys; generalise the comment lookup | `test_instrumentation.py` TEST 2 |
 | B-7 | Ours — `timeline_agent.py` | Agents were *always* told "you do not follow anyone yet", even holding follow edges; authors rendered as bare `agentN` | Keyed on `self.agent_id`, which is **camel's UUID**; the integer is `social_agent_id` (`agent.py:71`). Every lookup silently matched nothing. Separately, `sign_up` leaves `user_name` NULL and puts the handle in `name` | Use `social_agent_id`; `COALESCE(user_name, name)` | Reading the rendered prompt in the promptcheck run |
+| B-11 | Ours + upstream pattern — `refresh()` | Six agents ended round 14 of R-12 with no feed despite having 30 ranked candidates waiting, and nothing anywhere said why | `refresh()` wrapped its whole body in `except Exception: return {"success": False}`, so any failure produced a missing feed with **no signal at all**. Refresh traces totalled 476 against ~540 expected | Log the exception and count it; count legitimate empty feeds (round 0, own-posts-only) separately so the two cannot be confused | Investigating the six missing feeds |
 | B-10 | Upstream `platform.py:868-890` | Agents "followed" people who do not exist; round 0 appeared to start with 2 connections when the network was genuinely empty | `follow()` checks for a duplicate edge but **never that the followee exists** — it inserts whatever integer it is handed. Two agents both followed hallucinated id `12345` | Validate the target in `TimelinePlatform.follow/unfollow/mute`; `analyze.py` segregates phantom edges instead of counting them | Gordon asking how anyone was connected at round 0 |
 | B-3 | Ours — `run_simulation.py` | `final_counts` all `None`, `action_tally` returned `Cannot operate on a closed cursor` | Both were computed *after* `env.close()`, which closes the DB cursor (`platform.py:143-144` on `ActionType.EXIT`) | Read them inside the `try`, before `close()` | R-4 (stage 1) |
 

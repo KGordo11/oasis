@@ -79,7 +79,11 @@ def build(db_path, log_path=None, personas_path=None, manifest_path=None):
 
     personas = {}
     if personas_path and os.path.exists(personas_path):
-        for p in json.load(open(personas_path)):
+        # Route through the loader: the persona source may be the structured
+        # reddit JSON or the scraped twitter CSV, and json.load() only handles
+        # the first.
+        from personas import load_personas
+        for p in load_personas(personas_path):
             personas[p["username"]] = p
 
     manifest = {}
@@ -165,24 +169,33 @@ def s1_population(L, personas, data):
         L += ["    (persona file not supplied)", ""]
         return L
     ps = list(personas.values())
-    L += [f"    {len(ps)} agents.", "",
-          "    Age      : " + f"{min(p['age'] for p in ps)}-{max(p['age'] for p in ps)}"
-          f" (median {int(statistics.median([p['age'] for p in ps]))})",
-          "    Gender   : " + ", ".join(f"{k} {v}" for k, v in
-                                        Counter(p["gender"] for p in ps).most_common()),
-          "    Countries: " + ", ".join(f"{k} {v}" for k, v in
-                                        Counter(p["country"] for p in ps).most_common()),
-          "    MBTI     : " + ", ".join(f"{k} {v}" for k, v in
-                                        Counter(p["mbti"] for p in ps).most_common()),
-          ""]
-    L += ["    Professions:"]
-    for k, v in Counter(p["profession"] for p in ps).most_common():
-        L += [f"      {v:>3}  {k}"]
-    L += ["", "    Declared interests (an agent may hold several):"]
-    topics = Counter(t for p in ps for t in p["interested_topics"])
-    for k, v in topics.most_common():
-        bar = "#" * v
-        L += [f"      {v:>3}/{len(ps)}  {k:<24} {bar}"]
+    src = ps[0].get("source", "?") if ps else "?"
+    L += [f"    {len(ps)} personas available.  source: {src}", ""]
+
+    ages = [p["age"] for p in ps if p.get("age")]
+    if ages:
+        L += [f"    Age      : {min(ages)}-{max(ages)} "
+              f"(median {int(statistics.median(ages))})"]
+    for label, key in (("Gender   ", "gender"), ("Countries", "country"),
+                       ("MBTI     ", "mbti")):
+        vals = [p[key] for p in ps if p.get(key)]
+        if vals:
+            L += [f"    {label}: " + ", ".join(f"{k} {v}" for k, v in
+                                               Counter(vals).most_common())]
+    profs = [p["profession"] for p in ps if p.get("profession")]
+    if profs:
+        L += ["", "    Professions:"]
+        for k, v in Counter(profs).most_common():
+            L += [f"      {v:>3}  {k}"]
+    topics = Counter(t for p in ps for t in (p.get("interested_topics") or []))
+    if topics:
+        L += ["", "    Declared interests (an agent may hold several):"]
+        for k, v in topics.most_common():
+            L += [f"      {v:>3}/{len(ps)}  {k:<24} {'#' * v}"]
+    else:
+        L += ["", "    These personas are scraped profile text with no "
+              "structured demographic fields.",
+              "    They trade that structure for separability -- see below."]
     L += ["",
           "    READ THIS BEFORE INTERPRETING ANY PERSONALISATION RESULT.",
           "    The interest distribution is heavily concentrated: a large majority of",

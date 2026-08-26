@@ -252,6 +252,8 @@ Full detail with rationale lives in spec §2. Condensed index:
 | F-11 | Agents see only follower/following **counts**, never identities | `agent_environment.py:68-101`, both marked `# TODO` upstream |
 | F-12 | Two conflicting index bases for the `rec` matrix | `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based |
 | F-13 | Every table's `user_id` column actually stores **agent_id**; only the `user` table has both | `platform.py:407` — `user_id = agent_id`, repeated in every action |
+| F-17 | **The feed discarded its own ranking.** `refresh()` ranked 30 candidates then `random.sample()`d 8 (`platform.py:276-278`). Median rank shown was 14/30; only 16% came from the top 5. Posts were also rendered in arbitrary SQL order, so an agent's best match could appear anywhere | Fixed: top-ranked + 2 explore slots, rendered best-first. Median rank 14→3, top-5 share 16%→67% |
+| F-18 | **The persona population was the ceiling on personalisation.** Reddit `persona` texts (which become the system prompt) are **0.963** similar to each other; `bio` (which the recommender ranks on) 0.829. Agents were handed near-identical characters | Switched to diversity-selected scraped twitter bios: **0.637** |
 | F-16 | **Freshness barely counts over a short run.** Upstream recency `log((271.8-age)/100)` is calibrated for ~170 timesteps; across 12 rounds it moves only 0.9999→0.9586 (spread 0.04) while cosine similarity spans ~0.25. Ranking was therefore ~85% similarity, and a round-0 post was never displaced — post #3 reached 33 agents while a round-10 post reached 1 | Measured; fixed via `recency_span_rounds` |
 | F-15 | **Agents attempt actions and fumble the arguments** — 18 malformed tool calls in 5 rounds of the full run, 10 of them `follow`, mostly "unexpected keyword argument". These leave no trace row, so they were previously invisible and counted as "did nothing" | Measured by `analyze.py --log` |
 | F-14 | **Group chat hijacks the prompt and crowds out feed engagement** | `agent_environment.py:49-53` puts `$groups_env` *before* `$posts_env`; `:40-48` is a wall of imperatives; `:118-135` renders it every turn regardless of `available_actions`. Measured in R-5 |
@@ -571,6 +573,37 @@ duration rather than correctness (Q-3).
     `follow(author_id=…)` failed 19x, `create_comment(comment_id=…)` 21x. Also
     asks for 2-3 actions per turn, since agents averaged only 0.70.
 
+### 2026-08-26 — R-12, the improved full run
+
+39. Five changes went in before this run, each from measurement rather than
+    guesswork: **F-17** (feed was random-sampling its own ranked pool),
+    **F-18** (persona homogeneity), **F-16** (recency scaling), **B-10**
+    (phantom follow validation) and prompt **v3**. Plus an embedding cache and
+    explicit seed/temperature.
+
+40. **Results, against the two earlier full runs:**
+
+    | run | rate | act/turn | malformed | follows | posts | exposures | min |
+    |---|---|---|---|---|---|---|---|
+    | v1, reddit personas, 12r | 0.461 | 0.60 | 393 | 55 | 47 | 3581 | 105 |
+    | v2, reddit personas, 12r | 0.604 | 0.70 | 106 | 68 | 99 | 3940 | 86 |
+    | **v4, diverse personas, 15r** | **0.733** | **0.91** | **70** | **90** | **132** | **4697** | 92 |
+
+41. **Evidence the individual fixes landed**, not just that totals rose:
+    - **0 phantom follows** (B-10), against 2 in v2.
+    - The three most-seen posts now include one written in **round 6**; in v2
+      all three were round-0 posts. Freshness (F-16) is displacing entrenched
+      early content.
+    - Round time held **flat at ~370-390s** instead of climbing 299→640s
+      within the run — the embedding cache removing repeated work.
+    - 30 agents, 30 distinct feeds in the final round: personalisation is
+      per-person, not shared.
+
+42. **Honest caveats.** 70 malformed calls remain. Six agents received no feed
+    in the final round (they appear in earlier rounds), which is unexplained
+    and worth a look. And this is one run: the project's own standard is to
+    repeat before treating a number as real.
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -586,6 +619,7 @@ including failed and aborted ones.
 | R-2 | 0 | `pooler_probe.py`, 4 texts / 2 topics, run in two fresh processes | **Exposed B-1 and B-2.** Pooler weights differ per process (`sum=-6.18` vs `+6.46`); pooler margin `+0.0069` / `+0.0008`; mean-pooled margin `+0.0475` and bit-identical across processes | ~50s for both processes |
 | R-6 | 2 | 8 agents, 4 rounds, **22 actions** (`--no-groups`) — controlled A/B against R-5, identical otherwise | **Behaviour gate PASSED.** action_rate **0.812** (26/32, vs R-5's 0.469 and Sim 1's ~0.89); 14 posts, **9 comments, 3 quote_posts, 1 follow**, 1 search, 1 do_nothing; 148 exposures (nearly 2x R-5). First genuine content engagement of the build. Confirms F-14 | 340.1s |
 | R-11 | contrast | 36 agents, 12 rounds, **reddit hot-score**, prompt **v2** | **Completed.** action_rate **0.956**, only **7** malformed calls, 413 actions, **113 follows**, 106 posts, 2976 exposures. Verified: **1 distinct candidate pool** (all 36 agents see an identical feed) and 100% `recsys` source (no follow-injection) | 77 min |
+| R-12 | full | 36 **diversity-selected twitter** personas, 15 rounds, prompt v3, recency scaling, ranked feed, seed 0 / temp 0.7 | **Best run to date.** action_rate **0.733**, actions/turn **0.91**, malformed **70**, **90 follow edges**, 132 posts, 148 comments, 100 likes, 4697 exposures, 7 action types, **0 phantom follows**, 0 agent failures. Round time held ~370-390s **flat** (was 299->640s climbing) thanks to the embedding cache | 92 min |
 | R-10 | full | 36 agents, 12 rounds, twhin-bert, prompt **v2** | **Completed.** action_rate 0.604 (vs 0.461 at v1), malformed calls **393 → 106 (-73%)**, 302 actions, 70 follows, 99 posts, 3940 exposures. Sources: recsys 3073 / following 772 / both 95 — **22% of exposures arrived via the social graph**. 36 distinct candidate pools (fully personalized) | 86 min |
 | R-9 | contrast | 36 agents, 12 rounds, reddit, prompt v1 | **KILLED and data deleted** — B-8 meant `--recsys reddit` was silently running TWHIN, so it was comparing TWHIN to itself | — |
 | R-8 | full | 36 agents, 12 rounds, twhin-bert, 22 actions, prompt **v1** | **Completed, 0 agent failures.** 47 posts, 89 comments, 55 follows, 42 likes, 1 dislike, 3581 exposures, 10 distinct action types. action_rate 0.461. **But 393 malformed tool calls vs 260 successful actions** — see F-15 | 6277.6s (105 min) |

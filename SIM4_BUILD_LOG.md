@@ -252,6 +252,7 @@ Full detail with rationale lives in spec §2. Condensed index:
 | F-11 | Agents see only follower/following **counts**, never identities | `agent_environment.py:68-101`, both marked `# TODO` upstream |
 | F-12 | Two conflicting index bases for the `rec` matrix | `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based |
 | F-13 | Every table's `user_id` column actually stores **agent_id**; only the `user` table has both | `platform.py:407` — `user_id = agent_id`, repeated in every action |
+| F-20 | **Numeric handles were being parsed as ids.** The scraped personas ship as `user0`..`user110`; agents read the digits out of the handle and passed them as ids — `follow(46)` for `user46`. Measured in R-13: **230 rejected follows aimed at id 46, 136 at 44, 126 at 96**, plus 280 at the placeholder `12345`. This is why follows fell 90 → 53 | Handles are now generated from the persona's own words: readable, unique, digit-free (`@strategist_chief`, `@advanced_trading`) |
 | F-19 | **Agents acted on targets they had never seen.** Round 0 of the first v5 attempt logged **zero exposures** yet produced 12 follows and 4 likes — agent 13 "liked" post 2 having never seen it, agent 2 "followed" agent 1 with no exposure to them. B-10 catches non-existent ids, but a model guessing a small integer lands on a *valid* agent id most of the time, so that check cannot catch a valid-but-unseen target. Measured contamination: **8 of ~26 attempted actions (~30%)** were blind | Fixed by an informed-action gate; search hits count as encountered |
 | F-17 | **The feed discarded its own ranking.** `refresh()` ranked 30 candidates then `random.sample()`d 8 (`platform.py:276-278`). Median rank shown was 14/30; only 16% came from the top 5. Posts were also rendered in arbitrary SQL order, so an agent's best match could appear anywhere | Fixed: top-ranked + 2 explore slots, rendered best-first. Median rank 14→3, top-5 share 16%→67% |
 | F-18 | **The persona population was the ceiling on personalisation.** Reddit `persona` texts (which become the system prompt) are **0.963** similar to each other; `bio` (which the recommender ranks on) 0.829. Agents were handed near-identical characters | Switched to diversity-selected scraped twitter bios: **0.637** |
@@ -652,6 +653,54 @@ duration rather than correctness (Q-3).
     with an explicit `#` column, node tooltips show `(agent #N)`, and the
     footnote states the distinction.
 
+### 2026-08-26 — R-13, and three bugs it exposed
+
+48. R-13 ran clean: 36 agents, 15 rounds, 94 minutes, zero agent failures,
+    5033 exposures. **Round 0 is finally a true baseline** — 35 posts and
+    nothing else, because with no exposures there was nothing to act on. The
+    previous attempt invented 12 follows and 4 likes out of nothing.
+
+49. **Headline numbers fell, and that is the point.**
+
+    | | R-12 (v4) | R-13 (v5) |
+    |---|---|---|
+    | action rate | 0.733 | 0.720 |
+    | follow edges | 90 | **53** |
+    | exposures | 4697 | **5033** |
+    | invalid follow targets | 52 | **77** |
+    | blind actions rejected | n/a | **49** |
+
+    R-12's 90 follows were **inflated**: many were guesses at ids the agent had
+    never seen. R-13's 53 are every one of them informed — the agent had been
+    shown that person's content first. A smaller true graph beats a larger
+    false one, and the counters make the difference auditable rather than a
+    matter of trust.
+
+50. **F-20, found by reading which ids were rejected.** The invented targets
+    were not random: 230 aimed at id 46, 136 at 44, 126 at 96 — all matching
+    `user46`, `user44`, `user96` present in the feed. Agents were **parsing the
+    digits out of the username** and passing them as ids. This was a
+    self-inflicted wound from the persona switch: `millerhospitality` had no
+    digits to confuse, `user46` does. Handles are now generated from each
+    persona's own words — digit-free, unique, and readable
+    (`@strategist_chief`, `@advanced_trading`, `@empresario_viajero`), which
+    also makes the graph interpretable in a way `user46` never was.
+
+51. **B-12, found within minutes of the run starting**, because B-11 had
+    stopped swallowing exceptions the day before. A single quoted post anywhere
+    in a feed raised `UnboundLocalError` and blanked that agent's *entire*
+    feed. That is the root cause of the six no-feed agents in R-12 that had
+    been logged as "unexplained". Fixed by a mixin that retries the batch
+    post-by-post so one unrenderable post costs only itself.
+
+    The chain is worth noting: making a silent failure loud (B-11) is what
+    found the real bug (B-12), which explained an earlier mystery.
+
+52. R-13 was deliberately **not** restarted when B-12 appeared. The bug was by
+    then counted rather than invisible, so the run measures its exact cost —
+    3 refresh failures — and the fix lands in the next run. Restarting a third
+    time would have cost more than the measurement was worth.
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -667,6 +716,7 @@ including failed and aborted ones.
 | R-2 | 0 | `pooler_probe.py`, 4 texts / 2 topics, run in two fresh processes | **Exposed B-1 and B-2.** Pooler weights differ per process (`sum=-6.18` vs `+6.46`); pooler margin `+0.0069` / `+0.0008`; mean-pooled margin `+0.0475` and bit-identical across processes | ~50s for both processes |
 | R-6 | 2 | 8 agents, 4 rounds, **22 actions** (`--no-groups`) — controlled A/B against R-5, identical otherwise | **Behaviour gate PASSED.** action_rate **0.812** (26/32, vs R-5's 0.469 and Sim 1's ~0.89); 14 posts, **9 comments, 3 quote_posts, 1 follow**, 1 search, 1 do_nothing; 148 exposures (nearly 2x R-5). First genuine content engagement of the build. Confirms F-14 | 340.1s |
 | R-11 | contrast | 36 agents, 12 rounds, **reddit hot-score**, prompt **v2** | **Completed.** action_rate **0.956**, only **7** malformed calls, 413 actions, **113 follows**, 106 posts, 2976 exposures. Verified: **1 distinct candidate pool** (all 36 agents see an identical feed) and 100% `recsys` source (no follow-injection) | 77 min |
+| R-13 | full | 36 diverse personas, 15 rounds, prompt v3, **informed-action gate** | **Clean but sparse.** 94 min, 0 agent failures, 5033 exposures, 130 posts, 124 comments, 125 likes. **Round 0 finally correct: 35 posts, 0 follows, 0 likes, 0 comments** — nothing to act on, so nothing acted on. But only **53 follows**, because the gate rejected 77 invalid targets and 49 blind actions. Exposed **F-20** and **B-12** | 94 min |
 | R-12 | full | 36 **diversity-selected twitter** personas, 15 rounds, prompt v3, recency scaling, ranked feed, seed 0 / temp 0.7 | **Best run to date.** action_rate **0.733**, actions/turn **0.91**, malformed **70**, **90 follow edges**, 132 posts, 148 comments, 100 likes, 4697 exposures, 7 action types, **0 phantom follows**, 0 agent failures. Round time held ~370-390s **flat** (was 299->640s climbing) thanks to the embedding cache | 92 min |
 | R-10 | full | 36 agents, 12 rounds, twhin-bert, prompt **v2** | **Completed.** action_rate 0.604 (vs 0.461 at v1), malformed calls **393 → 106 (-73%)**, 302 actions, 70 follows, 99 posts, 3940 exposures. Sources: recsys 3073 / following 772 / both 95 — **22% of exposures arrived via the social graph**. 36 distinct candidate pools (fully personalized) | 86 min |
 | R-9 | contrast | 36 agents, 12 rounds, reddit, prompt v1 | **KILLED and data deleted** — B-8 meant `--recsys reddit` was silently running TWHIN, so it was comparing TWHIN to itself | — |

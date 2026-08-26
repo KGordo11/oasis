@@ -90,10 +90,90 @@ def load_twitter(path):
     return out
 
 
-def load_personas(path):
-    if str(path).endswith(".csv"):
-        return load_twitter(path)
-    return load_reddit(path)
+_STOP = {
+    "the", "and", "for", "with", "that", "this", "you", "your", "our", "are",
+    "all", "was", "not", "but", "have", "has", "from", "they", "their", "who",
+    "what", "when", "where", "how", "why", "can", "will", "just", "about",
+    "into", "out", "get", "got", "one", "two", "new", "now", "here", "there",
+    "more", "most", "some", "any", "than", "then", "them", "his", "her",
+    "she", "him", "its", "it's", "i'm", "i've", "don't", "user",
+}
+
+
+def make_handle(persona, taken):
+    """A readable, digit-free handle derived from the persona's own words.
+
+    Finding F-20. The scraped personas ship as `user0`..`user110`, and agents
+    read the digits out of the handle and passed them as ids: `follow(46)` for
+    `user46`. Measured in the v5 run -- 230 rejected follows aimed at id 46,
+    136 at 44, 126 at 96, all matching handles present in the feed. Follows
+    fell from 90 to 53 because those guesses were finally being caught rather
+    than silently entering the graph.
+
+    Handles from the anonymised source carry no information anyway, so they are
+    replaced with something drawn from the persona's own text: no digits for a
+    model to mistake for an id, and a name that actually says who this is,
+    which the raw `user46` never did.
+    """
+    import re
+
+    text = " ".join(str(persona.get(f) or "")
+                    for f in ("bio", "persona", "profession"))
+    raw = [w.lower() for w in re.findall(r"[A-Za-z][A-Za-z']{2,}", text)]
+    # Dedupe first: a word repeated in the bio would otherwise pair with
+    # itself and produce handles like "mainstream_mainstream".
+    seen, words = set(), []
+    for w in raw:
+        if w in _STOP or w in seen or not w.isalpha():
+            continue
+        seen.add(w)
+        words.append(w)
+
+    # Longer words are more distinctive; ties keep source order so the result
+    # is deterministic.
+    words.sort(key=lambda w: -len(w))
+    pick = words[:6]
+
+    for i in range(len(pick)):
+        for j in range(i + 1, len(pick)):
+            cand = f"{pick[i][:12]}_{pick[j][:10]}"
+            if cand not in taken:
+                return cand
+    for w in pick:
+        if w not in taken:
+            return w
+    n = len(taken)
+    base = "".join(chr(ord("a") + (n // (26 ** k)) % 26) for k in (2, 1, 0))
+    return f"anon_{base}"
+
+
+def assign_handles(personas):
+    """Give every persona a unique, digit-free handle (F-20)."""
+    taken, out = set(), []
+    for p in personas:
+        h = make_handle(p, taken)
+        taken.add(h)
+        q = dict(p)
+        q["source_username"] = p.get("username")
+        q["username"] = h
+        out.append(q)
+    return out
+
+
+def load_personas(path, rename_numeric=True):
+    """Load personas, replacing digit-bearing handles by default (F-20).
+
+    Reddit personas already have meaningful handles (`millerhospitality`) and
+    are left alone; only handles that look like ids get replaced.
+    """
+    import re
+
+    people = load_twitter(path) if str(path).endswith(".csv") \
+        else load_reddit(path)
+    if rename_numeric and any(re.search(r"\d", str(p.get("username") or ""))
+                              for p in people):
+        people = assign_handles(people)
+    return people
 
 
 def select_diverse(personas, k, field="bio"):

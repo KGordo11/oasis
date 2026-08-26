@@ -652,8 +652,45 @@ def s9_feed(L, data):
     return L
 
 
-def s10_failures(L, data):
+def s10_failures(L, data, manifest=None):
     L += [RULE, "SECTION 10 -- FAILURES AND LIMITS", RULE, ""]
+
+    stats = (manifest or {}).get("platform_stats") or {}
+    if stats:
+        L += ["    INTEGRITY COUNTERS", "",
+              "    These exist so that a degraded run cannot look like a clean",
+              "    one. Every value below is a thing that would otherwise have",
+              "    been invisible in the results.", ""]
+        explain = {
+            "blind_actions_rejected":
+                "actions aimed at a post or person the agent had never been "
+                "shown. Rejected: on a real platform you cannot like "
+                "something you never encountered (F-19)",
+            "invalid_follow_targets":
+                "follows aimed at an agent id that does not exist -- the "
+                "model inventing a plausible number (B-10)",
+            "refresh_errors":
+                "feed builds that threw. Upstream swallows these silently, so "
+                "they are counted here (B-11)",
+            "empty_feeds":
+                "feeds that were legitimately empty -- round 0 before anyone "
+                "has posted, or an agent whose only visible posts are its own",
+            "recency_clamped":
+                "posts older than the recency curve can express",
+            "empty_candidate_pools":
+                "agents with nothing rankable that round",
+            "exposures_logged": "total exposure events recorded",
+            "refresh_calls": "successful feed builds",
+            "rounds_ranked": "rounds where ranking ran",
+            "dm_joins_refused":
+                "attempts to join a 2-member group, refused to keep emergent "
+                "private conversation private (D-7)",
+        }
+        for k, v in stats.items():
+            L += [f"    {k:<26} {v}"]
+            if k in explain and v:
+                L += [wrap(explain[k], indent="        ")]
+        L += [""]
     tce = data.get("tool_call_errors")
     if tce:
         L += [f"    Malformed tool calls: {tce['total']}",
@@ -709,7 +746,7 @@ def main():
     L = s7b_pair_chronology(L, data, extra)
     L = s8_propagation(L, data)
     L = s9_feed(L, data)
-    L = s10_failures(L, data)
+    L = s10_failures(L, data, manifest)
 
     out = args.out or args.db.replace(".db", "_DOSSIER.txt")
     text = "\n".join(L)

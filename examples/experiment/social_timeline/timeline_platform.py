@@ -88,6 +88,59 @@ RECENCY_FLOOR = 1e-6
 log = logging.getLogger("social_timeline.platform")
 
 
+class _ResilientPlatformUtils:
+    """Mixin fixing an upstream crash that silently blanks whole feeds.
+
+    Bug B-12. `PlatformUtils._add_comments_to_posts` branches on post type and
+    assigns `num_reports` in the `repost` and `common` branches but **not** in
+    the `quote` branch (platform_utils.py:85-118), then reads it
+    unconditionally at :157. So a single quoted post anywhere in a feed raises
+    `UnboundLocalError` and takes down the entire feed build for that agent --
+    not just that one post.
+
+    That is what produced the six agents in R-12 who ended a round with no feed
+    despite having 30 ranked candidates waiting. It only became visible once
+    B-11 stopped swallowing the exception.
+
+    `oasis/` stays untouched (D-1), and the 110-line method is not copied --
+    copying it would silently rot against upstream. Instead, on failure the
+    batch is retried post by post, so one unrenderable post costs only itself
+    and the agent still gets a feed. Posts that still fail are rendered from
+    the row we already hold rather than dropped, because a missing post is a
+    missing exposure and would quietly bias what agents are recorded as seeing.
+    """
+
+    def _add_comments_to_posts(self, posts_results):
+        try:
+            return super()._add_comments_to_posts(posts_results)
+        except UnboundLocalError:
+            pass
+
+        recovered = []
+        for row in posts_results:
+            try:
+                recovered.extend(super()._add_comments_to_posts([row]))
+            except UnboundLocalError:
+                # Row shape comes from refresh()'s post_query.
+                (post_id, user_id, original_post_id, content, quote_content,
+                 created_at, num_likes, num_dislikes, num_shares) = row[:9]
+                body = quote_content or content or ""
+                recovered.append({
+                    "post_id": post_id,
+                    "user_id": user_id,
+                    "content": body,
+                    "created_at": created_at,
+                    **({"score": (num_likes or 0) - (num_dislikes or 0)}
+                       if self.show_score
+                       else {"num_likes": num_likes,
+                             "num_dislikes": num_dislikes}),
+                    "num_shares": num_shares,
+                    "num_reports": 0,
+                    "comments": [],
+                })
+        return recovered
+
+
 class TimelinePlatform(Platform):
     """Personalized, fully instrumented platform. See module docstring."""
 
@@ -108,6 +161,14 @@ class TimelinePlatform(Platform):
         behaviour. Either way the choice is recorded in the run manifest.
         """
         super().__init__(*args, **kwargs)
+
+        # B-12: rebuild pl_utils with the resilient mixin so one unrenderable
+        # quoted post cannot blank an entire agent's feed. Same instance state,
+        # same class otherwise -- only the broken method is intercepted.
+        base = type(self.pl_utils)
+        self.pl_utils.__class__ = type(
+            "ResilientPlatformUtils", (_ResilientPlatformUtils, base), {})
+
         self.recency_span_rounds = recency_span_rounds
         # How many of the algorithmic feed slots are exploration rather than
         # best-ranked content (F-17). 0 = pure exploitation, no serendipity.

@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 
 
 HTML = """<title>Agent Network Formation</title>
@@ -157,6 +158,28 @@ HTML = """<title>Agent Network Formation</title>
           max-width:72ch; }
   @media (prefers-reduced-motion:reduce) { * { transition:none !important; } }
 
+  .tabs { display:flex; gap:4px; flex-wrap:wrap;
+          border-bottom:1px solid var(--line); }
+  .tabs button { font-family:"IBM Plex Mono", monospace; font-size:12.5px;
+                 letter-spacing:.04em; text-transform:uppercase;
+                 background:none; border:none; color:var(--muted);
+                 padding:9px 14px; cursor:pointer; border-radius:6px 6px 0 0;
+                 border-bottom:2px solid transparent; }
+  .tabs button:hover { color:var(--fg); }
+  .tabs button[aria-selected="true"] { color:var(--fg);
+                 background:var(--panel); border-bottom-color:var(--follow); }
+  .panel { display:flex; flex-direction:column; gap:20px; }
+  /* display:flex on .panel outranks the UA [hidden] rule, so hiding
+     a panel silently did nothing. */
+  .panel[hidden] { display:none; }
+  .card { border:1px solid var(--line); border-radius:8px;
+          background:var(--panel); padding:14px 16px; }
+  .card h3 { margin:0 0 6px; font-size:15px;
+             font-family:"IBM Plex Mono", monospace; }
+  .quote { border-left:2px solid var(--line); padding-left:12px;
+           color:var(--fg); font-size:13.5px; margin:6px 0; }
+  .meta { color:var(--muted); font-size:12.5px;
+          font-family:"IBM Plex Mono", monospace; }
   .runbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
   .runbar select { font-family:"IBM Plex Mono", monospace; font-size:13px;
                    background:var(--panel); color:var(--fg);
@@ -184,6 +207,9 @@ HTML = """<title>Agent Network Formation</title>
 
   <div class="stats" id="stats"></div>
 
+  <nav class="tabs" id="tabs"></nav>
+
+  <section class="panel" id="panel-network">
   <figure>
     <div class="scrub">
       <label for="round">Round</label>
@@ -221,31 +247,6 @@ HTML = """<title>Agent Network Formation</title>
   <section id="algoBox" class="algo"></section>
 
   <div class="scroll">
-    <table id="rosterTable">
-      <caption id="rosterCaption">Roster &mdash; click any person in the graph</caption>
-      <thead><tr>
-        <th>Other agent</th><th class="num">Times seen</th>
-        <th>What they did to them</th><th>What came back</th>
-      </tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="scroll">
-    <table id="agentTable">
-      <caption>Per-agent detail &mdash; selected run</caption>
-      <thead><tr>
-        <th class="num">#</th><th>Agent</th>
-        <th class="num">Actions</th><th class="num">Posts</th>
-        <th class="num">Saw</th><th class="num">Engaged</th>
-        <th class="num">Follows</th><th class="num">Followers</th>
-        <th>Action mix</th>
-      </tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div class="scroll">
     <table id="propTable">
       <caption>Propagation &mdash; repeated exposure preceding interaction</caption>
       <thead><tr>
@@ -267,6 +268,55 @@ HTML = """<title>Agent Network Formation</title>
   </div>
 
   <p class="note" id="footnote"></p>
+  </section>
+
+  <section class="panel" id="panel-people" hidden>
+    <p class="lede">Every agent. Click one for their persona, everything they
+      did with full text, and their complete roster.</p>
+    <div class="scroll">
+      <table id="agentTable">
+        <caption>All agents</caption>
+        <thead><tr>
+          <th class="num">#</th><th>Agent</th>
+          <th class="num">Actions</th><th class="num">Posts</th>
+          <th class="num">Saw</th><th class="num">Engaged</th>
+          <th class="num">Follows</th><th class="num">Followers</th>
+          <th>Action mix</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div id="agentDetail"></div>
+  </section>
+
+  <section class="panel" id="panel-posts" hidden>
+    <p class="lede">Every post written during the run, who saw it, and who
+      engaged with it.</p>
+    <div id="postList"></div>
+  </section>
+
+  <section class="panel" id="panel-timeline" hidden>
+    <div class="scroll">
+      <table id="timelineTable">
+        <caption>Round by round</caption>
+        <thead><tr>
+          <th class="num">Round</th><th class="num">Actions</th>
+          <th class="num">Posts</th><th class="num">Comments</th>
+          <th class="num">Likes</th><th class="num">Follows</th>
+          <th class="num">Exposures</th><th class="num">Via graph</th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="note">"Via graph" is the share of exposures delivered because the
+      viewer follows the author. It starts at zero -- the network is not seeded
+      -- and grows as agents connect, which is the shift from algorithmic to
+      social discovery, measured rather than assumed.</p>
+  </section>
+
+  <section class="panel" id="panel-method" hidden>
+    <div id="methodBody"></div>
+  </section>
 </div>
 
 <script>
@@ -362,7 +412,8 @@ function loadRun(label) {
     tr.classList.toggle('current', tr.dataset.run === label));
 
   algoBox(); agentTable(); propTable(); exposureTable(); footnote();
-  roster(null);
+  postList(); timelineTable(); methodBody();
+  document.getElementById('agentDetail').innerHTML = '';
   render(maxRound);
 }
 
@@ -492,7 +543,6 @@ click to isolate this person's connections</title>`;
     g.addEventListener('click', () => {
       focusId = (focusId === n.id) ? null : n.id;
       render(lastRound);
-      roster(focusId);
     });
     svg.appendChild(g);
   }
@@ -547,53 +597,6 @@ function algoBox() {
     `</dl>` + (dev ? `<div><strong>Stated deviations from upstream:</strong><ul>${dev}</ul></div>` : '');
 }
 
-function roster(focus) {
-  // Every other agent, seen or not. Agents never seen are shown rather than
-  // omitted: that absence is a fact about what the feed did, and hiding it
-  // would make the roster look complete while concealing reach gaps.
-  const cap = document.getElementById('rosterCaption');
-  const body = document.querySelector('#rosterTable tbody');
-  if (focus === null || !byId[focus]) {
-    cap.textContent = 'Roster -- click any person in the graph to see every ' +
-      'agent they saw and everything they did with each one';
-    body.innerHTML = '<tr><td colspan="4">No one selected.</td></tr>';
-    return;
-  }
-  const a = byId[focus];
-  const saw = a.saw_authors || {};
-  const out = a.interacted_with || {};
-  const back = a.interacted_by || {};
-  const others = Object.values(agents)
-    .map(x => x.agent_id).filter(x => x !== focus);
-  others.sort((x, y) => (saw[y] || 0) - (saw[x] || 0) || x - y);
-
-  const nSeen = others.filter(o => saw[o]).length;
-  cap.textContent =
-    `${a.username} -- saw content from ${nSeen} of ${others.length} other ` +
-    `agents, never saw ${others.length - nSeen}. ` +
-    `Acted on ${Object.keys(out).length}, was acted on by ${Object.keys(back).length}.`;
-
-  const fmtActs = o => {
-    const m = out[o] || out[String(o)] || {};
-    const e = Object.entries(m);
-    return e.length ? e.map(([k, v]) => `${k}&times;${v}`).join(', ') : '&ndash;';
-  };
-  const fmtBack = o => {
-    const m = back[o] || back[String(o)] || {};
-    const e = Object.entries(m);
-    return e.length ? e.map(([k, v]) => `${k}&times;${v}`).join(', ') : '&ndash;';
-  };
-
-  body.innerHTML = others.map(o => {
-    const n = saw[o] || saw[String(o)] || 0;
-    const nm = (byId[o] || {}).username || ('agent' + o);
-    return `<tr><td class="who">${nm}</td>` +
-      `<td class="num">${n || '<span style="opacity:.45">never saw</span>'}</td>` +
-      `<td class="mix">${fmtActs(o)}</td>` +
-      `<td class="mix">${fmtBack(o)}</td></tr>`;
-  }).join('');
-}
-
 function agentTable() {
   const rows = Object.values(agents)
     .sort((a, b) => (b.total_actions || 0) - (a.total_actions || 0));
@@ -602,7 +605,8 @@ function agentTable() {
       .map(([k, v]) => `${k}&times;${v}`).join(', ') || '&ndash;';
     const eng = a.engagement_rate == null ? '&ndash;'
       : (a.engagement_rate * 100).toFixed(0) + '%';
-    return `<tr><td class="num">${a.agent_id}</td>` +
+    return `<tr data-agent="${a.agent_id}" style="cursor:pointer">` +
+      `<td class="num">${a.agent_id}</td>` +
       `<td class="who">${a.username}</td>` +
       `<td class="num">${a.total_actions ?? 0}</td>` +
       `<td class="num">${a.n_posts_authored ?? 0}</td>` +
@@ -613,6 +617,11 @@ function agentTable() {
       `<td class="mix">${mix}</td></tr>`;
   }).join('');
 }
+
+document.querySelector('#agentTable').addEventListener('click', e => {
+  const tr = e.target.closest('tr[data-agent]');
+  if (tr) agentDetail(Number(tr.dataset.agent));
+});
 
 function propTable() {
   const body = document.querySelector('#propTable tbody');
@@ -665,6 +674,229 @@ function footnote() {
         `interactions are drawn. The tables are unfiltered.` : '');
 }
 
+// ---------- tabs ----------
+const TABS = [['network','Network'], ['people','People'], ['posts','Posts'],
+              ['timeline','Timeline'], ['method','Method & integrity']];
+const tabs = document.getElementById('tabs');
+tabs.innerHTML = TABS.map(([k, lbl], i) =>
+  `<button role="tab" data-tab="${k}" aria-selected="${i === 0}">${lbl}</button>`
+).join('');
+tabs.addEventListener('click', e => {
+  const b = e.target.closest('button');
+  if (!b) return;
+  TABS.forEach(([k]) => {
+    document.getElementById('panel-' + k).hidden = (k !== b.dataset.tab);
+    tabs.querySelector(`[data-tab="${k}"]`)
+        .setAttribute('aria-selected', String(k === b.dataset.tab));
+  });
+});
+
+function esc(t) {
+  return String(t === null || t === undefined ? '' : t)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ---------- people: full dossier for one agent ----------
+function agentDetail(id) {
+  const a = byId[id];
+  const box = document.getElementById('agentDetail');
+  if (!a) { box.innerHTML = ''; return; }
+
+  const demo = ['age','gender','country','mbti','profession']
+    .filter(k => a[k]).map(k => `${k}: ${esc(a[k])}`).join(' | ');
+  const topics = (a.interested_topics || []).join(', ');
+
+  // Everything this agent did, in order, with the actual text.
+  const mine = DATA.events.filter(e => e[1] === id)
+    .sort((x, y) => x[0] - y[0]);
+  const actions = mine.map(e => {
+    const [rnd, , act, pid, tgt, text, cid, newPid] = e;
+    const who = tgt !== null && tgt !== undefined
+      ? ' &rarr; @' + esc((byId[tgt] || {}).username || tgt) : '';
+    let body = '';
+    if (act === 'create_comment' && cid && DATA.comments[cid])
+      body = DATA.comments[cid].content;
+    else if (text) body = text;
+    else if (pid && DATA.posts[pid]) body = DATA.posts[pid].content;
+    const on = pid ? ` on post #${pid}` : (newPid ? ` (post #${newPid})` : '');
+    return `<div style="margin:7px 0"><span class="meta">r${rnd}</span> ` +
+      `<b>${esc(act)}</b>${on}${who}` +
+      (body ? `<div class="quote">${esc(body)}</div>` : '') + `</div>`;
+  }).join('') || '<div class="meta">did nothing all run</div>';
+
+  // Complete roster: every other agent, seen or not.
+  const saw = a.saw_authors || {}, out = a.interacted_with || {},
+        back = a.interacted_by || {};
+  const others = Object.values(agents).map(x => x.agent_id)
+    .filter(x => x !== id)
+    .sort((x, y) => (saw[y] || 0) - (saw[x] || 0) || x - y);
+  const nSeen = others.filter(o => saw[o]).length;
+  const fmt = (m, o) => {
+    const e = Object.entries(m[o] || m[String(o)] || {});
+    return e.length ? e.map(([k, v]) => `${esc(k)}&times;${v}`).join(', ')
+                    : '<span style="opacity:.4">&ndash;</span>';
+  };
+  const rosterRows = others.map(o => {
+    const n = saw[o] || saw[String(o)] || 0;
+    return `<tr><td class="who">${esc((byId[o] || {}).username || o)}</td>` +
+      `<td class="num">${n || '<span style="opacity:.4">never saw</span>'}</td>` +
+      `<td class="mix">${fmt(out, o)}</td>` +
+      `<td class="mix">${fmt(back, o)}</td></tr>`;
+  }).join('');
+
+  // Every post this agent was shown.
+  const seen = DATA.exposures.filter(e => e[1] === id)
+    .sort((x, y) => x[0] - y[0] || (x[4] ?? 0) - (y[4] ?? 0));
+  const SRCN = ['recsys','following','both','?'];
+  const acted = new Set(a.seen_and_acted || []);
+  const seenRows = seen.map(e => {
+    const [rnd, , pid, au, pos, src, sc] = e;
+    const post = DATA.posts[pid] || {};
+    return `<tr><td class="num">${rnd}</td><td class="num">#${pid}</td>` +
+      `<td class="who">${esc((byId[au] || {}).username || au)}</td>` +
+      `<td class="num">${pos ?? ''}</td><td class="mix">${SRCN[src]}</td>` +
+      `<td class="num">${sc === null ? '&ndash;' : sc}</td>` +
+      `<td class="mix">${acted.has(pid) ? '<b>ACTED</b>' : 'ignored'}</td>` +
+      `<td class="mix">${esc(String(post.content || '').slice(0, 60))}</td></tr>`;
+  }).join('');
+
+  box.innerHTML =
+    `<div class="card"><h3>@${esc(a.username)} ` +
+      `<span class="meta">agent #${a.agent_id}` +
+      (a.source_username ? ` (was ${esc(a.source_username)})` : '') +
+      `</span></h3>` +
+      (demo ? `<div class="meta">${demo}</div>` : '') +
+      (topics ? `<div class="meta">interests: ${esc(topics)}</div>` : '') +
+      `<div class="quote">${esc(a.bio)}</div>` +
+      (a.persona && a.persona !== a.bio
+        ? `<div class="meta">persona given to the model:</div>
+           <div class="quote">${esc(a.persona)}</div>` : '') +
+      `<div class="meta">follows: ${(a.following || []).map(x =>
+          '@' + esc((byId[x] || {}).username || x)).join(', ') || 'nobody'}</div>` +
+      `<div class="meta">followed by: ${(a.followers || []).map(x =>
+          '@' + esc((byId[x] || {}).username || x)).join(', ') || 'nobody'}</div>` +
+    `</div>` +
+    `<div class="card"><h3>Everything @${esc(a.username)} did (${mine.length})</h3>${actions}</div>` +
+    `<div class="scroll"><table><caption>Roster &mdash; saw ${nSeen} of ` +
+      `${others.length} others, never saw ${others.length - nSeen}</caption>` +
+      `<thead><tr><th>Other agent</th><th class="num">Times seen</th>` +
+      `<th>Did to them</th><th>Came back</th></tr></thead>` +
+      `<tbody>${rosterRows}</tbody></table></div>` +
+    `<div class="scroll"><table><caption>Every post shown to ` +
+      `@${esc(a.username)} (${seen.length} exposures)</caption>` +
+      `<thead><tr><th class="num">Rnd</th><th class="num">Post</th>` +
+      `<th>Author</th><th class="num">Pos</th><th>Source</th>` +
+      `<th class="num">Score</th><th>Outcome</th><th>Content</th></tr></thead>` +
+      `<tbody>${seenRows}</tbody></table></div>`;
+  box.scrollIntoView({behavior: 'smooth', block: 'start'});
+}
+
+// ---------- posts ----------
+function postList() {
+  const reach = {}, eng = {};
+  DATA.exposures.forEach(e => {
+    (reach[e[2]] = reach[e[2]] || new Set()).add(e[1]);
+  });
+  DATA.events.forEach(e => {
+    if (e[3] === null || e[3] === undefined) return;
+    (eng[e[3]] = eng[e[3]] || []).push([e[1], e[2]]);
+  });
+  const byPost = {};
+  Object.values(DATA.comments).forEach(c => {
+    (byPost[c.post] = byPost[c.post] || []).push(c);
+  });
+
+  document.getElementById('postList').innerHTML =
+    Object.values(DATA.posts).sort((a, b) => a.id - b.id).map(p => {
+      const r = [...(reach[p.id] || [])];
+      const e = eng[p.id] || [];
+      const th = byPost[p.id] || [];
+      return `<div class="card"><h3>#${p.id} by @${esc((byId[p.author]||{}).username || p.author)}` +
+        ` <span class="meta">round ${p.round} &middot; ${p.likes} likes &middot; ` +
+        `${p.dislikes} dislikes &middot; ${p.shares} shares</span></h3>` +
+        `<div class="quote">${esc(p.content)}</div>` +
+        `<div class="meta">shown to ${r.length} agents: ${
+          r.map(x => '@' + esc((byId[x]||{}).username || x)).join(', ') || 'nobody'}</div>` +
+        `<div class="meta">engagement: ${
+          e.length ? e.map(([who, act]) =>
+            '@' + esc((byId[who]||{}).username || who) + ' ' + esc(act)).join('; ')
+          : 'none'}</div>` +
+        (th.length ? `<div class="meta">replies:</div>` + th.map(c =>
+          `<div class="quote">@${esc((byId[c.author]||{}).username || c.author)}: ${esc(c.content)}</div>`
+        ).join('') : '');
+    }).join('');
+}
+
+// ---------- timeline ----------
+function timelineTable() {
+  document.querySelector('#timelineTable tbody').innerHTML =
+    (DATA.timeline || []).map(t =>
+      `<tr><td class="num">${t.round}</td><td class="num">${t.actions}</td>` +
+      `<td class="num">${t.posts}</td><td class="num">${t.comments}</td>` +
+      `<td class="num">${t.likes}</td><td class="num">${t.follows}</td>` +
+      `<td class="num">${t.exposures}</td>` +
+      `<td class="num">${t.exposures ? Math.round(t.via_graph / t.exposures * 100) + '%' : '-'}</td></tr>`
+    ).join('');
+}
+
+// ---------- method & integrity ----------
+function methodBody() {
+  const C = DATA.config || {}, A = DATA.algorithm || {}, I = DATA.integrity || {};
+  const T = DATA.tool_errors || {};
+  const EXPLAIN = {
+    blind_actions_rejected: 'actions aimed at a post or person the agent had never been shown. On a real platform you cannot like something you never encountered.',
+    invalid_follow_targets: 'follows aimed at an agent id that does not exist -- the model inventing a plausible number.',
+    refresh_errors: 'feed builds that threw. Upstream swallows these silently; counted here so a lost turn is visible.',
+    empty_feeds: 'feeds legitimately empty -- round 0 before anyone has posted, or an agent whose only visible posts are its own.',
+    dm_joins_refused: 'attempts to join a 2-member group, refused to keep emergent private conversation private.',
+  };
+  const rows = Object.entries(I).map(([k, v]) =>
+    `<tr><td class="who">${esc(k)}</td><td class="num">${v}</td>` +
+    `<td class="mix">${esc(EXPLAIN[k] || '')}</td></tr>`).join('');
+
+  document.getElementById('methodBody').innerHTML =
+    `<div class="card"><h3>Where the people come from</h3>
+      <p>Personas are loaded from <code>${esc(C.personas || '?')}</code>. Each
+      record's text is flattened into one profile string and rendered as that
+      agent's <b>system prompt</b>, so every decision it makes is conditioned on
+      it. Mean pairwise similarity between personas is
+      <b>${DATA.summary.persona_similarity ?? '?'}</b> &mdash; lower means more
+      distinguishable, and an interest-based feed can only separate people to
+      the degree they actually differ.</p></div>` +
+    `<div class="card"><h3>Where the posts come from</h3>
+      <p>Nowhere but the model. There is no post corpus, no seed content and no
+      scripted action anywhere in the run. Every post, comment and quote was
+      generated at runtime by <code>${esc(C.model || '?')}</code> from that
+      agent's system prompt plus the feed it was shown that round.</p>
+      <p class="meta">persona file &rarr; profile string &rarr; system prompt
+      &rarr; ${esc(C.model || 'model')} &rarr; tool call &rarr; post table</p></div>` +
+    `<div class="card"><h3>Where the feed comes from</h3>
+      <p><code>${esc(A.formula || '')}</code></p>
+      <p>A feed is the union of two sources, and every exposure records which
+      one delivered it: <b>recsys</b> (the ranking chose it),
+      <b>following</b> (the viewer follows the author), or <b>both</b>.
+      ${C.refresh_rec_post_count ?? '?'} algorithmic posts +
+      ${C.following_post_count ?? '?'} from people followed, ranked from a pool
+      of ${C.max_rec_post_len ?? '?'}, with
+      ${A.explore_slots ?? 0} slot(s) kept for exploration. The network starts
+      at <b>${A.initial_follow_edges ?? 0} follow edges</b> &mdash; nothing is
+      seeded.</p></div>` +
+    `<div class="scroll"><table><caption>Integrity counters &mdash; so a degraded run cannot look like a clean one</caption>` +
+      `<thead><tr><th>Counter</th><th class="num">Value</th><th>What it means</th></tr></thead>` +
+      `<tbody>${rows}</tbody></table></div>` +
+    (T.total ? `<div class="card"><h3>Malformed tool calls: ${T.total}</h3>
+      <p class="meta">Actions the model chose and then mis-called. They leave no
+      trace row, so without this accounting they are indistinguishable from an
+      agent deciding to do nothing.</p>
+      <div class="meta">by action: ${esc(JSON.stringify(T.by_action || {}))}</div>
+      <div class="meta">by reason: ${esc(JSON.stringify(T.by_reason || {}))}</div></div>` : '') +
+    ((DATA.phantom_follows || []).length
+      ? `<div class="card"><h3>Phantom follows excluded: ${DATA.phantom_follows.length}</h3>
+         <p class="meta">Edges aimed at agent ids that do not exist. Segregated
+         rather than counted, so the graph reflects real relationships.</p></div>`
+      : '');
+}
+
 slider.addEventListener('input', e => render(Number(e.target.value)));
 loadRun(sel.value);
 </script>
@@ -673,19 +905,30 @@ loadRun(sel.value);
 PER_AGENT = ("agent_id", "username", "total_actions", "n_posts_authored",
              "distinct_posts_seen", "exposure_events", "engagement_rate",
              "action_counts", "following", "followers", "exposure_by_source",
-             # Relational detail: who this agent saw, and both directions of
-             # interaction. Without these the page can only show totals, and
-             # "who saw whom and what they did" is the whole question.
              "saw_authors", "interacted_with", "interacted_by",
-             "seen_and_acted", "seen_and_ignored", "bio")
+             "seen_and_acted", "seen_and_ignored", "never_seen", "bio")
+
+
+def _personas_for(cfg):
+    """Persona records keyed by handle, so the page can show who someone is."""
+    path = cfg.get("personas")
+    if not path or not os.path.exists(path):
+        return {}
+    try:
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from personas import load_personas
+        return {p["username"]: p for p in load_personas(path)}
+    except Exception:  # noqa: BLE001 - persona detail is a nicety, not a gate
+        return {}
 
 
 def project(analysis_path, manifest_path=None):
-    """Reduce one run's analysis + manifest to what the page renders.
+    """Reduce one run to what the page renders.
 
-    The analysis JSON carries the full event log, exposure ledger, post bodies
-    and comments -- thousands of rows -- and the page reads none of them.
-    Projecting explicitly keeps the artifact small even with many runs bundled.
+    The page is now the only artifact anyone reads, so it carries the whole
+    record -- posts, comments, every action with its text, and every exposure --
+    not just summaries. Exposures are encoded as positional arrays because at
+    ~5000 rows per run the key names would otherwise dominate the payload.
     """
     with open(analysis_path) as fh:
         full = json.load(fh)
@@ -705,15 +948,14 @@ def project(analysis_path, manifest_path=None):
     turns = manifest.get("turns_without_action", {}) or {}
     tce = full.get("tool_call_errors") or {}
     sep = cfg.get("persona_separability") or {}
+    personas = _personas_for(cfg)
 
     n_turns = turns.get("agent_turns_total") or 0
     actions = totals.get("actions_chosen", 0)
 
     summary = {
-        "agents": full.get("n_agents"),
-        "rounds": full.get("n_rounds"),
-        "posts": totals.get("posts", 0),
-        "actions": actions,
+        "agents": full.get("n_agents"), "rounds": full.get("n_rounds"),
+        "posts": totals.get("posts", 0), "actions": actions,
         "exposures": totals.get("exposure_events", 0),
         "follow_edges": totals.get("follow_edges", 0),
         "action_rate": turns.get("action_rate"),
@@ -724,21 +966,82 @@ def project(analysis_path, manifest_path=None):
         "persona_similarity": sep.get("mean_similarity"),
         "minutes": (round(manifest["total_seconds"] / 60)
                     if manifest.get("total_seconds") else None),
+        "action_counts": totals.get("action_counts", {}),
     }
 
+    agents = {}
+    for k, v in (full.get("agents") or {}).items():
+        rec = {f: v.get(f) for f in PER_AGENT}
+        p = personas.get(v.get("username")) or {}
+        rec["persona"] = p.get("persona") or ""
+        rec["source_username"] = p.get("source_username")
+        rec["realname"] = p.get("realname")
+        for f in ("age", "gender", "country", "mbti", "profession"):
+            if p.get(f):
+                rec[f] = p[f]
+        rec["interested_topics"] = p.get("interested_topics") or []
+        agents[k] = rec
+
+    posts = {str(pid): {
+        "id": pid, "author": pp["author_id"], "content": pp["content"],
+        "round": pp["round"], "likes": pp["num_likes"],
+        "dislikes": pp["num_dislikes"], "shares": pp["num_shares"],
+    } for pid, pp in (full.get("posts") or {}).items()}
+
+    comments = {str(cid): {
+        "id": cid, "post": cc["post_id"], "author": cc["user_id"],
+        "content": cc["content"],
+    } for cid, cc in (full.get("comments") or {}).items()}
+
+    events = [[e["round"], e["agent_id"], e["action"], e.get("post_id"),
+               e.get("target_agent_id"),
+               (e.get("info") or {}).get("content")
+               or (e.get("info") or {}).get("quote_content")
+               or (e.get("info") or {}).get("query"),
+               (e.get("info") or {}).get("comment_id"),
+               (e.get("info") or {}).get("post_id")]
+              for e in (full.get("events") or [])]
+
+    # [round, agent, post, author, feed_position, source, score]
+    SRC = {"recsys": 0, "following": 1, "both": 2}
+    exposures = [[e["round"], e["agent_id"], e["post_id"], e.get("author_id"),
+                  e.get("feed_position"), SRC.get(e.get("source"), 3),
+                  (round(e["score"], 4)
+                   if isinstance(e.get("score"), (int, float)) else None)]
+                 for e in (full.get("exposures") or [])]
+
+    # Round-by-round: actions, new follows, exposures, and how much of the
+    # feed arrived through the social graph rather than the algorithm.
+    from collections import Counter, defaultdict
+    per = defaultdict(Counter)
+    for e in (full.get("events") or []):
+        per[e["round"]][e["action"]] += 1
+    expo_r = Counter(x[0] for x in exposures)
+    graph_r = Counter(x[0] for x in exposures if x[5] in (1, 2))
+    rounds_tl = []
+    for r in sorted(set(list(per) + list(expo_r))):
+        rounds_tl.append({
+            "round": r, "actions": sum(per[r].values()),
+            "posts": per[r].get("create_post", 0),
+            "comments": per[r].get("create_comment", 0),
+            "likes": per[r].get("like_post", 0) + per[r].get("like_comment", 0),
+            "follows": per[r].get("follow", 0),
+            "exposures": expo_r.get(r, 0),
+            "via_graph": graph_r.get(r, 0),
+        })
+
     return label, {
-        "label": label,
-        "summary": summary,
-        "config": cfg,
+        "label": label, "summary": summary, "config": cfg,
         "algorithm": manifest.get("algorithm") or {},
+        "integrity": manifest.get("platform_stats") or {},
+        "tool_errors": tce,
+        "phantom_follows": full.get("phantom_follows") or [],
         "graph_by_round": full.get("graph_by_round", {}),
         "interaction_pairs": full.get("interaction_pairs", {}),
-        "exposure_pairs": dict(sorted(
-            (full.get("exposure_pairs") or {}).items(),
-            key=lambda kv: -kv[1])[:120]),
-        "agents": {k: {f: v.get(f) for f in PER_AGENT}
-                   for k, v in (full.get("agents") or {}).items()},
-        "propagation": (full.get("propagation_candidates") or [])[:20],
+        "exposure_pairs": full.get("exposure_pairs", {}),
+        "agents": agents, "posts": posts, "comments": comments,
+        "events": events, "exposures": exposures, "timeline": rounds_tl,
+        "propagation": (full.get("propagation_candidates") or [])[:40],
     }
 
 

@@ -172,6 +172,23 @@ HTML = """<title>Agent Network Formation</title>
   /* display:flex on .panel outranks the UA [hidden] rule, so hiding
      a panel silently did nothing. */
   .panel[hidden] { display:none; }
+  .cmp { display:grid; gap:18px; align-items:start;
+         grid-template-columns:1fr; }
+  .cmp.two { grid-template-columns:1fr 1fr; }
+  @media (max-width:900px) { .cmp.two { grid-template-columns:1fr; } }
+  .col { display:flex; flex-direction:column; gap:12px; min-width:0; }
+  .colhead { font-family:"IBM Plex Mono", monospace; font-size:13px;
+             letter-spacing:.05em; text-transform:uppercase;
+             color:var(--fg); background:var(--panel-2);
+             border:1px solid var(--line); border-radius:6px;
+             padding:9px 12px; }
+  .kv { display:grid; grid-template-columns:auto 1fr; gap:3px 12px;
+        font-size:13px; }
+  .kv dt { color:var(--muted); font-family:"IBM Plex Mono", monospace;
+           font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; }
+  .kv dd { margin:0; font-variant-numeric:tabular-nums; }
+  .ev { border-bottom:1px solid var(--line); padding:7px 0; font-size:13px; }
+  .ev:last-child { border-bottom:none; }
   .card { border:1px solid var(--line); border-radius:8px;
           background:var(--panel); padding:14px 16px; }
   .card h3 { margin:0 0 6px; font-size:15px;
@@ -268,6 +285,18 @@ HTML = """<title>Agent Network Formation</title>
   </div>
 
   <p class="note" id="footnote"></p>
+  </section>
+
+  <section class="panel" id="panel-rounds" hidden>
+    <div class="runbar">
+      <label for="roundA">Round</label>
+      <select id="roundA"></select>
+      <label><input type="checkbox" id="cmpOn"> compare with</label>
+      <select id="roundB" disabled></select>
+      <label><input type="checkbox" id="cmpRun"> across runs</label>
+      <select id="runB" disabled></select>
+    </div>
+    <div id="roundBody" class="cmp"></div>
   </section>
 
   <section class="panel" id="panel-people" hidden>
@@ -412,7 +441,7 @@ function loadRun(label) {
     tr.classList.toggle('current', tr.dataset.run === label));
 
   algoBox(); agentTable(); propTable(); exposureTable(); footnote();
-  postList(); timelineTable(); methodBody();
+  postList(); timelineTable(); methodBody(); roundsPanel();
   document.getElementById('agentDetail').innerHTML = '';
   render(maxRound);
 }
@@ -690,7 +719,8 @@ function footnote() {
 }
 
 // ---------- tabs ----------
-const TABS = [['network','Network'], ['people','People'], ['posts','Posts'],
+const TABS = [['network','Network'], ['rounds','Rounds'],
+              ['people','People'], ['posts','Posts'],
               ['timeline','Timeline'], ['method','Method & integrity']];
 const tabs = document.getElementById('tabs');
 tabs.innerHTML = TABS.map(([k, lbl], i) =>
@@ -709,6 +739,125 @@ tabs.addEventListener('click', e => {
 function esc(t) {
   return String(t === null || t === undefined ? '' : t)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ---------- rounds: exactly what happened, round by round ----------
+const SRCNAME = ['recsys','following','both','?'];
+
+function nameIn(run, id) {
+  const a = (run.agents[String(id)] || run.agents[id] || {});
+  const real = a.realname && a.realname !== a.username ? ` (${a.realname})` : '';
+  return (a.username || ('agent' + id)) + real;
+}
+
+function roundReport(run, rnd) {
+  // Everything that happened in one round of one run, in full: who acted, on
+  // whom, with what text, plus what the feed delivered and what it changed.
+  const evs = (run.events || []).filter(e => e[0] === rnd);
+  const exps = (run.exposures || []).filter(e => e[0] === rnd);
+  const tl = (run.timeline || []).find(t => t.round === rnd) || {};
+
+  const byAction = {};
+  evs.forEach(e => byAction[e[2]] = (byAction[e[2]] || 0) + 1);
+
+  // New follow edges created this round.
+  const edgesNow = (run.graph_by_round || {})[rnd] || [];
+  const edgesPrev = (run.graph_by_round || {})[rnd - 1] || [];
+  const prevKey = new Set(edgesPrev.map(p => p.join('>')));
+  const newEdges = edgesNow.filter(p => !prevKey.has(p.join('>')));
+
+  const viaGraph = exps.filter(e => e[5] === 1 || e[5] === 2).length;
+
+  const evHtml = evs.length ? evs.map(e => {
+    const [, actor, act, pid, tgt, text, cid, newPid] = e;
+    let body = '';
+    if (act === 'create_comment' && cid && run.comments[cid])
+      body = run.comments[cid].content;
+    else if (text) body = text;
+    const target = (tgt !== null && tgt !== undefined)
+      ? ` <span style="opacity:.7">&rarr;</span> ${esc(nameIn(run, tgt))}` : '';
+    const on = pid ? ` <span class="meta">post #${pid}</span>`
+                   : (newPid ? ` <span class="meta">post #${newPid}</span>` : '');
+    return `<div class="ev"><b>${esc(nameIn(run, actor))}</b> ` +
+      `<span style="color:var(--interact)">${esc(act)}</span>${on}${target}` +
+      (body ? `<div class="quote">${esc(body)}</div>` : '') + `</div>`;
+  }).join('') : '<div class="meta">no actions this round</div>';
+
+  const edgeHtml = newEdges.length
+    ? newEdges.map(([a, b]) =>
+        `<div class="ev">${esc(nameIn(run, a))} <span style="color:var(--follow)">now follows</span> ${esc(nameIn(run, b))}</div>`).join('')
+    : '<div class="meta">no new follows this round</div>';
+
+  // Who saw whom, this round.
+  const pair = {};
+  exps.forEach(e => {
+    if (e[3] === null || e[3] === undefined || e[3] === e[1]) return;
+    const k = e[1] + '>' + e[3];
+    pair[k] = (pair[k] || 0) + 1;
+  });
+  const topPairs = Object.entries(pair).sort((a, b) => b[1] - a[1]).slice(0, 15);
+  const pairHtml = topPairs.length ? topPairs.map(([k, n]) => {
+    const [v, au] = k.split('>').map(Number);
+    return `<tr><td class="who">${esc(nameIn(run, v))}</td>` +
+      `<td class="who">${esc(nameIn(run, au))}</td><td class="num">${n}</td></tr>`;
+  }).join('') : '<tr><td colspan="3">nobody saw anything this round</td></tr>';
+
+  const srcCount = {};
+  exps.forEach(e => srcCount[SRCNAME[e[5]]] = (srcCount[SRCNAME[e[5]]] || 0) + 1);
+
+  return `<div class="col">
+    <div class="colhead">${esc(run.label)} &middot; round ${rnd}</div>
+    <div class="card"><dl class="kv">
+      <dt>actions</dt><dd>${evs.length}</dd>
+      <dt>exposures</dt><dd>${exps.length}</dd>
+      <dt>via graph</dt><dd>${viaGraph}${exps.length ? ' (' + Math.round(viaGraph / exps.length * 100) + '%)' : ''}</dd>
+      <dt>new follows</dt><dd>${newEdges.length}</dd>
+      <dt>total edges</dt><dd>${edgesNow.length}</dd>
+      <dt>feed sources</dt><dd>${esc(JSON.stringify(srcCount))}</dd>
+      <dt>action mix</dt><dd>${esc(JSON.stringify(byAction))}</dd>
+    </dl></div>
+    <div class="card"><h3>Every action this round (${evs.length})</h3>${evHtml}</div>
+    <div class="card"><h3>New connections (${newEdges.length})</h3>${edgeHtml}</div>
+    <div class="scroll"><table><caption>Who saw whom this round</caption>
+      <thead><tr><th>Viewer</th><th>Author</th><th class="num">Times</th></tr></thead>
+      <tbody>${pairHtml}</tbody></table></div>
+  </div>`;
+}
+
+function roundsPanel() {
+  const selA = document.getElementById('roundA');
+  const selB = document.getElementById('roundB');
+  const selRun = document.getElementById('runB');
+  const cmpOn = document.getElementById('cmpOn');
+  const cmpRun = document.getElementById('cmpRun');
+
+  const opts = Array.from({length: maxRound + 1}, (_, i) =>
+    `<option value="${i}">round ${i}</option>`).join('');
+  const keepA = selA.value, keepB = selB.value;
+  selA.innerHTML = opts; selB.innerHTML = opts;
+  selA.value = (keepA && Number(keepA) <= maxRound) ? keepA : '0';
+  selB.value = (keepB && Number(keepB) <= maxRound) ? keepB : String(maxRound);
+  selRun.innerHTML = ALL.order.map(k => `<option value="${k}">${k}</option>`).join('');
+  if (!selRun.value) selRun.value = ALL.order[0];
+
+  function draw() {
+    selB.disabled = !cmpOn.checked;
+    selRun.disabled = !cmpRun.checked;
+    const box = document.getElementById('roundBody');
+    const a = roundReport(DATA, Number(selA.value));
+    if (!cmpOn.checked && !cmpRun.checked) {
+      box.className = 'cmp'; box.innerHTML = a; return;
+    }
+    // Comparing across runs pins the same round in the other run unless a
+    // different round is also chosen, so a like-for-like read is the default.
+    const otherRun = cmpRun.checked ? ALL.runs[selRun.value] : DATA;
+    const otherRnd = cmpOn.checked ? Number(selB.value) : Number(selA.value);
+    box.className = 'cmp two';
+    box.innerHTML = a + roundReport(otherRun, otherRnd);
+  }
+  [selA, selB, selRun].forEach(el => el.onchange = draw);
+  [cmpOn, cmpRun].forEach(el => el.onchange = draw);
+  draw();
 }
 
 // ---------- people: full dossier for one agent ----------

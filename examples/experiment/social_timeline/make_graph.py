@@ -187,6 +187,19 @@ HTML = """<title>Agent Network Formation</title>
   .kv dt { color:var(--muted); font-family:"IBM Plex Mono", monospace;
            font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; }
   .kv dd { margin:0; font-variant-numeric:tabular-nums; }
+  .tr { font-family:"IBM Plex Mono", monospace; font-size:12.5px;
+        line-height:1.65; }
+  .tr .rnd { font-family:"IBM Plex Sans Condensed","IBM Plex Sans",sans-serif;
+             font-size:17px; font-weight:700; color:var(--fg);
+             border-bottom:1px solid var(--line); padding:14px 0 6px;
+             margin-top:18px; }
+  .tr .saw { color:var(--muted); padding-left:18px; }
+  .tr .did { color:var(--fg); padding-left:6px; }
+  .tr .acted { color:var(--interact); font-weight:600; }
+  .tr .txt { color:var(--fg); padding-left:34px; border-left:2px solid var(--line);
+             margin:3px 0 6px 12px; font-family:"IBM Plex Sans",sans-serif;
+             font-size:13px; }
+  .tr .who { color:var(--follow); font-weight:600; }
   .ev { border-bottom:1px solid var(--line); padding:7px 0; font-size:13px; }
   .ev:last-child { border-bottom:none; }
   .card { border:1px solid var(--line); border-radius:8px;
@@ -297,6 +310,19 @@ HTML = """<title>Agent Network Formation</title>
       <select id="runB" disabled></select>
     </div>
     <div id="roundBody" class="cmp"></div>
+  </section>
+
+  <section class="panel" id="panel-transcript" hidden>
+    <p class="lede">A plain narration of everything that happened, in order.
+      Every post an agent was shown, whether they acted on it, and every action
+      they took with its full text. Nothing is summarised away.</p>
+    <div class="runbar">
+      <label for="trRound">Show</label>
+      <select id="trRound"></select>
+      <label><input type="checkbox" id="trFeeds" checked> include what each agent was shown</label>
+      <span class="meta" id="trCount"></span>
+    </div>
+    <div id="transcriptBody"></div>
   </section>
 
   <section class="panel" id="panel-people" hidden>
@@ -442,6 +468,7 @@ function loadRun(label) {
 
   algoBox(); agentTable(); propTable(); exposureTable(); footnote();
   postList(); timelineTable(); methodBody(); roundsPanel();
+  transcriptPanel();
   document.getElementById('agentDetail').innerHTML = '';
   render(maxRound);
 }
@@ -720,6 +747,7 @@ function footnote() {
 
 // ---------- tabs ----------
 const TABS = [['network','Network'], ['rounds','Rounds'],
+              ['transcript','Transcript'],
               ['people','People'], ['posts','Posts'],
               ['timeline','Timeline'], ['method','Method & integrity']];
 const tabs = document.getElementById('tabs');
@@ -739,6 +767,113 @@ tabs.addEventListener('click', e => {
 function esc(t) {
   return String(t === null || t === undefined ? '' : t)
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ---------- transcript: narrate everything, in order ----------
+const VERB = {
+  create_post: 'posted', create_comment: 'replied to', like_post: 'liked',
+  dislike_post: 'disliked', like_comment: 'liked a comment on',
+  dislike_comment: 'disliked a comment on', repost: 'reposted',
+  quote_post: 'quoted', follow: 'followed', unfollow: 'unfollowed',
+  mute: 'muted', unmute: 'unmuted', report_post: 'reported',
+  search_posts: 'searched posts for', search_user: 'searched for a user',
+  trend: 'checked trending', do_nothing: 'did nothing',
+  unlike_post: 'removed a like from', undo_dislike_post: 'undid a dislike on',
+};
+
+function transcriptFor(run, rnd, withFeeds) {
+  // One round, narrated. Feeds first -- an agent can only act on what it was
+  // shown, so the exposures are the context its actions are answering.
+  const out = [`<div class="rnd">Round ${rnd}</div>`];
+  const evs = (run.events || []).filter(e => e[0] === rnd);
+  const exps = (run.exposures || []).filter(e => e[0] === rnd);
+
+  const actors = [...new Set([...exps.map(e => e[1]), ...evs.map(e => e[1])])]
+    .sort((a, b) => a - b);
+
+  if (!actors.length) {
+    out.push('<div class="saw">nothing happened this round</div>');
+    return out.join('');
+  }
+
+  for (const id of actors) {
+    const nm = `<span class="who">${esc(nameIn(run, id))}</span>`;
+    const mySaw = exps.filter(e => e[1] === id)
+      .sort((a, b) => (a[4] ?? 0) - (b[4] ?? 0));
+    const myDid = evs.filter(e => e[1] === id);
+    const actedOn = new Set(myDid.map(e => e[3]).filter(x => x !== null && x !== undefined));
+
+    if (withFeeds) {
+      if (mySaw.length) {
+        out.push(`<div class="saw">${nm} opened the app and was shown ` +
+                 `${mySaw.length} post${mySaw.length === 1 ? '' : 's'}:</div>`);
+        for (const e of mySaw) {
+          const [, , pid, au, pos, src, sc] = e;
+          const post = run.posts[pid] || {};
+          const did = actedOn.has(pid);
+          out.push(`<div class="saw">&nbsp;&nbsp;#${pid} by ` +
+            `${esc(nameIn(run, au))} &middot; ${SRCNAME[src]}` +
+            (sc === null || sc === undefined ? '' : ` &middot; score ${sc}`) +
+            ` &middot; slot ${pos ?? '?'} &middot; ` +
+            (did ? '<span class="acted">ACTED ON THIS</span>'
+                 : 'scrolled past') +
+            `<div class="txt">${esc(String(post.content || '').slice(0, 220))}</div></div>`);
+        }
+      } else {
+        out.push(`<div class="saw">${nm} opened the app and was shown nothing.</div>`);
+      }
+    }
+
+    if (!myDid.length) {
+      out.push(`<div class="did">${nm} did nothing.</div>`);
+      continue;
+    }
+    for (const e of myDid) {
+      const [, , act, pid, tgt, text, cid, newPid] = e;
+      const verb = VERB[act] || act;
+      let line = `${nm} ${verb}`;
+      if (act === 'create_post') {
+        line += ` (post #${newPid ?? '?'})`;
+      } else if (tgt !== null && tgt !== undefined) {
+        line += ` ${esc(nameIn(run, tgt))}`;
+        if (pid) line += `'s post #${pid}`;
+      } else if (pid) {
+        line += ` post #${pid}`;
+      }
+      let body = '';
+      if (act === 'create_comment' && cid && run.comments[cid])
+        body = run.comments[cid].content;
+      else if (text) body = text;
+      out.push(`<div class="did">${line}.</div>` +
+               (body ? `<div class="txt">${esc(body)}</div>` : ''));
+    }
+  }
+  return out.join('');
+}
+
+function transcriptPanel() {
+  const sel = document.getElementById('trRound');
+  const feeds = document.getElementById('trFeeds');
+  const keep = sel.value;
+  sel.innerHTML = '<option value="all">every round</option>' +
+    Array.from({length: maxRound + 1}, (_, i) =>
+      `<option value="${i}">round ${i} only</option>`).join('');
+  sel.value = (keep && (keep === 'all' || Number(keep) <= maxRound)) ? keep : '0';
+
+  function draw() {
+    const body = document.getElementById('transcriptBody');
+    const rounds = sel.value === 'all'
+      ? Array.from({length: maxRound + 1}, (_, i) => i)
+      : [Number(sel.value)];
+    body.className = 'tr';
+    body.innerHTML = rounds.map(r =>
+      transcriptFor(DATA, r, feeds.checked)).join('');
+    document.getElementById('trCount').textContent =
+      `${DATA.events.length} actions and ${DATA.exposures.length} exposures ` +
+      `across ${maxRound + 1} rounds in ${DATA.label}`;
+  }
+  sel.onchange = draw; feeds.onchange = draw;
+  draw();
 }
 
 // ---------- rounds: exactly what happened, round by round ----------

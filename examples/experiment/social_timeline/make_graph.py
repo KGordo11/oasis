@@ -877,7 +877,7 @@ function transcriptPanel() {
 }
 
 // ---------- rounds: exactly what happened, round by round ----------
-const SRCNAME = ['recsys','following','both','?'];
+const SRCNAME = ['discovery','network','fof','both','?'];
 
 function nameIn(run, id) {
   const a = (run.agents[String(id)] || run.agents[id] || {});
@@ -1046,7 +1046,7 @@ function agentDetail(id) {
   // Every post this agent was shown.
   const seen = DATA.exposures.filter(e => e[1] === id)
     .sort((x, y) => x[0] - y[0] || (x[4] ?? 0) - (y[4] ?? 0));
-  const SRCN = ['recsys','following','both','?'];
+  const SRCN = ['discovery','network','fof','both','?'];
   const acted = new Set(a.seen_and_acted || []);
   const seenRows = seen.map(e => {
     const [rnd, , pid, au, pos, src, sc] = e;
@@ -1302,7 +1302,13 @@ def project(analysis_path, manifest_path=None):
               for e in (full.get("events") or [])]
 
     # [round, agent, post, author, feed_position, source, score]
-    SRC = {"recsys": 0, "following": 1, "both": 2}
+    # Old runs labelled sources recsys/following/both; the three-tier feed
+    # (F-25) labels them discovery/network/fof. They are the same concepts
+    # renamed, so both vocabularies map to one index set and runs from either
+    # era stay readable side by side.
+    SRC = {"discovery": 0, "recsys": 0,
+           "network": 1, "following": 1,
+           "fof": 2, "both": 3}
     exposures = [[e["round"], e["agent_id"], e["post_id"], e.get("author_id"),
                   e.get("feed_position"), SRC.get(e.get("source"), 3),
                   (round(e["score"], 4)

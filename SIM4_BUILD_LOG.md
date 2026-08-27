@@ -828,6 +828,40 @@ duration rather than correctness (Q-3).
     *which* agent is asking and can therefore consult *their* follow graph.
     `oasis/` remains byte-identical.
 
+### 2026-08-27 — Practice runs before scaling up
+
+66. **P1 (6 agents, 5 rounds) caught a real problem with F-25.** Fixed tier
+    sizes meant an unconnected agent got a 4-post feed against a connected
+    agent's 12 — measured at **4.5 posts per feed against the old ~12** — and
+    with so little to act on it never formed the connections that would grow
+    the feed. A trap the simulation could not climb out of.
+
+    There was also a methodological flaw: if isolated agents receive both
+    fewer social sources *and* a smaller feed, the two are confounded and low
+    engagement cannot be attributed to either.
+
+    Fix: discovery **backfills** whatever the graph did not supply, so feed
+    size is constant and only *composition* varies. A lonely agent still
+    receives nothing *from other users* — their feed is entirely algorithmic,
+    which is what a real platform shows someone who follows nobody.
+
+67. **P2 (8 agents, 6 rounds) confirmed the fix.** Feed size climbs 7.0 → 11.4
+    posts as connections form, exposures went 109 → 378, action rate held at
+    0.833, and the network and fof tiers grow round on round while discovery
+    shrinks to fill the remainder — the algorithmic-to-social shift, visible:
+
+    | round | network | fof | discovery | posts/feed |
+    |---|---|---|---|---|
+    | 1 | 0 | 0 | 56 | 7.0 |
+    | 3 | 7 | 1 | 69 | 9.6 |
+    | 5 | 9 | 3 | 79 | 11.4 |
+
+68. **Caught before the big run, not after:** renaming the feed sources broke
+    the artifact silently. It still mapped `recsys/following/both`, so every
+    exposure from a three-tier run would have rendered as `?`. Both
+    vocabularies now map to one index set, so runs from either era stay
+    readable side by side.
+
 *(Entries continue as the build proceeds.)*
 
 ---

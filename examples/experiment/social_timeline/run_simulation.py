@@ -166,6 +166,7 @@ async def run(args):
         network_slots=args.network_slots,
         fof_slots=args.fof_slots,
         discovery_slots=args.discovery_slots,
+        feed_size=args.feed_size,
     )
 
     env = oasis.make(
@@ -218,6 +219,7 @@ async def run(args):
             "network_slots": args.network_slots,
             "fof_slots": args.fof_slots,
             "discovery_slots": args.discovery_slots,
+            "feed_size": args.feed_size,
             "feed_model": "three-tier: network > friend-of-friend > "
                           "discovery; social ties are not interest-filtered",
         },
@@ -374,6 +376,11 @@ def main():
     p.add_argument("--temperature", type=float, default=0.7,
                    help="LLM sampling temperature. Previously unset and "
                         "therefore unstated; now explicit and recorded")
+    p.add_argument("--feed-size", type=int, default=12,
+                   dest="feed_size",
+                   help="total posts per feed. Discovery backfills "
+                        "what the graph did not supply, so size is "
+                        "constant and only composition varies")
     p.add_argument("--network-slots", type=int, default=5,
                    dest="network_slots",
                    help="feed slots for people you follow. Not "

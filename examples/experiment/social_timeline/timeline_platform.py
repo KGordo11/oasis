@@ -147,6 +147,7 @@ class TimelinePlatform(Platform):
     def __init__(self, *args, recency_span_rounds: int | None = None,
                  explore_slots: int = 2, network_slots: int = 5,
                  fof_slots: int = 3, discovery_slots: int = 4,
+                 feed_size: int = 12,
                  **kwargs):
         """recency_span_rounds: number of rounds over which a post should decay
         from brand-new to stale.
@@ -181,6 +182,10 @@ class TimelinePlatform(Platform):
         self.network_slots = network_slots
         self.fof_slots = fof_slots
         self.discovery_slots = discovery_slots
+        # Total posts per feed. Discovery backfills whatever the
+        # graph did not supply, so size is constant and only
+        # composition varies with how connected an agent is.
+        self.feed_size = feed_size
         self._feed_order = {}
         # agent_id -> ids surfaced by that agent's own searches
         self._search_hits = {}
@@ -557,11 +562,31 @@ class TimelinePlatform(Platform):
             from_fof = set(fof_pool[:self.fof_slots])
 
             # tier 3 -- discovery, interest ranked, with a slice of randomness
+            #
+            # Discovery BACKFILLS whatever the graph did not supply, so the
+            # feed is a constant size and only its composition varies. Two
+            # reasons, one practical and one methodological:
+            #
+            #   practical: with fixed tier sizes an unconnected agent got a
+            #   4-post feed against a connected agent's 12, and could barely
+            #   act, so it never formed the connections that would grow the
+            #   feed -- a trap the simulation could not climb out of.
+            #   Measured in p1: 4.5 posts per feed against the old ~12.
+            #
+            #   methodological: if isolated agents receive both fewer social
+            #   sources AND a smaller feed, the two are confounded and low
+            #   engagement cannot be attributed to either. Holding size fixed
+            #   isolates the variable that matters -- where content came from.
+            #
+            # A lonely agent still gets nothing *from other users*: their feed
+            # is entirely algorithmic, which is exactly what a real platform
+            # shows someone who follows nobody.
             taken = from_network | from_fof
             disc_ranked = [p for p in ranked if p not in taken]
-            n_explore = min(self.explore_slots,
-                            max(0, self.discovery_slots - 1))
-            n_top = self.discovery_slots - n_explore
+            disc_budget = max(self.discovery_slots,
+                              self.feed_size - len(taken))
+            n_explore = min(self.explore_slots, max(0, disc_budget - 1))
+            n_top = disc_budget - n_explore
             disc = disc_ranked[:n_top]
             rest = [p for p in disc_ranked[n_top:]]
             disc += (random.sample(rest, min(n_explore, len(rest)))

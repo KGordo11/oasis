@@ -701,6 +701,20 @@ duration rather than correctness (Q-3).
     3 refresh failures — and the fix lands in the next run. Restarting a third
     time would have cost more than the measurement was worth.
 
+53. **Complete roster added to every agent dossier.** The pair chronologies
+    covered pairs that had activity; what was missing was the *whole* picture
+    per agent. Each dossier entry now carries a row for **every one of the
+    other 35 agents** — times seen, which of their posts specifically, what
+    this agent did to them, what they did back — including the agents never
+    seen at all, which are stated rather than omitted. Each ends with a
+    summary line: *"Saw content from 26 of 35 other agents; never saw 9."*
+
+    Absence is data here: an agent that never once saw another is a fact about
+    what the feed did, and leaving those rows out would make the roster look
+    complete while hiding the reach gaps.
+
+    Dossier is now ~23,600 lines across 12 sections.
+
 *(Entries continue as the build proceeds.)*
 
 ---

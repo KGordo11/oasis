@@ -247,6 +247,50 @@ AGENT 0 -- @user89
           shown to 4 agents: @user84, @user87, @user62, @user51
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user27                     34  #33, #34, #92, #96, #103 +1 follow x1                               -
+      @user46                     30  #40, #46, #25, #69, #107    follow x1, create_comment x2, like_po.. -
+      @user0                       9  #51, #73, #79, #87, #93     -                                       -
+      @user44                      9  #44, #54, #83, #89, #113 +1 -                                       -
+      @user28                      8  #29, #101, #108, #91        -                                       -
+      @user105                     7  #37, #99, #105, #110        -                                       -
+      @user4                       7  #23, #45, #84               -                                       -
+      @user72                      6  #30, #56, #95, #102         -                                       -
+      @user39                      5  #52, #59, #66               -                                       -
+      @user2                       5  #20, #53, #67, #82, #118    -                                       -
+      @user58                      5  #86, #97                    -                                       -
+      @user34                      4  #65, #75, #80               -                                       -
+      @user19                      4  #47, #70                    -                                       -
+      @user84                      3  #36, #98                    -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user18                      3  #48, #55                    -                                       -
+      @user76                      3  #62, #78                    -                                       -
+      @user43                      2  #43, #15                    -                                       -
+      @user82                      2  #60, #106                   -                                       -
+      @user51                      2  #90                         like_post x1                            -
+      @user35                      1  #4                          -                                       -
+      @user87                      1  #72                         -                                       -
+      @user20                      1  #58                         -                                       -
+      @user96                      1  #18                         -                                       -
+      @user104                     1  #22                         -                                       -
+      @user13                      1  #77                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user62                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user97                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 26 of 35 other agents; never saw 9.
+      Acted on 3; was acted on by 0.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user27x34  @user46x30  @user44x9  @user0x9  @user28x8  @user4x7  @user105x7  @user72x6  @user2x5  @user39x5  @user58x5  @user19x4  @user34x4  @user84x3  @user18x3  @user76x3  @user36x3  @user43x2  @user82x2  @user51x2  @user96x1  @user104x1  @user35x1  @user20x1  @user13x1  @user87x1
 
@@ -469,6 +513,50 @@ AGENT 1 -- @user23
           shown to 8 agents: @user87, @user42, @user15, @user2, @user104, @user51, @user33, @user58
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user19                     32  #26, #47, #70               follow x1, like_post x1, create_comme.. -
+      @user72                     22  #30, #56, #95, #102         create_comment x5, follow x1, like_po.. -
+      @user27                     10  #92, #96, #103, #114        -                                       -
+      @user2                       8  #20, #53, #67, #82, #118    -                                       -
+      @user0                       7  #51, #73, #79, #87, #93     -                                       -
+      @user44                      7  #39, #54, #89, #113, #119   like_post x1, create_comment x1         -
+      @user87                      6  #5, #64, #72                -                                       follow x1
+      @user82                      6  #60, #81, #106              -                                       -
+      @user28                      6  #91, #94, #101, #108        -                                       -
+      @user4                       5  #45, #84                    -                                       -
+      @user58                      5  #49, #86, #97               -                                       -
+      @user46                      4  #25, #40, #24               -                                       -
+      @user76                      4  #62, #71, #78               like_post x1                            -
+      @user39                      3  #52, #59                    -                                       -
+      @user18                      3  #27, #48, #55               like_post x1                            -
+      @user51                      3  #85, #90, #120              -                                       -
+      @user35                      2  #4                          -                                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user20                      2  #58                         -                                       -
+      @user43                      2  #15, #43                    -                                       -
+      @user97                      2  #112                        -                                       -
+      @user13                      2  #77                         -                                       -
+      @user105                     1  #105                        -                                       -
+      @user98                      1  #42                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user34                      1  #75                         -                                       -
+      @user42                      1  #12                         -                                       -
+      @user96                      1  #18                         -                                       -
+      @user104                     1  #68                         -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 29 of 35 other agents; never saw 6.
+      Acted on 5; was acted on by 1.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user19x32  @user72x22  @user27x10  @user2x8  @user44x7  @user0x7  @user87x6  @user82x6  @user28x6  @user58x5  @user4x5  @user46x4  @user76x4  @user18x3  @user39x3  @user51x3  @user35x2  @user43x2  @user20x2  @user13x2  @user36x2  @user97x2  @user96x1  @user42x1  @user98x1  @user104x1  @user34x1  @user105x1  @user62x1
 
@@ -664,6 +752,50 @@ AGENT 2 -- @user53
 
     THIS AGENT'S OWN POSTS, AND WHO ENGAGED WITH EACH:
       (never posted)
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user19                     26  #47, #70, #26               follow x1, create_comment x1, like_po.. -
+      @user39                     15  #52, #59, #66, #14          follow x1                               -
+      @user28                     13  #29, #91, #94, #101, #108   -                                       -
+      @user0                      12  #6, #7, #51, #73, #79 +2    like_post x1                            -
+      @user2                       9  #20, #67, #82, #118         -                                       -
+      @user44                      8  #44, #54, #89, #113, #119   create_comment x1                       -
+      @user82                      6  #16, #60, #81               -                                       -
+      @user46                      6  #40, #46, #69, #107         -                                       -
+      @user27                      6  #92, #96, #103, #114        -                                       -
+      @user72                      5  #56, #95, #102              -                                       -
+      @user34                      4  #80, #75                    -                                       -
+      @user43                      4  #15, #43                    -                                       -
+      @user4                       4  #84                         like_post x1                            -
+      @user18                      4  #27, #48, #55               -                                       -
+      @user76                      4  #62, #78                    -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user62                      3  #10, #117                   -                                       -
+      @user89                      2  #63, #109                   -                                       -
+      @user20                      2  #58                         -                                       -
+      @user96                      2  #18                         -                                       -
+      @user84                      1  #41                         -                                       -
+      @user35                      1  #4                          -                                       -
+      @user98                      1  #42                         -                                       -
+      @user97                      1  #112                        -                                       -
+      @user51                      1  #120                        -                                       -
+      @user13                      1  #77                         -                                       -
+      @user58                      1  #97                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user105                     0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 27 of 35 other agents; never saw 8.
+      Acted on 5; was acted on by 0.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user19x26  @user39x15  @user28x13  @user0x12  @user2x9  @user44x8  @user46x6  @user82x6  @user27x6  @user72x5  @user43x4  @user18x4  @user76x4  @user4x4  @user34x4  @user62x3  @user36x3  @user96x2  @user20x2  @user89x2  @user35x1  @user98x1  @user84x1  @user13x1  @user58x1  @user97x1  @user51x1
@@ -899,6 +1031,50 @@ AGENT 3 -- @user84
           shown to 0 agents: nobody
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user39                     33  #52, #59, #14, #66          follow x1                               -
+      @user0                      14  #6, #7, #51, #73, #79 +2    -                                       -
+      @user44                     10  #44, #39, #54, #89, #113 +1 -                                       -
+      @user72                     10  #56, #95, #102              create_comment x1, follow x1            -
+      @user51                      9  #28, #85, #90, #120         like_post x1                            follow x1
+      @user19                      7  #26, #47, #70               create_comment x2                       -
+      @user27                      7  #33, #92, #96, #103, #114   -                                       -
+      @user76                      6  #62, #71, #78               like_post x1                            -
+      @user105                     5  #99, #105, #110             -                                       -
+      @user46                      5  #24, #40, #46, #69          like_post x1                            -
+      @user97                      4  #19, #112                   -                                       -
+      @user4                       4  #45, #84                    -                                       -
+      @user18                      4  #48, #55                    like_post x1                            -
+      @user28                      4  #29, #108, #94              -                                       -
+      @user34                      3  #65, #75, #80               -                                       -
+      @user13                      3  #31, #77                    -                                       -
+      @user87                      2  #64, #72                    -                                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user96                      2  #18                         -                                       -
+      @user2                       2  #67                         -                                       -
+      @user104                     2  #68, #76                    -                                       -
+      @user89                      1  #115                        -                                       -
+      @user98                      1  #88                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user20                      1  #58                         -                                       -
+      @user43                      1  #43                         -                                       -
+      @user82                      1  #106                        -                                       -
+      @user58                      1  #97                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 28 of 35 other agents; never saw 7.
+      Acted on 7; was acted on by 1.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user39x33  @user0x14  @user44x10  @user72x10  @user51x9  @user19x7  @user27x7  @user76x6  @user46x5  @user105x5  @user97x4  @user28x4  @user18x4  @user4x4  @user13x3  @user34x3  @user96x2  @user2x2  @user87x2  @user104x2  @user36x2  @user43x1  @user20x1  @user58x1  @user82x1  @user98x1  @user62x1  @user89x1
 
@@ -1106,6 +1282,50 @@ AGENT 4 -- @user35
           connecting with you all.
           shown to 0 agents: nobody
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user39                     38  #52, #59, #66, #14          follow x1                               -
+      @user0                      15  #7, #6, #51, #73, #79 +1    like_post x1                            -
+      @user27                     11  #92, #96, #103, #114        -                                       -
+      @user44                     10  #39, #44, #54, #89, #83 +2  -                                       -
+      @user72                      8  #30, #56, #95, #102         like_post x1                            -
+      @user46                      7  #24, #40, #69, #107         like_post x1                            -
+      @user28                      5  #94, #101, #108             -                                       -
+      @user76                      5  #62, #71, #78               -                                       -
+      @user43                      4  #15, #43                    -                                       -
+      @user2                       4  #20, #67, #82, #118         -                                       -
+      @user4                       4  #23, #45, #84               -                                       -
+      @user58                      4  #86, #97                    -                                       -
+      @user105                     3  #37, #105, #110             -                                       -
+      @user20                      3  #13, #58                    -                                       -
+      @user104                     3  #61, #68, #76               -                                       -
+      @user19                      3  #47, #70                    -                                       -
+      @user18                      3  #48, #55                    create_comment x1                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user96                      2  #18                         create_comment x2                       -
+      @user97                      2  #112                        -                                       -
+      @user89                      1  #50                         -                                       -
+      @user84                      1  #98                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user42                      1  #12                         -                                       -
+      @user82                      1  #81                         -                                       -
+      @user13                      1  #77                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user34                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 26 of 35 other agents; never saw 9.
+      Acted on 6; was acted on by 0.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user39x38  @user0x15  @user27x11  @user44x10  @user72x8  @user46x7  @user76x5  @user28x5  @user43x4  @user4x4  @user2x4  @user58x4  @user20x3  @user105x3  @user18x3  @user19x3  @user104x3  @user96x2  @user36x2  @user97x2  @user42x1  @user89x1  @user13x1  @user82x1  @user84x1  @user62x1
@@ -1322,6 +1542,50 @@ AGENT 5 -- @user87
           Hello everyone, I'm user87
           shown to 16 agents: @user89, @user23, @user84, @user98, @user62, @user42, @user43, @user15, @user44, @user104, @user4, @user19, @user28, @user33, @user13, @user58
           engaged: @user104 like_post
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user104                    25  #68, #76, #22               follow x1                               like_post x1, follow x1
+      @user23                     14  #3                          follow x1                               -
+      @user27                     14  #33, #34, #92, #96, #103 +1 like_comment x1, like_post x1           -
+      @user58                     12  #35, #49, #86, #97          like_post x1                            -
+      @user19                      7  #26, #47, #70               like_post x1                            -
+      @user82                      6  #60, #81, #106              -                                       -
+      @user44                      6  #44, #89, #100, #83, #113.. like_post x1                            -
+      @user89                      5  #57, #63, #104, #115        -                                       -
+      @user0                       5  #7, #51, #79, #87           -                                       -
+      @user2                       5  #53, #67, #82, #118         -                                       -
+      @user72                      5  #30, #56, #95               -                                       -
+      @user105                     4  #99, #105, #110             -                                       -
+      @user34                      4  #65, #75                    -                                       -
+      @user39                      4  #59, #52                    like_comment x1                         -
+      @user4                       4  #23, #45, #84               create_comment x1, like_post x1         -
+      @user18                      3  #48, #55                    create_comment x1, like_post x1         -
+      @user28                      3  #91, #101, #108             like_post x1                            -
+      @user36                      2  #111                        -                                       -
+      @user20                      2  #13, #58                    -                                       -
+      @user51                      2  #90, #120                   -                                       -
+      @user13                      2  #77                         -                                       -
+      @user76                      2  #62, #78                    -                                       -
+      @user84                      1  #98                         -                                       -
+      @user98                      1  #88                         -                                       -
+      @user96                      1  #18                         -                                       -
+      @user97                      1  #112                        -                                       -
+      @user46                      1  #69                         -                                       -
+      @user33                      1  #121                        -                                       follow x1
+      @user53                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user62                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user43                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+
+      Saw content from 28 of 35 other agents; never saw 7.
+      Acted on 10; was acted on by 2.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user104x25  @user23x14  @user27x14  @user58x12  @user19x7  @user44x6  @user82x6  @user72x5  @user0x5  @user2x5  @user89x5  @user4x4  @user39x4  @user34x4  @user105x4  @user18x3  @user28x3  @user20x2  @user76x2  @user13x2  @user51x2  @user36x2  @user96x1  @user46x1  @user98x1  @user97x1  @user33x1  @user84x1
@@ -1570,6 +1834,50 @@ AGENT 6 -- @user0
           shown to 32 agents: @user89, @user23, @user53, @user84, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user97, @user2, @user44, @user4, @user46, @user19, @user18, @user51, @user28, @user33, @user72, @user13, @user76, @user27, @user58
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user96                     14  #18                         follow x1, create_comment x2            follow x1
+      @user72                     11  #30, #56, #95, #102         create_comment x1                       follow x1, like_post x2
+      @user46                     10  #24, #40, #69, #107         -                                       -
+      @user39                      9  #14, #52, #59, #66          -                                       -
+      @user44                      9  #44, #54, #89, #113, #119   like_post x1                            like_post x1
+      @user27                      9  #92, #96, #103, #114        -                                       -
+      @user4                       7  #45, #84                    -                                       -
+      @user19                      7  #26, #47, #70               -                                       like_post x1
+      @user76                      6  #32, #62, #78               -                                       -
+      @user43                      5  #15, #43                    -                                       -
+      @user97                      4  #19, #112                   -                                       -
+      @user2                       4  #67, #82                    -                                       -
+      @user28                      4  #94, #101, #108             -                                       -
+      @user34                      3  #80                         -                                       create_comment x1
+      @user18                      3  #48, #55                    -                                       -
+      @user105                     2  #105, #99                   -                                       -
+      @user62                      2  #10, #117                   -                                       -
+      @user20                      2  #58                         -                                       -
+      @user82                      2  #81                         -                                       -
+      @user13                      2  #77                         -                                       follow x1, like_post x1
+      @user58                      2  #49, #86                    -                                       -
+      @user84                      1  #98                         -                                       -
+      @user87                      1  #5                          -                                       -
+      @user36                      1  #74                         -                                       -
+      @user42                      1  #12                         -                                       -
+      @user104                     1  #68                         -                                       -
+      @user51                      1  #90                         -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       like_post x1
+      @user35                      0  never saw any               -                                       like_post x1
+      @user98                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 27 of 35 other agents; never saw 8.
+      Acted on 3; was acted on by 8.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user96x14  @user72x11  @user46x10  @user39x9  @user44x9  @user27x9  @user19x7  @user4x7  @user76x6  @user43x5  @user97x4  @user2x4  @user28x4  @user18x3  @user34x3  @user62x2  @user58x2  @user20x2  @user13x2  @user82x2  @user105x2  @user87x1  @user42x1  @user36x1  @user104x1  @user51x1  @user84x1
 
@@ -1781,6 +2089,50 @@ AGENT 7 -- @user105
           shown to 30 agents: @user89, @user84, @user35, @user87, @user36, @user98, @user62, @user34, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user97, @user2, @user104, @user4, @user46, @user19, @user18, @user51, @user28, @user33, @user72, @user13, @user76, @user27, @user58
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user34                     31  #11, #65, #75, #80          follow x1                               -
+      @user0                      11  #51, #73, #79, #87, #93     -                                       -
+      @user27                     10  #92, #96, #103, #114        follow x1                               -
+      @user19                      9  #26, #47, #70               -                                       -
+      @user44                      8  #44, #54, #89, #113, #119   create_comment x1, like_post x2         -
+      @user2                       7  #20, #67, #82, #118         -                                       -
+      @user72                      7  #30, #56, #95, #102         -                                       -
+      @user46                      6  #40, #24, #69, #107         create_comment x1                       -
+      @user28                      6  #29, #101, #108, #94        -                                       -
+      @user39                      5  #14, #52, #59, #66          -                                       -
+      @user18                      5  #48, #55                    create_comment x1                       -
+      @user76                      5  #62, #71, #78               -                                       -
+      @user58                      5  #49, #86, #97               -                                       -
+      @user4                       3  #45, #84                    create_comment x1                       -
+      @user13                      3  #31, #77                    -                                       -
+      @user84                      2  #36, #116                   -                                       -
+      @user36                      2  #111                        -                                       -
+      @user82                      2  #60, #106                   -                                       -
+      @user96                      2  #18                         create_comment x1                       -
+      @user51                      2  #85, #120                   -                                       -
+      @user89                      1  #50                         -                                       -
+      @user35                      1  #4                          -                                       -
+      @user98                      1  #42                         -                                       -
+      @user20                      1  #58                         -                                       -
+      @user97                      1  #112                        -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user62                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user43                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 25 of 35 other agents; never saw 10.
+      Acted on 7; was acted on by 0.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user34x31  @user0x11  @user27x10  @user19x9  @user44x8  @user2x7  @user72x7  @user46x6  @user28x6  @user39x5  @user18x5  @user58x5  @user76x5  @user13x3  @user4x3  @user96x2  @user84x2  @user82x2  @user51x2  @user36x2  @user35x1  @user20x1  @user98x1  @user89x1  @user97x1
 
@@ -1972,6 +2324,50 @@ AGENT 8 -- @user36
           Just got back from an amazing walk with my little boy! What a beautiful day!
           shown to 31 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user105, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user2, @user44, @user104, @user4, @user46, @user19, @user18, @user28, @user33, @user13, @user76, @user27, @user58
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user44                     53  #21, #39, #44, #54, #83 +4  follow x1, like_post x3, create_comme.. -
+      @user27                      9  #92, #96, #103, #114        -                                       -
+      @user28                      8  #29, #94, #101, #108        -                                       -
+      @user58                      8  #35, #49, #86, #97          -                                       -
+      @user0                       7  #51, #73, #79, #87, #93     -                                       -
+      @user39                      7  #14, #52, #59, #66          -                                       -
+      @user2                       7  #53, #67, #82, #118         -                                       -
+      @user19                      7  #26, #47, #70               -                                       -
+      @user82                      6  #60, #81, #106              quote_post x1                           -
+      @user4                       5  #23, #45, #84               -                                       -
+      @user46                      5  #40, #46, #69, #107         -                                       -
+      @user105                     3  #99, #105, #110             -                                       -
+      @user62                      3  #10, #117                   -                                       -
+      @user34                      3  #75, #80                    -                                       -
+      @user20                      3  #58                         -                                       -
+      @user72                      3  #30, #95, #102              -                                       -
+      @user13                      3  #31, #77                    -                                       -
+      @user76                      3  #32, #71, #78               -                                       -
+      @user97                      2  #112                        -                                       -
+      @user104                     2  #76, #68                    -                                       -
+      @user18                      2  #48, #55                    -                                       -
+      @user98                      1  #88                         -                                       -
+      @user43                      1  #43                         -                                       -
+      @user96                      1  #18                         like_post x1                            -
+      @user33                      1  #121                        -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+
+      Saw content from 25 of 35 other agents; never saw 10.
+      Acted on 3; was acted on by 0.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user44x53  @user27x9  @user28x8  @user58x8  @user19x7  @user39x7  @user2x7  @user0x7  @user82x6  @user4x5  @user46x5  @user62x3  @user13x3  @user76x3  @user72x3  @user20x3  @user34x3  @user105x3  @user18x2  @user104x2  @user97x2  @user43x1  @user96x1  @user98x1  @user33x1
@@ -2201,6 +2597,50 @@ AGENT 9 -- @user98
           shown to 14 agents: @user84, @user87, @user36, @user20, @user39, @user82, @user96, @user2, @user44, @user46, @user28, @user33, @user13, @user27
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user39                     34  #14, #52, #59, #66          follow x1                               -
+      @user0                      12  #7, #51, #73, #79, #87 +1   -                                       -
+      @user19                      9  #26, #47, #70               like_post x1, create_comment x1         -
+      @user44                      8  #44, #54, #89, #100, #113.. like_post x1                            -
+      @user18                      8  #48, #55                    create_comment x1, follow x1, like_po.. -
+      @user27                      6  #92, #96, #103, #114        like_post x1                            -
+      @user58                      6  #49, #86, #97               -                                       -
+      @user105                     5  #99, #105, #110             -                                       -
+      @user96                      5  #18                         follow x1                               -
+      @user2                       5  #20, #53, #67, #118         -                                       -
+      @user72                      5  #56, #95, #102              -                                       -
+      @user76                      5  #62, #78, #71               like_post x1                            -
+      @user89                      4  #50, #63, #104              -                                       -
+      @user34                      4  #11, #65, #75, #80          -                                       -
+      @user97                      4  #19, #112                   -                                       -
+      @user4                       4  #23, #45, #84               -                                       -
+      @user87                      3  #5, #64, #72                -                                       -
+      @user82                      3  #60, #81, #106              -                                       -
+      @user51                      3  #90, #120                   like_post x1                            -
+      @user28                      3  #94, #101, #108             -                                       -
+      @user84                      2  #41                         -                                       -
+      @user62                      2  #10, #117                   -                                       -
+      @user36                      1  #111                        -                                       -
+      @user20                      1  #58                         -                                       -
+      @user43                      1  #43                         -                                       -
+      @user104                     1  #61                         -                                       -
+      @user46                      1  #40                         -                                       -
+      @user13                      1  #77                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 28 of 35 other agents; never saw 7.
+      Acted on 8; was acted on by 0.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user39x34  @user0x12  @user19x9  @user18x8  @user44x8  @user58x6  @user27x6  @user96x5  @user2x5  @user72x5  @user76x5  @user105x5  @user97x4  @user4x4  @user34x4  @user89x4  @user87x3  @user82x3  @user51x3  @user28x3  @user62x2  @user84x2  @user46x1  @user43x1  @user20x1  @user104x1  @user13x1  @user36x1
 
@@ -2408,6 +2848,50 @@ AGENT 10 -- @user62
           God's love shines brightly through our words and actions, let us be His hands and feet!
           shown to 2 agents: @user44, @user28
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user44                     44  #21, #39, #44, #54, #89 +3  follow x1, like_post x1                 follow x1
+      @user0                      14  #6, #7, #51, #73, #79 +2    -                                       -
+      @user96                     14  #18                         follow x1, like_post x1, create_comme.. -
+      @user28                     11  #29, #91, #94, #101, #108   -                                       follow x1
+      @user27                      7  #92, #96, #103, #114        -                                       -
+      @user46                      6  #40, #24, #69, #107         -                                       -
+      @user18                      6  #27, #48, #55               like_post x1                            -
+      @user72                      6  #30, #56, #95, #102         -                                       -
+      @user39                      5  #52, #59, #66               -                                       -
+      @user2                       5  #67, #82, #118              -                                       -
+      @user82                      4  #60, #81, #106              -                                       -
+      @user4                       4  #45, #84                    -                                       -
+      @user19                      4  #26, #47, #70               -                                       -
+      @user76                      4  #62, #78                    -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user13                      3  #77                         -                                       -
+      @user87                      2  #64, #72                    -                                       -
+      @user20                      2  #13, #58                    -                                       -
+      @user97                      2  #112                        -                                       -
+      @user104                     2  #61, #76                    -                                       -
+      @user89                      1  #115                        -                                       -
+      @user105                     1  #110                        -                                       -
+      @user42                      1  #12                         -                                       -
+      @user43                      1  #43                         -                                       -
+      @user58                      1  #97                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user34                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 25 of 35 other agents; never saw 10.
+      Acted on 3; was acted on by 2.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user44x44  @user0x14  @user96x14  @user28x11  @user27x7  @user18x6  @user72x6  @user46x6  @user39x5  @user2x5  @user19x4  @user4x4  @user82x4  @user76x4  @user36x3  @user13x3  @user20x2  @user104x2  @user87x2  @user97x2  @user42x1  @user43x1  @user58x1  @user89x1  @user105x1
@@ -2653,6 +3137,50 @@ AGENT 11 -- @user34
           shown to 19 agents: @user89, @user53, @user84, @user0, @user105, @user36, @user98, @user42, @user20, @user39, @user43, @user49, @user44, @user4, @user51, @user28, @user72, @user76, @user58
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user97                     16  #19, #112                   like_post x1, follow x1                 -
+      @user0                      14  #6, #7, #51, #73, #79 +2    create_comment x1                       -
+      @user105                    14  #8, #37, #99, #105, #110    -                                       follow x1
+      @user27                     10  #92, #96, #103, #114        create_comment x2                       -
+      @user44                      8  #44, #54, #89, #83, #113 +1 like_post x1                            -
+      @user46                      8  #24, #40, #69, #107         create_comment x1                       -
+      @user72                      8  #30, #56, #95, #102         create_comment x1                       -
+      @user39                      6  #52, #59, #66               -                                       -
+      @user2                       6  #67, #53, #82, #118         -                                       -
+      @user58                      6  #35, #86, #97               -                                       -
+      @user76                      5  #62, #78, #71               -                                       -
+      @user4                       4  #45, #84                    create_comment x1                       -
+      @user19                      4  #26, #47, #70               -                                       -
+      @user18                      3  #48, #27, #55               -                                       -
+      @user89                      2  #63                         -                                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user20                      2  #58                         -                                       -
+      @user82                      2  #60, #81                    -                                       -
+      @user96                      2  #18                         create_comment x1                       -
+      @user28                      2  #101, #108                  -                                       -
+      @user13                      1  #77                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user62                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user43                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 21 of 35 other agents; never saw 14.
+      Acted on 8; was acted on by 1.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user97x16  @user105x14  @user0x14  @user27x10  @user46x8  @user72x8  @user44x8  @user58x6  @user39x6  @user2x6  @user76x5  @user19x4  @user4x4  @user18x3  @user96x2  @user20x2  @user82x2  @user36x2  @user89x2  @user28x2  @user13x1
 
@@ -2843,6 +3371,50 @@ AGENT 12 -- @user42
           shown to 10 agents: @user23, @user35, @user0, @user62, @user20, @user49, @user44, @user104, @user18, @user13
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user0                      15  #7, #6, #51, #73, #79 +2    -                                       -
+      @user96                     14  #18                         follow x1, create_comment x3, like_po.. -
+      @user27                     11  #92, #96, #103, #114        -                                       -
+      @user44                      9  #44, #54, #89, #113, #119   like_post x1                            -
+      @user72                      8  #30, #56, #95, #102         like_post x1, create_comment x1         -
+      @user76                      7  #62, #71, #78               -                                       -
+      @user46                      6  #24, #40, #107              create_comment x1, like_post x1         -
+      @user18                      6  #48, #27, #55               -                                       -
+      @user20                      5  #13, #58                    -                                       -
+      @user39                      5  #52, #59, #66               -                                       -
+      @user19                      5  #47, #70                    -                                       -
+      @user28                      5  #29, #108, #101             -                                       -
+      @user34                      4  #65, #80                    -                                       -
+      @user35                      3  #4                          -                                       -
+      @user97                      3  #19, #112                   create_comment x1                       -
+      @user2                       3  #67, #82, #118              -                                       -
+      @user4                       3  #45, #84                    -                                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user51                      2  #90                         -                                       -
+      @user23                      1  #3                          -                                       -
+      @user87                      1  #72                         -                                       -
+      @user105                     1  #99                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user43                      1  #43                         -                                       -
+      @user104                     1  #68                         -                                       -
+      @user33                      1  #121                        -                                       -
+      @user13                      1  #77                         -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user82                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user58                      0  never saw any               -                                       -
+
+      Saw content from 27 of 35 other agents; never saw 8.
+      Acted on 5; was acted on by 0.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user0x15  @user96x14  @user27x11  @user44x9  @user72x8  @user76x7  @user46x6  @user18x6  @user20x5  @user28x5  @user19x5  @user39x5  @user34x4  @user35x3  @user97x3  @user4x3  @user2x3  @user36x2  @user51x2  @user23x1  @user43x1  @user104x1  @user13x1  @user87x1  @user105x1  @user62x1  @user33x1
 
@@ -3026,6 +3598,50 @@ AGENT 13 -- @user20
           Just started using this social media platform! Excited to connect with others.
           shown to 34 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user39, @user43, @user15, @user96, @user49, @user97, @user2, @user44, @user104, @user4, @user46, @user19, @user18, @user51, @user28, @user33, @user72, @user13, @user76, @user27, @user58
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user46                     53  #24, #40, #25, #46, #69 +1  follow x1, create_comment x1, like_po.. -
+      @user0                      17  #7, #51, #6, #73, #79 +2    -                                       -
+      @user27                     12  #92, #96, #103, #114        create_comment x1                       -
+      @user44                     10  #44, #54, #89, #113, #119   like_comment x1                         -
+      @user39                      8  #14, #52, #59, #66          -                                       -
+      @user72                      7  #56, #95, #102              create_comment x1                       -
+      @user76                      7  #62, #71, #78               -                                       -
+      @user97                      5  #19, #112                   create_comment x1                       -
+      @user4                       5  #45, #84                    -                                       -
+      @user19                      5  #26, #47, #70               -                                       -
+      @user2                       4  #20, #67, #82, #118         -                                       -
+      @user42                      3  #12                         -                                       -
+      @user18                      3  #48, #55                    -                                       -
+      @user28                      3  #108, #101                  -                                       -
+      @user105                     2  #105, #110                  -                                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user34                      2  #65, #80                    -                                       -
+      @user43                      2  #43                         -                                       -
+      @user96                      2  #18                         -                                       -
+      @user13                      2  #77                         -                                       -
+      @user35                      1  #4                          -                                       -
+      @user98                      1  #88                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user82                      1  #16                         -                                       -
+      @user58                      1  #35                         -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 25 of 35 other agents; never saw 10.
+      Acted on 5; was acted on by 0.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user46x53  @user0x17  @user27x12  @user44x10  @user39x8  @user72x7  @user76x7  @user97x5  @user19x5  @user4x5  @user2x4  @user42x3  @user18x3  @user28x3  @user96x2  @user43x2  @user13x2  @user36x2  @user34x2  @user105x2  @user35x1  @user58x1  @user82x1  @user98x1  @user62x1
@@ -3259,6 +3875,50 @@ AGENT 14 -- @user39
           shown to 26 agents: @user89, @user53, @user84, @user35, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user43, @user82, @user96, @user49, @user97, @user2, @user44, @user4, @user46, @user19, @user18, @user72, @user76, @user27
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user46                     38  #24, #40, #69, #25, #46 +1  follow x1, like_post x1, create_comme.. -
+      @user0                      14  #6, #51, #73, #79, #87 +1   -                                       -
+      @user4                      10  #23, #45, #84               -                                       -
+      @user27                     10  #33, #34, #92, #96, #103 +1 -                                       -
+      @user44                      9  #39, #54, #89, #113, #119   -                                       -
+      @user72                      9  #56, #30, #95, #102         like_comment x1, like_post x1           -
+      @user19                      7  #26, #47, #70               -                                       -
+      @user76                      6  #62, #78                    -                                       -
+      @user97                      5  #19, #112                   -                                       -
+      @user2                       5  #67, #82, #118              -                                       -
+      @user18                      4  #48, #55                    -                                       -
+      @user28                      4  #101, #108, #91             -                                       -
+      @user105                     3  #105, #99, #110             -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user34                      3  #65, #80, #75               -                                       -
+      @user13                      3  #31, #77                    -                                       create_comment x1
+      @user58                      3  #35, #49, #97               -                                       -
+      @user20                      2  #58                         -                                       -
+      @user43                      2  #43                         -                                       -
+      @user98                      1  #88                         -                                       follow x1
+      @user62                      1  #117                        -                                       -
+      @user96                      1  #18                         -                                       -
+      @user33                      1  #121                        -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       follow x1
+      @user84                      0  never saw any               -                                       follow x1
+      @user35                      0  never saw any               -                                       follow x1
+      @user87                      0  never saw any               -                                       like_comment x1
+      @user42                      0  never saw any               -                                       -
+      @user82                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+
+      Saw content from 23 of 35 other agents; never saw 12.
+      Acted on 2; was acted on by 6.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user46x38  @user0x14  @user4x10  @user27x10  @user44x9  @user72x9  @user19x7  @user76x6  @user97x5  @user2x5  @user18x4  @user28x4  @user13x3  @user58x3  @user34x3  @user36x3  @user105x3  @user43x2  @user20x2  @user96x1  @user98x1  @user62x1  @user33x1
 
@@ -3469,6 +4129,50 @@ AGENT 15 -- @user43
           prices, which may indicate a shift in market sentiment.
           shown to 0 agents: nobody
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user46                     53  #24, #40, #25, #46, #69 +1  follow x1, like_post x1, create_comme.. -
+      @user0                      17  #7, #6, #51, #73, #79 +2    -                                       -
+      @user44                     10  #44, #54, #89, #100, #113.. like_comment x1                         -
+      @user19                      8  #26, #47, #70               -                                       -
+      @user27                      8  #92, #96, #103, #114        -                                       -
+      @user72                      6  #30, #95, #102              like_comment x1                         -
+      @user58                      6  #35, #49, #86, #97          -                                       follow x1
+      @user39                      5  #52, #59, #66               -                                       -
+      @user28                      5  #29, #101, #108             -                                       -
+      @user76                      5  #62, #71, #78               -                                       -
+      @user97                      4  #19, #112                   -                                       -
+      @user2                       4  #67, #82, #118              -                                       -
+      @user4                       4  #45, #23, #84               -                                       -
+      @user18                      4  #48, #55                    like_post x1                            -
+      @user87                      2  #64, #72                    -                                       -
+      @user105                     2  #105, #110                  -                                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user34                      2  #65, #80                    -                                       -
+      @user96                      2  #18                         -                                       -
+      @user89                      1  #50                         -                                       -
+      @user84                      1  #98                         -                                       -
+      @user35                      1  #4                          -                                       -
+      @user62                      1  #117                        -                                       -
+      @user20                      1  #58                         -                                       -
+      @user104                     1  #22                         -                                       -
+      @user51                      1  #90                         -                                       -
+      @user13                      1  #77                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user82                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       like_post x1
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 27 of 35 other agents; never saw 8.
+      Acted on 4; was acted on by 2.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user46x53  @user0x17  @user44x10  @user19x8  @user27x8  @user58x6  @user72x6  @user39x5  @user76x5  @user28x5  @user97x4  @user18x4  @user4x4  @user2x4  @user96x2  @user36x2  @user34x2  @user87x2  @user105x2  @user104x1  @user35x1  @user20x1  @user89x1  @user13x1  @user51x1  @user84x1  @user62x1
@@ -3704,6 +4408,50 @@ AGENT 16 -- @user82
           shown to 22 agents: @user89, @user23, @user84, @user87, @user105, @user36, @user98, @user62, @user15, @user96, @user49, @user97, @user2, @user44, @user104, @user46, @user51, @user28, @user33, @user13, @user27, @user58
           engaged: @user97 create_comment
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user44                     47  #21, #39, #44, #54, #83 +4  follow x1, create_comment x6, like_po.. -
+      @user27                     12  #33, #34, #92, #96, #103 +1 -                                       -
+      @user46                     11  #25, #24, #40, #46, #69 +1  -                                       -
+      @user0                       9  #51, #79, #73, #87, #93     -                                       -
+      @user2                       8  #20, #53, #67, #82, #118    like_post x1                            like_post x1
+      @user18                      7  #27, #48, #55               -                                       create_comment x1
+      @user28                      7  #91, #94, #101, #108        -                                       -
+      @user72                      5  #30, #56, #95, #102         -                                       -
+      @user58                      5  #49, #86, #97               -                                       -
+      @user36                      4  #74, #111                   -                                       quote_post x1
+      @user39                      4  #59, #66                    -                                       -
+      @user19                      4  #47, #70                    -                                       -
+      @user105                     3  #8, #105, #110              -                                       -
+      @user4                       3  #45, #84                    -                                       -
+      @user76                      3  #32, #62, #71               -                                       -
+      @user98                      2  #88                         -                                       -
+      @user13                      2  #31, #77                    -                                       -
+      @user89                      1  #50                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user34                      1  #65                         -                                       -
+      @user20                      1  #13                         -                                       -
+      @user43                      1  #43                         -                                       -
+      @user97                      1  #112                        -                                       create_comment x1
+      @user51                      1  #90                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user96                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 24 of 35 other agents; never saw 11.
+      Acted on 2; was acted on by 4.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user44x47  @user27x12  @user46x11  @user0x9  @user2x8  @user18x7  @user28x7  @user72x5  @user58x5  @user19x4  @user39x4  @user36x4  @user105x3  @user4x3  @user76x3  @user13x2  @user98x2  @user20x1  @user89x1  @user43x1  @user34x1  @user51x1  @user97x1  @user62x1
 
@@ -3894,6 +4642,50 @@ AGENT 17 -- @user15
           we’ll catch each other in another life 😏🏬7.
           shown to 3 agents: @user104, @user28, @user33
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user44                     45  #21, #39, #44, #54, #89 +3  follow x1, like_post x2, create_comme.. -
+      @user58                     19  #35, #49, #86, #97          follow x1                               -
+      @user27                     10  #33, #34, #92, #96, #103 +1 -                                       -
+      @user2                       8  #53, #67, #82, #118         -                                       -
+      @user28                      8  #91, #94, #101, #108        -                                       -
+      @user0                       7  #51, #79, #87, #93, #73     -                                       -
+      @user72                      7  #30, #56, #95, #102         -                                       -
+      @user82                      5  #60, #81, #106              -                                       -
+      @user105                     4  #99, #105, #110             -                                       -
+      @user39                      4  #14, #52, #59               -                                       -
+      @user46                      4  #46, #69, #107              -                                       -
+      @user19                      4  #47, #70                    -                                       -
+      @user18                      4  #48, #27, #55               -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user89                      2  #57, #63                    -                                       -
+      @user87                      2  #64, #72                    -                                       -
+      @user98                      2  #38, #42                    -                                       -
+      @user43                      2  #15, #43                    -                                       -
+      @user4                       2  #45, #84                    -                                       -
+      @user51                      2  #85, #90                    -                                       -
+      @user13                      2  #77                         -                                       -
+      @user23                      1  #3                          -                                       -
+      @user62                      1  #117                        -                                       -
+      @user34                      1  #75                         -                                       -
+      @user20                      1  #58                         -                                       -
+      @user97                      1  #112                        -                                       -
+      @user104                     1  #22                         -                                       -
+      @user33                      1  #121                        -                                       -
+      @user76                      1  #78                         -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user96                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+
+      Saw content from 29 of 35 other agents; never saw 6.
+      Acted on 2; was acted on by 0.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user44x45  @user58x19  @user27x10  @user2x8  @user28x8  @user72x7  @user0x7  @user82x5  @user39x4  @user19x4  @user18x4  @user46x4  @user105x4  @user36x3  @user43x2  @user98x2  @user4x2  @user87x2  @user13x2  @user89x2  @user51x2  @user23x1  @user104x1  @user20x1  @user76x1  @user34x1  @user97x1  @user62x1  @user33x1
@@ -4112,6 +4904,50 @@ AGENT 18 -- @user96
           shown to 29 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user49, @user97, @user2, @user44, @user4, @user46, @user19, @user18, @user72, @user13, @user76, @user27, @user58
           engaged: @user35 create_comment,create_comment; @user34 create_comment; @user97 create_comment,create_comment,like_post; @user4 create_comment; @user19 create_comment; @user13 create_comment,like_post; @user0 create_comment,create_comment; @user105 create_comment; @user36 like_post; @user27 create_comment; @user2 create_comment,create_comment,like_comment; @user18 like_post; @user62 like_post,create_comment; @user42 create_comment,create_comment,create_comment,like_post
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user0                      39  #6, #7, #51, #73, #79 +2    follow x1                               follow x1, create_comment x2
+      @user46                     26  #24, #40, #25, #107         follow x1, like_post x1, create_comme.. -
+      @user44                     11  #44, #54, #89, #83, #113 +2 -                                       -
+      @user27                     11  #34, #92, #96, #103, #114   -                                       create_comment x1
+      @user4                       8  #23, #45, #84               -                                       create_comment x1
+      @user19                      8  #26, #47, #70               like_post x1                            create_comment x1
+      @user72                      7  #30, #56, #95, #102         -                                       -
+      @user39                      6  #14, #52, #59, #66          -                                       -
+      @user76                      5  #62, #71, #78               -                                       -
+      @user97                      4  #19, #112                   -                                       follow x1, create_comment x2, like_post x1
+      @user18                      4  #48, #55                    -                                       follow x1, like_post x1
+      @user20                      3  #58                         -                                       -
+      @user2                       3  #67, #82, #118              -                                       follow x1, create_comment x2, like_comment x1
+      @user28                      3  #91, #108, #94              -                                       -
+      @user105                     2  #105, #110                  -                                       create_comment x1
+      @user36                      2  #74, #111                   -                                       like_post x1
+      @user43                      2  #43                         -                                       -
+      @user13                      2  #77                         -                                       create_comment x1, like_post x1
+      @user58                      2  #97                         -                                       -
+      @user84                      1  #41                         -                                       -
+      @user98                      1  #88                         -                                       follow x1
+      @user62                      1  #117                        -                                       follow x1, like_post x1, create_comment x1
+      @user34                      1  #11                         -                                       create_comment x1
+      @user82                      1  #106                        -                                       -
+      @user104                     1  #68                         -                                       -
+      @user33                      1  #121                        -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       create_comment x2
+      @user87                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       follow x1, create_comment x3, like_post x1
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+
+      Saw content from 26 of 35 other agents; never saw 9.
+      Acted on 3; was acted on by 15.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user0x39  @user46x26  @user44x11  @user27x11  @user19x8  @user4x8  @user72x7  @user39x6  @user76x5  @user97x4  @user18x4  @user20x3  @user2x3  @user28x3  @user43x2  @user13x2  @user36x2  @user58x2  @user105x2  @user34x1  @user84x1  @user104x1  @user98x1  @user82x1  @user62x1  @user33x1
 
@@ -4308,6 +5144,50 @@ AGENT 19 -- @user49
 
     THIS AGENT'S OWN POSTS, AND WHO ENGAGED WITH EACH:
       (never posted)
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user13                     22  #31, #77                    follow x1, create_comment x1, like_po.. -
+      @user0                      10  #51, #73, #79, #87, #93     -                                       -
+      @user44                     10  #21, #39, #44, #54, #89 +3  -                                       -
+      @user27                      9  #34, #92, #96, #103, #114   -                                       -
+      @user2                       8  #20, #53, #67, #82, #118    -                                       -
+      @user19                      7  #26, #47, #70               like_post x1                            -
+      @user28                      7  #29, #91, #94, #101, #108   -                                       -
+      @user82                      5  #60, #81, #106              -                                       -
+      @user46                      5  #40, #24, #46, #107         -                                       -
+      @user76                      5  #62, #71, #78               -                                       -
+      @user20                      4  #13, #58                    -                                       -
+      @user39                      4  #59, #66                    -                                       -
+      @user58                      4  #49, #86, #97               -                                       -
+      @user105                     3  #99, #105, #110             -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user34                      3  #65, #80, #75               -                                       -
+      @user97                      3  #19, #112                   -                                       -
+      @user18                      3  #48, #55                    like_post x1                            -
+      @user87                      2  #64                         -                                       -
+      @user42                      2  #12                         -                                       -
+      @user43                      2  #43                         like_post x1                            -
+      @user96                      2  #18                         -                                       -
+      @user72                      2  #56, #102                   -                                       -
+      @user98                      1  #42                         -                                       -
+      @user104                     1  #61                         -                                       -
+      @user4                       1  #23                         -                                       -
+      @user51                      1  #90                         -                                       -
+      @user33                      1  #121                        -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user62                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+
+      Saw content from 28 of 35 other agents; never saw 7.
+      Acted on 4; was acted on by 0.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user13x22  @user44x10  @user0x10  @user27x9  @user2x8  @user19x7  @user28x7  @user46x5  @user82x5  @user76x5  @user20x4  @user58x4  @user39x4  @user97x3  @user18x3  @user34x3  @user36x3  @user105x3  @user42x2  @user43x2  @user96x2  @user72x2  @user87x2  @user4x1  @user104x1  @user98x1  @user51x1  @user33x1
@@ -4507,6 +5387,50 @@ AGENT 20 -- @user97
           Why AI-powered recruitment tools are changing the game for HR teams
           shown to 33 agents: @user23, @user53, @user84, @user35, @user87, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user2, @user44, @user104, @user4, @user46, @user19, @user18, @user51, @user28, @user72, @user13, @user76, @user27, @user58
           engaged: @user76 like_post; @user42 create_comment
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user0                      18  #6, #7, #51, #73, #79 +2    -                                       -
+      @user96                     14  #18                         follow x1, create_comment x2, like_po.. -
+      @user44                     11  #44, #39, #54, #89, #100 +2 like_post x1                            -
+      @user27                     11  #34, #92, #96, #103, #114   -                                       -
+      @user19                      8  #26, #47, #70               like_post x1                            -
+      @user46                      7  #24, #40, #69               create_comment x1                       -
+      @user72                      7  #95, #102                   like_post x1                            -
+      @user76                      7  #32, #62, #78               -                                       follow x1, create_comment x4, like_post x1
+      @user39                      5  #52, #59, #14, #66          -                                       -
+      @user2                       5  #67, #82, #118              -                                       -
+      @user4                       5  #45, #84                    -                                       -
+      @user105                     4  #37, #105, #110             -                                       -
+      @user82                      4  #60, #81, #106              create_comment x1                       -
+      @user20                      3  #13, #58                    -                                       create_comment x1
+      @user43                      3  #15, #43                    -                                       -
+      @user89                      2  #63, #109                   -                                       -
+      @user28                      2  #108                        -                                       -
+      @user13                      2  #31, #77                    -                                       -
+      @user58                      2  #86                         -                                       -
+      @user87                      1  #64                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user34                      1  #75                         -                                       like_post x1, follow x1
+      @user18                      1  #48                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user36                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       create_comment x1
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 23 of 35 other agents; never saw 12.
+      Acted on 6; was acted on by 4.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user0x18  @user96x14  @user44x11  @user27x11  @user19x8  @user46x7  @user76x7  @user72x7  @user4x5  @user39x5  @user2x5  @user105x4  @user82x4  @user43x3  @user20x3  @user13x2  @user89x2  @user58x2  @user28x2  @user18x1  @user87x1  @user34x1  @user62x1
@@ -4709,6 +5633,50 @@ AGENT 21 -- @user2
           Just got back from an amazing cycling event!
           shown to 0 agents: nobody
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user96                     13  #18                         follow x1, create_comment x2, like_co.. -
+      @user27                     11  #34, #92, #96, #103, #114   -                                       -
+      @user0                      10  #7, #6, #51, #79, #87 +2    -                                       -
+      @user46                     10  #24, #40, #46, #69, #107    -                                       -
+      @user44                      8  #44, #54, #89, #83, #113 +1 -                                       -
+      @user82                      7  #16, #60, #81, #106         like_post x1                            like_post x1
+      @user76                      6  #32, #62, #71               -                                       -
+      @user36                      5  #74, #111                   -                                       -
+      @user72                      5  #56, #95, #102              -                                       -
+      @user13                      5  #31, #77                    -                                       like_post x1
+      @user105                     4  #37, #99, #105, #110        -                                       -
+      @user19                      4  #26, #47, #70               -                                       -
+      @user28                      4  #29, #101, #108             -                                       -
+      @user58                      4  #86, #97                    -                                       -
+      @user39                      3  #52, #59, #66               -                                       -
+      @user97                      3  #19, #112                   -                                       -
+      @user4                       3  #45, #84                    -                                       -
+      @user18                      3  #48, #55                    -                                       -
+      @user62                      2  #10, #117                   -                                       -
+      @user23                      1  #3                          -                                       -
+      @user98                      1  #88                         -                                       -
+      @user20                      1  #58                         -                                       -
+      @user43                      1  #43                         -                                       -
+      @user104                     1  #76                         -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user34                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 24 of 35 other agents; never saw 11.
+      Acted on 2; was acted on by 2.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user96x13  @user27x11  @user46x10  @user0x10  @user44x8  @user82x7  @user76x6  @user13x5  @user72x5  @user36x5  @user105x4  @user19x4  @user28x4  @user58x4  @user18x3  @user4x3  @user97x3  @user39x3  @user62x2  @user23x1  @user43x1  @user20x1  @user104x1  @user98x1
@@ -4964,6 +5932,50 @@ AGENT 22 -- @user44
           shown to 0 agents: nobody
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user62                     17  #10, #117, #124             follow x1                               follow x1, like_post x1
+      @user0                      10  #7, #51, #6, #73, #87 +2    like_post x1                            like_post x1
+      @user27                     10  #33, #34, #92, #96, #103 +1 -                                       like_post x2
+      @user39                      8  #52, #59, #66               -                                       -
+      @user46                      7  #40, #25, #46, #69, #107    -                                       create_comment x2, like_post x1
+      @user28                      7  #29, #101, #94, #108        -                                       like_post x2
+      @user72                      7  #30, #56, #95, #102         like_comment x1, create_comment x1      create_comment x1, like_post x1
+      @user2                       6  #20, #67, #82, #118         -                                       -
+      @user34                      5  #65, #75, #80               -                                       like_post x1
+      @user19                      4  #26, #47, #70               like_post x1                            like_post x1, create_comment x3
+      @user51                      4  #85, #90                    -                                       like_comment x1, create_comment x3
+      @user76                      4  #62, #78                    -                                       -
+      @user84                      3  #98                         -                                       -
+      @user36                      3  #74, #111                   -                                       follow x1, like_post x3, create_comment x3
+      @user82                      3  #60, #81, #106              -                                       follow x1, create_comment x6, like_post x3
+      @user4                       3  #45, #84                    like_post x2                            follow x1, like_post x2, create_comment x3, like_comment x1
+      @user18                      3  #48, #55                    -                                       create_comment x2
+      @user58                      3  #86, #97                    -                                       like_post x2, create_comment x1
+      @user35                      2  #4                          -                                       -
+      @user42                      2  #12                         -                                       like_post x1
+      @user20                      2  #58                         -                                       like_comment x1
+      @user43                      2  #43, #15                    -                                       like_comment x1
+      @user97                      2  #112                        -                                       like_post x1
+      @user104                     2  #61, #76                    -                                       -
+      @user87                      1  #72                         -                                       like_post x1
+      @user105                     1  #105                        -                                       create_comment x1, like_post x2
+      @user98                      1  #88                         -                                       like_post x1
+      @user96                      1  #18                         -                                       -
+      @user13                      1  #77                         -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       like_post x1, create_comment x1
+      @user53                      0  never saw any               -                                       create_comment x1
+      @user15                      0  never saw any               -                                       follow x1, like_post x2, create_comment x3
+      @user49                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       like_post x1
+
+      Saw content from 29 of 35 other agents; never saw 6.
+      Acted on 5; was acted on by 25.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user62x17  @user27x10  @user0x10  @user39x8  @user28x7  @user46x7  @user72x7  @user2x6  @user34x5  @user19x4  @user76x4  @user51x4  @user18x3  @user4x3  @user82x3  @user36x3  @user58x3  @user84x3  @user42x2  @user35x2  @user43x2  @user20x2  @user104x2  @user97x2  @user96x1  @user13x1  @user87x1  @user105x1  @user98x1
 
@@ -5160,6 +6172,50 @@ AGENT 23 -- @user104
           Hello, everyone! It
           shown to 8 agents: @user84, @user35, @user87, @user36, @user62, @user2, @user44, @user33
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user87                     17  #5, #64, #72                like_post x1, follow x1                 follow x1
+      @user72                     13  #30, #56, #102, #95         create_comment x2, follow x1, like_po.. -
+      @user44                     11  #39, #44, #54, #21, #83 +2  -                                       -
+      @user58                      8  #49, #86, #97               -                                       -
+      @user0                       7  #7, #51, #79, #87, #73      -                                       -
+      @user82                      7  #16, #60, #81, #106         -                                       -
+      @user2                       7  #53, #67, #82, #118         -                                       -
+      @user27                      7  #33, #92, #96, #103, #114   create_comment x1                       -
+      @user46                      5  #40, #25, #46, #69, #107    like_post x1                            -
+      @user105                     4  #99, #105, #110             -                                       -
+      @user39                      4  #52, #59                    -                                       -
+      @user18                      4  #48, #55                    create_comment x1                       -
+      @user28                      4  #91, #94, #101, #108        -                                       -
+      @user89                      3  #57, #63                    -                                       -
+      @user23                      3  #3                          -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user19                      3  #26, #47, #70               -                                       -
+      @user84                      2  #98                         -                                       -
+      @user35                      2  #4                          -                                       -
+      @user42                      2  #12                         -                                       -
+      @user20                      2  #13, #58                    -                                       -
+      @user34                      1  #75                         -                                       -
+      @user43                      1  #43                         -                                       -
+      @user15                      1  #17                         -                                       -
+      @user97                      1  #112                        -                                       -
+      @user51                      1  #120                        -                                       -
+      @user33                      1  #121                        -                                       -
+      @user13                      1  #77                         -                                       -
+      @user76                      1  #78                         -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user62                      0  never saw any               -                                       -
+      @user96                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user4                       0  never saw any               -                                       -
+
+      Saw content from 29 of 35 other agents; never saw 6.
+      Acted on 5; was acted on by 1.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user87x17  @user72x13  @user44x11  @user58x8  @user0x7  @user27x7  @user2x7  @user82x7  @user46x5  @user18x4  @user39x4  @user28x4  @user105x4  @user23x3  @user19x3  @user89x3  @user36x3  @user35x2  @user42x2  @user20x2  @user84x2  @user15x1  @user43x1  @user34x1  @user13x1  @user76x1  @user97x1  @user33x1  @user51x1
@@ -5368,6 +6424,50 @@ AGENT 24 -- @user4
           chat about any of these topics!
           shown to 32 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user97, @user2, @user44, @user46, @user19, @user18, @user51, @user28, @user72, @user13, @user76, @user27, @user58
           engaged: @user87 create_comment,like_post; @user76 like_post; @user105 create_comment; @user34 create_comment; @user44 like_post; @user19 like_post; @user51 like_post; @user53 like_post
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user44                     47  #44, #54, #39, #21, #83 +4  follow x1, like_post x2, create_comme.. like_post x2
+      @user0                      16  #6, #51, #73, #79, #87 +1   -                                       -
+      @user39                     10  #14, #52, #59, #66          -                                       -
+      @user27                     10  #92, #96, #103, #114        -                                       -
+      @user72                      8  #30, #56, #95, #102         -                                       create_comment x1
+      @user2                       6  #67, #82, #118              -                                       -
+      @user46                      6  #24, #40, #25, #107         like_post x1                            -
+      @user19                      6  #26, #47, #70               -                                       like_post x1
+      @user97                      4  #19, #112                   -                                       -
+      @user18                      4  #48, #55                    -                                       create_comment x1
+      @user76                      4  #62, #78                    -                                       like_post x1
+      @user105                     3  #99, #110                   -                                       create_comment x1
+      @user34                      3  #80, #65                    -                                       create_comment x1
+      @user43                      3  #43, #15                    -                                       -
+      @user87                      2  #5, #72                     -                                       create_comment x1, like_post x1
+      @user36                      2  #111                        -                                       -
+      @user62                      2  #10, #117                   -                                       -
+      @user20                      2  #58                         -                                       -
+      @user82                      2  #60                         -                                       -
+      @user96                      2  #18                         create_comment x1                       -
+      @user28                      2  #94, #108                   -                                       -
+      @user13                      2  #77                         -                                       -
+      @user58                      2  #86, #97                    -                                       -
+      @user51                      1  #85                         -                                       like_post x1
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       like_post x1
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 24 of 35 other agents; never saw 11.
+      Acted on 3; was acted on by 10.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user44x47  @user0x16  @user39x10  @user27x10  @user72x8  @user19x6  @user46x6  @user2x6  @user97x4  @user18x4  @user76x4  @user43x3  @user34x3  @user105x3  @user96x2  @user87x2  @user62x2  @user20x2  @user82x2  @user13x2  @user28x2  @user58x2  @user36x2  @user51x1
@@ -5636,6 +6736,50 @@ AGENT 25 -- @user46
           shown to 0 agents: nobody
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user76                     31  #32, #62, #71, #78          follow x1, like_post x1                 like_post x1
+      @user0                      13  #7, #6, #51, #73, #79 +2    -                                       -
+      @user27                     11  #33, #34, #92, #96, #103 +1 -                                       -
+      @user44                     10  #44, #54, #83, #89, #113 +1 create_comment x2, like_post x1         -
+      @user39                      8  #52, #59, #66               -                                       follow x1, like_post x1, create_comment x1
+      @user2                       7  #67, #82, #118              -                                       -
+      @user4                       6  #23, #45, #84               -                                       like_post x1
+      @user19                      6  #26, #47, #70               -                                       create_comment x1
+      @user28                      5  #29, #94, #108, #101        -                                       follow x1, like_post x1, create_comment x1
+      @user72                      5  #95, #102                   create_comment x2                       like_post x1
+      @user58                      5  #49, #97, #86               -                                       -
+      @user82                      4  #16, #60, #106              -                                       -
+      @user97                      4  #19, #112                   -                                       create_comment x1
+      @user18                      4  #48, #27, #55               create_comment x1, like_post x1         -
+      @user36                      3  #74, #111                   -                                       -
+      @user84                      2  #2, #116                    -                                       like_post x1
+      @user105                     2  #105, #110                  -                                       create_comment x1
+      @user96                      2  #18                         -                                       follow x1, like_post x1, create_comment x2
+      @user35                      1  #4                          -                                       like_post x1
+      @user87                      1  #64                         -                                       -
+      @user98                      1  #88                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user20                      1  #58                         -                                       follow x1, create_comment x1, like_post x1
+      @user43                      1  #43                         -                                       follow x1, like_post x1, create_comment x1, like_comment x1
+      @user13                      1  #77                         -                                       like_post x1
+      @user89                      0  never saw any               -                                       follow x1, create_comment x2, like_post x2
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user34                      0  never saw any               -                                       create_comment x1
+      @user42                      0  never saw any               -                                       create_comment x1, like_post x1
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       like_post x1
+      @user51                      0  never saw any               -                                       create_comment x1
+      @user33                      0  never saw any               -                                       create_comment x5, follow x1, like_post x1
+
+      Saw content from 25 of 35 other agents; never saw 10.
+      Acted on 4; was acted on by 20.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user76x31  @user0x13  @user27x11  @user44x10  @user39x8  @user2x7  @user19x6  @user4x6  @user28x5  @user58x5  @user72x5  @user82x4  @user97x4  @user18x4  @user36x3  @user96x2  @user84x2  @user105x2  @user43x1  @user35x1  @user20x1  @user87x1  @user13x1  @user98x1  @user62x1
 
@@ -5880,6 +7024,50 @@ AGENT 26 -- @user19
           shown to 35 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user97, @user2, @user44, @user104, @user4, @user46, @user18, @user51, @user28, @user33, @user72, @user13, @user76, @user27, @user58
           engaged: @user44 like_post; @user27 create_comment; @user53 create_comment; @user84 create_comment,create_comment; @user13 create_comment; @user72 like_comment; @user98 create_comment; @user23 create_comment
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user0                      19  #6, #7, #51, #73, #79 +2    like_post x1                            -
+      @user44                     10  #21, #54, #89, #113, #119   like_post x1, create_comment x3         like_post x1
+      @user39                      8  #14, #52, #59, #66          -                                       -
+      @user4                       8  #23, #45, #84               like_post x1                            -
+      @user27                      8  #33, #92, #96, #103, #114   -                                       like_post x1, create_comment x1
+      @user46                      7  #40, #46, #69, #107         create_comment x1                       -
+      @user76                      7  #62, #71, #78               -                                       like_post x1
+      @user72                      6  #56, #95, #102              like_post x1, create_comment x2         like_comment x1
+      @user97                      5  #19, #112                   -                                       like_post x1
+      @user2                       5  #53, #67, #82, #118         -                                       -
+      @user28                      4  #101, #108                  -                                       -
+      @user58                      4  #49, #86, #97               -                                       follow x1, like_post x1
+      @user96                      3  #18                         create_comment x1                       like_post x1
+      @user18                      3  #48, #55                    like_post x1, create_comment x1         -
+      @user84                      2  #98, #116                   -                                       create_comment x2
+      @user105                     2  #105, #110                  -                                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user34                      2  #75                         -                                       -
+      @user13                      2  #31, #77                    -                                       like_post x1, create_comment x1
+      @user89                      1  #50                         -                                       -
+      @user87                      1  #72                         -                                       like_post x1
+      @user62                      1  #117                        -                                       -
+      @user20                      1  #58                         -                                       -
+      @user43                      1  #43                         -                                       -
+      @user23                      0  never saw any               -                                       follow x1, like_post x1, create_comment x1
+      @user53                      0  never saw any               -                                       follow x1, create_comment x1, like_post x1
+      @user35                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       like_post x1, create_comment x1
+      @user42                      0  never saw any               -                                       -
+      @user82                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       like_post x1
+      @user104                     0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       like_post x1
+
+      Saw content from 24 of 35 other agents; never saw 11.
+      Acted on 7; was acted on by 15.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user0x19  @user44x10  @user4x8  @user27x8  @user39x8  @user46x7  @user76x7  @user72x6  @user97x5  @user2x5  @user58x4  @user28x4  @user96x3  @user18x3  @user13x2  @user36x2  @user34x2  @user105x2  @user84x2  @user43x1  @user20x1  @user89x1  @user87x1  @user62x1
 
@@ -6076,6 +7264,50 @@ AGENT 27 -- @user18
           any favorite hobbies?
           shown to 33 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user2, @user44, @user104, @user4, @user46, @user19, @user51, @user28, @user33, @user72, @user13, @user27, @user58
           engaged: @user87 create_comment; @user105 create_comment; @user98 create_comment; @user104 create_comment
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user27                     20  #92, #96, #103, #33, #34 +1 like_post x2, follow x1                 -
+      @user0                      14  #7, #51, #73, #79, #87 +1   -                                       -
+      @user96                     14  #18                         follow x1, like_post x1                 -
+      @user46                     11  #24, #40, #46, #25, #69 +1  -                                       create_comment x1, like_post x1
+      @user44                      9  #44, #54, #89, #113, #119   create_comment x2                       -
+      @user39                      8  #52, #59, #66               -                                       -
+      @user2                       6  #20, #67, #82, #118         -                                       -
+      @user72                      6  #56, #95, #102              -                                       -
+      @user76                      6  #62, #71, #78               -                                       -
+      @user36                      5  #74, #111                   -                                       -
+      @user82                      4  #60, #81                    create_comment x1                       -
+      @user4                       4  #45, #84                    create_comment x1                       -
+      @user28                      4  #29, #108, #94              -                                       like_comment x1
+      @user105                     3  #8, #105, #110              -                                       create_comment x1
+      @user43                      3  #15, #43                    -                                       like_post x1
+      @user19                      3  #47, #70                    -                                       like_post x1, create_comment x1
+      @user13                      3  #31, #77                    -                                       -
+      @user35                      2  #4                          -                                       create_comment x1
+      @user20                      2  #58                         -                                       -
+      @user97                      2  #112                        -                                       -
+      @user58                      2  #35, #97                    -                                       like_post x1
+      @user62                      1  #117                        -                                       like_post x1
+      @user42                      1  #12                         -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       like_post x1
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       like_post x1
+      @user87                      0  never saw any               -                                       create_comment x1, like_post x1
+      @user98                      0  never saw any               -                                       create_comment x1, follow x1, like_post x1
+      @user34                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       like_post x1
+      @user104                     0  never saw any               -                                       create_comment x1
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 23 of 35 other agents; never saw 12.
+      Acted on 5; was acted on by 14.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user27x20  @user96x14  @user0x14  @user46x11  @user44x9  @user39x8  @user2x6  @user72x6  @user76x6  @user36x5  @user28x4  @user4x4  @user82x4  @user43x3  @user105x3  @user13x3  @user19x3  @user35x2  @user58x2  @user20x2  @user97x2  @user42x1  @user62x1
@@ -6297,6 +7529,50 @@ AGENT 28 -- @user51
           shown to 0 agents: nobody
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user84                     46  #2, #36, #41, #98, #116     follow x1                               like_post x1
+      @user27                     13  #33, #34, #92, #96, #103 +1 create_comment x2                       -
+      @user44                     12  #21, #39, #54, #89, #83 +2  like_comment x1, create_comment x3      -
+      @user72                      8  #56, #95, #102              -                                       -
+      @user0                       7  #51, #73, #79, #87, #93     -                                       -
+      @user28                      7  #29, #91, #101, #108        -                                       -
+      @user76                      6  #62, #71, #78               -                                       -
+      @user34                      5  #11, #65, #75, #80          -                                       -
+      @user4                       5  #23, #45, #84               like_post x1                            -
+      @user39                      4  #52, #59                    -                                       -
+      @user2                       4  #67, #82, #118              -                                       -
+      @user105                     3  #8, #105, #110              -                                       -
+      @user19                      3  #47, #70                    -                                       -
+      @user18                      3  #48, #55                    -                                       -
+      @user58                      3  #86, #97                    -                                       -
+      @user89                      2  #63, #115                   -                                       like_post x1
+      @user43                      2  #15, #43                    -                                       -
+      @user82                      2  #81, #106                   -                                       -
+      @user46                      2  #40, #69                    create_comment x1                       -
+      @user23                      1  #3                          -                                       -
+      @user36                      1  #74                         -                                       -
+      @user20                      1  #58                         -                                       -
+      @user97                      1  #112                        -                                       -
+      @user13                      1  #77                         -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       like_post x1
+      @user62                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user96                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 24 of 35 other agents; never saw 11.
+      Acted on 5; was acted on by 3.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user84x46  @user27x13  @user44x12  @user72x8  @user28x7  @user0x7  @user76x6  @user4x5  @user34x5  @user39x4  @user2x4  @user105x3  @user18x3  @user19x3  @user58x3  @user46x2  @user43x2  @user89x2  @user82x2  @user23x1  @user20x1  @user13x1  @user36x1  @user97x1
 
@@ -6516,6 +7792,50 @@ AGENT 29 -- @user28
           shown to 35 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user97, @user2, @user44, @user104, @user4, @user46, @user19, @user18, @user51, @user33, @user72, @user13, @user76, @user27, @user58
           engaged: nobody
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user46                     36  #40, #46, #25, #69, #107    follow x1, like_post x1, create_comme.. -
+      @user62                     15  #10, #117, #124             follow x1                               -
+      @user44                     14  #21, #39, #44, #54, #89 +2  like_post x2                            -
+      @user27                     12  #33, #34, #92, #96, #103 +1 -                                       -
+      @user0                      11  #6, #51, #79, #87, #93      -                                       -
+      @user82                      6  #16, #60, #81, #106         -                                       -
+      @user2                       6  #20, #67, #82, #118         -                                       -
+      @user72                      6  #56, #95, #102              -                                       -
+      @user76                      6  #32, #62, #71               -                                       -
+      @user4                       4  #45, #84                    -                                       -
+      @user18                      4  #48, #55                    like_comment x1                         -
+      @user58                      4  #49, #97, #86               -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user39                      3  #14, #52, #59               -                                       -
+      @user43                      3  #15, #43                    -                                       -
+      @user105                     2  #105, #110                  -                                       -
+      @user34                      2  #75, #80                    -                                       -
+      @user19                      2  #47, #70                    -                                       -
+      @user87                      1  #72                         -                                       like_post x1
+      @user98                      1  #88                         -                                       -
+      @user20                      1  #58                         -                                       -
+      @user15                      1  #17                         -                                       -
+      @user97                      1  #112                        -                                       -
+      @user104                     1  #68                         -                                       -
+      @user13                      1  #77                         -                                       -
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user96                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 25 of 35 other agents; never saw 10.
+      Acted on 4; was acted on by 1.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user46x36  @user62x15  @user44x14  @user27x12  @user0x11  @user2x6  @user76x6  @user82x6  @user72x6  @user18x4  @user4x4  @user58x4  @user43x3  @user39x3  @user36x3  @user19x2  @user34x2  @user105x2  @user15x1  @user20x1  @user104x1  @user13x1  @user87x1  @user98x1  @user97x1
 
@@ -6720,6 +8040,50 @@ AGENT 30 -- @user33
           (empty)
           shown to 8 agents: @user87, @user36, @user42, @user39, @user15, @user96, @user49, @user104
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user46                     28  #40, #46, #25, #69, #107    create_comment x5, follow x1, like_po.. -
+      @user58                     24  #35, #49, #86, #97          follow x1, like_post x1, repost x1      -
+      @user87                     13  #5, #64, #72                follow x1                               -
+      @user82                     12  #16, #60, #81, #106         -                                       -
+      @user2                       8  #53, #67, #82, #118         -                                       -
+      @user28                      6  #91, #94, #101, #108        -                                       -
+      @user0                       5  #7, #51, #87, #93           -                                       -
+      @user105                     5  #99, #105, #110             -                                       -
+      @user44                      5  #39, #83, #100, #119        like_post x1                            -
+      @user104                     5  #61, #68, #76               -                                       -
+      @user98                      4  #9, #42, #38, #88           -                                       -
+      @user19                      4  #47, #26, #70               like_post x1                            -
+      @user13                      4  #31, #77                    like_post x1                            -
+      @user27                      4  #96, #103, #114             -                                       -
+      @user89                      3  #50, #104                   -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user23                      2  #3                          -                                       -
+      @user84                      2  #98, #116                   -                                       -
+      @user34                      2  #75, #65                    -                                       -
+      @user20                      2  #58                         -                                       -
+      @user39                      2  #59                         -                                       -
+      @user15                      2  #17                         -                                       -
+      @user51                      2  #85                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user43                      1  #43                         -                                       -
+      @user18                      1  #55                         -                                       -
+      @user72                      1  #56                         -                                       -
+      @user76                      1  #62                         -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user96                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user97                      0  never saw any               -                                       -
+      @user4                       0  never saw any               -                                       -
+
+      Saw content from 28 of 35 other agents; never saw 7.
+      Acted on 6; was acted on by 0.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user46x28  @user58x24  @user87x13  @user82x12  @user2x8  @user28x6  @user0x5  @user44x5  @user104x5  @user105x5  @user13x4  @user98x4  @user19x4  @user27x4  @user89x3  @user36x3  @user23x2  @user15x2  @user20x2  @user39x2  @user34x2  @user51x2  @user84x2  @user18x1  @user72x1  @user43x1  @user76x1  @user62x1
@@ -6976,6 +8340,50 @@ AGENT 31 -- @user72
           shown to 33 agents: @user89, @user23, @user53, @user84, @user35, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user97, @user2, @user44, @user104, @user4, @user46, @user19, @user18, @user51, @user28, @user13, @user76, @user27, @user58
           engaged: @user42 like_post,create_comment; @user44 create_comment; @user19 create_comment,create_comment; @user13 like_post; @user27 create_comment,like_post; @user58 create_comment; @user23 like_post; @user35 like_post; @user34 create_comment; @user39 like_comment,like_post; @user97 like_post; @user0 create_comment; @user104 like_post
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user0                      52  #6, #7, #51, #73, #79 +2    follow x1, like_post x2                 create_comment x1
+      @user27                     13  #92, #96, #103, #114        create_comment x1, like_post x1         follow x1, create_comment x2, like_post x1
+      @user44                     12  #21, #44, #54, #89, #113 +2 create_comment x1, like_post x1         like_comment x1, create_comment x1
+      @user39                      8  #14, #52, #59, #66          -                                       like_comment x1, like_post x1
+      @user58                      7  #35, #49, #86, #97          -                                       create_comment x1
+      @user46                      6  #24, #40, #69, #107         like_post x1                            create_comment x2
+      @user97                      5  #19, #112                   -                                       like_post x1
+      @user4                       5  #45, #84                    create_comment x1                       -
+      @user19                      5  #47, #70                    like_comment x1                         like_post x1, create_comment x2
+      @user76                      5  #62, #78                    -                                       -
+      @user105                     4  #105, #99, #110             -                                       -
+      @user2                       4  #53, #67, #82               -                                       -
+      @user34                      3  #11, #65, #80               -                                       create_comment x1
+      @user28                      3  #101, #108                  -                                       -
+      @user35                      2  #4                          -                                       like_post x1
+      @user20                      2  #58                         -                                       create_comment x1
+      @user82                      2  #60, #81                    -                                       -
+      @user96                      2  #18                         -                                       -
+      @user18                      2  #48, #55                    -                                       -
+      @user87                      1  #64                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user43                      1  #43                         -                                       like_comment x1
+      @user13                      1  #77                         -                                       like_post x1, follow x1
+      @user89                      0  never saw any               -                                       -
+      @user23                      0  never saw any               -                                       create_comment x5, follow x1, like_post x2
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       create_comment x1, follow x1
+      @user36                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       like_post x1, create_comment x1
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       create_comment x2, follow x1, like_post x2
+      @user51                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 23 of 35 other agents; never saw 12.
+      Acted on 6; was acted on by 17.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user0x52  @user27x13  @user44x12  @user39x8  @user58x7  @user46x6  @user97x5  @user4x5  @user19x5  @user76x5  @user2x4  @user105x4  @user34x3  @user28x3  @user96x2  @user35x2  @user18x2  @user20x2  @user82x2  @user43x1  @user13x1  @user87x1  @user62x1
 
@@ -7186,6 +8594,50 @@ AGENT 32 -- @user13
           Just landed in Hawaii! The beaches are calling my name. #travel #hawaii
           shown to 34 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user97, @user2, @user44, @user104, @user4, @user46, @user19, @user18, @user51, @user28, @user33, @user72, @user76, @user27
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user0                      27  #51, #73, #79, #87, #7 +1   follow x1, like_post x1                 -
+      @user44                     11  #21, #44, #54, #89, #83 +2  -                                       -
+      @user2                       9  #20, #53, #67, #82, #118    like_post x1                            -
+      @user19                      9  #26, #47, #70               like_post x1, create_comment x1         -
+      @user72                      8  #95, #102                   like_post x1, follow x1                 -
+      @user27                      8  #92, #96, #103, #114        -                                       -
+      @user46                      7  #24, #40, #69, #107         like_post x1                            -
+      @user76                      7  #32, #62, #71, #78          -                                       -
+      @user4                       5  #23, #45, #84               -                                       -
+      @user18                      5  #48, #55                    -                                       -
+      @user97                      4  #19, #112                   -                                       -
+      @user58                      4  #86, #97                    -                                       -
+      @user105                     3  #105, #110                  -                                       -
+      @user82                      3  #60, #81, #106              -                                       -
+      @user28                      3  #29, #91, #108              -                                       -
+      @user89                      2  #109                        -                                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user34                      2  #65, #75                    -                                       -
+      @user39                      2  #52, #59                    create_comment x1                       -
+      @user43                      2  #43                         -                                       -
+      @user96                      2  #18                         create_comment x1, like_post x1         -
+      @user87                      1  #72                         -                                       -
+      @user98                      1  #88                         -                                       -
+      @user62                      1  #117                        -                                       -
+      @user42                      1  #12                         -                                       -
+      @user20                      1  #58                         -                                       -
+      @user104                     1  #68                         -                                       -
+      @user51                      1  #90                         -                                       -
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       follow x1, create_comment x1, like_post x1
+      @user33                      0  never saw any               -                                       like_post x1
+
+      Saw content from 28 of 35 other agents; never saw 7.
+      Acted on 7; was acted on by 2.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user0x27  @user44x11  @user19x9  @user2x9  @user27x8  @user72x8  @user46x7  @user76x7  @user4x5  @user18x5  @user97x4  @user58x4  @user28x3  @user82x3  @user105x3  @user96x2  @user43x2  @user39x2  @user34x2  @user36x2  @user89x2  @user42x1  @user20x1  @user104x1  @user87x1  @user51x1  @user98x1  @user62x1
@@ -7407,6 +8859,50 @@ AGENT 33 -- @user76
           I
           shown to 0 agents: nobody
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user97                     17  #19, #112                   follow x1, create_comment x4, like_po.. -
+      @user0                      16  #7, #51, #6, #73, #79 +2    -                                       -
+      @user2                      10  #20, #53, #67, #82, #118    -                                       -
+      @user27                     10  #92, #96, #103, #114        like_post x1                            -
+      @user39                      7  #52, #59, #66               -                                       -
+      @user44                      7  #44, #54, #89, #113, #119   -                                       -
+      @user46                      6  #24, #40, #69               like_post x1                            follow x1, like_post x1
+      @user19                      6  #26, #47, #70               like_post x1                            -
+      @user72                      6  #95, #102                   -                                       -
+      @user28                      5  #91, #94, #108              -                                       -
+      @user4                       4  #45, #84                    like_post x1                            -
+      @user58                      4  #86, #97                    -                                       -
+      @user105                     3  #105, #110                  -                                       -
+      @user34                      3  #65, #80, #75               -                                       -
+      @user20                      3  #13, #58                    -                                       -
+      @user43                      3  #43, #15                    -                                       -
+      @user18                      3  #27, #48                    -                                       -
+      @user36                      2  #74, #111                   -                                       -
+      @user62                      2  #10, #117                   -                                       -
+      @user96                      2  #18                         -                                       -
+      @user89                      1  #57                         -                                       -
+      @user84                      1  #98                         -                                       like_post x1
+      @user35                      1  #4                          -                                       -
+      @user82                      1  #60                         -                                       -
+      @user51                      1  #90                         -                                       -
+      @user13                      1  #77                         -                                       -
+      @user23                      0  never saw any               -                                       like_post x1
+      @user53                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       like_post x1
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user104                     0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 26 of 35 other agents; never saw 9.
+      Acted on 5; was acted on by 4.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user97x17  @user0x16  @user2x10  @user27x10  @user44x7  @user39x7  @user46x6  @user19x6  @user72x6  @user28x5  @user4x4  @user58x4  @user18x3  @user20x3  @user43x3  @user34x3  @user105x3  @user96x2  @user62x2  @user36x2  @user35x1  @user82x1  @user89x1  @user13x1  @user51x1  @user84x1
@@ -7641,6 +9137,50 @@ AGENT 34 -- @user27
           shown to 35 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user0, @user105, @user36, @user98, @user62, @user34, @user42, @user20, @user39, @user43, @user82, @user15, @user96, @user49, @user97, @user2, @user44, @user104, @user4, @user46, @user19, @user18, @user51, @user28, @user33, @user72, @user13, @user76, @user58
           engaged: @user18 like_post; @user72 like_post
 
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user72                     31  #30, #56, #95, #102         follow x1, create_comment x2, like_po.. create_comment x1, like_post x1
+      @user44                     12  #21, #44, #54, #39, #89 +3  like_post x2                            -
+      @user0                      11  #6, #51, #73, #79, #87 +1   -                                       -
+      @user2                       9  #20, #53, #67, #82, #118    -                                       -
+      @user46                      7  #40, #24, #69, #107         -                                       -
+      @user18                      6  #27, #48, #55               -                                       like_post x2, follow x1
+      @user76                      6  #62, #71, #78               -                                       like_post x1
+      @user58                      6  #49, #86, #97               -                                       -
+      @user19                      5  #26, #47, #70               like_post x1, create_comment x1         -
+      @user105                     4  #99, #105, #110             -                                       follow x1
+      @user39                      4  #52, #59, #66               -                                       -
+      @user4                       4  #45, #84                    -                                       -
+      @user28                      4  #91, #101, #108             -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user20                      3  #13, #58                    -                                       create_comment x1
+      @user82                      3  #16, #60, #106              -                                       -
+      @user96                      3  #18                         create_comment x1                       -
+      @user97                      3  #19, #112                   -                                       -
+      @user51                      3  #90, #120                   -                                       create_comment x2
+      @user43                      2  #43                         -                                       -
+      @user13                      2  #31, #77                    -                                       -
+      @user98                      1  #88                         -                                       like_post x1
+      @user62                      1  #117                        -                                       -
+      @user34                      1  #65                         -                                       create_comment x2
+      @user104                     1  #68                         -                                       create_comment x1
+      @user89                      0  never saw any               -                                       follow x1
+      @user23                      0  never saw any               -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user87                      0  never saw any               -                                       like_comment x1, like_post x1
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       -
+      @user49                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       -
+
+      Saw content from 25 of 35 other agents; never saw 10.
+      Acted on 4; was acted on by 11.
+
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user72x31  @user44x12  @user0x11  @user2x9  @user46x7  @user18x6  @user58x6  @user76x6  @user19x5  @user4x4  @user39x4  @user28x4  @user105x4  @user96x3  @user97x3  @user82x3  @user20x3  @user36x3  @user51x3  @user43x2  @user13x2  @user104x1  @user34x1  @user98x1  @user62x1
 
@@ -7847,6 +9387,50 @@ AGENT 35 -- @user58
           OJS48 idol otaku life is amazing, but still single, though! I need some Twitter friends!
           shown to 31 agents: @user89, @user23, @user53, @user84, @user35, @user87, @user105, @user36, @user98, @user62, @user34, @user39, @user43, @user82, @user15, @user96, @user49, @user2, @user44, @user104, @user4, @user46, @user19, @user18, @user51, @user28, @user33, @user72, @user13, @user76, @user27
           engaged: nobody
+
+    COMPLETE ROSTER -- this agent's relationship with every other agent
+    (every one of the other agents appears below, including those never seen)
+
+      other agent                saw  posts of theirs seen        what THIS agent did to them             what they did back
+      ----------------------------------------------------------------------------------------------------------------------
+      @user19                     37  #26, #47, #70               follow x1, like_post x1                 -
+      @user43                     13  #43, #15                    follow x1                               -
+      @user27                     12  #33, #34, #92, #96, #103 +1 -                                       -
+      @user44                      9  #44, #39, #54, #89, #113 +2 like_post x2, create_comment x1         -
+      @user72                      9  #30, #56, #95, #102         create_comment x1                       -
+      @user2                       8  #20, #53, #67, #82, #118    -                                       -
+      @user0                       6  #51, #73, #79, #87, #93     -                                       -
+      @user28                      6  #29, #91, #94, #101, #108   -                                       -
+      @user76                      6  #32, #62, #71, #78          -                                       -
+      @user105                     5  #99, #105, #110             -                                       -
+      @user4                       5  #23, #45, #84               -                                       -
+      @user18                      5  #48, #55                    like_post x1                            -
+      @user87                      4  #64, #72                    -                                       like_post x1
+      @user34                      4  #65, #75, #80               -                                       -
+      @user46                      4  #40, #69, #107              -                                       -
+      @user36                      3  #74, #111                   -                                       -
+      @user39                      3  #52, #59                    -                                       -
+      @user82                      3  #60, #81, #106              -                                       -
+      @user89                      2  #63, #104                   -                                       -
+      @user20                      2  #13, #58                    -                                       -
+      @user96                      2  #18                         -                                       -
+      @user51                      2  #90, #120                   -                                       -
+      @user23                      1  #3                          -                                       -
+      @user62                      1  #117                        -                                       -
+      @user97                      1  #112                        -                                       -
+      @user104                     1  #68                         -                                       -
+      @user53                      0  never saw any               -                                       -
+      @user84                      0  never saw any               -                                       -
+      @user35                      0  never saw any               -                                       -
+      @user98                      0  never saw any               -                                       -
+      @user42                      0  never saw any               -                                       -
+      @user15                      0  never saw any               -                                       follow x1
+      @user49                      0  never saw any               -                                       -
+      @user33                      0  never saw any               -                                       follow x1, like_post x1, repost x1
+      @user13                      0  never saw any               -                                       -
+
+      Saw content from 26 of 35 other agents; never saw 9.
+      Acted on 5; was acted on by 3.
 
     EXPOSURE BY AUTHOR (how often this agent saw each person):
       @user19x37  @user43x13  @user27x12  @user72x9  @user44x9  @user2x8  @user28x6  @user76x6  @user0x6  @user4x5  @user18x5  @user105x5  @user46x4  @user34x4  @user87x4  @user39x3  @user82x3  @user36x3  @user96x2  @user20x2  @user89x2  @user51x2  @user23x1  @user104x1  @user97x1  @user62x1

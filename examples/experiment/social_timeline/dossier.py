@@ -402,6 +402,64 @@ def s4_agents(L, data, extra, personas):
             else:
                 L += ["          engaged: nobody"]
 
+        # ---- complete roster: EVERY other agent, seen or not -------------
+        L += ["",
+              "    COMPLETE ROSTER -- this agent's relationship with every "
+              "other agent",
+              "    (every one of the other agents appears below, including "
+              "those never seen)",
+              ""]
+        L += [f"      {'other agent':<26}{'saw':>4}  {'posts of theirs seen':<28}"
+              f"{'what THIS agent did to them':<40}what they did back"]
+        L += ["      " + "-" * 118]
+
+        my_exp = exp_by_agent[aid]
+        seen_posts_by_author = defaultdict(list)
+        seen_count_by_author = Counter()
+        for e in my_exp:
+            au = e.get("author_id")
+            if au is None or au == aid:
+                continue
+            seen_count_by_author[au] += 1
+            if e["post_id"] not in seen_posts_by_author[au]:
+                seen_posts_by_author[au].append(e["post_id"])
+
+        out_map = a.get("interacted_with") or {}
+        in_map = a.get("interacted_by") or {}
+
+        others = sorted((int(k) for k in agents), key=lambda x: (
+            -seen_count_by_author.get(x, 0), x))
+        for other in others:
+            if other == aid:
+                continue
+            n_seen = seen_count_by_author.get(other, 0)
+            posts_seen = seen_posts_by_author.get(other, [])
+            did = out_map.get(str(other)) or out_map.get(other) or {}
+            back = in_map.get(str(other)) or in_map.get(other) or {}
+
+            def fit(text, width):
+                """Hard-truncate so columns cannot run into each other."""
+                return (text if len(text) <= width
+                        else text[:width - 2] + "..")
+
+            posts_txt = (", ".join(f"#{p}" for p in posts_seen[:5])
+                         + (f" +{len(posts_seen)-5}" if len(posts_seen) > 5
+                            else "")) if posts_seen else "never saw any"
+            posts_txt = fit(posts_txt, 27)
+            did_txt = fit(", ".join(f"{k} x{v}" for k, v in did.items())
+                          or "-", 39)
+            back_txt = ", ".join(f"{k} x{v}" for k, v in back.items()) or "-"
+            L += [f"      @{fit(name(other), 24):<25}{n_seen:>4}  {posts_txt:<28}"
+                  f"{did_txt:<40}{back_txt}"]
+
+        never = [o for o in others
+                 if o != aid and not seen_count_by_author.get(o)]
+        L += ["",
+              f"      Saw content from {len(seen_count_by_author)} of "
+              f"{len(agents) - 1} other agents; "
+              f"never saw {len(never)}.",
+              f"      Acted on {len(out_map)}; was acted on by {len(in_map)}."]
+
         L += ["", "    EXPOSURE BY AUTHOR (how often this agent saw each person):"]
         sa = sorted((a.get("saw_authors") or {}).items(),
                     key=lambda kv: -kv[1])

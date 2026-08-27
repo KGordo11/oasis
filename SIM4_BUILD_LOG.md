@@ -252,6 +252,7 @@ Full detail with rationale lives in spec §2. Condensed index:
 | F-11 | Agents see only follower/following **counts**, never identities | `agent_environment.py:68-101`, both marked `# TODO` upstream |
 | F-12 | Two conflicting index bases for the `rec` matrix | `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based |
 | F-13 | Every table's `user_id` column actually stores **agent_id**; only the `user` table has both | `platform.py:407` — `user_id = agent_id`, repeated in every action |
+| F-26 | **A self-inflicted regression, traced to one word.** Malformed calls climbed every run from v3 onward: 113 → 169 → 429 → **831**. Cause: prompt v3 opened with *"Take TWO OR THREE of these **actions** this turn"*, reintroducing the exact word F-20 had removed. The smoking gun is `follow() got an unexpected keyword argument 'actions'` — **the plural**, 87 times | Reworded without the word, and the forced volume dropped entirely. Smoke test: **831 → 0 malformed** |
 | F-25 | **Reach came from a global pool, not the social graph.** Every agent drew candidates from all posts ranked by interest × recency, so a completely unconnected agent saw as much as a hub. That is a magazine, not a social network | Three-tier feed: **network** (people you follow, *not* interest-filtered) > **friend-of-friend** (2-hop, interest ranked) > **discovery** (small global slice). Isolation is not penalised — it falls out, since an agent with no follows fills only the discovery tier |
 | B-13 | Ours — `refresh()` + upstream `trace` schema | A duplicate refresh in one round threw `IntegrityError` and destroyed the whole feed | `trace`'s primary key is `(user_id, created_at, action, info)`, and for a refresh `info` is the entire feed — so refreshing twice with an unchanged feed collides. Same shape as B-12: one small error taking down everything around it | Catch it and count it. Exposure rows are already written by that point, so only the duplicate audit row is lost — the one row carrying no new information |
 | F-24 | **A third of posts are the author's bio, echoed back.** 21 of 66 posts (32%) closely reproduce the author's own profile text — one at similarity 1.00, i.e. verbatim. Posts *do* match their author (0.785 to own bio vs 0.641 to others, +0.14 gap), but that number is inflated by parroting rather than earned by the agent writing something new | Open — likely needs the prompt to stop showing the bio as if it were content to riff on |
@@ -861,6 +862,43 @@ duration rather than correctness (Q-3).
     exposure from a three-tier run would have rendered as `?`. Both
     vocabularies now map to one index set, so runs from either era stay
     readable side by side.
+
+### 2026-08-27 — R-16 (v8): the social feed works, the prompt did not
+
+69. **R-16 ran clean mechanically** — 36 agents, 15 rounds, 124 min, zero agent
+    failures, zero refresh errors, **6048 exposures** (the highest of any run).
+    Real names worked (*James Miller*, *Emma Hayes*), and the three-tier feed
+    delivered as designed:
+
+    | source | exposures | share |
+    |---|---|---|
+    | discovery | 4062 | 67% |
+    | network | 1157 | 19% |
+    | fof | 829 | 14% |
+
+    **A third of all reach now flows through the social graph** rather than a
+    global pool. That is the F-25 design doing its job.
+
+70. **But behaviour degraded badly, and it was my fault.** action_rate fell to
+    **0.306** and malformed calls hit **831**. Tracing the errors showed
+    `action=` wrapping dominating again — the failure F-20 had fixed.
+
+    The cause was one word. Prompt v3 opened with *"Take TWO OR THREE of these
+    **actions** this turn"*, which reintroduced the priming word removed in v2.
+    The plural gave it away: `follow() got an unexpected keyword argument
+    'actions'`, 87 times. Malformed counts had been climbing ever since v3
+    (113 → 169 → 429 → 831) and I had attributed each rise to whatever else
+    that run changed. **Logged as F-26.**
+
+71. **Two prompt changes, and the second was Gordon's call.** Removing the word
+    took the smoke test to 0.58 malformed/turn. Removing the *forced volume*
+    entirely — "as many or as few as you feel like, including nothing at all"
+    — took it to **0.00**, against v8's 1.54/turn.
+
+    Forcing a volume was also bad method: dictating how much agents act biases
+    the very behaviour the simulation exists to measure. Action rate fell from
+    0.875 (forced) to 0.708 (free), which is the honest number rather than a
+    coerced one.
 
 *(Entries continue as the build proceeds.)*
 

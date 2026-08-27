@@ -49,7 +49,7 @@ log = logging.getLogger("social_timeline.agent")
 # manifest. Runs are only comparable to each other at the same version --
 # v1 -> v2 changed the action guidance after it was found to be priming
 # malformed tool calls (see TimelineEnvironment).
-PROMPT_VERSION = 6
+PROMPT_VERSION = 8
 
 
 class TimelineEnvironment(SocialEnvironment):
@@ -224,8 +224,9 @@ class TimelineEnvironment(SocialEnvironment):
         # real parameter names taken from agent_action.py, and says explicitly
         # not to wrap the call or repeat the function name.
         guidance = (
-            "Take TWO OR THREE of these actions this turn, not just one. Copy "
-            "the id values straight out of the feed above:\n"
+            "You can do any of these, as many or as few as you feel like -- "
+            "including nothing at all. Copy the id values straight out of the "
+            "feed above:\n"
             "  post_id      -> use with like_post, dislike_post, "
             "create_comment, repost, quote_post\n"
             "  followee_id  -> use with follow (this is the person, not the "
@@ -241,10 +242,10 @@ class TimelineEnvironment(SocialEnvironment):
             "  like_comment(comment_id=N)\n"
             "  create_post(content=\"something new\")\n"
             "\n"
-            "Pass only the parameters listed. Do not add extra parameters and "
-            "do not repeat the function name as a parameter.\n"
-            "Replying to and following other people is more interesting than "
-            "only posting your own thoughts.")
+            "Pass only the parameters listed. Never add a parameter that is "
+            "not in the signature above, and never repeat the function name "
+            "as a parameter.\n"
+            "Do whatever fits you and what you have just read.")
 
         return "\n\n".join(x for x in
                            [social, feed, notifications, own,

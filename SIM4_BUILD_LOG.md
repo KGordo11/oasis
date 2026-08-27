@@ -252,6 +252,7 @@ Full detail with rationale lives in spec §2. Condensed index:
 | F-11 | Agents see only follower/following **counts**, never identities | `agent_environment.py:68-101`, both marked `# TODO` upstream |
 | F-12 | Two conflicting index bases for the `rec` matrix | `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based |
 | F-13 | Every table's `user_id` column actually stores **agent_id**; only the `user` table has both | `platform.py:407` — `user_id = agent_id`, repeated in every action |
+| F-23 | **F-22's fix backfired badly and was reverted.** Gluing the id into the author string as `"name (followee_id=7)"` made malformed calls jump 169 → **429**, with `follow()` handed `post_id` 145 times and `action=` wrapping exploding across every action. Burying a key=value pair inside a JSON *value* made the object harder to read, so the model grabbed the first id it saw | Reverted to v6's shape: the id stays in its own field named exactly as the tool expects |
 | F-22 | **Removing digits from handles created a new failure.** F-20's fix worked precisely — invalid follow targets fell 77→17, follows rose 53→73 — but with no digits to grab, the model started calling `follow()` with **no argument at all** (29 times) and reverted to `action=` wrapping. Action rate fell 0.72→0.611, malformed rose 113→169 | Stop fighting the habit: the id now travels *with* the name — `author: "strategist_chief (followee_id=7)"` — so grabbing digits and reading the field both yield the right value |
 | F-21 | **Agents never saw replies to their own posts, so nobody ever answered anyone.** In R-13, 17 posts drew multiple comments and the author replied back on **zero** of them. Cause: an agent's own posts are correctly excluded from its feed, but the comments live *under* those posts — so replies were invisible to the one person they were addressed to. The result was parallel monologue, not conversation | Added a notifications block: replies you received, with the `post_id` to answer, `comment_id` to like, and `followee_id` to follow |
 | F-20 | **Numeric handles were being parsed as ids.** The scraped personas ship as `user0`..`user110`; agents read the digits out of the handle and passed them as ids — `follow(46)` for `user46`. Measured in R-13: **230 rejected follows aimed at id 46, 136 at 44, 126 at 96**, plus 280 at the placeholder `12345`. This is why follows fell 90 → 53 | Handles are now generated from the persona's own words: readable, unique, digit-free (`@strategist_chief`, `@advanced_trading`) |
@@ -717,6 +718,40 @@ duration rather than correctness (Q-3).
 
     Dossier is now ~23,600 lines across 12 sections.
 
+### 2026-08-27 — R-15: two changes, both failures
+
+54. **Stated plainly: both changes in R-15 made things worse or did nothing.**
+    v6 (R-14) remains the best configuration.
+
+    | | R-13 | R-14 | R-15 |
+    |---|---|---|---|
+    | action rate | 0.720 | **0.611** | 0.487 |
+    | malformed | 113 | **169** | 429 |
+    | follows | 53 | **73** | 65 |
+    | comments | 124 | **134** | 90 |
+
+55. **F-22 (id glued to the name) backfired.** The theory was that the model
+    reaches for a number next to the person, so putting the right number there
+    would help. Instead malformed calls jumped to 429, with `follow()` handed
+    `post_id` 145 times. Burying `key=value` inside a JSON *value* made the
+    object harder to parse and the model grabbed the first id it saw, while
+    `action=` wrapping exploded across every action type. Reverted.
+
+56. **F-21 (notifications) did not produce conversation.** Authors replied on
+    **0 of 23** threads, identical to R-14's 0 of 29. So the inability to see
+    replies was *not* the reason nobody answered anybody.
+
+    Caveat that matters: notifications shipped in the same run as F-22, so the
+    two are confounded — F-22's damage may have swamped any effect. Prompt v6
+    keeps notifications while reverting F-22 precisely so the next run tests
+    them in isolation. Until then, "notifications don't help" is unproven, not
+    established.
+
+57. Worth recording as method: R-14's regression was predicted by nothing and
+    only surfaced because malformed calls are counted. Three runs in a row now
+    have had their real story told by the integrity counters rather than by the
+    headline numbers.
+
 *(Entries continue as the build proceeds.)*
 
 ---
@@ -732,6 +767,8 @@ including failed and aborted ones.
 | R-2 | 0 | `pooler_probe.py`, 4 texts / 2 topics, run in two fresh processes | **Exposed B-1 and B-2.** Pooler weights differ per process (`sum=-6.18` vs `+6.46`); pooler margin `+0.0069` / `+0.0008`; mean-pooled margin `+0.0475` and bit-identical across processes | ~50s for both processes |
 | R-6 | 2 | 8 agents, 4 rounds, **22 actions** (`--no-groups`) — controlled A/B against R-5, identical otherwise | **Behaviour gate PASSED.** action_rate **0.812** (26/32, vs R-5's 0.469 and Sim 1's ~0.89); 14 posts, **9 comments, 3 quote_posts, 1 follow**, 1 search, 1 do_nothing; 148 exposures (nearly 2x R-5). First genuine content engagement of the build. Confirms F-14 | 340.1s |
 | R-11 | contrast | 36 agents, 12 rounds, **reddit hot-score**, prompt **v2** | **Completed.** action_rate **0.956**, only **7** malformed calls, 413 actions, **113 follows**, 106 posts, 2976 exposures. Verified: **1 distinct candidate pool** (all 36 agents see an identical feed) and 100% `recsys` source (no follow-injection) | 77 min |
+| R-15 | full | 36 agents, 15 rounds, prompt **v5** (id glued to name + notifications) | **WORSE. Both changes failed.** action_rate **0.487** (from 0.611), malformed **429** (from 169), comments 134→90, follows 73→65. And notifications did **not** produce conversation: **0 of 23** threads had the author reply back, identical to v6's 0 of 29 | 109 min |
+| R-14 | full | 36 agents, 15 rounds, prompt v4, **readable handles** | **Best run so far.** invalid_follow_targets **77→17** and follows **53→73**, both exactly as F-20 predicted; refresh_errors **3→0** (B-12 holds). But action_rate fell 0.72→0.611 and malformed rose 113→169 — an unpredicted regression, diagnosed as F-22 | 97 min |
 | R-13 | full | 36 diverse personas, 15 rounds, prompt v3, **informed-action gate** | **Clean but sparse.** 94 min, 0 agent failures, 5033 exposures, 130 posts, 124 comments, 125 likes. **Round 0 finally correct: 35 posts, 0 follows, 0 likes, 0 comments** — nothing to act on, so nothing acted on. But only **53 follows**, because the gate rejected 77 invalid targets and 49 blind actions. Exposed **F-20** and **B-12** | 94 min |
 | R-12 | full | 36 **diversity-selected twitter** personas, 15 rounds, prompt v3, recency scaling, ranked feed, seed 0 / temp 0.7 | **Best run to date.** action_rate **0.733**, actions/turn **0.91**, malformed **70**, **90 follow edges**, 132 posts, 148 comments, 100 likes, 4697 exposures, 7 action types, **0 phantom follows**, 0 agent failures. Round time held ~370-390s **flat** (was 299->640s climbing) thanks to the embedding cache | 92 min |
 | R-10 | full | 36 agents, 12 rounds, twhin-bert, prompt **v2** | **Completed.** action_rate 0.604 (vs 0.461 at v1), malformed calls **393 → 106 (-73%)**, 302 actions, 70 follows, 99 posts, 3940 exposures. Sources: recsys 3073 / following 772 / both 95 — **22% of exposures arrived via the social graph**. 36 distinct candidate pools (fully personalized) | 86 min |

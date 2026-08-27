@@ -49,7 +49,7 @@ log = logging.getLogger("social_timeline.agent")
 # manifest. Runs are only comparable to each other at the same version --
 # v1 -> v2 changed the action guidance after it was found to be priming
 # malformed tool calls (see TimelineEnvironment).
-PROMPT_VERSION = 5
+PROMPT_VERSION = 6
 
 
 class TimelineEnvironment(SocialEnvironment):
@@ -119,13 +119,15 @@ class TimelineEnvironment(SocialEnvironment):
                 author = names.get(p.get("user_id"), f"agent{p.get('user_id')}")
                 entry = {
                     "post_id": p.get("post_id"),
-                    # F-22: the id travels WITH the name. v6 removed digits
-                    # from handles to stop the model grabbing the wrong number
-                    # (F-20), and it then started calling follow() with no
-                    # argument at all -- 29 times. The model reaches for a
-                    # number next to the person; give it the RIGHT one there,
-                    # so grabbing digits and reading followee_id both work.
-                    "author": f"{author} (followee_id={p.get('user_id')})",
+                    # F-22 REVERTED. v7 glued the id into this string as
+                    # "name (followee_id=7)" on the theory that the model
+                    # reaches for a number next to the person. It backfired
+                    # badly: malformed calls 169 -> 429, with follow() being
+                    # handed post_id 145 times, because burying a key=value
+                    # pair inside a JSON *value* made the object harder to
+                    # read and the model grabbed the first id it saw. Keep the
+                    # id in its own field, named exactly as the tool expects.
+                    "author": author,
                     # v3: named `followee_id`, not `author_id`. At v2 this key
                     # was `author_id` and the model copied the FIELD name into
                     # the call -- follow(author_id=5) failed 19 times. Field
@@ -140,9 +142,9 @@ class TimelineEnvironment(SocialEnvironment):
                 if comments:
                     entry["comments"] = [{
                         "comment_id": c.get("comment_id"),
-                        "by": (names.get(c.get("user_id"),
-                                         f"agent{c.get('user_id')}")
-                               + f" (followee_id={c.get('user_id')})"),
+                        "by": names.get(c.get("user_id"),
+                                        f"agent{c.get('user_id')}"),
+                        "followee_id": c.get("user_id"),
                         "content": c.get("content"),
                     } for c in comments[:3]]
                 lines.append(entry)
@@ -154,8 +156,7 @@ class TimelineEnvironment(SocialEnvironment):
                     "yourself.")
 
         # --- who you already follow, by name (F-11) -----------------------
-        following = [f"{names.get(r[0], f'agent{r[0]}')} (id {r[0]})"
-                     for r in self._query(
+        following = [names.get(r[0], f"agent{r[0]}") for r in self._query(
             "SELECT followee_id FROM follow WHERE follower_id = ?",
             (self.agent_id, ))]
         followers = [names.get(r[0], f"agent{r[0]}") for r in self._query(
@@ -186,8 +187,7 @@ class TimelineEnvironment(SocialEnvironment):
         if replies:
             lines_r = [
                 {"comment_id": cid, "on_your_post_id": pid,
-                 "from": (names.get(uid, f"agent{uid}")
-                          + f" (followee_id={uid})"),
+                 "from": names.get(uid, f"agent{uid}"),
                  "followee_id": uid, "said": content}
                 for cid, pid, uid, content in replies
             ]

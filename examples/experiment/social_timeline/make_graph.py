@@ -452,11 +452,26 @@ function edgesAt(round) {
     .map(([a, b]) => ({ source: a, target: b }));
 }
 
-function interactionEdges() {
-  const all = Object.entries(inter).map(([key, n]) => {
+function interactionEdges(upTo) {
+  // Interactions must respect the round slider. This previously read the
+  // run-total interaction_pairs, so round 0 -- before anyone had seen or done
+  // anything -- still drew every interaction that ever occurred, making an
+  // empty network look connected. Rebuild from the event log instead, keeping
+  // only what had actually happened by the round being viewed.
+  const upto = (upTo === undefined) ? maxRound : upTo;
+  const counts = {};
+  for (const e of DATA.events || []) {
+    const [rnd, actor, , , target] = e;
+    if (rnd > upto) continue;
+    if (target === null || target === undefined || target === actor) continue;
+    const k = actor + '->' + target;
+    counts[k] = (counts[k] || 0) + 1;
+  }
+  const all = Object.entries(counts).map(([key, n]) => {
     const [a, b] = key.split('->').map(Number);
     return { source: a, target: b, weight: n };
   }).filter(e => nodeById[e.source] && nodeById[e.target]);
+
   const DENSE = 60;
   if (all.length <= DENSE) return all;
   const repeated = all.filter(e => e.weight > 1);
@@ -467,7 +482,7 @@ function interactionEdges() {
 function render(round) {
   lastRound = round;
   const follows = edgesAt(round);
-  const interactions = interactionEdges();
+  const interactions = interactionEdges(round);
   simulate(follows.length ? follows : interactions);
 
   const fc = {};
@@ -658,7 +673,7 @@ function exposureTable() {
 
 function footnote() {
   const totalPairs = Object.keys(inter).length;
-  const shown = interactionEdges().length;
+  const shown = interactionEdges(maxRound).length;
   document.getElementById('footnote').textContent =
     'The follow graph starts empty by design: no relationships are seeded, so ' +
     'every edge shown was created by an agent choosing to follow someone. ' +

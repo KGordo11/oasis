@@ -361,10 +361,19 @@ async def generate_timeline_agents(
                 "profession": entry.get("profession"),
                 "interested_topics": entry.get("interested_topics"),
                 "realname": entry.get("realname"),
+                "handle": entry.get("username"),
             },
         }
+        # The DISPLAY NAME is the person's real name from the persona file --
+        # "James Miller", not "millerhospitality" and certainly not "user_98".
+        # Every table, graph label, transcript line and feed entry keys off
+        # this, so a reader can point at a node and know exactly who it is.
+        # sign_up stores it in user.name, which is what everything downstream
+        # reads (COALESCE(user_name, name)).
+        display = (entry.get("realname") or entry.get("username")
+                   or f"agent{i}")
         user_info = UserInfo(
-            name=entry["username"] or f"agent{i}",
+            name=display,
             description=entry["bio"],
             profile=profile,
             # "twitter" selects the Twitter system prompt; see module docstring.

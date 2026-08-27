@@ -755,6 +755,79 @@ duration rather than correctness (Q-3).
     have had their real story told by the integrity counters rather than by the
     headline numbers.
 
+### 2026-08-27 — Making the artifact the deliverable, and the feed social
+
+58. **The artifact became the only thing anyone needs to open.** The detail had
+    been living in a 1.6 MB `.txt` while the published page showed summaries,
+    so the one artefact anyone actually reads was the one missing the data.
+    Six tabs now: Network, Rounds, Transcript, People, Posts, Timeline,
+    Method & integrity.
+
+59. **Two artifacts existed with the same name**, and there is a real chance
+    earlier feedback was aimed at a stale copy from 25 August rather than the
+    live one. The duplicate (`96788f41…`) has been overwritten with a notice
+    pointing at the live URL (`732d1879…`) so it cannot mislead again. Worth
+    recording as a process failure: publishing under a second filename silently
+    forked the deliverable.
+
+60. **Round 0 showed phantom connections.** The graph draws follow edges *and*
+    interaction edges; follows respected the round slider, interactions did not
+    — they came from a run-total and ignored it entirely, so round 0 displayed
+    every interaction that ever occurred on a network with zero edges.
+    Interactions are now rebuilt from the event log filtered to the round on
+    screen.
+
+61. **Rounds tab.** One round in full: action mix, exposure count and the share
+    delivered via the follow graph, every action with actor/target/full text,
+    every new follow edge, and who saw whom. Two checkboxes compare a second
+    round or the same round in another run, side by side.
+
+62. **Transcript tab.** A narrated log rather than a table — for each round,
+    each agent in turn, what they were shown and what they did:
+
+    ```
+    mainstream_retweeten (user_89) opened the app and was shown nothing.
+    mainstream_retweeten (user_89) posted (post #4).
+        Retweeten wirkt meist mehr als Liken.
+    ```
+
+    With feeds on, every exposure is listed individually with post id, author,
+    delivery route, score, feed slot, and ACTED / scrolled past.
+
+63. **Real names.** The display name is now the person's actual name from the
+    persona file — *James Miller*, not `millerhospitality` and not `user_98`.
+    The persona default moved back to `data/reddit/user_data_36.json`, which
+    carries real names plus age, gender, MBTI, country and profession; the
+    twitter CSV is more separable (0.637 vs 0.829) but anonymised to
+    `user0..user110`, which made every table unreadable. **Separability was
+    traded for interpretability, deliberately.**
+
+64. **F-24, measured rather than assumed.** Posts do track their author's
+    persona — 0.785 similarity to their own bio against 0.641 to everyone
+    else's, a +0.14 gap — but **21 of 66 posts (32%) echo the author's own bio**,
+    one of them verbatim at similarity 1.00. The gap is therefore partly
+    parroting rather than the agent composing something new, and the headline
+    number overstates how persona-driven the content really is.
+
+65. **F-25: the feed became social.** Until now every agent drew candidates
+    from a global pool ranked by interest × recency, so a completely
+    unconnected agent saw as much as a hub — a magazine, not a social network.
+    Reach now flows through the graph in three tiers: **network** (people you
+    follow, deliberately *not* interest-filtered, because real friendships span
+    people with nothing in common) > **friend-of-friend** (2-hop, interest
+    ranked, since no relationship justifies that reach on its own) >
+    **discovery** (a small global slice, and the only source an unconnected
+    agent has).
+
+    Isolation is not penalised anywhere in the code; it simply falls out.
+    Verified on a 4-agent fixture: a connected agent received one post from
+    each tier, while the loner received discovery only.
+
+    Placement note: the tiers live in `refresh()` rather than
+    `update_rec_table()`, because `refresh()` is the only place that knows
+    *which* agent is asking and can therefore consult *their* follow graph.
+    `oasis/` remains byte-identical.
+
 *(Entries continue as the build proceeds.)*
 
 ---

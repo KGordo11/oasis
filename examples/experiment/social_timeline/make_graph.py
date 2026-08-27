@@ -221,6 +221,17 @@ HTML = """<title>Agent Network Formation</title>
   <section id="algoBox" class="algo"></section>
 
   <div class="scroll">
+    <table id="rosterTable">
+      <caption id="rosterCaption">Roster &mdash; click any person in the graph</caption>
+      <thead><tr>
+        <th>Other agent</th><th class="num">Times seen</th>
+        <th>What they did to them</th><th>What came back</th>
+      </tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div class="scroll">
     <table id="agentTable">
       <caption>Per-agent detail &mdash; selected run</caption>
       <thead><tr>
@@ -351,6 +362,7 @@ function loadRun(label) {
     tr.classList.toggle('current', tr.dataset.run === label));
 
   algoBox(); agentTable(); propTable(); exposureTable(); footnote();
+  roster(null);
   render(maxRound);
 }
 
@@ -478,7 +490,9 @@ click to isolate this person's connections</title>`;
     t.textContent = n.name.length > 16 ? n.name.slice(0,15) + '...' : n.name;
     g.appendChild(t);
     g.addEventListener('click', () => {
-      focusId = (focusId === n.id) ? null : n.id; render(lastRound);
+      focusId = (focusId === n.id) ? null : n.id;
+      render(lastRound);
+      roster(focusId);
     });
     svg.appendChild(g);
   }
@@ -531,6 +545,53 @@ function algoBox() {
         ` (lower = more distinguishable)` : '') + `</dd>` +
     `<dt>Start</dt><dd>${A.initial_follow_edges ?? 0} follow edges &mdash; not seeded</dd>` +
     `</dl>` + (dev ? `<div><strong>Stated deviations from upstream:</strong><ul>${dev}</ul></div>` : '');
+}
+
+function roster(focus) {
+  // Every other agent, seen or not. Agents never seen are shown rather than
+  // omitted: that absence is a fact about what the feed did, and hiding it
+  // would make the roster look complete while concealing reach gaps.
+  const cap = document.getElementById('rosterCaption');
+  const body = document.querySelector('#rosterTable tbody');
+  if (focus === null || !byId[focus]) {
+    cap.textContent = 'Roster -- click any person in the graph to see every ' +
+      'agent they saw and everything they did with each one';
+    body.innerHTML = '<tr><td colspan="4">No one selected.</td></tr>';
+    return;
+  }
+  const a = byId[focus];
+  const saw = a.saw_authors || {};
+  const out = a.interacted_with || {};
+  const back = a.interacted_by || {};
+  const others = Object.values(agents)
+    .map(x => x.agent_id).filter(x => x !== focus);
+  others.sort((x, y) => (saw[y] || 0) - (saw[x] || 0) || x - y);
+
+  const nSeen = others.filter(o => saw[o]).length;
+  cap.textContent =
+    `${a.username} -- saw content from ${nSeen} of ${others.length} other ` +
+    `agents, never saw ${others.length - nSeen}. ` +
+    `Acted on ${Object.keys(out).length}, was acted on by ${Object.keys(back).length}.`;
+
+  const fmtActs = o => {
+    const m = out[o] || out[String(o)] || {};
+    const e = Object.entries(m);
+    return e.length ? e.map(([k, v]) => `${k}&times;${v}`).join(', ') : '&ndash;';
+  };
+  const fmtBack = o => {
+    const m = back[o] || back[String(o)] || {};
+    const e = Object.entries(m);
+    return e.length ? e.map(([k, v]) => `${k}&times;${v}`).join(', ') : '&ndash;';
+  };
+
+  body.innerHTML = others.map(o => {
+    const n = saw[o] || saw[String(o)] || 0;
+    const nm = (byId[o] || {}).username || ('agent' + o);
+    return `<tr><td class="who">${nm}</td>` +
+      `<td class="num">${n || '<span style="opacity:.45">never saw</span>'}</td>` +
+      `<td class="mix">${fmtActs(o)}</td>` +
+      `<td class="mix">${fmtBack(o)}</td></tr>`;
+  }).join('');
 }
 
 function agentTable() {
@@ -611,7 +672,12 @@ loadRun(sel.value);
 
 PER_AGENT = ("agent_id", "username", "total_actions", "n_posts_authored",
              "distinct_posts_seen", "exposure_events", "engagement_rate",
-             "action_counts", "following", "followers", "exposure_by_source")
+             "action_counts", "following", "followers", "exposure_by_source",
+             # Relational detail: who this agent saw, and both directions of
+             # interaction. Without these the page can only show totals, and
+             # "who saw whom and what they did" is the whole question.
+             "saw_authors", "interacted_with", "interacted_by",
+             "seen_and_acted", "seen_and_ignored", "bio")
 
 
 def project(analysis_path, manifest_path=None):

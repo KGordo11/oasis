@@ -49,7 +49,7 @@ log = logging.getLogger("social_timeline.agent")
 # manifest. Runs are only comparable to each other at the same version --
 # v1 -> v2 changed the action guidance after it was found to be priming
 # malformed tool calls (see TimelineEnvironment).
-PROMPT_VERSION = 3
+PROMPT_VERSION = 4
 
 
 class TimelineEnvironment(SocialEnvironment):
@@ -159,6 +159,37 @@ class TimelineEnvironment(SocialEnvironment):
                   + (f"Following you: {', '.join(followers)}."
                      if followers else "Nobody follows you yet."))
 
+        # --- replies to your own posts, i.e. notifications (F-21) ---------
+        # An agent's own posts are excluded from its feed, which is correct --
+        # nobody is shown their own content by a recommender. But the comments
+        # on those posts live *under* them, so an agent never saw a single
+        # reply it received. Measured in R-13: 17 posts drew multiple comments
+        # and the author replied back on **zero** of them. That is not
+        # conversation, it is parallel monologue.
+        #
+        # Every real platform closes this with notifications. This is the
+        # notification tab: replies you received, which you can answer.
+        replies = self._query(
+            "SELECT c.comment_id, c.post_id, c.user_id, c.content "
+            "FROM comment c JOIN post p ON c.post_id = p.post_id "
+            "WHERE p.user_id = ? AND c.user_id != ? "
+            "ORDER BY c.comment_id DESC LIMIT 6", (self.agent_id,
+                                                   self.agent_id))
+        if replies:
+            lines_r = [
+                {"comment_id": cid, "on_your_post_id": pid,
+                 "from": names.get(uid, f"agent{uid}"),
+                 "followee_id": uid, "said": content}
+                for cid, pid, uid, content in replies
+            ]
+            notifications = ("People replied to YOUR posts. You can reply back "
+                             "with create_comment(post_id=..., content=...), "
+                             "like their reply with like_comment(comment_id="
+                             "...), or follow them:\n"
+                             + json.dumps(lines_r, indent=1))
+        else:
+            notifications = "Nobody has replied to your posts yet."
+
         # --- your own recent posts, so you do not repeat yourself ---------
         mine = [r[0] for r in self._query(
             "SELECT content FROM post WHERE user_id = ? "
@@ -207,7 +238,8 @@ class TimelineEnvironment(SocialEnvironment):
             "only posting your own thoughts.")
 
         return "\n\n".join(x for x in
-                           [social, feed, own, groups, guidance] if x)
+                           [social, feed, notifications, own,
+                            groups, guidance] if x)
 
 
 class TimelineAgent(SocialAgent):

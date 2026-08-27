@@ -162,6 +162,10 @@ async def run(args):
         # F-17: show best-ranked posts, keeping a couple of slots for
         # exploration rather than sampling the pool at random.
         explore_slots=args.explore_slots,
+        # F-25: reach flows through the graph, not a global pool.
+        network_slots=args.network_slots,
+        fof_slots=args.fof_slots,
+        discovery_slots=args.discovery_slots,
     )
 
     env = oasis.make(
@@ -211,6 +215,11 @@ async def run(args):
             "recency_span_rounds": (None if args.no_recency_scaling
                                    else args.rounds),
             "explore_slots": args.explore_slots,
+            "network_slots": args.network_slots,
+            "fof_slots": args.fof_slots,
+            "discovery_slots": args.discovery_slots,
+            "feed_model": "three-tier: network > friend-of-friend > "
+                          "discovery; social ties are not interest-filtered",
         },
         "environment": {
             "python": sys.version.split()[0],
@@ -365,6 +374,19 @@ def main():
     p.add_argument("--temperature", type=float, default=0.7,
                    help="LLM sampling temperature. Previously unset and "
                         "therefore unstated; now explicit and recorded")
+    p.add_argument("--network-slots", type=int, default=5,
+                   dest="network_slots",
+                   help="feed slots for people you follow. Not "
+                        "interest-filtered: following someone means "
+                        "you see them (F-25)")
+    p.add_argument("--fof-slots", type=int, default=3,
+                   dest="fof_slots",
+                   help="slots for friends-of-friends, interest ranked")
+    p.add_argument("--discovery-slots", type=int, default=4,
+                   dest="discovery_slots",
+                   help="global discovery slots. The only source an "
+                        "unconnected agent has, so isolation limits "
+                        "reach on its own")
     p.add_argument("--explore-slots", type=int, default=2,
                    dest="explore_slots",
                    help="feed slots given to exploration instead of the "

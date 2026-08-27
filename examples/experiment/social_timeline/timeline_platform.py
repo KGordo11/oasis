@@ -145,7 +145,9 @@ class TimelinePlatform(Platform):
     """Personalized, fully instrumented platform. See module docstring."""
 
     def __init__(self, *args, recency_span_rounds: int | None = None,
-                 explore_slots: int = 2, **kwargs):
+                 explore_slots: int = 2, network_slots: int = 5,
+                 fof_slots: int = 3, discovery_slots: int = 4,
+                 **kwargs):
         """recency_span_rounds: number of rounds over which a post should decay
         from brand-new to stale.
 
@@ -173,6 +175,12 @@ class TimelinePlatform(Platform):
         # How many of the algorithmic feed slots are exploration rather than
         # best-ranked content (F-17). 0 = pure exploitation, no serendipity.
         self.explore_slots = explore_slots
+        # Feed tier sizes (F-25). An agent with no follows fills
+        # only the discovery tier, so isolation limits reach by
+        # itself rather than by any penalty.
+        self.network_slots = network_slots
+        self.fof_slots = fof_slots
+        self.discovery_slots = discovery_slots
         self._feed_order = {}
         # agent_id -> ids surfaced by that agent's own searches
         self._search_hits = {}
@@ -209,6 +217,7 @@ class TimelinePlatform(Platform):
             "refresh_errors": 0,
             "empty_feeds": 0,
             "blind_actions_rejected": 0,
+            "duplicate_refresh_traces": 0,
         }
 
     # ---------------------------------------------------------------- tables
@@ -492,42 +501,84 @@ class TimelinePlatform(Platform):
             # feed" that shows a random draw from a shortlist is barely
             # personalised at all.
             #
-            # Real feeds exploit AND explore: mostly best-ranked content, with
-            # a small slice of exploration so the bubble is not airtight.
-            # That is what this does, and both parts are recorded.
+            # ---- socially-structured feed (F-25) -------------------------
+            # Reach flows through the graph, not from a global pool. Three
+            # tiers, and which one delivered a post is recorded:
+            #
+            #   network   posts by people you follow. NOT interest-filtered --
+            #             following someone means you see them, the way real
+            #             friendships span people with nothing in common.
+            #   fof       posts by people your followees follow. Interest
+            #             ranked, because there is no relationship here to
+            #             justify the reach on its own.
+            #   discovery a small global slice, interest ranked. The only way
+            #             an unconnected agent sees anything, and how weak
+            #             ties get a chance to form.
+            #
+            # Isolation is not punished, it simply falls out: an agent with no
+            # follows has empty network and fof tiers and receives only the
+            # discovery slice -- a few posts instead of a full feed.
             self.pl_utils._execute_db_command(
                 "SELECT post_id FROM rec_candidates WHERE round = ? AND "
                 "agent_id = ? ORDER BY rank", (round_no, agent_id))
-            ranked = [r[0] for r in self.db_cursor.fetchall()]
-            if not ranked:
-                ranked = rec_post_ids
+            ranked = [r[0] for r in self.db_cursor.fetchall()] or rec_post_ids
+            rank_of = {pid: i for i, pid in enumerate(ranked)}
 
-            n = self.refresh_rec_post_count
-            n_explore = min(self.explore_slots, max(0, n - 1))
-            n_top = n - n_explore
-            top = ranked[:n_top]
-            rest = [p for p in ranked[n_top:] if p not in set(top)]
-            explore = (random.sample(rest, min(n_explore, len(rest)))
-                       if rest else [])
-            selected_post_ids = top + explore
-            # Best-ranked first: presentation order is itself a ranking signal,
-            # and previously the feed was rendered in arbitrary SQL row order.
+            # tier 1 -- people you follow
+            self.pl_utils._execute_db_command(
+                "SELECT followee_id FROM follow WHERE follower_id = ?",
+                (user_id, ))
+            followees = [r[0] for r in self.db_cursor.fetchall()]
+
+            def posts_by(authors, limit):
+                if not authors:
+                    return []
+                ph = ", ".join("?" for _ in authors)
+                self.pl_utils._execute_db_command(
+                    f"SELECT post_id FROM post WHERE user_id IN ({ph}) "
+                    f"AND user_id != ? ORDER BY post_id DESC LIMIT ?",
+                    (*authors, user_id, limit))
+                return [r[0] for r in self.db_cursor.fetchall()]
+
+            from_network = set(posts_by(followees, self.network_slots))
+
+            # tier 2 -- friends of friends, excluding people already followed
+            fof = []
+            if followees:
+                ph = ", ".join("?" for _ in followees)
+                self.pl_utils._execute_db_command(
+                    f"SELECT DISTINCT followee_id FROM follow "
+                    f"WHERE follower_id IN ({ph})", followees)
+                fof = [r[0] for r in self.db_cursor.fetchall()
+                       if r[0] != user_id and r[0] not in set(followees)]
+            fof_pool = [p for p in posts_by(fof, self.fof_slots * 6)
+                        if p not in from_network]
+            fof_pool.sort(key=lambda p: rank_of.get(p, 10_000))
+            from_fof = set(fof_pool[:self.fof_slots])
+
+            # tier 3 -- discovery, interest ranked, with a slice of randomness
+            taken = from_network | from_fof
+            disc_ranked = [p for p in ranked if p not in taken]
+            n_explore = min(self.explore_slots,
+                            max(0, self.discovery_slots - 1))
+            n_top = self.discovery_slots - n_explore
+            disc = disc_ranked[:n_top]
+            rest = [p for p in disc_ranked[n_top:]]
+            disc += (random.sample(rest, min(n_explore, len(rest)))
+                     if rest else [])
+            from_discovery = set(disc)
+
+            # Network first, then friends-of-friends, then discovery: position
+            # is itself a signal and the graph should lead.
+            selected_post_ids = (
+                sorted(from_network, key=lambda p: -p)
+                + [p for p in fof_pool[:self.fof_slots]]
+                + disc)
             self._feed_order = {pid: i
                                 for i, pid in enumerate(selected_post_ids)}
-            from_recsys = set(selected_post_ids)
-
-            from_following = set()
-            if self.recsys_type != RecsysType.REDDIT:
-                self.pl_utils._execute_db_command(
-                    "SELECT post.post_id, post.user_id, post.content, "
-                    "post.created_at, post.num_likes FROM post "
-                    "JOIN follow ON post.user_id = follow.followee_id "
-                    "WHERE follow.follower_id = ? "
-                    "ORDER BY post.num_likes DESC "
-                    "LIMIT ?", (user_id, self.following_post_count))
-                following_posts = self.db_cursor.fetchall()
-                from_following = {row[0] for row in following_posts}
-                selected_post_ids = list(from_following | from_recsys)
+            # Kept for the exposure labels below.
+            from_recsys = from_discovery
+            from_following = from_network
 
             if not selected_post_ids:
                 # Legitimate in round 0 (nothing has been posted yet) and for
@@ -553,12 +604,29 @@ class TimelinePlatform(Platform):
             results_with_comments = self.pl_utils._add_comments_to_posts(
                 results)
 
+            self._last_fof = from_fof
             self._log_exposure(round_no, agent_id, results, from_recsys,
                                from_following)
 
             action_info = {"posts": results_with_comments}
-            self.pl_utils._record_trace(user_id, ActionType.REFRESH.value,
-                                        action_info, current_time)
+            try:
+                self.pl_utils._record_trace(user_id, ActionType.REFRESH.value,
+                                            action_info, current_time)
+            except Exception as exc:  # noqa: BLE001
+                # B-13. The trace table's primary key is
+                # (user_id, created_at, action, info), and for a refresh `info`
+                # is the whole feed. An agent refreshing twice in one round
+                # with an unchanged feed therefore collides, and the exception
+                # was destroying the feed it had already built -- the same
+                # shape of failure as B-12, where one small error took down
+                # everything around it.
+                #
+                # The exposure rows are already written at this point, so the
+                # data is intact; only the duplicate audit row is lost, which
+                # is exactly the row that carries no new information.
+                self.stats["duplicate_refresh_traces"] += 1
+                log.debug("duplicate refresh trace for agent %s round %s: %s",
+                          agent_id, round_no, exc)
             self.stats["refresh_calls"] += 1
             return {"success": True, "posts": results_with_comments}
         except Exception as e:  # noqa: BLE001
@@ -593,9 +661,10 @@ class TimelinePlatform(Platform):
             post_id, author_id = row[0], row[1]
             in_rec = post_id in from_recsys
             in_fol = post_id in from_following
-            source = ("both" if in_rec and in_fol
-                      else "recsys" if in_rec
-                      else "following" if in_fol
+            in_fof = post_id in (getattr(self, "_last_fof", set()))
+            source = ("network" if in_fol
+                      else "fof" if in_fof
+                      else "discovery" if in_rec
                       else "unknown")
             rows.append((round_no, agent_id, post_id, author_id, position,
                          source, scores.get(post_id)))

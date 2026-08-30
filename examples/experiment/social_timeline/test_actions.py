@@ -69,6 +69,16 @@ async def main():
     post_id = r.get("post_id")
     check("create_post", r.get("success"), f"post_id={post_id}")
 
+    # F-19: an agent may only act on what it has been shown, so bob has to see
+    # the post before any of the engagement checks below can pass. Without this
+    # the suite tests the gate rather than the actions, which is why it began
+    # failing wholesale once the gate landed.
+    await pf.update_rec_table()
+    seen = await pf.refresh(1)
+    check("bob's feed contains alice's post",
+          any(p.get("post_id") == post_id for p in (seen.get("posts") or [])),
+          f"feed={[p.get('post_id') for p in (seen.get('posts') or [])]}")
+
     # bob engages with alice's post
     r = await pf.like_post(1, post_id)
     check("like_post", r.get("success"), str(r))

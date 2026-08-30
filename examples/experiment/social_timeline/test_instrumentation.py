@@ -62,7 +62,15 @@ async def test_source_attribution():
     alice_post = r["post_id"]
     r = await pf.create_post(2, "Debugging a memory allocator in C today.")
     carol_post = r["post_id"]
-    await pf.follow(1, 0)
+
+    # F-19: bob must see alice before he can follow her. Following first
+    # silently failed the blind-action gate, so no network-tier exposure ever
+    # appeared and the attribution checks below had nothing to find.
+    await pf.update_rec_table()
+    await pf.refresh(1)
+    followed = await pf.follow(1, 0)
+    check("bob can follow alice once he has seen her", followed.get("success"),
+          str(followed))
 
     await pf.update_rec_table()
     await pf.refresh(1)
@@ -74,17 +82,22 @@ async def test_source_attribution():
 
     check("bob was exposed to alice's post (he follows her)",
           alice_post in seen, f"post {alice_post}")
+    # F-25 renamed the tiers: following -> network, recsys -> discovery,
+    # plus a new fof tier. Both vocabularies are accepted so this suite keeps
+    # working against databases from either era.
+    SOCIAL = ("network", "following", "both", "fof")
     check("alice's post is attributed to the follow graph",
-          seen.get(alice_post) in ("following", "both"),
+          seen.get(alice_post) in SOCIAL,
           f"source={seen.get(alice_post)!r}")
-    check("at least one non-'recsys' source is now exercised",
-          any(v in ("following", "both") for v in seen.values()),
+    check("at least one social source is now exercised",
+          any(v in SOCIAL for v in seen.values()),
           f"sources={sorted(set(seen.values()))}")
 
     # carol is unfollowed, so if she appears at all it must be via recsys.
     if carol_post in seen:
-        check("unfollowed author is attributed to recsys",
-              seen[carol_post] == "recsys", f"source={seen[carol_post]!r}")
+        check("unfollowed author is attributed to the algorithm",
+              seen[carol_post] in ("discovery", "recsys"),
+              f"source={seen[carol_post]!r}")
     else:
         print("      (carol not in this feed sample -- nothing to assert)")
 
@@ -109,6 +122,10 @@ async def test_analyzer_targets():
     for aid, name in ((0, "alice"), (1, "bob")):
         await pf.sign_up(aid, (name, name, f"{name} bio"))
     post_id = (await pf.create_post(0, "Alice's original post."))["post_id"]
+
+    # F-19: bob must see the post before he can act on it.
+    await pf.update_rec_table()
+    await pf.refresh(1)
 
     # The three payload shapes that differ from each other.
     await pf.create_comment(1, (post_id, "Bob's reply."))   # comment_id only

@@ -49,7 +49,7 @@ log = logging.getLogger("social_timeline.agent")
 # manifest. Runs are only comparable to each other at the same version --
 # v1 -> v2 changed the action guidance after it was found to be priming
 # malformed tool calls (see TimelineEnvironment).
-PROMPT_VERSION = 8
+PROMPT_VERSION = 9
 
 
 class TimelineEnvironment(SocialEnvironment):
@@ -168,6 +168,31 @@ class TimelineEnvironment(SocialEnvironment):
                   + (f"Following you: {', '.join(followers)}."
                      if followers else "Nobody follows you yet."))
 
+        # --- how your own posts have landed (F-27) -------------------------
+        # An agent could not tell whether anything it wrote had reached anyone.
+        # In R-17, 21 posts drew likes and 36 drew comments, and none of that
+        # was ever visible to their authors: they were posting into a void,
+        # which is a plausible reason 64% of all actions were create_post.
+        #
+        # Every real platform shows this. It is information, not instruction --
+        # no one is told to engage more, they are simply told what happened,
+        # which is the feedback loop a social network runs on.
+        mine_stats = self._query(
+            "SELECT post_id, num_likes, num_dislikes, "
+            "(SELECT COUNT(*) FROM comment WHERE comment.post_id = post.post_id)"
+            " FROM post WHERE user_id = ? ORDER BY post_id DESC LIMIT 5",
+            (self.agent_id, ))
+        landed = [r for r in mine_stats if (r[1] or r[2] or r[3])]
+        if landed:
+            reception = ("How your recent posts have landed:\n" + json.dumps(
+                [{"post_id": r[0], "likes": r[1], "dislikes": r[2],
+                  "replies": r[3]} for r in landed], indent=1))
+        elif mine_stats:
+            reception = ("None of your posts have had any likes or replies "
+                         "yet.")
+        else:
+            reception = ""
+
         # --- replies to your own posts, i.e. notifications (F-21) ---------
         # An agent's own posts are excluded from its feed, which is correct --
         # nobody is shown their own content by a recommender. But the comments
@@ -248,7 +273,7 @@ class TimelineEnvironment(SocialEnvironment):
             "Do whatever fits you and what you have just read.")
 
         return "\n\n".join(x for x in
-                           [social, feed, notifications, own,
+                           [social, feed, reception, notifications, own,
                             groups, guidance] if x)
 
 

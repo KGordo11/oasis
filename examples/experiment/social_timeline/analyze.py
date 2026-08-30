@@ -546,6 +546,17 @@ def render_report(data):
         f"exposure events={t['exposure_events']}  "
         f"follow edges={t['follow_edges']}")
     add("")
+    # F-32/F-33. Every number below describes ONE run. Comparing two of these
+    # reports by eye, or with a test that treats chosen actions as independent
+    # observations, is what produced three wrong conclusions: actions are
+    # clustered within agent (ICC up to 0.38, design effect up to 4.8), and the
+    # unit of randomisation is the run, not the action.
+    add("NOTE: single-run report. Do NOT compare two of these directly --")
+    add("      actions are clustered within agent and the unit of")
+    add("      randomisation is the run. For any cross-run claim use:")
+    add("          compare.py --runs <before> <after>")
+    add("      which pairs on agent id and reports what it could detect.")
+    add("")
     add("ACTION MIX (chosen actions only; refresh/sign_up excluded)")
     if t["action_counts"]:
         for action, n in sorted(t["action_counts"].items(),

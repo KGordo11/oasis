@@ -902,6 +902,58 @@ duration rather than correctness (Q-3).
     0.875 (forced) to 0.708 (free), which is the honest number rather than a
     coerced one.
 
+### 2026-08-30 — R-17: the baseline, and what it reveals
+
+72. **Pre-flight caught that all three test gates were broken**, and the code
+    was right in every case — the tests had gone stale. `test_actions` called
+    engagement methods without showing the agent anything first, so F-19's
+    informed-action gate rejected them; the suite was testing the gate rather
+    than the actions. `test_instrumentation` still expected the pre-F-25 tier
+    names and also followed before seeing. Repaired both. Broken gates are
+    worse than none: they cry wolf until nobody reads them.
+
+73. **R-17 is the reference run.** Everything correct simultaneously for the
+    first time: disjoint three-tier feed, informed-action gate, real names,
+    prompt v8 with no priming word and no forced volume.
+
+    | | v7 | v8 | **baseline** |
+    |---|---|---|---|
+    | action rate | 0.487 | 0.306 | **0.617** |
+    | malformed | 429 | 831 | **237** |
+    | invalid follow targets | 23 | 26 | **0** |
+    | refresh errors | 0 | 0 | **0** |
+    | exposures | 4897 | 6048 | **6048** |
+
+74. **The headline finding: unprompted agents broadcast, they do not converse.**
+    256 of 403 chosen actions (64%) were `create_post`. Posts outnumber
+    comments **262 to 59**, likes 29, follows 42.
+
+    Earlier runs told agents *"engaging with other people is more interesting
+    than only posting your own thoughts"* and got the opposite mix. Removing
+    that line — correctly, since instructing the behaviour under study
+    contaminates it — revealed the underlying disposition: **left alone, an 8B
+    agent treats a social network as a broadcast channel.** Every prior
+    engagement number in this project was partly an artefact of being told to
+    engage.
+
+75. **The social feed holds up under the honest prompt.** Isolation reproduces
+    cleanly — connected agents (≥2 follows) draw **39.3%** of their feed
+    through the graph, isolated agents **0.0%** — and the tiers are now
+    disjoint after B-14. The sparser graph (42 edges vs v8's 64) is a
+    consequence of agents choosing to follow less, not of the feed model.
+
+76. **Conversation remains near-zero: 1 of 36 threads** had an author reply,
+    the first non-zero count across five runs, and not enough to call a change.
+    F-21b already ruled out notifications as the cause. With broadcasting now
+    identified as the default disposition, the likelier explanation is that
+    these agents do not model an interlocutor at all — they post *at* a feed
+    rather than *to* a person. Untested.
+
+77. **Malformed calls fell 831 → 237 but did not vanish**, and the mix is still
+    led by `action=` wrapping (240). Since the word no longer appears anywhere
+    in the prompt, the remaining cases are the model's own prior rather than
+    something being primed — a floor rather than a bug to chase.
+
 *(Entries continue as the build proceeds.)*
 
 ---

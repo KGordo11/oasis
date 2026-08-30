@@ -373,7 +373,7 @@ def main():
     p.add_argument("--seed", type=int, default=0,
                    help="seeds feed exploration and any other Python RNG "
                         "use, so that component is reproducible")
-    p.add_argument("--temperature", type=float, default=0.7,
+    p.add_argument("--temperature", type=float, default=0.9,
                    help="LLM sampling temperature. Previously unset and "
                         "therefore unstated; now explicit and recorded")
     p.add_argument("--feed-size", type=int, default=12,

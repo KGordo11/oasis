@@ -49,7 +49,7 @@ log = logging.getLogger("social_timeline.agent")
 # manifest. Runs are only comparable to each other at the same version --
 # v1 -> v2 changed the action guidance after it was found to be priming
 # malformed tool calls (see TimelineEnvironment).
-PROMPT_VERSION = 9
+PROMPT_VERSION = 10
 
 
 class TimelineEnvironment(SocialEnvironment):
@@ -151,9 +151,22 @@ class TimelineEnvironment(SocialEnvironment):
             feed = ("Here is your feed. Each post shows who wrote it:\n"
                     + json.dumps(lines, indent=1))
         else:
-            feed = ("Your feed is empty right now -- nobody you can see has "
-                    "posted yet. This is a good moment to post something "
-                    "yourself.")
+            # F-28. The old wording -- "a good moment to post something
+            # yourself" -- invited an introduction, and round 0 has an empty
+            # feed for everyone at once. 77% of round-0 posts were "just
+            # joined / excited to be here", which then became the entire feed
+            # and set the register for the whole run: agents mimic what they
+            # read, and vague posts beget vague posts.
+            #
+            # Measured context: posts in-run are 0.809 similar to each other,
+            # while the same model prompted cold writes concrete things
+            # ("attended a panel on supply chain innovation"). The sameness is
+            # partly self-inflicted by what round 0 seeds.
+            #
+            # This says nothing about what to write, only removes the cue that
+            # produced 36 simultaneous hellos.
+            feed = ("Your feed is empty -- nothing has been posted that you "
+                    "can see.")
 
         # --- who you already follow, by name (F-11) -----------------------
         following = [names.get(r[0], f"agent{r[0]}") for r in self._query(

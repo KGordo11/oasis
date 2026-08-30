@@ -535,6 +535,17 @@ class TimelinePlatform(Platform):
                 (user_id, ))
             followees = [r[0] for r in self.db_cursor.fetchall()]
 
+            def posts_by_with_author(authors, limit):
+                if not authors:
+                    return []
+                ph = ", ".join("?" for _ in authors)
+                self.pl_utils._execute_db_command(
+                    f"SELECT post_id, user_id FROM post "
+                    f"WHERE user_id IN ({ph}) AND user_id != ? "
+                    f"ORDER BY post_id DESC LIMIT ?",
+                    (*authors, user_id, limit))
+                return [(r[0], r[1]) for r in self.db_cursor.fetchall()]
+
             def posts_by(authors, limit):
                 if not authors:
                     return []
@@ -556,8 +567,17 @@ class TimelinePlatform(Platform):
                     f"WHERE follower_id IN ({ph})", followees)
                 fof = [r[0] for r in self.db_cursor.fetchall()
                        if r[0] != user_id and r[0] not in set(followees)]
-            fof_pool = [p for p in posts_by(fof, self.fof_slots * 6)
-                        if p not in from_network]
+            # B-14: exclude posts by anyone already followed, not merely the
+            # posts already chosen for the network tier. network_slots caps
+            # that tier at 5, so a followee's sixth post fell through and was
+            # labelled `fof` -- 37 exposures in R-16 were tagged
+            # friend-of-friend when they came from a direct connection. The
+            # tiers must be disjoint or the social/algorithmic split they exist
+            # to measure is wrong.
+            direct = set(followees)
+            fof_pool = [p for p, a in posts_by_with_author(fof,
+                                                           self.fof_slots * 6)
+                        if p not in from_network and a not in direct]
             fof_pool.sort(key=lambda p: rank_of.get(p, 10_000))
             from_fof = set(fof_pool[:self.fof_slots])
 

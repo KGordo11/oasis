@@ -955,6 +955,46 @@ duration rather than correctness (Q-3).
     in the prompt, the remaining cases are the model's own prior rather than
     something being primed — a floor rather than a bug to chase.
 
+### 2026-08-30 — R-18: a clean negative result
+
+78. **F-27 was refuted.** The reasoning was that agents broadcast because they
+    had no way to know anything they wrote landed — 21 posts drew likes and 36
+    drew comments in R-17, none of it visible to the authors. Adding a
+    reception block (likes, dislikes, reply counts on your own recent posts)
+    should, on that theory, have shifted behaviour toward engagement.
+
+    It did the opposite:
+
+    | | baseline | +feedback |
+    |---|---|---|
+    | posts | 256 | **302** |
+    | comments | 59 | **48** |
+    | post : engage | 1.82:1 | **2.24:1** |
+    | author-replies | 1/36 | **0/31** |
+    | action rate | 0.617 | 0.687 |
+
+    Agents got *more* active overall but the extra activity went into posting.
+    In hindsight the mechanism is obvious: telling someone their post drew
+    three likes **reinforces posting**. The feedback rewarded exactly the
+    behaviour it was introduced to counter.
+
+79. **What this rules out.** Two explanations for the broadcast disposition are
+    now dead: agents cannot see replies (F-21b, disproved), and agents cannot
+    tell whether anything landed (F-27, disproved — and it made things worse).
+    The remaining hypothesis, still untested, is that these agents do not model
+    an interlocutor at all: they post *at* a feed rather than *to* a person,
+    and no amount of information about the audience changes that.
+
+80. **Everything else held.** Social feed share 28.5% → 27.9%, malformed 237 →
+    276, zero agent failures, zero refresh errors, zero invalid follow targets.
+    The infrastructure is stable across both runs; only the prompt differed,
+    which is what makes this a clean comparison rather than a confounded one.
+
+81. **Kept, not reverted.** The reception block stays in the prompt: it is
+    realistic — every platform shows this — and the run is more informative for
+    having it. What changes is the claim attached to it. It is now documented
+    as a measured *negative* result rather than an improvement.
+
 *(Entries continue as the build proceeds.)*
 
 ---

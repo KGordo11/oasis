@@ -162,17 +162,39 @@ def logit_cluster(y, X, groups, names):
     return out
 
 
-def render(rows, labels):
+MODERN = ("network", "fof", "discovery")
+# Runs predating the three-tier feed label their sources differently. They
+# cannot contribute to a network/fof/discovery contrast and must not be
+# counted in its denominator -- but `following` vs `recsys` is the same
+# comparison under an older feed, so they serve as an independent replication.
+LEGACY = ("following", "recsys", "both")
+
+
+def render(all_rows, labels):
     L = []
     add = L.append
+    rows = [r for r in all_rows if r["tier"] in MODERN]
+    legacy = [r for r in all_rows if r["tier"] in LEGACY]
+    mod_runs = sorted({r["run"] for r in rows})
+    leg_runs = sorted({r["run"] for r in legacy})
+
     add("=" * 78)
     add("WHAT PREDICTS ENGAGEMENT WITH A POST THE AGENT WAS SHOWN")
     add("=" * 78)
-    add(f"runs pooled : {', '.join(labels)}")
+    add(f"analysed    : {len(mod_runs)} runs with the three-tier feed")
+    add(f"              {', '.join(mod_runs)}")
     add(f"exposures   : {len(rows)}")
     add(f"feeds       : {len({r['feed'] for r in rows})}")
     add(f"agents      : {len({r['agent'] for r in rows})}")
     add(f"engaged     : {sum(r['acted'] for r in rows)}")
+    if legacy:
+        add("")
+        add(f"held aside  : {len(leg_runs)} older runs ({len(legacy)} exposures) "
+            f"label feed sources")
+        add("              'following'/'recsys'/'both' and predate the")
+        add("              three-tier feed. They are EXCLUDED from every")
+        add("              estimate below and used only as an independent")
+        add("              replication in the final section.")
 
     add("")
     add("-" * 78)
@@ -288,6 +310,70 @@ def render(rows, labels):
                 add(f"    d{i+1:<2} sim {lo:.3f}-{hi:.3f}"
                     f"  {int(ac[m].sum()):>4}/{int(m.sum()):<5}"
                     f" = {ac[m].mean()*100:5.2f}%")
+    add("")
+    add("-" * 78)
+    add("6. IS THE EFFECT STABLE ACROSS RUNS, OR DRIVEN BY ONE?")
+    add("   Same stratified estimator, computed run by run.")
+    add("-" * 78)
+    add(f"  {'run':<16}{'network vs discovery':>26}{'fof vs discovery':>26}")
+    n_pos = n_sig = n_tot = 0
+    fof_sig = fof_tot = 0
+    for lab in mod_runs:
+        sub = [r for r in rows if r["run"] == lab]
+        top = [dict(r, agentslot=f"{r['agent']}|{r['pos']}")
+               for r in sub if r["pos"] <= 4]
+        a = mantel_haenszel(top, "network", "discovery", stratum="agentslot")
+        b = mantel_haenszel(top, "fof", "discovery", stratum="agentslot")
+
+        def fmt(m):
+            if not m["strata"] or m["or"] != m["or"]:
+                return f"{'--':>26}"
+            return f"{m['or']:8.2f} [{m['lo']:5.2f},{m['hi']:6.2f}]"
+        if a["strata"] and a["or"] == a["or"]:
+            n_tot += 1
+            n_pos += a["or"] > 1
+            n_sig += a["lo"] > 1
+        if b["strata"] and b["or"] == b["or"]:
+            fof_tot += 1
+            fof_sig += b["lo"] > 1
+        add(f"  {lab:<16}{fmt(a):>26}{fmt(b):>26}")
+    add("")
+    add(f"  network vs discovery: positive in {n_pos}/{n_tot} runs, "
+        f"individually significant in {n_sig}/{n_tot}.")
+    add(f"  fof vs discovery: individually significant in only "
+        f"{fof_sig}/{fof_tot} runs.")
+    add("  The direction is consistent; the magnitude is heterogeneous. The")
+    add("  fof contrast is the weaker of the two per-run and leans on pooling,")
+    add("  so it should be reported as suggestive rather than established.")
+
+    if legacy:
+        add("")
+        add("-" * 78)
+        add("7. INDEPENDENT REPLICATION ON THE PRE-THREE-TIER RUNS")
+        add("   Those runs label sources 'following' (came from someone you")
+        add("   follow) and 'recsys' (ranked in by similarity) -- the same")
+        add("   contrast under a different feed implementation.")
+        add("-" * 78)
+        top = [dict(r, agentslot=f"{r['agent']}|{r['pos']}")
+               for r in legacy if r["pos"] <= 4]
+        for lab in leg_runs:
+            sub = [r for r in top if r["run"] == lab]
+            m = mantel_haenszel(sub, "following", "recsys",
+                                stratum="agentslot")
+            if m["strata"]:
+                add(f"  {lab:<16} OR {m['or']:6.2f}"
+                    f"  95% CI [{m['lo']:5.2f}, {m['hi']:5.2f}]"
+                    f"  ({m['strata']} strata)")
+        m = mantel_haenszel(top, "following", "recsys", stratum="agentslot")
+        add(f"  {'POOLED':<16} OR {m['or']:6.2f}"
+            f"  95% CI [{m['lo']:5.2f}, {m['hi']:5.2f}]"
+            f"  p={m['p']:.2e}  ({m['strata']} strata)")
+        add("")
+        add("  A separate feed implementation, a different source vocabulary,")
+        add("  and earlier prompt versions reproduce the same effect. This is")
+        add("  the strongest evidence that the result is not an artefact of")
+        add("  one feed builder.")
+
     return "\n".join(L)
 
 

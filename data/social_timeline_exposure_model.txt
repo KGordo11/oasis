@@ -1,11 +1,18 @@
 ==============================================================================
 WHAT PREDICTS ENGAGEMENT WITH A POST THE AGENT WAS SHOWN
 ==============================================================================
-runs pooled : baseline, full_twhin, full_twhin_v2, stage2_nogroups, stage3, v10_register, v10_replicate, v4_full, v5_full, v6_full, v7_full, v8_full, v9_feedback
-exposures   : 57682
-feeds       : 5345
-agents      : 412
-engaged     : 6834
+analysed    : 5 runs with the three-tier feed
+              baseline, v10_register, v10_replicate, v8_full, v9_feedback
+exposures   : 30240
+feeds       : 2520
+agents      : 180
+engaged     : 2174
+
+held aside  : 8 older runs (27442 exposures) label feed sources
+              'following'/'recsys'/'both' and predate the
+              three-tier feed. They are EXCLUDED from every
+              estimate below and used only as an independent
+              replication in the final section.
 
 ------------------------------------------------------------------------------
 1. CRUDE RATES (confounded -- shown for reference only)
@@ -91,3 +98,35 @@ engaged     : 6834
     d8  sim 0.808-0.824    53/2082  =  2.55%
     d9  sim 0.824-0.840    44/2082  =  2.11%
     d10 sim 0.840-0.927    62/2083  =  2.98%
+
+------------------------------------------------------------------------------
+6. IS THE EFFECT STABLE ACROSS RUNS, OR DRIVEN BY ONE?
+   Same stratified estimator, computed run by run.
+------------------------------------------------------------------------------
+  run                   network vs discovery          fof vs discovery
+  baseline               5.77 [ 3.35,  9.94]                        --
+  v10_register           3.73 [ 2.33,  5.97]       2.90 [ 0.78, 10.83]
+  v10_replicate          3.04 [ 2.06,  4.47]       3.15 [ 0.52, 18.94]
+  v8_full                1.85 [ 1.32,  2.60]       1.17 [ 0.66,  2.06]
+  v9_feedback            8.67 [ 4.95, 15.21]      17.42 [ 3.19, 95.02]
+
+  network vs discovery: positive in 5/5 runs, individually significant in 5/5.
+  fof vs discovery: individually significant in only 1/4 runs.
+  The direction is consistent; the magnitude is heterogeneous. The
+  fof contrast is the weaker of the two per-run and leans on pooling,
+  so it should be reported as suggestive rather than established.
+
+------------------------------------------------------------------------------
+7. INDEPENDENT REPLICATION ON THE PRE-THREE-TIER RUNS
+   Those runs label sources 'following' (came from someone you
+   follow) and 'recsys' (ranked in by similarity) -- the same
+   contrast under a different feed implementation.
+------------------------------------------------------------------------------
+  full_twhin       OR   4.79  95% CI [ 3.14,  7.32]  (87 strata)
+  full_twhin_v2    OR   5.14  95% CI [ 3.65,  7.22]  (135 strata)
+  POOLED           OR   5.00  95% CI [ 3.83,  6.52]  p=1.84e-32  (222 strata)
+
+  A separate feed implementation, a different source vocabulary,
+  and earlier prompt versions reproduce the same effect. This is
+  the strongest evidence that the result is not an artefact of
+  one feed builder.

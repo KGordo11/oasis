@@ -1,0 +1,52 @@
+==============================================================================
+PAIRED COMPARISON   v10_register  ->  v10_replicate
+==============================================================================
+
+CONFIG IDENTICAL -- this is a true replicate. The paired SD below
+is the run-to-run noise floor for this configuration.
+
+PAIRED WITHIN-AGENT TESTS   (n=36 personas at matched ids)
+  share of each agent's own chosen actions; paired on agent id
+
+  action              diff      SD            95% CI     t p    holm  wilcox     MDE
+  --------------------------------------------------------------------------
+  create_post        +0.6%   30.7%  [ -9.8,+11.0]%   0.908   1.000   0.534   14.3pp
+  create_comment     -0.4%   18.4%  [ -6.6, +5.8]%   0.902   1.000   0.940    8.6pp
+  like_post          -1.6%   13.9%  [ -6.3, +3.1]%   0.498   1.000   0.584    6.5pp
+  follow             +0.1%   10.6%  [ -3.5, +3.7]%   0.937   1.000   0.974    5.0pp
+
+  * = survives Holm correction across the actions tested.
+  MDE = smallest true shift this paired design could detect
+        (alpha=0.05, power=0.8). An observed effect below its
+        own MDE is not evidence of absence.
+
+CLUSTERING DIAGNOSTIC (why the unpaired test is not usable)
+  action          run                 ICC  design eff   eff. n   raw n
+  --------------------------------------------------------------------
+  create_post     v10_register      0.310        4.28       98     418
+  create_comment  v10_register      0.270        3.86      108     418
+  like_post       v10_register      0.079        1.84      228     418
+  follow          v10_register      0.000        1.00      418     418
+  create_post     v10_replicate     0.255        3.52      111     391
+  create_comment  v10_replicate     0.183        2.81      139     391
+  like_post       v10_replicate     0.000        1.00      391     391
+  follow          v10_replicate     0.000        1.00      391     391
+
+  Effective n is what the clustered data is worth. Treating raw n as
+  independent inflates significance; this is finding F-32.
+
+==============================================================================
+NOISE FLOOR  (identical configs -- this is pure run-to-run variation)
+==============================================================================
+  create_post      paired SD  30.7 pp   -> at n=36 an intervention must move >= 14.3 pp to be visible
+  create_comment   paired SD  18.4 pp   -> at n=36 an intervention must move >=  8.6 pp to be visible
+  like_post        paired SD  13.9 pp   -> at n=36 an intervention must move >=  6.5 pp to be visible
+  follow           paired SD  10.6 pp   -> at n=36 an intervention must move >=  5.0 pp to be visible
+
+  Agent-pairs required to resolve a given true shift:
+     shift  create_post  create_comm    like_post       follow
+      3.0pp          819          294          168           99
+      5.0pp          295          106           60           35
+     10.0pp           74           26           15            9
+
+  Divide by 36 for the number of pooled runs at the current size.

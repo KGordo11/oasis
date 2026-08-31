@@ -21,6 +21,63 @@ build without having to ask a question or guess at a rationale.
 
 ---
 
+## 0. STATUS — read this first when resuming
+
+*Last updated 2026-08-31. Update this section at the end of every working session.*
+
+**Branch `social-timeline-sim`, pushed to `origin`. HEAD is the F-40/F-41 commit.
+Working tree clean. Nothing is mid-flight; no run is in progress.**
+
+### The two results
+
+1. **Connection predicts engagement; content similarity does not** (F-37, F-38,
+   corrected by F-40, replicated by F-41). Holding agent *and* feed slot fixed:
+   `network` vs `discovery` **OR 3.54** [2.92, 4.29], significant in **5/5 runs**.
+   `fof` vs `discovery` **OR 1.97** [1.25, 3.11] but significant in only **1/4**
+   runs individually — **suggestive, not established**. The TwHIN similarity score
+   is mildly **anti**-predictive (OR 0.305 per unit cosine). An older, structurally
+   different feed builder independently replicates the main effect at **OR 5.00**
+   [3.83, 6.52].
+2. **The cross-run noise floor swamps every prompt intervention tried** (F-35,
+   F-36). Pure run-to-run SD for posting share is **30.7 pp**; the four
+   interventions moved it 3-5 pp against a detectable minimum of 14.3 pp. They
+   were unfalsifiable at this scale, not merely unsupported.
+
+### Done
+
+- Instrumentation, three-tier feed, informed-action gate, 22-action surface.
+- 20 runs (see §7). 9 analysed runs in the data artifact.
+- `analyze.py` (per-run), `dossier.py` (~28k-line transcripts), `make_graph.py`
+  (artifact), `compare.py` (cross-run, paired), `exposure_model.py` (within-run).
+- Test gates for all statistics: `test_compare.py` 16/16,
+  `test_exposure_model.py` 12/12, plus `check_deps.py`, `test_actions.py`,
+  `test_instrumentation.py`.
+- Findings F-1..F-41, bugs B-1..B-14, decisions D-1..D-14 — all recorded below.
+
+### Next, in priority order
+
+| # | Task | Cost | Why |
+|---|---|---|---|
+| 1 | **Rule out recency as the cause of F-38's anti-predictive similarity.** The ranker blends similarity with recency, so high-similarity posts may simply be older. If so the negative coefficient is a staleness effect misread as a similarity effect | ~10 min, no run | F-38 is the most surprising claim and the one most likely to be challenged. It currently has no mechanism |
+| 2 | Optional: a `follow`-targeted designed experiment | ~1 run (1.75 h) | F-36 — `follow` has ICC 0.000 and needs only ~35 agent-pairs for 5 pp, the only affordable designed experiment on this setup |
+| 3 | Open, unexplained: 14 of 21 actions never fire (no dislike/unfollow/mute/report/search/trend) | unscoped | Limits any claim about the action surface being exercised |
+| 4 | Open, unexplained: F-24, ~32% of posts echo the author's own bio | unscoped | Content-quality question; per F-35 do **not** attack it with prompt tweaks |
+
+**Do not** run another prompt-intervention experiment at 36 agents. F-35 shows it
+cannot resolve anything. Judge any future change against **baseline**, never
+against the previous run, and use `compare.py` so the correction and the MDE are
+reported automatically.
+
+### Deliverables
+
+- Write-up for the professor: https://claude.ai/code/artifact/55d7c5a5-4a69-406c-bc4f-8f14a94f710b
+- 9-run data explorer: https://claude.ai/code/artifact/732d1879-2f3b-49fe-83f6-0cf4b55c87c3
+- `data/social_timeline_exposure_model.txt` — the engagement analysis
+- `data/social_timeline_noise_floor.txt` — the replicate/noise-floor analysis
+- `data/social_timeline_<label>_DOSSIER.txt` — per-round transcripts per run
+
+---
+
 ## 1. Environment
 
 Captured 2026-08-24 by direct inspection, not from memory.
@@ -316,10 +373,24 @@ Living list. Every file this build creates or modifies, and why.
 | `examples/experiment/social_timeline/timeline_agent.py` | `TimelineAgent` (per-agent exception isolation) and the persona→agent-graph generator, with zero initial follow edges (D-10) | Working (R-4) |
 | `examples/experiment/social_timeline/run_simulation.py` | Driver: 27-action set, all-`LLMAction` rounds, run manifest with exact config, timings, counters and action tallies | Working (R-4), B-3 fixed |
 | `examples/experiment/social_timeline/check_deps.py` | Stage 0 gate: 6 checks — torch devices, TwHIN-BERT loads, embeddings discriminate across two topics, embedding space reproduces a baseline recorded in a *different* process, upstream pooler regression guard, Ollama reachable | **Strengthened and passing** (R-3). Original 3-text single-process version passed by luck and missed B-1/B-2 |
+| `examples/experiment/social_timeline/personas.py` | Persona loading, greedy max-min diversity selection, digit-free handle generation (F-20), separability reporting. **`select_diverse` is deterministic**, which is what makes the paired design in `compare.py` valid | Working |
+| `examples/experiment/social_timeline/analyze.py` | Per-run ledgers → `_analysis.json` / `_analysis.txt`. Carries an explicit warning that its report is single-run and that cross-run claims need `compare.py` (F-32/F-33) | Working |
+| `examples/experiment/social_timeline/dossier.py` | The exhaustive per-round transcript → `_DOSSIER.txt`, ~28k lines / 2 MB per run. Real names, every action, every exposure, per-pair chronologies | Working |
+| `examples/experiment/social_timeline/make_graph.py` | Multi-run interactive artifact (network graph, per-round detail, per-agent records, run comparison) | Working, 9 runs |
+| `examples/experiment/social_timeline/compare.py` | **Cross-run comparison.** Paired within-agent tests (agent ids are stable across runs), Holm correction, MDE reported alongside every null, ICC/design-effect diagnostics, `--replicate` noise-floor mode, and an F-22 warning when two runs differ in more than one setting | Working (F-33) |
+| `examples/experiment/social_timeline/exposure_model.py` | **Within-run engagement analysis.** Mantel-Haenszel stratified by (agent, feed slot); per-run stability; independent replication on pre-three-tier runs; similarity tested inside `discovery` only because the score is missing-not-at-random | Working (F-37..F-41) |
+| `examples/experiment/social_timeline/test_actions.py` | Gate: every engagement action works mechanically, so absence in a run is a model choice not a broken surface | Passing |
+| `examples/experiment/social_timeline/test_instrumentation.py` | Gate: exposure/interaction records reconstruct correctly from both sides | Passing |
+| `examples/experiment/social_timeline/test_compare.py` | Gate: Holm vs hand-computed values and order-invariance, MDE closed form and monotonicity, ICC ~0 for homogeneous agents vs 0.73 for heterogeneous, paired recovery of an injected effect, no false positive on a null | **16/16 passing** |
+| `examples/experiment/social_timeline/test_exposure_model.py` | Gate: Mantel-Haenszel against known-answer data — homogeneous-OR recovery, true null, **Simpson's paradox (crude 83% vs 17%, true OR 1, recovered 1.000)**, stratum dropping, degenerate inputs, CI narrowing | **12/12 passing** |
 
 ### Modified
 
-*(none yet — D-1 requires that `oasis/` stay untouched)*
+| Path | Change | Why |
+|---|---|---|
+| `oasis-env` | Added `statsmodels` | Cluster-robust logistic regression for F-38. Hand-rolling it is exactly what produced F-30 and F-32 |
+
+*`oasis/` itself remains untouched per D-1 — every deviation is a subclass.*
 
 ---
 
@@ -1018,9 +1089,23 @@ duration rather than correctness (Q-3).
 Every simulation run: configuration, outcome, timing. No run goes unrecorded,
 including failed and aborted ones.
 
-| Run | Stage | Config | Outcome | Wall-clock |
+**DB label mapping.** Runs are stored as `data/social_timeline_<label>.db`. In
+chronological order: `stage1`, `stage2`, `stage2_nogroups`, `stage3`,
+`full_twhin`, `full_twhin_v2`, `v4_full`, `v5_full`, `v6_full`, `v7_full`,
+`v8_full`, `baseline`, `v9_feedback`, `v10_register`, `v10_replicate`.
+*Known inconsistency:* the `v4..v8_full` labels do not track `prompt_version` in
+their own manifests (`v6_full` records pv=3, `v8_full` records pv=6), because the
+version counter was not always bumped when the label was. **Trust the manifest's
+`prompt_version`, not the label.** From `baseline` onward the two agree.
+
+| Run | Label | Config | Outcome | Wall-clock |
 |---|---|---|---|---|
-| R-1 | 0 | `check_deps.py`, no simulation | **PASS (but inadequate)** — TwHIN-BERT loaded (279M params, XLMRobertaTokenizerFast + BertModel, device `cpu`), embeddings non-NaN, margin `+0.0358`, Ollama reachable with `llama3.1:8b`. The margin check passed by luck; see B-1/B-2 | 29.7s total (24.6s model load incl. download) |
+| R-20 | `v10_replicate` | 36 agents, 15 rounds, prompt **v10**, temp 0.9, seed 0 — **byte-identical to R-19**; `compare.py` confirms zero config differences | **The noise-floor run (F-35).** 243 posts, 391 actions, 44 edges, 6048 exposures, 0 agent failures. Paired vs R-19 is a clean null: `create_post` +0.6 pp (p=.91), `create_comment` -0.4 pp, `like_post` -1.6 pp, `follow` +0.1 pp, nothing surviving Holm. **Pure run-to-run SD 30.7 pp for posting share vs 30.3 pp for the baseline->v10 comparison that changed two settings** — so that variance was entirely noise | 118 min |
+| R-19 | `v10_register` | 36 agents, 15 rounds, prompt **v10**, **temp 0.9** (raised from 0.7) — F-28 reword of the empty-feed line | **Both pre-registered predictions failed (F-30).** 255 posts, 418 actions, 46 edges, 6048 exposures, 0 agent failures. Round-0 intro share 77%->60% is **p=0.135**; corpus similarity 0.8285->0.8175 **spans zero** at the post level. Also confounded: wording *and* temperature changed together, repeating the F-22 error | 110 min |
+| R-18 | `v9_feedback` | 36 agents, 15 rounds, prompt **v9**, temp 0.7 — F-27 reception block (likes/dislikes/replies on your own recent posts) | **Made broadcasting worse, not better.** 312 posts, 447 actions, 46 edges. `create_post` share rose to 67.6%, the highest of any run. Later shown by F-31 to be indistinguishable from baseline once clustering is accounted for — the apparent regression was noise | 121 min |
+| R-17 | `baseline` | 36 agents, 15 rounds, prompt **v8**, temp 0.7, seed 0 | **The reference run. Judge every future change against this one (F-31), never against the previous run.** 262 posts, 403 actions, 42 edges, 6048 exposures, 0 agent failures. Action mix `create_post` 63.5%, `create_comment` 14.6%, `follow` 10.4%, `like_post` 7.2% | 121 min |
+| R-16 | `v8_full` | 36 agents, 15 rounds, prompt v6 per manifest, temp 0.7 | **Highest engagement of any run, and the least broadcast-heavy.** 57 posts but 264 actions: `create_comment` 77, `follow` 64, `create_post` 53, `like_post` 51, `like_comment` 15. **64 follow edges.** `create_post` only 20.1% of actions vs baseline's 63.5% — the mix later runs never recovered | 124 min |
+| R-1 | `--` | `check_deps.py`, no simulation | **PASS (but inadequate)** — TwHIN-BERT loaded (279M params, XLMRobertaTokenizerFast + BertModel, device `cpu`), embeddings non-NaN, margin `+0.0358`, Ollama reachable with `llama3.1:8b`. The margin check passed by luck; see B-1/B-2 | 29.7s total (24.6s model load incl. download) |
 | R-2 | 0 | `pooler_probe.py`, 4 texts / 2 topics, run in two fresh processes | **Exposed B-1 and B-2.** Pooler weights differ per process (`sum=-6.18` vs `+6.46`); pooler margin `+0.0069` / `+0.0008`; mean-pooled margin `+0.0475` and bit-identical across processes | ~50s for both processes |
 | R-6 | 2 | 8 agents, 4 rounds, **22 actions** (`--no-groups`) — controlled A/B against R-5, identical otherwise | **Behaviour gate PASSED.** action_rate **0.812** (26/32, vs R-5's 0.469 and Sim 1's ~0.89); 14 posts, **9 comments, 3 quote_posts, 1 follow**, 1 search, 1 do_nothing; 148 exposures (nearly 2x R-5). First genuine content engagement of the build. Confirms F-14 | 340.1s |
 | R-11 | contrast | 36 agents, 12 rounds, **reddit hot-score**, prompt **v2** | **Completed.** action_rate **0.956**, only **7** malformed calls, 413 actions, **113 follows**, 106 posts, 2976 exposures. Verified: **1 distinct candidate pool** (all 36 agents see an identical feed) and 100% `recsys` source (no follow-injection) | 77 min |
@@ -1044,6 +1129,8 @@ Bugs found during this build — in our code or upstream — with how each surfa
 
 | # | Where | Symptom | Cause | Fix | Found by |
 |---|---|---|---|---|---|
+| B-8 | Ours, `timeline_platform.update_rec_table` | `--recsys reddit` produced results indistinguishable from `--recsys twhin-bert` — because it *was* TWHIN. The intended hot-score-vs-interest comparison was silently TWHIN against itself | The override reimplemented ranking but never branched on `self.recsys_type`, so the flag was accepted and ignored | Branch on `recsys_type` (now `timeline_platform.py:330` and `:489`). **R-9 was killed and its data deleted** rather than reported | Noticing two "different" algorithms gave identical candidate pools |
+| B-9 | Upstream `oasis/environment/env.py:197-198` | `created_at` stayed `0` for every post in non-Twitter runs, so recency ranking had no signal and round boundaries could not be recovered from the clock | `self.platform.sandbox_clock.time_step += 1` is guarded by `if self.platform_type == DefaultPlatformType.TWITTER`, so the clock never advances on any other platform type | Do not depend on the sandbox clock. `round_boundary` is written directly by our own instrumentation, and `created_at` is stamped from the round number we control | Round-0 posts and round-14 posts carrying the same timestamp |
 | B-1 | Upstream `process_recsys_posts.py:33` | Embedding space differs on every process launch; runs not reproducible | `outputs.pooler_output` reads a pooler whose weights TwHIN-BERT's checkpoint does not contain, so they are randomly re-initialized at every load | Mean-pool `last_hidden_state` instead (D-13) | Stage 0 probe, cross-process fingerprint |
 | B-2 | Same line | Interest-based ranking is barely discriminative — one process produced a within-vs-across-topic margin of `+0.0008`, i.e. noise | `tanh` saturation on a random projection compresses all cosines into ~0.88-0.97 | Same fix (D-13) | Stage 0 probe, 2-topic margin test |
 | B-4 | Ours — `analyze.py` | Agents showed `engagement_rate 0.0` and `acted on: []` despite having posted real comments — genuine engagement silently missing from the ledger | Trace `info` payloads are **not uniform**: `create_comment` records only `comment_id` (no `post_id`), and `quote_post` records `quoted_id` as a **string**, which an `isinstance(..., int)` check rejects | Numeric-string coercion + a `comment_id -> post_id` lookup via the comment table | R-6 analysis: comment counts and "acted on" disagreed |
@@ -1104,8 +1191,16 @@ a check that can pass by luck is not a gate.
 
 ## 9. Open questions
 
+**Still genuinely open (as of 2026-08-31) — the rest of this table is answered
+history, kept for the record.**
+
 | # | Question | Status |
 |---|---|---|
+| Q-10 | **Is F-38's anti-predictive similarity actually a recency effect?** The ranker blends similarity with recency, so high-similarity posts may systematically be older, and a staleness effect would be misread as a similarity effect. **This is the top open item** — F-38 is the most surprising claim in the write-up and currently has no mechanism | **Open.** ~10 minutes on existing data, no run needed |
+| Q-11 | Why do 14 of the 21 available actions never fire? No `dislike`, `unfollow`, `mute`, `report`, `search` or `trend` in any run. `test_actions.py` proves they work mechanically, so it is a model choice — but an unexplained one | **Open.** Limits any claim that the action surface is exercised |
+| Q-12 | F-24: ~32% of posts echo the author's own bio. Is that persona-anchoring, or the 8B model's limited generation? | **Open.** Per F-35, do **not** attack this with prompt tweaks at n=36 — the noise floor makes it unmeasurable |
+| Q-13 | Does the `fof` effect (F-37) survive a properly powered test? It is significant pooled but in only 1 of 4 runs individually | **Open.** Would need either more runs or the F-36 follow-targeted design |
+| Q-14 | Is the F-35 noise floor itself stable? It rests on one replicate pair, though it landed within 0.4 pp of an independent estimate | **Open, low priority.** A second replicate would confirm it; the machine time is probably better spent on Q-13 |
 | Q-1 | Does TwHIN-BERT download and embed acceptably on CPU? | **Answered.** Yes — 279M params, loads in ~25s, embeds 4 texts in ~0.1s. But only usable with the D-13 mean-pooling fix; as shipped it is non-deterministic and near-non-discriminative (B-1/B-2) |
 | Q-6 | How much does the D-13 mean-pooling deviation change results vs. upstream-exact? | Measurable via the comparison flag once the engine runs |
 | Q-9 | Can the malformed-call rate (F-15) be reduced by stating each action's exact signature in the guidance rather than a prose list? 10 lost follows in 5 rounds is a material undercount of intent | Open — prompt-content change, testable as an A/B |

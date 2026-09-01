@@ -21,6 +21,24 @@ build without having to ask a question or guess at a rationale.
 
 ---
 
+## Contents
+
+- [0. STATUS — read this first when resuming](#0-status--read-this-first-when-resuming)
+- [1. Environment](#1-environment)
+- [2. Sources consulted](#2-sources-consulted)
+- [3. Decision log](#3-decision-log)
+- [4. Findings from source investigation](#4-findings-from-source-investigation)
+- [5. File inventory](#5-file-inventory)
+- [6. Chronological log](#6-chronological-log)
+- [7. Run ledger](#7-run-ledger)
+- [8. Bug ledger](#8-bug-ledger)
+- [9. Open questions](#9-open-questions)
+
+Findings are `F-n`, bugs `B-n`, decisions `D-n`, runs `R-n`, open questions
+`Q-n`; each is its own `####` entry and can be jumped to by searching that id.
+
+---
+
 ## 0. STATUS — read this first when resuming
 
 *Last updated 2026-09-01. Update this section at the end of every working session.*
@@ -313,54 +331,559 @@ this build is large enough to warrant isolation, and `main` stays clean.
 
 Full detail with rationale lives in spec §2. Condensed index:
 
-| # | Finding | Evidence |
-|---|---|---|
-| F-1 | Hot-score gives every user an identical feed | `recsys.py:257` — `[top_post_ids] * len(rec_matrix)` |
-| F-2 | The follow graph reaches the feed, but only for non-REDDIT recsys | `platform.py:280-303` — `JOIN follow ON post.user_id = follow.followee_id` |
-| F-3 | **`RecsysType.TWITTER` silently returns random recommendations** | `recsys.py:39` (`model = None`), assigned only at `:282` in a different function; `:749` falls through to `random.random()` with no error |
-| F-4 | Exposure history is destroyed every round | `platform.py:383` — `DELETE FROM rec` |
-| F-5 | Default feed is ~5 posts, recsys ranks only a top-2 pool | `env.py:82-84` |
-| F-6 | Group chat is open-join public rooms, not DMs | `platform.py:1497-1527`; no recipient field in `group_message.sql` |
-| F-7 | TWHIN keeps state in module globals across calls | `recsys.py:436-437`, cleared only by `reset_globals()` at `:124` |
-| F-8 | `enable_like_score=True` hits `pdb.set_trace()` in exception handlers | `recsys.py:564, 579` — would hang a headless run indefinitely |
-| F-9 | TWHIN recency score goes non-finite past ~171 timesteps | `recsys.py:469-472` — `log((271.8 - age)/100)`; source comments a ~90 ceiling |
-| F-10 | `generate_twitter_agent_graph` discards `following_agentid_list` | `agents_generator.py:614-649` |
-| F-11 | Agents see only follower/following **counts**, never identities | `agent_environment.py:68-101`, both marked `# TODO` upstream |
-| F-12 | Two conflicting index bases for the `rec` matrix | `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based |
-| F-13 | Every table's `user_id` column actually stores **agent_id**; only the `user` table has both | `platform.py:407` — `user_id = agent_id`, repeated in every action |
-| F-30 | **F-28's reword did not work, and four interventions have now failed.** Measured on v10 vs v9 over the same rounds (0-8): round-0 intro share 77%->60% (p=0.135, CI [-5.2, +39.5] pp) and corpus similarity 0.8285->0.8175 (CI [-0.015, +0.038]). **Neither reaches significance.** Together with F-21b (notifications), F-27 (reception block) and F-29 (echo chamber), four separate interventions have failed to move content quality. The convergent conclusion is that the vagueness is a capacity limit of `llama3.1:8b`, not a fixable property of the prompt or the feed. **Methodological caveat, stated because it nearly produced a false finding:** the first bootstrap resampled *pairs* and returned CI [+0.0089, +0.0132], "real". Pairwise cosines are not independent -- each post appears in ~150 pairs -- so resampling pairs understates uncertainty. Resampling *posts*, the correct unit, widened the CI to span zero. **Second caveat:** v10 changed the wording *and* temperature (0.7->0.9) together, so even a real effect could not have been attributed. Both errors are mine and both are the same error the log records at F-22 | Recorded as a negative result. Stop tuning the prompt for content quality; a larger model is the only remaining lever |
-| F-40 | **F-37's evidence base was overstated, its network result is robust, and its fof result is not.** Two corrections. (a) **Reporting error, mine:** the pooled header claimed "57,682 exposures, 13 runs". Eight of those runs predate the three-tier feed and label sources `following`/`recsys`/`both`, so they contributed **zero** to every tier contrast while still being counted in the denominator. The estimates were always computed on the right rows; only the headline was wrong. Correct base: **5 runs, 30,240 exposures, 2,520 feeds, 2,174 engagements (7.2%)**. (b) **Per-run heterogeneity:** `network` vs `discovery` is positive and individually significant in **5/5 runs** (baseline 5.77, v8 1.85, v9 8.67, v10 3.73, v10_replicate 3.04) -- direction fully consistent, magnitude spanning 4.7x. But `fof` vs `discovery` is individually significant in **only 1/4 runs** and its pooled significance is an artefact of pooling. **The fof contrast -- the one carrying the causal interpretation -- must be reported as suggestive, not established** | Header corrected in `exposure_model.py`; legacy runs now explicitly excluded and named. Per-run breakdown added as section 6 |
-| F-41 | **Independent replication under a different feed implementation.** The eight excluded runs are not useless: `following` (came from someone you follow) vs `recsys` (ranked in by similarity) is the same contrast built by an earlier, structurally different feed builder, at earlier prompt versions. Same stratified estimator, on strata sharing nothing with the main analysis: **full_twhin OR 4.79 [3.14, 7.32], full_twhin_v2 OR 5.14 [3.65, 7.22], pooled OR 5.00 [3.83, 6.52], p=1.8e-32, 222 strata.** A different feed builder reproduces the effect at comparable magnitude | The strongest evidence that F-37 is not an artefact of one feed implementation. Added as section 7 |
-| F-42 | **F-38 is wrong, and the error is a mislabelled variable, not a confound.** The regressor F-38 reported as "similarity ... per unit cosine" is `rec_history.score`, which is `sim * recency` (`timeline_platform.py:365` writes the product; `:699-701` copies it into the exposure row; `exposure_model.py:80` reads it and §5 of its output labels it "similarity"). The tell was visible in F-38's own decile table, whose bottom bin reads "sim 0.000-0.387" — raw cosine never falls below **0.198** in any run, but `recency` clamps to `RECENCY_FLOOR = 1e-6` past the age cliff (`timeline_platform.py:299-301`), driving the *product* to ~0 for stale posts however similar they are. Recovering `sim` and `recency` separately from `rec_candidates` and re-fitting F-38's exact specification (cluster-robust logit, clustered by agent, feed slot included; the control reproduces OR 0.305 [0.164, 0.568] to three decimals): **cosine alone OR 1.544 [0.588, 4.054], p=0.38 — null, and positive if anything.** The negative coefficient belonged entirely to the recency half: **recency alone OR 0.176 [0.103, 0.300], p=1.7e-10.** Cosine is also null inside every one of the 8 fittable recency levels (one nominal p=0.024 across 8 tests). **Retract "TwHIN similarity is anti-predictive." The supported claim is that similarity has no detectable effect on engagement** | Q-10 closed. The "connection beats content" headline is unaffected and if anything cleaner: content similarity does nothing, rather than doing something backwards. `recency_check.py`, `data/social_timeline_recency_check.txt` |
-| F-43 | **What the recency coefficient actually is: repeat exposure.** Taken at face value the recency term says older posts draw *more* engagement, which is backwards for a social feed and needed checking. It is not a round effect — raw engagement *falls* over rounds (5.65% in round 1 to 1.86% in round 14), so pooling would bias the estimate the other way, and stratifying on the feed (one agent, one round, one run — the F-37 identification) leaves **stale vs fresh OR 1.751 [1.384, 2.215], p=3.0e-06, 1956 feeds.** The mechanism is that age and prior sightings are nearly the same variable here: a fresh post is a first sighting **by construction** (100% of fresh exposures), while stale posts average **1.69** prior sightings and are first sightings only 19.4% of the time. Engagement rises monotonically with prior sightings — **2.20% → 4.52% → 5.94% → 6.80% → 7.33%** (0,1,2,3,4 priors) — and within-feed **seen-before vs first-sighting OR 2.321 [1.826, 2.951], p=6.1e-12.** Decisive test: inside first sightings only, where the repeat channel is closed by construction, the stale advantage **reverses** to **OR 0.551 [0.314, 0.969]**. Replicated independently in the **network** tier, where the similarity score plays no part in feed construction: **OR 1.801 [1.348, 2.406], p=6.9e-05.** **Caveat:** prior sightings are not randomly assigned — a post is re-shown because the ranker kept choosing it — so this is an observational reading supported by dose-response and replication, not an experiment. **Robustness (added same day, per the F-40 lesson): significant in 4/5 runs individually** (baseline 2.76, v10_register 2.32, v10_replicate 2.60, v8_full 2.46) but **v9_feedback returns 0.89 [0.38, 2.11], null** — the same run that is the outlier on the tier effect at 8.67. **By tier: network 1.801 and discovery 2.321 hold, fof 1.290 [0.805, 2.068] does not**, so this is a network-and-discovery effect, not a whole-feed one. Adding feed slot to the stratification leaves 2.130 [1.700, 2.669], and re-shown posts sit LOWER in the feed (mean slot 7.60 vs 6.40) because age drives their score down — position biases against this result, not for it. Absolute scale 2.20% -> 5.27%, a 3.07 pp gap; the OR is the larger-sounding number because the base rate is low. The apparent turnover past 4 sightings is NOT claimed: only 81 distinct posts are ever shown a sixth time | A third result alongside F-37 and F-35: **repetition drives engagement more than either content or freshness**. Also the mechanism F-38 was missing. Testable properly with a designed re-exposure run |
-| F-37 | **Connection predicts engagement; content similarity does not. This is the project's actual result.** Pooled over 13 analysed runs: **57,682 exposures, 5,345 feeds, 412 agent-runs, 6,834 engagements.** Crude rates network 18.6% / fof 11.5% / discovery 3.1%, but that is confounded by agent, round, run and feed position. **Identified estimate, Mantel-Haenszel stratified by (agent, feed slot) over slots 0-4 -- holding both the agent and the position in the feed fixed: network vs discovery OR 3.54 [2.92, 4.29] p=4e-38; fof vs discovery OR 1.97 [1.25, 3.11] p=.003; network vs fof OR 2.12 [1.42, 3.16].** Stratifying by feed only (position free) gives 11.07 and 4.11, so **roughly half the crude gap is the feed builder placing network posts at the top, and half is the tier itself.** **The `fof` contrast is the causal one**: friend-of-friend authors were selected by *other* agents' follows and never by the focal agent, so it carries no selection-on-affinity, whereas the network contrast is an upper bound that does. Unlike every cross-run comparison in this project, this sits far above any noise floor because it is a within-agent, within-slot contrast | The shield works. Reach flows through the graph, and it is not merely an artefact of network posts being shown first |
-| F-38 | **The TwHIN similarity score is mildly ANTI-predictive of engagement.** Tested inside the discovery tier only -- the score is present for 100% of discovery exposures but 28% of network and 43% of fof, so it is missing not at random and cannot sit in a model beside tier. On 20,822 scored discovery exposures, cluster-robust by agent: **similarity OR 0.305 [0.164, 0.568] per unit cosine, p<.001 -- in the wrong direction.** The assumption-free decile view agrees and is close to monotone: engagement falls **3.94% -> 3.60% -> 3.51% -> 3.41% -> 2.59% -> 3.65% -> 2.21% -> 2.55% -> 2.11% -> 2.98%** from least to most similar. So the ranking signal the recommender is built on does not select posts these agents engage with, and if anything slightly anti-selects. Consistent with F-29 (the corpus is uniformly homogeneous, mean pairwise 0.81, so the score has almost no real range to work with) | Major caveat on any personalisation claim. The graph carries the personalisation; the embedding does not |
-| F-39 | **Tier and feed position are structurally collinear, and a naive logit hides it.** The feed builder assigns network to slots 0-4, fof to 1-7, discovery to all 12. On the network-vs-discovery subset, slot dummies for 5-11 predict "not network" perfectly and the Hessian is **singular**. Fitting slot as one linear term conceals this and yields an unstable estimate: **dropping the fof rows moves the network OR from 1.76 to 5.52 with no change to the contrast being estimated.** The stratified estimator is reported instead because it conditions on the strata where the comparison actually exists and discards the rest rather than extrapolating into them | `exposure_model.py` reports no multivariable logit for tier and states why. `test_exposure_model.py` validates the MH estimator against known-answer data including a Simpson's-paradox case (crude 83% vs 17%, true OR 1, recovered 1.000) |
-| F-35 | **The noise floor is measured, and it is larger than every effect this project has ever tested for.** `v10_replicate` reruns `v10_register` at byte-identical config (prompt v10, temp 0.9, seed 0, 36 agents, 15 rounds); `compare.py` confirms zero config differences. Paired within-agent differences are a clean null -- `create_post` +0.6 pp (p=.91), `create_comment` -0.4 pp (p=.90), `like_post` -1.6 pp (p=.50), `follow` +0.1 pp (p=.94), nothing surviving Holm -- which is what a valid replicate should look like and validates the apparatus. **The decisive number is the dispersion.** Pure run-to-run SD is **30.7 pp** for posting share, against **30.3 pp** for the baseline->v10 comparison that changed *both* prompt version and temperature. Two runs differing in two settings vary no more than two identical runs. The 30.3 pp attributed to "agent x run variation" in F-33 was **entirely noise** -- there was never signal in it. Consequence: at n=36 an intervention must move posting share **>=14.3 pp** to be visible, and every intervention tested here (F-21b, F-27, F-28, F-29) moved it by roughly 3-5 pp. **All four were unfalsifiable by construction at this scale**, which is a stronger and cleaner statement than F-30's "they failed" | Definitive. Noise floor written to `data/social_timeline_noise_floor.txt` |
-| F-36 | **Engagement actions are 8x cheaper to study than posting.** The per-action noise floor is not uniform: `create_post` SD 30.7 pp (ICC .26-.31), `create_comment` 18.4 pp, `like_post` 13.9 pp, `follow` 10.6 pp with **ICC 0.000 in both runs** -- agents follow at genuinely uniform rates, so clustering costs nothing there and the naive unpaired test was never wrong for `follow`. Agent-pairs needed to resolve a 5 pp shift: **295 for `create_post` (8.2 runs), 106 for `create_comment`, 60 for `like_post`, 35 for `follow` (~1 run)** | Any future intervention study should target follow/like behaviour, which is answerable in 1-2 runs, and treat posting-share claims as needing 8+ pooled runs |
-| F-32 | **F-30 and F-31 overstated their conclusion: the design was never able to detect the effects it was looking for.** Power analysis on the tests actually run: at n=403 vs 418 chosen actions the minimum detectable effect (alpha=.05, power=.80) is **9.1 pp** for `create_post`, and the observed shift was 3.2 pp. The round-0 intro test could only detect **>=21.1 pp** and observed 17.1 pp -- **it could not have confirmed F-28 no matter what happened.** Worse, those MDEs assume independent observations, and the actions are clustered within agent: per-agent `create_post` share ranges 0.14-1.00, **ICC ~ 0.31-0.38, design effect ~ 4.3-4.8**, so effective n is **~90, not ~410**, and the true MDE is **~20 pp**. Recomputing the two "significant" F-31 hits with clustering: z 2.23 -> 1.05 (p~.29) and z 2.10 -> 0.99 (p~.32) -- null on their own, before any Bonferroni. **The correct statement is not "the interventions did nothing" but "this design cannot distinguish no effect from an effect smaller than ~20 pp."** The capacity-limit conclusion is still the best available explanation but is no longer *established* by these runs | F-30/F-31 downgraded from "negative result" to "underpowered, inconclusive". Do not repeat the capacity claim as settled |
-| F-33 | **The unit of randomisation is the run, and every cross-run p-value so far had n=1 per condition.** Treating 418 actions as 418 observations when they come from 36 agents in a single run is the same units-of-analysis error as F-30's pair-level bootstrap, one level up. **Fix available in existing data:** `select_diverse` is deterministic, so the same 36 personas occupy the same agent ids in every run (verified 36/36 for baseline vs v10) -- a **paired within-agent design** is therefore valid retrospectively and removes the between-agent variance that causes the design effect. Paired MDE improves from ~20 pp to **4.7-14.1 pp**. Paired baseline->v10: `create_post` -5.3 pp (p=.29), `create_comment` -0.5 pp (p=.88), `follow` +0.8 pp (p=.62), `like_post` +4.2 pp (p=.041, but below its own 5.8 pp MDE and not surviving Bonferroni across 4 tests). **The dominant term is within-agent across-run SD of 30.3 pp for posting share** -- the same persona posts 20% of the time in one run and 80% in another. Roughly half of that is binomial noise from only ~11 actions per agent; the rest is genuine agent x run variation | Paired analysis is now the required method for any cross-run claim. Powering an intervention to 5 pp needs ~288 agent-pairs, i.e. ~8 pooled runs at 36 agents or one run at ~240 agents |
-| F-34 | **"Nobody replies to anybody" was wrong.** Threading is stable and unremarkable across runs: **38.9% of commented posts became threads in baseline, 35.5% in v9, 32.5% in v10** (>1 comment on the same post). Comments do reach agents -- the three-tier `refresh()` override calls `pl_utils._add_comments_to_posts` (`timeline_platform.py:649`) exactly as upstream does, and all 40 commented posts in v10 were subsequently shown to someone | Open question retired. No bug; the earlier claim was stale |
-| F-31 | **The action mix is also unchanged since baseline — the negative result covers behaviour, not just content.** Full-run comparison (v10 n=418 chosen actions, v9 n=447, baseline n=403): baseline->v10 `create_post` 63.5%->60.3% (p=0.34), `create_comment` 14.6%->14.1% (p=0.83), `like_post` 7.2%->11.0% (p=0.058), `follow` 10.4%->11.0% (p=0.79). **Nothing significant.** The pairwise v9->v10 test *did* return two hits (`create_post` p=0.026, `like_post` p=0.036), and taken alone they look like the reception block being a regression that the reword fixed. They are not: v9 is itself indistinguishable from baseline on every measure (`create_post` p=0.22, `create_comment` p=0.087, `like_post` p=0.88), so both "significant" results sit between two runs that each match baseline. **12 tests were run; at alpha=0.05 that expects ~0.6 false positives, and Bonferroni gives alpha=0.0042 — neither hit survives.** This is the same error class as F-30's pair-level bootstrap: a test applied at the wrong unit or without correction manufactures an effect | Recorded. Any future intervention must be judged against **baseline**, not against the previous run, and corrected for the number of comparisons |
-| F-29 | **The homogeneity is the model's, not the feed's.** Tested directly: two posts shown to the same agent are 0.824 similar, a random pair from the whole corpus is 0.809 — the feed contributes **+0.015**. The corpus is uniformly alike regardless of who saw what, so the echo-chamber explanation is dead and no ranking change can fix it | Recorded. Rules out feed-side fixes |
-| F-28 | **Round 0's wording seeded the register for the entire run.** The empty-feed line read *"a good moment to post something yourself"*, and with 36 agents hitting an empty feed simultaneously, **77% of round-0 posts were introductions**. Those became the whole feed, and agents mimic what they read — vague begets vague. The same model prompted cold writes concrete things ("attended a panel on supply chain innovation") | Reworded to state the fact without inviting an introduction. Says nothing about what to write |
-| F-27 | **Agents were posting into a void.** In R-17, 21 posts drew likes and 36 drew comments, and none of it was ever visible to their authors — an agent could not tell whether anything it wrote had reached anyone. A plausible reason 64% of all actions were `create_post` | Added a reception block: likes, dislikes and reply counts on your own recent posts. Information, not instruction — nobody is told to engage, they are told what happened |
-| F-26 | **A self-inflicted regression, traced to one word.** Malformed calls climbed every run from v3 onward: 113 → 169 → 429 → **831**. Cause: prompt v3 opened with *"Take TWO OR THREE of these **actions** this turn"*, reintroducing the exact word F-20 had removed. The smoking gun is `follow() got an unexpected keyword argument 'actions'` — **the plural**, 87 times | Reworded without the word, and the forced volume dropped entirely. Smoke test: **831 → 0 malformed** |
-| F-25 | **Reach came from a global pool, not the social graph.** Every agent drew candidates from all posts ranked by interest × recency, so a completely unconnected agent saw as much as a hub. That is a magazine, not a social network | Three-tier feed: **network** (people you follow, *not* interest-filtered) > **friend-of-friend** (2-hop, interest ranked) > **discovery** (small global slice). Isolation is not penalised — it falls out, since an agent with no follows fills only the discovery tier |
-| B-14 | Ours — `refresh()` tier assembly | 37 exposures in R-16 were labelled `fof` but came from a **direct connection**, so the social/algorithmic split the tiers exist to measure was wrong | fof excluded only the posts already *picked* for the network tier, which `network_slots` caps at 5 — so a followee's sixth post fell through into fof | Exclude posts by anyone already followed, not merely the posts already chosen. Tiers are now disjoint |
-| B-13 | Ours — `refresh()` + upstream `trace` schema | A duplicate refresh in one round threw `IntegrityError` and destroyed the whole feed | `trace`'s primary key is `(user_id, created_at, action, info)`, and for a refresh `info` is the entire feed — so refreshing twice with an unchanged feed collides. Same shape as B-12: one small error taking down everything around it | Catch it and count it. Exposure rows are already written by that point, so only the duplicate audit row is lost — the one row carrying no new information |
-| F-24 | **A third of posts are the author's bio, echoed back.** 21 of 66 posts (32%) closely reproduce the author's own profile text — one at similarity 1.00, i.e. verbatim. Posts *do* match their author (0.785 to own bio vs 0.641 to others, +0.14 gap), but that number is inflated by parroting rather than earned by the agent writing something new | Open — likely needs the prompt to stop showing the bio as if it were content to riff on |
-| F-23 | **F-22's fix backfired badly and was reverted.** Gluing the id into the author string as `"name (followee_id=7)"` made malformed calls jump 169 → **429**, with `follow()` handed `post_id` 145 times and `action=` wrapping exploding across every action. Burying a key=value pair inside a JSON *value* made the object harder to read, so the model grabbed the first id it saw | Reverted to v6's shape: the id stays in its own field named exactly as the tool expects |
-| F-22 | **Removing digits from handles created a new failure.** F-20's fix worked precisely — invalid follow targets fell 77→17, follows rose 53→73 — but with no digits to grab, the model started calling `follow()` with **no argument at all** (29 times) and reverted to `action=` wrapping. Action rate fell 0.72→0.611, malformed rose 113→169 | Stop fighting the habit: the id now travels *with* the name — `author: "strategist_chief (followee_id=7)"` — so grabbing digits and reading the field both yield the right value |
-| F-21b | **Notifications are disproved, now cleanly.** R-15 tested them confounded with F-22's damage; R-16 ran them with F-22 reverted and got **0 of 17 threads** with an author replying — identical to before. Being unable to see replies was never the reason nobody answers anybody. The real cause is elsewhere and is still unknown | Open. Notifications are kept (they cost nothing and are realistic) but they are not the fix |
-| F-21 | **Agents never saw replies to their own posts, so nobody ever answered anyone.** In R-13, 17 posts drew multiple comments and the author replied back on **zero** of them. Cause: an agent's own posts are correctly excluded from its feed, but the comments live *under* those posts — so replies were invisible to the one person they were addressed to. The result was parallel monologue, not conversation | Added a notifications block: replies you received, with the `post_id` to answer, `comment_id` to like, and `followee_id` to follow |
-| F-20 | **Numeric handles were being parsed as ids.** The scraped personas ship as `user0`..`user110`; agents read the digits out of the handle and passed them as ids — `follow(46)` for `user46`. Measured in R-13: **230 rejected follows aimed at id 46, 136 at 44, 126 at 96**, plus 280 at the placeholder `12345`. This is why follows fell 90 → 53 | Handles are now generated from the persona's own words: readable, unique, digit-free (`@strategist_chief`, `@advanced_trading`) |
-| F-19 | **Agents acted on targets they had never seen.** Round 0 of the first v5 attempt logged **zero exposures** yet produced 12 follows and 4 likes — agent 13 "liked" post 2 having never seen it, agent 2 "followed" agent 1 with no exposure to them. B-10 catches non-existent ids, but a model guessing a small integer lands on a *valid* agent id most of the time, so that check cannot catch a valid-but-unseen target. Measured contamination: **8 of ~26 attempted actions (~30%)** were blind | Fixed by an informed-action gate; search hits count as encountered |
-| F-17 | **The feed discarded its own ranking.** `refresh()` ranked 30 candidates then `random.sample()`d 8 (`platform.py:276-278`). Median rank shown was 14/30; only 16% came from the top 5. Posts were also rendered in arbitrary SQL order, so an agent's best match could appear anywhere | Fixed: top-ranked + 2 explore slots, rendered best-first. Median rank 14→3, top-5 share 16%→67% |
-| F-18 | **The persona population was the ceiling on personalisation.** Reddit `persona` texts (which become the system prompt) are **0.963** similar to each other; `bio` (which the recommender ranks on) 0.829. Agents were handed near-identical characters | Switched to diversity-selected scraped twitter bios: **0.637** |
-| F-16 | **Freshness barely counts over a short run.** Upstream recency `log((271.8-age)/100)` is calibrated for ~170 timesteps; across 12 rounds it moves only 0.9999→0.9586 (spread 0.04) while cosine similarity spans ~0.25. Ranking was therefore ~85% similarity, and a round-0 post was never displaced — post #3 reached 33 agents while a round-10 post reached 1 | Measured; fixed via `recency_span_rounds` |
-| F-15 | **Agents attempt actions and fumble the arguments** — 18 malformed tool calls in 5 rounds of the full run, 10 of them `follow`, mostly "unexpected keyword argument". These leave no trace row, so they were previously invisible and counted as "did nothing" | Measured by `analyze.py --log` |
-| F-14 | **Group chat hijacks the prompt and crowds out feed engagement** | `agent_environment.py:49-53` puts `$groups_env` *before* `$posts_env`; `:40-48` is a wall of imperatives; `:118-135` renders it every turn regardless of `available_actions`. Measured in R-5 |
+#### F-1
+
+**Finding.** Hot-score gives every user an identical feed
+
+**Evidence.** `recsys.py:257` — `[top_post_ids] * len(rec_matrix)`
+
+#### F-2
+
+**Finding.** The follow graph reaches the feed, but only for non-REDDIT recsys
+
+**Evidence.** `platform.py:280-303` — `JOIN follow ON post.user_id = follow.followee_id`
+
+#### F-3 — `RecsysType.TWITTER` silently returns random recommendations
+
+
+**Evidence.** `recsys.py:39` (`model = None`), assigned only at `:282` in a different
+function; `:749` falls through to `random.random()` with no error
+
+#### F-4
+
+**Finding.** Exposure history is destroyed every round
+
+**Evidence.** `platform.py:383` — `DELETE FROM rec`
+
+#### F-5
+
+**Finding.** Default feed is ~5 posts, recsys ranks only a top-2 pool
+
+**Evidence.** `env.py:82-84`
+
+#### F-6
+
+**Finding.** Group chat is open-join public rooms, not DMs
+
+**Evidence.** `platform.py:1497-1527`; no recipient field in `group_message.sql`
+
+#### F-7
+
+**Finding.** TWHIN keeps state in module globals across calls
+
+**Evidence.** `recsys.py:436-437`, cleared only by `reset_globals()` at `:124`
+
+#### F-8
+
+**Finding.** `enable_like_score=True` hits `pdb.set_trace()` in exception handlers
+
+**Evidence.** `recsys.py:564, 579` — would hang a headless run indefinitely
+
+#### F-9
+
+**Finding.** TWHIN recency score goes non-finite past ~171 timesteps
+
+**Evidence.** `recsys.py:469-472` — `log((271.8 - age)/100)`; source comments a ~90
+ceiling
+
+#### F-10
+
+**Finding.** `generate_twitter_agent_graph` discards `following_agentid_list`
+
+**Evidence.** `agents_generator.py:614-649`
+
+#### F-11
+
+**Finding.** Agents see only follower/following **counts**, never identities
+
+**Evidence.** `agent_environment.py:68-101`, both marked `# TODO` upstream
+
+#### F-12
+
+**Finding.** Two conflicting index bases for the `rec` matrix
+
+**Evidence.** `database.py:281` inserts 1-based; `platform.py:390` inserts 0-based
+
+#### F-13
+
+**Finding.** Every table's `user_id` column actually stores **agent_id**; only the
+`user` table has both
+
+**Evidence.** `platform.py:407` — `user_id = agent_id`, repeated in every action
+
+#### F-30 — F-28's reword did not work, and four interventions have now failed
+
+**Finding.** Measured on v10 vs v9 over the same rounds (0-8): round-0 intro share
+77%->60% (p=0.135, CI [-5.2, +39.5] pp) and corpus similarity 0.8285->0.8175 (CI
+[-0.015, +0.038]). **Neither reaches significance.** Together with F-21b
+(notifications), F-27 (reception block) and F-29 (echo chamber), four separate
+interventions have failed to move content quality. The convergent conclusion is that the
+vagueness is a capacity limit of `llama3.1:8b`, not a fixable property of the prompt or
+the feed. **Methodological caveat, stated because it nearly produced a false finding:**
+the first bootstrap resampled *pairs* and returned CI [+0.0089, +0.0132], "real".
+Pairwise cosines are not independent -- each post appears in ~150 pairs -- so resampling
+pairs understates uncertainty. Resampling *posts*, the correct unit, widened the CI to
+span zero. **Second caveat:** v10 changed the wording *and* temperature (0.7->0.9)
+together, so even a real effect could not have been attributed. Both errors are mine and
+both are the same error the log records at F-22
+
+
+**Evidence.** Recorded as a negative result. Stop tuning the prompt for content quality;
+a larger model is the only remaining lever
+
+#### F-40 — F-37's evidence base was overstated, its network result is robust, and its fof result is not
+
+**Finding.** Two corrections. (a) **Reporting error, mine:** the pooled header claimed
+"57,682 exposures, 13 runs". Eight of those runs predate the three-tier feed and label
+sources `following`/`recsys`/`both`, so they contributed **zero** to every tier contrast
+while still being counted in the denominator. The estimates were always computed on the
+right rows; only the headline was wrong. Correct base: **5 runs, 30,240 exposures, 2,520
+feeds, 2,174 engagements (7.2%)**. (b) **Per-run heterogeneity:** `network` vs
+`discovery` is positive and individually significant in **5/5 runs** (baseline 5.77, v8
+1.85, v9 8.67, v10 3.73, v10_replicate 3.04) -- direction fully consistent, magnitude
+spanning 4.7x. But `fof` vs `discovery` is individually significant in **only 1/4 runs**
+and its pooled significance is an artefact of pooling. **The fof contrast -- the one
+carrying the causal interpretation -- must be reported as suggestive, not established**
+
+
+**Evidence.** Header corrected in `exposure_model.py`; legacy runs now explicitly
+excluded and named. Per-run breakdown added as section 6
+
+#### F-41 — Independent replication under a different feed implementation
+
+**Finding.** The eight excluded runs are not useless: `following` (came from someone you
+follow) vs `recsys` (ranked in by similarity) is the same contrast built by an earlier,
+structurally different feed builder, at earlier prompt versions. Same stratified
+estimator, on strata sharing nothing with the main analysis: **full_twhin OR 4.79 [3.14,
+7.32], full_twhin_v2 OR 5.14 [3.65, 7.22], pooled OR 5.00 [3.83, 6.52], p=1.8e-32, 222
+strata.** A different feed builder reproduces the effect at comparable magnitude
+
+
+**Evidence.** The strongest evidence that F-37 is not an artefact of one feed
+implementation. Added as section 7
+
+#### F-42 — F-38 is wrong, and the error is a mislabelled variable, not a confound
+
+**Finding.** The regressor F-38 reported as "similarity ... per unit cosine" is
+`rec_history.score`, which is `sim * recency` (`timeline_platform.py:365` writes the
+product; `:699-701` copies it into the exposure row; `exposure_model.py:80` reads it and
+§5 of its output labels it "similarity"). The tell was visible in F-38's own decile
+table, whose bottom bin reads "sim 0.000-0.387" — raw cosine never falls below **0.198**
+in any run, but `recency` clamps to `RECENCY_FLOOR = 1e-6` past the age cliff
+(`timeline_platform.py:299-301`), driving the *product* to ~0 for stale posts however
+similar they are. Recovering `sim` and `recency` separately from `rec_candidates` and
+re-fitting F-38's exact specification (cluster-robust logit, clustered by agent, feed
+slot included; the control reproduces OR 0.305 [0.164, 0.568] to three decimals):
+**cosine alone OR 1.544 [0.588, 4.054], p=0.38 — null, and positive if anything.** The
+negative coefficient belonged entirely to the recency half: **recency alone OR 0.176
+[0.103, 0.300], p=1.7e-10.** Cosine is also null inside every one of the 8 fittable
+recency levels (one nominal p=0.024 across 8 tests). **Retract "TwHIN similarity is
+anti-predictive." The supported claim is that similarity has no detectable effect on
+engagement**
+
+
+**Evidence.** Q-10 closed. The "connection beats content" headline is unaffected and if
+anything cleaner: content similarity does nothing, rather than doing something
+backwards. `recency_check.py`, `data/social_timeline_recency_check.txt`
+
+#### F-43 — What the recency coefficient actually is: repeat exposure
+
+**Finding.** Taken at face value the recency term says older posts draw *more*
+engagement, which is backwards for a social feed and needed checking. It is not a round
+effect — raw engagement *falls* over rounds (5.65% in round 1 to 1.86% in round 14), so
+pooling would bias the estimate the other way, and stratifying on the feed (one agent,
+one round, one run — the F-37 identification) leaves **stale vs fresh OR 1.751 [1.384,
+2.215], p=3.0e-06, 1956 feeds.** The mechanism is that age and prior sightings are
+nearly the same variable here: a fresh post is a first sighting **by construction**
+(100% of fresh exposures), while stale posts average **1.69** prior sightings and are
+first sightings only 19.4% of the time. Engagement rises monotonically with prior
+sightings — **2.20% → 4.52% → 5.94% → 6.80% → 7.33%** (0,1,2,3,4 priors) — and
+within-feed **seen-before vs first-sighting OR 2.321 [1.826, 2.951], p=6.1e-12.**
+Decisive test: inside first sightings only, where the repeat channel is closed by
+construction, the stale advantage **reverses** to **OR 0.551 [0.314, 0.969]**.
+Replicated independently in the **network** tier, where the similarity score plays no
+part in feed construction: **OR 1.801 [1.348, 2.406], p=6.9e-05.** **Caveat:** prior
+sightings are not randomly assigned — a post is re-shown because the ranker kept
+choosing it — so this is an observational reading supported by dose-response and
+replication, not an experiment. **Robustness (added same day, per the F-40 lesson):
+significant in 4/5 runs individually** (baseline 2.76, v10_register 2.32, v10_replicate
+2.60, v8_full 2.46) but **v9_feedback returns 0.89 [0.38, 2.11], null** — the same run
+that is the outlier on the tier effect at 8.67. **By tier: network 1.801 and discovery
+2.321 hold, fof 1.290 [0.805, 2.068] does not**, so this is a network-and-discovery
+effect, not a whole-feed one. Adding feed slot to the stratification leaves 2.130
+[1.700, 2.669], and re-shown posts sit LOWER in the feed (mean slot 7.60 vs 6.40)
+because age drives their score down — position biases against this result, not for it.
+Absolute scale 2.20% -> 5.27%, a 3.07 pp gap; the OR is the larger-sounding number
+because the base rate is low. The apparent turnover past 4 sightings is NOT claimed:
+only 81 distinct posts are ever shown a sixth time
+
+
+**Evidence.** A third result alongside F-37 and F-35: **repetition drives engagement
+more than either content or freshness**. Also the mechanism F-38 was missing. Testable
+properly with a designed re-exposure run
+
+#### F-37 — Connection predicts engagement; content similarity does not. This is the project's actual result
+
+**Finding.** Pooled over 13 analysed runs: **57,682 exposures, 5,345 feeds, 412
+agent-runs, 6,834 engagements.** Crude rates network 18.6% / fof 11.5% / discovery 3.1%,
+but that is confounded by agent, round, run and feed position. **Identified estimate,
+Mantel-Haenszel stratified by (agent, feed slot) over slots 0-4 -- holding both the
+agent and the position in the feed fixed: network vs discovery OR 3.54 [2.92, 4.29]
+p=4e-38; fof vs discovery OR 1.97 [1.25, 3.11] p=.003; network vs fof OR 2.12 [1.42,
+3.16].** Stratifying by feed only (position free) gives 11.07 and 4.11, so **roughly
+half the crude gap is the feed builder placing network posts at the top, and half is the
+tier itself.** **The `fof` contrast is the causal one**: friend-of-friend authors were
+selected by *other* agents' follows and never by the focal agent, so it carries no
+selection-on-affinity, whereas the network contrast is an upper bound that does. Unlike
+every cross-run comparison in this project, this sits far above any noise floor because
+it is a within-agent, within-slot contrast
+
+
+**Evidence.** The shield works. Reach flows through the graph, and it is not merely an
+artefact of network posts being shown first
+
+#### F-38 — The TwHIN similarity score is mildly ANTI-predictive of engagement
+
+**Finding.** Tested inside the discovery tier only -- the score is present for 100% of
+discovery exposures but 28% of network and 43% of fof, so it is missing not at random
+and cannot sit in a model beside tier. On 20,822 scored discovery exposures,
+cluster-robust by agent: **similarity OR 0.305 [0.164, 0.568] per unit cosine, p<.001 --
+in the wrong direction.** The assumption-free decile view agrees and is close to
+monotone: engagement falls **3.94% -> 3.60% -> 3.51% -> 3.41% -> 2.59% -> 3.65% -> 2.21%
+-> 2.55% -> 2.11% -> 2.98%** from least to most similar. So the ranking signal the
+recommender is built on does not select posts these agents engage with, and if anything
+slightly anti-selects. Consistent with F-29 (the corpus is uniformly homogeneous, mean
+pairwise 0.81, so the score has almost no real range to work with)
+
+
+**Evidence.** Major caveat on any personalisation claim. The graph carries the
+personalisation; the embedding does not
+
+#### F-39 — Tier and feed position are structurally collinear, and a naive logit hides it
+
+**Finding.** The feed builder assigns network to slots 0-4, fof to 1-7, discovery to all
+12. On the network-vs-discovery subset, slot dummies for 5-11 predict "not network"
+perfectly and the Hessian is **singular**. Fitting slot as one linear term conceals this
+and yields an unstable estimate: **dropping the fof rows moves the network OR from 1.76
+to 5.52 with no change to the contrast being estimated.** The stratified estimator is
+reported instead because it conditions on the strata where the comparison actually
+exists and discards the rest rather than extrapolating into them
+
+
+**Evidence.** `exposure_model.py` reports no multivariable logit for tier and states
+why. `test_exposure_model.py` validates the MH estimator against known-answer data
+including a Simpson's-paradox case (crude 83% vs 17%, true OR 1, recovered 1.000)
+
+#### F-35 — The noise floor is measured, and it is larger than every effect this project has ever tested for
+
+**Finding.** `v10_replicate` reruns `v10_register` at byte-identical config (prompt v10,
+temp 0.9, seed 0, 36 agents, 15 rounds); `compare.py` confirms zero config differences.
+Paired within-agent differences are a clean null -- `create_post` +0.6 pp (p=.91),
+`create_comment` -0.4 pp (p=.90), `like_post` -1.6 pp (p=.50), `follow` +0.1 pp (p=.94),
+nothing surviving Holm -- which is what a valid replicate should look like and validates
+the apparatus. **The decisive number is the dispersion.** Pure run-to-run SD is **30.7
+pp** for posting share, against **30.3 pp** for the baseline->v10 comparison that
+changed *both* prompt version and temperature. Two runs differing in two settings vary
+no more than two identical runs. The 30.3 pp attributed to "agent x run variation" in
+F-33 was **entirely noise** -- there was never signal in it. Consequence: at n=36 an
+intervention must move posting share **>=14.3 pp** to be visible, and every intervention
+tested here (F-21b, F-27, F-28, F-29) moved it by roughly 3-5 pp. **All four were
+unfalsifiable by construction at this scale**, which is a stronger and cleaner statement
+than F-30's "they failed"
+
+
+**Evidence.** Definitive. Noise floor written to `data/social_timeline_noise_floor.txt`
+
+#### F-36 — Engagement actions are 8x cheaper to study than posting
+
+**Finding.** The per-action noise floor is not uniform: `create_post` SD 30.7 pp (ICC
+.26-.31), `create_comment` 18.4 pp, `like_post` 13.9 pp, `follow` 10.6 pp with **ICC
+0.000 in both runs** -- agents follow at genuinely uniform rates, so clustering costs
+nothing there and the naive unpaired test was never wrong for `follow`. Agent-pairs
+needed to resolve a 5 pp shift: **295 for `create_post` (8.2 runs), 106 for
+`create_comment`, 60 for `like_post`, 35 for `follow` (~1 run)**
+
+
+**Evidence.** Any future intervention study should target follow/like behaviour, which
+is answerable in 1-2 runs, and treat posting-share claims as needing 8+ pooled runs
+
+#### F-32 — F-30 and F-31 overstated their conclusion: the design was never able to detect the effects it was looking for
+
+**Finding.** Power analysis on the tests actually run: at n=403 vs 418 chosen actions
+the minimum detectable effect (alpha=.05, power=.80) is **9.1 pp** for `create_post`,
+and the observed shift was 3.2 pp. The round-0 intro test could only detect **>=21.1
+pp** and observed 17.1 pp -- **it could not have confirmed F-28 no matter what
+happened.** Worse, those MDEs assume independent observations, and the actions are
+clustered within agent: per-agent `create_post` share ranges 0.14-1.00, **ICC ~
+0.31-0.38, design effect ~ 4.3-4.8**, so effective n is **~90, not ~410**, and the true
+MDE is **~20 pp**. Recomputing the two "significant" F-31 hits with clustering: z 2.23
+-> 1.05 (p~.29) and z 2.10 -> 0.99 (p~.32) -- null on their own, before any Bonferroni.
+**The correct statement is not "the interventions did nothing" but "this design cannot
+distinguish no effect from an effect smaller than ~20 pp."** The capacity-limit
+conclusion is still the best available explanation but is no longer *established* by
+these runs
+
+
+**Evidence.** F-30/F-31 downgraded from "negative result" to "underpowered,
+inconclusive". Do not repeat the capacity claim as settled
+
+#### F-33 — The unit of randomisation is the run, and every cross-run p-value so far had n=1 per condition
+
+**Finding.** Treating 418 actions as 418 observations when they come from 36 agents in a
+single run is the same units-of-analysis error as F-30's pair-level bootstrap, one level
+up. **Fix available in existing data:** `select_diverse` is deterministic, so the same
+36 personas occupy the same agent ids in every run (verified 36/36 for baseline vs v10)
+-- a **paired within-agent design** is therefore valid retrospectively and removes the
+between-agent variance that causes the design effect. Paired MDE improves from ~20 pp to
+**4.7-14.1 pp**. Paired baseline->v10: `create_post` -5.3 pp (p=.29), `create_comment`
+-0.5 pp (p=.88), `follow` +0.8 pp (p=.62), `like_post` +4.2 pp (p=.041, but below its
+own 5.8 pp MDE and not surviving Bonferroni across 4 tests). **The dominant term is
+within-agent across-run SD of 30.3 pp for posting share** -- the same persona posts 20%
+of the time in one run and 80% in another. Roughly half of that is binomial noise from
+only ~11 actions per agent; the rest is genuine agent x run variation
+
+
+**Evidence.** Paired analysis is now the required method for any cross-run claim.
+Powering an intervention to 5 pp needs ~288 agent-pairs, i.e. ~8 pooled runs at 36
+agents or one run at ~240 agents
+
+#### F-34 — "Nobody replies to anybody" was wrong
+
+**Finding.** Threading is stable and unremarkable across runs: **38.9% of commented
+posts became threads in baseline, 35.5% in v9, 32.5% in v10** (>1 comment on the same
+post). Comments do reach agents -- the three-tier `refresh()` override calls
+`pl_utils._add_comments_to_posts` (`timeline_platform.py:649`) exactly as upstream does,
+and all 40 commented posts in v10 were subsequently shown to someone
+
+
+**Evidence.** Open question retired. No bug; the earlier claim was stale
+
+#### F-31 — The action mix is also unchanged since baseline — the negative result covers behaviour, not just content
+
+**Finding.** Full-run comparison (v10 n=418 chosen actions, v9 n=447, baseline n=403):
+baseline->v10 `create_post` 63.5%->60.3% (p=0.34), `create_comment` 14.6%->14.1%
+(p=0.83), `like_post` 7.2%->11.0% (p=0.058), `follow` 10.4%->11.0% (p=0.79). **Nothing
+significant.** The pairwise v9->v10 test *did* return two hits (`create_post` p=0.026,
+`like_post` p=0.036), and taken alone they look like the reception block being a
+regression that the reword fixed. They are not: v9 is itself indistinguishable from
+baseline on every measure (`create_post` p=0.22, `create_comment` p=0.087, `like_post`
+p=0.88), so both "significant" results sit between two runs that each match baseline.
+**12 tests were run; at alpha=0.05 that expects ~0.6 false positives, and Bonferroni
+gives alpha=0.0042 — neither hit survives.** This is the same error class as F-30's
+pair-level bootstrap: a test applied at the wrong unit or without correction
+manufactures an effect
+
+
+**Evidence.** Recorded. Any future intervention must be judged against **baseline**, not
+against the previous run, and corrected for the number of comparisons
+
+#### F-29 — The homogeneity is the model's, not the feed's
+
+**Finding.** Tested directly: two posts shown to the same agent are 0.824 similar, a
+random pair from the whole corpus is 0.809 — the feed contributes **+0.015**. The corpus
+is uniformly alike regardless of who saw what, so the echo-chamber explanation is dead
+and no ranking change can fix it
+
+
+**Evidence.** Recorded. Rules out feed-side fixes
+
+#### F-28 — Round 0's wording seeded the register for the entire run
+
+**Finding.** The empty-feed line read *"a good moment to post something yourself"*, and
+with 36 agents hitting an empty feed simultaneously, **77% of round-0 posts were
+introductions**. Those became the whole feed, and agents mimic what they read — vague
+begets vague. The same model prompted cold writes concrete things ("attended a panel on
+supply chain innovation")
+
+
+**Evidence.** Reworded to state the fact without inviting an introduction. Says nothing
+about what to write
+
+#### F-27 — Agents were posting into a void
+
+**Finding.** In R-17, 21 posts drew likes and 36 drew comments, and none of it was ever
+visible to their authors — an agent could not tell whether anything it wrote had reached
+anyone. A plausible reason 64% of all actions were `create_post`
+
+
+**Evidence.** Added a reception block: likes, dislikes and reply counts on your own
+recent posts. Information, not instruction — nobody is told to engage, they are told
+what happened
+
+#### F-26 — A self-inflicted regression, traced to one word
+
+**Finding.** Malformed calls climbed every run from v3 onward: 113 → 169 → 429 →
+**831**. Cause: prompt v3 opened with *"Take TWO OR THREE of these **actions** this
+turn"*, reintroducing the exact word F-20 had removed. The smoking gun is `follow() got
+an unexpected keyword argument 'actions'` — **the plural**, 87 times
+
+
+**Evidence.** Reworded without the word, and the forced volume dropped entirely. Smoke
+test: **831 → 0 malformed**
+
+#### F-25 — Reach came from a global pool, not the social graph
+
+**Finding.** Every agent drew candidates from all posts ranked by interest × recency, so
+a completely unconnected agent saw as much as a hub. That is a magazine, not a social
+network
+
+
+**Evidence.** Three-tier feed: **network** (people you follow, *not* interest-filtered)
+> **friend-of-friend** (2-hop, interest ranked) > **discovery** (small global slice).
+Isolation is not penalised — it falls out, since an agent with no follows fills only the
+discovery tier
+
+#### B-14
+
+**Where.** Ours — `refresh()` tier assembly
+
+**Symptom.** 37 exposures in R-16 were labelled `fof` but came from a **direct
+connection**, so the social/algorithmic split the tiers exist to measure was wrong
+
+**Cause.** fof excluded only the posts already *picked* for the network tier, which
+`network_slots` caps at 5 — so a followee's sixth post fell through into fof
+
+**Fix.** Exclude posts by anyone already followed, not merely the posts already
+chosen. Tiers are now disjoint
+
+#### B-13
+
+**Where.** Ours — `refresh()` + upstream `trace` schema
+
+**Symptom.** A duplicate refresh in one round threw `IntegrityError` and destroyed the
+whole feed
+
+**Cause.** `trace`'s primary key is `(user_id, created_at, action, info)`, and for a
+refresh `info` is the entire feed — so refreshing twice with an unchanged feed collides.
+Same shape as B-12: one small error taking down everything around it
+
+**Fix.** Catch it and count it. Exposure rows are already written by that point, so
+only the duplicate audit row is lost — the one row carrying no new information
+
+#### F-24 — A third of posts are the author's bio, echoed back
+
+**Finding.** 21 of 66 posts (32%) closely reproduce the author's own profile text — one
+at similarity 1.00, i.e. verbatim. Posts *do* match their author (0.785 to own bio vs
+0.641 to others, +0.14 gap), but that number is inflated by parroting rather than earned
+by the agent writing something new
+
+
+**Evidence.** Open — likely needs the prompt to stop showing the bio as if it were
+content to riff on
+
+#### F-23 — F-22's fix backfired badly and was reverted
+
+**Finding.** Gluing the id into the author string as `"name (followee_id=7)"` made
+malformed calls jump 169 → **429**, with `follow()` handed `post_id` 145 times and
+`action=` wrapping exploding across every action. Burying a key=value pair inside a JSON
+*value* made the object harder to read, so the model grabbed the first id it saw
+
+
+**Evidence.** Reverted to v6's shape: the id stays in its own field named exactly as the
+tool expects
+
+#### F-22 — Removing digits from handles created a new failure
+
+**Finding.** F-20's fix worked precisely — invalid follow targets fell 77→17, follows
+rose 53→73 — but with no digits to grab, the model started calling `follow()` with **no
+argument at all** (29 times) and reverted to `action=` wrapping. Action rate fell
+0.72→0.611, malformed rose 113→169
+
+
+**Evidence.** Stop fighting the habit: the id now travels *with* the name — `author:
+"strategist_chief (followee_id=7)"` — so grabbing digits and reading the field both
+yield the right value
+
+#### F-21b
+
+**Finding.** **Notifications are disproved, now cleanly.** R-15 tested them confounded
+with F-22's damage; R-16 ran them with F-22 reverted and got **0 of 17 threads** with an
+author replying — identical to before. Being unable to see replies was never the reason
+nobody answers anybody. The real cause is elsewhere and is still unknown
+
+**Evidence.** Open. Notifications are kept (they cost nothing and are realistic) but
+they are not the fix
+
+#### F-21 — Agents never saw replies to their own posts, so nobody ever answered anyone
+
+**Finding.** In R-13, 17 posts drew multiple comments and the author replied back on
+**zero** of them. Cause: an agent's own posts are correctly excluded from its feed, but
+the comments live *under* those posts — so replies were invisible to the one person they
+were addressed to. The result was parallel monologue, not conversation
+
+
+**Evidence.** Added a notifications block: replies you received, with the `post_id` to
+answer, `comment_id` to like, and `followee_id` to follow
+
+#### F-20 — Numeric handles were being parsed as ids
+
+**Finding.** The scraped personas ship as `user0`..`user110`; agents read the digits out
+of the handle and passed them as ids — `follow(46)` for `user46`. Measured in R-13:
+**230 rejected follows aimed at id 46, 136 at 44, 126 at 96**, plus 280 at the
+placeholder `12345`. This is why follows fell 90 → 53
+
+
+**Evidence.** Handles are now generated from the persona's own words: readable, unique,
+digit-free (`@strategist_chief`, `@advanced_trading`)
+
+#### F-19 — Agents acted on targets they had never seen
+
+**Finding.** Round 0 of the first v5 attempt logged **zero exposures** yet produced 12
+follows and 4 likes — agent 13 "liked" post 2 having never seen it, agent 2 "followed"
+agent 1 with no exposure to them. B-10 catches non-existent ids, but a model guessing a
+small integer lands on a *valid* agent id most of the time, so that check cannot catch a
+valid-but-unseen target. Measured contamination: **8 of ~26 attempted actions (~30%)**
+were blind
+
+
+**Evidence.** Fixed by an informed-action gate; search hits count as encountered
+
+#### F-17 — The feed discarded its own ranking
+
+**Finding.** `refresh()` ranked 30 candidates then `random.sample()`d 8
+(`platform.py:276-278`). Median rank shown was 14/30; only 16% came from the top 5.
+Posts were also rendered in arbitrary SQL order, so an agent's best match could appear
+anywhere
+
+
+**Evidence.** Fixed: top-ranked + 2 explore slots, rendered best-first. Median rank
+14→3, top-5 share 16%→67%
+
+#### F-18 — The persona population was the ceiling on personalisation
+
+**Finding.** Reddit `persona` texts (which become the system prompt) are **0.963**
+similar to each other; `bio` (which the recommender ranks on) 0.829. Agents were handed
+near-identical characters
+
+
+**Evidence.** Switched to diversity-selected scraped twitter bios: **0.637**
+
+#### F-16 — Freshness barely counts over a short run
+
+**Finding.** Upstream recency `log((271.8-age)/100)` is calibrated for ~170 timesteps;
+across 12 rounds it moves only 0.9999→0.9586 (spread 0.04) while cosine similarity spans
+~0.25. Ranking was therefore ~85% similarity, and a round-0 post was never displaced —
+post #3 reached 33 agents while a round-10 post reached 1
+
+
+**Evidence.** Measured; fixed via `recency_span_rounds`
+
+#### F-15 — Agents attempt actions and fumble the arguments
+
+**Finding.** — 18 malformed tool calls in 5 rounds of the full run, 10 of them `follow`,
+mostly "unexpected keyword argument". These leave no trace row, so they were previously
+invisible and counted as "did nothing"
+
+
+**Evidence.** Measured by `analyze.py --log`
+
+#### F-14 — Group chat hijacks the prompt and crowds out feed engagement
+
+
+**Evidence.** `agent_environment.py:49-53` puts `$groups_env` *before* `$posts_env`;
+`:40-48` is a wall of imperatives; `:118-135` renders it every turn regardless of
+`available_actions`. Measured in R-5
+
 
 **Note on F-3.** This is the most consequential finding of the investigation. Had we
 selected the option whose name most suggests "the interest-based one", the run would
@@ -383,27 +906,138 @@ proves to be a real bottleneck (measured, not assumed).
 
 Living list. Every file this build creates or modifies, and why.
 
+All simulation and analysis code lives in `examples/experiment/social_timeline/`;
+that prefix is dropped from the entries below. Paths outside it are given in
+full.
+
 ### Created
 
-| Path | Purpose | Status |
-|---|---|---|
-| `docs/superpowers/specs/2026-08-24-social-timeline-design.md` | Design spec | Committed `2b82487` |
-| `SIM4_BUILD_LOG.md` | This document | In progress |
-| `examples/experiment/social_timeline/embedding.py` | Mean-pooled TwHIN-BERT embeddings (D-13). Exists because upstream's `pooler_output` path is non-deterministic and near-non-discriminative (B-1/B-2) | Working |
-| `examples/experiment/social_timeline/timeline_platform.py` | `TimelinePlatform(Platform)`: implements the ranking, creates and writes `rec_candidates` / `rec_history` / `round_boundary`, asserts the algorithm ran, enforces DM privacy | Working (R-4) |
-| `examples/experiment/social_timeline/timeline_agent.py` | `TimelineAgent` (per-agent exception isolation) and the persona→agent-graph generator, with zero initial follow edges (D-10) | Working (R-4) |
-| `examples/experiment/social_timeline/run_simulation.py` | Driver: 27-action set, all-`LLMAction` rounds, run manifest with exact config, timings, counters and action tallies | Working (R-4), B-3 fixed |
-| `examples/experiment/social_timeline/check_deps.py` | Stage 0 gate: 6 checks — torch devices, TwHIN-BERT loads, embeddings discriminate across two topics, embedding space reproduces a baseline recorded in a *different* process, upstream pooler regression guard, Ollama reachable | **Strengthened and passing** (R-3). Original 3-text single-process version passed by luck and missed B-1/B-2 |
-| `examples/experiment/social_timeline/personas.py` | Persona loading, greedy max-min diversity selection, digit-free handle generation (F-20), separability reporting. **`select_diverse` is deterministic**, which is what makes the paired design in `compare.py` valid | Working |
-| `examples/experiment/social_timeline/analyze.py` | Per-run ledgers → `_analysis.json` / `_analysis.txt`. Carries an explicit warning that its report is single-run and that cross-run claims need `compare.py` (F-32/F-33) | Working |
-| `examples/experiment/social_timeline/dossier.py` | The exhaustive per-round transcript → `_DOSSIER.txt`, ~28k lines / 2 MB per run. Real names, every action, every exposure, per-pair chronologies | Working |
-| `examples/experiment/social_timeline/make_graph.py` | Multi-run interactive artifact (network graph, per-round detail, per-agent records, run comparison) | Working, 9 runs |
-| `examples/experiment/social_timeline/compare.py` | **Cross-run comparison.** Paired within-agent tests (agent ids are stable across runs), Holm correction, MDE reported alongside every null, ICC/design-effect diagnostics, `--replicate` noise-floor mode, and an F-22 warning when two runs differ in more than one setting | Working (F-33) |
-| `examples/experiment/social_timeline/exposure_model.py` | **Within-run engagement analysis.** Mantel-Haenszel stratified by (agent, feed slot); per-run stability; independent replication on pre-three-tier runs; similarity tested inside `discovery` only because the score is missing-not-at-random | Working (F-37..F-41) |
-| `examples/experiment/social_timeline/test_actions.py` | Gate: every engagement action works mechanically, so absence in a run is a model choice not a broken surface | Passing |
-| `examples/experiment/social_timeline/test_instrumentation.py` | Gate: exposure/interaction records reconstruct correctly from both sides | Passing |
-| `examples/experiment/social_timeline/test_compare.py` | Gate: Holm vs hand-computed values and order-invariance, MDE closed form and monotonicity, ICC ~0 for homogeneous agents vs 0.73 for heterogeneous, paired recovery of an injected effect, no false positive on a null | **16/16 passing** |
-| `examples/experiment/social_timeline/test_exposure_model.py` | Gate: Mantel-Haenszel against known-answer data — homogeneous-OR recovery, true null, **Simpson's paradox (crude 83% vs 17%, true OR 1, recovered 1.000)**, stratum dropping, degenerate inputs, CI narrowing | **12/12 passing** |
+#### `docs/superpowers/specs/2026-08-24-social-timeline-design.md`
+
+**Purpose.** Design spec
+
+**Status.** Committed `2b82487`
+
+#### `SIM4_BUILD_LOG.md`
+
+**Purpose.** This document
+
+**Status.** In progress
+
+#### `embedding.py`
+
+**Purpose.** Mean-pooled TwHIN-BERT embeddings (D-13). Exists because upstream's
+`pooler_output` path is non-deterministic and near-non-discriminative (B-1/B-2)
+
+**Status.** Working
+
+#### `timeline_platform.py`
+
+**Purpose.** `TimelinePlatform(Platform)`: implements the ranking, creates and writes
+`rec_candidates` / `rec_history` / `round_boundary`, asserts the algorithm ran, enforces
+DM privacy
+
+**Status.** Working (R-4)
+
+#### `timeline_agent.py`
+
+**Purpose.** `TimelineAgent` (per-agent exception isolation) and the persona→agent-graph
+generator, with zero initial follow edges (D-10)
+
+**Status.** Working (R-4)
+
+#### `run_simulation.py`
+
+**Purpose.** Driver: 27-action set, all-`LLMAction` rounds, run manifest with exact
+config, timings, counters and action tallies
+
+**Status.** Working (R-4), B-3 fixed
+
+#### `check_deps.py`
+
+**Purpose.** Stage 0 gate: 6 checks — torch devices, TwHIN-BERT loads, embeddings
+discriminate across two topics, embedding space reproduces a baseline recorded in a
+*different* process, upstream pooler regression guard, Ollama reachable
+
+**Status.** **Strengthened and passing** (R-3). Original 3-text single-process version
+passed by luck and missed B-1/B-2
+
+#### `personas.py`
+
+**Purpose.** Persona loading, greedy max-min diversity selection, digit-free handle
+generation (F-20), separability reporting. **`select_diverse` is deterministic**, which
+is what makes the paired design in `compare.py` valid
+
+**Status.** Working
+
+#### `analyze.py`
+
+**Purpose.** Per-run ledgers → `_analysis.json` / `_analysis.txt`. Carries an explicit
+warning that its report is single-run and that cross-run claims need `compare.py`
+(F-32/F-33)
+
+**Status.** Working
+
+#### `dossier.py`
+
+**Purpose.** The exhaustive per-round transcript → `_DOSSIER.txt`, ~28k lines / 2 MB per
+run. Real names, every action, every exposure, per-pair chronologies
+
+**Status.** Working
+
+#### `make_graph.py`
+
+**Purpose.** Multi-run interactive artifact (network graph, per-round detail, per-agent
+records, run comparison)
+
+**Status.** Working, 9 runs
+
+#### `compare.py`
+
+**Purpose.** **Cross-run comparison.** Paired within-agent tests (agent ids are stable
+across runs), Holm correction, MDE reported alongside every null, ICC/design-effect
+diagnostics, `--replicate` noise-floor mode, and an F-22 warning when two runs differ in
+more than one setting
+
+**Status.** Working (F-33)
+
+#### `exposure_model.py`
+
+**Purpose.** **Within-run engagement analysis.** Mantel-Haenszel stratified by (agent,
+feed slot); per-run stability; independent replication on pre-three-tier runs;
+similarity tested inside `discovery` only because the score is missing-not-at-random
+
+**Status.** Working (F-37..F-41)
+
+#### `test_actions.py`
+
+**Purpose.** Gate: every engagement action works mechanically, so absence in a run is a
+model choice not a broken surface
+
+**Status.** Passing
+
+#### `test_instrumentation.py`
+
+**Purpose.** Gate: exposure/interaction records reconstruct correctly from both sides
+
+**Status.** Passing
+
+#### `test_compare.py`
+
+**Purpose.** Gate: Holm vs hand-computed values and order-invariance, MDE closed form
+and monotonicity, ICC ~0 for homogeneous agents vs 0.73 for heterogeneous, paired
+recovery of an injected effect, no false positive on a null
+
+**Status.** **16/16 passing**
+
+#### `test_exposure_model.py`
+
+**Purpose.** Gate: Mantel-Haenszel against known-answer data — homogeneous-OR recovery,
+true null, **Simpson's paradox (crude 83% vs 17%, true OR 1, recovered 1.000)**, stratum
+dropping, degenerate inputs, CI narrowing
+
+**Status.** **12/12 passing**
+
 
 ### Modified
 
@@ -1148,20 +1782,192 @@ version counter was not always bumped when the label was. **Trust the manifest's
 
 Bugs found during this build — in our code or upstream — with how each surfaced.
 
-| # | Where | Symptom | Cause | Fix | Found by |
-|---|---|---|---|---|---|
-| B-8 | Ours, `timeline_platform.update_rec_table` | `--recsys reddit` produced results indistinguishable from `--recsys twhin-bert` — because it *was* TWHIN. The intended hot-score-vs-interest comparison was silently TWHIN against itself | The override reimplemented ranking but never branched on `self.recsys_type`, so the flag was accepted and ignored | Branch on `recsys_type` (now `timeline_platform.py:330` and `:489`). **R-9 was killed and its data deleted** rather than reported | Noticing two "different" algorithms gave identical candidate pools |
-| B-9 | Upstream `oasis/environment/env.py:197-198` | `created_at` stayed `0` for every post in non-Twitter runs, so recency ranking had no signal and round boundaries could not be recovered from the clock | `self.platform.sandbox_clock.time_step += 1` is guarded by `if self.platform_type == DefaultPlatformType.TWITTER`, so the clock never advances on any other platform type | Do not depend on the sandbox clock. `round_boundary` is written directly by our own instrumentation, and `created_at` is stamped from the round number we control | Round-0 posts and round-14 posts carrying the same timestamp |
-| B-1 | Upstream `process_recsys_posts.py:33` | Embedding space differs on every process launch; runs not reproducible | `outputs.pooler_output` reads a pooler whose weights TwHIN-BERT's checkpoint does not contain, so they are randomly re-initialized at every load | Mean-pool `last_hidden_state` instead (D-13) | Stage 0 probe, cross-process fingerprint |
-| B-2 | Same line | Interest-based ranking is barely discriminative — one process produced a within-vs-across-topic margin of `+0.0008`, i.e. noise | `tanh` saturation on a random projection compresses all cosines into ~0.88-0.97 | Same fix (D-13) | Stage 0 probe, 2-topic margin test |
-| B-4 | Ours — `analyze.py` | Agents showed `engagement_rate 0.0` and `acted on: []` despite having posted real comments — genuine engagement silently missing from the ledger | Trace `info` payloads are **not uniform**: `create_comment` records only `comment_id` (no `post_id`), and `quote_post` records `quoted_id` as a **string**, which an `isinstance(..., int)` check rejects | Numeric-string coercion + a `comment_id -> post_id` lookup via the comment table | R-6 analysis: comment counts and "acted on" disagreed |
-| B-5 | Ours — `make_graph.py` | Usernames rendered as `millerhospitaliâ€¦`; table text illegibly low-contrast | The HTML template is a **non-raw** Python string, so `\\u2013`-style escapes were decoded into literal non-ASCII before ever reaching the file, and mojibake appeared wherever charset was not guaranteed. Separately, `td` inherited its colour through the table instead of taking a token | Emit pure ASCII (HTML entities); set `td { color: var(--fg) }` explicitly | Browser verification before publishing |
-| B-6 | Upstream `platform.py:905` + our `analyze.py` | Every `follow` was unattributed — the interaction ledger could not say who was followed | `follow` records only `{"follow_id": ...}`; the followee appears **nowhere** in the payload. Surveyed all relational actions and found each uses a different key: `unfollow`→`followee_id`, `mute`→`mutee_id`, `repost`→`reposted_id`, comment actions→`comment_id` only | Recover followee via the follow table; add the other keys; generalise the comment lookup | `test_instrumentation.py` TEST 2 |
-| B-7 | Ours — `timeline_agent.py` | Agents were *always* told "you do not follow anyone yet", even holding follow edges; authors rendered as bare `agentN` | Keyed on `self.agent_id`, which is **camel's UUID**; the integer is `social_agent_id` (`agent.py:71`). Every lookup silently matched nothing. Separately, `sign_up` leaves `user_name` NULL and puts the handle in `name` | Use `social_agent_id`; `COALESCE(user_name, name)` | Reading the rendered prompt in the promptcheck run |
-| B-12 | Upstream `platform_utils.py:85-157` | **A single quoted post anywhere in a feed blanks that agent's entire feed.** This is the root cause behind B-11's symptom | `_add_comments_to_posts` assigns `num_reports` in the `repost` and `common` branches but **not** in the `quote` branch, then reads it unconditionally at `:157` → `UnboundLocalError`, which upstream's bare `except` swallowed | `_ResilientPlatformUtils` mixin: on failure, retry the batch post-by-post so one unrenderable post costs only itself; unrenderable posts are still rendered from the row already held, since dropping them would bias recorded exposure | The B-11 logging, within minutes of the v5 run starting |
-| B-11 | Ours + upstream pattern — `refresh()` | Six agents ended round 14 of R-12 with no feed despite having 30 ranked candidates waiting, and nothing anywhere said why | `refresh()` wrapped its whole body in `except Exception: return {"success": False}`, so any failure produced a missing feed with **no signal at all**. Refresh traces totalled 476 against ~540 expected | Log the exception and count it; count legitimate empty feeds (round 0, own-posts-only) separately so the two cannot be confused | Investigating the six missing feeds |
-| B-10 | Upstream `platform.py:868-890` | Agents "followed" people who do not exist; round 0 appeared to start with 2 connections when the network was genuinely empty | `follow()` checks for a duplicate edge but **never that the followee exists** — it inserts whatever integer it is handed. Two agents both followed hallucinated id `12345` | Validate the target in `TimelinePlatform.follow/unfollow/mute`; `analyze.py` segregates phantom edges instead of counting them | Gordon asking how anyone was connected at round 0 |
-| B-3 | Ours — `run_simulation.py` | `final_counts` all `None`, `action_tally` returned `Cannot operate on a closed cursor` | Both were computed *after* `env.close()`, which closes the DB cursor (`platform.py:143-144` on `ActionType.EXIT`) | Read them inside the `try`, before `close()` | R-4 (stage 1) |
+#### B-8
+
+**Where.** Ours, `timeline_platform.update_rec_table`
+
+**Symptom.** `--recsys reddit` produced results indistinguishable from `--recsys
+twhin-bert` — because it *was* TWHIN. The intended hot-score-vs-interest comparison was
+silently TWHIN against itself
+
+**Cause.** The override reimplemented ranking but never branched on `self.recsys_type`,
+so the flag was accepted and ignored
+
+**Fix.** Branch on `recsys_type` (now `timeline_platform.py:330` and `:489`). **R-9 was
+killed and its data deleted** rather than reported
+
+**Found by.** Noticing two "different" algorithms gave identical candidate pools
+
+#### B-9
+
+**Where.** Upstream `oasis/environment/env.py:197-198`
+
+**Symptom.** `created_at` stayed `0` for every post in non-Twitter runs, so recency
+ranking had no signal and round boundaries could not be recovered from the clock
+
+**Cause.** `self.platform.sandbox_clock.time_step += 1` is guarded by `if
+self.platform_type == DefaultPlatformType.TWITTER`, so the clock never advances on any
+other platform type
+
+**Fix.** Do not depend on the sandbox clock. `round_boundary` is written directly by our
+own instrumentation, and `created_at` is stamped from the round number we control
+
+**Found by.** Round-0 posts and round-14 posts carrying the same timestamp
+
+#### B-1
+
+**Where.** Upstream `process_recsys_posts.py:33`
+
+**Symptom.** Embedding space differs on every process launch; runs not reproducible
+
+**Cause.** `outputs.pooler_output` reads a pooler whose weights TwHIN-BERT's checkpoint
+does not contain, so they are randomly re-initialized at every load
+
+**Fix.** Mean-pool `last_hidden_state` instead (D-13)
+
+**Found by.** Stage 0 probe, cross-process fingerprint
+
+#### B-2
+
+**Where.** Same line
+
+**Symptom.** Interest-based ranking is barely discriminative — one process produced a
+within-vs-across-topic margin of `+0.0008`, i.e. noise
+
+**Cause.** `tanh` saturation on a random projection compresses all cosines into
+~0.88-0.97
+
+**Fix.** Same fix (D-13)
+
+**Found by.** Stage 0 probe, 2-topic margin test
+
+#### B-4
+
+**Where.** Ours — `analyze.py`
+
+**Symptom.** Agents showed `engagement_rate 0.0` and `acted on: []` despite having
+posted real comments — genuine engagement silently missing from the ledger
+
+**Cause.** Trace `info` payloads are **not uniform**: `create_comment` records only
+`comment_id` (no `post_id`), and `quote_post` records `quoted_id` as a **string**, which
+an `isinstance(..., int)` check rejects
+
+**Fix.** Numeric-string coercion + a `comment_id -> post_id` lookup via the comment
+table
+
+**Found by.** R-6 analysis: comment counts and "acted on" disagreed
+
+#### B-5
+
+**Where.** Ours — `make_graph.py`
+
+**Symptom.** Usernames rendered as `millerhospitaliâ€¦`; table text illegibly
+low-contrast
+
+**Cause.** The HTML template is a **non-raw** Python string, so `\\u2013`-style escapes
+were decoded into literal non-ASCII before ever reaching the file, and mojibake appeared
+wherever charset was not guaranteed. Separately, `td` inherited its colour through the
+table instead of taking a token
+
+**Fix.** Emit pure ASCII (HTML entities); set `td { color: var(--fg) }` explicitly
+
+**Found by.** Browser verification before publishing
+
+#### B-6
+
+**Where.** Upstream `platform.py:905` + our `analyze.py`
+
+**Symptom.** Every `follow` was unattributed — the interaction ledger could not say who
+was followed
+
+**Cause.** `follow` records only `{"follow_id": ...}`; the followee appears **nowhere**
+in the payload. Surveyed all relational actions and found each uses a different key:
+`unfollow`→`followee_id`, `mute`→`mutee_id`, `repost`→`reposted_id`, comment
+actions→`comment_id` only
+
+**Fix.** Recover followee via the follow table; add the other keys; generalise the
+comment lookup
+
+**Found by.** `test_instrumentation.py` TEST 2
+
+#### B-7
+
+**Where.** Ours — `timeline_agent.py`
+
+**Symptom.** Agents were *always* told "you do not follow anyone yet", even holding
+follow edges; authors rendered as bare `agentN`
+
+**Cause.** Keyed on `self.agent_id`, which is **camel's UUID**; the integer is
+`social_agent_id` (`agent.py:71`). Every lookup silently matched nothing. Separately,
+`sign_up` leaves `user_name` NULL and puts the handle in `name`
+
+**Fix.** Use `social_agent_id`; `COALESCE(user_name, name)`
+
+**Found by.** Reading the rendered prompt in the promptcheck run
+
+#### B-12
+
+**Where.** Upstream `platform_utils.py:85-157`
+
+**Symptom.** **A single quoted post anywhere in a feed blanks that agent's entire
+feed.** This is the root cause behind B-11's symptom
+
+**Cause.** `_add_comments_to_posts` assigns `num_reports` in the `repost` and `common`
+branches but **not** in the `quote` branch, then reads it unconditionally at `:157` →
+`UnboundLocalError`, which upstream's bare `except` swallowed
+
+**Fix.** `_ResilientPlatformUtils` mixin: on failure, retry the batch post-by-post so
+one unrenderable post costs only itself; unrenderable posts are still rendered from the
+row already held, since dropping them would bias recorded exposure
+
+**Found by.** The B-11 logging, within minutes of the v5 run starting
+
+#### B-11
+
+**Where.** Ours + upstream pattern — `refresh()`
+
+**Symptom.** Six agents ended round 14 of R-12 with no feed despite having 30 ranked
+candidates waiting, and nothing anywhere said why
+
+**Cause.** `refresh()` wrapped its whole body in `except Exception: return {"success":
+False}`, so any failure produced a missing feed with **no signal at all**. Refresh
+traces totalled 476 against ~540 expected
+
+**Fix.** Log the exception and count it; count legitimate empty feeds (round 0,
+own-posts-only) separately so the two cannot be confused
+
+**Found by.** Investigating the six missing feeds
+
+#### B-10
+
+**Where.** Upstream `platform.py:868-890`
+
+**Symptom.** Agents "followed" people who do not exist; round 0 appeared to start with 2
+connections when the network was genuinely empty
+
+**Cause.** `follow()` checks for a duplicate edge but **never that the followee exists**
+— it inserts whatever integer it is handed. Two agents both followed hallucinated id
+`12345`
+
+**Fix.** Validate the target in `TimelinePlatform.follow/unfollow/mute`; `analyze.py`
+segregates phantom edges instead of counting them
+
+**Found by.** Gordon asking how anyone was connected at round 0
+
+#### B-3
+
+**Where.** Ours — `run_simulation.py`
+
+**Symptom.** `final_counts` all `None`, `action_tally` returned `Cannot operate on a
+closed cursor`
+
+**Cause.** Both were computed *after* `env.close()`, which closes the DB cursor
+(`platform.py:143-144` on `ActionType.EXIT`)
+
+**Fix.** Read them inside the `try`, before `close()`
+
+**Found by.** R-4 (stage 1)
+
 
 ### B-1 / B-2 in detail
 
@@ -1215,20 +2021,129 @@ a check that can pass by luck is not a gate.
 **Still genuinely open (as of 2026-08-31) — the rest of this table is answered
 history, kept for the record.**
 
-| # | Question | Status |
-|---|---|---|
-| Q-10 | **Is F-38's anti-predictive similarity actually a recency effect?** | **Answered — and F-38 is retracted.** Not a confound but a mislabelled variable: F-38 modelled `sim * recency`, not cosine. Cosine alone is null (OR 1.544, p=0.38); the negative coefficient was recency, and recency in turn is repeat exposure. See F-42, F-43 |
-| Q-15 | **Does repeat exposure (F-43) survive a designed test?** Prior sightings are an outcome of the ranker, not randomised, so the current estimate is observational. A run that deliberately re-injects a fixed set of posts at controlled intervals would settle it | **Open.** The most valuable single run this setup could still do: the effect is large (OR 2.3) so it needs far less power than the prompt interventions that failed in F-35 |
-| Q-11 | Why do 14 of the 21 available actions never fire? No `dislike`, `unfollow`, `mute`, `report`, `search` or `trend` in any run. `test_actions.py` proves they work mechanically, so it is a model choice — but an unexplained one | **Open.** Limits any claim that the action surface is exercised |
-| Q-12 | F-24: ~32% of posts echo the author's own bio. Is that persona-anchoring, or the 8B model's limited generation? | **Open.** Per F-35, do **not** attack this with prompt tweaks at n=36 — the noise floor makes it unmeasurable |
-| Q-13 | Does the `fof` effect (F-37) survive a properly powered test? It is significant pooled but in only 1 of 4 runs individually | **Open.** Would need either more runs or the F-36 follow-targeted design |
-| Q-14 | Is the F-35 noise floor itself stable? It rests on one replicate pair, though it landed within 0.4 pp of an independent estimate | **Open, low priority.** A second replicate would confirm it; the machine time is probably better spent on Q-13 |
-| Q-1 | Does TwHIN-BERT download and embed acceptably on CPU? | **Answered.** Yes — 279M params, loads in ~25s, embeds 4 texts in ~0.1s. But only usable with the D-13 mean-pooling fix; as shipped it is non-deterministic and near-non-discriminative (B-1/B-2) |
-| Q-6 | How much does the D-13 mean-pooling deviation change results vs. upstream-exact? | Measurable via the comparison flag once the engine runs |
-| Q-9 | Can the malformed-call rate (F-15) be reduced by stating each action's exact signature in the guidance rather than a prose list? 10 lost follows in 5 rounds is a material undercount of intent | Open — prompt-content change, testable as an A/B |
-| Q-8 | Why do agents post but rarely like or follow? Note the prompt's closing line reads "Do not limit your action in just `like` to like posts" (`agent_environment.py:51-53`) — awkward enough that an 8B model may read it as an instruction *against* liking | Open; testable by rewording prompt content only, which D-2 permits |
-| Q-7 | Is a `+0.0475` within-vs-across margin enough dynamic range for personalization to visibly shape feeds, once multiplied by recency decay? | Stage 3 — recency may dominate content similarity |
-| Q-2 | Does the 27-action set degrade 8B tool-calling vs. Sim 1's ~32/36 baseline? | **Answered: yes, badly.** 0.469 with 27 actions vs 0.812 with 22. Cause was not tool count alone but the group-chat prompt hijack (F-14). Resolved by D-14 |
-| Q-3 | Do agents actually form follows, given they see only counts and never identities (F-11)? | **Partially.** Exactly 1 follow in 32 agent-turns (R-6) — non-zero, so it is possible, but far too sparse for a meaningful before/after graph. The likeliest cause is F-11: agents are told only *how many* people they follow, never *who*, so a follow target must be inferred from author ids in the feed. Open, and now the build's main question |
-| Q-4 | Do 2-member groups (de-facto DMs) emerge at all (D-7)? | **Yes, but at a cost.** R-5 produced 2 groups, 3 members and 6 group messages unprompted — so they do emerge. But the same actions suppress feed engagement (F-14/D-14), so studying DMs and studying timelines are in direct tension on an 8B model. Reported, not engineered around |
-| Q-5 | Does F-12's index-base conflict affect TWHIN, leaving any agent with an empty feed? | **Answered: no.** Every agent received a non-empty feed in R-4 and R-6. Avoided by keying on `agent_id` explicitly (F-13) rather than reproducing upstream's positional indexing |
+#### Q-10 — Is F-38's anti-predictive similarity actually a recency effect?
+
+
+**Status.** **Answered — and F-38 is retracted.** Not a confound but a mislabelled
+variable: F-38 modelled `sim * recency`, not cosine. Cosine alone is null (OR 1.544,
+p=0.38); the negative coefficient was recency, and recency in turn is repeat exposure.
+See F-42, F-43
+
+#### Q-15 — Does repeat exposure (F-43) survive a designed test?
+
+**Question.** Prior sightings are an outcome of the ranker, not randomised, so the
+current estimate is observational. A run that deliberately re-injects a fixed set of
+posts at controlled intervals would settle it
+
+
+**Status.** **Open.** The most valuable single run this setup could still do: the effect
+is large (OR 2.3) so it needs far less power than the prompt interventions that failed
+in F-35
+
+#### Q-11
+
+**Question.** Why do 14 of the 21 available actions never fire? No `dislike`,
+`unfollow`, `mute`, `report`, `search` or `trend` in any run. `test_actions.py` proves
+they work mechanically, so it is a model choice — but an unexplained one
+
+**Status.** **Open.** Limits any claim that the action surface is exercised
+
+#### Q-12
+
+**Question.** F-24: ~32% of posts echo the author's own bio. Is that persona-anchoring,
+or the 8B model's limited generation?
+
+**Status.** **Open.** Per F-35, do **not** attack this with prompt tweaks at n=36 — the
+noise floor makes it unmeasurable
+
+#### Q-13
+
+**Question.** Does the `fof` effect (F-37) survive a properly powered test? It is
+significant pooled but in only 1 of 4 runs individually
+
+**Status.** **Open.** Would need either more runs or the F-36 follow-targeted design
+
+#### Q-14
+
+**Question.** Is the F-35 noise floor itself stable? It rests on one replicate pair,
+though it landed within 0.4 pp of an independent estimate
+
+**Status.** **Open, low priority.** A second replicate would confirm it; the machine
+time is probably better spent on Q-13
+
+#### Q-1
+
+**Question.** Does TwHIN-BERT download and embed acceptably on CPU?
+
+**Status.** **Answered.** Yes — 279M params, loads in ~25s, embeds 4 texts in ~0.1s. But
+only usable with the D-13 mean-pooling fix; as shipped it is non-deterministic and
+near-non-discriminative (B-1/B-2)
+
+#### Q-6
+
+**Question.** How much does the D-13 mean-pooling deviation change results vs.
+upstream-exact?
+
+**Status.** Measurable via the comparison flag once the engine runs
+
+#### Q-9
+
+**Question.** Can the malformed-call rate (F-15) be reduced by stating each action's
+exact signature in the guidance rather than a prose list? 10 lost follows in 5 rounds is
+a material undercount of intent
+
+**Status.** Open — prompt-content change, testable as an A/B
+
+#### Q-8
+
+**Question.** Why do agents post but rarely like or follow? Note the prompt's closing
+line reads "Do not limit your action in just `like` to like posts"
+(`agent_environment.py:51-53`) — awkward enough that an 8B model may read it as an
+instruction *against* liking
+
+**Status.** Open; testable by rewording prompt content only, which D-2 permits
+
+#### Q-7
+
+**Question.** Is a `+0.0475` within-vs-across margin enough dynamic range for
+personalization to visibly shape feeds, once multiplied by recency decay?
+
+**Status.** Stage 3 — recency may dominate content similarity
+
+#### Q-2
+
+**Question.** Does the 27-action set degrade 8B tool-calling vs. Sim 1's ~32/36
+baseline?
+
+**Status.** **Answered: yes, badly.** 0.469 with 27 actions vs 0.812 with 22. Cause was
+not tool count alone but the group-chat prompt hijack (F-14). Resolved by D-14
+
+#### Q-3
+
+**Question.** Do agents actually form follows, given they see only counts and never
+identities (F-11)?
+
+**Status.** **Partially.** Exactly 1 follow in 32 agent-turns (R-6) — non-zero, so it is
+possible, but far too sparse for a meaningful before/after graph. The likeliest cause is
+F-11: agents are told only *how many* people they follow, never *who*, so a follow
+target must be inferred from author ids in the feed. Open, and now the build's main
+question
+
+#### Q-4
+
+**Question.** Do 2-member groups (de-facto DMs) emerge at all (D-7)?
+
+**Status.** **Yes, but at a cost.** R-5 produced 2 groups, 3 members and 6 group
+messages unprompted — so they do emerge. But the same actions suppress feed engagement
+(F-14/D-14), so studying DMs and studying timelines are in direct tension on an 8B
+model. Reported, not engineered around
+
+#### Q-5
+
+**Question.** Does F-12's index-base conflict affect TWHIN, leaving any agent with an
+empty feed?
+
+**Status.** **Answered: no.** Every agent received a non-empty feed in R-4 and R-6.
+Avoided by keying on `agent_id` explicitly (F-13) rather than reproducing upstream's
+positional indexing
+

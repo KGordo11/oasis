@@ -208,6 +208,15 @@ HTML = """<title>Agent Network Formation</title>
              font-family:"IBM Plex Mono", monospace; }
   .quote { border-left:2px solid var(--line); padding-left:12px;
            color:var(--fg); font-size:13.5px; margin:6px 0; }
+  /* Posts stack flush; only replies indent, and only by one step. */
+  #postList { display:flex; flex-direction:column; gap:12px; }
+  #postList .card.post { margin:0; }
+  .thread { margin:12px 0 2px 6px; padding-left:16px;
+            border-left:2px solid var(--accent, var(--line));
+            display:flex; flex-direction:column; gap:12px; }
+  .reply .rhead { font-family:"IBM Plex Mono", monospace; font-size:12.5px;
+                  color:var(--muted); margin-bottom:3px; }
+  .reply .rbody { font-size:13.5px; color:var(--fg); }
   .meta { color:var(--muted); font-size:12.5px;
           font-family:"IBM Plex Mono", monospace; }
   .runbar { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
@@ -1105,24 +1114,42 @@ function postList() {
     (byPost[c.post] = byPost[c.post] || []).push(c);
   });
 
+  const uname = id => '@' + esc((byId[id] || {}).username || id);
+
+  // Top-level posts sit flush in document order. Comments are nested inside
+  // the card of the post they reply to, indented once -- never twice, and
+  // never cumulatively. (Before this, the card div was never closed, so each
+  // post rendered INSIDE its predecessor and the whole list staircased right.)
   document.getElementById('postList').innerHTML =
     Object.values(DATA.posts).sort((a, b) => a.id - b.id).map(p => {
       const r = [...(reach[p.id] || [])];
       const e = eng[p.id] || [];
-      const th = byPost[p.id] || [];
-      return `<div class="card"><h3>#${p.id} by @${esc((byId[p.author]||{}).username || p.author)}` +
+      const th = (byPost[p.id] || []).slice().sort((a, b) => a.id - b.id);
+
+      const replies = th.length
+        ? `<div class="thread">` + th.map(c =>
+            `<div class="reply">` +
+              `<div class="rhead">&#8627; #${c.id} ${uname(c.author)} replied` +
+              (c.round !== undefined && c.round !== null
+                ? ` <span class="meta">round ${c.round}</span>` : '') +
+              `</div>` +
+              `<div class="rbody">${esc(c.content)}</div>` +
+            `</div>`).join('') + `</div>`
+        : '';
+
+      return `<article class="card post">` +
+        `<h3>#${p.id} by ${uname(p.author)}` +
         ` <span class="meta">round ${p.round} &middot; ${p.likes} likes &middot; ` +
-        `${p.dislikes} dislikes &middot; ${p.shares} shares</span></h3>` +
+        `${p.dislikes} dislikes &middot; ${p.shares} shares &middot; ` +
+        `${th.length} ${th.length === 1 ? 'reply' : 'replies'}</span></h3>` +
         `<div class="quote">${esc(p.content)}</div>` +
         `<div class="meta">shown to ${r.length} agents: ${
-          r.map(x => '@' + esc((byId[x]||{}).username || x)).join(', ') || 'nobody'}</div>` +
+          r.map(uname).join(', ') || 'nobody'}</div>` +
         `<div class="meta">engagement: ${
-          e.length ? e.map(([who, act]) =>
-            '@' + esc((byId[who]||{}).username || who) + ' ' + esc(act)).join('; ')
+          e.length ? e.map(([who, act]) => uname(who) + ' ' + esc(act)).join('; ')
           : 'none'}</div>` +
-        (th.length ? `<div class="meta">replies:</div>` + th.map(c =>
-          `<div class="quote">@${esc((byId[c.author]||{}).username || c.author)}: ${esc(c.content)}</div>`
-        ).join('') : '');
+        replies +
+        `</article>`;
     }).join('');
 }
 
@@ -1289,7 +1316,7 @@ def project(analysis_path, manifest_path=None):
 
     comments = {str(cid): {
         "id": cid, "post": cc["post_id"], "author": cc["user_id"],
-        "content": cc["content"],
+        "content": cc["content"], "round": cc.get("created_at"),
     } for cid, cc in (full.get("comments") or {}).items()}
 
     events = [[e["round"], e["agent_id"], e["action"], e.get("post_id"),

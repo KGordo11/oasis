@@ -25,9 +25,8 @@ build without having to ask a question or guess at a rationale.
 
 *Last updated 2026-09-01. Update this section at the end of every working session.*
 
-**Branch `social-timeline-sim`. HEAD is still the F-40/F-41 commit — the F-42/F-43
-work (`recency_check.py`, the `exposure_model.py` relabel, this section) is
-UNCOMMITTED in the working tree. Nothing is mid-flight; no run is in progress.**
+**Branch `social-timeline-sim`. HEAD is the F-42/F-43 commit (`e2d9cc3`). Working
+tree clean, NOT yet pushed to `origin`. Nothing is mid-flight; no run in progress.**
 
 ### The three results
 
@@ -53,8 +52,9 @@ UNCOMMITTED in the working tree. Nothing is mid-flight; no run is in progress.**
 cosine)", is wrong and is retracted by F-42.** The variable was
 `rec_history.score` = `sim * recency`, not cosine. Cosine alone is **null**:
 OR 1.544 [0.588, 4.054], p=0.38. The correct statement is *similarity has no
-detectable effect*. The write-up artifact still carries the old claim and
-**must be corrected before it is shown to anyone**.
+detectable effect*. **The write-up artifact was corrected on 2026-09-01** — section 03 now carries the
+retraction, section 04 the repeat-exposure result, and the forest plot shows
+similarity in neutral grey spanning the null line.
 
 ### Done
 
@@ -72,11 +72,10 @@ detectable effect*. The write-up artifact still carries the old claim and
 
 | # | Task | Cost | Why |
 |---|---|---|---|
-| 1 | **Correct the write-up artifact** — it still states the retracted F-38 | ~20 min, no run | It is the professor-facing deliverable and currently carries a claim known to be false |
-| 2 | **A designed repeat-exposure run** (Q-15): re-inject a fixed set of posts at controlled intervals | ~1 run (1.75 h) | F-43 is the largest effect in the project (OR 2.3) and the only one cheap enough to test properly. Prior sightings are currently an outcome of the ranker, not randomised |
-| 3 | Optional: a `follow`-targeted designed experiment | ~1 run | F-36 — `follow` has ICC 0.000, ~35 agent-pairs for 5 pp |
-| 4 | Open, unexplained: 14 of 21 actions never fire | unscoped | Limits any claim about the action surface being exercised |
-| 5 | Open, unexplained: F-24, ~32% of posts echo the author's own bio | unscoped | Per F-35 do **not** attack it with prompt tweaks |
+| 1 | **A designed repeat-exposure run** (Q-15): re-inject a fixed set of posts at controlled intervals | ~1 run (2 h) | F-43 is the largest effect in the project (OR 2.3) and the only one cheap enough to test properly. Prior sightings are currently an outcome of the ranker, not randomised |
+| 2 | Optional: a `follow`-targeted designed experiment | ~1 run | F-36 — `follow` has ICC 0.000, ~35 agent-pairs for 5 pp |
+| 3 | Open, unexplained: 14 of 21 actions never fire | unscoped | Limits any claim about the action surface being exercised |
+| 4 | Open, unexplained: F-24, ~32% of posts echo the author's own bio | unscoped | Per F-35 do **not** attack it with prompt tweaks |
 
 **Do not** run another prompt-intervention experiment at 36 agents. F-35 shows it
 cannot resolve anything. Judge any future change against **baseline**, never
@@ -85,7 +84,8 @@ reported automatically.
 
 ### Deliverables
 
-- Write-up for the professor: https://claude.ai/code/artifact/55d7c5a5-4a69-406c-bc4f-8f14a94f710b
+- Write-up for the professor (corrected 2026-09-01): https://claude.ai/code/artifact/55d7c5a5-4a69-406c-bc4f-8f14a94f710b
+- Field guide — step-by-step explainer of the whole build: https://claude.ai/code/artifact/b878972f-ab95-4d0c-ba12-e1b1684467ba
 - 9-run data explorer: https://claude.ai/code/artifact/732d1879-2f3b-49fe-83f6-0cf4b55c87c3
 - `data/social_timeline_exposure_model.txt` — the engagement analysis
 - `data/social_timeline_noise_floor.txt` — the replicate/noise-floor analysis

@@ -1,0 +1,187 @@
+==============================================================================
+Q-10: IS F-38'S ANTI-PREDICTIVE 'SIMILARITY' A RECENCY EFFECT?
+==============================================================================
+runs             : 5  (baseline, v10_register, v10_replicate, v8_full, v9_feedback)
+discovery rows   : 20822 with sim, recency and score all present
+agents (clusters): 180
+engaged          : 636
+
+The variable F-38 called 'similarity' is rec_history.score, which is
+sim * recency (timeline_platform.py:365, 699-701) -- not cosine.
+
+------------------------------------------------------------------------------
+1. CONTROL: F-38 REPRODUCED ON `score`
+   Should match the published OR 0.305 [0.164, 0.568]. If it does,
+   every difference below is the decomposition and not the pipeline.
+------------------------------------------------------------------------------
+    score          OR  0.305  95% CI [ 0.164,  0.568]  p=0.000185
+    feed_slot      OR  0.927  95% CI [ 0.895,  0.961]  p=2.98e-05
+
+------------------------------------------------------------------------------
+2. THE CONFOUND Q-10 HYPOTHESISED: ARE SIMILAR POSTS OLDER?
+------------------------------------------------------------------------------
+  corr(sim, recency)   +0.051
+  corr(sim, score)     +0.706
+  corr(recency, score) +0.731
+
+  sim      range 0.212 - 0.996   mean 0.798  sd 0.150
+  recency  range 0.000001 - 0.931   mean 0.857  sd 0.167  (10 distinct values)
+  score    range 0.000000 - 0.927   mean 0.685  sd 0.190
+
+  mean cosine within each recency level:
+    recency  0.000001  n=   304  mean sim 0.814
+    recency  0.089109  n=   127  mean sim 0.764
+    recency  0.241952  n=   161  mean sim 0.749
+    recency  0.374502  n=   214  mean sim 0.775
+    recency  0.491520  n=   295  mean sim 0.772
+    recency  0.596269  n=   471  mean sim 0.783
+    recency  0.691078  n=   727  mean sim 0.774
+    recency  0.777672  n=  1383  mean sim 0.782
+    recency  0.857361  n=  3502  mean sim 0.775
+    recency  0.931166  n= 13638  mean sim 0.809
+
+------------------------------------------------------------------------------
+3. ASSUMPTION-FREE: ENGAGEMENT BY COSINE, AND BY RECENCY
+------------------------------------------------------------------------------
+  by cosine decile (this is the variable F-38 claimed to describe):
+    d1  sim 0.212-0.563    48/2082  =  2.31%
+    d2  sim 0.563-0.743    57/2082  =  2.74%
+    d3  sim 0.743-0.800    68/2081  =  3.27%
+    d4  sim 0.800-0.831    75/2083  =  3.60%
+    d5  sim 0.831-0.853    67/2083  =  3.22%
+    d6  sim 0.853-0.869    49/2082  =  2.35%
+    d7  sim 0.869-0.883    61/2081  =  2.93%
+    d8  sim 0.883-0.897    61/2083  =  2.93%
+    d9  sim 0.897-0.912    75/2081  =  3.60%
+    d10 sim 0.912-0.996    75/2084  =  3.60%
+
+  by recency level (deterministic in post age, so these are age bins;
+  1e-06 is the clamp floor for posts past the age cliff):
+    recency  0.000001    21/304   =  6.91%
+    recency  0.089109     5/127   =  3.94%
+    recency  0.241952    13/161   =  8.07%
+    recency  0.374502    12/214   =  5.61%
+    recency  0.491520    12/295   =  4.07%
+    recency  0.596269    24/471   =  5.10%
+    recency  0.691078    36/727   =  4.95%
+    recency  0.777672    65/1383  =  4.70%
+    recency  0.857361   134/3502  =  3.83%
+    recency  0.931166   314/13638 =  2.30%
+
+  by blended-score decile (F-38's published table, for comparison):
+    d1  score 0.000-0.387    82/2082  =  3.94%
+    d2  score 0.387-0.560    75/2082  =  3.60%
+    d3  score 0.560-0.667    73/2082  =  3.51%
+    d4  score 0.667-0.722    71/2082  =  3.41%
+    d5  score 0.722-0.759    54/2083  =  2.59%
+    d6  score 0.759-0.787    76/2082  =  3.65%
+    d7  score 0.787-0.808    46/2082  =  2.21%
+    d8  score 0.808-0.824    53/2082  =  2.55%
+    d9  score 0.824-0.840    44/2082  =  2.11%
+    d10 score 0.840-0.927    62/2083  =  2.98%
+
+------------------------------------------------------------------------------
+4. THE TERMS PULLED APART (cluster-robust logit, clustered by agent)
+------------------------------------------------------------------------------
+  cosine alone:
+    sim            OR  1.544  95% CI [ 0.588,  4.054]  p=0.378
+    feed_slot      OR  0.952  95% CI [ 0.921,  0.985]  p=0.0042
+  recency alone:
+    recency        OR  0.176  95% CI [ 0.103,  0.300]  p=1.67e-10
+    feed_slot      OR  0.920  95% CI [ 0.887,  0.954]  p=5.41e-06
+  both together:
+    sim            OR  1.568  95% CI [ 0.607,  4.048]  p=0.353
+    recency        OR  0.176  95% CI [ 0.104,  0.299]  p=1.15e-10
+    feed_slot      OR  0.923  95% CI [ 0.889,  0.958]  p=2.42e-05
+
+------------------------------------------------------------------------------
+5. COSINE WITHIN EACH RECENCY LEVEL
+   Recency held fixed by stratification rather than functional form.
+   A level needs both variation in cosine and some engagement to be
+   informative; the rest are reported as uninformative, not dropped
+   silently.
+------------------------------------------------------------------------------
+  recency  0.000001  n=   304  acted=21   sim OR   1.459  [ 0.018, 120.185]  p=0.867
+  recency  0.089109  n=   127  acted=5    -- too thin to fit
+  recency  0.241952  n=   161  acted=13   -- too thin to fit
+  recency  0.374502  n=   214  acted=12   sim OR   0.229  [ 0.010,   5.119]  p=0.352
+  recency  0.491520  n=   295  acted=12   sim OR  11.241  [ 0.287, 440.655]  p=0.196
+  recency  0.596269  n=   471  acted=24   sim OR   0.485  [ 0.070,   3.374]  p=0.465
+  recency  0.691078  n=   727  acted=36   sim OR   3.022  [ 0.284,  32.218]  p=0.36
+  recency  0.777672  n=  1383  acted=65   sim OR   2.757  [ 0.866,   8.781]  p=0.0861
+  recency  0.857361  n=  3502  acted=134  sim OR   3.651  [ 1.186,  11.236]  p=0.024
+  recency  0.931166  n= 13638  acted=314  sim OR   0.882  [ 0.318,   2.444]  p=0.809
+
+------------------------------------------------------------------------------
+6. IS THE RECENCY EFFECT ITSELF JUST A ROUND EFFECT?
+   A post can only be old in a late round, so post age is entangled
+   with round, and engagement varies by round. Stratifying on the
+   FEED (one agent, one round, one run, twelve posts seen at the same
+   instant) holds round, agent and run fixed by construction, exactly
+   as the tier estimate in exposure_model.py section 3 does.
+------------------------------------------------------------------------------
+  raw engagement rate by round (the thing that could confound it):
+    round   1    122/2160  =  5.65%
+    round   2     90/2020  =  4.46%
+    round   3     57/1881  =  3.03%
+    round   4     40/1715  =  2.33%
+    round   5     39/1603  =  2.43%
+    round   6     36/1521  =  2.37%
+    round   7     47/1440  =  3.26%
+    round   8     37/1367  =  2.71%
+    round   9     37/1304  =  2.84%
+    round  10     32/1260  =  2.54%
+    round  11     29/1199  =  2.42%
+    round  12     23/1160  =  1.98%
+    round  13     27/1115  =  2.42%
+    round  14     20/1077  =  1.86%
+
+  'fresh' = newest recency level (0.931166, age 0); 'stale' = every older level.
+    stale vs fresh, stratified by feed   OR  1.751  95% CI [ 1.384,  2.215]  p=3.04e-06  (1956 informative feeds)
+    stale vs fresh, stratified by agent  OR  1.177  95% CI [ 0.984,  1.409]  p=0.0752  (180 informative agents)
+
+  If the feed-stratified OR stays well above 1, older posts really do
+  draw more engagement than fresh ones seen in the same feed, and the
+  round cannot be the explanation. If it collapses toward 1, the
+  recency effect was a round effect.
+
+------------------------------------------------------------------------------
+7. THE MECHANISM: IT IS NOT AGE, IT IS REPEAT EXPOSURE
+   A post can only be old and still in a feed if it has been
+   circulating, which means the agent has probably already seen it.
+   Age and prior sightings are therefore almost the same variable.
+   `prior` counts earlier sightings of this (agent, post) across the
+   whole feed, not just this tier.
+------------------------------------------------------------------------------
+  fresh  n= 13638  mean prior sightings  0.00   first-sighting share 100.0%
+  stale  n=  7184  mean prior sightings  1.69   first-sighting share  19.4%
+
+  A fresh post is a first sighting by construction, so 'fresh vs
+  stale' was largely 'never seen before vs seen before'.
+
+  engagement by number of prior sightings (discovery):
+    prior=0    331/15032  =  2.20%
+    prior=1    138/3050   =  4.52%
+    prior=2     67/1127   =  5.94%
+    prior=3     46/676    =  6.80%
+    prior=4     30/409    =  7.33%
+    prior=5+    24/528    =  4.55%
+
+    seen-before vs first sighting, by feed  OR  2.321  [ 1.826,  2.951]  p=6.12e-12  (1658 strata, agent+round+run fixed by construction)
+    seen-before vs first sighting, by agent OR  1.505  [ 1.253,  1.806]  p=1.16e-05  (180 strata, agent fixed, pools across rounds)
+
+  The decisive test -- re-run stale vs fresh inside FIRST SIGHTINGS
+  only, where the repeat-exposure channel is closed by construction:
+    stale vs fresh | first sightings only  OR  0.551  [ 0.314,  0.969]  p=0.0386  (1023 feeds, n=15032)
+
+  Independent replication in the NETWORK tier, where the similarity
+  score plays no part in the feed at all:
+    seen-before vs first sighting, by feed  OR  1.801  [ 1.348,  2.406]  p=6.94e-05  (578 feeds, n=6396)
+
+  CAVEAT, and it is a real one: prior sightings are not randomly
+  assigned. A post is re-shown because the ranker kept choosing it,
+  so repeat-exposure status is an outcome of the same system whose
+  effect is being estimated. Feed stratification fixes the agent,
+  the round and the run, but not selection into being re-shown.
+  The dose-response and the network-tier replication are what make
+  the reading credible; neither makes it experimental.

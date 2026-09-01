@@ -23,45 +23,60 @@ build without having to ask a question or guess at a rationale.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-08-31. Update this section at the end of every working session.*
+*Last updated 2026-09-01. Update this section at the end of every working session.*
 
-**Branch `social-timeline-sim`, pushed to `origin`. HEAD is the F-40/F-41 commit.
-Working tree clean. Nothing is mid-flight; no run is in progress.**
+**Branch `social-timeline-sim`. HEAD is still the F-40/F-41 commit — the F-42/F-43
+work (`recency_check.py`, the `exposure_model.py` relabel, this section) is
+UNCOMMITTED in the working tree. Nothing is mid-flight; no run is in progress.**
 
-### The two results
+### The three results
 
-1. **Connection predicts engagement; content similarity does not** (F-37, F-38,
-   corrected by F-40, replicated by F-41). Holding agent *and* feed slot fixed:
-   `network` vs `discovery` **OR 3.54** [2.92, 4.29], significant in **5/5 runs**.
-   `fof` vs `discovery` **OR 1.97** [1.25, 3.11] but significant in only **1/4**
-   runs individually — **suggestive, not established**. The TwHIN similarity score
-   is mildly **anti**-predictive (OR 0.305 per unit cosine). An older, structurally
-   different feed builder independently replicates the main effect at **OR 5.00**
-   [3.83, 6.52].
-2. **The cross-run noise floor swamps every prompt intervention tried** (F-35,
-   F-36). Pure run-to-run SD for posting share is **30.7 pp**; the four
+1. **Connection predicts engagement; content does not** (F-37, F-40, F-41).
+   Holding agent *and* feed slot fixed: `network` vs `discovery` **OR 3.54**
+   [2.92, 4.29], significant in **5/5 runs**. `fof` vs `discovery` **OR 1.97**
+   [1.25, 3.11] but significant in only **1/4** runs individually —
+   **suggestive, not established**. Independently replicated under a
+   structurally different feed builder at **OR 5.00** [3.83, 6.52].
+2. **Repetition beats both content and freshness** (F-43, new). Engagement
+   rises monotonically with the number of times an agent has already seen a
+   post: **2.20% → 4.52% → 5.94% → 6.80% → 7.33%**. Within-feed, seen-before
+   vs first-sighting **OR 2.321** [1.826, 2.951], p=6.1e-12; replicated in the
+   network tier at **OR 1.801**. Observational, not randomised — see Q-15.
+3. **The cross-run noise floor swamps every prompt intervention tried**
+   (F-35, F-36). Pure run-to-run SD for posting share is **30.7 pp**; the four
    interventions moved it 3-5 pp against a detectable minimum of 14.3 pp. They
    were unfalsifiable at this scale, not merely unsupported.
+
+### RETRACTED — do not repeat this claim
+
+**F-38, "TwHIN similarity is anti-predictive of engagement (OR 0.305 per unit
+cosine)", is wrong and is retracted by F-42.** The variable was
+`rec_history.score` = `sim * recency`, not cosine. Cosine alone is **null**:
+OR 1.544 [0.588, 4.054], p=0.38. The correct statement is *similarity has no
+detectable effect*. The write-up artifact still carries the old claim and
+**must be corrected before it is shown to anyone**.
 
 ### Done
 
 - Instrumentation, three-tier feed, informed-action gate, 22-action surface.
 - 20 runs (see §7). 9 analysed runs in the data artifact.
 - `analyze.py` (per-run), `dossier.py` (~28k-line transcripts), `make_graph.py`
-  (artifact), `compare.py` (cross-run, paired), `exposure_model.py` (within-run).
+  (artifact), `compare.py` (cross-run, paired), `exposure_model.py`
+  (within-run), `recency_check.py` (the F-42/F-43 decomposition).
 - Test gates for all statistics: `test_compare.py` 16/16,
   `test_exposure_model.py` 12/12, plus `check_deps.py`, `test_actions.py`,
   `test_instrumentation.py`.
-- Findings F-1..F-41, bugs B-1..B-14, decisions D-1..D-14 — all recorded below.
+- Findings F-1..F-43, bugs B-1..B-14, decisions D-1..D-14 — all recorded below.
 
 ### Next, in priority order
 
 | # | Task | Cost | Why |
 |---|---|---|---|
-| 1 | **Rule out recency as the cause of F-38's anti-predictive similarity.** The ranker blends similarity with recency, so high-similarity posts may simply be older. If so the negative coefficient is a staleness effect misread as a similarity effect | ~10 min, no run | F-38 is the most surprising claim and the one most likely to be challenged. It currently has no mechanism |
-| 2 | Optional: a `follow`-targeted designed experiment | ~1 run (1.75 h) | F-36 — `follow` has ICC 0.000 and needs only ~35 agent-pairs for 5 pp, the only affordable designed experiment on this setup |
-| 3 | Open, unexplained: 14 of 21 actions never fire (no dislike/unfollow/mute/report/search/trend) | unscoped | Limits any claim about the action surface being exercised |
-| 4 | Open, unexplained: F-24, ~32% of posts echo the author's own bio | unscoped | Content-quality question; per F-35 do **not** attack it with prompt tweaks |
+| 1 | **Correct the write-up artifact** — it still states the retracted F-38 | ~20 min, no run | It is the professor-facing deliverable and currently carries a claim known to be false |
+| 2 | **A designed repeat-exposure run** (Q-15): re-inject a fixed set of posts at controlled intervals | ~1 run (1.75 h) | F-43 is the largest effect in the project (OR 2.3) and the only one cheap enough to test properly. Prior sightings are currently an outcome of the ranker, not randomised |
+| 3 | Optional: a `follow`-targeted designed experiment | ~1 run | F-36 — `follow` has ICC 0.000, ~35 agent-pairs for 5 pp |
+| 4 | Open, unexplained: 14 of 21 actions never fire | unscoped | Limits any claim about the action surface being exercised |
+| 5 | Open, unexplained: F-24, ~32% of posts echo the author's own bio | unscoped | Per F-35 do **not** attack it with prompt tweaks |
 
 **Do not** run another prompt-intervention experiment at 36 agents. F-35 shows it
 cannot resolve anything. Judge any future change against **baseline**, never
@@ -74,6 +89,7 @@ reported automatically.
 - 9-run data explorer: https://claude.ai/code/artifact/732d1879-2f3b-49fe-83f6-0cf4b55c87c3
 - `data/social_timeline_exposure_model.txt` — the engagement analysis
 - `data/social_timeline_noise_floor.txt` — the replicate/noise-floor analysis
+- `data/social_timeline_recency_check.txt` — the F-42/F-43 decomposition
 - `data/social_timeline_<label>_DOSSIER.txt` — per-round transcripts per run
 
 ---
@@ -312,6 +328,8 @@ Full detail with rationale lives in spec §2. Condensed index:
 | F-30 | **F-28's reword did not work, and four interventions have now failed.** Measured on v10 vs v9 over the same rounds (0-8): round-0 intro share 77%->60% (p=0.135, CI [-5.2, +39.5] pp) and corpus similarity 0.8285->0.8175 (CI [-0.015, +0.038]). **Neither reaches significance.** Together with F-21b (notifications), F-27 (reception block) and F-29 (echo chamber), four separate interventions have failed to move content quality. The convergent conclusion is that the vagueness is a capacity limit of `llama3.1:8b`, not a fixable property of the prompt or the feed. **Methodological caveat, stated because it nearly produced a false finding:** the first bootstrap resampled *pairs* and returned CI [+0.0089, +0.0132], "real". Pairwise cosines are not independent -- each post appears in ~150 pairs -- so resampling pairs understates uncertainty. Resampling *posts*, the correct unit, widened the CI to span zero. **Second caveat:** v10 changed the wording *and* temperature (0.7->0.9) together, so even a real effect could not have been attributed. Both errors are mine and both are the same error the log records at F-22 | Recorded as a negative result. Stop tuning the prompt for content quality; a larger model is the only remaining lever |
 | F-40 | **F-37's evidence base was overstated, its network result is robust, and its fof result is not.** Two corrections. (a) **Reporting error, mine:** the pooled header claimed "57,682 exposures, 13 runs". Eight of those runs predate the three-tier feed and label sources `following`/`recsys`/`both`, so they contributed **zero** to every tier contrast while still being counted in the denominator. The estimates were always computed on the right rows; only the headline was wrong. Correct base: **5 runs, 30,240 exposures, 2,520 feeds, 2,174 engagements (7.2%)**. (b) **Per-run heterogeneity:** `network` vs `discovery` is positive and individually significant in **5/5 runs** (baseline 5.77, v8 1.85, v9 8.67, v10 3.73, v10_replicate 3.04) -- direction fully consistent, magnitude spanning 4.7x. But `fof` vs `discovery` is individually significant in **only 1/4 runs** and its pooled significance is an artefact of pooling. **The fof contrast -- the one carrying the causal interpretation -- must be reported as suggestive, not established** | Header corrected in `exposure_model.py`; legacy runs now explicitly excluded and named. Per-run breakdown added as section 6 |
 | F-41 | **Independent replication under a different feed implementation.** The eight excluded runs are not useless: `following` (came from someone you follow) vs `recsys` (ranked in by similarity) is the same contrast built by an earlier, structurally different feed builder, at earlier prompt versions. Same stratified estimator, on strata sharing nothing with the main analysis: **full_twhin OR 4.79 [3.14, 7.32], full_twhin_v2 OR 5.14 [3.65, 7.22], pooled OR 5.00 [3.83, 6.52], p=1.8e-32, 222 strata.** A different feed builder reproduces the effect at comparable magnitude | The strongest evidence that F-37 is not an artefact of one feed implementation. Added as section 7 |
+| F-42 | **F-38 is wrong, and the error is a mislabelled variable, not a confound.** The regressor F-38 reported as "similarity ... per unit cosine" is `rec_history.score`, which is `sim * recency` (`timeline_platform.py:365` writes the product; `:699-701` copies it into the exposure row; `exposure_model.py:80` reads it and §5 of its output labels it "similarity"). The tell was visible in F-38's own decile table, whose bottom bin reads "sim 0.000-0.387" — raw cosine never falls below **0.198** in any run, but `recency` clamps to `RECENCY_FLOOR = 1e-6` past the age cliff (`timeline_platform.py:299-301`), driving the *product* to ~0 for stale posts however similar they are. Recovering `sim` and `recency` separately from `rec_candidates` and re-fitting F-38's exact specification (cluster-robust logit, clustered by agent, feed slot included; the control reproduces OR 0.305 [0.164, 0.568] to three decimals): **cosine alone OR 1.544 [0.588, 4.054], p=0.38 — null, and positive if anything.** The negative coefficient belonged entirely to the recency half: **recency alone OR 0.176 [0.103, 0.300], p=1.7e-10.** Cosine is also null inside every one of the 8 fittable recency levels (one nominal p=0.024 across 8 tests). **Retract "TwHIN similarity is anti-predictive." The supported claim is that similarity has no detectable effect on engagement** | Q-10 closed. The "connection beats content" headline is unaffected and if anything cleaner: content similarity does nothing, rather than doing something backwards. `recency_check.py`, `data/social_timeline_recency_check.txt` |
+| F-43 | **What the recency coefficient actually is: repeat exposure.** Taken at face value the recency term says older posts draw *more* engagement, which is backwards for a social feed and needed checking. It is not a round effect — raw engagement *falls* over rounds (5.65% in round 1 to 1.86% in round 14), so pooling would bias the estimate the other way, and stratifying on the feed (one agent, one round, one run — the F-37 identification) leaves **stale vs fresh OR 1.751 [1.384, 2.215], p=3.0e-06, 1956 feeds.** The mechanism is that age and prior sightings are nearly the same variable here: a fresh post is a first sighting **by construction** (100% of fresh exposures), while stale posts average **1.69** prior sightings and are first sightings only 19.4% of the time. Engagement rises monotonically with prior sightings — **2.20% → 4.52% → 5.94% → 6.80% → 7.33%** (0,1,2,3,4 priors) — and within-feed **seen-before vs first-sighting OR 2.321 [1.826, 2.951], p=6.1e-12.** Decisive test: inside first sightings only, where the repeat channel is closed by construction, the stale advantage **reverses** to **OR 0.551 [0.314, 0.969]**. Replicated independently in the **network** tier, where the similarity score plays no part in feed construction: **OR 1.801 [1.348, 2.406], p=6.9e-05.** **Caveat:** prior sightings are not randomly assigned — a post is re-shown because the ranker kept choosing it — so this is an observational reading supported by dose-response and replication, not an experiment | A third result alongside F-37 and F-35: **repetition drives engagement more than either content or freshness**. Also the mechanism F-38 was missing. Testable properly with a designed re-exposure run |
 | F-37 | **Connection predicts engagement; content similarity does not. This is the project's actual result.** Pooled over 13 analysed runs: **57,682 exposures, 5,345 feeds, 412 agent-runs, 6,834 engagements.** Crude rates network 18.6% / fof 11.5% / discovery 3.1%, but that is confounded by agent, round, run and feed position. **Identified estimate, Mantel-Haenszel stratified by (agent, feed slot) over slots 0-4 -- holding both the agent and the position in the feed fixed: network vs discovery OR 3.54 [2.92, 4.29] p=4e-38; fof vs discovery OR 1.97 [1.25, 3.11] p=.003; network vs fof OR 2.12 [1.42, 3.16].** Stratifying by feed only (position free) gives 11.07 and 4.11, so **roughly half the crude gap is the feed builder placing network posts at the top, and half is the tier itself.** **The `fof` contrast is the causal one**: friend-of-friend authors were selected by *other* agents' follows and never by the focal agent, so it carries no selection-on-affinity, whereas the network contrast is an upper bound that does. Unlike every cross-run comparison in this project, this sits far above any noise floor because it is a within-agent, within-slot contrast | The shield works. Reach flows through the graph, and it is not merely an artefact of network posts being shown first |
 | F-38 | **The TwHIN similarity score is mildly ANTI-predictive of engagement.** Tested inside the discovery tier only -- the score is present for 100% of discovery exposures but 28% of network and 43% of fof, so it is missing not at random and cannot sit in a model beside tier. On 20,822 scored discovery exposures, cluster-robust by agent: **similarity OR 0.305 [0.164, 0.568] per unit cosine, p<.001 -- in the wrong direction.** The assumption-free decile view agrees and is close to monotone: engagement falls **3.94% -> 3.60% -> 3.51% -> 3.41% -> 2.59% -> 3.65% -> 2.21% -> 2.55% -> 2.11% -> 2.98%** from least to most similar. So the ranking signal the recommender is built on does not select posts these agents engage with, and if anything slightly anti-selects. Consistent with F-29 (the corpus is uniformly homogeneous, mean pairwise 0.81, so the score has almost no real range to work with) | Major caveat on any personalisation claim. The graph carries the personalisation; the embedding does not |
 | F-39 | **Tier and feed position are structurally collinear, and a naive logit hides it.** The feed builder assigns network to slots 0-4, fof to 1-7, discovery to all 12. On the network-vs-discovery subset, slot dummies for 5-11 predict "not network" perfectly and the Hessian is **singular**. Fitting slot as one linear term conceals this and yields an unstable estimate: **dropping the fof rows moves the network OR from 1.76 to 5.52 with no change to the contrast being estimated.** The stratified estimator is reported instead because it conditions on the strata where the comparison actually exists and discards the rest rather than extrapolating into them | `exposure_model.py` reports no multivariable logit for tier and states why. `test_exposure_model.py` validates the MH estimator against known-answer data including a Simpson's-paradox case (crude 83% vs 17%, true OR 1, recovered 1.000) |
@@ -1196,7 +1214,8 @@ history, kept for the record.**
 
 | # | Question | Status |
 |---|---|---|
-| Q-10 | **Is F-38's anti-predictive similarity actually a recency effect?** The ranker blends similarity with recency, so high-similarity posts may systematically be older, and a staleness effect would be misread as a similarity effect. **This is the top open item** — F-38 is the most surprising claim in the write-up and currently has no mechanism | **Open.** ~10 minutes on existing data, no run needed |
+| Q-10 | **Is F-38's anti-predictive similarity actually a recency effect?** | **Answered — and F-38 is retracted.** Not a confound but a mislabelled variable: F-38 modelled `sim * recency`, not cosine. Cosine alone is null (OR 1.544, p=0.38); the negative coefficient was recency, and recency in turn is repeat exposure. See F-42, F-43 |
+| Q-15 | **Does repeat exposure (F-43) survive a designed test?** Prior sightings are an outcome of the ranker, not randomised, so the current estimate is observational. A run that deliberately re-injects a fixed set of posts at controlled intervals would settle it | **Open.** The most valuable single run this setup could still do: the effect is large (OR 2.3) so it needs far less power than the prompt interventions that failed in F-35 |
 | Q-11 | Why do 14 of the 21 available actions never fire? No `dislike`, `unfollow`, `mute`, `report`, `search` or `trend` in any run. `test_actions.py` proves they work mechanically, so it is a model choice — but an unexplained one | **Open.** Limits any claim that the action surface is exercised |
 | Q-12 | F-24: ~32% of posts echo the author's own bio. Is that persona-anchoring, or the 8B model's limited generation? | **Open.** Per F-35, do **not** attack this with prompt tweaks at n=36 — the noise floor makes it unmeasurable |
 | Q-13 | Does the `fof` effect (F-37) survive a properly powered test? It is significant pooled but in only 1 of 4 runs individually | **Open.** Would need either more runs or the F-36 follow-targeted design |

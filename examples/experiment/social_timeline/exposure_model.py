@@ -273,7 +273,7 @@ def render(all_rows, labels):
 
     add("")
     add("-" * 78)
-    add("5. DOES THE SIMILARITY SCORE PREDICT ANYTHING?")
+    add("5. DOES THE RANKING SCORE PREDICT ANYTHING?")
     add("   Tested inside the discovery tier only: the score is present for")
     add("   100% of discovery exposures but 28% of network and 43% of fof,")
     add("   so it is missing not at random and cannot sit beside tier.")
@@ -287,27 +287,31 @@ def render(all_rows, labels):
         g = [r["agent"] for r in disc]
         try:
             for row in logit_cluster(y, X, g,
-                                     ["intercept", "similarity", "feed_slot"]):
+                                     ["intercept", "rank_score", "feed_slot"]):
                 if row["name"] == "intercept":
                     continue
                 add(f"  {row['name']:<16} OR {row['or']:6.3f}"
                     f"  95% CI [{row['lo']:5.3f}, {row['hi']:5.3f}]"
                     f"  p={row['p']:.3f}")
             add("")
-            add("  similarity OR is per +1.00 cosine, i.e. the whole range.")
+            add("  NOTE (F-42): this variable is rec_history.score, which is")
+            add("  sim * recency (timeline_platform.py:365), NOT cosine. An")
+            add("  earlier version of this output labelled it 'similarity'")
+            add("  and that produced the retracted F-38. Cosine and recency")
+            add("  are decomposed in recency_check.py: cosine alone is null.")
         except Exception as exc:                      # noqa: BLE001
             add(f"  logit failed: {exc}")
         # decile view, robust to any functional form
         sc = np.array([r["score"] for r in disc], float)
         ac = np.array([r["acted"] for r in disc], float)
         add("")
-        add("  engagement by similarity decile (assumption-free view):")
+        add("  engagement by ranking-score decile (assumption-free view):")
         qs = np.quantile(sc, np.linspace(0, 1, 11))
         for i in range(10):
             lo, hi = qs[i], qs[i + 1]
             m = (sc >= lo) & (sc <= hi if i == 9 else sc < hi)
             if m.sum():
-                add(f"    d{i+1:<2} sim {lo:.3f}-{hi:.3f}"
+                add(f"    d{i+1:<2} score {lo:.3f}-{hi:.3f}"
                     f"  {int(ac[m].sum()):>4}/{int(m.sum()):<5}"
                     f" = {ac[m].mean()*100:5.2f}%")
     add("")

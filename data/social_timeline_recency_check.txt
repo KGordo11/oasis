@@ -178,6 +178,43 @@ sim * recency (timeline_platform.py:365, 699-701) -- not cosine.
   score plays no part in the feed at all:
     seen-before vs first sighting, by feed  OR  1.801  [ 1.348,  2.406]  p=6.94e-05  (578 feeds, n=6396)
 
+
+------------------------------------------------------------------------------
+8. ROBUSTNESS OF THE REPEAT-EXPOSURE RESULT
+   F-40's lesson: a pooled estimate must be shown run by run, or it
+   may be one unusual run wearing a confidence interval.
+------------------------------------------------------------------------------
+  per run, discovery tier, stratified by feed:
+    baseline        OR   2.76  [ 1.54,   4.93]  p=0.00061  significant=yes (340 strata)
+    v10_register    OR   2.32  [ 1.27,   4.24]  p=0.0061  significant=yes (301 strata)
+    v10_replicate   OR   2.60  [ 1.62,   4.19]  p=8.2e-05  significant=yes (346 strata)
+    v8_full         OR   2.46  [ 1.63,   3.70]  p=1.8e-05  significant=yes (378 strata)
+    v9_feedback     OR   0.89  [ 0.38,   2.11]  p=0.8  significant=NO  (293 strata)
+
+  by tier -- the score plays no part in network or fof construction:
+    network    n=  6396  OR  1.801  [1.348,  2.406]  p=6.9e-05
+    fof        n=  3022  OR  1.290  [0.805,  2.068]  p=0.29
+    discovery  n= 20822  OR  2.321  [1.826,  2.951]  p=6.1e-12
+
+  feed slot held fixed as well -- re-shown posts rank LOWER (mean slot
+  7.60 vs 6.40), so slot biases against this result, not for it:
+    stratified by (agent, slot)  OR  2.130  [1.700,  2.669]  p=4.9e-11  (1180 strata)
+
+  absolute scale, which the odds ratio overstates at a low base rate:
+    first sighting  2.20%   repeat  5.27%   difference 3.07 pp  (2.39x the raw rate)
+
+  the tail, with distinct posts behind each bin -- the apparent
+  turnover past 4 sightings rests on very few posts:
+    prior=0    331/15032  =  2.20% +/- 0.23pp  (1029 distinct posts)
+    prior=1    138/3050   =  4.52% +/- 0.74pp  (614 distinct posts)
+    prior=2     67/1127   =  5.94% +/- 1.38pp  (144 distinct posts)
+    prior=3     46/676    =  6.80% +/- 1.90pp  (85 distinct posts)
+    prior=4     30/409    =  7.33% +/- 2.53pp  (59 distinct posts)
+    prior=5     11/218    =  5.05% +/- 2.91pp  (35 distinct posts)
+    prior=6      6/148    =  4.05% +/- 3.18pp  (20 distinct posts)
+    prior=7      4/87     =  4.60% +/- 4.40pp  (12 distinct posts)
+    prior=8      2/60     =  3.33% +/- 4.54pp  (10 distinct posts)
+    prior=9+     1/15     =  6.67% +/-12.62pp  (4 distinct posts)
   CAVEAT, and it is a real one: prior sightings are not randomly
   assigned. A post is re-shown because the ranker kept choosing it,
   so repeat-exposure status is an outcome of the same system whose

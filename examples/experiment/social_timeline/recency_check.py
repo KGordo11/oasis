@@ -386,6 +386,68 @@ def render(rows, labels):
             f"  [{mn['lo']:6.3f}, {mn['hi']:6.3f}]  p={mn['p']:.3g}"
             f"  ({mn['strata']} feeds, n={len(net)})")
     add("")
+    add("")
+    add("-" * 78)
+    add("8. ROBUSTNESS OF THE REPEAT-EXPOSURE RESULT")
+    add("   F-40's lesson: a pooled estimate must be shown run by run, or it")
+    add("   may be one unusual run wearing a confidence interval.")
+    add("-" * 78)
+    add("  per run, discovery tier, stratified by feed:")
+    for lab in labels:
+        sel = [r for r in disc if r["run"] == lab]
+        if not sel:
+            continue
+        m = mantel_haenszel(
+            [{**r, "tier": "repeat" if r["prior"] >= 1 else "first"}
+             for r in sel], "repeat", "first", stratum="feed")
+        sig = "yes" if (m["hi"] < 1 or m["lo"] > 1) else "NO"
+        add(f"    {lab:<15} OR {m['or']:6.2f}  [{m['lo']:5.2f}, {m['hi']:6.2f}]"
+            f"  p={m['p']:.2g}  significant={sig:<3} ({m['strata']} strata)")
+    add("")
+    add("  by tier -- the score plays no part in network or fof construction:")
+    for tier in ("network", "fof", "discovery"):
+        sel = [{**r, "tier": "repeat" if r["prior"] >= 1 else "first"}
+               for r in rows if r["tier"] == tier]
+        if not sel:
+            continue
+        m = mantel_haenszel(sel, "repeat", "first", stratum="feed")
+        add(f"    {tier:<10} n={len(sel):>6}  OR {m['or']:6.3f}"
+            f"  [{m['lo']:5.3f}, {m['hi']:6.3f}]  p={m['p']:.2g}")
+    add("")
+    add("  feed slot held fixed as well -- re-shown posts rank LOWER (mean slot")
+    add("  7.60 vs 6.40), so slot biases against this result, not for it:")
+    rep_slot = [{**r, "tier": "repeat" if r["prior"] >= 1 else "first",
+                 "slot_stratum": f'{r["agent"]}|{r["pos"]}'} for r in disc]
+    m = mantel_haenszel(rep_slot, "repeat", "first", stratum="slot_stratum")
+    add(f"    stratified by (agent, slot)  OR {m['or']:6.3f}"
+        f"  [{m['lo']:5.3f}, {m['hi']:6.3f}]  p={m['p']:.2g}"
+        f"  ({m['strata']} strata)")
+    add("")
+    add("  absolute scale, which the odds ratio overstates at a low base rate:")
+    fst = [r for r in disc if r["prior"] == 0]
+    rpt = [r for r in disc if r["prior"] >= 1]
+    rf = sum(r["acted"] for r in fst) / len(fst) * 100
+    rr = sum(r["acted"] for r in rpt) / len(rpt) * 100
+    add(f"    first sighting {rf:5.2f}%   repeat {rr:5.2f}%   "
+        f"difference {rr - rf:4.2f} pp  ({rr / rf:.2f}x the raw rate)")
+    add("")
+    add("  the tail, with distinct posts behind each bin -- the apparent")
+    add("  turnover past 4 sightings rests on very few posts:")
+    seen_posts = defaultdict(set)
+    by9 = defaultdict(lambda: [0, 0])
+    for r in disc:
+        k = min(r["prior"], 9)
+        by9[k][0] += r["acted"]
+        by9[k][1] += 1
+        seen_posts[k].add((r["run"], r["post"]))
+    for k in sorted(by9):
+        a, n = by9[k]
+        rate = a / n
+        halfwidth = 1.96 * (rate * (1 - rate) / n) ** 0.5 * 100
+        add(f"    prior={('9+' if k >= 9 else str(k)):<3} {a:>4}/{n:<6} "
+            f"= {rate*100:5.2f}% +/-{halfwidth:5.2f}pp  "
+            f"({len(seen_posts[k])} distinct posts)")
+
     add("  CAVEAT, and it is a real one: prior sightings are not randomly")
     add("  assigned. A post is re-shown because the ranker kept choosing it,")
     add("  so repeat-exposure status is an outcome of the same system whose")

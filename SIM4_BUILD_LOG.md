@@ -234,7 +234,7 @@ scripted posts, no puppeted behavior. Directly per user instruction.
 
 **D-7 — Direct messages are not faked.**
 OASIS cannot express a targeted DM: `create_group` takes only a name and adds only its
-creator (`platform.py:1497-1527`); there is no recipient field anywhere in the schema.
+creator (`platform.py:1497-1527`); wasnthe there is no recipient field anywhere in the schema.
 Two workarounds were considered and both rejected — pre-seeding 2-person groups
 (violates D-6) and adding a custom `send_dm` action (violates D-2). Resolution: the
 five group actions are available, agents may form groups freely, and analytics
@@ -594,8 +594,22 @@ every cross-run comparison in this project, this sits far above any noise floor 
 it is a within-agent, within-slot contrast
 
 
-**Evidence.** The shield works. Reach flows through the graph, and it is not merely an
-artefact of network posts being shown first
+**Evidence.** Reach flows through the social graph, and it is not merely an artefact
+of network posts being shown first.
+
+> **Superseded — read the numbers below, not the ones above.** As first written,
+> this finding claimed "13 analysed runs, 57,682 exposures". Eight of those runs
+> predate the three-tier feed and contributed **zero** to every estimate while
+> still being counted in the denominator; the estimates were always computed on
+> the right rows, only the headline was wrong. Corrected first to 5 runs / 30,240
+> exposures, and now standing at **9 runs / 54,444 exposures / 4,536 feeds /
+> 3,692 engagements**, with `network` vs `discovery` **OR 3.51 [3.06, 4.04]**
+> significant in **9/9 runs** and `fof` vs `discovery` **OR 2.34 [1.64, 3.35]**
+> significant in **3/7**. The original text is kept unedited above, because the
+> wrong turn is worth as much as the correction.
+>
+> ("The shield works" was a stray sentence here from the start — a leftover from
+> Simulation 3's vocabulary. Simulation 4 has no shield; see the note below.)
 
 #### F-38 — The TwHIN similarity score is mildly ANTI-predictive of engagement
 

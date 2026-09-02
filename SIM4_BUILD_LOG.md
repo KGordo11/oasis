@@ -980,11 +980,67 @@ proves to be a real bottleneck (measured, not assumed).
 
 ## 5. File inventory
 
-Living list. Every file this build creates or modifies, and why.
+Every file this build **consumes**, **creates**, **modifies** and **produces** —
+what it is, where it lives, and where it came from. A file that the simulation
+reads but nobody wrote is just as much a dependency as one we authored, and was
+missing from earlier versions of this section.
 
 All simulation and analysis code lives in `examples/experiment/social_timeline/`;
 that prefix is dropped from the entries below. Paths outside it are given in
 full.
+
+### Consumed — inputs the simulation reads but did not create
+
+#### `data/reddit/user_data_36.json`
+
+**What.** The 36 personas. 32 KB, one record each with `realname`, `username`,
+`bio`, `persona`, `age`, `gender`, `mbti`, `country`, `profession`,
+`interested_topics`.
+
+**Where from.** **Ships with OASIS upstream** — last touched by upstream author
+`yiyiyi0817` in commit `9db593a`, not by us. This matters for the result: we did
+not author the population, so we could not have shaped it to produce the answer
+we wanted.
+
+**How it is used.** `personas.py:192` `select_diverse()` picks a maximally
+separated subset (deterministic — no RNG, so persona #7 is agent 7 in every
+run); `timeline_agent.py:341` `compose_persona()` flattens each record into the
+paragraph that becomes that agent's **system prompt**.
+
+**Caveat.** Topically lopsided — 24 of 36 declare "Business", mean pairwise bio
+similarity 0.83. That caps what any interest-based recommender could
+discriminate.
+
+#### `Twitter/twhin-bert-base` (Hugging Face model)
+
+**What.** 279M-parameter BERT trained by Twitter on tweets. Turns any text into
+768 numbers so two pieces of text can be compared for meaning.
+
+**Where.** Downloaded on first use to `~/.cache/huggingface/hub/`, ~1.1 GB. Not
+in the repo.
+
+**How it is used.** `embedding.py` mean-pools `last_hidden_state` — deliberately
+NOT the `pooler_output` upstream uses, whose weights are randomly re-initialised
+in every process and would make runs unreproducible.
+
+#### `llama3.1:8b` (Ollama model)
+
+**What.** The language model that *is* every agent. 4.9 GB, served locally at
+`http://localhost:11434/v1`.
+
+**Where.** Ollama's own store, outside the repo. `ollama pull llama3.1:8b`.
+
+**Why this one.** OASIS agents act by emitting tool calls, and this model
+supports them natively. A model without tool-calling cannot drive the simulation
+at all. Nothing leaves the machine and there is no API bill.
+
+#### The OASIS engine itself — `oasis/`
+
+**What.** The upstream framework: database schema, the agent-to-LLM plumbing,
+the `Platform` and `SocialAgent` classes this project subclasses.
+
+**How it is used.** Read extensively (§2) and subclassed, never edited. `oasis/`
+stays byte-identical to upstream commit `10b1a5b`.
 
 ### Created
 
@@ -1085,6 +1141,26 @@ similarity tested inside `discovery` only because the score is missing-not-at-ra
 
 **Status.** Working (F-37..F-41)
 
+#### `recency_check.py`
+
+**Purpose.** Pulls similarity and recency apart -- they are stored multiplied
+together in the exposure record, which is what made the retracted similarity
+claim possible. Recovers both from `rec_candidates`, refits the original
+specification on each separately, and tests repeat exposure. Produced the
+retraction and the project's second result.
+
+**Status.** Working. 9 runs, 37,668 discovery rows.
+
+#### `noise_floor.py`
+
+**Purpose.** Measures how much results move when nothing is changed at all,
+across every pair of identical-configuration runs. Written 2026-09-02 to settle
+whether the original noise floor -- which rested on a single replicate pair --
+was a fair draw. It was: all four single-pair figures fall inside the spread of
+all fifteen pairs.
+
+**Status.** Working. 15 pairs over six identical runs.
+
 #### `test_actions.py`
 
 **Purpose.** Gate: every engagement action works mechanically, so absence in a run is a
@@ -1122,6 +1198,80 @@ dropping, degenerate inputs, CI narrowing
 | `oasis-env` | Added `statsmodels` | Cluster-robust logistic regression for F-38. Hand-rolling it is exactly what produced F-30 and F-32 |
 
 *`oasis/` itself remains untouched per D-1 — every deviation is a subclass.*
+
+### Produced — output files, and which tool writes each
+
+Nothing here is hand-edited; every file is regenerable from the database by
+re-running the tool named. `<label>` is the run label, e.g. `baseline`.
+
+**Per run — written by `run_simulation.py`**
+
+| File | Size | Contents |
+|---|---|---|
+| `data/social_timeline_<label>.db` | ~8 MB | The entire world: users, posts, comments, follows, likes, `trace`, and our three instrumentation tables. **Gitignored** (`.gitignore:98`, `*.db`) — regenerable only by re-running the 2-hour simulation, so back it up separately. |
+| `data/social_timeline_<label>.json` | ~8 KB | The run manifest: exact settings, library versions, per-round timings and counters, action tallies. Committed. This is what makes a run self-describing years later. |
+
+**Per run — written by the analysis tools**
+
+| File | Size | Written by |
+|---|---|---|
+| `..._<label>_analysis.json` | ~1.6 MB | `analyze.py` — the hinge file every other tool reads |
+| `..._<label>_analysis.txt` | ~630 KB | `analyze.py` — human-readable per-run summary |
+| `..._<label>_DOSSIER.txt` | ~2 MB | `dossier.py` — the ~28,000-line round-by-round transcript |
+
+**Cross-run reports**
+
+| File | Written by | What it answers |
+|---|---|---|
+| `data/social_timeline_exposure_model.txt` | `exposure_model.py` | Does connection or content predict engagement? |
+| `data/social_timeline_recency_check.txt` | `recency_check.py` | Similarity vs recency pulled apart; the repeat-exposure result |
+| `data/social_timeline_noise_floor_6runs.txt` | `noise_floor.py` | How much do results move when nothing changes? (15 pairs) |
+| `data/social_timeline_noise_floor.txt` | `compare.py` | The original single-pair replicate comparison |
+| `data/graph.html` | `make_graph.py` | The interactive explorer artifact (~5 MB) |
+
+**Not committed**
+
+| Path | Why |
+|---|---|
+| `data/*.db` | ~8 MB each, 15 of them. `.gitignore:98` |
+| `data/overnight_logs/` | 241 MB of verbose LLM output from the replicate batch. The manifests already carry the timings that matter. `.gitignore:107` |
+| `oasis-env/` | The virtualenv. Rebuild with `python3.11 -m venv oasis-env && pip install -e . && pip install statsmodels` |
+
+Total data footprint on disk: **161 MB** across all runs, of which ~120 MB is
+databases that git does not track.
+
+### Where to find everything
+
+```
+oasis/
+├── SIM4_BUILD_LOG.md                     this file
+├── PROJECT_LOG.md                        project-wide log (modified)
+├── overnight_replicates.sh               the batch runner
+├── .gitignore                            :98 *.db   :107 overnight_logs
+├── docs/superpowers/specs/
+│   └── 2026-08-24-social-timeline-design.md    the design spec
+├── oasis/                                UPSTREAM ENGINE — never edited
+├── data/
+│   ├── reddit/user_data_36.json          THE 36 PERSONAS (upstream)
+│   └── social_timeline_*                 every run's db, manifest, analysis,
+│                                         dossier, and the cross-run reports
+└── examples/experiment/social_timeline/  ALL 7,540 LINES WE WROTE
+    ├── run_simulation.py                 the start button
+    ├── timeline_platform.py              the website
+    ├── timeline_agent.py                 one pretend person
+    ├── personas.py                       the personalities
+    ├── embedding.py                      text -> numbers
+    ├── check_deps.py                     pre-flight gate
+    ├── analyze.py                        db -> analysis json
+    ├── dossier.py                        the transcript
+    ├── exposure_model.py                 the main result
+    ├── recency_check.py                  the retraction + repeat exposure
+    ├── noise_floor.py                    how much noise is there
+    ├── compare.py                        run vs run
+    ├── make_graph.py                     the explorer artifact
+    └── test_*.py                         four gates, 57 checks
+```
+
 
 ---
 

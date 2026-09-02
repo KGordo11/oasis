@@ -802,6 +802,32 @@ network
 Isolation is not penalised — it falls out, since an agent with no follows fills only the
 discovery tier
 
+#### B-16 — The graph's edge filter made cumulative interactions look like they vanished
+
+**Where.** Ours, `make_graph.py:551` `interactionEdges()`
+
+**Symptom.** Scrubbing the round slider on `v10_rep6`, interaction edges appeared
+to **disappear** between round 5 and round 6 — from a well-connected picture to a
+sparse one. Interactions are strictly cumulative and can never decrease, so the
+picture contradicted the data.
+
+**Cause.** A decluttering rule: at 60 or fewer interaction pairs the graph draws
+every one; above 60 it silently switches to drawing only pairs that interacted
+more than once. `v10_rep6` crosses that threshold at exactly round 6 — **54 pairs
+drawn at round 5, then 61 pairs exist but only 14 are drawn at round 6.** The
+underlying data grew, as it must; the rendering rule changed underneath the
+viewer with no indication. A disclosure existed but sat in the methodology text
+of a different tab and quoted run-totals, so it was invisible at the moment of
+confusion.
+
+**Fix.** The filter now reports what it hid, and a caption under the graph updates
+live with the slider: "Drawing 14 of 61 interaction pairs ... the hidden pairs
+still exist — the tables and every statistic are unfiltered." The caption also
+states plainly that the view is cumulative.
+
+**Found by.** Gordon, reading the artifact and noticing the picture disagreed
+with the claim that interactions accumulate.
+
 #### B-15 — The overnight batch script silently failed every analysis
 
 **Where.** Ours, `overnight_replicates.sh`

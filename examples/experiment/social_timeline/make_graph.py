@@ -217,6 +217,9 @@ HTML = """<title>Agent Network Formation</title>
           background:var(--panel); padding:14px 16px; }
   .card h3 { margin:0 0 6px; font-size:15px;
              font-family:"IBM Plex Mono", monospace; }
+  #graphNote { font-size:12.5px; color:var(--muted); line-height:1.5;
+               margin-top:10px; max-width:84ch; }
+  #graphNote b { color:var(--fg); font-weight:600; }
   .quote { border-left:2px solid var(--line); padding-left:12px;
            color:var(--fg); font-size:13.5px; margin:6px 0; }
   /* Posts stack flush; only replies indent, and only by one step. */
@@ -270,6 +273,7 @@ HTML = """<title>Agent Network Formation</title>
     </div>
     <svg id="graph" role="img"
          aria-label="Force-directed graph of agents, follow edges and interactions"></svg>
+    <figcaption id="graphNote"></figcaption>
   </figure>
 
   <div class="focusbox" id="focusBox"></div>
@@ -548,11 +552,42 @@ function interactionEdges(upTo) {
     return { source: a, target: b, weight: n };
   }).filter(e => nodeById[e.source] && nodeById[e.target]);
 
+  // Decluttering. Past ~60 edges nearly every node touches every other and the
+  // picture becomes a hairball. But the switch must be VISIBLE: crossing this
+  // threshold once made the round-5 -> round-6 view drop from 54 drawn edges to
+  // 14, which reads as "interactions disappeared" when the underlying data is
+  // strictly cumulative and had in fact GROWN from 54 to 61 pairs.
   const DENSE = 60;
-  if (all.length <= DENSE) return all;
+  if (all.length <= DENSE) {
+    lastEdgeFilter = {total: all.length, drawn: all.length, rule: 'all'};
+    return all;
+  }
   const repeated = all.filter(e => e.weight > 1);
-  return repeated.length >= 12 ? repeated
-       : all.sort((a, b) => b.weight - a.weight).slice(0, 40);
+  const out = repeated.length >= 12 ? repeated
+            : all.sort((a, b) => b.weight - a.weight).slice(0, 40);
+  lastEdgeFilter = {total: all.length, drawn: out.length,
+                    rule: repeated.length >= 12 ? 'repeated' : 'top40'};
+  return out;
+}
+
+// Set by interactionEdges on every render; read by the caption under the graph.
+let lastEdgeFilter = {total: 0, drawn: 0, rule: 'all'};
+
+function updateGraphNote(round) {
+  const el = document.getElementById('graphNote');
+  if (!el) return;
+  const f = lastEdgeFilter;
+  const base = `Round ${round}. Everything here is cumulative -- follows and ` +
+    `interactions persist once they happen, so the picture only ever grows. ` +
+    `(No agent unfollowed anyone in any run.)`;
+  el.innerHTML = f.drawn < f.total
+    ? base + ` <b>Drawing ${f.drawn} of ${f.total} interaction pairs.</b> Past 60 ` +
+      `pairs almost every node touches every other, so only ` +
+      (f.rule === 'repeated' ? 'pairs that interacted more than once' :
+                               'the 40 heaviest pairs') +
+      ` are drawn. <b>The hidden pairs still exist</b> -- the tables and every ` +
+      `statistic are unfiltered.`
+    : base + ` Drawing all ${f.total} interaction pairs.`;
 }
 
 function render(round) {
@@ -560,6 +595,8 @@ function render(round) {
   const follows = edgesAt(round);
   const interactions = interactionEdges(round);
   simulate(follows.length ? follows : interactions);
+
+  updateGraphNote(round);
 
   const fc = {};
   follows.forEach(e => fc[e.target] = (fc[e.target] || 0) + 1);

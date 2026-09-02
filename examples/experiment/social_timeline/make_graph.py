@@ -552,26 +552,33 @@ function interactionEdges(upTo) {
     return { source: a, target: b, weight: n };
   }).filter(e => nodeById[e.source] && nodeById[e.target]);
 
-  // Decluttering. Past ~60 edges nearly every node touches every other and the
-  // picture becomes a hairball. But the switch must be VISIBLE: crossing this
-  // threshold once made the round-5 -> round-6 view drop from 54 drawn edges to
-  // 14, which reads as "interactions disappeared" when the underlying data is
-  // strictly cumulative and had in fact GROWN from 54 to 61 pairs.
-  const DENSE = 60;
-  if (all.length <= DENSE) {
-    lastEdgeFilter = {total: all.length, drawn: all.length, rule: 'all'};
+  // Decluttering, with one hard requirement: the number drawn must never FALL
+  // as the round advances. The data is strictly cumulative, so a view that
+  // shrinks is telling the viewer something untrue.
+  //
+  // The original rule had three modes -- draw everything at <=60 pairs, else
+  // only pairs seen more than once, else the 40 heaviest -- and switched
+  // between them as density grew. Because the modes return wildly different
+  // counts, crossing a boundary collapsed the picture: v10_rep6 went 54 drawn
+  // -> 14 drawn between rounds 5 and 6 while the real count ROSE 54 -> 61, and
+  // v10_rep5 collapsed twice (56 -> 40 -> 14) by passing through both
+  // fallbacks. Both read as "the interactions disappeared" (bug B-16).
+  //
+  // One rule instead: draw the heaviest pairs, capped. min(real, CAP) rises
+  // and then plateaus, so it can never decrease, and rounds below the cap keep
+  // every edge -- the early network stays fully legible.
+  const CAP = 60;
+  if (all.length <= CAP) {
+    lastEdgeFilter = {total: all.length, drawn: all.length, capped: false};
     return all;
   }
-  const repeated = all.filter(e => e.weight > 1);
-  const out = repeated.length >= 12 ? repeated
-            : all.sort((a, b) => b.weight - a.weight).slice(0, 40);
-  lastEdgeFilter = {total: all.length, drawn: out.length,
-                    rule: repeated.length >= 12 ? 'repeated' : 'top40'};
+  const out = all.slice().sort((a, b) => b.weight - a.weight).slice(0, CAP);
+  lastEdgeFilter = {total: all.length, drawn: out.length, capped: true};
   return out;
 }
 
 // Set by interactionEdges on every render; read by the caption under the graph.
-let lastEdgeFilter = {total: 0, drawn: 0, rule: 'all'};
+let lastEdgeFilter = {total: 0, drawn: 0, capped: false};
 
 function updateGraphNote(round) {
   const el = document.getElementById('graphNote');
@@ -580,12 +587,10 @@ function updateGraphNote(round) {
   const base = `Round ${round}. Everything here is cumulative -- follows and ` +
     `interactions persist once they happen, so the picture only ever grows. ` +
     `(No agent unfollowed anyone in any run.)`;
-  el.innerHTML = f.drawn < f.total
-    ? base + ` <b>Drawing ${f.drawn} of ${f.total} interaction pairs.</b> Past 60 ` +
-      `pairs almost every node touches every other, so only ` +
-      (f.rule === 'repeated' ? 'pairs that interacted more than once' :
-                               'the 40 heaviest pairs') +
-      ` are drawn. <b>The hidden pairs still exist</b> -- the tables and every ` +
+  el.innerHTML = f.capped
+    ? base + ` <b>Drawing the 60 heaviest of ${f.total} interaction pairs</b> — past ` +
+      `60 almost every node touches every other and the picture stops being ` +
+      `readable. <b>The hidden pairs still exist</b>: the tables and every ` +
       `statistic are unfiltered.`
     : base + ` Drawing all ${f.total} interaction pairs.`;
 }

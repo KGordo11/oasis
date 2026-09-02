@@ -820,10 +820,24 @@ viewer with no indication. A disclosure existed but sat in the methodology text
 of a different tab and quoted run-totals, so it was invisible at the moment of
 confusion.
 
-**Fix.** The filter now reports what it hid, and a caption under the graph updates
-live with the slider: "Drawing 14 of 61 interaction pairs ... the hidden pairs
-still exist — the tables and every statistic are unfiltered." The caption also
-states plainly that the view is cumulative.
+**Worse than first thought.** The original rule had three modes — draw everything
+at <=60 pairs, else only pairs seen more than once, else the 40 heaviest — and
+switched between them as density grew. Because the modes return wildly different
+counts, a run could collapse **more than once**: `v10_rep5` drops twice, 56 -> 40
+at round 5 (falling to the top-40 mode) and 40 -> 14 at round 6 (switching to
+repeated-only), while its real count rose 56 -> 63 -> 74.
+
+**Fix.** Replaced with a single rule that cannot decrease: **draw the heaviest
+pairs, capped at 60**. `min(real, 60)` rises and then plateaus, so the drawn
+count never falls, and every round below the cap still shows all its edges — the
+early network stays fully legible, which the fixed-rule alternatives lost. A
+caption under the graph updates live with the slider, states that the view is
+cumulative, and when the cap bites says "Drawing the 60 heaviest of 113
+interaction pairs ... the hidden pairs still exist: the tables and every
+statistic are unfiltered."
+
+**Verified** in the browser by scrubbing every round of **all 13 runs** in the
+artifact and asserting the drawn count never decreases: zero drops.
 
 **Found by.** Gordon, reading the artifact and noticing the picture disagreed
 with the claim that interactions accumulate.

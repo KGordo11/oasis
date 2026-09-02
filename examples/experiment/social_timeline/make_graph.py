@@ -1,5 +1,16 @@
 """Build the before/after social-graph web diagram from an analysis JSON.
 
+IN PLAIN WORDS
+--------------
+This builds the INTERACTIVE WEBPAGE for exploring the results.
+
+It takes the finished runs and produces a single web page with tabs: a network
+picture of who follows whom that you can scrub through round by round, every
+post with who saw it, a per-person record, and a round-by-round timeline.
+
+Everything is packed into that one file, so it can be shared or opened on its
+own with nothing else installed.
+
 Emits a single self-contained HTML file: a force-directed network where
 nodes are agents and edges are follows, with a round slider so the graph can
 be scrubbed from "before" (empty, by design D-10) to "after". Edge thickness
@@ -1430,6 +1441,7 @@ def discover(data_dir="data", since=None):
 
 
 def main():
+    """Command-line entry point: build the interactive web page."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--analysis", nargs="*", default=None,
                     help="one or more *_analysis.json files. Omit to include "

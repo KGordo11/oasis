@@ -1,5 +1,14 @@
 """Gate for `compare.py`'s statistics, validated against synthetic data.
 
+IN PLAIN WORDS
+--------------
+A TEST. It checks that the run-comparison maths is correct.
+
+It runs the calculations on made-up data where the right answer is already
+known, and fails loudly if the code disagrees. This exists because several
+results in this project were wrong the first time; the tests are what stops
+that happening silently again.
+
 WHY THIS EXISTS
 ---------------
 `compare.py` exists because three conclusions in this project were wrong on
@@ -33,6 +42,7 @@ failures = []
 
 
 def check(label, ok, detail=""):
+    """Run one test and record whether it passed."""
     print(f"{'PASS' if ok else 'FAIL'}  {label}  {detail}")
     if not ok:
         failures.append(label)

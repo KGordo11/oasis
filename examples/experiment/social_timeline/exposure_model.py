@@ -1,5 +1,18 @@
 """What actually predicts whether an agent engages with a post it was shown.
 
+IN PLAIN WORDS
+--------------
+This answers THE MAIN QUESTION of the project.
+
+The question is: when a pretend person reacts to a post, why? Was it because it
+came from a friend, or because it matched their interests?
+
+The tricky part is being fair. Posts from friends sit at the top of the feed,
+and top posts get more attention no matter who wrote them. So instead of
+comparing everything at once, this file only ever compares posts in the SAME
+SLOT, in the SAME feed, for the SAME person. Thousands of fair little
+comparisons get added up into one honest answer.
+
 WHY THIS EXISTS
 ---------------
 Findings F-35 and F-36 established that the cross-run noise floor (30.7 pp for
@@ -136,6 +149,11 @@ def mantel_haenszel(rows, exposed, unexposed, stratum="feed"):
 
 
 def crude_rates(rows, tier):
+    """The simple engagement rate for one feed tier, before any correction.
+
+    Shown only for reference -- it is confounded, which is the whole point
+    of the rest of this file.
+    """
     sel = [r for r in rows if r["tier"] == tier]
     n = len(sel)
     a = sum(r["acted"] for r in sel)
@@ -171,6 +189,7 @@ LEGACY = ("following", "recsys", "both")
 
 
 def render(all_rows, labels):
+    """Turn the analysis into the readable text report."""
     L = []
     add = L.append
     rows = [r for r in all_rows if r["tier"] in MODERN]
@@ -330,6 +349,7 @@ def render(all_rows, labels):
         b = mantel_haenszel(top, "fof", "discovery", stratum="agentslot")
 
         def fmt(m):
+            """Format one number for the report."""
             if not m["strata"] or m["or"] != m["or"]:
                 return f"{'--':>26}"
             return f"{m['or']:8.2f} [{m['lo']:5.2f},{m['hi']:6.2f}]"
@@ -382,6 +402,7 @@ def render(all_rows, labels):
 
 
 def main():
+    """Command-line entry point: run the engagement analysis."""
     ap = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)

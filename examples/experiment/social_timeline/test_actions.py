@@ -1,5 +1,14 @@
 """Mechanical verification that the engagement actions actually work.
 
+IN PLAIN WORDS
+--------------
+A TEST. It checks that all 22 things a pretend person can do actually work.
+
+This matters for an honest reason. In our runs the people never once disliked,
+muted, or unfollowed anything. That could mean two very different things: the
+buttons were broken, or the AI simply chose not to press them. This test proves
+the buttons work, so it must be a choice.
+
 WHY THIS EXISTS
 ---------------
 Small runs (R-4, R-5) showed agents creating posts and using group chat but
@@ -36,6 +45,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 
 async def main():
+    """Run every action test and report the score."""
     db_path = os.path.join(tempfile.mkdtemp(), "action_test.db")
     os.environ["OASIS_DB_PATH"] = db_path
 
@@ -56,6 +66,7 @@ async def main():
     failures = []
 
     def check(label, ok, detail=""):
+        """Run one test and record whether it passed."""
         print(f"{'PASS' if ok else 'FAIL'}  {label}  {detail}")
         if not ok:
             failures.append(label)

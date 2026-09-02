@@ -1,5 +1,16 @@
 """Mean-pooled TwHIN-BERT embeddings for Simulation 4.
 
+IN PLAIN WORDS
+--------------
+This turns TEXT INTO NUMBERS so the computer can compare meanings.
+
+A computer cannot tell that "I love farming" and "sustainable agriculture is
+great" are about the same thing. So we feed each piece of text through a model
+that turns it into a list of 768 numbers. Similar meanings get similar lists.
+
+It also remembers results, so the same sentence is never processed twice. That
+saves a lot of time, because a run does this thousands of times.
+
 WHY THIS EXISTS
 ---------------
 OASIS embeds text via `process_recsys_posts.process_batch`, which returns
@@ -80,6 +91,7 @@ def embed_cached(texts: list[str], batch_size: int = 64) -> torch.Tensor:
 
 
 def cache_stats() -> dict:
+    """Report how often a saved result was reused instead of recomputed."""
     return {"cached_texts": len(_cache)}
 
 

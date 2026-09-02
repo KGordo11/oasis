@@ -1,5 +1,18 @@
 """Is F-38's anti-predictive 'similarity' actually a recency effect? (Q-10)
 
+IN PLAIN WORDS
+--------------
+This file exists because WE GOT AN ANSWER WRONG and had to find out why.
+
+We had reported that posts matching your interests got FEWER reactions, which
+was strange and had no explanation. It turned out we had measured the wrong
+thing: two numbers had been multiplied together, and we had been calling the
+result "similarity" when it was really "similarity times freshness".
+
+This file pulls those two numbers apart and tests them separately. Doing that
+showed the real answer: matching interests does nothing at all, and what
+actually drives reactions is HOW MANY TIMES YOU HAVE ALREADY SEEN THE POST.
+
 WHY THIS EXISTS
 ---------------
 F-38 reported that the TwHIN similarity score is mildly ANTI-predictive of
@@ -168,6 +181,7 @@ def fit(rows, terms):
 
 
 def fmt_fit(res, skip_intercept=True):
+    """Format one model's results as report lines."""
     L = []
     for t in res:
         if skip_intercept and t["name"] == "intercept":
@@ -179,6 +193,7 @@ def fmt_fit(res, skip_intercept=True):
 
 
 def render(rows, labels):
+    """Turn the analysis into the readable text report."""
     L = []
     add = L.append
 
@@ -460,6 +475,7 @@ def render(rows, labels):
 
 
 def main():
+    """Command-line entry point: run the similarity/recency decomposition."""
     ap = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)

@@ -1,5 +1,17 @@
 """TimelinePlatform: an instrumented, personalized OASIS platform.
 
+IN PLAIN WORDS
+--------------
+This is the WEBSITE the pretend people are using.
+
+It does the job Twitter's servers would do: it decides which posts each person
+sees, in what order, and it writes down every single thing that happened.
+
+The most important part is that it REMEMBERS WHAT EVERYONE SAW. The original
+OASIS code throws that away at the end of every round. Without keeping it, we
+could only see what people did, never what they scrolled past and ignored --
+and the whole study depends on knowing both.
+
 Subclasses `Platform` so that `oasis/` stays byte-identical (decision D-1).
 `env.py:103` accepts a `Platform` instance directly, so no upstream change is
 needed to use this.
@@ -111,6 +123,7 @@ class _ResilientPlatformUtils:
     """
 
     def _add_comments_to_posts(self, posts_results):
+        """Attach each post's replies to it, so a person sees the conversation."""
         try:
             return super()._add_comments_to_posts(posts_results)
         except UnboundLocalError:
@@ -536,6 +549,7 @@ class TimelinePlatform(Platform):
             followees = [r[0] for r in self.db_cursor.fetchall()]
 
             def posts_by_with_author(authors, limit):
+                """Fetch this author's posts together with who wrote them."""
                 if not authors:
                     return []
                 ph = ", ".join("?" for _ in authors)
@@ -547,6 +561,7 @@ class TimelinePlatform(Platform):
                 return [(r[0], r[1]) for r in self.db_cursor.fetchall()]
 
             def posts_by(authors, limit):
+                """Fetch the posts written by one person."""
                 if not authors:
                     return []
                 ph = ", ".join("?" for _ in authors)
@@ -724,12 +739,14 @@ class TimelinePlatform(Platform):
     # ------------------------------------------------- informed-action gate
 
     def _has_seen_post(self, agent_id, post_id) -> bool:
+        """Has this person actually been shown this post before?"""
         self.pl_utils._execute_db_command(
             "SELECT 1 FROM rec_history WHERE agent_id = ? AND post_id = ? "
             "LIMIT 1", (agent_id, post_id))
         return self.db_cursor.fetchone() is not None
 
     def _knows_author(self, agent_id, author_id) -> bool:
+        """Has this person ever been shown anything by this author?"""
         self.pl_utils._execute_db_command(
             "SELECT 1 FROM rec_history WHERE agent_id = ? AND author_id = ? "
             "LIMIT 1", (agent_id, author_id))
@@ -762,6 +779,11 @@ class TimelinePlatform(Platform):
         return (post_id in found) or (author_id in found)
 
     def _reject_blind(self, kind, target):
+        """Refuse an action aimed at something the person was never shown.
+
+        This is the honesty rule. Without it the AI invents post numbers and
+        'reacts' to posts that were never in its feed.
+        """
         self.stats["blind_actions_rejected"] += 1
         return {"success": False,
                 "error": (f"You have not seen {kind} {target}. You can only "
@@ -769,27 +791,32 @@ class TimelinePlatform(Platform):
                           f"feed or in your search results.")}
 
     async def like_post(self, agent_id: int, post_id: int):
+        """Like a post -- but only if the person was actually shown it."""
         if not self._informed(agent_id, post_id=post_id):
             return self._reject_blind("post", post_id)
         return await super().like_post(agent_id, post_id)
 
     async def dislike_post(self, agent_id: int, post_id: int):
+        """Dislike a post -- but only if the person was actually shown it."""
         if not self._informed(agent_id, post_id=post_id):
             return self._reject_blind("post", post_id)
         return await super().dislike_post(agent_id, post_id)
 
     async def repost(self, agent_id: int, post_id: int):
+        """Repost something -- but only if the person was actually shown it."""
         if not self._informed(agent_id, post_id=post_id):
             return self._reject_blind("post", post_id)
         return await super().repost(agent_id, post_id)
 
     async def quote_post(self, agent_id: int, quote_message: tuple):
+        """Quote a post with a comment -- only if the person was shown it."""
         post_id = quote_message[0] if quote_message else None
         if not self._informed(agent_id, post_id=post_id):
             return self._reject_blind("post", post_id)
         return await super().quote_post(agent_id, quote_message)
 
     async def create_comment(self, agent_id: int, comment_message: tuple):
+        """Reply to a post -- but only if the person was actually shown it."""
         post_id = comment_message[0] if comment_message else None
         if not self._informed(agent_id, post_id=post_id):
             return self._reject_blind("post", post_id)
@@ -805,6 +832,7 @@ class TimelinePlatform(Platform):
         return result
 
     async def search_user(self, agent_id: int, query: str):
+        """Look somebody up by name."""
         result = await super().search_user(agent_id, query)
         for u in (result.get("users") or []) if isinstance(result, dict) else []:
             uid = u[0] if isinstance(u, (list, tuple)) else u.get("user_id")
@@ -815,6 +843,11 @@ class TimelinePlatform(Platform):
     # --------------------------------------------------- target validation
 
     def _agent_exists(self, agent_id) -> bool:
+        """Does this person id actually exist?
+
+        The original code never checked, so agents could follow people who were
+        never real -- it just wrote the row anyway.
+        """
         self.pl_utils._execute_db_command(
             "SELECT 1 FROM user WHERE agent_id = ?", (agent_id, ))
         return self.db_cursor.fetchone() is not None
@@ -844,6 +877,7 @@ class TimelinePlatform(Platform):
         return await super().follow(agent_id, followee_id)
 
     async def unfollow(self, agent_id: int, followee_id: int):
+        """Stop following somebody."""
         if not self._agent_exists(followee_id):
             self.stats["invalid_follow_targets"] += 1
             return {"success": False,
@@ -851,6 +885,7 @@ class TimelinePlatform(Platform):
         return await super().unfollow(agent_id, followee_id)
 
     async def mute(self, agent_id: int, mutee_id: int):
+        """Mute somebody so their posts stop appearing."""
         if not self._agent_exists(mutee_id):
             self.stats["invalid_follow_targets"] += 1
             return {"success": False,

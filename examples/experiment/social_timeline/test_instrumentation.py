@@ -1,5 +1,13 @@
 """Tests for the two things that silently produced wrong data.
 
+IN PLAIN WORDS
+--------------
+A TEST. It checks that our record-keeping is complete and not double-counted.
+
+The entire study rests on the claim that we wrote down every post every person
+saw. This test proves that claim by rebuilding the record from both directions
+and checking the two agree.
+
 Both bugs these cover were invisible in a passing run -- the simulation
 completed, numbers appeared, and the numbers were wrong.
 
@@ -36,12 +44,14 @@ FAILURES = []
 
 
 def check(label, ok, detail=""):
+    """Run one test and record whether it passed."""
     print(f"{'PASS' if ok else 'FAIL'}  {label}  {detail}")
     if not ok:
         FAILURES.append(label)
 
 
 async def test_source_attribution():
+    """Check each exposure is labelled with the right feed tier."""
     print("\n--- TEST 1: exposure source attribution ---")
     db_path = os.path.join(tempfile.mkdtemp(), "src.db")
     os.environ["OASIS_DB_PATH"] = db_path
@@ -106,6 +116,7 @@ async def test_source_attribution():
 
 
 async def test_analyzer_targets():
+    """Check the analyser points each action at the right post or person."""
     print("\n--- TEST 2: analyzer target resolution (B-4) ---")
     db_path = os.path.join(tempfile.mkdtemp(), "an.db")
     os.environ["OASIS_DB_PATH"] = db_path
@@ -158,6 +169,7 @@ async def test_analyzer_targets():
 
 
 async def main():
+    """Run every instrumentation test and report the score."""
     await test_source_attribution()
     await test_analyzer_targets()
     print("\n" + "=" * 60)

@@ -1,5 +1,17 @@
 """Persona loading and diversity selection.
 
+IN PLAIN WORDS
+--------------
+This makes the 36 PERSONALITIES.
+
+Each pretend person comes from a small record -- a name, a job, an age, what
+they are interested in. This file turns that record into the paragraph of
+instructions the AI reads to "become" that person.
+
+It also always picks the same 36 people in the same order every run. That
+sounds boring but it is essential: it means person #7 is the same person in
+every run, so runs can be fairly compared.
+
 WHY THIS EXISTS
 ---------------
 An interest-based feed can only tell people apart to the extent they actually
@@ -37,6 +49,7 @@ import os
 
 
 def _clean(x, fallback=""):
+    """Tidy up a piece of persona text before it goes into the prompt."""
     s = ("" if x is None else str(x)).strip()
     return s if s and s.lower() != "nan" else fallback
 

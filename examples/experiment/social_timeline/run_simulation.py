@@ -1,5 +1,17 @@
 """Simulation 4 driver: a multi-round, fully-instrumented social timeline.
 
+IN PLAIN WORDS
+--------------
+This is the START BUTTON for the whole simulation.
+
+You run this file and it does everything: it wakes up 36 pretend people, gives
+each one a personality, builds them a social media feed, lets them take turns
+posting and reading for 15 rounds, and saves everything that happened into one
+file so it can be studied afterwards.
+
+Think of it as the director of a play. It does not act; it tells everyone else
+when to go.
+
 Every agent acts every round via LLMAction only -- no ManualAction anywhere,
 no scripted posts, no staged relationships (decisions D-6 and D-10). The
 social graph starts empty and assembles itself out of agent choices.
@@ -94,6 +106,7 @@ def build_action_set(include_groups: bool = True):
 # --------------------------------------------------------------------- main
 
 async def run(args):
+    """Run the whole simulation: build the world, then step it round by round."""
     from camel.models import ModelFactory
     from camel.types import ModelPlatformType
 
@@ -353,6 +366,7 @@ def turns_without_action(sim_platform, n_agents, n_rounds):
 
 
 def main():
+    """Command-line entry point: read the settings and start the run."""
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--agents", type=int, default=4,
                    help="number of agents (default 4 -- start small)")

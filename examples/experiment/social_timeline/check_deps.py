@@ -1,5 +1,14 @@
 """Stage 0 dependency check for Simulation 4 (social timeline).
 
+IN PLAIN WORDS
+--------------
+This is the PRE-FLIGHT CHECK. Run it before starting a simulation.
+
+It makes sure everything the run needs is actually working: the AI model loads,
+the text-to-numbers model behaves, and the numbers come out the same twice in a
+row. If something is broken it says so now, instead of you finding out two
+hours into a run.
+
 Verifies every external dependency the simulation relies on BEFORE any
 simulation code is written or run, so that a failure here costs seconds
 rather than a multi-hour run.
@@ -30,6 +39,7 @@ def check(name):
     """Decorator that records pass/fail and keeps going after a failure."""
 
     def wrap(fn):
+        """Run one check and report whether it passed, without crashing the rest."""
         print(f"\n--- {name} ---")
         start = time.time()
         try:
@@ -48,6 +58,7 @@ def check(name):
 
 @check("torch device availability")
 def _torch_device():
+    """Check which hardware the maths will run on (CPU or GPU)."""
     import torch
 
     cuda = torch.cuda.is_available()
@@ -62,6 +73,7 @@ def _torch_device():
 
 @check("TwHIN-BERT loads via the real OASIS path")
 def _twhin_loads():
+    """Check the text-to-numbers model downloads and loads."""
     from oasis.social_platform.recsys import get_recsys_model
 
     tokenizer, model = get_recsys_model(recsys_type="twhin-bert")
@@ -114,6 +126,10 @@ def _mean_pooled(texts):
 
 @check("embeddings are discriminative across two topics")
 def _twhin_discriminative():
+    """Check the model can actually tell two different topics apart.
+
+    If it cannot, ranking by similarity is meaningless.
+    """
     import torch
 
     vecs = _mean_pooled(PROBE_TEXTS)
@@ -121,6 +137,7 @@ def _twhin_discriminative():
         raise ValueError("embeddings contain NaN")
 
     def cos(i, j):
+        """Measure how similar two lists of numbers are, from 0 to 1."""
         a, b = vecs[i], vecs[j]
         return float(torch.dot(a, b) / (torch.norm(a) * torch.norm(b)))
 
@@ -142,11 +159,16 @@ def _twhin_discriminative():
 
 @check("embedding space is reproducible across processes")
 def _twhin_deterministic():
+    """Check the model gives the SAME numbers when run twice.
+
+    A model that answers differently every time makes runs unrepeatable.
+    """
     import torch
 
     vecs = _mean_pooled(PROBE_TEXTS)
 
     def cos(i, j):
+        """Measure how similar two lists of numbers are, from 0 to 1."""
         a, b = vecs[i], vecs[j]
         return float(torch.dot(a, b) / (torch.norm(a) * torch.norm(b)))
 
@@ -187,6 +209,7 @@ def _pooler_guard():
 
 @check("Ollama reachable with llama3.1:8b")
 def _ollama():
+    """Check the AI model is running and responding."""
     import urllib.request
     import json
 

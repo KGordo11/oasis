@@ -1,5 +1,15 @@
 """Paired, cluster-aware comparison between simulation runs.
 
+IN PLAIN WORDS
+--------------
+This compares TWO DIFFERENT RUNS to see whether a change made a difference.
+
+It is careful in three ways that matter. It compares each person to themselves
+across the two runs, rather than comparing crowds. It knows that one chatty
+person doing fifty things is not fifty separate facts. And when it finds
+nothing, it also tells you the smallest difference it COULD have found -- so
+"we saw no effect" never gets confused with "we could never have seen one".
+
 WHY THIS EXISTS
 ---------------
 Findings F-32 and F-33. Every cross-run claim in this project was, until now,
@@ -200,6 +210,7 @@ def paired_tests(run_a, run_b, actions):
 
 
 def render(run_a, run_b, actions, replicate=False):
+    """Turn the comparison results into the readable text report."""
     out = []
     add = out.append
     la, lb = run_a["label"], run_b["label"]
@@ -289,6 +300,7 @@ def render(run_a, run_b, actions, replicate=False):
 
 
 def main():
+    """Command-line entry point: compare the runs named on the command line."""
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--runs", nargs=2, required=True,

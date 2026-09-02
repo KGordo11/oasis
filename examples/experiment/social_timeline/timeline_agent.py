@@ -1,5 +1,17 @@
 """TimelineAgent and the agent-graph generator for Simulation 4.
 
+IN PLAIN WORDS
+--------------
+This is ONE PRETEND PERSON.
+
+It holds that person's personality, shows them their feed, asks the AI what
+they want to do, and carries out their choice.
+
+It also enforces one honesty rule: you may only like or reply to a post that
+was actually shown to you. Without that rule the AI invents post numbers and
+"reacts" to things it never saw, which would make all our measurements
+meaningless.
+
 TWO JOBS
 --------
 1. `TimelineAgent` isolates per-agent failures. `env.step()` gathers all agent
@@ -86,11 +98,13 @@ class TimelineEnvironment(SocialEnvironment):
     """
 
     def __init__(self, action, agent_id: int, include_groups: bool = False):
+        """Set up one pretend person: their personality, feed, and connection to the AI."""
         super().__init__(action)
         self.agent_id = agent_id
         self.include_groups = include_groups
 
     def _query(self, sql, params=()):
+        """Ask the database a question and hand back the rows."""
         try:
             conn = sqlite3.connect(get_db_path())
             rows = conn.execute(sql, params).fetchall()
@@ -103,11 +117,13 @@ class TimelineEnvironment(SocialEnvironment):
         # B-7: sign_up leaves user_name NULL and puts the handle in `name`
         # (verified in the DB), so COALESCE is required or every author
         # renders as a bare "agentN".
+        """Look up display names for a set of person ids."""
         return {r[0]: (r[1] or f"agent{r[0]}")
                 for r in self._query(
                     "SELECT agent_id, COALESCE(user_name, name) FROM user")}
 
     async def to_text_prompt(self, *args, **kwargs) -> str:
+        """Turn this person's feed into the text the AI actually reads."""
         names = self._usernames()
         me = names.get(self.agent_id, f"agent{self.agent_id}")
 
@@ -294,6 +310,7 @@ class TimelineAgent(SocialAgent):
     """A SocialAgent whose per-round failure cannot take down the round."""
 
     def __init__(self, *args, include_groups: bool = False, **kwargs):
+        """Set up the agent wrapper that survives errors without killing the run."""
         super().__init__(*args, **kwargs)
         self.action_failures = 0
         # Swap in the environment that names names and leads with the feed.
@@ -308,6 +325,7 @@ class TimelineAgent(SocialAgent):
                                        include_groups=include_groups)
 
     async def perform_action_by_llm(self):
+        """Show this person their feed, ask the AI what to do, and do it."""
         try:
             return await super().perform_action_by_llm()
         except Exception as exc:  # noqa: BLE001 - deliberate: never propagate
@@ -385,6 +403,7 @@ async def generate_timeline_agents(
     agent_graph = AgentGraph()
 
     async def build(i: int, entry: dict):
+        """Create all the pretend people, each with their own personality."""
         profile = {
             "nodes": [],
             "edges": [],

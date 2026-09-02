@@ -1,5 +1,14 @@
 """Gate for the Mantel-Haenszel estimator in `exposure_model.py`.
 
+IN PLAIN WORDS
+--------------
+A TEST. It checks the maths behind the project's main result.
+
+It includes a deliberately nasty case where the obvious comparison says one
+group wins 83% to 17%, but the correct answer is that there is no difference at
+all. If the code cannot get that case right, it cannot be trusted on the real
+data.
+
 WHY THIS EXISTS
 ---------------
 The MH odds ratio is the primary result of the exposure analysis, and it is
@@ -28,6 +37,7 @@ failures = []
 
 
 def check(label, ok, detail=""):
+    """Run one test and record whether it passed."""
     print(f"{'PASS' if ok else 'FAIL'}  {label}  {detail}")
     if not ok:
         failures.append(label)

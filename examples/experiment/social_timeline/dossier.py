@@ -1,5 +1,16 @@
 """Exhaustive dossier for a Simulation 4 run.
 
+IN PLAIN WORDS
+--------------
+This writes the STORY OF THE RUN so a human can read it.
+
+It produces a very long file -- about 28,000 lines -- that walks through the
+simulation round by round: here is what this person saw, here is what they did,
+here is what they wrote.
+
+Numbers can hide strange behaviour. Reading the actual transcript is how the
+odd things in this project were spotted.
+
 `analyze.py` produces the summary ledgers. This produces the complete record:
 every agent, every post, every exposure, every interaction, every
 conversation thread, with full content and full provenance -- the level of
@@ -64,6 +75,7 @@ def wrap(text, width=94, indent="    "):
 
 
 def build(db_path, log_path=None, personas_path=None, manifest_path=None):
+    """Assemble the whole transcript, section by section, and return it as text."""
     data = analyze.analyze(db_path)
     if log_path:
         data["tool_call_errors"] = analyze.parse_tool_errors(log_path)
@@ -95,6 +107,7 @@ def build(db_path, log_path=None, personas_path=None, manifest_path=None):
 
 
 def s0_provenance(L, data, manifest, personas_path, db_path):
+    """Section 0 -- where this run came from: settings, versions, timings."""
     a = manifest.get("algorithm", {})
     c = manifest.get("config", {})
     L += [RULE, "SECTION 0 -- PROVENANCE AND METHOD", RULE, "",
@@ -164,6 +177,7 @@ def s0_provenance(L, data, manifest, personas_path, db_path):
 
 
 def s1_population(L, personas, data):
+    """Section 1 -- who the 36 pretend people are."""
     L += [RULE, "SECTION 1 -- POPULATION", RULE, ""]
     if not personas:
         L += ["    (persona file not supplied)", ""]
@@ -208,6 +222,7 @@ def s1_population(L, personas, data):
 
 
 def s2_timeline(L, data, extra):
+    """Section 2 -- what happened in each round, in order."""
     L += [RULE, "SECTION 2 -- RUN TIMELINE", RULE, "",
           "    Round-by-round. 'new follows' is edges created that round;",
           "    saturation shows as new follows decaying while actions stay flat.", ""]
@@ -243,6 +258,7 @@ def s2_timeline(L, data, extra):
 
 
 def s3_network(L, data):
+    """Section 3 -- who ended up following whom."""
     L += [RULE, "SECTION 3 -- NETWORK STRUCTURE", RULE, ""]
     agents = data["agents"]
     edges = set()
@@ -254,6 +270,7 @@ def s3_network(L, data):
     mutual = {(s, t) for s, t in edges if (t, s) in edges}
 
     def name(i):
+        """Display name for a person id."""
         a = agents.get(i) or agents.get(str(i)) or {}
         return a.get("username", f"agent{i}")
 
@@ -287,6 +304,7 @@ def s3_network(L, data):
 
 
 def s4_agents(L, data, extra, personas):
+    """Section 4 -- one full record per person: what they saw and did."""
     L += [RULE, "SECTION 4 -- AGENT DOSSIERS", RULE, "",
           "    One entry per agent: who they are, everything they did, everyone",
           "    they touched, everyone who touched them, and everything they were",
@@ -296,6 +314,7 @@ def s4_agents(L, data, extra, personas):
     comments = extra["comments"]
 
     def name(i):
+        """Display name for a person id."""
         a = agents.get(i) or agents.get(str(i)) or {}
         return a.get("username", f"agent{i}")
 
@@ -489,12 +508,14 @@ def s4_agents(L, data, extra, personas):
 
 
 def s5_posts(L, data, extra):
+    """Section 5 -- every post, who saw it, and who reacted."""
     L += [RULE, "SECTION 5 -- POST LEDGER", RULE, "",
           "    Every post: who wrote it, what it said, how far it reached, and",
           "    who engaged. 'reach' counts distinct agents shown the post.", ""]
     agents, posts = data["agents"], data["posts"]
 
     def name(i):
+        """Display name for a person id."""
         a = agents.get(i) or agents.get(str(i)) or {}
         return a.get("username", f"agent{i}")
 
@@ -529,11 +550,13 @@ def s5_posts(L, data, extra):
 
 
 def s6_threads(L, data, extra):
+    """Section 6 -- the conversations: posts together with their replies."""
     L += [RULE, "SECTION 6 -- CONVERSATION THREADS", RULE, "",
           "    Posts that drew replies, with the full exchange in order.", ""]
     agents, posts = data["agents"], data["posts"]
 
     def name(i):
+        """Display name for a person id."""
         a = agents.get(i) or agents.get(str(i)) or {}
         return a.get("username", f"agent{i}")
 
@@ -556,12 +579,14 @@ def s6_threads(L, data, extra):
 
 
 def s7_matrix(L, data):
+    """Section 7 -- a grid of who interacted with whom, and how often."""
     L += [RULE, "SECTION 7 -- INTERACTION MATRIX", RULE, "",
           "    Every ordered pair with at least one interaction, and how often",
           "    the actor had been shown the target's content beforehand.", ""]
     agents = data["agents"]
 
     def name(i):
+        """Display name for a person id."""
         a = agents.get(i) or agents.get(str(i)) or {}
         return a.get("username", f"agent{i}")
 
@@ -598,6 +623,7 @@ def s7b_pair_chronology(L, data, extra):
     comments = extra["comments"]
 
     def name(i):
+        """Display name for a person id."""
         a = agents.get(i) or agents.get(str(i)) or {}
         return a.get("username", f"agent{i}" if i is not None else "?")
 
@@ -662,6 +688,7 @@ def s7b_pair_chronology(L, data, extra):
 
 
 def s8_propagation(L, data):
+    """Section 8 -- how far each post travelled through the network."""
     L += [RULE, "SECTION 8 -- PROPAGATION", RULE, "",
           "    Repeated exposure preceding interaction. This is the mechanism the",
           "    simulation exists to observe: A keeps being shown B's content and",
@@ -671,6 +698,7 @@ def s8_propagation(L, data):
     agents = data["agents"]
 
     def name(i):
+        """Display name for a person id."""
         a = agents.get(i) or agents.get(str(i)) or {}
         return a.get("username", f"agent{i}")
 
@@ -683,6 +711,7 @@ def s8_propagation(L, data):
 
 
 def s9_feed(L, data):
+    """Section 9 -- the exact feed each person was shown, round by round."""
     L += [RULE, "SECTION 9 -- FEED COMPOSITION", RULE, ""]
     src = Counter(e.get("source") for e in data["exposures"])
     total = sum(src.values()) or 1
@@ -711,6 +740,7 @@ def s9_feed(L, data):
 
 
 def s10_failures(L, data, manifest=None):
+    """Section 10 -- anything that went wrong during the run."""
     L += [RULE, "SECTION 10 -- FAILURES AND LIMITS", RULE, ""]
 
     stats = (manifest or {}).get("platform_stats") or {}
@@ -775,6 +805,7 @@ def s10_failures(L, data, manifest=None):
 
 
 def main():
+    """Command-line entry point: write the transcript for the named run."""
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--db", required=True)
     ap.add_argument("--log", default=None)

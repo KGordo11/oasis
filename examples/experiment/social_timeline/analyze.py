@@ -1,5 +1,16 @@
 """Analysis for Simulation 4: the micro-detail ledger.
 
+IN PLAIN WORDS
+--------------
+This READS ONE FINISHED SIMULATION and adds up what happened.
+
+After a run there is just a big database file. This file goes through it and
+answers the basic questions: who posted, who followed whom, what did each
+person see, and what did they do about it.
+
+It produces a summary that every other analysis file reads. Nothing else works
+until this has run.
+
 Answers, for every agent and every pair of agents:
 
   * exactly what each agent did, how many times, and to whom
@@ -75,6 +86,7 @@ def coerce_int(value):
 
 
 def connect(db_path):
+    """Open a run's database file for reading."""
     conn = sqlite3.connect(db_path)
     conn.row_factory = sqlite3.Row
     return conn
@@ -96,6 +108,7 @@ def load_agents(conn):
 
 
 def load_posts(conn):
+    """Read every post written during the run."""
     out = {}
     for row in conn.execute(
             "SELECT post_id, user_id, original_post_id, content, "
@@ -116,6 +129,7 @@ def load_posts(conn):
 
 
 def safe_int(value, default=0):
+    """Turn a value into a whole number, returning None if it cannot be."""
     try:
         return int(value)
     except (TypeError, ValueError):
@@ -193,6 +207,7 @@ def load_actions(conn, posts):
 
 
 def load_exposures(conn):
+    """Read the record of every post that was shown to somebody."""
     rows = []
     try:
         cur = conn.execute(
@@ -229,6 +244,10 @@ def load_follow_timeline(conn, valid_ids=None):
 
 
 def analyze(db_path):
+    """Read one whole run and work out everything worth knowing about it.
+
+    This is the main job of the file. Everything else here feeds it.
+    """
     conn = connect(db_path)
     agents = load_agents(conn)
     posts = load_posts(conn)
@@ -424,6 +443,7 @@ def parse_tool_errors(log_path):
 
 
 def load_comments(conn):
+    """Read every reply written during the run."""
     out = {}
     for row in conn.execute(
             "SELECT comment_id, post_id, user_id, content, created_at "
@@ -433,6 +453,7 @@ def load_comments(conn):
 
 
 def excerpt(text, n=64):
+    """Shorten a piece of text so it fits in a report."""
     if not text:
         return ""
     text = " ".join(str(text).split())
@@ -449,6 +470,7 @@ def render_event_log(data):
     comments = data.get("comments", {})
 
     def who(agent_id):
+        """Display name for a person id."""
         a = agents.get(agent_id) or agents.get(str(agent_id)) or {}
         return a.get("username") or f"agent{agent_id}"
 
@@ -504,6 +526,7 @@ def render_exposure_ledger(data):
     agents, posts = data["agents"], data["posts"]
 
     def who(agent_id):
+        """Display name for a person id."""
         a = agents.get(agent_id) or agents.get(str(agent_id)) or {}
         return a.get("username") or f"agent{agent_id}"
 
@@ -535,6 +558,7 @@ def render_exposure_ledger(data):
 
 
 def render_report(data):
+    """Turn the numbers into the human-readable text report."""
     L = []
     add = L.append
     add("=" * 74)
@@ -629,6 +653,7 @@ def render_report(data):
 
 
 def main():
+    """Command-line entry point: analyse the run whose database is named."""
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--db", required=True)
     p.add_argument("--log", default=None,

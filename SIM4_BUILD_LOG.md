@@ -49,28 +49,34 @@ Nothing is mid-flight; no run in progress.**
 
 ### The three results
 
-1. **Connection predicts engagement; content does not** (F-37, F-40, F-41,
-   F-44). Over **9 runs / 54,444 exposures**, holding agent *and* feed slot
+1. **Connection predicts engagement; content does not.** Over **9 runs / 54,444 exposures**, holding agent *and* feed slot
    fixed: `network` vs `discovery` **OR 3.51** [3.06, 4.04], significant in
    **9/9 runs**. `fof` vs `discovery` **OR 2.34** [1.64, 3.35], significant in
    **3/7** runs individually — stronger than before but still **suggestive,
    not established**. Independently replicated under a structurally different
    feed builder at **OR 5.00** [3.83, 6.52].
-2. **Repetition beats both content and freshness** (F-43, new). Engagement
+2. **Repetition beats both content and freshness.** Engagement
    rises monotonically with the number of times an agent has already seen a
    post: **2.05% → 4.17% → 5.75% → 6.95% → 8.19%** (2.05% → 4.94% in absolute
    terms, a 2.89 pp gap). Within-feed **OR 2.624** [2.184, 3.153], p=7.4e-25;
    survives adding feed slot (2.454) and replicates in the network tier (1.643),
    whose feed never touches the ranking score. **Significant in 8/9 runs —
    `v9_feedback` is the lone null at 0.89 — and in 2/3 tiers — `fof` is null at
-   1.222.** Consistent, not universal. **F-45: the "reverses inside first
-   sightings" argument is now p=0.097 and must be reported as directional only.**
-   Observational, not randomised — see Q-15.
-3. **The cross-run noise floor swamps every prompt intervention tried**
-   (F-35, F-36). Pure run-to-run SD for posting share is **~28-31 pp**; the four
+   1.222.** Consistent, not universal. **One supporting argument weakened: restricted to
+   first sightings only, the stale-post advantage used to reverse significantly
+   and is now p=0.097 — report it as directional only, never as a reversal.**
+   Observational, not randomised — the ranker chose what to repeat, we did not.
+   The designed test (deliberately re-injecting a fixed post set on a schedule)
+   is still the top open item.
+3. **The cross-run noise floor swamps every prompt intervention tried.** Pure run-to-run SD for posting share is **~28-31 pp**; the four
    interventions moved it 3-5 pp against a detectable minimum of 14.3 pp. They
    were unfalsifiable at this scale, not merely unsupported. **Confirmed across
-   all 15 pairs of six identical runs (Q-14), not just the original pair.**
+   all 15 pairs of six identical runs, not just the original pair.**
+
+*Every finding, bug, decision, run and open question also has an id (`F-43`,
+`B-15`, `D-5`, `R-21`, `Q-14`). Ids are for searching this file — each is its own
+`####` heading whose title states the claim, so searching an id lands you on a
+sentence, not a cross-reference.*
 
 ### RETRACTED — do not repeat this claim
 

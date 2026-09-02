@@ -1,0 +1,32 @@
+==============================================================================
+Q-14: THE NOISE FLOOR, MEASURED ACROSS SIX IDENTICAL RUNS
+==============================================================================
+runs            : 6  (v10_register, v10_replicate, v10_rep3, v10_rep4, v10_rep5, v10_rep6)
+agents per run  : [36, 36, 33, 35, 36, 36]
+pairs available : 15
+
+Every run here shares one identical configuration, so any difference
+between them is noise by construction -- nothing was changed.
+
+------------------------------------------------------------------------------
+PAIRED SD PER ACTION, OVER ALL PAIRS
+------------------------------------------------------------------------------
+  action             pairs   mean SD      min      max
+  create_post           15     28.2%    24.7%    33.1%
+  create_comment        15     18.5%    16.2%    22.0%
+  like_post             15     15.5%    13.1%    18.8%
+  follow                15      9.6%     8.0%    11.4%
+
+------------------------------------------------------------------------------
+DOES THE ORIGINAL SINGLE-PAIR FIGURE (F-35) STAND?
+------------------------------------------------------------------------------
+  F-35 used only the v10_register / v10_replicate pair:
+  action              that pair    range of all pairs   inside?
+  create_post             30.5%         24.7% - 33.1%       yes
+  create_comment          18.4%         16.2% - 22.0%       yes
+  like_post               14.4%         13.1% - 18.8%       yes
+  follow                  10.7%          8.0% - 11.4%       yes
+
+  If every single-pair figure falls inside the spread of all
+  fifteen pairs, the F-35 noise floor is confirmed rather than
+  a lucky draw, and the conclusion built on it stands.

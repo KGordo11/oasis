@@ -1,12 +1,12 @@
 ==============================================================================
 WHAT PREDICTS ENGAGEMENT WITH A POST THE AGENT WAS SHOWN
 ==============================================================================
-analysed    : 5 runs with the three-tier feed
-              baseline, v10_register, v10_replicate, v8_full, v9_feedback
-exposures   : 30240
-feeds       : 2520
-agents      : 180
-engaged     : 2174
+analysed    : 9 runs with the three-tier feed
+              baseline, v10_register, v10_rep3, v10_rep4, v10_rep5, v10_rep6, v10_replicate, v8_full, v9_feedback
+exposures   : 54444
+feeds       : 4536
+agents      : 324
+engaged     : 3692
 
 held aside  : 8 older runs (27442 exposures) label feed sources
               'following'/'recsys'/'both' and predate the
@@ -17,18 +17,18 @@ held aside  : 8 older runs (27442 exposures) label feed sources
 ------------------------------------------------------------------------------
 1. CRUDE RATES (confounded -- shown for reference only)
 ------------------------------------------------------------------------------
-  network     1191/6396   = 18.62%
-  fof          347/3022   = 11.48%
-  discovery    636/20822  =  3.05%
+  network     2081/11459  = 18.16%
+  fof          581/5317   = 10.93%
+  discovery   1030/37668  =  2.73%
 
 ------------------------------------------------------------------------------
 2. STRATIFIED BY FEED (Mantel-Haenszel)
    one agent, one round, one run, one moment -- so agent, round, run
    and disposition are all held fixed. Position is not yet held fixed.
 ------------------------------------------------------------------------------
-    network vs discovery  OR  11.07  95% CI [ 9.44, 12.99]  p=6.44e-192  (1618 informative feeds)
-        fof vs discovery  OR   4.11  95% CI [ 3.37,  5.00]  p=1.35e-44  (1072 informative feeds)
-    network vs fof        OR   1.79  95% CI [ 1.57,  2.06]  p=4.21e-17  (1072 informative feeds)
+    network vs discovery  OR  12.76  95% CI [11.23, 14.50]  p=0.00e+00  (2900 informative feeds)
+        fof vs discovery  OR   5.44  95% CI [ 4.61,  6.42]  p=7.69e-90  (1881 informative feeds)
+    network vs fof        OR   1.80  95% CI [ 1.62,  2.01]  p=8.18e-28  (1881 informative feeds)
 
   The fof contrast is the one to trust causally: fof authors were
   chosen by other agents' follows, never by the focal agent, so it
@@ -47,13 +47,13 @@ held aside  : 8 older runs (27442 exposures) label feed sources
    on network vs discovery with slot dummies is literally singular.
    Slots 0-4 are where all three tiers actually compete.
 
-   mean slot within 0-4, network    1.74  (n=6396)
-   mean slot within 0-4, fof        2.86  (n=948)
-   mean slot within 0-4, discovery  2.16  (n=5256)
+   mean slot within 0-4, network    1.72  (n=11459)
+   mean slot within 0-4, fof        2.92  (n=1545)
+   mean slot within 0-4, discovery  2.18  (n=9681)
 
-    network vs discovery  OR   3.54  95% CI [ 2.92,  4.29]  p=3.65e-38  (711 strata)
-        fof vs discovery  OR   1.97  95% CI [ 1.25,  3.11]  p=3.45e-03  (171 strata)
-    network vs fof        OR   2.12  95% CI [ 1.42,  3.16]  p=2.12e-04  (117 strata)
+    network vs discovery  OR   3.51  95% CI [ 3.06,  4.04]  p=3.31e-70  (1296 strata)
+        fof vs discovery  OR   2.34  95% CI [ 1.64,  3.35]  p=2.79e-06  (301 strata)
+    network vs fof        OR   1.85  95% CI [ 1.38,  2.48]  p=3.97e-05  (218 strata)
 
   Compare against section 2, where position is NOT held fixed:
   controlling for slot roughly halves the tier effect, so about half
@@ -81,9 +81,9 @@ held aside  : 8 older runs (27442 exposures) label feed sources
    100% of discovery exposures but 28% of network and 43% of fof,
    so it is missing not at random and cannot sit beside tier.
 ------------------------------------------------------------------------------
-  discovery exposures with a score: 20822
-  rank_score       OR  0.305  95% CI [0.164, 0.568]  p=0.000
-  feed_slot        OR  0.927  95% CI [0.895, 0.961]  p=0.000
+  discovery exposures with a score: 37668
+  rank_score       OR  0.267  95% CI [0.157, 0.457]  p=0.000
+  feed_slot        OR  0.912  95% CI [0.889, 0.936]  p=0.000
 
   NOTE (F-42): this variable is rec_history.score, which is
   sim * recency (timeline_platform.py:365), NOT cosine. An
@@ -92,16 +92,16 @@ held aside  : 8 older runs (27442 exposures) label feed sources
   are decomposed in recency_check.py: cosine alone is null.
 
   engagement by ranking-score decile (assumption-free view):
-    d1  score 0.000-0.387    82/2083  =  3.94%
-    d2  score 0.387-0.560    75/2082  =  3.60%
-    d3  score 0.560-0.667    73/2082  =  3.51%
-    d4  score 0.667-0.722    71/2082  =  3.41%
-    d5  score 0.722-0.759    54/2082  =  2.59%
-    d6  score 0.759-0.787    76/2082  =  3.65%
-    d7  score 0.787-0.808    46/2082  =  2.21%
-    d8  score 0.808-0.824    53/2082  =  2.55%
-    d9  score 0.824-0.840    44/2082  =  2.11%
-    d10 score 0.840-0.927    62/2083  =  2.98%
+    d1  score 0.000-0.422   119/3767  =  3.16%
+    d2  score 0.422-0.607   147/3767  =  3.90%
+    d3  score 0.607-0.695   108/3766  =  2.87%
+    d4  score 0.695-0.736   109/3767  =  2.89%
+    d5  score 0.736-0.765    92/3767  =  2.44%
+    d6  score 0.765-0.787   106/3767  =  2.81%
+    d7  score 0.787-0.805    85/3765  =  2.26%
+    d8  score 0.805-0.821    94/3768  =  2.49%
+    d9  score 0.821-0.838    85/3767  =  2.26%
+    d10 score 0.838-0.927    85/3767  =  2.26%
 
 ------------------------------------------------------------------------------
 6. IS THE EFFECT STABLE ACROSS RUNS, OR DRIVEN BY ONE?
@@ -110,12 +110,16 @@ held aside  : 8 older runs (27442 exposures) label feed sources
   run                   network vs discovery          fof vs discovery
   baseline               5.77 [ 3.35,  9.94]                        --
   v10_register           3.73 [ 2.33,  5.97]       2.90 [ 0.78, 10.83]
+  v10_rep3               3.04 [ 1.92,  4.83]       6.05 [ 2.16, 16.91]
+  v10_rep4               4.65 [ 3.18,  6.79]       2.91 [ 1.10,  7.65]
+  v10_rep5               4.13 [ 2.59,  6.57]       2.16 [ 0.55,  8.40]
+  v10_rep6               2.57 [ 1.81,  3.65]                        --
   v10_replicate          3.04 [ 2.06,  4.47]       3.15 [ 0.52, 18.94]
   v8_full                1.85 [ 1.32,  2.60]       1.17 [ 0.66,  2.06]
   v9_feedback            8.67 [ 4.95, 15.21]      17.42 [ 3.19, 95.02]
 
-  network vs discovery: positive in 5/5 runs, individually significant in 5/5.
-  fof vs discovery: individually significant in only 1/4 runs.
+  network vs discovery: positive in 9/9 runs, individually significant in 9/9.
+  fof vs discovery: individually significant in only 3/7 runs.
   The direction is consistent; the magnitude is heterogeneous. The
   fof contrast is the weaker of the two per-run and leans on pooling,
   so it should be reported as suggestive rather than established.

@@ -77,7 +77,9 @@ for i in 3 4 5 6; do
         say "$LABEL finished in ${MINS}m"
 
         # Analyse immediately, so an interrupted night still leaves usable runs.
-        if "$PY" "$ANALYZE" "data/social_timeline_$LABEL.db" \
+        # analyze.py requires --db; calling it positionally silently fails
+        # and cost the 2026-09-01 batch its automatic analysis (B-15).
+        if "$PY" "$ANALYZE" --db "data/social_timeline_$LABEL.db" \
                 >> "$LOG_DIR/$LABEL.analyze.log" 2>&1; then
             say "$LABEL analysed"
             COMPLETED=$((COMPLETED + 1))

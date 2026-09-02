@@ -43,29 +43,34 @@ Findings are `F-n`, bugs `B-n`, decisions `D-n`, runs `R-n`, open questions
 
 *Last updated 2026-09-01. Update this section at the end of every working session.*
 
-**Branch `social-timeline-sim`. HEAD is the F-42/F-43 commit (`e2d9cc3`). Working
-tree clean, NOT yet pushed to `origin`. Nothing is mid-flight; no run in progress.**
+**Branch `social-timeline-sim`. Four overnight replicates (R-21..R-24) completed
+2026-09-02 06:24 and are analysed; the project now has **9 three-tier runs**.
+Nothing is mid-flight; no run in progress.**
 
 ### The three results
 
-1. **Connection predicts engagement; content does not** (F-37, F-40, F-41).
-   Holding agent *and* feed slot fixed: `network` vs `discovery` **OR 3.54**
-   [2.92, 4.29], significant in **5/5 runs**. `fof` vs `discovery` **OR 1.97**
-   [1.25, 3.11] but significant in only **1/4** runs individually —
-   **suggestive, not established**. Independently replicated under a
-   structurally different feed builder at **OR 5.00** [3.83, 6.52].
+1. **Connection predicts engagement; content does not** (F-37, F-40, F-41,
+   F-44). Over **9 runs / 54,444 exposures**, holding agent *and* feed slot
+   fixed: `network` vs `discovery` **OR 3.51** [3.06, 4.04], significant in
+   **9/9 runs**. `fof` vs `discovery` **OR 2.34** [1.64, 3.35], significant in
+   **3/7** runs individually — stronger than before but still **suggestive,
+   not established**. Independently replicated under a structurally different
+   feed builder at **OR 5.00** [3.83, 6.52].
 2. **Repetition beats both content and freshness** (F-43, new). Engagement
    rises monotonically with the number of times an agent has already seen a
-   post: **2.20% → 4.52% → 5.94% → 6.80% → 7.33%** (2.20% → 5.27% in absolute
-   terms, a 3.07 pp gap). Within-feed, seen-before vs first-sighting **OR 2.321**
-   [1.826, 2.951], p=6.1e-12; survives adding feed slot (2.130) and replicates in
-   the network tier (1.801). **Significant in 4/5 runs — `v9_feedback` is null at
-   0.89 — and in 2/3 tiers — `fof` is null at 1.290.** Consistent, not universal.
+   post: **2.05% → 4.17% → 5.75% → 6.95% → 8.19%** (2.05% → 4.94% in absolute
+   terms, a 2.89 pp gap). Within-feed **OR 2.624** [2.184, 3.153], p=7.4e-25;
+   survives adding feed slot (2.454) and replicates in the network tier (1.643),
+   whose feed never touches the ranking score. **Significant in 8/9 runs —
+   `v9_feedback` is the lone null at 0.89 — and in 2/3 tiers — `fof` is null at
+   1.222.** Consistent, not universal. **F-45: the "reverses inside first
+   sightings" argument is now p=0.097 and must be reported as directional only.**
    Observational, not randomised — see Q-15.
 3. **The cross-run noise floor swamps every prompt intervention tried**
-   (F-35, F-36). Pure run-to-run SD for posting share is **30.7 pp**; the four
+   (F-35, F-36). Pure run-to-run SD for posting share is **~28-31 pp**; the four
    interventions moved it 3-5 pp against a detectable minimum of 14.3 pp. They
-   were unfalsifiable at this scale, not merely unsupported.
+   were unfalsifiable at this scale, not merely unsupported. **Confirmed across
+   all 15 pairs of six identical runs (Q-14), not just the original pair.**
 
 ### RETRACTED — do not repeat this claim
 
@@ -93,7 +98,7 @@ similarity in neutral grey spanning the null line.
 
 | # | Task | Cost | Why |
 |---|---|---|---|
-| 1 | **A designed repeat-exposure run** (Q-15): re-inject a fixed set of posts at controlled intervals | ~1 run (2 h) | F-43 is the largest effect in the project (OR 2.3) and the only one cheap enough to test properly. Prior sightings are currently an outcome of the ranker, not randomised |
+| 1 | **A designed repeat-exposure run** (Q-15): re-inject a fixed set of posts at controlled intervals | ~1 run (2 h) | Still the top item. F-44 made repeat exposure the project's best-evidenced effect (OR 2.62, 8/9 runs) but more replicates cannot make it experimental — only assignment can |
 | 2 | Optional: a `follow`-targeted designed experiment | ~1 run | F-36 — `follow` has ICC 0.000, ~35 agent-pairs for 5 pp |
 | 3 | Open, unexplained: 14 of 21 actions never fire | unscoped | Limits any claim about the action surface being exercised |
 | 4 | Open, unexplained: F-24, ~32% of posts echo the author's own bio | unscoped | Per F-35 do **not** attack it with prompt tweaks |
@@ -110,7 +115,8 @@ reported automatically.
 - 9-run data explorer: https://claude.ai/code/artifact/732d1879-2f3b-49fe-83f6-0cf4b55c87c3
 - `data/social_timeline_exposure_model.txt` — the engagement analysis
 - `data/social_timeline_noise_floor.txt` — the replicate/noise-floor analysis
-- `data/social_timeline_recency_check.txt` — the F-42/F-43 decomposition
+- `data/social_timeline_recency_check.txt` — the F-42/F-43/F-44/F-45 decomposition
+- `data/social_timeline_noise_floor_6runs.txt` — Q-14, the six-run noise floor
 - `data/social_timeline_<label>_DOSSIER.txt` — per-round transcripts per run
 
 ---
@@ -522,6 +528,49 @@ only 81 distinct posts are ever shown a sixth time
 more than either content or freshness**. Also the mechanism F-38 was missing. Testable
 properly with a designed re-exposure run
 
+#### F-44 — Four more replicates take repeat exposure to 8 of 9 runs
+
+**Finding.** Four additional runs at one identical configuration (prompt v10,
+temperature 0.9 — `v10_rep3` through `v10_rep6`, R-21..R-24) were added, giving
+**9 three-tier runs, 54,444 exposures, 4,536 feeds, 324 agents, 3,692
+engagements**. Repeat exposure now reproduces in **8 of 9 runs individually**
+(2.11, 2.32, 2.46, 2.60, 2.76, 3.30, 3.91, 4.55), with `v9_feedback` still the
+sole null at 0.89 [0.38, 2.11]. Pooled within-feed **OR 2.624 [2.184, 3.153],
+p=7.4e-25**, up from 2.321 on five runs and with a substantially tighter
+interval. Survives adding feed slot (**2.454 [2.065, 2.916]**) and holds by
+agent (**1.768 [1.534, 2.038]**). The dose-response is cleaner than before and
+now monotone through five levels: **2.05% → 4.17% → 5.75% → 6.95% → 8.19%**.
+Absolute scale 2.05% → 4.94%, a 2.89 pp gap.
+
+**Tier picture unchanged in shape:** network **1.643 [1.331, 2.028]** holds,
+`fof` **1.222 [0.851, 1.755]** still does not. This remains a
+network-and-discovery effect.
+
+**Evidence.** `recency_check.py` §8 over 9 runs;
+`data/social_timeline_recency_check.txt`. The four new runs are a genuine
+out-of-sample test: they were run after F-43 was written, at a configuration
+fixed in advance, with no analysis choices changed.
+
+#### F-45 — One of F-43's supporting arguments weakened and must be restated
+
+**Finding.** F-43 leaned on a "decisive test": restricted to first sightings
+only, where the repeat channel is closed by construction, stale posts did
+*worse* — OR 0.551 [0.314, 0.969], p=0.039 on five runs. **On nine runs that
+result is no longer significant: OR 0.703 [0.463, 1.066], p=0.097.** The point
+estimate still sits below 1 and the direction is unchanged, but the interval now
+crosses it.
+
+This does not overturn F-43 — the main contrast strengthened, and the
+network-tier replication (a tier whose feed never touches the ranking score)
+still holds at 1.643. But the specific claim that age *reverses* inside first
+sightings is no longer supported at the 5% level and must be reported as
+directional only. **Do not repeat "the advantage reverses" as though it were
+established.**
+
+**Evidence.** `recency_check.py` §7, "stale vs fresh | first sightings only",
+5-run vs 9-run output. An honest cost of adding data: more evidence made the
+headline stronger and one supporting argument weaker at the same time.
+
 #### F-37 — Connection predicts engagement; content similarity does not. This is the project's actual result
 
 **Finding.** Pooled over 13 analysed runs: **57,682 exposures, 5,345 feeds, 412
@@ -732,6 +781,27 @@ network
 > **friend-of-friend** (2-hop, interest ranked) > **discovery** (small global slice).
 Isolation is not penalised — it falls out, since an agent with no follows fills only the
 discovery tier
+
+#### B-15 — The overnight batch script silently failed every analysis
+
+**Where.** Ours, `overnight_replicates.sh`
+
+**Symptom.** All four overnight runs (R-21..R-24) completed normally, but each
+reported "ran but analysis FAILED", and the script's final line read "batch done:
+0 of 4 runs completed and analysed" despite four complete runs sitting on disk.
+
+**Cause.** The script called `analyze.py "data/social_timeline_$LABEL.db"`
+positionally. `analyze.py` requires the path behind `--db`, so argparse exited
+with a usage error every time. The run data was never at risk -- only the
+convenience step of analysing it automatically.
+
+**Fix.** Pass `--db`. Found after the first run at 00:31; the script was
+deliberately **not** edited mid-flight, because bash re-reads a running script by
+byte offset and editing one in place can corrupt execution. A separate watcher
+process analysed rep4-rep6 as their manifests appeared, and rep3 was analysed by
+hand. The flag was fixed once the batch had finished.
+
+**Found by.** The monitor on `overnight.log`, at the first run's completion.
 
 #### B-14
 
@@ -1778,6 +1848,13 @@ version counter was not always bumped when the label was. **Trust the manifest's
 
 ---
 
+| R-21 | 0 | `v10_rep3` — 36 agents, 15 rounds, prompt v10, temp 0.9, `--no-groups`. Overnight replicate batch, launched to give six runs at one identical configuration | **PASS.** 116 min, 0 agent failures. 208 posts, 56 comments, 41 follows, 34 likes, 6048 exposures. Analysis initially failed (the batch script called `analyze.py` without its required `--db` flag); the run data was unaffected and all four were analysed by a separate watcher |
+| R-22 | 0 | `v10_rep4` — 36 agents, 15 rounds, prompt v10, temp 0.9, `--no-groups`. Overnight replicate batch, launched to give six runs at one identical configuration | **PASS.** 115 min, 0 agent failures. 243 posts, 56 comments, 44 follows, 46 likes, 6048 exposures. Analysis initially failed (the batch script called `analyze.py` without its required `--db` flag); the run data was unaffected and all four were analysed by a separate watcher |
+| R-23 | 0 | `v10_rep5` — 36 agents, 15 rounds, prompt v10, temp 0.9, `--no-groups`. Overnight replicate batch, launched to give six runs at one identical configuration | **PASS.** 120 min, 0 agent failures. 215 posts, 49 comments, 49 follows, 42 likes, 6048 exposures. Analysis initially failed (the batch script called `analyze.py` without its required `--db` flag); the run data was unaffected and all four were analysed by a separate watcher |
+| R-24 | 0 | `v10_rep6` — 36 agents, 15 rounds, prompt v10, temp 0.9, `--no-groups`. Overnight replicate batch, launched to give six runs at one identical configuration | **PASS.** 117 min, 0 agent failures. 243 posts, 64 comments, 47 follows, 40 likes, 6048 exposures. Analysis initially failed (the batch script called `analyze.py` without its required `--db` flag); the run data was unaffected and all four were analysed by a separate watcher |
+
+---
+
 ## 8. Bug ledger
 
 Bugs found during this build — in our code or upstream — with how each surfaced.
@@ -2063,13 +2140,18 @@ significant pooled but in only 1 of 4 runs individually
 
 **Status.** **Open.** Would need either more runs or the F-36 follow-targeted design
 
-#### Q-14
+#### Q-14 — Is the F-35 noise floor itself stable?
 
-**Question.** Is the F-35 noise floor itself stable? It rests on one replicate pair,
-though it landed within 0.4 pp of an independent estimate
+**Question.** It rested on a single replicate pair, though it landed within
+0.4 pp of an independent estimate.
 
-**Status.** **Open, low priority.** A second replicate would confirm it; the machine
-time is probably better spent on Q-13
+**Status.** **Answered — it stands.** Six runs at one identical configuration
+give all 15 pairs. Mean paired SD: `create_post` **28.2%** (range 24.7-33.1),
+`create_comment` 18.5% (16.2-22.0), `like_post` 15.5% (13.1-18.8), `follow`
+9.6% (8.0-11.4). Every figure from the original single pair (30.5 / 18.4 / 14.4
+/ 10.7) falls **inside** the spread of all fifteen, so F-35 was a fair draw and
+the conclusion built on it holds. `noise_floor.py`,
+`data/social_timeline_noise_floor_6runs.txt`
 
 #### Q-1
 

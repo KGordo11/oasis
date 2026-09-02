@@ -1,10 +1,10 @@
 ==============================================================================
 Q-10: IS F-38'S ANTI-PREDICTIVE 'SIMILARITY' A RECENCY EFFECT?
 ==============================================================================
-runs             : 5  (baseline, v10_register, v10_replicate, v8_full, v9_feedback)
-discovery rows   : 20822 with sim, recency and score all present
-agents (clusters): 180
-engaged          : 636
+runs             : 9  (baseline, v10_register, v10_replicate, v8_full, v9_feedback, v10_rep3, v10_rep4, v10_rep5, v10_rep6)
+discovery rows   : 37668 with sim, recency and score all present
+agents (clusters): 324
+engaged          : 1030
 
 The variable F-38 called 'similarity' is rec_history.score, which is
 sim * recency (timeline_platform.py:365, 699-701) -- not cosine.
@@ -14,85 +14,85 @@ sim * recency (timeline_platform.py:365, 699-701) -- not cosine.
    Should match the published OR 0.305 [0.164, 0.568]. If it does,
    every difference below is the decomposition and not the pipeline.
 ------------------------------------------------------------------------------
-    score          OR  0.305  95% CI [ 0.164,  0.568]  p=0.000185
-    feed_slot      OR  0.927  95% CI [ 0.895,  0.961]  p=2.98e-05
+    score          OR  0.267  95% CI [ 0.157,  0.457]  p=1.39e-06
+    feed_slot      OR  0.912  95% CI [ 0.889,  0.936]  p=2.38e-12
 
 ------------------------------------------------------------------------------
 2. THE CONFOUND Q-10 HYPOTHESISED: ARE SIMILAR POSTS OLDER?
 ------------------------------------------------------------------------------
-  corr(sim, recency)   +0.051
-  corr(sim, score)     +0.706
-  corr(recency, score) +0.731
+  corr(sim, recency)   +0.063
+  corr(sim, score)     +0.788
+  corr(recency, score) +0.653
 
-  sim      range 0.212 - 0.996   mean 0.798  sd 0.150
-  recency  range 0.000001 - 0.931   mean 0.857  sd 0.167  (10 distinct values)
-  score    range 0.000000 - 0.927   mean 0.685  sd 0.190
+  sim      range 0.212 - 0.996   mean 0.796  sd 0.149
+  recency  range 0.000001 - 0.931   mean 0.878  sd 0.132  (10 distinct values)
+  score    range 0.000000 - 0.927   mean 0.700  sd 0.172
 
   mean cosine within each recency level:
     recency  0.000001  n=   304  mean sim 0.814
     recency  0.089109  n=   127  mean sim 0.764
     recency  0.241952  n=   161  mean sim 0.749
-    recency  0.374502  n=   214  mean sim 0.775
-    recency  0.491520  n=   295  mean sim 0.772
-    recency  0.596269  n=   471  mean sim 0.783
-    recency  0.691078  n=   727  mean sim 0.774
-    recency  0.777672  n=  1383  mean sim 0.782
-    recency  0.857361  n=  3502  mean sim 0.775
-    recency  0.931166  n= 13638  mean sim 0.809
+    recency  0.374502  n=   221  mean sim 0.777
+    recency  0.491520  n=   321  mean sim 0.771
+    recency  0.596269  n=   542  mean sim 0.771
+    recency  0.691078  n=   928  mean sim 0.750
+    recency  0.777672  n=  2317  mean sim 0.770
+    recency  0.857361  n=  6670  mean sim 0.771
+    recency  0.931166  n= 26077  mean sim 0.808
 
 ------------------------------------------------------------------------------
 3. ASSUMPTION-FREE: ENGAGEMENT BY COSINE, AND BY RECENCY
 ------------------------------------------------------------------------------
   by cosine decile (this is the variable F-38 claimed to describe):
-    d1  sim 0.212-0.563    48/2082  =  2.31%
-    d2  sim 0.563-0.743    57/2082  =  2.74%
-    d3  sim 0.743-0.800    68/2081  =  3.27%
-    d4  sim 0.800-0.831    75/2083  =  3.60%
-    d5  sim 0.831-0.853    67/2083  =  3.22%
-    d6  sim 0.853-0.869    49/2082  =  2.35%
-    d7  sim 0.869-0.883    61/2081  =  2.93%
-    d8  sim 0.883-0.897    61/2083  =  2.93%
-    d9  sim 0.897-0.912    75/2081  =  3.60%
-    d10 sim 0.912-0.996    75/2084  =  3.60%
+    d1  sim 0.212-0.558    87/3765  =  2.31%
+    d2  sim 0.558-0.749   116/3768  =  3.08%
+    d3  sim 0.749-0.803    97/3767  =  2.57%
+    d4  sim 0.803-0.830    92/3767  =  2.44%
+    d5  sim 0.830-0.849   118/3767  =  3.13%
+    d6  sim 0.849-0.865    84/3766  =  2.23%
+    d7  sim 0.865-0.878   112/3767  =  2.97%
+    d8  sim 0.878-0.892    93/3766  =  2.47%
+    d9  sim 0.892-0.908   105/3768  =  2.79%
+    d10 sim 0.908-0.996   126/3767  =  3.34%
 
   by recency level (deterministic in post age, so these are age bins;
   1e-06 is the clamp floor for posts past the age cliff):
     recency  0.000001    21/304   =  6.91%
     recency  0.089109     5/127   =  3.94%
     recency  0.241952    13/161   =  8.07%
-    recency  0.374502    12/214   =  5.61%
-    recency  0.491520    12/295   =  4.07%
-    recency  0.596269    24/471   =  5.10%
-    recency  0.691078    36/727   =  4.95%
-    recency  0.777672    65/1383  =  4.70%
-    recency  0.857361   134/3502  =  3.83%
-    recency  0.931166   314/13638 =  2.30%
+    recency  0.374502    14/221   =  6.33%
+    recency  0.491520    14/321   =  4.36%
+    recency  0.596269    32/542   =  5.90%
+    recency  0.691078    48/928   =  5.17%
+    recency  0.777672    96/2317  =  4.14%
+    recency  0.857361   230/6670  =  3.45%
+    recency  0.931166   557/26077 =  2.14%
 
   by blended-score decile (F-38's published table, for comparison):
-    d1  score 0.000-0.387    82/2082  =  3.94%
-    d2  score 0.387-0.560    75/2082  =  3.60%
-    d3  score 0.560-0.667    73/2082  =  3.51%
-    d4  score 0.667-0.722    71/2082  =  3.41%
-    d5  score 0.722-0.759    54/2083  =  2.59%
-    d6  score 0.759-0.787    76/2082  =  3.65%
-    d7  score 0.787-0.808    46/2082  =  2.21%
-    d8  score 0.808-0.824    53/2082  =  2.55%
-    d9  score 0.824-0.840    44/2082  =  2.11%
-    d10 score 0.840-0.927    62/2083  =  2.98%
+    d1  score 0.000-0.422   119/3766  =  3.16%
+    d2  score 0.422-0.607   147/3767  =  3.90%
+    d3  score 0.607-0.695   108/3767  =  2.87%
+    d4  score 0.695-0.736   109/3767  =  2.89%
+    d5  score 0.736-0.765    92/3767  =  2.44%
+    d6  score 0.765-0.787   106/3766  =  2.81%
+    d7  score 0.787-0.805    85/3766  =  2.26%
+    d8  score 0.805-0.821    94/3768  =  2.49%
+    d9  score 0.821-0.838    85/3767  =  2.26%
+    d10 score 0.838-0.927    85/3767  =  2.26%
 
 ------------------------------------------------------------------------------
 4. THE TERMS PULLED APART (cluster-robust logit, clustered by agent)
 ------------------------------------------------------------------------------
   cosine alone:
-    sim            OR  1.544  95% CI [ 0.588,  4.054]  p=0.378
-    feed_slot      OR  0.952  95% CI [ 0.921,  0.985]  p=0.0042
+    sim            OR  1.143  95% CI [ 0.524,  2.495]  p=0.738
+    feed_slot      OR  0.931  95% CI [ 0.908,  0.955]  p=2.57e-08
   recency alone:
-    recency        OR  0.176  95% CI [ 0.103,  0.300]  p=1.67e-10
-    feed_slot      OR  0.920  95% CI [ 0.887,  0.954]  p=5.41e-06
+    recency        OR  0.120  95% CI [ 0.073,  0.198]  p=1.18e-16
+    feed_slot      OR  0.905  95% CI [ 0.881,  0.929]  p=7.16e-14
   both together:
-    sim            OR  1.568  95% CI [ 0.607,  4.048]  p=0.353
-    recency        OR  0.176  95% CI [ 0.104,  0.299]  p=1.15e-10
-    feed_slot      OR  0.923  95% CI [ 0.889,  0.958]  p=2.42e-05
+    sim            OR  1.215  95% CI [ 0.558,  2.646]  p=0.624
+    recency        OR  0.120  95% CI [ 0.073,  0.197]  p=6.7e-17
+    feed_slot      OR  0.906  95% CI [ 0.882,  0.931]  p=7.2e-13
 
 ------------------------------------------------------------------------------
 5. COSINE WITHIN EACH RECENCY LEVEL
@@ -104,13 +104,13 @@ sim * recency (timeline_platform.py:365, 699-701) -- not cosine.
   recency  0.000001  n=   304  acted=21   sim OR   1.459  [ 0.018, 120.185]  p=0.867
   recency  0.089109  n=   127  acted=5    -- too thin to fit
   recency  0.241952  n=   161  acted=13   -- too thin to fit
-  recency  0.374502  n=   214  acted=12   sim OR   0.229  [ 0.010,   5.119]  p=0.352
-  recency  0.491520  n=   295  acted=12   sim OR  11.241  [ 0.287, 440.655]  p=0.196
-  recency  0.596269  n=   471  acted=24   sim OR   0.485  [ 0.070,   3.374]  p=0.465
-  recency  0.691078  n=   727  acted=36   sim OR   3.022  [ 0.284,  32.218]  p=0.36
-  recency  0.777672  n=  1383  acted=65   sim OR   2.757  [ 0.866,   8.781]  p=0.0861
-  recency  0.857361  n=  3502  acted=134  sim OR   3.651  [ 1.186,  11.236]  p=0.024
-  recency  0.931166  n= 13638  acted=314  sim OR   0.882  [ 0.318,   2.444]  p=0.809
+  recency  0.374502  n=   221  acted=14   sim OR   0.446  [ 0.019,  10.221]  p=0.614
+  recency  0.491520  n=   321  acted=14   sim OR  26.873  [ 0.601, 1201.647]  p=0.0896
+  recency  0.596269  n=   542  acted=32   sim OR   0.467  [ 0.083,   2.628]  p=0.388
+  recency  0.691078  n=   928  acted=48   sim OR   1.751  [ 0.228,  13.431]  p=0.59
+  recency  0.777672  n=  2317  acted=96   sim OR   1.745  [ 0.473,   6.434]  p=0.403
+  recency  0.857361  n=  6670  acted=230  sim OR   3.144  [ 1.256,   7.872]  p=0.0144
+  recency  0.931166  n= 26077  acted=557  sim OR   0.795  [ 0.351,   1.801]  p=0.583
 
 ------------------------------------------------------------------------------
 6. IS THE RECENCY EFFECT ITSELF JUST A ROUND EFFECT?
@@ -121,24 +121,24 @@ sim * recency (timeline_platform.py:365, 699-701) -- not cosine.
    as the tier estimate in exposure_model.py section 3 does.
 ------------------------------------------------------------------------------
   raw engagement rate by round (the thing that could confound it):
-    round   1    122/2160  =  5.65%
-    round   2     90/2020  =  4.46%
-    round   3     57/1881  =  3.03%
-    round   4     40/1715  =  2.33%
-    round   5     39/1603  =  2.43%
-    round   6     36/1521  =  2.37%
-    round   7     47/1440  =  3.26%
-    round   8     37/1367  =  2.71%
-    round   9     37/1304  =  2.84%
-    round  10     32/1260  =  2.54%
-    round  11     29/1199  =  2.42%
-    round  12     23/1160  =  1.98%
-    round  13     27/1115  =  2.42%
-    round  14     20/1077  =  1.86%
+    round   1    216/3888  =  5.56%
+    round   2    145/3663  =  3.96%
+    round   3     95/3407  =  2.79%
+    round   4     70/3154  =  2.22%
+    round   5     59/2949  =  2.00%
+    round   6     59/2788  =  2.12%
+    round   7     70/2631  =  2.66%
+    round   8     62/2486  =  2.49%
+    round   9     51/2330  =  2.19%
+    round  10     56/2246  =  2.49%
+    round  11     47/2141  =  2.20%
+    round  12     36/2066  =  1.74%
+    round  13     38/1996  =  1.90%
+    round  14     26/1923  =  1.35%
 
   'fresh' = newest recency level (0.931166, age 0); 'stale' = every older level.
-    stale vs fresh, stratified by feed   OR  1.751  95% CI [ 1.384,  2.215]  p=3.04e-06  (1956 informative feeds)
-    stale vs fresh, stratified by agent  OR  1.177  95% CI [ 0.984,  1.409]  p=0.0752  (180 informative agents)
+    stale vs fresh, stratified by feed   OR  2.061  95% CI [ 1.724,  2.464]  p=1.97e-15  (3693 informative feeds)
+    stale vs fresh, stratified by agent  OR  1.370  95% CI [ 1.194,  1.573]  p=7.32e-06  (324 informative agents)
 
   If the feed-stratified OR stays well above 1, older posts really do
   draw more engagement than fresh ones seen in the same feed, and the
@@ -153,30 +153,30 @@ sim * recency (timeline_platform.py:365, 699-701) -- not cosine.
    `prior` counts earlier sightings of this (agent, post) across the
    whole feed, not just this tier.
 ------------------------------------------------------------------------------
-  fresh  n= 13638  mean prior sightings  0.00   first-sighting share 100.0%
-  stale  n=  7184  mean prior sightings  1.69   first-sighting share  19.4%
+  fresh  n= 26077  mean prior sightings  0.00   first-sighting share 100.0%
+  stale  n= 11591  mean prior sightings  1.39   first-sighting share  23.0%
 
   A fresh post is a first sighting by construction, so 'fresh vs
   stale' was largely 'never seen before vs seen before'.
 
   engagement by number of prior sightings (discovery):
-    prior=0    331/15032  =  2.20%
-    prior=1    138/3050   =  4.52%
-    prior=2     67/1127   =  5.94%
-    prior=3     46/676    =  6.80%
-    prior=4     30/409    =  7.33%
-    prior=5+    24/528    =  4.55%
+    prior=0    589/28739  =  2.05%
+    prior=1    235/5634   =  4.17%
+    prior=2     87/1514   =  5.75%
+    prior=3     55/791    =  6.95%
+    prior=4     37/452    =  8.19%
+    prior=5+    27/538    =  5.02%
 
-    seen-before vs first sighting, by feed  OR  2.321  [ 1.826,  2.951]  p=6.12e-12  (1658 strata, agent+round+run fixed by construction)
-    seen-before vs first sighting, by agent OR  1.505  [ 1.253,  1.806]  p=1.16e-05  (180 strata, agent fixed, pools across rounds)
+    seen-before vs first sighting, by feed  OR  2.624  [ 2.184,  3.153]  p=7.44e-25  (3047 strata, agent+round+run fixed by construction)
+    seen-before vs first sighting, by agent OR  1.768  [ 1.534,  2.038]  p=3.57e-15  (324 strata, agent fixed, pools across rounds)
 
   The decisive test -- re-run stale vs fresh inside FIRST SIGHTINGS
   only, where the repeat-exposure channel is closed by construction:
-    stale vs fresh | first sightings only  OR  0.551  [ 0.314,  0.969]  p=0.0386  (1023 feeds, n=15032)
+    stale vs fresh | first sightings only  OR  0.703  [ 0.463,  1.066]  p=0.0972  (1991 feeds, n=28739)
 
   Independent replication in the NETWORK tier, where the similarity
   score plays no part in the feed at all:
-    seen-before vs first sighting, by feed  OR  1.801  [ 1.348,  2.406]  p=6.94e-05  (578 feeds, n=6396)
+    seen-before vs first sighting, by feed  OR  1.643  [ 1.331,  2.028]  p=3.81e-06  (1074 feeds, n=11459)
 
 
 ------------------------------------------------------------------------------
@@ -190,28 +190,32 @@ sim * recency (timeline_platform.py:365, 699-701) -- not cosine.
     v10_replicate   OR   2.60  [ 1.62,   4.19]  p=8.2e-05  significant=yes (346 strata)
     v8_full         OR   2.46  [ 1.63,   3.70]  p=1.8e-05  significant=yes (378 strata)
     v9_feedback     OR   0.89  [ 0.38,   2.11]  p=0.8  significant=NO  (293 strata)
+    v10_rep3        OR   3.91  [ 2.01,   7.61]  p=6e-05  significant=yes (362 strata)
+    v10_rep4        OR   4.55  [ 2.45,   8.48]  p=1.8e-06  significant=yes (357 strata)
+    v10_rep5        OR   3.30  [ 1.87,   5.82]  p=3.8e-05  significant=yes (337 strata)
+    v10_rep6        OR   2.11  [ 1.30,   3.44]  p=0.0026  significant=yes (333 strata)
 
   by tier -- the score plays no part in network or fof construction:
-    network    n=  6396  OR  1.801  [1.348,  2.406]  p=6.9e-05
-    fof        n=  3022  OR  1.290  [0.805,  2.068]  p=0.29
-    discovery  n= 20822  OR  2.321  [1.826,  2.951]  p=6.1e-12
+    network    n= 11459  OR  1.643  [1.331,  2.028]  p=3.8e-06
+    fof        n=  5317  OR  1.222  [0.851,  1.755]  p=0.28
+    discovery  n= 37668  OR  2.624  [2.184,  3.153]  p=7.4e-25
 
   feed slot held fixed as well -- re-shown posts rank LOWER (mean slot
   7.60 vs 6.40), so slot biases against this result, not for it:
-    stratified by (agent, slot)  OR  2.130  [1.700,  2.669]  p=4.9e-11  (1180 strata)
+    stratified by (agent, slot)  OR  2.454  [2.065,  2.916]  p=2.1e-24  (2209 strata)
 
   absolute scale, which the odds ratio overstates at a low base rate:
-    first sighting  2.20%   repeat  5.27%   difference 3.07 pp  (2.39x the raw rate)
+    first sighting  2.05%   repeat  4.94%   difference 2.89 pp  (2.41x the raw rate)
 
   the tail, with distinct posts behind each bin -- the apparent
   turnover past 4 sightings rests on very few posts:
-    prior=0    331/15032  =  2.20% +/- 0.23pp  (1029 distinct posts)
-    prior=1    138/3050   =  4.52% +/- 0.74pp  (614 distinct posts)
-    prior=2     67/1127   =  5.94% +/- 1.38pp  (144 distinct posts)
-    prior=3     46/676    =  6.80% +/- 1.90pp  (85 distinct posts)
-    prior=4     30/409    =  7.33% +/- 2.53pp  (59 distinct posts)
-    prior=5     11/218    =  5.05% +/- 2.91pp  (35 distinct posts)
-    prior=6      6/148    =  4.05% +/- 3.18pp  (20 distinct posts)
+    prior=0    589/28739  =  2.05% +/- 0.16pp  (1859 distinct posts)
+    prior=1    235/5634   =  4.17% +/- 0.52pp  (1216 distinct posts)
+    prior=2     87/1514   =  5.75% +/- 1.17pp  (275 distinct posts)
+    prior=3     55/791    =  6.95% +/- 1.77pp  (118 distinct posts)
+    prior=4     37/452    =  8.19% +/- 2.53pp  (78 distinct posts)
+    prior=5     13/225    =  5.78% +/- 3.05pp  (39 distinct posts)
+    prior=6      7/151    =  4.64% +/- 3.35pp  (21 distinct posts)
     prior=7      4/87     =  4.60% +/- 4.40pp  (12 distinct posts)
     prior=8      2/60     =  3.33% +/- 4.54pp  (10 distinct posts)
     prior=9+     1/15     =  6.67% +/-12.62pp  (4 distinct posts)

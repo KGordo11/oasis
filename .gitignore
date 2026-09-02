@@ -100,3 +100,8 @@ models/
 *.sqlite
 
 tmp
+
+# Overnight batch logs: 241MB of verbose camel/LLM output. The run manifests
+# (data/social_timeline_*.json) already carry per-round timings and counters,
+# which is the provenance that matters.
+data/overnight_logs/

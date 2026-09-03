@@ -7,6 +7,10 @@ outcome. It is written so that anyone (including future-me) can reconstruct the 
 build without having to ask a question or guess at a rationale.
 
 **Related documents**
+- **Scaling & data-pipeline work: `SIM4_SCALING_LOG.md`** — the current task
+  (make runs faster; store results at 1000x1000 scale). It continues the
+  `F-`/`B-`/`D-`/`R-`/`Q-` sequences from this file rather than restarting them, and
+  changes no result recorded here.
 - Design spec: `docs/superpowers/specs/2026-08-24-social-timeline-design.md`
 - Project-wide running log: `PROJECT_LOG.md`
 - Prior simulations: `SESSION_REPORT (basic sim1).md`,

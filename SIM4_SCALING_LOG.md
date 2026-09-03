@@ -60,7 +60,22 @@ halves fail for completely different reasons and have completely different fixes
   Every analysis tool reads that single file. It is 1.6 MB at 36 × 15. It does not
   survive this.
 
-### Next, in priority order
+### The build queue — agreed, not started
+
+**Confirmed with the user 2026-09-03. Nothing here has been started, deliberately:
+brainstorming is still open and the design may still change. Do not begin building
+without checking in.** Update this block — status, findings, and any re-ordering — as
+work happens; it is the answer to "where were we".
+
+| # | Task | Cost | Status | Why it is in this order |
+|---|---|---|---|---|
+| 1 | **Phase-level timing instrumentation** — split a round into embed / score / feed-build / DB-write / LLM-wait in `run_simulation.py` (Q-16) | ~1 h, no run | **not started** | F-50 attributes ~99 % of runtime to the LLM by *subtraction and micro-benchmark*, not by measuring a real run. This either confirms it or redirects the whole effort, so it goes first and costs almost nothing |
+| 2 | **`export.py` → partitioned Parquet** (D-15) | ~3 h, no run | **not started** | Unblocks the professor's actual ask. Testable against the nine existing runs immediately — no simulation needed to prove it works |
+| 3 | **Prompt-size reduction** (Q-17) | ~1 h + 1 smoke test | **not started** | Prefill scales with the 12-post feed text. The cheapest real speedup that leaves the model unchanged — but per F-35 it must still be judged against baseline, not against the previous run |
+
+Everything below is the wider backlog, and stays subordinate to those three.
+
+### The rest of the backlog
 
 | # | Task | Cost | Why |
 |---|---|---|---|

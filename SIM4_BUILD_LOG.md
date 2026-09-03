@@ -7,6 +7,10 @@ outcome. It is written so that anyone (including future-me) can reconstruct the 
 build without having to ask a question or guess at a rationale.
 
 **Related documents**
+- **Ongoing work since the build finished: `SIM4_UPDATE_LOG.md`** — read that one
+  first when resuming. This file is the stable reference for how Sim 4 was built
+  and what the nine analysed runs established; live work is tracked there, and the
+  `F-`/`B-`/`D-`/`R-`/`Q-` sequences continue into it rather than restarting.
 - Design spec: `docs/superpowers/specs/2026-08-24-social-timeline-design.md`
 - Project-wide running log: `PROJECT_LOG.md`
 - Prior simulations: `SESSION_REPORT (basic sim1).md`,

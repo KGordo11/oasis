@@ -41,7 +41,19 @@ Findings are `F-n`, bugs `B-n`, decisions `D-n`, runs `R-n`, open questions
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-01. Update this section at the end of every working session.*
+*Last updated 2026-09-03. Update this section at the end of every working session.*
+
+**2026-09-03 — both artifacts re-figured from 5-run to 9-run numbers.** The write-up
+and field guide had been updated in their headline figures after the four overnight
+replicates but still carried 5-run values in prose, tables and (B-17) chart geometry.
+Corrected throughout: cosine OR **1.143** [0.524, 2.495] p=0.74 (was 1.544/0.588-4.054/0.38),
+blended score **0.267**, recency **0.120**, fof **2.34** and **3 of 7** runs (was 1.97 / 1 of 4),
+feed-only network OR **12.76** and slot-fixed **3.51** (was 11.07 / 3.54), the cosine
+decile table, tier exposure counts, round-1/round-14 rates, run count **24** (was 20),
+and the tail count **39** distinct posts (was 86 and 81, which also disagreed with each other).
+One claim changed in substance, not just value: cosine is null in **seven of eight**
+recency levels, not all eight — level 0.857 returns OR 3.14 [1.26, 7.87], p=0.014,
+positive and uncorrected across eight tests. See B-17 for the forest-plot defect.
 
 **Branch `social-timeline-sim`. Four overnight replicates (R-21..R-24) completed
 2026-09-02 06:24 and are analysed; the project now has **9 three-tier runs**.
@@ -91,7 +103,7 @@ similarity in neutral grey spanning the null line.
 ### Done
 
 - Instrumentation, three-tier feed, informed-action gate, 22-action surface.
-- 20 runs (see §7). 9 analysed runs in the data artifact.
+- 24 runs (see §7). 9 analysed runs in the statistics; the data explorer carries 13.
 - `analyze.py` (per-run), `dossier.py` (~28k-line transcripts), `make_graph.py`
   (artifact), `compare.py` (cross-run, paired), `exposure_model.py`
   (within-run), `recency_check.py` (the F-42/F-43 decomposition).
@@ -116,9 +128,9 @@ reported automatically.
 
 ### Deliverables
 
-- Write-up for the professor (corrected 2026-09-01): https://claude.ai/code/artifact/55d7c5a5-4a69-406c-bc4f-8f14a94f710b
-- Field guide — step-by-step explainer of the whole build: https://claude.ai/code/artifact/b878972f-ab95-4d0c-ba12-e1b1684467ba
-- 9-run data explorer: https://claude.ai/code/artifact/732d1879-2f3b-49fe-83f6-0cf4b55c87c3
+- Write-up for the professor (corrected 2026-09-01; re-figured to 9 runs 2026-09-03): https://claude.ai/code/artifact/55d7c5a5-4a69-406c-bc4f-8f14a94f710b
+- Field guide — step-by-step explainer of the whole build (re-figured to 9 runs 2026-09-03): https://claude.ai/code/artifact/b878972f-ab95-4d0c-ba12-e1b1684467ba
+- 13-run data explorer (9 three-tier + 4 pre-three-tier): https://claude.ai/code/artifact/732d1879-2f3b-49fe-83f6-0cf4b55c87c3
 - `data/social_timeline_exposure_model.txt` — the engagement analysis
 - `data/social_timeline_noise_floor.txt` — the replicate/noise-floor analysis
 - `data/social_timeline_recency_check.txt` — the F-42/F-43/F-44/F-45 decomposition
@@ -801,6 +813,41 @@ network
 > **friend-of-friend** (2-hop, interest ranked) > **discovery** (small global slice).
 Isolation is not penalised — it falls out, since an agent with no follows fills only the
 discovery tier
+
+#### B-17 — The write-up's forest plot drew the 5-run estimates under 9-run labels
+
+**Where.** The write-up artifact (`55d7c5a5`), section 02 forest plot.
+
+**Symptom.** When the four overnight replicates took the study from five runs to
+nine, the forest plot's printed values were updated but the CSS geometry that
+draws each bar was not. Every bar was positioned from the superseded estimate
+while the number beside it read the current one. Decoding the published
+`left`/`width` percentages against the plot's own log axis
+(`pos(x) = (log10(x)+1) x 45.35`, calibrated from its 0.1/0.3/1/3/10 ticks)
+recovers the old values exactly:
+
+| Row | Drawn at | Labelled |
+|---|---|---|
+| network vs discovery | 3.55 [2.93, 4.30] | 3.51 [3.06, 4.04] |
+| fof vs discovery | 1.97 [1.25, 3.11] | 2.34 [1.64, 3.35] |
+| network vs fof | 2.13 [1.42, 3.16] | 1.85 [1.38, 2.48] |
+| seen before | 2.33 [1.83, 2.94] | 2.62 [2.18, 3.15] |
+
+**Cause.** The plot stores each bar's position as a hand-computed literal rather
+than deriving it from the estimate, so a value edit and a geometry edit are two
+separate actions and nothing enforces that both happen. The field guide's
+equivalent plot computes geometry from a data array and was internally
+consistent — the same content, one implementation self-checking and one not.
+
+**Fix.** All five rows recomputed from the analysis output and verified
+programmatically against the axis scale (max placement error 0.05%). The lesson
+generalises past this plot: **a chart whose marks are literals will drift from
+its labels silently.** Prefer the field guide's pattern — one data array, geometry
+derived — for anything that gets re-estimated.
+
+**Found.** 2026-09-03, while re-figuring both artifacts from 5-run to 9-run
+numbers. Nothing flagged it; it surfaced only because the bar positions were
+checked against the axis rather than trusted.
 
 #### B-16 — The graph's edge filter made cumulative interactions look like they vanished
 

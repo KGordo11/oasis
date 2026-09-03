@@ -50,8 +50,12 @@ halves fail for completely different reasons and have completely different fixes
 - **The wall is the language model, and only the language model** (F-50). At the
   measured 14.4 s per agent-turn, 1000 × 1000 is **167 days**. Scoring is not the
   problem: a full 1000 × 1,000,000 cosine pass is ~1.1 s of matmul.
-- **The concurrency knob is already at its optimum** (F-51). Ollama throughput on
-  this machine peaks at semaphore 4 and *falls* at 8. There is no free speedup there.
+- **There was a free speedup, and F-51 missed it** (F-53). Ollama had
+  `OLLAMA_NUM_PARALLEL:1` — it served one request at a time and the semaphore of 4 only
+  filled a queue. Setting it properly is worth **1.9×**; today's config is actually
+  **19 % slower than running serially**. F-51 is retracted.
+- **Prefill is ~4 % of a turn** (F-54), so trimming prompts was aimed at the wrong end.
+  Decode is ~96 %. The lever is how much the model *writes*.
 - **Storage fails separately, and is entirely fixable** (F-52). 43.5 M rows and
   ~14.7 GB of SQLite at target scale; the same data is **0.62 GB** as partitioned
   Parquet — 23× smaller — and readable by pandas, R, DuckDB, Polars and Tableau
@@ -71,7 +75,8 @@ work happens; it is the answer to "where were we".
 |---|---|---|---|---|
 | 1 | **Phase-level timing instrumentation** — split a round into embed / score / feed-build / DB-write / LLM-wait in `run_simulation.py` (Q-16) | ~1 h, no run | **not started** | F-50 attributes ~99 % of runtime to the LLM by *subtraction and micro-benchmark*, not by measuring a real run. This either confirms it or redirects the whole effort, so it goes first and costs almost nothing |
 | 2 | **`export.py` → partitioned Parquet** (D-15) | ~3 h, no run | **not started** | Unblocks the professor's actual ask. Testable against the nine existing runs immediately — no simulation needed to prove it works |
-| 3 | **Prompt-size reduction** (Q-17) | ~1 h + 1 smoke test | **not started** | Prefill scales with the 12-post feed text. The cheapest real speedup that leaves the model unchanged — but per F-35 it must still be judged against baseline, not against the previous run |
+| 3 | ~~Prompt-size reduction (Q-17)~~ → **replaced by: set `OLLAMA_NUM_PARALLEL` and re-tune `--semaphore`** | ~15 min + 1 smoke | **not started** | **Changed 2026-09-03 by F-53/F-54.** Prefill turned out to be ~4 % of a turn, so trimming the prompt was aimed at the wrong end. The measured 1.9× is one env var and one flag. Item 3 is now the cheapest *real* speedup |
+| 4 | **Measure generated tokens and tool-call round-trips per turn** (Q-20) | ~30 min | **not started** | F-54 says decode is ~96 % of a turn, so the only prompt-side lever that matters is how much the model *writes*, not what it reads. Folds naturally into item 1 |
 
 Everything below is the wider backlog, and stays subordinate to those three.
 
@@ -86,9 +91,11 @@ Not queued — these wait on the three above, or on a decision.
 | **Decide the honest target scale** (Q-18) | discussion | You and your professor. §3 gives what is reachable; 1000 × 1000 is not |
 | **Decide on model size** (D-17) | discussion | Same conversation. `llama3.2:3b` is a *condition*, not an optimisation |
 
-**Do not** raise `--semaphore` expecting a speedup (F-51). **Do not** swap to
-`llama3.2:3b` and call it an optimisation — it is a different experimental condition
-and invalidates comparison to all 24 existing runs (D-17, pending).
+**`--semaphore` alone does nothing** — the server was pinned at `OLLAMA_NUM_PARALLEL:1`
+and queued everything (F-53, which retracts F-51). Raise the *server* setting, then the
+flag. **Do not** swap to `llama3.2:3b` and call it an optimisation: it is worth 3.35×
+and it is a different experimental condition, which makes it D-17's decision, not a
+tuning step.
 
 ---
 
@@ -153,6 +160,86 @@ instrumenting a real run, which is Q-16.
 ---
 
 ## 2. Data at scale — why the current format fails
+
+### F-53 — RETRACTS F-51. Ollama was serving one request at a time; the semaphore never did anything
+
+**Finding.** `OLLAMA_NUM_PARALLEL` was never set. The Homebrew-launched server logs
+`OLLAMA_NUM_PARALLEL:1` and the runner loads with `Parallel:1`
+(`/opt/homebrew/var/log/ollama.log`). **Every agent turn in all 24 runs was served
+strictly serially.** The client-side `--semaphore 4` has only ever been filling a
+queue inside Ollama.
+
+**F-51 is retracted.** It concluded "throughput peaks at 4 and falls at 8, the machine
+is saturated". The measurement was contaminated: the concurrency-1 case had `n=2` and
+included the cold model load, which made the serial baseline look artificially slow
+and every higher concurrency look like a win. Re-run warm, with equal `n=24` at every
+level and a warm-up pass per level, on `llama3.1:8b`:
+
+| `NUM_PARALLEL` | conc 1 | conc 2 | conc 4 | conc 8 |
+|---|---|---|---|---|
+| **1** (current) | 1.08 turns/s | 0.96 | **0.88** | 0.96 |
+| **4** | 1.01 | 1.11 | 1.47 | 1.54 |
+| **8** | 1.11 | 1.18 | 1.52 | **1.68** |
+
+Two things fall out, and the second is embarrassing:
+
+1. **Server-side parallelism is worth about 1.6×**, not the 4× the slot count
+   suggests. Aggregate throughput rises while *per-stream* decode falls from
+   ~41 tok/s to ~9 tok/s — the GPU is shared, not multiplied.
+2. **The current configuration is the worst available.** At `Parallel:1`, running
+   `--semaphore 4` (0.88 turns/s) is **19 % slower than running `--semaphore 1`**
+   (1.08). The queueing buys nothing and costs contention. Whatever else is decided,
+   the present combination is strictly dominated.
+
+**Corrected ceiling for the whole knob:**
+
+| Configuration | turns/s | vs today |
+|---|---|---|
+| 8b, `Parallel:1`, semaphore 4 — **today** | 0.88 | 1.00× |
+| 8b, `Parallel:1`, semaphore 1 — one env var | 1.08 | 1.23× |
+| 8b, `Parallel:8`, semaphore 8 | 1.68 | **1.91×** |
+| 3b, `Parallel:8`, semaphore 8 | 2.95 | **3.35×** |
+
+**Method.** A second Ollama on `:11435` with the alternate settings, benchmarked
+against the untouched original on `:11434`, then stopped. 24 calls per level after a
+per-level warm-up, 788-token prompt, 80-token cap, timings from Ollama's own
+`eval_count`/`eval_duration`.
+
+**Caveat that limits what this licenses.** The synthetic turn takes ~1 s; a real agent
+turn takes 14.4 s, because it carries the full OASIS scaffold and 22 tool definitions
+and emits tool calls. The **ratios** should carry; the absolute rates will not. This
+is precisely why Q-16's in-run instrumentation stays item 1.
+
+### F-54 — Prefill is ~4 % of a turn, so prompt-size reduction is close to worthless
+
+**Finding.** From the same benchmark, per call on a 788-token prompt:
+
+| | time | rate |
+|---|---|---|
+| Prefill (prompt) | **0.02–0.03 s** | ~26,000 tok/s |
+| Decode (generation) | **0.66–0.82 s** | ~40 tok/s |
+
+Prefill is **~4 %** of the call. Generation is ~96 %. Apple Silicon reads the prompt
+about 650× faster than it writes tokens.
+
+**Consequence for the queue.** Q-17 / item 3 — trimming the 12-post feed text to cut
+prefill — targets 4 % of the wrong end. Even halving the prompt saves ~2 % of a turn.
+**Demoted.** The lever that matters is *generated* tokens: how long each agent's reply
+is, and how many tool-call round-trips a turn takes. That is worth measuring (Q-20),
+and it is a genuinely different question from the one item 3 was going to answer.
+
+### D-17 — Model choice is a scientific decision, not a performance one (still open)
+
+`llama3.2:3b` gives **3.35×** combined with parallelism, against 1.91× for parallelism
+alone. It is the single largest lever available on this hardware.
+
+It is also a different experimental condition. Every finding in the build log is
+measured on `llama3.1:8b`; F-35's noise floor, F-48's action surface and F-49's
+persona effects are all statements about that model. Switching invalidates comparison
+with all 24 existing runs unless the change is treated as an experiment in its own
+right — which, at ~28 pp of run-to-run noise, needs its own replicates.
+
+**Not deciding this unilaterally.** It belongs in the same conversation as Q-18.
 
 ### F-52 — Two separate failures: the database is merely large, the analysis hinge is fatal
 

@@ -77,13 +77,14 @@ Everything below is the wider backlog, and stays subordinate to those three.
 
 ### The rest of the backlog
 
-| # | Task | Cost | Why |
-|---|---|---|---|
-| 1 | **Phase-level timing instrumentation** (Q-16) | ~1 h, no run | F-50 attributes the cost by arithmetic, not measurement. Before optimising anything, split a round into LLM / embed / score / DB and *see* it |
-| 2 | **`export.py` → partitioned Parquet** (D-15) | ~3 h, no run | Unblocks the professor's actual ask; testable against the nine existing runs today |
-| 3 | **Prompt-size reduction** (Q-17) | ~1 h + 1 smoke | Prefill scales with feed text. The cheapest real speedup that does not change the model |
-| 4 | **Streaming writes** so a 14 GB SQLite never exists (D-16) | ~2 h | At scale the post-hoc export is itself infeasible |
-| 5 | Decide the honest target scale (Q-18) | discussion | 1000 × 1000 is not reachable on this laptop. §3 gives what is |
+Not queued — these wait on the three above, or on a decision.
+
+| Task | Cost | Waiting on |
+|---|---|---|
+| **Streaming writes** so a 14 GB SQLite never exists (D-16) | ~2 h | Item 1's numbers — D-16 is deliberately undecided until instrumentation says what DB writes actually cost |
+| **Chunk the score matrix over agents** | ~1 h | Only bites past ~300 agents (4 GB/round at 1000). Not urgent, but it is the one place scoring does break |
+| **Decide the honest target scale** (Q-18) | discussion | You and your professor. §3 gives what is reachable; 1000 × 1000 is not |
+| **Decide on model size** (D-17) | discussion | Same conversation. `llama3.2:3b` is a *condition*, not an optimisation |
 
 **Do not** raise `--semaphore` expecting a speedup (F-51). **Do not** swap to
 `llama3.2:3b` and call it an optimisation — it is a different experimental condition

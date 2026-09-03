@@ -43,6 +43,17 @@ Findings are `F-n`, bugs `B-n`, decisions `D-n`, runs `R-n`, open questions
 
 *Last updated 2026-09-03. Update this section at the end of every working session.*
 
+**2026-09-03 (third pass) — verification sweep, not a review.** Asked whether
+everything was accurate, I checked instead of asserting, and found four more things.
+**F-49**: F-24's "~32% of posts echo the author's bio" belongs to `v7_full` and its
+Twitter persona file; on the nine analysed runs nothing is verbatim and the own-vs-other
+gap is **+0.013**, not +0.14 — the fourth instance of a per-run figure promoted to an
+all-run claim. Two **line references had drifted** (`timeline_platform.py:365` → `:380`
+for the score formula, `:727` → `:728` for the `unknown` label) and are fixed
+everywhere. Every **per-file line count** in the field guide was stale — all eleven
+corrected, and the totals are now pinned to a commit because they move with every
+change. Line counts and refs were verified by script against the working tree, not read.
+
 **2026-09-03 (second pass) — all five artifacts reviewed, corrected and republished.**
 The two I had not seen were found via `action: "list"`: **Simulation 4 Mechanics**
 (`e49bf8a7`, the technical manual — sound, two stale figures) and **Moved - Use The
@@ -133,7 +144,7 @@ similarity in neutral grey spanning the null line.
 | 1 | **A designed repeat-exposure run** (Q-15): re-inject a fixed set of posts at controlled intervals | ~1 run (2 h) | Still the top item. F-44 made repeat exposure the project's best-evidenced effect (OR 2.62, 8/9 runs) but more replicates cannot make it experimental — only assignment can |
 | 2 | Optional: a `follow`-targeted designed experiment | ~1 run | F-36 — `follow` has ICC 0.000, ~35 agent-pairs for 5 pp |
 | 3 | Open, unexplained: **8 of 22** actions never fire — all mutes, trends and undos (Q-11, corrected by F-48) | unscoped | Narrower than previously stated; the rare tail does fire |
-| 4 | Open, unexplained: F-24, ~32% of posts echo the author's own bio | unscoped | Per F-35 do **not** attack it with prompt tweaks |
+| 4 | ~~F-24, ~32% of posts echo the author's own bio~~ — **corrected by F-49**: that figure is `v7_full`'s persona file, not these runs. Real gap is **+0.013** | closed | Nothing left to attack; the effect is ~11x smaller than advertised |
 
 **Do not** run another prompt-intervention experiment at 36 agents. F-35 shows it
 cannot resolve anything. Judge any future change against **baseline**, never
@@ -503,7 +514,7 @@ implementation. Added as section 7
 #### F-42 — F-38 is wrong, and the error is a mislabelled variable, not a confound
 
 **Finding.** The regressor F-38 reported as "similarity ... per unit cosine" is
-`rec_history.score`, which is `sim * recency` (`timeline_platform.py:365` writes the
+`rec_history.score`, which is `sim * recency` (`timeline_platform.py:380` writes the
 product; `:699-701` copies it into the exposure row; `exposure_model.py:80` reads it and
 §5 of its output labels it "similarity"). The tell was visible in F-38's own decile
 table, whose bottom bin reads "sim 0.000-0.387" — raw cosine never falls below **0.198**
@@ -603,6 +614,49 @@ established.**
 5-run vs 9-run output. An honest cost of adding data: more evidence made the
 headline stronger and one supporting argument weaker at the same time.
 
+#### F-49 — F-24's bio-echo figure belongs to a different persona file and does not describe the nine analysed runs
+
+**Finding.** F-24 reported *"21 of 66 posts (32%) closely reproduce the author's own
+profile text — one at similarity 1.00, i.e. verbatim"*, with a gap of **+0.14** to
+own bio vs others (0.785 / 0.641). That figure is quoted as a general known weakness
+in §0, in the field guide and in the mechanics manual. **It does not hold on the nine
+analysed runs.**
+
+F-24 was measured on **`v7_full`** — the only run with exactly 66 posts — which uses
+`data/twitter_dataset/.../False_Business_0.csv`, mean pairwise persona similarity
+**0.637**. The nine analysed runs use `data/reddit/user_data_36.json` at **0.829**.
+
+Re-measured on all **2,019** posts of the nine analysed runs, using F-24's own metric
+(cosine between a post and its author's bio, mean-pooled TwHIN-BERT):
+
+| threshold | share of posts |
+|---|---|
+| >= 0.80 | 56.0% |
+| >= 0.85 | 17.5% |
+| >= 0.90 | 1.1% |
+| >= 0.95 | **0** |
+| verbatim | **0** — max observed is 0.942 |
+
+A bare percentage is meaningless here: it is entirely a function of the threshold, and
+nothing is verbatim. **The baseline is the honest number.** Against a random *other*
+agent's bio:
+
+- cosine to own author's bio: **0.795**
+- cosine to another agent's bio: **0.782**
+- **gap +0.013, 95% CI [+0.010, +0.016]**, n=2,019
+
+Significant, and about **eleven times smaller** than F-24's +0.14. The mechanism is
+the persona file: when mean pairwise similarity is 0.829, everything resembles
+everything, so resembling *your own* bio adds almost nothing. On the more separable
+Twitter personas there was room for the effect to show.
+
+**This is the fourth instance of the same error class** — a per-run figure promoted to
+an all-run claim — after F-40, the inflated denominator, and F-48. All four survived
+because nobody re-ran the query after the run set changed.
+
+**Evidence.** `embedding.embed_cached` over 2,019 posts and their authors' bios across
+the nine analysed databases; persona files and separability read from each run manifest.
+
 #### F-48 — The action surface IS exercised: 14 of 22 fire, and the 8 that do not are all undos
 
 **Finding.** The long-standing claim that *"14 of the 21 actions never fire — no
@@ -690,7 +744,7 @@ demonstrated capacity to be silently wrong.
    `unknown` (`:724-728`). B-14 was precisely an overlap — a followee's sixth post
    falling into the fof tier, 37 exposures mislabelled in R-16. Priority ordering
    *masks* a recurrence of that class rather than surfacing it.
-3. **`"unknown"` is reachable and unmonitored.** `:727` can emit it; no integrity
+3. **`"unknown"` is reachable and unmonitored.** `:728` can emit it; no integrity
    counter tracks it. It has never fired — `SELECT source, COUNT(*) FROM
    rec_history GROUP BY source` returns only `discovery`/`fof`/`network` on
    three-tier runs and only `recsys`/`following`/`both` on pre-three-tier runs.
@@ -1022,7 +1076,7 @@ pre-three-tier vocabulary. Index **4** (`'?'`), the slot that exists precisely t
 mean "unrecognised", is unreachable: nothing ever produces it.
 
 **Why it is live rather than theoretical.** `_log_exposure` can emit the string
-`"unknown"` (`timeline_platform.py:727`) whenever a shown post is in none of the
+`"unknown"` (`timeline_platform.py:728`) whenever a shown post is in none of the
 three tier sets. It has never fired, so no wrong row exists today. But both halves
 are in place: the writer can produce a value the reader will mislabel, and it will
 mislabel it as a real category rather than as an error. This is the project's own

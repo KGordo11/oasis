@@ -715,9 +715,14 @@ function algoBox() {
     `<dt>Name</dt><dd>${A.name}</dd>` +
     `<dt>Score</dt><dd><code>${A.formula || ''}</code></dd>` +
     `<dt>Embedding</dt><dd>${A.embedding || ''}</dd>` +
-    `<dt>Feed</dt><dd>${C.refresh_rec_post_count ?? '?'} algorithmic posts + ` +
-    `${C.following_post_count ?? '?'} from people you follow, ranked from a pool ` +
-    `of ${C.max_rec_post_len ?? '?'}` +
+    `<dt>Feed</dt><dd>` +
+    (A.feed_model
+      ? `three tiers into ${A.feed_size ?? 12} slots: ${A.network_slots ?? '?'} network + ` +
+        `${A.fof_slots ?? '?'} fof + ${A.discovery_slots ?? '?'} discovery, ` +
+        `discovery backfilling, ranked from a pool of ${C.max_rec_post_len ?? '?'}`
+      : `two sources (pre-three-tier): ${C.refresh_rec_post_count ?? '?'} algorithmic posts + ` +
+        `${C.following_post_count ?? '?'} from people you follow, ranked from a pool ` +
+        `of ${C.max_rec_post_len ?? '?'}`) +
     (A.explore_slots !== undefined ? `, ${A.explore_slots} slot(s) kept for exploration` : '') +
     `</dd><dt>Model</dt><dd>${C.model || ''} &middot; ${C.n_actions ?? '?'} actions` +
     (C.temperature !== undefined ? ` &middot; temp ${C.temperature}` : '') +
@@ -874,7 +879,7 @@ function transcriptFor(run, rnd, withFeeds) {
           const post = run.posts[pid] || {};
           const did = actedOn.has(pid);
           out.push(`<div class="saw">&nbsp;&nbsp;#${pid} by ` +
-            `${esc(nameIn(run, au))} &middot; ${SRCNAME[src]}` +
+            `${esc(nameIn(run, au))} &middot; ${srcName(run, src)}` +
             (sc === null || sc === undefined ? '' : ` &middot; score ${sc}`) +
             ` &middot; slot ${pos ?? '?'} &middot; ` +
             (did ? '<span class="acted">ACTED ON THIS</span>'
@@ -939,7 +944,26 @@ function transcriptPanel() {
 }
 
 // ---------- rounds: exactly what happened, round by round ----------
-const SRCNAME = ['discovery','network','fof','both','?'];
+// B-19: two eras, two vocabularies. A run that declares `feed_model` was
+// built by the three-tier feed and its sources are discovery/network/fof; a run
+// that does not was built by the pre-three-tier feed and its sources are
+// recsys/following/both. They share the index set, never the labels: the
+// pre-three-tier runs are held aside from every estimate precisely because the
+// feed builder differs (F-37), so displaying them under three-tier names erases
+// the distinction the replication argument rests on. Index 4 means the source
+// string was not recognised at all (B-20) -- it is an error, not a category.
+const SRC_LABELS = {
+  tiered: ['discovery','network','fof','(n/a)','unrecognised'],
+  legacy: ['recsys','following','(n/a)','both','unrecognised'],
+};
+function srcNames(run) {
+  return (run && run.algorithm && run.algorithm.feed_model)
+    ? SRC_LABELS.tiered : SRC_LABELS.legacy;
+}
+function srcName(run, i) {
+  const n = srcNames(run)[i];
+  return n === undefined ? 'unrecognised' : n;
+}
 
 function nameIn(run, id) {
   const a = (run.agents[String(id)] || run.agents[id] || {});
@@ -1000,7 +1024,8 @@ function roundReport(run, rnd) {
   }).join('') : '<tr><td colspan="3">nobody saw anything this round</td></tr>';
 
   const srcCount = {};
-  exps.forEach(e => srcCount[SRCNAME[e[5]]] = (srcCount[SRCNAME[e[5]]] || 0) + 1);
+  exps.forEach(e => { const k = srcName(run, e[5]);
+    srcCount[k] = (srcCount[k] || 0) + 1; });
 
   return `<div class="col">
     <div class="colhead">${esc(run.label)} &middot; round ${rnd}</div>
@@ -1108,14 +1133,13 @@ function agentDetail(id) {
   // Every post this agent was shown.
   const seen = DATA.exposures.filter(e => e[1] === id)
     .sort((x, y) => x[0] - y[0] || (x[4] ?? 0) - (y[4] ?? 0));
-  const SRCN = ['discovery','network','fof','both','?'];
   const acted = new Set(a.seen_and_acted || []);
   const seenRows = seen.map(e => {
     const [rnd, , pid, au, pos, src, sc] = e;
     const post = DATA.posts[pid] || {};
     return `<tr><td class="num">${rnd}</td><td class="num">#${pid}</td>` +
       `<td class="who">${esc((byId[au] || {}).username || au)}</td>` +
-      `<td class="num">${pos ?? ''}</td><td class="mix">${SRCN[src]}</td>` +
+      `<td class="num">${pos ?? ''}</td><td class="mix">${srcName(DATA, src)}</td>` +
       `<td class="num">${sc === null ? '&ndash;' : sc}</td>` +
       `<td class="mix">${acted.has(pid) ? '<b>ACTED</b>' : 'ignored'}</td>` +
       `<td class="mix">${esc(String(post.content || '').slice(0, 60))}</td></tr>`;
@@ -1251,15 +1275,34 @@ function methodBody() {
       &rarr; ${esc(C.model || 'model')} &rarr; tool call &rarr; post table</p></div>` +
     `<div class="card"><h3>Where the feed comes from</h3>
       <p><code>${esc(A.formula || '')}</code></p>
-      <p>A feed is the union of two sources, and every exposure records which
-      one delivered it: <b>recsys</b> (the ranking chose it),
+      ${A.feed_model ? `
+      <p>A feed is <b>${A.feed_size ?? 12} slots</b> filled from <b>three
+      tiers</b>, and every exposure records which one delivered it:
+      <b>network</b> (${A.network_slots ?? '?'} slots &mdash; the viewer follows
+      the author; not interest-filtered), <b>fof</b> (${A.fof_slots ?? '?'}
+      &mdash; friend-of-friend, ranked) and <b>discovery</b>
+      (${A.discovery_slots ?? '?'} &mdash; ranked from a pool of
+      ${C.max_rec_post_len ?? '?'}, ${A.explore_slots ?? 0} slot(s) kept for
+      exploration).</p>
+      <p><b>Discovery backfills</b> whatever the graph does not supply, so the
+      feed is a constant size and only its composition varies: an agent
+      following nobody receives ${A.feed_size ?? 12} discovery posts. Tiers are
+      disjoint, and network posts are placed first &mdash; so tier and feed
+      position are entangled by construction, which is why estimates are
+      stratified on the slot rather than modelled.</p>` : `
+      <p>A feed is the union of <b>two sources</b>, and every exposure records
+      which one delivered it: <b>recsys</b> (the ranking chose it),
       <b>following</b> (the viewer follows the author), or <b>both</b>.
       ${C.refresh_rec_post_count ?? '?'} algorithmic posts +
       ${C.following_post_count ?? '?'} from people followed, ranked from a pool
-      of ${C.max_rec_post_len ?? '?'}, with
-      ${A.explore_slots ?? 0} slot(s) kept for exploration. The network starts
-      at <b>${A.initial_follow_edges ?? 0} follow edges</b> &mdash; nothing is
-      seeded.</p></div>` +
+      of ${C.max_rec_post_len ?? '?'}, with ${A.explore_slots ?? 0} slot(s) kept
+      for exploration.</p>
+      <p class="meta">This run predates the three-tier feed (F-25). It is
+      excluded from every published estimate and used only as an independent
+      replication &mdash; that argument depends on the feed builder being
+      different, so its sources are shown in its own vocabulary.</p>`}
+      <p>The network starts at <b>${A.initial_follow_edges ?? 0} follow
+      edges</b> &mdash; nothing is seeded.</p></div>` +
     `<div class="scroll"><table><caption>Integrity counters &mdash; so a degraded run cannot look like a clean one</caption>` +
       `<thead><tr><th>Counter</th><th class="num">Value</th><th>What it means</th></tr></thead>` +
       `<tbody>${rows}</tbody></table></div>` +
@@ -1382,15 +1425,25 @@ def project(analysis_path, manifest_path=None):
               for e in (full.get("events") or [])]
 
     # [round, agent, post, author, feed_position, source, score]
-    # Old runs labelled sources recsys/following/both; the three-tier feed
-    # (F-25) labels them discovery/network/fof. They are the same concepts
-    # renamed, so both vocabularies map to one index set and runs from either
-    # era stay readable side by side.
+    # Two eras, two vocabularies: pre-three-tier runs label sources
+    # recsys/following/both; the three-tier feed (F-25) labels them
+    # discovery/network/fof. They share an index set so the tuple layout is
+    # uniform -- but B-19: they are NOT the same concepts renamed, and must not
+    # be *displayed* under one vocabulary. The reason the pre-three-tier runs
+    # are held aside, and their pooled OR 5.00 counts as an independent
+    # replication (F-37), is precisely that the feed builder differs. The
+    # display name is chosen per run from `algorithm.feed_model`; see
+    # SRC_LABELS in the page script.
+    #
+    # B-20: the default is 4 ("unrecognised"), NOT 3 ("both"). 3 is a real
+    # category in the pre-three-tier vocabulary, so defaulting to it turned an
+    # unknown source into a confident wrong answer. `_log_exposure` can emit
+    # "unknown" (timeline_platform.py:727) and nothing else maps to 4.
     SRC = {"discovery": 0, "recsys": 0,
            "network": 1, "following": 1,
            "fof": 2, "both": 3}
     exposures = [[e["round"], e["agent_id"], e["post_id"], e.get("author_id"),
-                  e.get("feed_position"), SRC.get(e.get("source"), 3),
+                  e.get("feed_position"), SRC.get(e.get("source"), 4),
                   (round(e["score"], 4)
                    if isinstance(e.get("score"), (int, float)) else None)]
                  for e in (full.get("exposures") or [])]

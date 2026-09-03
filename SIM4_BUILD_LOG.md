@@ -7,10 +7,6 @@ outcome. It is written so that anyone (including future-me) can reconstruct the 
 build without having to ask a question or guess at a rationale.
 
 **Related documents**
-- **Ongoing work since the build finished: `SIM4_UPDATE_LOG.md`** — read that one
-  first when resuming. This file is the stable reference for how Sim 4 was built
-  and what the nine analysed runs established; live work is tracked there, and the
-  `F-`/`B-`/`D-`/`R-`/`Q-` sequences continue into it rather than restarting.
 - Design spec: `docs/superpowers/specs/2026-08-24-social-timeline-design.md`
 - Project-wide running log: `PROJECT_LOG.md`
 - Prior simulations: `SESSION_REPORT (basic sim1).md`,
@@ -47,7 +43,21 @@ Findings are `F-n`, bugs `B-n`, decisions `D-n`, runs `R-n`, open questions
 
 *Last updated 2026-09-03. Update this section at the end of every working session.*
 
-**2026-09-03 — both artifacts re-figured from 5-run to 9-run numbers.** The write-up
+**2026-09-03 (second pass) — all five artifacts reviewed, corrected and republished.**
+The two I had not seen were found via `action: "list"`: **Simulation 4 Mechanics**
+(`e49bf8a7`, the technical manual — sound, two stale figures) and **Moved - Use The
+Other Link** (`96788f41`, a deprecation stub for the explorer — correct, left alone).
+Corrections this pass: **F-48** retracts the action-surface claim (14 of 22 actions
+*do* fire; the 8 that never do are all mutes, trends and undos — agents never reverse
+themselves); **B-18/B-19/B-20** fixed in `make_graph.py` and the explorer regenerated
+and republished, so each of the 13 runs is now described and labelled by the feed
+builder that actually produced it; **B-21** records that republishing a *downloaded*
+artifact silently renamed two of them, and how to avoid it. Mechanics: `11.07 → 12.76`
+(twice), line count `7,540 → 7,582`, persona-similarity figure disambiguated between
+the two persona files, and a rapid-fire answer added for the action surface. No
+simulation was run.
+
+**2026-09-03 (first pass) — both artifacts re-figured from 5-run to 9-run numbers.** The write-up
 and field guide had been updated in their headline figures after the four overnight
 replicates but still carried 5-run values in prose, tables and (B-17) chart geometry.
 Corrected throughout: cosine OR **1.143** [0.524, 2.495] p=0.74 (was 1.544/0.588-4.054/0.38),
@@ -122,7 +132,7 @@ similarity in neutral grey spanning the null line.
 |---|---|---|---|
 | 1 | **A designed repeat-exposure run** (Q-15): re-inject a fixed set of posts at controlled intervals | ~1 run (2 h) | Still the top item. F-44 made repeat exposure the project's best-evidenced effect (OR 2.62, 8/9 runs) but more replicates cannot make it experimental — only assignment can |
 | 2 | Optional: a `follow`-targeted designed experiment | ~1 run | F-36 — `follow` has ICC 0.000, ~35 agent-pairs for 5 pp |
-| 3 | Open, unexplained: 14 of 21 actions never fire | unscoped | Limits any claim about the action surface being exercised |
+| 3 | Open, unexplained: **8 of 22** actions never fire — all mutes, trends and undos (Q-11, corrected by F-48) | unscoped | Narrower than previously stated; the rare tail does fire |
 | 4 | Open, unexplained: F-24, ~32% of posts echo the author's own bio | unscoped | Per F-35 do **not** attack it with prompt tweaks |
 
 **Do not** run another prompt-intervention experiment at 36 agents. F-35 shows it
@@ -593,6 +603,103 @@ established.**
 5-run vs 9-run output. An honest cost of adding data: more evidence made the
 headline stronger and one supporting argument weaker at the same time.
 
+#### F-48 — The action surface IS exercised: 14 of 22 fire, and the 8 that do not are all undos
+
+**Finding.** The long-standing claim that *"14 of the 21 actions never fire — no
+dislike, unfollow, mute, report, search or trend in any run"* is **wrong and is
+retracted.** It appeared in Q-11, in §0 STATUS, and in the field guide.
+
+Measured across the nine analysed runs (`SELECT action, COUNT(*) FROM trace`):
+
+| | count | runs |
+|---|---|---|
+| `refresh` | 4,537 | 9 |
+| `create_post` | 1,988 | 9 |
+| `create_comment` | 519 | 9 |
+| `follow` | 424 | 9 |
+| `like_post` | 360 | 9 |
+| `sign_up` | 324 | 9 |
+| `like_comment` | 110 | 9 |
+| `quote_post` | 33 | 9 |
+| `repost` | 17 | 8 |
+| `search_user` | 7 | 4 |
+| `dislike_post` | 5 | 3 |
+| `report_post` | 4 | 3 |
+| `search_posts` | 3 | 2 |
+| `do_nothing` | 1 | 1 |
+| `unfollow` | 1 | 1 |
+
+The offered set is **22** (`build_action_set(include_groups=False)`, verified by
+import — `sign_up` is *not* among them; it is internal plumbing). Of those 22,
+**14 fire at least once and 8 never do.**
+
+**The eight that never fire:** `mute`, `unmute`, `trend`, `dislike_comment`,
+`unlike_post`, `unlike_comment`, `undo_dislike_post`, `undo_dislike_comment`.
+
+**Why this is a better finding than the one it replaces.** Every single one of the
+eight is a mute, a trend lookup, or an **undo**. The agents never reverse an action
+they have already taken. That is a specific, explainable behavioural regularity;
+"two thirds of the buttons are unused" was neither.
+
+**How the error happened, and why it matters.** The claim was read off `baseline`'s
+action table, which has exactly nine rows, and generalised to "not once in 20 runs".
+It is the **third** instance of the same mistake already on this project's record —
+alongside F-40 (a pooled estimate that was really one run) and the inflated
+denominator ("57,682 exposures across 13 runs" when 8 contributed zero). A per-run
+figure was promoted to an all-run claim without re-running the query.
+
+**Evidence.** `SELECT DISTINCT action FROM trace` over all nine analysed databases;
+action set confirmed by importing `run_simulation.build_action_set`.
+
+#### F-46 — Every run manifest already records which feed built it; the explorer never reads it
+
+**Finding.** `run_simulation.py:215-236` writes a self-describing `algorithm`
+block per run. The nine three-tier runs carry `feed_model: "three-tier: network >
+friend-of-friend > discovery; social ties are not interest-filtered"` plus
+`network_slots: 5`, `fof_slots: 3`, `discovery_slots: 4`, `feed_size: 12`,
+`explore_slots: 2`. The four pre-three-tier runs (`v4_full`..`v7_full`) carry none
+of those — only `explore_slots` and `recency_span_rounds`. Verified across
+`v4_full`, `v7_full`, `v8_full`, `baseline`, `v10_rep6`.
+
+`make_graph.py` reads none of them. Its Algorithm box and Method tab read
+`config.refresh_rec_post_count` (8), `config.following_post_count` (4) and
+`config.max_rec_post_len` (30) instead — upstream knobs the three-tier `refresh()`
+never consults (`timeline_platform.py:574-631` uses the slot fields exclusively).
+
+**Why this matters.** B-18 and B-19 are therefore pure presentation defects: no
+re-run, no re-analysis, no new data. The correct values sit in manifests the
+explorer already loads, and the presence of `feed_model` is a ready-made
+discriminator — one field decides which vocabulary and which description a run gets.
+
+#### F-47 — Tier attribution is correct today, but rests on three invariants nothing checks
+
+**Finding.** Not a bug; no incorrect row has been produced. Recorded because B-14
+was already a tier-attribution bug, so this is the part of the code with a
+demonstrated capacity to be silently wrong.
+
+1. **`fof` travels by side channel.** `refresh()` passes network and discovery into
+   `_log_exposure()` as arguments but hands it `fof` via `self._last_fof`, an
+   attribute on the shared platform object (`timeline_platform.py:667-669`).
+   Correct today for two independent reasons: `_log_exposure` is synchronous with
+   no `await` (verified: zero `await` tokens in `:703-737`), and the platform is a
+   single-consumer loop (`oasis/social_platform/platform.py:128-130`), so refreshes
+   are serialised by the channel. Both are real; neither is stated at the call
+   site. The asymmetry is the smell — two tiers as parameters, one as instance state.
+2. **Disjointness is asserted by construction and verified by nothing.**
+   `_log_exposure` labels by first match, `network` -> `fof` -> `discovery` ->
+   `unknown` (`:724-728`). B-14 was precisely an overlap — a followee's sixth post
+   falling into the fof tier, 37 exposures mislabelled in R-16. Priority ordering
+   *masks* a recurrence of that class rather than surfacing it.
+3. **`"unknown"` is reachable and unmonitored.** `:727` can emit it; no integrity
+   counter tracks it. It has never fired — `SELECT source, COUNT(*) FROM
+   rec_history GROUP BY source` returns only `discovery`/`fof`/`network` on
+   three-tier runs and only `recsys`/`following`/`both` on pre-three-tier runs.
+   See B-20 for what the explorer would do with one.
+
+**Fix for all three:** pass `fof` as a parameter; assert the three sets pairwise
+disjoint before labelling; count `unknown` in `self.stats` so it surfaces in the
+integrity table the Method tab already renders.
+
 #### F-37 — Connection predicts engagement; content similarity does not. This is the project's actual result
 
 **Finding.** Pooled over 13 analysed runs: **57,682 exposures, 5,345 feeds, 412
@@ -817,6 +924,114 @@ network
 > **friend-of-friend** (2-hop, interest ranked) > **discovery** (small global slice).
 Isolation is not penalised — it falls out, since an agent with no follows fills only the
 discovery tier
+
+#### B-21 — Republishing a downloaded artifact silently renamed two of them
+
+**Where.** Ours — the republish procedure, not any file in the repo.
+
+**Symptom.** After the 2026-09-03 re-figuring, the gallery listed the write-up and
+field guide as **"writeup"** and **"guide"** instead of *Connection Over Content* and
+*Simulation 4 Field Guide*. Their published pages also carried a duplicated document
+skeleton.
+
+**Cause.** `Artifact action:read` returns the page *as served*, including the
+injected `<!doctype html><head>` and the ~13.8 KB frame-runtime script. Those edits
+were made to that downloaded file and published back verbatim. Two consequences: the
+publish wrapper wrapped an already-complete document, and — because only the first
+**8 KB** is scanned for a `<title>` — the real `<title>` now sat at byte **14,080**,
+past the window, so each artifact fell back to its *filename* for a name.
+
+**Why it went unnoticed.** The pages still rendered. Nothing errored. The only
+visible symptom was in the gallery listing, which is not where you look after
+publishing.
+
+**Fix.** Strip everything before `<title>` and the trailing `</body></html>` before
+republishing, so the file contains only authored content and `<title>` sits at byte
+0. Both artifacts re-published; names restored.
+
+**Rule going forward.** *A downloaded artifact is not a publishable artifact.* Take
+the authored region only. Verify with `s.find('<title>') < 8192`.
+
+#### B-18 — The explorer describes the pre-three-tier feed for all runs, including the nine the results rest on
+
+**Where.** Ours, `make_graph.py:686-690` (Algorithm box) and `:1250-1260`
+(Method & integrity tab).
+
+**Symptom.** For every one of the 13 runs the Method tab states: *"A feed is the
+union of **two sources**, and every exposure records which one delivered it:
+**recsys** (the ranking chose it), **following** (the viewer follows the author),
+or **both**. 8 algorithmic posts + 4 from people followed, ranked from a pool of
+30."*
+
+For the nine three-tier runs this is wrong in every particular. The feed is
+**three** tiers, not two; 5 network + 3 fof + 4 discovery into a fixed `feed_size`
+of 12, not 8+4; `both` does not exist in that vocabulary (confirmed: zero rows);
+and `fof`, which does, is not mentioned. The Algorithm box repeats the same
+8/4/30. These are the nine runs every published estimate is computed on.
+
+**Cause.** The Method tab was written for the v4-v7 feed and never revisited when
+F-25 introduced the three-tier builder. It reads config fields that still exist
+but went inert (F-46).
+
+**Why it survived.** The numbers it prints are real config values, so the tab
+looks data-driven and internally consistent. Nothing is blank or obviously stale —
+it is confidently describing a different experiment.
+
+**Fix — DONE 2026-09-03.** The Method tab and Algorithm box now branch on
+`algorithm.feed_model`: three-tier runs get the real tier breakdown, slot counts and
+backfill rule; pre-three-tier runs keep the two-source description plus an explicit
+note that they are excluded from every estimate and why. Explorer regenerated and
+republished.
+
+#### B-19 — The explorer renders the held-aside runs in the three-tier vocabulary
+
+**Where.** Ours, `make_graph.py:942` (`SRCNAME`) and `:1111` (`SRCN`), both
+`['discovery','network','fof','both','?']`; encoding at `:1384-1391`.
+
+**Symptom.** In the People tab's per-agent exposure table and the Rounds tab's
+feed-source breakdown, `v4_full`..`v7_full` exposures are labelled **discovery**
+and **network**. Those runs' databases contain no such values — they hold `recsys`
+(3,651 rows in v4_full), `following` (889) and `both` (157). The index collapse at
+`:1389` maps `recsys`->0->"discovery" and `following`->1->"network".
+
+**Cause.** Deliberate, documented in-code as *"They are the same concepts renamed,
+so both vocabularies map to one index set and runs from either era stay readable
+side by side."*
+
+**Why that reasoning does not hold.** The study's own argument contradicts it. The
+write-up excludes these runs from every estimate and then presents their pooled
+**OR 5.00 [3.83, 6.52]** as an *independent replication* — evidence that carries
+weight *because* the feed builder is structurally different, not a renaming. The
+build log holds them apart for the same reason (F-37, F-41). Displaying their
+exposures under three-tier names erases, in the artifact, the very distinction the
+headline evidence depends on. It is also the exact failure class as the retracted
+F-38: a column shown under a name that is not what it holds.
+
+**Fix — DONE 2026-09-03.** `SRC_LABELS` now holds one label set per era and
+`srcName(run, i)` selects between them from `algorithm.feed_model`. Three-tier runs
+read discovery/network/fof; pre-three-tier runs read recsys/following/both. The
+shared `SRCNAME`/`SRCN` arrays are gone.
+
+#### B-20 — An unrecognised feed source would silently render as "both"
+
+**Where.** Ours, `make_graph.py:1389` — `SRC.get(e.get("source"), 3)`.
+
+**Symptom.** The default index for an unknown source string is **3**, which
+`SRCNAME`/`SRCN` render as `"both"` — a plausible-looking label borrowed from the
+pre-three-tier vocabulary. Index **4** (`'?'`), the slot that exists precisely to
+mean "unrecognised", is unreachable: nothing ever produces it.
+
+**Why it is live rather than theoretical.** `_log_exposure` can emit the string
+`"unknown"` (`timeline_platform.py:727`) whenever a shown post is in none of the
+three tier sets. It has never fired, so no wrong row exists today. But both halves
+are in place: the writer can produce a value the reader will mislabel, and it will
+mislabel it as a real category rather than as an error. This is the project's own
+catalogued upstream failure mode — fail silently, produce quietly meaningless data
+— reproduced in our code.
+
+**Fix — DONE 2026-09-03.** The encoder defaults to `4`, which renders as
+`unrecognised` in both label sets. Index 3 is now reachable only from a literal
+`both`. Counting `unknown` in `self.stats` (F-47) remains open.
 
 #### B-17 — The write-up's forest plot drew the 5-run estimates under 9-run labels
 
@@ -2380,11 +2595,22 @@ in F-35
 
 #### Q-11
 
-**Question.** Why do 14 of the 21 available actions never fire? No `dislike`,
-`unfollow`, `mute`, `report`, `search` or `trend` in any run. `test_actions.py` proves
-they work mechanically, so it is a model choice — but an unexplained one
+**Question.** Why do some available actions never fire? `test_actions.py` proves they
+work mechanically, so it is a model choice — but an unexplained one
 
-**Status.** **Open.** Limits any claim that the action surface is exercised
+**Status.** **Open, but the question was mis-stated and is corrected by F-48.** It used
+to read "14 of the 21 available actions never fire. No `dislike`, `unfollow`, `mute`,
+`report`, `search` or `trend` in any run." That was measured on `baseline` alone and
+generalised. The action set is **22**, not 21, and across the nine analysed runs **14
+fire and 8 do not**. `dislike_post`, `unfollow`, `report_post`, `search_user` and
+`search_posts` all occur — rarely, but they occur.
+
+The surviving question is narrower and sharper: the eight that never fire are `mute`,
+`unmute`, `trend`, `dislike_comment`, `unlike_post`, `unlike_comment`,
+`undo_dislike_post`, `undo_dislike_comment` — every one a mute, a trend lookup, or an
+**undo**. *Agents never reverse an action they have taken.* That is a far more specific
+behavioural claim than "two thirds of the buttons are unused", and it is the one worth
+explaining
 
 #### Q-12
 

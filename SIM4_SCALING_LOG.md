@@ -31,9 +31,15 @@ than restart, so a search for any id still lands in exactly one place:
 
 *Last updated 2026-09-03. Update at the end of every working session.*
 
-**Task received; measurement done; nothing built yet. No simulation has been run and
-none is needed for the next step.** Working tree clean at `f97c568`, branch
-`social-timeline-sim`.
+**Queue items 1–4 are done and committed. No full simulation has been run — only
+4-agent/2-round smoke tests.** Branch `social-timeline-sim`.
+
+**One thing needs your decision before anything else proceeds:** your Ollama server is
+still `OLLAMA_NUM_PARALLEL=1`, so `check_deps.py` will now *fail* and block runs until
+it is restarted as `OLLAMA_NUM_PARALLEL=8 ollama serve` (or overridden with
+`OASIS_ALLOW_SERIAL_OLLAMA=1`). That is deliberate — the misconfiguration cost 24 runs
+roughly a third of their speed and nothing caught it — but it is your machine and your
+service, so I have not restarted it.
 
 ### The task, as given
 
@@ -50,12 +56,16 @@ halves fail for completely different reasons and have completely different fixes
 - **The wall is the language model, and only the language model** (F-50). At the
   measured 14.4 s per agent-turn, 1000 × 1000 is **167 days**. Scoring is not the
   problem: a full 1000 × 1,000,000 cosine pass is ~1.1 s of matmul.
-- **There was a free speedup, and F-51 missed it** (F-53). Ollama had
+- **There was a free speedup, and F-51 missed it** (F-53, F-56). Ollama had
   `OLLAMA_NUM_PARALLEL:1` — it served one request at a time and the semaphore of 4 only
-  filled a queue. Setting it properly is worth **1.9×**; today's config is actually
-  **19 % slower than running serially**. F-51 is retracted.
-- **Prefill is ~4 % of a turn** (F-54), so trimming prompts was aimed at the wrong end.
-  Decode is ~96 %. The lever is how much the model *writes*.
+  filled a queue. Fixing it is worth **~1.3× on realistic prompts**; today's config
+  gains nothing at all from concurrency. F-51 is retracted; `check_deps.py` now gates it.
+- **Prefill is ~25 % of a turn** (F-55, which retracts F-54). Trimming the prompt is a
+  real lever after all — but the feed is the study's independent variable, so cutting it
+  changes the experiment rather than optimising it. The free version is the **8 tool
+  definitions that never fire** (F-48), and that needs an A/B (Q-21).
+- **Two of my own benchmarks were wrong the same way**: they reused one prompt and
+  measured Ollama's KV cache. Vary the prompt per call, always.
 - **Storage fails separately, and is entirely fixable** (F-52). 43.5 M rows and
   ~14.7 GB of SQLite at target scale; the same data is **0.62 GB** as partitioned
   Parquet — 23× smaller — and readable by pandas, R, DuckDB, Polars and Tableau
@@ -71,12 +81,12 @@ brainstorming is still open and the design may still change. Do not begin buildi
 without checking in.** Update this block — status, findings, and any re-ordering — as
 work happens; it is the answer to "where were we".
 
-| # | Task | Cost | Status | Why it is in this order |
+| # | Task | Cost | Status | Outcome |
 |---|---|---|---|---|
-| 1 | **Phase-level timing instrumentation** — split a round into embed / score / feed-build / DB-write / LLM-wait in `run_simulation.py` (Q-16) | ~1 h, no run | **not started** | F-50 attributes ~99 % of runtime to the LLM by *subtraction and micro-benchmark*, not by measuring a real run. This either confirms it or redirects the whole effort, so it goes first and costs almost nothing |
-| 2 | **`export.py` → partitioned Parquet** (D-15) | ~3 h, no run | **not started** | Unblocks the professor's actual ask. Testable against the nine existing runs immediately — no simulation needed to prove it works |
-| 3 | ~~Prompt-size reduction (Q-17)~~ → **replaced by: set `OLLAMA_NUM_PARALLEL` and re-tune `--semaphore`** | ~15 min + 1 smoke | **not started** | **Changed 2026-09-03 by F-53/F-54.** Prefill turned out to be ~4 % of a turn, so trimming the prompt was aimed at the wrong end. The measured 1.9× is one env var and one flag. Item 3 is now the cheapest *real* speedup |
-| 4 | **Measure generated tokens and tool-call round-trips per turn** (Q-20) | ~30 min | **not started** | F-54 says decode is ~96 % of a turn, so the only prompt-side lever that matters is how much the model *writes*, not what it reads. Folds naturally into item 1 |
+| 1 | **Phase-level timing instrumentation** (Q-16) | ~1 h, no run | **DONE** `1c8383f` | Seven phases timed per round; anything unaccounted is `llm_wait`. Smoke-tested: **llm_wait 99.8 %, embed 0.2 %**, everything else sub-millisecond. **F-50 confirmed by measurement rather than inference.** |
+| 2 | **`export_parquet.py` → partitioned Parquet** (D-15) | ~3 h, no run | **DONE** `94ea4d1` | All 19 databases exported. **115.7 MB → 6.5 MB, 17.8× smaller, 20.3 bytes/row.** DuckDB answers a cross-run query over all 19 in 14 ms. 22-check fidelity gate (`test_export_parquet.py`) — which caught the exporter silently turning 1,217 NULL scores into 0.0 |
+| 3 | **Gate the Ollama misconfiguration** (F-53) | ~15 min | **DONE** `b9ca849` | `check_deps.py` now refuses a run when Ollama serialises. Took three probe designs; the two failures are recorded in its docstring |
+| 4 | **Measure a real turn's prefill/decode split** (Q-20) | ~30 min | **DONE** | **Overturned F-54.** Prefill is **~25 % of a turn**, not 4 % — the earlier benchmark reused one prompt and was reading Ollama's KV cache. See F-55, F-56 |
 
 Everything below is the wider backlog, and stays subordinate to those three.
 
@@ -227,6 +237,63 @@ prefill — targets 4 % of the wrong end. Even halving the prompt saves ~2 % of 
 **Demoted.** The lever that matters is *generated* tokens: how long each agent's reply
 is, and how many tool-call round-trips a turn takes. That is worth measuring (Q-20),
 and it is a genuinely different question from the one item 3 was going to answer.
+
+### F-55 — RETRACTS F-54. Prefill is ~25 % of a turn, not 4 %; the benchmark was reading its own cache
+
+**Finding.** F-54 reported prefill at 0.02–0.03 s against 0.66–0.82 s of decode, and
+concluded prompt-size reduction was worth ~2 % and should be dropped. **That was
+measured on the same prompt sent repeatedly**, so every call after the first hit
+Ollama's KV cache and paid no prefill at all. A real run sends a *different* prompt to
+every agent every round — different persona, different feed — and never reuses a cache
+entry.
+
+Re-measured with a unique prompt per call, `num_predict=160`:
+
+| Feed size | Prompt tokens | Prefill | Decode | Wall | Prefill share |
+|---|---|---|---|---|---|
+| 12 posts (current) | 610 | **1.31 s** | 3.82 s | 5.29 s | **24.8 %** |
+| 6 posts | 328 | 0.80 s | 4.20 s | 5.15 s | 15.6 % |
+| 3 posts | 187 | 0.52 s | 4.26 s | 4.92 s | 10.5 % |
+
+Prefill is **a quarter of a turn**, and it scales with the prompt as expected. The
+identical-prompt benchmark was measuring cache hits and calling it prefill.
+
+**What this restores, and what it does not.** Halving the feed saves ~0.5 s of a 5.3 s
+turn — about **10 %**, not the ~2 % F-54 claimed. But feed size is the study's central
+independent variable: 12 slots split 5/3/4 is the design (F-25), and every tier
+estimate is conditioned on it. **Cutting the feed to go faster would change the
+experiment, not optimise it.** Q-17 is reopened as a real lever and immediately
+constrained by that.
+
+**The genuinely free version, which needs a test before it can be claimed.** The
+prompt also carries ~979 tokens of tool definitions for **22 actions**, and F-48
+established that **8 of them never fire in any of the nine analysed runs** — all mutes,
+trends and undos. Dropping those eight would cut prompt tokens with, in principle, no
+behavioural consequence. In principle is not good enough: an agent that *could* have
+muted and now cannot is a different agent, and "never observed in 9 runs" is not
+"impossible". This is Q-21, and it needs an A/B against baseline, not an assumption.
+
+**Method note that generalises.** Any LLM benchmark that reuses a prompt measures a
+cache. Both F-51 and F-54 were wrong for want of a control the workload actually has —
+cold caches in one case, real concurrency in the other. Benchmarks of this system
+should vary the prompt per call by default.
+
+### F-56 — The parallelism gain survives the cache correction, at a lower magnitude
+
+**Finding.** F-53's headline was measured with repeated identical prompts, so it needed
+re-checking against the same flaw as F-54. Re-run with a unique prompt per call:
+
+| Server | conc 1 | conc 4 | gain |
+|---|---|---|---|
+| `OLLAMA_NUM_PARALLEL=1` (current) | 0.29 calls/s | 0.30 | **1.01×** — nothing |
+| `OLLAMA_NUM_PARALLEL=8` | 0.30 calls/s | 0.39 | **1.30×** |
+
+**F-53's substance stands**: the server was serialising, the semaphore did nothing, and
+fixing it is a real gain. The *magnitude* is lower on realistic prompts — about
+**1.3× at concurrency 4** rather than the 1.5× the cached benchmark suggested, because
+unique prompts spend a quarter of each turn in prefill, which batches less well than
+decode. Absolute throughput also falls by ~3× against the cached figures, which is
+what a real run actually sees.
 
 ### D-17 — Model choice is a scientific decision, not a performance one (still open)
 

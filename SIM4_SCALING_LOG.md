@@ -31,8 +31,15 @@ than restart, so a search for any id still lands in exactly one place:
 
 *Last updated 2026-09-03. Update at the end of every working session.*
 
-**Queue items 1–4 are done and committed. No full simulation has been run — only
-4-agent/2-round smoke tests.** Branch `social-timeline-sim`.
+**All queue items done, plus three scaling defects found and fixed while
+double-checking. No full simulation has been run — only 4- and 5-agent smoke tests.**
+Branch `social-timeline-sim`, 88 test-gate checks passing.
+
+**The pattern worth noting.** Every one of the three defects (F-57 ranking loop, F-58
+index shape, F-55 cache-contaminated benchmark) was invisible at 36 agents and squarely
+in the path at 1,000. Measuring *where time goes today* — which is what Q-16's
+instrumentation does, correctly — cannot find any of them. They only appear when you
+ask how cost scales with size, which is a different question.
 
 **One thing needs your decision before anything else proceeds:** your Ollama server is
 still `OLLAMA_NUM_PARALLEL=1`, so `check_deps.py` will now *fail* and block runs until
@@ -51,11 +58,26 @@ service, so I have not restarted it.
 That last sentence is correct, and §1 and §2 below establish in what way — the two
 halves fail for completely different reasons and have completely different fixes.
 
+### What was built
+
+| | |
+|---|---|
+| **Phase timing** | Seven phases per round; anything unaccounted is `llm_wait`. Confirms F-50 by measurement: **99.8 % LLM**, 0.2 % embed, rest sub-millisecond |
+| **`export_parquet.py`** | All 19 runs: **115.7 MB → 6.5 MB**, 17.8x smaller. DuckDB cross-run query over all 19 in **14 ms** |
+| **`check_deps.py` gate** | Refuses a run when Ollama serialises. Took three probe designs; two produced false results and are documented |
+| **Vectorised ranker** | **25-30x** faster, bit-identical including under forced ties. Removes a ~23 min/round wall at target scale |
+| **Composite indexes** | **260x** on the informed-action gate; both hot queries now covering-index |
+| **Test gates** | 57 → **88 checks** across 6 suites, all passing |
+
 ### What the measurements say
 
-- **The wall is the language model, and only the language model** (F-50). At the
-  measured 14.4 s per agent-turn, 1000 × 1000 is **167 days**. Scoring is not the
-  problem: a full 1000 × 1,000,000 cosine pass is ~1.1 s of matmul.
+- **The wall is the language model** (F-50, now confirmed in-run at 99.8 %). At
+  14.4 s per agent-turn, 1000 × 1000 is **167 days**.
+- **But there was a second wall underneath it** (F-57). F-50 timed the matmul and
+  called scoring free. The Python loop *around* it was **1,231× larger** — ~23 min
+  per round at target scale. Now vectorised and gated.
+- **And a third, in the index** (F-58). The informed-action gate scanned ~12,000 rows
+  per check at scale; the right composite index makes it **260× faster**.
 - **There was a free speedup, and F-51 missed it** (F-53, F-56). Ollama had
   `OLLAMA_NUM_PARALLEL:1` — it served one request at a time and the semaphore of 4 only
   filled a queue. Fixing it is worth **~1.3× on realistic prompts**; today's config

@@ -238,6 +238,48 @@ prefill — targets 4 % of the wrong end. Even halving the prompt saves ~2 % of 
 is, and how many tool-call round-trips a turn takes. That is worth measuring (Q-20),
 and it is a genuinely different question from the one item 3 was going to answer.
 
+### F-57 — The scoring bottleneck is the Python loop, not the matmul, and it was 1,231x larger
+
+**Finding.** F-50 measured the *matmul* — 1000 agents x 1e6 posts in ~1.1 s — and
+concluded that "optimising the feed builder would be optimising 0.03 % of the runtime".
+That is true at 36 x 262 and **false at the scale being planned for**, because the
+matmul was never the expensive part. The Python loop wrapped around it was.
+
+Measured at ~**1.35 us per (agent, post) pair**, flat across sizes:
+
+| agents x posts | ranking loop |
+|---|---|
+| 36 x 262 (today) | 0.01 s |
+| 100 x 1,000 | 0.14 s |
+| 200 x 4,000 | 1.14 s |
+| 1,000 x 100,000 | **~2 min per round** |
+| 1,000 x 1,000,000 | **~23 min per round** |
+
+Against ~1.1 s for the matmul over the same space: **the loop is ~1,231x the
+matrix multiply it wraps.** At 1,000 rounds that is roughly **16 days of pure
+ranking**, on top of the LLM time — a second wall nobody had measured, hiding
+underneath a phase everyone had agreed was free.
+
+**Fixed.** `_rank_candidates` is now vectorised with numpy: mask self-authored
+posts, multiply the similarity row by recency, `argsort` and take the top k.
+Measured **25-30x faster** at 200 x 4,000; extrapolated, **28 min -> 0.9 min per
+round** at target scale.
+
+**Bit-identical, and gated.** A rewrite of the ranker is a rewrite of what every
+agent sees, so `test_ranking.py` holds the new implementation against the old one —
+kept verbatim as an oracle — across six shapes including two with **forced exact
+ties**, and requires identical output to 1e-9. The tie cases matter: the original
+built its list in ascending post-index order and relied on Python's stable sort, so
+equal scores kept ascending post index. `np.argsort(kind="stable")` reproduces that
+only because it is stable and only because the input order matches. Both are now
+things a future change has to break a test to break.
+
+**Why this was missed.** F-50 timed the operation that *looked* expensive. The loop
+around it costs nothing at the only scale ever run, so no measurement of an actual
+run would have caught it either -- the instrumentation added in Q-16 reports
+`score_rank` at 0.0 s, correctly. It only appears when you ask what the cost is as a
+function of size, which is a different question from where the time goes today.
+
 ### F-55 — RETRACTS F-54. Prefill is ~25 % of a turn, not 4 %; the benchmark was reading its own cache
 
 **Finding.** F-54 reported prefill at 0.02–0.03 s against 0.66–0.82 s of decode, and

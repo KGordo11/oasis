@@ -447,26 +447,45 @@ class TimelinePlatform(Platform):
         the matmul it follows. Keeping `sim` and `recency` in separate columns
         is what made F-42's retraction possible at all -- do not collapse them.
         """
+        import numpy as np
+
+        # Vectorised. The loop this replaces cost ~1.35 us per (agent, post)
+        # pair regardless of size -- fine at 36 x 262, but agents x posts is
+        # the term that explodes: at 1000 agents x 1e6 posts it is ~23 minutes
+        # PER ROUND, against ~1.1s for the matmul it wraps. A factor of 1,231.
+        # F-50's "scoring is 0.03% of runtime" is true at today's scale and
+        # false at the one being planned for.
+        #
+        # Tie-breaking is preserved exactly. The old code built `scored` in
+        # ascending post-index order and used Python's stable sort, so equal
+        # scores kept ascending post index. `np.argsort(kind="stable")` on the
+        # negated scores reproduces that ordering element for element.
+        sims_np = sims.detach().cpu().numpy() if hasattr(sims, "detach") \
+            else np.asarray(sims)
+        recency_np = np.asarray(recency, dtype=np.float64)
+        authors_np = np.asarray(authors)
+        post_ids_np = np.asarray(post_ids)
+        k = self.max_rec_post_len
+
         rec_rows, candidate_rows = [], []
         for u_idx, agent_id in enumerate(agent_ids):
-            scored = []
-            for p_idx, post_id in enumerate(post_ids):
-                if authors[p_idx] == agent_id:
-                    continue  # never recommend a user their own post
-                sim = float(sims[u_idx, p_idx])
-                scored.append((sim * recency[p_idx], sim, p_idx))
-
-            if not scored:
+            keep = authors_np != agent_id      # never recommend own post
+            if not keep.any():
                 self.stats["empty_candidate_pools"] += 1
                 continue
 
-            scored.sort(key=lambda t: t[0], reverse=True)
-            top = scored[:self.max_rec_post_len]
-            for rank, (score, sim, p_idx) in enumerate(top):
-                rec_rows.append((agent_id, post_ids[p_idx]))
+            idx = np.flatnonzero(keep)
+            sim_u = sims_np[u_idx, idx].astype(np.float64)
+            score_u = sim_u * recency_np[idx]
+
+            order = np.argsort(-score_u, kind="stable")[:k]
+            for rank, j in enumerate(order):
+                p_idx = int(idx[j])
+                rec_rows.append((agent_id, int(post_ids_np[p_idx])))
                 candidate_rows.append(
-                    (round_no, agent_id, post_ids[p_idx], authors[p_idx],
-                     rank, sim, recency[p_idx], score))
+                    (round_no, agent_id, int(post_ids_np[p_idx]),
+                     int(authors_np[p_idx]), rank, float(sim_u[j]),
+                     float(recency_np[p_idx]), float(score_u[j])))
         return rec_rows, candidate_rows
 
     async def _rank_hot_score(self, round_no, user_rows, post_rows):

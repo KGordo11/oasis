@@ -398,6 +398,62 @@ def turns_without_action(sim_platform, n_agents, n_rounds):
         return {"error": str(exc)}
 
 
+def _check_server_keep_alive(ollama_url: str):
+    """Return a warning string if the Ollama SERVER will unload between bursts.
+
+    D-5: a 5-minute default unload made earlier simulations 3-4x slower,
+    because a round's LLM burst is followed by minutes of scoring and I/O.
+    The setting lives on the server, so this asks the server rather than
+    inspecting our own environment (which was the old, wrong, check).
+
+    Returns None when the server looks correctly configured, or when it cannot
+    be interrogated -- an unreachable server is check_deps.py's problem, not a
+    reason to emit a misleading warning here.
+    """
+    import urllib.request
+
+    base = (ollama_url or "").rstrip("/")
+    for suffix in ("/v1", "/api"):
+        if base.endswith(suffix):
+            base = base[: -len(suffix)]
+    if not base:
+        return None
+
+    # A loaded model reports when it will be evicted. That is the ground truth
+    # for whether keep-alive is long enough, and it needs no env var at all.
+    try:
+        with urllib.request.urlopen(base + "/api/ps", timeout=3) as resp:
+            models = json.loads(resp.read()).get("models") or []
+    except Exception:  # noqa: BLE001
+        return None
+
+    if not models:
+        # Nothing resident yet: fall back to our own environment, which is at
+        # least a signal when the run and the server share a shell.
+        if "OLLAMA_KEEP_ALIVE" not in os.environ:
+            return ("Could not confirm the Ollama server's keep-alive (no "
+                    "model loaded yet). If the server was started without "
+                    "OLLAMA_KEEP_ALIVE=60m, it unloads after 5 minutes idle "
+                    "and the run gets 3-4x slower (D-5).")
+        return None
+
+    from datetime import datetime, timezone
+    for m in models:
+        raw = (m.get("expires_at") or "").replace("Z", "+00:00")
+        try:
+            expires = datetime.fromisoformat(raw)
+        except ValueError:
+            continue
+        minutes = (expires - datetime.now(timezone.utc)).total_seconds() / 60
+        if minutes < 15:
+            return (f"Ollama will unload {m.get('name')} in ~{minutes:.0f} min. "
+                    f"A round's LLM burst is followed by minutes of scoring, so "
+                    f"the model gets evicted mid-run and every round pays a "
+                    f"reload -- 3-4x slower (D-5). Restart the server with "
+                    f"OLLAMA_KEEP_ALIVE=60m.")
+    return None
+
+
 def main():
     """Command-line entry point: read the settings and start the run."""
     p = argparse.ArgumentParser(description=__doc__)
@@ -472,11 +528,14 @@ def main():
                    dest="following_post_count")
     args = p.parse_args()
 
-    if "OLLAMA_KEEP_ALIVE" not in os.environ:
-        log.warning("OLLAMA_KEEP_ALIVE is unset. Runs have multi-minute gaps "
-                    "between LLM bursts and the default 5m unload made "
-                    "earlier simulations 3-4x slower. Consider "
-                    "OLLAMA_KEEP_ALIVE=60m (decision D-5).")
+    # D-5. Keep-alive is a SERVER setting: it governs how long Ollama holds the
+    # model in memory, and it is read by `ollama serve`, not by this process.
+    # Checking our own environment cried wolf at anyone who set it correctly on
+    # the server and launched the run from a different shell -- which is the
+    # normal way to do it. Ask the server what it is actually using instead.
+    _keep_alive_note = _check_server_keep_alive(args.ollama_url)
+    if _keep_alive_note:
+        log.warning("%s", _keep_alive_note)
 
     asyncio.run(run(args))
 

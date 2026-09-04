@@ -200,6 +200,12 @@ async def run(args):
             "recsys": args.recsys,
             "model": args.model,
             "semaphore": args.semaphore,
+            # F-53: the client semaphore is meaningless without the server
+            # setting, and the server setting was silently 1 for R-1..R-24.
+            # Recording it makes a run's real concurrency reconstructable
+            # instead of assumed.
+            "ollama_num_parallel": os.environ.get(
+                "OLLAMA_NUM_PARALLEL", "(unset -> server default)"),
             "max_rec_post_len": args.max_rec_post_len,
             "refresh_rec_post_count": args.refresh_rec_post_count,
             "following_post_count": args.following_post_count,
@@ -450,8 +456,14 @@ def main():
                         "ahead of the feed and crowd out content engagement "
                         "-- see finding F-14.")
     p.add_argument("--semaphore", type=int, default=4,
-                   help="max concurrent LLM calls (default 4; local Ollama "
-                        "serialises and high concurrency causes timeouts)")
+                   help="max concurrent LLM calls (default 4). NOTE F-53: "
+                        "this only does anything if the Ollama SERVER is "
+                        "started with OLLAMA_NUM_PARALLEL>1. It was 1 for all "
+                        "of R-1..R-24, so every turn queued and this flag "
+                        "merely filled the queue -- at Parallel:1, "
+                        "--semaphore 4 is 19%% SLOWER than --semaphore 1. "
+                        "With OLLAMA_NUM_PARALLEL=8, --semaphore 8 measured "
+                        "1.9x. check_deps.py gates this.")
     p.add_argument("--max-rec-post-len", type=int, default=30,
                    dest="max_rec_post_len")
     p.add_argument("--refresh-rec-post-count", type=int, default=8,

@@ -222,6 +222,88 @@ def _ollama():
     return f"models={names}"
 
 
+@check("Ollama batches requests (OLLAMA_NUM_PARALLEL > 1)")
+def _ollama_parallel():
+    """Detect OLLAMA_NUM_PARALLEL=1, which silently serialises every agent.
+
+    F-53: this was misconfigured for all 24 runs. `--semaphore 4` sent four
+    concurrent requests and Ollama processed them one at a time, so the flag
+    only ever filled a queue. Setting the server correctly is worth ~1.9x, and
+    at Parallel:1 `--semaphore 4` is actually 19% SLOWER than serial, because
+    queueing costs contention and buys nothing.
+
+    Measured as a THROUGHPUT ratio, not a latency ratio. Two earlier versions
+    of this gate got it wrong in both directions and are worth recording:
+
+      * an 8-token probe finished in 0.2s, where queueing hid inside the
+        noise -- false PASS on a server we knew was serial;
+      * comparing wall time for 2 concurrent requests against 1 -- false FAIL
+        on a correctly configured server, because two streams share one GPU
+        and each individually slows down. Per-request latency rises either
+        way; only aggregate throughput separates the two cases.
+
+    So: run a fixed batch at concurrency 1, then the same batch at
+    concurrency 4, and compare completed-calls-per-second.
+
+    The threshold is 1.0, and deliberately not tighter. Measured on this
+    machine: a serialising server returns 0.82-0.85 (concurrency makes it
+    *worse*, because queueing costs contention and buys nothing), a batching
+    one 1.17-1.19. Putting the line at 1.0 leaves ~0.17 margin on both sides
+    and states the honest claim -- "concurrency bought nothing at all" -- 
+    rather than fitting a number to one measurement. A threshold of 1.15 was
+    tried and rejected: it passed by 0.02, which is inside the run-to-run
+    noise of the probe itself.
+
+    Set OASIS_ALLOW_SERIAL_OLLAMA=1 to proceed anyway.
+    """
+    import concurrent.futures as cf
+    import json
+    import os
+    import time
+    import urllib.request
+
+    def ping(_):
+        body = json.dumps({"model": "llama3.1:8b",
+                           "prompt": "Describe a social media feed in detail.",
+                           "stream": False,
+                           "options": {"num_predict": 48,
+                                       "temperature": 0.7}}).encode()
+        req = urllib.request.Request(
+            "http://localhost:11434/api/generate", body,
+            {"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=120).read()
+
+    def throughput(conc, n=6):
+        with cf.ThreadPoolExecutor(max_workers=conc) as ex:
+            t0 = time.time()
+            list(ex.map(ping, range(n)))
+            return n / (time.time() - t0)
+
+    # Warm BOTH the model and each concurrency level. Ollama allocates its
+    # KV slots lazily, so the first batch at concurrency 4 pays to build four
+    # caches and reads ~15% slower than steady state -- enough to push a
+    # correctly configured server under the threshold and fail it.
+    ping(0)
+    serial = throughput(1)
+    throughput(4, n=4)                        # warm the parallel slots
+    batched = throughput(4)
+    gain = batched / serial if serial else 0
+    verdict = (f"{serial:.2f} calls/s at conc 1, {batched:.2f} at conc 4 "
+               f"(gain {gain:.2f}x)")
+
+    if gain < 1.0:
+        if os.environ.get("OASIS_ALLOW_SERIAL_OLLAMA"):
+            return verdict + " -- SERIAL, allowed by override"
+        raise ValueError(
+            verdict + " -- concurrency buys nothing, so Ollama is serialising "
+            "(OLLAMA_NUM_PARALLEL=1). Every agent turn queues and the run "
+            "takes roughly twice as long as it needs to. Fix:\n"
+            "      OLLAMA_NUM_PARALLEL=8 ollama serve\n"
+            "    then run with --semaphore 8 (F-53 measured 1.9x here).\n"
+            "    To proceed anyway: OASIS_ALLOW_SERIAL_OLLAMA=1")
+    return verdict + " -- batching"
+
+
 print("\n" + "=" * 68)
 failed = [r for r in results if not r[1]]
 for name, ok, detail, elapsed in results:

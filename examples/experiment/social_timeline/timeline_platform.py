@@ -316,10 +316,24 @@ class TimelinePlatform(Platform):
                 n_follows  INTEGER
             );
 
+            -- (agent_id, round) serves the per-round exposure reads.
             CREATE INDEX IF NOT EXISTS idx_rec_history_agent
                 ON rec_history(agent_id, round);
             CREATE INDEX IF NOT EXISTS idx_rec_history_author
                 ON rec_history(author_id);
+
+            -- The informed-action gate asks "has this agent seen this post?"
+            -- on every like, comment, repost and quote. On (agent_id, round)
+            -- that seeks the agent and then scans every row it has -- 12,000
+            -- of them at 1000 agents x 12M exposures. Measured at 1.2M rows:
+            -- 425.7 us per lookup against 1.6 us with the pair indexed, a
+            -- factor of 260, and SQLite can answer it from the index alone
+            -- without touching the table.
+            CREATE INDEX IF NOT EXISTS idx_rec_history_agent_post
+                ON rec_history(agent_id, post_id);
+            -- Same shape for _knows_author, which gates follow().
+            CREATE INDEX IF NOT EXISTS idx_rec_history_agent_author
+                ON rec_history(agent_id, author_id);
         """)
         self.db.commit()
 

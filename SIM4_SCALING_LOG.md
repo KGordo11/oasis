@@ -238,6 +238,53 @@ prefill — targets 4 % of the wrong end. Even halving the prompt saves ~2 % of 
 is, and how many tool-call round-trips a turn takes. That is worth measuring (Q-20),
 and it is a genuinely different question from the one item 3 was going to answer.
 
+### F-58 — The informed-action gate's index was the wrong shape; a 260x fix
+
+**Finding.** `_informed()` runs on every like, comment, repost and quote, asking
+"has this agent been shown this post?" via
+`SELECT 1 FROM rec_history WHERE agent_id=? AND post_id=?`. The only index that
+served it was `(agent_id, round)`, which seeks the agent and then **scans every row
+that agent has** — about 12,000 of them at 1,000 agents and 12 M exposures.
+
+Benchmarked on a synthetic `rec_history` of 1.2 M rows across 1,000 agents, 300
+random lookups:
+
+| Index | Mean lookup |
+|---|---|
+| `(agent_id, round)` — what existed | **425.7 us** |
+| `(agent_id, post_id)` — added | **1.6 us** |
+
+**260x**, and SQLite answers it from the index alone without touching the table
+(`USING COVERING INDEX`). The matching `(agent_id, author_id)` index was added for
+`_knows_author()`, which gates `follow()` the same way.
+
+Invisible today — `baseline` has 6,048 rows and any index looks fine — and squarely
+in the path at the scale being planned for.
+
+### F-59 — Three other suspected walls, measured and cleared
+
+Recorded because "we checked and it is fine" is worth as much as a fix, and stops
+the next person re-investigating.
+
+| Suspected | Measured at 1,000 agents x 1 M posts | Verdict |
+|---|---|---|
+| `fetch_table_from_db("post")` reloads every post every round | 434 ms/round, ~200 MB materialised; **~4 min cumulative** over 1,000 rounds | **not a wall** — trivial beside a 4-hour LLM round. Memory is the real cost, not time |
+| `embed_cached` re-hashing every post text each round | 0.5 us per cached lookup -> **~0.5 s/round** | **not a wall** |
+| Embeddings stored at double precision | already `float32` | **nothing to win** |
+
+**One genuine limit, deliberately not fixed.** `cosine_matrix` allocates the score
+matrix in one block: 1,000 x 1 M float32 is **4.0 GB per round**. Survivable on this
+32 GB machine, wasteful, and a hard stop beyond that size. Chunking the score-and-rank
+pipeline over agents would cut peak memory ~10x and is straightforward, because
+ranking is already per-agent independent.
+
+It is **not being done now**, on purpose. The only scale where 4 GB bites is
+1,000 x 1 M, which is 167 days of LLM time (F-50) and therefore unreachable. The
+realistic near-term target — a few hundred agents (§3) — needs 0.16 GB. Rewriting the
+scoring path a second time to solve a problem that cannot currently be reached is
+speculative work on the most safety-critical code in the project. Recorded as **Q-22**,
+to be done if and when the scale becomes reachable.
+
 ### F-57 — The scoring bottleneck is the Python loop, not the matmul, and it was 1,231x larger
 
 **Finding.** F-50 measured the *matmul* — 1000 agents x 1e6 posts in ~1.1 s — and

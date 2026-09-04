@@ -183,7 +183,24 @@ def _write(df: pd.DataFrame, path: str) -> int:
     return os.path.getsize(path)
 
 
-def export_run(db_path: str, out_root: str) -> dict:
+def _write_csv(df: pd.DataFrame, path: str) -> int:
+    """Write the same table as CSV, for Excel and anything else that cannot
+    read Parquet.
+
+    Not the default, and worth saying why. CSV has no types, so the
+    `user_id`-is-really-`agent_id` and `created_at`-is-really-`round` traps
+    come back as untyped strings for the reader to misinterpret, and NULL
+    becomes indistinguishable from empty -- which is exactly the confusion
+    that turned 1,217 unscored exposures into zeros the first time. It is also
+    ~20x larger. Offered because Excel is a real constraint, not because it is
+    a good interchange format.
+    """
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    df.to_csv(path, index=False)
+    return os.path.getsize(path)
+
+
+def export_run(db_path: str, out_root: str, also_csv: bool = False) -> dict:
     """Export one run. Returns a summary dict."""
     label = os.path.basename(db_path)
     label = label.replace("social_timeline_", "").replace(".db", "")
@@ -206,6 +223,11 @@ def export_run(db_path: str, out_root: str) -> dict:
 
         df = _coerce(df, name)
         rows = len(df)
+
+        if also_csv and rows:
+            # One flat file per table -- partitioning helps a query engine and
+            # only annoys a spreadsheet.
+            _write_csv(df, os.path.join(out, "csv", f"{name}.csv"))
 
         if rows and name in PARTITIONED and "round" in df.columns:
             total = 0
@@ -317,6 +339,10 @@ def main() -> int:
     ap.add_argument("--data-dir", default="data")
     ap.add_argument("--out", default=None,
                     help="output root (default: <data-dir>/parquet)")
+    ap.add_argument("--csv", action="store_true",
+                    help="also write flat CSVs alongside the Parquet, for "
+                         "Excel. Larger and untyped -- Parquet is the format "
+                         "to prefer wherever the reader supports it.")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -337,7 +363,7 @@ def main() -> int:
     results = []
     for db in dbs:
         log.info("%s", os.path.basename(db))
-        results.append(export_run(db, out_root))
+        results.append(export_run(db, out_root, also_csv=args.csv))
 
     log.info("=" * 70)
     tp = sum(r["total_bytes"] for r in results)

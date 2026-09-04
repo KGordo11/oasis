@@ -105,3 +105,10 @@ tmp
 # (data/social_timeline_*.json) already carry per-round timings and counters,
 # which is the provenance that matters.
 data/overnight_logs/
+
+# Parquet exports are derived artifacts: export_parquet.py regenerates them
+# from the .db files in seconds, and the .db files are themselves ignored.
+# Committing 6.5 MB of output that is reproducible by one command adds noise
+# to every diff and nothing to the record. The exporter and its fidelity gate
+# are what need to be under version control, and they are.
+data/parquet/

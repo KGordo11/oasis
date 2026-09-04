@@ -77,6 +77,9 @@ from __future__ import annotations
 import math
 import os
 import sys
+import time
+from collections import defaultdict
+from contextlib import contextmanager
 from datetime import datetime
 
 # These modules sit alongside this file and are imported by name, so the
@@ -238,6 +241,45 @@ class TimelinePlatform(Platform):
             "duplicate_refresh_traces": 0,
         }
 
+        # Q-16 phase timing. F-50 attributed ~99% of runtime to the language
+        # model by subtraction and micro-benchmark rather than by measuring a
+        # real run, and F-51 was wrong precisely because it inferred instead
+        # of measuring. These are cumulative seconds per phase, sampled by the
+        # `_timed` context manager below, and reported per round by
+        # run_simulation.py. Everything not accounted for here is LLM wait.
+        self.phase_seconds = defaultdict(float)
+        self._phase_marks = defaultdict(float)
+
+    @contextmanager
+    def _timed(self, phase: str):
+        """Accumulate wall time against a named phase.
+
+        Deliberately wall-clock, not CPU: the question is where a round's two
+        hours go, and blocking on a socket is time spent whether or not a core
+        is busy.
+        """
+        t0 = time.perf_counter()
+        try:
+            yield
+        finally:
+            self.phase_seconds[phase] += time.perf_counter() - t0
+
+    def take_phase_seconds(self) -> dict:
+        """Return seconds accumulated since the last call, and reset.
+
+        Called once per round so each round's figures are independent rather
+        than cumulative -- the growth across rounds is itself the signal
+        (F-50: 309s to 566s as posts accumulate).
+        """
+        out = {k: round(v - self._phase_marks[k], 4)
+               for k, v in self.phase_seconds.items()}
+        self._phase_marks = defaultdict(float, self.phase_seconds)
+        # Every phase that has ever run is reported, including sub-millisecond
+        # ones. Filtering them out would let a reader conclude a phase never
+        # happened when it merely finished fast -- the same reading error that
+        # made "14 of 21 actions never fire" (F-48) wrong.
+        return out
+
     # ---------------------------------------------------------------- tables
 
     def _create_instrumentation_tables(self):
@@ -364,12 +406,47 @@ class TimelinePlatform(Platform):
 
         # Cached: post text never changes, so re-encoding every post every
         # round was pure waste and the main source of growing CPU load.
-        user_vecs = embed_cached(profile_texts)
-        post_vecs = embed_cached(contents)
-        sims = cosine_matrix(user_vecs, post_vecs)
+        with self._timed("embed"):
+            user_vecs = embed_cached(profile_texts)
+            post_vecs = embed_cached(contents)
+        with self._timed("score_matmul"):
+            sims = cosine_matrix(user_vecs, post_vecs)
 
         self._assert_algorithm_ran(sims)
 
+        # Q-16: this loop is timed separately from the matmul above because
+        # they scale differently and only one of them is a problem. The matmul
+        # is ~1.1s at 1000 agents x 1e6 posts (F-50); this is agents x posts
+        # *Python iterations* over the same space, and is the term that
+        # actually breaks at scale.
+        with self._timed("score_rank"):
+            rec_rows, candidate_rows = self._rank_candidates(
+                agent_ids, post_ids, authors, sims, recency, round_no)
+        # Upstream wipes `rec` each round; that is preserved. The history now
+        # lives in rec_candidates/rec_history instead of being lost.
+        with self._timed("db_write_candidates"):
+            self.pl_utils._execute_db_command("DELETE FROM rec", commit=True)
+            if rec_rows:
+                self.pl_utils._execute_many_db_command(
+                    "INSERT INTO rec (user_id, post_id) VALUES (?, ?)",
+                    rec_rows, commit=True)
+                self.pl_utils._execute_many_db_command(
+                    "INSERT OR REPLACE INTO rec_candidates (round, agent_id, "
+                    "post_id, author_id, rank, sim, recency, score) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    candidate_rows, commit=True)
+
+        self.stats["rounds_ranked"] += 1
+
+    def _rank_candidates(self, agent_ids, post_ids, authors, sims, recency,
+                         round_no):
+        """Top-`max_rec_post_len` candidates per agent, with the two score
+        terms kept apart.
+
+        Split out of `update_rec_table` so Q-16 can time it independently of
+        the matmul it follows. Keeping `sim` and `recency` in separate columns
+        is what made F-42's retraction possible at all -- do not collapse them.
+        """
         rec_rows, candidate_rows = [], []
         for u_idx, agent_id in enumerate(agent_ids):
             scored = []
@@ -390,21 +467,7 @@ class TimelinePlatform(Platform):
                 candidate_rows.append(
                     (round_no, agent_id, post_ids[p_idx], authors[p_idx],
                      rank, sim, recency[p_idx], score))
-
-        # Upstream wipes `rec` each round; that is preserved. The history now
-        # lives in rec_candidates/rec_history instead of being lost.
-        self.pl_utils._execute_db_command("DELETE FROM rec", commit=True)
-        if rec_rows:
-            self.pl_utils._execute_many_db_command(
-                "INSERT INTO rec (user_id, post_id) VALUES (?, ?)",
-                rec_rows, commit=True)
-            self.pl_utils._execute_many_db_command(
-                "INSERT OR REPLACE INTO rec_candidates (round, agent_id, "
-                "post_id, author_id, rank, sim, recency, score) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
-                candidate_rows, commit=True)
-
-        self.stats["rounds_ranked"] += 1
+        return rec_rows, candidate_rows
 
     async def _rank_hot_score(self, round_no, user_rows, post_rows):
         """Reddit-style hot-score ranking, the contrast condition.
@@ -499,6 +562,7 @@ class TimelinePlatform(Platform):
         from oasis.social_platform.platform import datetime  # noqa: F401
 
         round_no = max(self._round, 0)
+        self._feed_t0 = time.perf_counter()
         if self.recsys_type == RecsysType.REDDIT:
             current_time = self.sandbox_clock.time_transfer(
                 __import__("datetime").datetime.now(), self.start_time)
@@ -664,6 +728,10 @@ class TimelinePlatform(Platform):
             results_with_comments = self.pl_utils._add_comments_to_posts(
                 results)
 
+            # Feed construction ends here; everything after is logging and
+            # upstream bookkeeping, timed separately.
+            self.phase_seconds["feed_build"] += (
+                time.perf_counter() - self._feed_t0)
             self._last_fof = from_fof
             self._log_exposure(round_no, agent_id, results, from_recsys,
                                from_following)
@@ -730,10 +798,11 @@ class TimelinePlatform(Platform):
                          source, scores.get(post_id)))
 
         if rows:
-            self.pl_utils._execute_many_db_command(
-                "INSERT INTO rec_history (round, agent_id, post_id, "
-                "author_id, feed_position, source, score) "
-                "VALUES (?, ?, ?, ?, ?, ?, ?)", rows, commit=True)
+            with self._timed("db_write_exposures"):
+                self.pl_utils._execute_many_db_command(
+                    "INSERT INTO rec_history (round, agent_id, post_id, "
+                    "author_id, feed_position, source, score) "
+                    "VALUES (?, ?, ?, ?, ?, ?, ?)", rows, commit=True)
             self.stats["exposures_logged"] += len(rows)
 
     # ------------------------------------------------- informed-action gate

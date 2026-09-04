@@ -262,16 +262,28 @@ async def run(args):
             counts = snapshot_counts(sim_platform)
             failures = sum(getattr(a, "action_failures", 0)
                            for _, a in env.agent_graph.get_agents())
+
+            # Q-16. Everything the platform did NOT account for is time spent
+            # waiting on the model. F-50 inferred that split; this measures it.
+            phases = sim_platform.take_phase_seconds()
+            accounted = sum(phases.values())
+            phases["llm_wait"] = round(max(0.0, elapsed - accounted), 3)
+
             manifest["rounds"].append({
                 "round": round_no,
                 "seconds": round(elapsed, 1),
                 "cumulative_agent_failures": failures,
+                "phase_seconds": phases,
                 **counts,
             })
             log.info("round %d done in %.1fs | %s | agent failures: %d",
                      round_no, elapsed,
                      " ".join(f"{k}={v}" for k, v in counts.items()),
                      failures)
+            log.info("  phases: %s  (llm %.0f%% of round)",
+                     " ".join(f"{k}={v}s" for k, v in sorted(
+                         phases.items(), key=lambda kv: -kv[1])),
+                     100 * phases["llm_wait"] / elapsed if elapsed else 0)
 
         # Bug B-3: these MUST be read before env.close(), which closes the
         # database cursor (platform.py:143-144 on ActionType.EXIT). Reading
@@ -285,6 +297,19 @@ async def run(args):
         await env.close()
 
     manifest["total_seconds"] = round(time.time() - t_start, 1)
+
+    # Whole-run phase totals, so a reader does not have to sum the rounds.
+    totals = {}
+    for r in manifest["rounds"]:
+        for k, v in (r.get("phase_seconds") or {}).items():
+            totals[k] = round(totals.get(k, 0.0) + v, 2)
+    manifest["phase_totals"] = dict(
+        sorted(totals.items(), key=lambda kv: -kv[1]))
+    if manifest["total_seconds"]:
+        manifest["phase_share"] = {
+            k: round(100 * v / manifest["total_seconds"], 1)
+            for k, v in manifest["phase_totals"].items()}
+
     manifest["platform_stats"] = sim_platform.stats
     manifest["finished_at"] = datetime.now().isoformat()
 
@@ -295,6 +320,8 @@ async def run(args):
     log.info("run complete in %.1fs", manifest["total_seconds"])
     log.info("database: %s", db_path)
     log.info("manifest: %s", manifest_path)
+    log.info("phase totals (s): %s", manifest.get("phase_totals"))
+    log.info("phase share (%%):   %s", manifest.get("phase_share"))
     log.info("platform stats: %s", sim_platform.stats)
     log.info("final counts: %s", manifest["final_counts"])
     log.info("actions performed: %s", manifest["action_tally"])

@@ -1,0 +1,253 @@
+{
+  "label": "sweep_16",
+  "started_at": "2026-09-05T12:56:37.289913",
+  "config": {
+    "agents": 36,
+    "rounds": 5,
+    "recsys": "twhin-bert",
+    "model": "llama3.1:8b",
+    "semaphore": 16,
+    "ollama_num_parallel": "(unset -> server default)",
+    "max_rec_post_len": 30,
+    "refresh_rec_post_count": 8,
+    "following_post_count": 4,
+    "personas": "data/reddit/user_data_36.json",
+    "persona_separability": {
+      "n": 36,
+      "source": "reddit_generated",
+      "field": "bio",
+      "mean_similarity": 0.8287,
+      "min": 0.6764,
+      "max": 0.9329,
+      "spread": 0.2565
+    },
+    "prompt_version": 10,
+    "seed": 0,
+    "temperature": 0.7,
+    "n_actions": 22,
+    "lean_actions": false,
+    "actions": [
+      "create_post",
+      "create_comment",
+      "like_post",
+      "unlike_post",
+      "dislike_post",
+      "undo_dislike_post",
+      "like_comment",
+      "unlike_comment",
+      "dislike_comment",
+      "undo_dislike_comment",
+      "repost",
+      "quote_post",
+      "report_post",
+      "follow",
+      "unfollow",
+      "mute",
+      "unmute",
+      "search_user",
+      "search_posts",
+      "trend",
+      "refresh",
+      "do_nothing"
+    ]
+  },
+  "algorithm": {
+    "name": "TWHIN interest-based (TimelinePlatform implementation)",
+    "formula": "score(u,p) = cosine(embed(profile_u), embed(content_p)) * log((271.8 - age_p)/100)",
+    "embedding": "Twitter/twhin-bert-base, mean-pooled last_hidden_state",
+    "deviations_from_upstream": [
+      "mean-pooled last_hidden_state instead of pooler_output (bugs B-1/B-2: upstream pooler weights are randomly re-initialised every process, making runs unreplicable and near-non-discriminative)",
+      "per-(user,post) scores captured for rec_history"
+    ],
+    "initial_follow_edges": 0,
+    "recency_span_rounds": 5,
+    "explore_slots": 2,
+    "network_slots": 5,
+    "fof_slots": 3,
+    "discovery_slots": 4,
+    "feed_size": 12,
+    "feed_model": "three-tier: network > friend-of-friend > discovery; social ties are not interest-filtered"
+  },
+  "environment": {
+    "python": "3.11.15",
+    "platform": "macOS-15.8-arm64-arm-64bit",
+    "ollama_keep_alive": "(unset)"
+  },
+  "rounds": [
+    {
+      "round": 0,
+      "seconds": 262.8,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "llm_wait": 262.786
+      },
+      "post": 33,
+      "comment": 0,
+      "follow": 0,
+      "like": 0,
+      "dislike": 0,
+      "rec_history": 0,
+      "rec_candidates": 0,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    },
+    {
+      "round": 1,
+      "seconds": 455.2,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "embed": 0.6927,
+        "score_matmul": 0.0001,
+        "score_rank": 0.0013,
+        "db_write_candidates": 0.0042,
+        "feed_build": 0.0096,
+        "db_write_exposures": 0.0112,
+        "llm_wait": 454.489
+      },
+      "post": 38,
+      "comment": 5,
+      "follow": 9,
+      "like": 19,
+      "dislike": 0,
+      "rec_history": 432,
+      "rec_candidates": 1080,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    },
+    {
+      "round": 2,
+      "seconds": 369.9,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "embed": 0.1562,
+        "score_matmul": 0.0001,
+        "score_rank": 0.0014,
+        "db_write_candidates": 0.0056,
+        "feed_build": 0.0106,
+        "db_write_exposures": 0.0115,
+        "llm_wait": 369.665
+      },
+      "post": 47,
+      "comment": 8,
+      "follow": 22,
+      "like": 23,
+      "dislike": 0,
+      "rec_history": 864,
+      "rec_candidates": 2160,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    },
+    {
+      "round": 3,
+      "seconds": 446.7,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "embed": 0.2332,
+        "score_matmul": 0.0003,
+        "score_rank": 0.001,
+        "db_write_candidates": 0.0043,
+        "feed_build": 0.0107,
+        "db_write_exposures": 0.015,
+        "llm_wait": 446.468
+      },
+      "post": 60,
+      "comment": 10,
+      "follow": 30,
+      "like": 25,
+      "dislike": 0,
+      "rec_history": 1296,
+      "rec_candidates": 3240,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    },
+    {
+      "round": 4,
+      "seconds": 409.5,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "embed": 0.3815,
+        "score_matmul": 0.0002,
+        "score_rank": 0.001,
+        "db_write_candidates": 0.0033,
+        "feed_build": 0.0117,
+        "db_write_exposures": 0.0142,
+        "llm_wait": 409.085
+      },
+      "post": 70,
+      "comment": 12,
+      "follow": 31,
+      "like": 31,
+      "dislike": 0,
+      "rec_history": 1728,
+      "rec_candidates": 4320,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    }
+  ],
+  "final_counts": {
+    "post": 70,
+    "comment": 12,
+    "follow": 31,
+    "like": 31,
+    "dislike": 0,
+    "rec_history": 1728,
+    "rec_candidates": 4320,
+    "chat_group": 0,
+    "group_members": 0,
+    "group_messages": 0
+  },
+  "action_tally": {
+    "refresh": 144,
+    "create_post": 69,
+    "sign_up": 36,
+    "like_post": 31,
+    "follow": 31,
+    "create_comment": 12,
+    "like_comment": 4,
+    "repost": 1
+  },
+  "turns_without_action": {
+    "agent_turns_total": 180,
+    "turns_with_action": 137,
+    "turns_without_action": 43,
+    "action_rate": 0.761
+  },
+  "total_seconds": 1944.1,
+  "phase_totals": {
+    "llm_wait": 1942.5,
+    "embed": 1.46,
+    "db_write_exposures": 0.05,
+    "feed_build": 0.04,
+    "db_write_candidates": 0.01,
+    "score_matmul": 0.0,
+    "score_rank": 0.0
+  },
+  "phase_share": {
+    "llm_wait": 99.9,
+    "embed": 0.1,
+    "db_write_exposures": 0.0,
+    "feed_build": 0.0,
+    "db_write_candidates": 0.0,
+    "score_matmul": 0.0,
+    "score_rank": 0.0
+  },
+  "platform_stats": {
+    "rounds_ranked": 4,
+    "recency_clamped": 0,
+    "empty_candidate_pools": 0,
+    "refresh_calls": 144,
+    "exposures_logged": 1728,
+    "dm_joins_refused": 0,
+    "invalid_follow_targets": 0,
+    "refresh_errors": 0,
+    "empty_feeds": 36,
+    "blind_actions_rejected": 1,
+    "duplicate_refresh_traces": 0
+  },
+  "finished_at": "2026-09-05T13:29:01.468217"
+}

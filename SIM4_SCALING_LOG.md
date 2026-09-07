@@ -260,6 +260,61 @@ prefill — targets 4 % of the wrong end. Even halving the prompt saves ~2 % of 
 is, and how many tool-call round-trips a turn takes. That is worth measuring (Q-20),
 and it is a genuinely different question from the one item 3 was going to answer.
 
+### F-60 — The concurrency fix is worth nothing on a full run. F-53's magnitude does not survive
+
+**Finding.** F-53 established that Ollama was serialising, and F-56 measured the fix at
+~1.3x on unique prompts. A 12-agent A/B suggested 3.10x. **At full scale it is worth
+nothing measurable.**
+
+| Run | Config | Total | s/round |
+|---|---|---|---|
+| `baseline` (2026-08) | serial, `--semaphore 4` | 7,279 s | 485.3 |
+| `full_8b` (2026-09-05) | `NUM_PARALLEL=8`, `--semaphore 8` | 7,326 s | 488.4 |
+
+**+0.6 %.** Identical within any reasonable error.
+
+**And the error is large.** Two runs at the *same* new configuration disagree by 15 %
+over their first five rounds — `sweep_8` at 1,770 s against `full_8b` at 2,042 s. Against
+baseline's 1,984 s that is **-10.8 %** and **+2.9 %** respectively. The change is
+somewhere between "nothing" and "about a tenth", and a single pair of runs cannot
+separate those. This is F-35's noise floor showing up in wall clock rather than
+behaviour, and it is the reason the earlier estimates were wrong.
+
+**Why the small benchmarks lied.** They had idle gaps for batching to fill. A 36-agent
+round does not: the queue is saturated from the first request to the last, so the GPU is
+already busy and there is nothing for concurrency to recover. Every measurement in
+F-51, F-54 and F-56 was taken at a scale that does not resemble the workload.
+
+**What stands.** The server *was* serialising for all 24 runs, `check_deps.py` now
+catches it, and the configuration is no longer strictly dominated. What does not stand
+is the claim that fixing it makes runs meaningfully faster. **It does not.**
+
+### F-61 — Past 16 parallel slots the KV cache spills to CPU and throughput collapses
+
+**Finding.** Swept at 36 agents x 5 rounds, one configuration at a time, nothing else
+on the GPU:
+
+| `NUM_PARALLEL` | s/round | KV on Metal | KV on CPU | Total |
+|---|---|---|---|---|
+| **8** | **355.2** | 3.5 GiB | none | 7.0 GiB |
+| 16 | 390.4 | 8.0 GiB | none | 16.5 GiB |
+| 24 | 1,089.4 | 10.5 GiB | **1.5 GiB** | 22.5 GiB |
+| 32 | 1,299.0 | 9.5 GiB | **6.5 GiB** | 28.6 GiB |
+
+The collapse is not contention, it is **placement**. At 24 slots the KV cache no longer
+fits in the M2 Max's 21.3 GiB and Ollama silently puts part of it on the CPU; every
+attention step then crosses the memory boundary. 24 is **3.1x** slower than 8, and 32 is
+**3.7x**.
+
+This answers "can we run all 36 agents at once" with a measurement rather than
+arithmetic: **no.** 8 is optimal on this hardware, 16 is already 10 % worse, and past 16
+it falls off a cliff. The earlier VRAM estimate put the ceiling near 28 by counting bytes;
+the real ceiling is lower because throughput degrades well before allocation fails.
+
+**Generalisable rule:** the useful number is not "how many will load" but "how many keep
+the KV cache on the GPU". Ollama logs both placements at load time
+(`kv cache device=Metal` / `device=CPU`), so it is checkable before committing to a run.
+
 ### F-58 — The informed-action gate's index was the wrong shape; a 260x fix
 
 **Finding.** `_informed()` runs on every like, comment, repost and quote, asking
@@ -518,6 +573,43 @@ or both. Nothing in `examples/experiment/social_timeline/` gets there.
 
 **The useful question is therefore not "how do we hit 1000 × 1000" but "what is the
 largest run that answers the professor's question, and what does it cost".** Q-18.
+
+---
+
+## 3b. Bugs
+
+*Continues the build log's sequence at B-22.*
+
+#### B-22 — A run hung for twenty-four hours and nothing noticed
+
+**Where.** Ours, `run_simulation.py` — the model client had no request timeout.
+
+**Symptom.** The `full_3b` run stopped making progress at **18:52:43 on 2026-09-05**
+having completed only round 0, and was still sitting there **24 hours later**. The
+process was alive at 0.2 % CPU. The Ollama server answered `/api/tags` normally. The
+database had not been written since the stall. One LLM request had never returned and
+the client was waiting on it with no deadline.
+
+**Why nothing caught it.** Every signal looked healthy. A live process, a responsive
+server, and a database that simply is not growing are indistinguishable from a slow
+round unless something is comparing progress against elapsed time. This is the same
+failure class as B-12 (one small error destroying the feed around it) and B-15 (the
+overnight batch silently analysing nothing): **the system's default response to trouble
+is to look fine.**
+
+**Cost.** A full day of unattended machine time, and phases 3-5 of the campaign never
+started.
+
+**Fix, two layers.**
+1. `--request-timeout` (default 300 s), passed into the model config. A request that
+   exceeds it raises, which the round loop already handles as a counted agent failure
+   and continues past — turning an infinite wait into a visible number.
+2. A watchdog in the unattended runner: if the run's database has not been written for
+   20 minutes, the run is stalled rather than slow (a worst-case round is ~8 minutes),
+   so kill it and move to the next phase rather than lose the night.
+
+**Verified.** Smoke run with `--request-timeout 300`: completes, and the manifest
+records the value so any run's timeout is reconstructable after the fact.
 
 ---
 

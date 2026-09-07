@@ -56,7 +56,7 @@ log = logging.getLogger("social_timeline.run")
 
 # ---------------------------------------------------------------- action set
 
-def build_action_set(include_groups: bool = True):
+def build_action_set(include_groups: bool = True, lean: bool = False):
     """The action set agents may choose from (decision D-4).
 
     `include_groups=False` drops the 5 group-chat actions, leaving 22.
@@ -96,8 +96,27 @@ def build_action_set(include_groups: bool = True):
         ActionType.LEAVE_GROUP, ActionType.SEND_TO_GROUP,
         ActionType.LISTEN_FROM_GROUP,
     ]
+    if lean:
+        # Q-21. F-48 established that eight of the 22 never fire in any of the
+        # nine analysed runs -- every one a mute, a trend lookup, or an undo.
+        # Their schemas still cost ~980 prompt tokens on every single turn, and
+        # F-55 measured prefill at ~25% of a turn, so this is the one prompt
+        # reduction that should cost nothing behaviourally.
+        #
+        # "Should" is doing work in that sentence. An agent that COULD have
+        # muted and now cannot is a different agent, and "never observed in
+        # nine runs" is not "impossible". This flag exists to MEASURE the
+        # difference, not to become the default.
+        never_fired = {
+            ActionType.MUTE, ActionType.UNMUTE, ActionType.TREND,
+            ActionType.DISLIKE_COMMENT, ActionType.UNLIKE_POST,
+            ActionType.UNLIKE_COMMENT, ActionType.UNDO_DISLIKE_POST,
+            ActionType.UNDO_DISLIKE_COMMENT,
+        }
+        social = [a for a in social if a not in never_fired]
+
     actions = social + group if include_groups else social
-    expected = 27 if include_groups else 22
+    expected = (27 if include_groups else 22) - (8 if lean else 0)
     assert len(actions) == expected, \
         f"expected {expected} actions, got {len(actions)}"
     return actions
@@ -136,14 +155,27 @@ async def run(args):
     # than expecting identical output.
     import random as _random
     _random.seed(args.seed)
+    # B-22: a per-request timeout. Without one, a single request that never
+    # returns blocks the whole run forever -- measured on 2026-09-05, when the
+    # `full_3b` run hung at 18:52:43 and sat at 0.2% CPU for TWENTY-FOUR HOURS
+    # waiting on a socket, having completed only round 0. Nothing detected it;
+    # the process was alive, the server was responsive, and the run was simply
+    # never going to finish.
+    #
+    # This is the same failure class as B-12 and B-15: a silent stall is
+    # indistinguishable from slow progress unless something is watching. A
+    # timeout converts it into a counted agent failure, which the round loop
+    # already handles and reports.
     model = ModelFactory.create(
         model_platform=ModelPlatformType.OLLAMA,
         model_type=args.model,
         url=args.ollama_url,
-        model_config_dict={"temperature": args.temperature},
+        model_config_dict={"temperature": args.temperature,
+                           "timeout": args.request_timeout},
     )
 
-    actions = build_action_set(include_groups=not args.no_groups)
+    actions = build_action_set(include_groups=not args.no_groups,
+                               lean=getattr(args, 'lean_actions', False))
     agent_graph = await generate_timeline_agents(
         profile_path=os.path.join(REPO_ROOT, args.personas),
         model=model,
@@ -216,6 +248,8 @@ async def run(args):
             "seed": args.seed,
             "temperature": args.temperature,
             "n_actions": len(actions),
+            "lean_actions": getattr(args, "lean_actions", False),
+            "request_timeout": getattr(args, "request_timeout", None),
             "actions": [a.value for a in actions],
         },
         "algorithm": {
@@ -511,6 +545,18 @@ def main():
                         "Group instructions are injected into every prompt "
                         "ahead of the feed and crowd out content engagement "
                         "-- see finding F-14.")
+    p.add_argument("--request-timeout", type=float, default=300.0,
+                   dest="request_timeout",
+                   help="seconds before a single LLM request is abandoned "
+                        "(default 300). B-22: without this a hung request "
+                        "blocks the entire run indefinitely -- one cost 24 "
+                        "hours on 2026-09-05. A turn that exceeds it is "
+                        "counted as an agent failure and the round continues.")
+    p.add_argument("--lean-actions", action="store_true", dest="lean_actions",
+                   help="Q-21: drop the 8 actions F-48 found never fire, "
+                        "cutting ~980 prompt tokens per turn. A DIFFERENT "
+                        "CONDITION, not an optimisation -- the action surface "
+                        "is an experimental variable. Recorded in the manifest.")
     p.add_argument("--semaphore", type=int, default=4,
                    help="max concurrent LLM calls (default 4). NOTE F-53: "
                         "this only does anything if the Ollama SERVER is "

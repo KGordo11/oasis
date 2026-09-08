@@ -260,6 +260,65 @@ prefill — targets 4 % of the wrong end. Even halving the prompt saves ~2 % of 
 is, and how many tool-call round-trips a turn takes. That is worth measuring (Q-20),
 and it is a genuinely different question from the one item 3 was going to answer.
 
+### F-64 — The prompt is 80 % tool docstrings, and shortening them is the one real speedup
+
+**Finding.** Every turn ships the full Python docstring of all 22 actions as tool
+descriptions. Measured directly:
+
+| | Tokens |
+|---|---|
+| 22 tool docstrings | **~3,759** |
+| persona + 12-post feed + instructions | ~1,000 |
+| **total prompt** | **~4,761** |
+
+**Eighty percent of every prompt is API documentation the model does not need.**
+`search_user` alone is ~302 tokens, `refresh` ~289, `search_posts` ~273 — and
+`refresh` is not even a model choice (it is our own prompt-building, see the
+campaign notes).
+
+Replacing each description with its **first line only** — same 22 tools, same
+signatures, same action surface, nothing removed:
+
+| | Wall | Prompt | Tool calls |
+|---|---|---|---|
+| Full docstrings | 5.10 s | 4,761 tok | 0 / 5 |
+| First line only | **3.53 s** | **1,320 tok** | **2 / 5** |
+
+**1.44x faster, 72 % fewer prompt tokens, and tool calling got *better*, not worse.**
+That last part is the opposite of the usual efficiency trade and is mechanically
+sensible: less irrelevant text between the feed and the instruction.
+
+This is the only lever tested in this whole campaign that speeds the simulation up
+without changing what the agents can do. Unlike `--lean-actions` it removes no
+action, and unlike `--max-tokens` it constrains no output.
+
+### F-65 — Raising NUM_PARALLEL silently truncated every prompt, and I caused it
+
+**Finding.** Ollama divides its context across parallel slots. At
+`OLLAMA_NUM_PARALLEL=1` each sequence gets the whole 32,768 tokens. At
+`NUM_PARALLEL=8` each gets **4,096** — and the real prompt is **4,761**.
+
+Demonstrated by holding everything else fixed and growing the feed:
+
+| Feed | ctx 4096/slot | ctx 8192/slot |
+|---|---|---|
+| 12 posts | prompt **4,096** | prompt 4,712 |
+| 30 posts | prompt **4,096** | prompt 5,270 |
+| 60 posts | prompt **4,096** | — |
+
+Pinned at exactly 4,096 regardless of input: the prompt was being **cut**, and
+`prompt_tokens` reports the truncated length without complaint.
+
+**This is my doing.** F-53 recommended `OLLAMA_NUM_PARALLEL=8` on the strength of a
+throughput benchmark, and nothing in that benchmark used a prompt near the context
+limit. The 24 historical runs at `NUM_PARALLEL=1` were *not* truncated. Every run
+from last night's campaign was.
+
+**Two consequences.** Anyone raising `NUM_PARALLEL` must raise
+`OLLAMA_CONTEXT_LENGTH` with it — 8192 at NP=8 costs ~7 GiB of KV against 21.3 GiB
+available. And F-64's shorter descriptions fix this for free by putting the prompt
+back under 1,400 tokens, where truncation cannot occur at any sensible slot count.
+
 ### F-62 — Cost is exactly linear in agent count, and the sim cannot exceed 36 agents
 
 **Finding.** Nothing in this project had ever measured cost against agent count —

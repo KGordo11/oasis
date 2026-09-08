@@ -108,26 +108,45 @@ exps    = q("SELECT COUNT(*) FROM rec_history")
 kinds   = q("SELECT COUNT(DISTINCT action) FROM trace")
 malf    = (m.get("platform_stats") or {}).get("blind_actions_rejected", 0)
 c.close()
+
+# B-23. THE check, and the one the first version of this gate did not make.
+# This study measures engagement with a post the agent was SHOWN. A config can
+# keep every other number healthy -- actions per turn, posts written, a full
+# 12-slot feed -- while agents never react to anything, and then it answers no
+# research question at all. `max_tokens=512` did exactly that: it looked 1.9x
+# faster and had 1 engagement in 42,336 exposures, and seven full runs were
+# spent on it before anyone looked.
+#
+# Taken from analyze.py's own seen_and_acted, so the gate and the analysis
+# cannot drift apart on the definition.
+eng_rate = None
+try:
+    a = json.load(open(f"data/social_timeline_{lbl}_analysis.json")).get("agents") or {}
+    hit  = sum(len(x.get("seen_and_acted") or []) for x in a.values())
+    seen = hit + sum(len(x.get("seen_and_ignored") or []) for x in a.values())
+    eng_rate = hit / seen if seen else 0.0
+except Exception:
+    pass
+
 rate = acts / turns if turns else 0
 feed = exps / turns if turns else 0
 bad = []
-# An agent surface that produces almost nothing is a broken condition, not a
-# fast one. Baseline sits near 0.75 real actions per turn.
 if rate < 0.25: bad.append(f"action rate {rate:.2f}/turn (baseline ~0.75)")
 if posts < agents * 0.5: bad.append(f"only {posts} posts")
-# Feed integrity. Upper bound always applies -- more than one feed per
-# agent-round means double-logging. The LOWER bound only applies once enough
-# posts exist to fill a 12-slot feed: early rounds are legitimately thin, and
-# a 4-agent smoke run failed this check at 1.5 exposures/turn purely because
-# only 3 posts existed in the whole world. A gate that fails honest runs would
-# make the campaign pick the wrong winner.
 if feed > 13.0: bad.append(f"{feed:.1f} exposures/turn -- double-logged?")
 if feed <= 0.0: bad.append("no exposures logged at all")
 if posts >= agents and feed < 11.0: bad.append(f"{feed:.1f} exposures/turn on {posts} posts, expected ~12")
 if kinds < 3: bad.append(f"only {kinds} distinct actions")
+# baseline 2.40%, s_ctrl 4.31%; the broken configs sit at 0.00%. 1.0% splits
+# them with room on both sides.
+if eng_rate is None: bad.append("no analysis json -- cannot check engagement")
+elif eng_rate < 0.010: bad.append(f"engagement {100*eng_rate:.2f}% of seen posts (baseline 2.40%)")
+
 verdict = "FAIL" if bad else "PASS"
+er = "n/a" if eng_rate is None else f"{100*eng_rate:.2f}%"
 print(f"{verdict}  actions/turn {rate:.2f} | posts {posts} | exposures/turn {feed:.1f} "
-      f"| kinds {kinds} | blind-rejects {malf}" + ("  << " + "; ".join(bad) if bad else ""))
+      f"| ENGAGE {er} | kinds {kinds} | blind-rejects {malf}"
+      + ("  << " + "; ".join(bad) if bad else ""))
 PY
 }
 

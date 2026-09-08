@@ -1,0 +1,207 @@
+{
+  "label": "s_ctrl",
+  "started_at": "2026-09-08T01:05:22.285274",
+  "config": {
+    "agents": 36,
+    "rounds": 3,
+    "recsys": "twhin-bert",
+    "model": "llama3.1:8b",
+    "semaphore": 8,
+    "ollama_num_parallel": "(unset -> server default)",
+    "max_rec_post_len": 30,
+    "refresh_rec_post_count": 8,
+    "following_post_count": 4,
+    "personas": "data/reddit/user_data_36.json",
+    "persona_separability": {
+      "n": 36,
+      "source": "reddit_generated",
+      "field": "bio",
+      "mean_similarity": 0.8287,
+      "min": 0.6764,
+      "max": 0.9329,
+      "spread": 0.2565
+    },
+    "prompt_version": 10,
+    "seed": 0,
+    "temperature": 0.7,
+    "n_actions": 22,
+    "lean_actions": false,
+    "request_timeout": 300.0,
+    "max_tokens": 999999999,
+    "actions": [
+      "create_post",
+      "create_comment",
+      "like_post",
+      "unlike_post",
+      "dislike_post",
+      "undo_dislike_post",
+      "like_comment",
+      "unlike_comment",
+      "dislike_comment",
+      "undo_dislike_comment",
+      "repost",
+      "quote_post",
+      "report_post",
+      "follow",
+      "unfollow",
+      "mute",
+      "unmute",
+      "search_user",
+      "search_posts",
+      "trend",
+      "refresh",
+      "do_nothing"
+    ]
+  },
+  "algorithm": {
+    "name": "TWHIN interest-based (TimelinePlatform implementation)",
+    "formula": "score(u,p) = cosine(embed(profile_u), embed(content_p)) * log((271.8 - age_p)/100)",
+    "embedding": "Twitter/twhin-bert-base, mean-pooled last_hidden_state",
+    "deviations_from_upstream": [
+      "mean-pooled last_hidden_state instead of pooler_output (bugs B-1/B-2: upstream pooler weights are randomly re-initialised every process, making runs unreplicable and near-non-discriminative)",
+      "per-(user,post) scores captured for rec_history"
+    ],
+    "initial_follow_edges": 0,
+    "recency_span_rounds": 3,
+    "explore_slots": 2,
+    "network_slots": 5,
+    "fof_slots": 3,
+    "discovery_slots": 4,
+    "feed_size": 12,
+    "feed_model": "three-tier: network > friend-of-friend > discovery; social ties are not interest-filtered"
+  },
+  "environment": {
+    "python": "3.11.15",
+    "platform": "macOS-15.8-arm64-arm-64bit",
+    "ollama_keep_alive": "(unset)"
+  },
+  "rounds": [
+    {
+      "round": 0,
+      "seconds": 285.5,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "llm_wait": 285.488
+      },
+      "post": 30,
+      "comment": 0,
+      "follow": 0,
+      "like": 0,
+      "dislike": 0,
+      "rec_history": 0,
+      "rec_candidates": 0,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    },
+    {
+      "round": 1,
+      "seconds": 450.1,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "embed": 0.8254,
+        "score_matmul": 0.0001,
+        "score_rank": 0.0014,
+        "db_write_candidates": 0.0031,
+        "feed_build": 0.0114,
+        "db_write_exposures": 0.0169,
+        "llm_wait": 449.256
+      },
+      "post": 41,
+      "comment": 6,
+      "follow": 7,
+      "like": 9,
+      "dislike": 0,
+      "rec_history": 432,
+      "rec_candidates": 1050,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    },
+    {
+      "round": 2,
+      "seconds": 475.3,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "embed": 0.3095,
+        "score_matmul": 0.0001,
+        "score_rank": 0.001,
+        "db_write_candidates": 0.0038,
+        "feed_build": 0.0122,
+        "db_write_exposures": 0.0207,
+        "llm_wait": 474.93
+      },
+      "post": 56,
+      "comment": 27,
+      "follow": 26,
+      "like": 21,
+      "dislike": 0,
+      "rec_history": 864,
+      "rec_candidates": 2130,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    }
+  ],
+  "final_counts": {
+    "post": 56,
+    "comment": 27,
+    "follow": 26,
+    "like": 21,
+    "dislike": 0,
+    "rec_history": 864,
+    "rec_candidates": 2130,
+    "chat_group": 0,
+    "group_members": 0,
+    "group_messages": 0
+  },
+  "action_tally": {
+    "refresh": 72,
+    "create_post": 56,
+    "sign_up": 36,
+    "create_comment": 27,
+    "follow": 26,
+    "like_post": 21,
+    "search_user": 1,
+    "like_comment": 1
+  },
+  "turns_without_action": {
+    "agent_turns_total": 108,
+    "turns_with_action": 92,
+    "turns_without_action": 16,
+    "action_rate": 0.852
+  },
+  "total_seconds": 1210.9,
+  "phase_totals": {
+    "llm_wait": 1209.68,
+    "embed": 1.14,
+    "db_write_exposures": 0.04,
+    "feed_build": 0.02,
+    "score_matmul": 0.0,
+    "score_rank": 0.0,
+    "db_write_candidates": 0.0
+  },
+  "phase_share": {
+    "llm_wait": 99.9,
+    "embed": 0.1,
+    "db_write_exposures": 0.0,
+    "feed_build": 0.0,
+    "score_matmul": 0.0,
+    "score_rank": 0.0,
+    "db_write_candidates": 0.0
+  },
+  "platform_stats": {
+    "rounds_ranked": 2,
+    "recency_clamped": 0,
+    "empty_candidate_pools": 0,
+    "refresh_calls": 72,
+    "exposures_logged": 864,
+    "dm_joins_refused": 0,
+    "invalid_follow_targets": 1,
+    "refresh_errors": 0,
+    "empty_feeds": 36,
+    "blind_actions_rejected": 1,
+    "duplicate_refresh_traces": 0
+  },
+  "finished_at": "2026-09-08T01:25:33.268726"
+}

@@ -260,6 +260,57 @@ prefill — targets 4 % of the wrong end. Even halving the prompt saves ~2 % of 
 is, and how many tool-call round-trips a turn takes. That is worth measuring (Q-20),
 and it is a genuinely different question from the one item 3 was going to answer.
 
+### F-62 — Cost is exactly linear in agent count, and the sim cannot exceed 36 agents
+
+**Finding.** Nothing in this project had ever measured cost against agent count —
+all 24 runs were 36 agents. Held at 3 rounds, one config, one at a time:
+
+| Agents | Time | Per agent |
+|---|---|---|
+| 12 | 83.0 s | **6.92 s** |
+| 24 | 166.5 s | **6.94 s** |
+| 36 | 250.1 s | **6.95 s** |
+
+**Linear to three significant figures.** There is no hidden quadratic in the code
+path — which is the outcome that matters, because F-57 found exactly such a term
+in the ranking loop and this confirms nothing comparable survives elsewhere. Double
+the agents, double the cost; nothing worse.
+
+**And a hard ceiling nobody had hit.** `--agents 72` silently produced a **36-agent
+run**. `data/reddit/user_data_36.json` holds 36 personas and `select_diverse()`
+returns what it has, without complaint. The 72-agent data point was invalid and is
+discarded; the real finding is that **the simulation cannot currently run more than
+36 agents at all.** Bigger worlds are blocked on persona supply, not on speed —
+which reverses the assumption behind every scaling estimate in this log.
+
+### F-63 — RETRACTS the `max_tokens` speedup. It was agents ceasing to engage
+
+**Finding.** Capping generated tokens looked like the cheapest real win of the
+campaign: 1,220 s to 823 s, a **1.48x** speedup on an otherwise identical config.
+It is not a speedup. It is the agents no longer doing the thing the study measures.
+
+8b, 36 agents x 3 rounds, everything else held:
+
+| Config | Time | Engagement with shown posts |
+|---|---|---|
+| 22 actions, uncapped | 1,220 s | **4.31 %** |
+| 14 actions, uncapped | 967 s | **3.87 %** |
+| 14 actions, **capped 512** | 641 s | **0.00 %** |
+| 3b + 14 actions + capped | 258 s | **0.00 %** |
+
+The cap is causal and total: holding the action set fixed at 14, uncapped gives
+3.87 % engagement and capped gives **zero**. Agents still post — 59 posts, a full
+12-slot feed, 1.26 actions per turn — they simply never react to anything they are
+shown. Across the seven full replicates the campaign then spent on that config:
+**1 engagement in 42,336 exposures.**
+
+**`--max-tokens` must never be set below the default.** The flag is kept only so the
+manifest records that it was not used.
+
+**Lean actions are separately suspect.** 4.31 % to 3.87 % is within one pair at
+F-35's noise, so it is not established — but it is the wrong direction, and the
+1.26x it buys is not worth a behavioural risk that would need replicates to clear.
+
 ### F-60 — The concurrency fix is worth nothing on a full run. F-53's magnitude does not survive
 
 **Finding.** F-53 established that Ollama was serialising, and F-56 measured the fix at
@@ -579,6 +630,39 @@ largest run that answers the professor's question, and what does it cost".** Q-1
 ## 3b. Bugs
 
 *Continues the build log's sequence at B-22.*
+
+#### B-23 — The behavioural gate measured activity, and let a dead config through
+
+**Where.** Ours, `overnight.sh` — the `gate()` function as first written.
+
+**Symptom.** The gate checked actions per turn, posts written, feed size and action
+diversity. Every one of those stayed healthy on a config where agents had **stopped
+engaging with their feed entirely**. It passed `max_tokens=512` at 1.26 actions/turn,
+59 posts and a full 12-slot feed, and the campaign then spent **seven full 36x15
+runs** — about four hours — on a world with 1 engagement in 42,336 exposures.
+
+**Cause.** The gate measured *activity*. The study measures *engagement with a post
+the agent was shown*. Those come apart exactly when a config makes agents write into
+the void, which is what happened, and nothing in the gate could see it.
+
+**Why it is the same mistake as F-38.** F-38 reported on a column that was not what
+its name said. This gate reported on a quantity adjacent to the one that mattered.
+Both pass every internal consistency check and both are wrong about the world.
+
+**Fix.** The gate now reads `seen_and_acted` from `analyze.py`'s own output, so the
+gate and the analysis cannot drift apart on what engagement means, and fails below
+1.0 %. Validated against every config the night produced:
+
+| Config | Engagement | Verdict |
+|---|---|---|
+| `baseline` | 2.40 % | PASS |
+| `s_ctrl` (8b, uncapped) | 4.31 % | PASS |
+| `diag_leanuncap` | 3.87 % | PASS |
+| `s_cap` (capped) | 0.36 % | **FAIL** |
+| `s_lean` (capped) | 0.00 % | **FAIL** |
+| 3b replicates | 0.00 % | **FAIL** |
+
+Clean separation, with the threshold sitting in open space between the two groups.
 
 #### B-22 — A run hung for twenty-four hours and nothing noticed
 

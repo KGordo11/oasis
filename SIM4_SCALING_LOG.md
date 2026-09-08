@@ -260,6 +260,66 @@ prefill — targets 4 % of the wrong end. Even halving the prompt saves ~2 % of 
 is, and how many tool-call round-trips a turn takes. That is worth measuring (Q-20),
 and it is a genuinely different question from the one item 3 was going to answer.
 
+### F-66 — Prefill is 78 % of a turn and it is re-computed for every agent. Prompt ORDER is the fix
+
+**Finding.** The single largest inefficiency in the simulation is not the model, the
+concurrency, or the code. It is that **every agent re-processes the same ~2,000 tokens
+of shared prompt from scratch, 540 times per run.**
+
+Measured raw rates on this machine, single stream, unique prompts:
+
+| | Rate | Bound by |
+|---|---|---|
+| Prefill (reading the prompt) | ~490 tok/s | compute |
+| Decode (writing the reply) | ~54 tok/s | memory bandwidth |
+
+A turn is ~2,675 prompt tokens and ~60-100 generated, so **prefill is ~5.5 s and decode
+~1.5 s — prefill is 78 % of the work.** Every earlier claim in this log that decode
+dominates was measured on repeated identical prompts, where prefill is served from
+cache and costs nothing.
+
+**Ollama does cache prompt prefixes, and the simulation defeats it.** A shared prefix
+followed by a varying suffix reprocesses at **20,000 tok/s instead of 490** — a 40x
+difference, effectively free. But the prompt is laid out as
+
+    [ system: OBJECTIVE + THIS AGENT'S PERSONA ] [ tools ] [ user: feed ]
+
+and the persona is at the **front**, so no two of the 36 agents share a prefix and the
+cache never hits. Moving the persona behind the shared block:
+
+| Layout | agent 1 | 2 | 3 | 4 |
+|---|---|---|---|---|
+| Persona in system (current) | 5.47 s | 6.78 s | 6.78 s | 6.92 s |
+| Persona in the user turn | 6.92 s | **1.27 s** | **1.17 s** | **1.20 s** |
+
+**5.7x faster after the first agent**, 2.46x even across only four. Over a full run the
+cold cost is paid once per parallel slot and then never again, so essentially every
+turn hits.
+
+**Nothing is removed and nothing is constrained.** The agent is told exactly the same
+things about itself; the words sit in a different message. That distinguishes this
+from every other lever tried: `--lean-actions` removes actions, `--max-tokens` caps
+output and destroys engagement, the 3b model cannot tool-call. This only reorders.
+
+**It is still a prompt change**, so per F-35 it must be judged against baseline rather
+than assumed harmless — models do weight system and user content differently.
+
+### F-67 — The hardware is not being wasted; the work is being repeated
+
+**Finding.** Recorded to close off a whole family of "buy a better setup" answers.
+
+| | Theoretical | Measured | Utilisation |
+|---|---|---|---|
+| Decode, 8B Q4 | 81 tok/s (400 GB/s ÷ 4.92 GB) | 54 tok/s | 66 % |
+| Prefill | ~800 tok/s | ~490 tok/s | ~60 % |
+| GPU busy during a run | — | **100 %** | — |
+
+The M2 Max is delivering roughly two thirds of its theoretical ceiling and is busy
+100 % of wall clock during a run (measured across 236 requests). **There is no idle
+capacity to reclaim and no configuration that makes the chip faster.** Every remaining
+win must come from doing *less work*, which is why F-64 (shorter prompts) and F-66
+(cache-friendly ordering) are the only levers that have worked.
+
 ### F-64 — The prompt is 80 % tool docstrings, and shortening them is the one real speedup
 
 **Finding.** Every turn ships the full Python docstring of all 22 actions as tool

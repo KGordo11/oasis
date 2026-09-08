@@ -171,7 +171,15 @@ async def run(args):
         model_type=args.model,
         url=args.ollama_url,
         model_config_dict={"temperature": args.temperature,
-                           "timeout": args.request_timeout},
+                           "timeout": args.request_timeout,
+                           # Q-22. camel defaults max_tokens to 999_999_999,
+                           # i.e. no cap. Decode is ~96% of a turn (F-55) and a
+                           # real action carries a median 48 tokens of content,
+                           # so a runaway generation is pure loss with no
+                           # experimental value. Capping bounds the worst case;
+                           # it is a condition, not a free win, so it is
+                           # recorded in the manifest and screened before use.
+                           "max_tokens": args.max_tokens},
     )
 
     actions = build_action_set(include_groups=not args.no_groups,
@@ -250,6 +258,7 @@ async def run(args):
             "n_actions": len(actions),
             "lean_actions": getattr(args, "lean_actions", False),
             "request_timeout": getattr(args, "request_timeout", None),
+            "max_tokens": getattr(args, "max_tokens", None),
             "actions": [a.value for a in actions],
         },
         "algorithm": {
@@ -545,6 +554,11 @@ def main():
                         "Group instructions are injected into every prompt "
                         "ahead of the feed and crowd out content engagement "
                         "-- see finding F-14.")
+    p.add_argument("--max-tokens", type=int, default=512, dest="max_tokens",
+                   help="cap on generated tokens per turn (default 512). "
+                        "camel's default is 999999999 -- no cap at all. A real "
+                        "action carries ~48 tokens of content, so 512 is ~10x "
+                        "headroom while bounding a runaway turn (Q-22).")
     p.add_argument("--request-timeout", type=float, default=300.0,
                    dest="request_timeout",
                    help="seconds before a single LLM request is abandoned "

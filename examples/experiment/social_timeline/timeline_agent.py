@@ -371,6 +371,7 @@ class TimelineAgent(SocialAgent):
 
     def __init__(self, *args, terse_tools: bool = True,
                  shared_prefix: bool = True,
+                 max_tool_rounds: int | None = None,
                  include_groups: bool = False, **kwargs):
         """Set up the agent wrapper that survives errors without killing the run."""
         super().__init__(*args, **kwargs)
@@ -378,6 +379,24 @@ class TimelineAgent(SocialAgent):
 
         if terse_tools:
             self._shorten_tool_descriptions()
+        # Q-23. camel's tool loop is `while True`: it calls the model, runs
+        # whatever tools came back, then calls the model AGAIN so it can react
+        # to the results, and repeats until the model stops asking for tools.
+        # `max_iteration=None` (its default) means unlimited. Measured cost:
+        # 1.31 model calls per agent turn, so ~24% of all LLM work is the
+        # follow-up call.
+        #
+        # For this simulation the follow-up is close to worthless: the actions
+        # have already been executed and written to the database by then, and
+        # the model's closing prose is discarded. Setting this to 1 stops after
+        # the first round of tool calls.
+        #
+        # It is NOT the default, because the risk is real: an agent that wants
+        # to take a second action in a second round-trip would lose it, and
+        # turns average 1.70 actions. That is an A/B, not an assumption.
+        if max_tool_rounds is not None:
+            self.max_iteration = max_tool_rounds
+
         self.shared_prefix = shared_prefix
         self.persona_text = None
         if shared_prefix:
@@ -538,6 +557,7 @@ async def generate_timeline_agents(
     diverse: bool = True,
     terse_tools: bool = True,
     shared_prefix: bool = True,
+    max_tool_rounds: int | None = None,
 ) -> AgentGraph:
     """Build the agent graph. No follow edges, no scripted actions.
 
@@ -602,6 +622,7 @@ async def generate_timeline_agents(
         agent = TimelineAgent(
             terse_tools=terse_tools,
             shared_prefix=shared_prefix,
+            max_tool_rounds=max_tool_rounds,
             include_groups=include_groups,
             agent_id=i,
             user_info=user_info,

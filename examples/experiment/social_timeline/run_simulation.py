@@ -187,6 +187,7 @@ async def run(args):
     agent_graph = await generate_timeline_agents(
         terse_tools=getattr(args, "terse_tools", True),
         shared_prefix=getattr(args, "shared_prefix", True),
+        max_tool_rounds=getattr(args, "max_tool_rounds", None),
         profile_path=os.path.join(REPO_ROOT, args.personas),
         model=model,
         available_actions=actions,
@@ -263,6 +264,7 @@ async def run(args):
             "max_tokens": getattr(args, "max_tokens", None),
             "terse_tools": getattr(args, "terse_tools", True),
             "shared_prefix": getattr(args, "shared_prefix", True),
+            "max_tool_rounds": getattr(args, "max_tool_rounds", None),
             "actions": [a.value for a in actions],
         },
         "algorithm": {
@@ -558,6 +560,13 @@ def main():
                         "Group instructions are injected into every prompt "
                         "ahead of the feed and crowd out content engagement "
                         "-- see finding F-14.")
+    p.add_argument("--max-tool-rounds", type=int, default=None,
+                   dest="max_tool_rounds",
+                   help="cap camel's tool loop at N model calls per turn "
+                        "(Q-23). Default None = camel's unlimited. Measured "
+                        "1.31 calls/turn, so --max-tool-rounds 1 removes ~24%% "
+                        "of all LLM work -- but an agent wanting a second "
+                        "action in a second round-trip would lose it. A/B it.")
     p.add_argument("--persona-in-system", action="store_false",
                    dest="shared_prefix",
                    help="keep the persona in the system message, as upstream "
@@ -571,11 +580,15 @@ def main():
                         "prompt tokens of API documentation per turn, 1.54x "
                         "slower, and tool-call reliability drops from 5/6 to "
                         "1/6. The terse descriptions are the default.")
-    p.add_argument("--max-tokens", type=int, default=512, dest="max_tokens",
-                   help="cap on generated tokens per turn (default 512). "
-                        "camel's default is 999999999 -- no cap at all. A real "
-                        "action carries ~48 tokens of content, so 512 is ~10x "
-                        "headroom while bounding a runaway turn (Q-22).")
+    p.add_argument("--max-tokens", type=int, default=999_999_999,
+                   dest="max_tokens",
+                   help="cap on generated tokens per turn. DEFAULT IS NO CAP, "
+                        "and F-63 is why: capping at 512 -- with every other "
+                        "setting identical -- took engagement with shown posts "
+                        "from 4.31%% to 0.36%%. Agents kept posting and stopped "
+                        "reacting, which answers no research question. The "
+                        "mechanism is still unexplained (Q-22), so the flag "
+                        "exists to record that no cap was applied.")
     p.add_argument("--request-timeout", type=float, default=300.0,
                    dest="request_timeout",
                    help="seconds before a single LLM request is abandoned "
@@ -610,6 +623,16 @@ def main():
     # Checking our own environment cried wolf at anyone who set it correctly on
     # the server and launched the run from a different shell -- which is the
     # normal way to do it. Ask the server what it is actually using instead.
+    # F-63 guard. A cap here silently voids the study rather than failing --
+    # agents keep posting and stop reacting to their feed -- and seven full
+    # runs were spent before anyone noticed. Make it loud.
+    if args.max_tokens < 100_000:
+        log.warning(
+            "--max-tokens=%s. F-63: capping generated tokens took engagement "
+            "with shown posts from 4.31%% to 0.36%% with every other setting "
+            "held fixed. Unless you are deliberately reproducing that, leave "
+            "it uncapped.", args.max_tokens)
+
     _keep_alive_note = _check_server_keep_alive(args.ollama_url)
     if _keep_alive_note:
         log.warning("%s", _keep_alive_note)

@@ -1,0 +1,187 @@
+{
+  "label": "smoke",
+  "started_at": "2026-09-08T14:22:34.372675",
+  "config": {
+    "agents": 4,
+    "rounds": 2,
+    "recsys": "twhin-bert",
+    "model": "llama3.1:8b",
+    "semaphore": 4,
+    "ollama_num_parallel": "(unset -> server default)",
+    "max_rec_post_len": 30,
+    "refresh_rec_post_count": 8,
+    "following_post_count": 4,
+    "personas": "data/reddit/user_data_36.json",
+    "persona_separability": {
+      "n": 4,
+      "source": "reddit_generated",
+      "field": "bio",
+      "mean_similarity": 0.7418,
+      "min": 0.709,
+      "max": 0.7807,
+      "spread": 0.0717
+    },
+    "prompt_version": 10,
+    "seed": 0,
+    "temperature": 0.9,
+    "n_actions": 27,
+    "lean_actions": false,
+    "request_timeout": 300.0,
+    "max_tokens": 999999999,
+    "terse_tools": true,
+    "shared_prefix": true,
+    "max_tool_rounds": null,
+    "actions": [
+      "create_post",
+      "create_comment",
+      "like_post",
+      "unlike_post",
+      "dislike_post",
+      "undo_dislike_post",
+      "like_comment",
+      "unlike_comment",
+      "dislike_comment",
+      "undo_dislike_comment",
+      "repost",
+      "quote_post",
+      "report_post",
+      "follow",
+      "unfollow",
+      "mute",
+      "unmute",
+      "search_user",
+      "search_posts",
+      "trend",
+      "refresh",
+      "do_nothing",
+      "create_group",
+      "join_group",
+      "leave_group",
+      "send_to_group",
+      "listen_from_group"
+    ]
+  },
+  "algorithm": {
+    "name": "TWHIN interest-based (TimelinePlatform implementation)",
+    "formula": "score(u,p) = cosine(embed(profile_u), embed(content_p)) * log((271.8 - age_p)/100)",
+    "embedding": "Twitter/twhin-bert-base, mean-pooled last_hidden_state",
+    "deviations_from_upstream": [
+      "mean-pooled last_hidden_state instead of pooler_output (bugs B-1/B-2: upstream pooler weights are randomly re-initialised every process, making runs unreplicable and near-non-discriminative)",
+      "per-(user,post) scores captured for rec_history"
+    ],
+    "initial_follow_edges": 0,
+    "recency_span_rounds": 2,
+    "explore_slots": 2,
+    "network_slots": 5,
+    "fof_slots": 3,
+    "discovery_slots": 4,
+    "feed_size": 12,
+    "feed_model": "three-tier: network > friend-of-friend > discovery; social ties are not interest-filtered"
+  },
+  "environment": {
+    "python": "3.11.15",
+    "platform": "macOS-15.8-arm64-arm-64bit",
+    "ollama_keep_alive": "(unset)"
+  },
+  "rounds": [
+    {
+      "round": 0,
+      "seconds": 20.3,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "llm_wait": 20.311
+      },
+      "post": 1,
+      "comment": 0,
+      "follow": 0,
+      "like": 0,
+      "dislike": 0,
+      "rec_history": 0,
+      "rec_candidates": 0,
+      "chat_group": 0,
+      "group_members": 0,
+      "group_messages": 0
+    },
+    {
+      "round": 1,
+      "seconds": 38.7,
+      "cumulative_agent_failures": 0,
+      "phase_seconds": {
+        "embed": 0.1312,
+        "score_matmul": 0.0,
+        "score_rank": 0.0005,
+        "db_write_candidates": 0.0024,
+        "feed_build": 0.0002,
+        "db_write_exposures": 0.001,
+        "llm_wait": 38.585
+      },
+      "post": 1,
+      "comment": 0,
+      "follow": 0,
+      "like": 0,
+      "dislike": 0,
+      "rec_history": 3,
+      "rec_candidates": 3,
+      "chat_group": 1,
+      "group_members": 1,
+      "group_messages": 0
+    }
+  ],
+  "final_counts": {
+    "post": 1,
+    "comment": 0,
+    "follow": 0,
+    "like": 0,
+    "dislike": 0,
+    "rec_history": 3,
+    "rec_candidates": 3,
+    "chat_group": 1,
+    "group_members": 1,
+    "group_messages": 0
+  },
+  "action_tally": {
+    "sign_up": 4,
+    "refresh": 3,
+    "create_post": 1,
+    "create_group": 1
+  },
+  "turns_without_action": {
+    "agent_turns_total": 8,
+    "turns_with_action": 2,
+    "turns_without_action": 6,
+    "action_rate": 0.25
+  },
+  "total_seconds": 59.0,
+  "phase_totals": {
+    "llm_wait": 58.89,
+    "embed": 0.13,
+    "score_matmul": 0.0,
+    "score_rank": 0.0,
+    "db_write_candidates": 0.0,
+    "feed_build": 0.0,
+    "db_write_exposures": 0.0
+  },
+  "phase_share": {
+    "llm_wait": 99.8,
+    "embed": 0.2,
+    "score_matmul": 0.0,
+    "score_rank": 0.0,
+    "db_write_candidates": 0.0,
+    "feed_build": 0.0,
+    "db_write_exposures": 0.0
+  },
+  "platform_stats": {
+    "rounds_ranked": 1,
+    "recency_clamped": 0,
+    "empty_candidate_pools": 1,
+    "refresh_calls": 3,
+    "exposures_logged": 3,
+    "dm_joins_refused": 0,
+    "invalid_follow_targets": 0,
+    "refresh_errors": 0,
+    "empty_feeds": 5,
+    "blind_actions_rejected": 0,
+    "duplicate_refresh_traces": 0
+  },
+  "finished_at": "2026-09-08T14:23:33.506550"
+}

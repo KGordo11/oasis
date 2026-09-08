@@ -185,6 +185,7 @@ async def run(args):
     actions = build_action_set(include_groups=not args.no_groups,
                                lean=getattr(args, 'lean_actions', False))
     agent_graph = await generate_timeline_agents(
+        terse_tools=getattr(args, "terse_tools", True),
         profile_path=os.path.join(REPO_ROOT, args.personas),
         model=model,
         available_actions=actions,
@@ -259,6 +260,7 @@ async def run(args):
             "lean_actions": getattr(args, "lean_actions", False),
             "request_timeout": getattr(args, "request_timeout", None),
             "max_tokens": getattr(args, "max_tokens", None),
+            "terse_tools": getattr(args, "terse_tools", True),
             "actions": [a.value for a in actions],
         },
         "algorithm": {
@@ -554,6 +556,12 @@ def main():
                         "Group instructions are injected into every prompt "
                         "ahead of the feed and crowd out content engagement "
                         "-- see finding F-14.")
+    p.add_argument("--verbose-tools", action="store_false", dest="terse_tools",
+                   help="ship each action's full docstring as its tool "
+                        "description, as upstream does. F-64: that is ~3,000 "
+                        "prompt tokens of API documentation per turn, 1.54x "
+                        "slower, and tool-call reliability drops from 5/6 to "
+                        "1/6. The terse descriptions are the default.")
     p.add_argument("--max-tokens", type=int, default=512, dest="max_tokens",
                    help="cap on generated tokens per turn (default 512). "
                         "camel's default is 999999999 -- no cap at all. A real "

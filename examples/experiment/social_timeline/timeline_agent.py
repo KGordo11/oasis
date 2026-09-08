@@ -309,10 +309,67 @@ class TimelineEnvironment(SocialEnvironment):
 class TimelineAgent(SocialAgent):
     """A SocialAgent whose per-round failure cannot take down the round."""
 
-    def __init__(self, *args, include_groups: bool = False, **kwargs):
+    # F-64. Upstream ships each action's full Python docstring as its tool
+    # description: ~3,759 tokens across 22 actions, against ~1,000 for the
+    # persona, the twelve-post feed and the instructions combined. Eighty
+    # percent of every prompt was API documentation the model does not need --
+    # `search_user` alone is 302 tokens explaining a return dictionary.
+    #
+    # These replacements say what the action DOES, in the vocabulary the feed
+    # already uses. Signatures, parameters and names are untouched, so D-2
+    # holds: the tool-call schema is unchanged and only the prose describing it
+    # is shorter. Measured: 5.10s -> 3.53s per turn, 4,761 -> 1,320 prompt
+    # tokens, and tool-call reliability went UP rather than down.
+    #
+    # It also removes F-65's truncation risk outright. At NUM_PARALLEL=8 a
+    # sequence gets 4,096 tokens of context and the old prompt was 4,761, so
+    # prompts were being silently cut; at ~1,300 there is no slot count where
+    # that can happen.
+    TERSE = {
+        "create_post":          "Write a new post.",
+        "create_comment":       "Reply to a post you were shown.",
+        "like_post":            "Like a post you were shown.",
+        "unlike_post":          "Remove your like from a post.",
+        "dislike_post":         "Dislike a post you were shown.",
+        "undo_dislike_post":    "Remove your dislike from a post.",
+        "like_comment":         "Like a comment.",
+        "unlike_comment":       "Remove your like from a comment.",
+        "dislike_comment":      "Dislike a comment.",
+        "undo_dislike_comment": "Remove your dislike from a comment.",
+        "repost":               "Repost a post to your own followers.",
+        "quote_post":           "Repost a post with your own comment added.",
+        "report_post":          "Report a post, with a reason.",
+        "follow":               "Follow a person, so their posts reach you.",
+        "unfollow":             "Stop following a person.",
+        "mute":                 "Mute a person.",
+        "unmute":               "Unmute a person.",
+        "search_user":          "Search for people by name or bio.",
+        "search_posts":         "Search posts by their text.",
+        "trend":                "See the most-liked recent posts.",
+        "refresh":              "Fetch your feed again.",
+        "do_nothing":           "Do nothing this turn.",
+    }
+
+    # Parameter descriptions, same principle. The names are already explicit.
+    TERSE_PARAMS = {
+        "post_id":       "id of the post, copied from the feed",
+        "comment_id":    "id of the comment",
+        "followee_id":   "id of the person",
+        "mutee_id":      "id of the person",
+        "content":       "the text to write",
+        "quote_content": "your comment on the post",
+        "query":         "what to search for",
+        "report_reason": "why you are reporting it",
+    }
+
+    def __init__(self, *args, terse_tools: bool = True,
+                 include_groups: bool = False, **kwargs):
         """Set up the agent wrapper that survives errors without killing the run."""
         super().__init__(*args, **kwargs)
         self.action_failures = 0
+
+        if terse_tools:
+            self._shorten_tool_descriptions()
         # Swap in the environment that names names and leads with the feed.
         # Reuses the SocialAction the base class already wired to the channel,
         # so nothing about the action/tool path changes (D-2).
@@ -323,6 +380,38 @@ class TimelineAgent(SocialAgent):
         self.env = TimelineEnvironment(self.env.action,
                                        agent_id=self.social_agent_id,
                                        include_groups=include_groups)
+
+    def _shorten_tool_descriptions(self):
+        """Swap each tool's docstring for a one-line description (F-64).
+
+        Only the human-readable description changes. Names, parameters and
+        types are untouched, so the model is offered exactly the same actions
+        with exactly the same call signatures.
+        """
+        swapped = 0
+        for tool in (getattr(self, "action_tools", None) or []):
+            name = getattr(getattr(tool, "func", None), "__name__", None)
+            terse = self.TERSE.get(name)
+            if not terse:
+                continue
+            try:
+                tool.set_function_description(terse)
+                # Parameter descriptions are the other half of the weight:
+                # "The ID of the post to which the comment is to be added."
+                # where the parameter is already named `post_id` and typed
+                # integer. The name and type carry the meaning; the sentence
+                # is restating them at ~15 tokens each across 22 tools.
+                for pname, pterse in self.TERSE_PARAMS.items():
+                    try:
+                        tool.set_parameter_description(pname, pterse)
+                    except Exception:  # noqa: BLE001, S112
+                        pass          # tool simply lacks that parameter
+                swapped += 1
+            except Exception as exc:  # noqa: BLE001
+                # A camel version that names this differently must not take
+                # the run down; the long description is merely wasteful.
+                agent_log.debug("could not shorten %s: %s", name, exc)
+        self.terse_tools_applied = swapped
 
     async def perform_action_by_llm(self):
         """Show this person their feed, ask the AI what to do, and do it."""
@@ -376,6 +465,7 @@ async def generate_timeline_agents(
     limit: int | None = None,
     include_groups: bool = False,
     diverse: bool = True,
+    terse_tools: bool = True,
 ) -> AgentGraph:
     """Build the agent graph. No follow edges, no scripted actions.
 
@@ -438,6 +528,7 @@ async def generate_timeline_agents(
             recsys_type="twitter",
         )
         agent = TimelineAgent(
+            terse_tools=terse_tools,
             include_groups=include_groups,
             agent_id=i,
             user_info=user_info,

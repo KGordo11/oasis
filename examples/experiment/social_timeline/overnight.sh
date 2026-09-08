@@ -164,6 +164,61 @@ sim s_3blean 3 --max-tokens 512 --model llama3.2:3b --lean-actions     >/dev/nul
 log "############ SCREEN COMPLETE — $(left) min left ############"
 cat $R
 
+# Winner is needed by the scaling phase too, so resolve it here.
+BEST_EARLY=$($P - <<'PY'
+rows=[]
+for line in open('/tmp/overnight_results.txt'):
+    p=line.split()
+    if len(p)==4 and p[2].isdigit() and p[3]=="PASS":
+        rows.append((int(p[2]), p[0]))
+print(sorted(rows)[0][1] if rows else "s_ctrl")
+PY
+)
+case $BEST_EARLY in
+  s_ctrl)    WIN_FLAGS_EARLY="--max-tokens 999999999" ;;
+  s_cap)     WIN_FLAGS_EARLY="--max-tokens 512" ;;
+  s_lean)    WIN_FLAGS_EARLY="--max-tokens 512 --lean-actions" ;;
+  s_3b)      WIN_FLAGS_EARLY="--max-tokens 512 --model llama3.2:3b" ;;
+  s_3blean)  WIN_FLAGS_EARLY="--max-tokens 512 --model llama3.2:3b --lean-actions" ;;
+esac
+log "screen winner: $BEST_EARLY ($WIN_FLAGS_EARLY)"
+
+# ------------------------------------------------------- phase A2: scaling
+# Does cost grow linearly with agent count, or worse? This is the question
+# "is it scalable" actually asks, and nothing in the project has ever measured
+# it -- every run has been 36 agents.
+#
+# What the answer distinguishes:
+#   linear      -> the GPU is saturated and each agent is a fixed cost. Bigger
+#                  worlds are affordable in proportion, and nothing else is
+#                  broken.
+#   super-linear-> something in OUR code is quadratic in agents. That would be
+#                  a real bug worth hunting, and it is exactly what F-57 found
+#                  hiding in the ranking loop before it was vectorised.
+#   sub-linear  -> the GPU was NOT saturated at 36 and there is headroom.
+#
+# Held at 3 rounds so post accumulation does not confound the agent-count
+# effect, and run at the winning config so it measures the system as it will
+# actually be used.
+log "############ PHASE A2 — does cost scale with agent count? ############"
+scale () {   # $1=agents
+  local lbl=sc_$1 t0=$(date +%s)
+  rm -f data/social_timeline_$lbl.db data/social_timeline_$lbl.json
+  $P examples/experiment/social_timeline/run_simulation.py \
+     --agents $1 --rounds 3 --label $lbl --no-groups --temperature 0.7 \
+     --semaphore 8 --request-timeout 300 ${=WIN_FLAGS_EARLY} \
+     > /tmp/ov_$lbl.log 2>&1 &
+  local pid=$!; watchdog $lbl $pid & local wd=$!
+  wait $pid 2>/dev/null; kill $wd 2>/dev/null
+  local t=$(( $(date +%s) - t0 ))
+  log "  ${1} agents: ${t}s  ($(echo "scale=2; $t/$1" | bc)s per agent)"
+  echo "SCALE $1 $t" >> $R
+}
+for A in 12 24 36 72; do
+  [ $(left) -lt 60 ] && { log "  skipping ${A} agents, only $(left) min left"; break; }
+  scale $A
+done
+
 # ---------------------------------------------------------------- decide
 # Pick the fastest config that also PASSED its behavioural gate. Speed alone
 # is not a winner; a broken condition that runs fast is worth nothing.

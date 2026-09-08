@@ -115,8 +115,15 @@ bad = []
 # fast one. Baseline sits near 0.75 real actions per turn.
 if rate < 0.25: bad.append(f"action rate {rate:.2f}/turn (baseline ~0.75)")
 if posts < agents * 0.5: bad.append(f"only {posts} posts")
-# Feed integrity: exposures must still be one full feed per agent-round.
-if rounds > 1 and not (11.0 <= feed <= 13.0): bad.append(f"{feed:.1f} exposures/turn, expected 12")
+# Feed integrity. Upper bound always applies -- more than one feed per
+# agent-round means double-logging. The LOWER bound only applies once enough
+# posts exist to fill a 12-slot feed: early rounds are legitimately thin, and
+# a 4-agent smoke run failed this check at 1.5 exposures/turn purely because
+# only 3 posts existed in the whole world. A gate that fails honest runs would
+# make the campaign pick the wrong winner.
+if feed > 13.0: bad.append(f"{feed:.1f} exposures/turn -- double-logged?")
+if feed <= 0.0: bad.append("no exposures logged at all")
+if posts >= agents and feed < 11.0: bad.append(f"{feed:.1f} exposures/turn on {posts} posts, expected ~12")
 if kinds < 3: bad.append(f"only {kinds} distinct actions")
 verdict = "FAIL" if bad else "PASS"
 print(f"{verdict}  actions/turn {rate:.2f} | posts {posts} | exposures/turn {feed:.1f} "

@@ -122,6 +122,8 @@ class TimelineEnvironment(SocialEnvironment):
                 for r in self._query(
                     "SELECT agent_id, COALESCE(user_name, name) FROM user")}
 
+    persona_text = None      # set by TimelineAgent when F-66 hoisting is on
+
     async def to_text_prompt(self, *args, **kwargs) -> str:
         """Turn this person's feed into the text the AI actually reads."""
         names = self._usernames()
@@ -301,8 +303,13 @@ class TimelineEnvironment(SocialEnvironment):
             "as a parameter.\n"
             "Do whatever fits you and what you have just read.")
 
+        # F-66: when the persona has been hoisted out of the system message so
+        # every agent shares a cacheable prefix, it is reinstated here -- first,
+        # so the agent still reads who it is before it reads its feed.
+        who = (f"You are {self.persona_text}" if self.persona_text else None)
+
         return "\n\n".join(x for x in
-                           [social, feed, reception, notifications, own,
+                           [who, social, feed, reception, notifications, own,
                             groups, guidance] if x)
 
 
@@ -363,6 +370,7 @@ class TimelineAgent(SocialAgent):
     }
 
     def __init__(self, *args, terse_tools: bool = True,
+                 shared_prefix: bool = True,
                  include_groups: bool = False, **kwargs):
         """Set up the agent wrapper that survives errors without killing the run."""
         super().__init__(*args, **kwargs)
@@ -370,6 +378,10 @@ class TimelineAgent(SocialAgent):
 
         if terse_tools:
             self._shorten_tool_descriptions()
+        self.shared_prefix = shared_prefix
+        self.persona_text = None
+        if shared_prefix:
+            self._hoist_persona_out_of_system()
         # Swap in the environment that names names and leads with the feed.
         # Reuses the SocialAction the base class already wired to the channel,
         # so nothing about the action/tool path changes (D-2).
@@ -380,6 +392,65 @@ class TimelineAgent(SocialAgent):
         self.env = TimelineEnvironment(self.env.action,
                                        agent_id=self.social_agent_id,
                                        include_groups=include_groups)
+        # F-66: the persona was taken out of the system message so every agent
+        # shares a cacheable prefix. It has to arrive somewhere, so the
+        # environment prepends it to the per-turn message. Same words, later.
+        self.env.persona_text = self.persona_text
+
+    def _hoist_persona_out_of_system(self):
+        """Make the system message identical for every agent (F-66).
+
+        Ollama caches prompt prefixes and serves a hit at ~20,000 tok/s against
+        ~490 for a cold prompt -- a 40x difference on the 78% of a turn that is
+        prefill. The simulation was defeating that cache by construction: the
+        prompt is laid out
+
+            [ system: OBJECTIVE + THIS AGENT'S PERSONA ] [ tools ] [ user: feed ]
+
+        and because the persona sits at the FRONT, no two of the 36 agents share
+        a prefix and the cache never hits. Every agent paid ~5.5s to re-read the
+        same tool block.
+
+        This moves the persona out of the system message and into the per-turn
+        user message, leaving a system message that is byte-identical across
+        agents. Measured 6.92s -> 1.20s from the second agent onward.
+
+        The agent is told exactly the same things about itself. Only the message
+        it arrives in changes, so no action is removed and no output constrained
+        -- but it IS a prompt change, and per F-35 must be judged against
+        baseline rather than assumed harmless.
+        """
+        try:
+            full = self.system_message.content
+        except Exception:  # noqa: BLE001
+            return
+        # The persona lives under "# SELF-DESCRIPTION" in upstream's template
+        # (oasis/social_platform/config/user.py). Everything else is shared.
+        marker = "# SELF-DESCRIPTION"
+        if marker not in full:
+            self.persona_text = None
+            return
+        head, _, rest = full.partition(marker)
+        # Keep any trailing shared sections (e.g. "# RESPONSE METHOD").
+        tail = ""
+        for nxt in ("# RESPONSE METHOD", "# OBJECTIVE"):
+            if nxt in rest:
+                _, _, tail = rest.partition(nxt)
+                tail = nxt + tail
+                rest = rest[:rest.index(nxt)]
+                break
+        self.persona_text = rest.strip()
+        shared = (head + tail).strip()
+        # `system_message` is a read-only property on ChatAgent; the backing
+        # field is `_system_message`, and init_messages() rebuilds the memory
+        # from it. Assigning the property raises, so set the field and re-init.
+        from camel.messages import BaseMessage
+        self._system_message = BaseMessage.make_assistant_message(
+            role_name="system", content=shared)
+        try:
+            self.init_messages()
+        except Exception as exc:  # noqa: BLE001
+            agent_log.debug("init_messages after persona hoist: %s", exc)
 
     def _shorten_tool_descriptions(self):
         """Swap each tool's docstring for a one-line description (F-64).
@@ -466,6 +537,7 @@ async def generate_timeline_agents(
     include_groups: bool = False,
     diverse: bool = True,
     terse_tools: bool = True,
+    shared_prefix: bool = True,
 ) -> AgentGraph:
     """Build the agent graph. No follow edges, no scripted actions.
 
@@ -529,6 +601,7 @@ async def generate_timeline_agents(
         )
         agent = TimelineAgent(
             terse_tools=terse_tools,
+            shared_prefix=shared_prefix,
             include_groups=include_groups,
             agent_id=i,
             user_info=user_info,

@@ -1,0 +1,1512 @@
+==========================================================================
+SIMULATION 4 ANALYSIS -- social_timeline_p1_terse.db
+==========================================================================
+agents=36  rounds=3  posts=38  chosen actions=100  exposure events=864  follow edges=16
+
+NOTE: single-run report. Do NOT compare two of these directly --
+      actions are clustered within agent and the unit of
+      randomisation is the run. For any cross-run claim use:
+          compare.py --runs <before> <after>
+      which pairs on agent id and reports what it could detect.
+
+ACTION MIX (chosen actions only; refresh/sign_up excluded)
+  create_post              38
+  create_comment           30
+  follow                   16
+  like_post                9
+  like_comment             7
+
+SOCIAL GRAPH: 0 edges before -> 16 edges after
+
+--------------------------------------------------------------------------
+PER-AGENT DETAIL
+--------------------------------------------------------------------------
+
+[agent 0] @James Miller
+  bio: Passionate about hospitality & tourism. Exploring the world one destination at a time.
+  actions (2): {'follow': 1, 'create_comment': 1}
+  authored 0 posts: []
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [11]
+    ignored  : [1, 2, 3, 4, 8, 9, 10, 13, 15, 25, 32, 34, 35, 36, 37]
+    never saw: [5, 6, 7, 12, 14, 16, 17, 18, 19, 20, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 33, 38]
+  engagement rate (acted / seen): 0.062
+  follows [35] | followed by []
+  exposure to others: agent 14 x2, agent 26 x2, agent 7 x2, agent 35 x2, agent 12 x2, agent 4 x2, agent 13 x2, agent 9 x2, agent 2 x2, agent 5 x1, agent 17 x1, agent 8 x1, agent 21 x1, agent 16 x1, agent 32 x1
+  acted on others: {'35': {'follow': 1}, '14': {'create_comment': 1}}
+
+[agent 1] @Emma Hayes
+  bio: Passionate about transportation and logistics | ENFJ | Always seeking new connections an
+  actions (3): {'create_post': 1, 'create_comment': 1, 'like_comment': 1}
+  authored 1 posts: [7]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [11]
+    ignored  : [3, 4, 10, 13, 14, 15, 24, 25, 27, 28, 32, 33, 35, 36, 37]
+    never saw: [1, 2, 5, 6, 8, 9, 12, 16, 17, 18, 19, 20, 21, 22, 23, 26, 29, 30, 31, 34, 38]
+  engagement rate (acted / seen): 0.062
+  follows [] | followed by [2, 5, 23]
+  exposure to others: agent 16 x3, agent 5 x2, agent 12 x2, agent 32 x2, agent 17 x2, agent 26 x2, agent 24 x2, agent 30 x2, agent 28 x1, agent 34 x1, agent 14 x1, agent 4 x1, agent 9 x1, agent 21 x1, agent 13 x1
+  acted on others: {'14': {'create_comment': 1}}
+  acted on by    : {'2': {'follow': 1, 'create_comment': 1}, '5': {'follow': 1}, '12': {'create_comment': 1}, '23': {'follow': 1, 'like_post': 1}, '25': {'create_comment': 1}, '32': {'create_comment': 1, 'like_post': 1}, '8': {'create_comment': 1}, '9': {'create_comment': 1}, '13': {'create_comment': 1}}
+
+[agent 2] @Ryan Johnson
+  bio: Tech enthusiast | STEM student | Constantly seeking knowledge
+  actions (3): {'create_post': 1, 'follow': 1, 'create_comment': 1}
+  authored 1 posts: [2]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 23, 'network': 1})
+    acted on : [7]
+    ignored  : [1, 3, 4, 11, 12, 13, 17, 19, 23, 31, 32, 33, 34, 35, 36, 37]
+    never saw: [5, 6, 8, 9, 10, 14, 15, 16, 18, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 38]
+  engagement rate (acted / seen): 0.059
+  follows [1] | followed by []
+  exposure to others: agent 34 x2, agent 1 x2, agent 5 x2, agent 14 x2, agent 20 x2, agent 12 x2, agent 32 x2, agent 35 x1, agent 31 x1, agent 4 x1, agent 15 x1, agent 7 x1, agent 9 x1, agent 21 x1, agent 16 x1, agent 19 x1, agent 22 x1
+  acted on others: {'1': {'follow': 1, 'create_comment': 1}}
+
+[agent 3] @Alexandra Whitmore
+  bio: Dedicated marketer with a passion for economics and business. Constantly seeking new opp
+  actions (3): {'create_post': 1, 'create_comment': 1, 'like_post': 1}
+  authored 1 posts: [6]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [23]
+    ignored  : [3, 4, 7, 11, 13, 15, 17, 18, 19, 22, 31, 33, 34, 35, 36, 37]
+    never saw: [1, 2, 5, 8, 9, 10, 12, 14, 16, 20, 21, 24, 25, 26, 27, 28, 29, 30, 32, 38]
+  engagement rate (acted / seen): 0.059
+  follows [] | followed by [15]
+  exposure to others: agent 22 x2, agent 31 x2, agent 4 x2, agent 25 x2, agent 35 x2, agent 14 x2, agent 5 x2, agent 19 x1, agent 20 x1, agent 1 x1, agent 17 x1, agent 34 x1, agent 21 x1, agent 9 x1, agent 16 x1, agent 18 x1, agent 12 x1
+  acted on others: {'22': {'create_comment': 1, 'like_post': 1}}
+  acted on by    : {'15': {'follow': 1, 'create_comment': 1}}
+
+[agent 4] @Jake Thompson
+  bio: Exploring the intersections of agriculture, economics, and business 🌾💼 | ISTJ | 23 |  #A
+  actions (3): {'create_post': 1, 'create_comment': 1, 'like_comment': 1}
+  authored 1 posts: [4]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [15]
+    ignored  : [2, 3, 5, 7, 8, 11, 13, 14, 19, 24, 26, 28, 33, 35, 36, 37]
+    never saw: [1, 6, 9, 10, 12, 16, 17, 18, 20, 21, 22, 23, 25, 27, 29, 30, 31, 32, 34, 38]
+  engagement rate (acted / seen): 0.059
+  follows [] | followed by [17]
+  exposure to others: agent 16 x3, agent 17 x2, agent 6 x2, agent 5 x2, agent 1 x2, agent 20 x2, agent 34 x2, agent 9 x2, agent 2 x1, agent 12 x1, agent 14 x1, agent 30 x1, agent 21 x1, agent 27 x1, agent 24 x1
+  acted on others: {'17': {'create_comment': 1}}
+  acted on by    : {'8': {'create_comment': 1}, '17': {'follow': 1}}
+
+[agent 5] @Simon Walker
+  bio: Passionate about economics and business. Let's explore the world of transportation and l
+  actions (3): {'create_post': 1, 'follow': 1, 'create_comment': 1}
+  authored 1 posts: [3]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 23, 'network': 1})
+    acted on : [11]
+    ignored  : [1, 4, 7, 13, 14, 15, 24, 26, 27, 28, 29, 31, 33, 35, 36, 37]
+    never saw: [2, 5, 6, 8, 9, 10, 12, 16, 17, 18, 19, 20, 21, 22, 23, 25, 30, 32, 34, 38]
+  engagement rate (acted / seen): 0.059
+  follows [1] | followed by []
+  exposure to others: agent 16 x3, agent 1 x2, agent 14 x2, agent 12 x2, agent 28 x2, agent 4 x2, agent 27 x2, agent 24 x1, agent 34 x1, agent 31 x1, agent 17 x1, agent 29 x1, agent 9 x1, agent 21 x1, agent 30 x1, agent 7 x1
+  acted on others: {'1': {'follow': 1}, '14': {'create_comment': 1}}
+  acted on by    : {'22': {'create_comment': 1}}
+
+[agent 6] @Emily Carter
+  bio: Exploring the world through economics and business. Human services professional with a c
+  actions (3): {'create_post': 1, 'create_comment': 2}
+  authored 1 posts: [5]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [10, 23]
+    ignored  : [1, 2, 3, 4, 7, 13, 14, 15, 19, 20, 28, 34, 35, 36, 37]
+    never saw: [6, 8, 9, 11, 12, 16, 17, 18, 21, 22, 24, 25, 26, 27, 29, 30, 31, 32, 33, 38]
+  engagement rate (acted / seen): 0.118
+  follows [] | followed by [13]
+  exposure to others: agent 17 x2, agent 13 x2, agent 4 x2, agent 1 x2, agent 12 x2, agent 20 x2, agent 5 x2, agent 16 x2, agent 21 x2, agent 22 x1, agent 35 x1, agent 30 x1, agent 9 x1, agent 7 x1, agent 2 x1
+  acted on others: {'22': {'create_comment': 1}, '13': {'create_comment': 1}}
+  acted on by    : {'13': {'follow': 1}}
+
+[agent 7] @Aria Thompson
+  bio: Passionate about promoting social welfare and advocating for change. Lover of culture, s
+  actions (2): {'create_post': 1, 'follow': 1}
+  authored 1 posts: [1]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 22, 'network': 1, 'fof': 1})
+    acted on : []
+    ignored  : [2, 4, 5, 7, 10, 11, 13, 14, 15, 23, 25, 26, 29, 32, 35, 36, 37]
+    never saw: [3, 6, 8, 9, 12, 16, 17, 18, 19, 20, 21, 22, 24, 27, 28, 30, 31, 33, 34, 38]
+  engagement rate (acted / seen): 0.0
+  follows [17] | followed by []
+  exposure to others: agent 16 x3, agent 17 x2, agent 1 x2, agent 6 x2, agent 12 x2, agent 13 x2, agent 14 x2, agent 26 x1, agent 29 x1, agent 22 x1, agent 27 x1, agent 32 x1, agent 4 x1, agent 9 x1, agent 21 x1, agent 2 x1
+  acted on others: {'17': {'follow': 1}}
+
+[agent 8] @Henry Farmer
+  bio: Agriculture enthusiast | Exploring the intersection of culture, society, and business | 
+  actions (3): {'create_post': 1, 'create_comment': 2}
+  authored 1 posts: [9]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [4, 7]
+    ignored  : [3, 5, 6, 11, 12, 13, 14, 15, 22, 23, 25, 29, 35, 36, 37]
+    never saw: [1, 2, 8, 10, 16, 17, 18, 19, 20, 21, 24, 26, 27, 28, 30, 31, 32, 33, 34, 38]
+  engagement rate (acted / seen): 0.118
+  follows [] | followed by []
+  exposure to others: agent 16 x3, agent 1 x2, agent 5 x2, agent 4 x2, agent 17 x2, agent 12 x2, agent 22 x2, agent 14 x1, agent 26 x1, agent 6 x1, agent 3 x1, agent 29 x1, agent 21 x1, agent 9 x1, agent 15 x1, agent 25 x1
+  acted on others: {'4': {'create_comment': 1}, '1': {'create_comment': 1}}
+
+[agent 9] @Ethan Grayson
+  bio: Curious mind exploring the intersection of STEM and society 🌌 | INFP | Tech enthusiast |
+  actions (3): {'create_post': 2, 'create_comment': 1}
+  authored 2 posts: [8, 35]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [7]
+    ignored  : [2, 3, 5, 6, 10, 13, 14, 15, 23, 24, 25, 26, 32, 33, 36, 37]
+    never saw: [1, 4, 9, 11, 12, 16, 17, 18, 19, 20, 21, 22, 27, 28, 29, 30, 31, 34, 38]
+  engagement rate (acted / seen): 0.059
+  follows [] | followed by []
+  exposure to others: agent 16 x3, agent 1 x2, agent 34 x2, agent 12 x2, agent 32 x2, agent 5 x2, agent 26 x2, agent 17 x1, agent 2 x1, agent 22 x1, agent 27 x1, agent 3 x1, agent 21 x1, agent 24 x1, agent 6 x1, agent 13 x1
+  acted on others: {'1': {'create_comment': 1}}
+
+[agent 10] @Sophia Nguyen
+  bio: Curious mind exploring the intersections of technology and society 🌟 Human Services enth
+  actions (0): (none)
+  authored 0 posts: []
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : []
+    ignored  : [1, 3, 4, 5, 7, 10, 13, 15, 19, 20, 22, 25, 33, 34, 35, 36, 37]
+    never saw: [2, 6, 8, 9, 11, 12, 14, 16, 17, 18, 21, 23, 24, 26, 27, 28, 29, 30, 31, 32, 38]
+  engagement rate (acted / seen): 0.0
+  follows [] | followed by []
+  exposure to others: agent 5 x2, agent 1 x2, agent 6 x2, agent 7 x2, agent 13 x2, agent 17 x2, agent 26 x2, agent 21 x2, agent 34 x1, agent 20 x1, agent 12 x1, agent 35 x1, agent 16 x1, agent 9 x1, agent 4 x1, agent 25 x1
+
+[agent 11] @Samuel Reynolds
+  bio: Passionate about marketing and technology. Learning and growing every day. 🚀
+  actions (3): {'create_post': 1, 'create_comment': 1, 'follow': 1}
+  authored 1 posts: [16]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [11]
+    ignored  : [2, 3, 4, 17, 19, 22, 23, 25, 27, 31, 33, 34, 35, 36, 37]
+    never saw: [1, 5, 6, 7, 8, 9, 10, 12, 13, 14, 15, 18, 20, 21, 24, 26, 28, 29, 30, 32, 38]
+  engagement rate (acted / seen): 0.062
+  follows [14] | followed by []
+  exposure to others: agent 31 x2, agent 14 x2, agent 2 x2, agent 20 x2, agent 35 x2, agent 25 x2, agent 5 x2, agent 34 x2, agent 22 x1, agent 4 x1, agent 19 x1, agent 26 x1, agent 9 x1, agent 21 x1, agent 16 x1, agent 28 x1
+  acted on others: {'14': {'create_comment': 1, 'follow': 1}}
+
+[agent 12] @Oliver Wang
+  bio: Health Science enthusiast | Keeping up with the latest news | Fun is my middle name 🎉
+  actions (3): {'create_post': 1, 'create_comment': 1, 'follow': 1}
+  authored 1 posts: [13]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [7]
+    ignored  : [3, 11, 15, 17, 19, 20, 24, 25, 26, 27, 32, 33, 35, 36, 37]
+    never saw: [1, 2, 4, 5, 6, 8, 9, 10, 12, 14, 16, 18, 21, 22, 23, 28, 29, 30, 31, 34, 38]
+  engagement rate (acted / seen): 0.062
+  follows [26] | followed by [26]
+  exposure to others: agent 21 x3, agent 5 x2, agent 1 x2, agent 28 x2, agent 32 x2, agent 34 x2, agent 17 x2, agent 26 x2, agent 24 x1, agent 14 x1, agent 27 x1, agent 19 x1, agent 9 x1, agent 16 x1, agent 20 x1
+  acted on others: {'1': {'create_comment': 1}, '26': {'follow': 1}}
+  acted on by    : {'26': {'create_comment': 1, 'follow': 1}, '17': {'create_comment': 1}, '30': {'like_comment': 1}}
+
+[agent 13] @Maxwell Armstrong
+  bio: Architect & Construction Enthusiast | Passionate about Economics & Business | ESTJ | Let
+  actions (3): {'create_post': 1, 'follow': 1, 'create_comment': 1}
+  authored 1 posts: [10]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 23, 'network': 1})
+    acted on : [7]
+    ignored  : [2, 3, 4, 5, 11, 13, 15, 19, 23, 25, 27, 28, 35, 36, 37]
+    never saw: [1, 6, 8, 9, 12, 14, 16, 17, 18, 20, 21, 22, 24, 26, 29, 30, 31, 32, 33, 34, 38]
+  engagement rate (acted / seen): 0.062
+  follows [6] | followed by [29]
+  exposure to others: agent 1 x2, agent 6 x2, agent 5 x2, agent 28 x2, agent 20 x2, agent 22 x2, agent 12 x2, agent 2 x2, agent 4 x1, agent 26 x1, agent 17 x1, agent 30 x1, agent 9 x1, agent 21 x1, agent 16 x1, agent 14 x1
+  acted on others: {'6': {'follow': 1}, '1': {'create_comment': 1}}
+  acted on by    : {'29': {'follow': 1, 'like_comment': 1}, '6': {'create_comment': 1}}
+
+[agent 14] @Emily Hayes
+  bio: Passionate about connecting people through efficient transportation and logistics. Embra
+  actions (2): {'create_post': 1, 'like_comment': 1}
+  authored 1 posts: [11]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : []
+    ignored  : [1, 3, 4, 5, 6, 7, 13, 14, 15, 20, 23, 26, 27, 31, 35, 36, 37]
+    never saw: [2, 8, 9, 10, 12, 16, 17, 18, 19, 21, 22, 24, 25, 28, 29, 30, 32, 33, 34, 38]
+  engagement rate (acted / seen): 0.0
+  follows [] | followed by [11]
+  exposure to others: agent 16 x3, agent 5 x2, agent 1 x2, agent 17 x2, agent 12 x2, agent 28 x2, agent 4 x2, agent 21 x2, agent 6 x1, agent 31 x1, agent 3 x1, agent 7 x1, agent 9 x1, agent 27 x1, agent 22 x1
+  acted on by    : {'1': {'create_comment': 1}, '11': {'create_comment': 1, 'follow': 1}, '20': {'create_comment': 1}, '24': {'create_comment': 1}, '31': {'create_comment': 1}, '0': {'create_comment': 1}, '5': {'create_comment': 1}}
+
+[agent 15] @Oliver Robinson
+  bio: Exploring the world through architecture| Future designer and builder| ENTP
+  actions (3): {'create_post': 1, 'follow': 1, 'create_comment': 1}
+  authored 1 posts: [12]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 23, 'network': 1})
+    acted on : [6]
+    ignored  : [1, 2, 4, 5, 7, 10, 13, 15, 19, 23, 24, 25, 26, 35, 36, 37]
+    never saw: [3, 8, 9, 11, 14, 16, 17, 18, 20, 21, 22, 27, 28, 29, 30, 31, 32, 33, 34, 38]
+  engagement rate (acted / seen): 0.059
+  follows [3] | followed by []
+  exposure to others: agent 1 x2, agent 26 x2, agent 12 x2, agent 22 x2, agent 6 x2, agent 13 x2, agent 3 x2, agent 20 x1, agent 7 x1, agent 17 x1, agent 4 x1, agent 24 x1, agent 21 x1, agent 9 x1, agent 16 x1, agent 27 x1, agent 2 x1
+  acted on others: {'3': {'follow': 1, 'create_comment': 1}}
+
+[agent 16] @Daniel Miller
+  bio: Passionate about economics and politics. Government & Public Administration enthusiast. 
+  actions (3): {'create_post': 3}
+  authored 3 posts: [14, 36, 38]
+  saw 19 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : []
+    ignored  : [3, 4, 5, 7, 9, 11, 13, 15, 19, 21, 24, 25, 26, 27, 29, 32, 33, 35, 37]
+    never saw: [1, 2, 6, 8, 10, 12, 16, 17, 18, 20, 22, 23, 28, 30, 31, 34]
+  engagement rate (acted / seen): 0.0
+  follows [] | followed by []
+  exposure to others: agent 1 x2, agent 5 x2, agent 12 x2, agent 17 x2, agent 20 x2, agent 26 x1, agent 32 x1, agent 14 x1, agent 28 x1, agent 24 x1, agent 8 x1, agent 23 x1, agent 9 x1, agent 21 x1, agent 6 x1, agent 4 x1, agent 34 x1, agent 27 x1, agent 29 x1
+  acted on by    : {'20': {'like_post': 1}, '21': {'like_post': 1}, '31': {'like_post': 1}}
+
+[agent 17] @Daniel Rivera
+  bio: Passionate about health science, culture & society, and business. ENFP
+  actions (3): {'create_post': 1, 'follow': 1, 'create_comment': 1}
+  authored 1 posts: [15]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 23, 'network': 1})
+    acted on : [13]
+    ignored  : [2, 3, 4, 5, 7, 8, 10, 14, 22, 25, 32, 33, 35, 36, 37]
+    never saw: [1, 6, 9, 11, 12, 16, 17, 18, 19, 20, 21, 23, 24, 26, 27, 28, 29, 30, 31, 34, 38]
+  engagement rate (acted / seen): 0.062
+  follows [4] | followed by [7]
+  exposure to others: agent 16 x3, agent 1 x2, agent 12 x2, agent 6 x2, agent 5 x2, agent 32 x2, agent 2 x2, agent 4 x2, agent 9 x2, agent 34 x1, agent 26 x1, agent 25 x1, agent 21 x1, agent 13 x1
+  acted on others: {'4': {'follow': 1}, '12': {'create_comment': 1}}
+  acted on by    : {'4': {'create_comment': 1}, '7': {'follow': 1}}
+
+[agent 18] @Eleanor Thompson
+  bio: Passionate about economics and business. Still learning and growing at 94!
+  actions (3): {'create_post': 1, 'create_comment': 2}
+  authored 1 posts: [18]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [23, 27]
+    ignored  : [1, 2, 3, 4, 10, 11, 13, 17, 19, 26, 33, 35, 36, 37]
+    never saw: [5, 6, 7, 8, 9, 12, 14, 15, 16, 20, 21, 22, 24, 25, 28, 29, 30, 31, 32, 34, 38]
+  engagement rate (acted / seen): 0.125
+  follows [] | followed by []
+  exposure to others: agent 22 x2, agent 28 x2, agent 20 x2, agent 13 x2, agent 19 x2, agent 2 x2, agent 14 x2, agent 27 x2, agent 5 x1, agent 12 x1, agent 7 x1, agent 34 x1, agent 21 x1, agent 9 x1, agent 16 x1, agent 4 x1
+  acted on others: {'28': {'create_comment': 1}, '22': {'create_comment': 1}}
+
+[agent 19] @Bethany Davidson
+  bio: Passionate finance professional with a keen interest in economics and business. Always s
+  actions (3): {'create_post': 1, 'create_comment': 1, 'follow': 1}
+  authored 1 posts: [17]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [23]
+    ignored  : [2, 3, 4, 5, 7, 8, 11, 12, 14, 15, 19, 32, 33, 35, 36, 37]
+    never saw: [1, 6, 9, 10, 13, 16, 18, 20, 21, 22, 24, 25, 26, 27, 28, 29, 30, 31, 34, 38]
+  engagement rate (acted / seen): 0.059
+  follows [22] | followed by []
+  exposure to others: agent 16 x3, agent 22 x2, agent 20 x2, agent 4 x2, agent 1 x2, agent 6 x2, agent 17 x2, agent 9 x2, agent 5 x1, agent 2 x1, agent 14 x1, agent 15 x1, agent 21 x1, agent 34 x1, agent 32 x1
+  acted on others: {'22': {'create_comment': 1, 'follow': 1}}
+
+[agent 20] @Isabella Thompson
+  bio: Passionate about economics & business administration. Always seeking to learn & grow. IS
+  actions (3): {'create_post': 1, 'create_comment': 1, 'like_post': 1}
+  authored 1 posts: [19]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [11, 36]
+    ignored  : [1, 2, 3, 4, 7, 10, 13, 14, 15, 20, 25, 32, 35, 37]
+    never saw: [5, 6, 8, 9, 12, 16, 17, 18, 21, 22, 23, 24, 26, 27, 28, 29, 30, 31, 33, 34, 38]
+  engagement rate (acted / seen): 0.125
+  follows [] | followed by []
+  exposure to others: agent 16 x3, agent 1 x2, agent 17 x2, agent 2 x2, agent 4 x2, agent 5 x2, agent 12 x2, agent 26 x2, agent 21 x2, agent 14 x1, agent 32 x1, agent 7 x1, agent 9 x1, agent 13 x1
+  acted on others: {'14': {'create_comment': 1}, '16': {'like_post': 1}}
+
+[agent 21] @Steven Johnson
+  bio: Exploring the intersections of economics, culture & society, and business. Human Service
+  actions (3): {'create_post': 2, 'like_post': 1}
+  authored 2 posts: [20, 37]
+  saw 15 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [36]
+    ignored  : [3, 4, 5, 7, 11, 13, 14, 15, 19, 23, 27, 31, 33, 35]
+    never saw: [1, 2, 6, 8, 9, 10, 12, 16, 17, 18, 21, 22, 24, 25, 26, 28, 29, 30, 32, 34, 38]
+  engagement rate (acted / seen): 0.067
+  follows [] | followed by [33]
+  exposure to others: agent 16 x3, agent 28 x2, agent 6 x2, agent 14 x2, agent 17 x2, agent 12 x2, agent 4 x2, agent 1 x2, agent 5 x2, agent 20 x1, agent 31 x1, agent 22 x1, agent 9 x1, agent 34 x1
+  acted on others: {'16': {'like_post': 1}}
+  acted on by    : {'27': {'like_post': 1}, '33': {'follow': 1}}
+
+[agent 22] @Victoria Greene
+  bio: Health Science professional with a passion for economics and business. Turning insights 
+  actions (3): {'create_post': 1, 'create_comment': 1, 'like_comment': 1}
+  authored 1 posts: [23]
+  saw 15 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [3]
+    ignored  : [4, 5, 7, 10, 13, 15, 20, 26, 27, 31, 33, 35, 36, 37]
+    never saw: [1, 2, 6, 8, 9, 11, 12, 14, 16, 17, 18, 19, 21, 22, 24, 25, 28, 29, 30, 32, 34, 38]
+  engagement rate (acted / seen): 0.067
+  follows [] | followed by [19, 34]
+  exposure to others: agent 21 x3, agent 17 x2, agent 5 x2, agent 12 x2, agent 1 x2, agent 28 x2, agent 4 x2, agent 13 x2, agent 27 x2, agent 6 x1, agent 34 x1, agent 31 x1, agent 16 x1, agent 9 x1
+  acted on others: {'5': {'create_comment': 1}}
+  acted on by    : {'3': {'create_comment': 1, 'like_post': 1}, '6': {'create_comment': 1}, '19': {'create_comment': 1, 'follow': 1}, '33': {'create_comment': 1}, '34': {'create_comment': 1, 'follow': 1}, '18': {'create_comment': 1}}
+
+[agent 23] @James Thompson
+  bio: Lifelong learner with a passion for education and cultural exploration. ENFP | Educator 
+  actions (3): {'create_post': 1, 'follow': 1, 'like_post': 1}
+  authored 1 posts: [21]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 23, 'network': 1})
+    acted on : [7]
+    ignored  : [3, 5, 10, 13, 14, 15, 19, 24, 25, 28, 32, 33, 35, 36, 37]
+    never saw: [1, 2, 4, 6, 8, 9, 11, 12, 16, 17, 18, 20, 22, 23, 26, 27, 29, 30, 31, 34, 38]
+  engagement rate (acted / seen): 0.062
+  follows [1] | followed by []
+  exposure to others: agent 16 x3, agent 1 x2, agent 32 x2, agent 34 x2, agent 5 x2, agent 12 x2, agent 17 x2, agent 13 x2, agent 20 x1, agent 26 x1, agent 24 x1, agent 30 x1, agent 9 x1, agent 21 x1, agent 6 x1
+  acted on others: {'1': {'follow': 1, 'like_post': 1}}
+
+[agent 24] @Michael Thompson
+  bio: Passionate architect & construction enthusiast | Embracing creativity in design | Sharin
+  actions (3): {'create_post': 1, 'create_comment': 1, 'like_post': 1}
+  authored 1 posts: [24]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [11, 25]
+    ignored  : [2, 3, 5, 7, 13, 14, 15, 26, 28, 32, 34, 35, 36, 37]
+    never saw: [1, 4, 6, 8, 9, 10, 12, 16, 17, 18, 19, 20, 21, 22, 23, 27, 29, 30, 31, 33, 38]
+  engagement rate (acted / seen): 0.125
+  follows [] | followed by []
+  exposure to others: agent 16 x3, agent 1 x2, agent 5 x2, agent 17 x2, agent 12 x2, agent 32 x2, agent 26 x2, agent 14 x2, agent 27 x1, agent 6 x1, agent 35 x1, agent 2 x1, agent 9 x1, agent 21 x1, agent 30 x1
+  acted on others: {'14': {'create_comment': 1}, '26': {'like_post': 1}}
+
+[agent 25] @Luna Reyes
+  bio: Exploring the intersection of culture and business 🌟 | Marketing enthusiast 🚀 | Dreamer 
+  actions (2): {'create_post': 1, 'create_comment': 1}
+  authored 1 posts: [22]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [7]
+    ignored  : [2, 3, 5, 10, 11, 12, 15, 16, 23, 31, 32, 33, 34, 35, 36, 37]
+    never saw: [1, 4, 6, 8, 9, 13, 14, 17, 18, 19, 20, 21, 24, 25, 26, 27, 28, 29, 30, 38]
+  engagement rate (acted / seen): 0.059
+  follows [] | followed by [35]
+  exposure to others: agent 1 x2, agent 34 x2, agent 35 x2, agent 22 x2, agent 5 x2, agent 31 x2, agent 17 x2, agent 32 x1, agent 2 x1, agent 14 x1, agent 11 x1, agent 15 x1, agent 9 x1, agent 21 x1, agent 16 x1, agent 13 x1, agent 6 x1
+  acted on others: {'1': {'create_comment': 1}}
+  acted on by    : {'35': {'follow': 1}}
+
+[agent 26] @Sophie Green
+  bio: Exploring the world through agriculture and fun! 🌿🎉 #ISFP
+  actions (3): {'create_post': 1, 'create_comment': 1, 'follow': 1}
+  authored 1 posts: [25]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [13]
+    ignored  : [1, 2, 3, 7, 11, 14, 15, 20, 24, 27, 31, 32, 35, 36, 37]
+    never saw: [4, 5, 6, 8, 9, 10, 12, 16, 17, 18, 19, 21, 22, 23, 26, 28, 29, 30, 33, 34, 38]
+  engagement rate (acted / seen): 0.062
+  follows [12] | followed by [12]
+  exposure to others: agent 12 x2, agent 1 x2, agent 32 x2, agent 17 x2, agent 5 x2, agent 28 x2, agent 14 x2, agent 16 x2, agent 24 x2, agent 21 x2, agent 31 x1, agent 2 x1, agent 9 x1, agent 7 x1
+  acted on others: {'12': {'create_comment': 1, 'follow': 1}}
+  acted on by    : {'27': {'like_post': 1}, '12': {'follow': 1}, '24': {'like_post': 1}}
+
+[agent 27] @Nathan Brooks
+  bio: Passionate about all things business and economics. Business Management student. Let's t
+  actions (3): {'create_post': 1, 'like_post': 2}
+  authored 1 posts: [26]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [25, 37]
+    ignored  : [3, 7, 11, 13, 14, 16, 18, 19, 27, 29, 31, 32, 33, 35, 36]
+    never saw: [1, 2, 4, 5, 6, 8, 9, 10, 12, 15, 17, 20, 21, 22, 23, 24, 28, 30, 34, 38]
+  engagement rate (acted / seen): 0.118
+  follows [] | followed by []
+  exposure to others: agent 5 x2, agent 28 x2, agent 12 x2, agent 1 x2, agent 14 x2, agent 32 x2, agent 31 x2, agent 16 x2, agent 26 x1, agent 20 x1, agent 11 x1, agent 29 x1, agent 9 x1, agent 21 x1, agent 34 x1, agent 18 x1
+  acted on others: {'26': {'like_post': 1}, '21': {'like_post': 1}}
+
+[agent 28] @Emily Thompson
+  bio: Passionate about economics and politics. Working in Government & Public Administration. 
+  actions (2): {'create_post': 1, 'like_comment': 1}
+  authored 1 posts: [27]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : []
+    ignored  : [2, 3, 4, 7, 10, 11, 13, 14, 15, 20, 21, 25, 32, 35, 36, 37]
+    never saw: [1, 5, 6, 8, 9, 12, 16, 17, 18, 19, 22, 23, 24, 26, 28, 29, 30, 31, 33, 34, 38]
+  engagement rate (acted / seen): 0.0
+  follows [] | followed by []
+  exposure to others: agent 16 x3, agent 21 x3, agent 1 x2, agent 12 x2, agent 5 x2, agent 14 x2, agent 26 x2, agent 32 x2, agent 17 x1, agent 2 x1, agent 23 x1, agent 13 x1, agent 9 x1, agent 4 x1
+  acted on by    : {'18': {'create_comment': 1}, '30': {'create_comment': 1}}
+
+[agent 29] @Olivia Garcia
+  bio: Passionate about law, society, and making a difference. INFJ. Advocate for justice.
+  actions (3): {'create_post': 1, 'follow': 1, 'like_comment': 1}
+  authored 1 posts: [29]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 22, 'network': 1, 'fof': 1})
+    acted on : [10]
+    ignored  : [3, 5, 7, 13, 14, 15, 20, 21, 24, 25, 26, 27, 32, 35, 36, 37]
+    never saw: [1, 2, 4, 6, 8, 9, 11, 12, 16, 17, 18, 19, 22, 23, 28, 30, 31, 33, 34, 38]
+  engagement rate (acted / seen): 0.059
+  follows [13] | followed by []
+  exposure to others: agent 13 x2, agent 12 x2, agent 17 x2, agent 1 x2, agent 26 x2, agent 6 x2, agent 28 x2, agent 16 x2, agent 21 x2, agent 32 x1, agent 5 x1, agent 24 x1, agent 9 x1, agent 23 x1, agent 27 x1
+  acted on others: {'13': {'follow': 1, 'like_comment': 1}}
+
+[agent 30] @Olivia Rodriguez
+  bio: Passionate about education, culture, and fun! 📚✨ Let's learn and have some fun together!
+  actions (3): {'create_post': 1, 'create_comment': 1, 'like_comment': 1}
+  authored 1 posts: [28]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [13, 27]
+    ignored  : [3, 7, 11, 14, 15, 20, 25, 31, 32, 33, 34, 35, 36, 37]
+    never saw: [1, 2, 4, 5, 6, 8, 9, 10, 12, 16, 17, 18, 19, 21, 22, 23, 24, 26, 29, 30, 38]
+  engagement rate (acted / seen): 0.125
+  follows [] | followed by []
+  exposure to others: agent 16 x3, agent 32 x2, agent 12 x2, agent 1 x2, agent 26 x2, agent 28 x2, agent 31 x2, agent 34 x2, agent 21 x2, agent 14 x1, agent 5 x1, agent 17 x1, agent 9 x1, agent 35 x1
+  acted on others: {'28': {'create_comment': 1}, '12': {'like_comment': 1}}
+
+[agent 31] @Carlos Rodriguez
+  bio: 💼 Marketing enthusiast | 🎉 Fun seeker | 📷 Amateur photographer | ✨ Living life to the fu
+  actions (3): {'create_post': 1, 'create_comment': 1, 'like_post': 1}
+  authored 1 posts: [31]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [11, 36]
+    ignored  : [3, 5, 7, 8, 13, 14, 16, 22, 24, 26, 32, 33, 34, 35, 37]
+    never saw: [1, 2, 4, 6, 9, 10, 12, 15, 17, 18, 19, 20, 21, 23, 25, 27, 28, 29, 30, 38]
+  engagement rate (acted / seen): 0.118
+  follows [] | followed by []
+  exposure to others: agent 1 x2, agent 5 x2, agent 24 x2, agent 35 x2, agent 14 x2, agent 32 x2, agent 27 x2, agent 9 x2, agent 16 x2, agent 12 x1, agent 25 x1, agent 34 x1, agent 6 x1, agent 21 x1, agent 11 x1
+  acted on others: {'14': {'create_comment': 1}, '16': {'like_post': 1}}
+  acted on by    : {'35': {'create_comment': 1}}
+
+[agent 32] @Emily Watson
+  bio: Passionate about education, culture, and business. Learning enthusiast. 📚 #ISFJ
+  actions (3): {'create_post': 1, 'create_comment': 1, 'like_post': 1}
+  authored 1 posts: [32]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [7]
+    ignored  : [3, 13, 14, 15, 17, 19, 24, 25, 26, 27, 28, 33, 35, 36, 37]
+    never saw: [1, 2, 4, 5, 6, 8, 9, 10, 11, 12, 16, 18, 20, 21, 22, 23, 29, 30, 31, 34, 38]
+  engagement rate (acted / seen): 0.062
+  follows [] | followed by []
+  exposure to others: agent 16 x3, agent 1 x2, agent 12 x2, agent 17 x2, agent 26 x2, agent 5 x2, agent 30 x2, agent 28 x2, agent 34 x1, agent 24 x1, agent 27 x1, agent 19 x1, agent 9 x1, agent 21 x1, agent 20 x1
+  acted on others: {'1': {'create_comment': 1, 'like_post': 1}}
+
+[agent 33] @Henry Richardson
+  bio: Passionate about economics and business. Always seeking growth opportunities in the worl
+  actions (3): {'create_post': 1, 'create_comment': 1, 'follow': 1}
+  authored 1 posts: [30]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [23]
+    ignored  : [1, 3, 4, 5, 9, 10, 11, 12, 13, 14, 15, 17, 19, 35, 36, 37]
+    never saw: [2, 6, 7, 8, 16, 18, 20, 21, 22, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 38]
+  engagement rate (acted / seen): 0.059
+  follows [21] | followed by []
+  exposure to others: agent 22 x2, agent 13 x2, agent 4 x2, agent 6 x2, agent 14 x2, agent 19 x2, agent 20 x2, agent 16 x2, agent 7 x1, agent 17 x1, agent 12 x1, agent 8 x1, agent 21 x1, agent 9 x1, agent 15 x1, agent 5 x1
+  acted on others: {'22': {'create_comment': 1}, '21': {'follow': 1}}
+
+[agent 34] @Cassandra Johnson
+  bio: Enthusiastic STEM student exploring the world of Information Technology and Culture & So
+  actions (3): {'create_post': 1, 'create_comment': 1, 'follow': 1}
+  authored 1 posts: [33]
+  saw 17 distinct posts across 24 exposure events (by source: {'discovery': 24})
+    acted on : [23]
+    ignored  : [2, 3, 4, 7, 10, 11, 13, 15, 19, 21, 26, 32, 34, 35, 36, 37]
+    never saw: [1, 5, 6, 8, 9, 12, 14, 16, 17, 18, 20, 22, 24, 25, 27, 28, 29, 30, 31, 38]
+  engagement rate (acted / seen): 0.059
+  follows [22] | followed by []
+  exposure to others: agent 1 x2, agent 17 x2, agent 5 x2, agent 12 x2, agent 32 x2, agent 2 x2, agent 20 x2, agent 23 x1, agent 27 x1, agent 4 x1, agent 22 x1, agent 35 x1, agent 9 x1, agent 16 x1, agent 21 x1, agent 14 x1, agent 13 x1
+  acted on others: {'22': {'create_comment': 1, 'follow': 1}}
+
+[agent 35] @Simon Greene
+  bio: Finding inspiration in creativity and connecting with people through marketing strategie
+  actions (3): {'create_post': 1, 'follow': 1, 'create_comment': 1}
+  authored 1 posts: [34]
+  saw 16 distinct posts across 24 exposure events (by source: {'discovery': 23, 'network': 1})
+    acted on : [31]
+    ignored  : [1, 2, 7, 11, 13, 15, 17, 22, 23, 25, 32, 33, 35, 36, 37]
+    never saw: [3, 4, 5, 6, 8, 9, 10, 12, 14, 16, 18, 19, 20, 21, 24, 26, 27, 28, 29, 30, 38]
+  engagement rate (acted / seen): 0.062
+  follows [25] | followed by [0]
+  exposure to others: agent 25 x2, agent 31 x2, agent 14 x2, agent 17 x2, agent 2 x2, agent 1 x2, agent 22 x2, agent 12 x2, agent 34 x1, agent 26 x1, agent 7 x1, agent 19 x1, agent 21 x1, agent 9 x1, agent 16 x1, agent 32 x1
+  acted on others: {'25': {'follow': 1}, '31': {'create_comment': 1}}
+  acted on by    : {'0': {'follow': 1}}
+
+--------------------------------------------------------------------------
+PROPAGATION CANDIDATES (repeated exposure preceding interaction)
+--------------------------------------------------------------------------
+  agent 20 saw agent 16 x3 -> {'like_post': 1}
+  agent 21 saw agent 16 x3 -> {'like_post': 1}
+  agent 2 saw agent 1 x2 -> {'follow': 1, 'create_comment': 1}
+  agent 3 saw agent 22 x2 -> {'create_comment': 1, 'like_post': 1}
+  agent 11 saw agent 14 x2 -> {'create_comment': 1, 'follow': 1}
+  agent 15 saw agent 3 x2 -> {'follow': 1, 'create_comment': 1}
+  agent 19 saw agent 22 x2 -> {'create_comment': 1, 'follow': 1}
+  agent 23 saw agent 1 x2 -> {'follow': 1, 'like_post': 1}
+  agent 26 saw agent 12 x2 -> {'create_comment': 1, 'follow': 1}
+  agent 29 saw agent 13 x2 -> {'follow': 1, 'like_comment': 1}
+  agent 32 saw agent 1 x2 -> {'create_comment': 1, 'like_post': 1}
+  agent 4 saw agent 17 x2 -> {'create_comment': 1}
+  agent 5 saw agent 1 x2 -> {'follow': 1}
+  agent 7 saw agent 17 x2 -> {'follow': 1}
+  agent 8 saw agent 4 x2 -> {'create_comment': 1}
+  agent 12 saw agent 1 x2 -> {'create_comment': 1}
+  agent 13 saw agent 6 x2 -> {'follow': 1}
+  agent 17 saw agent 4 x2 -> {'follow': 1}
+  agent 18 saw agent 28 x2 -> {'create_comment': 1}
+  agent 22 saw agent 5 x2 -> {'create_comment': 1}
+  agent 24 saw agent 14 x2 -> {'create_comment': 1}
+  agent 25 saw agent 1 x2 -> {'create_comment': 1}
+  agent 30 saw agent 28 x2 -> {'create_comment': 1}
+  agent 31 saw agent 14 x2 -> {'create_comment': 1}
+  agent 33 saw agent 22 x2 -> {'create_comment': 1}
+
+
+==============================================================================
+EVENT LOG -- every action, in order
+==============================================================================
+rnd actor                 action            target / content
+------------------------------------------------------------------------------
+r0  Emma Hayes            create_post       own post#7  "Hi everyone! I'm Emma Hayes, logistics enthusiast and student o…"
+r0  Ryan Johnson          create_post       own post#2  "Just joined Twitter! Looking forward to sharing my thoughts on …"
+r0  Alexandra Whitmore    create_post       own post#6  "Just started analyzing market trends for our next marketing cam…"
+r0  Jake Thompson         create_post       own post#4  "Just joined Twitter! Excited to share my insights on agribusine…"
+r0  Simon Walker          create_post       own post#3  "Hello Twitter! I'm Simon Walker, transportation enthusiast exci…"
+r0  Emily Carter          create_post       own post#5  "Just got back from a conference on human services and economics…"
+r0  Aria Thompson         create_post       own post#1  "Just started learning about the impact of social media on menta…"
+r0  Henry Farmer          create_post       own post#9  "Just started tending to my crops for the new season! Looking fo…"
+r0  Ethan Grayson         create_post       own post#8  "Just joined Twitter! Looking forward to connecting with like-mi…"
+r0  Samuel Reynolds       create_post       own post#16  "I'm excited to start exploring the world of marketing and busin…"
+r0  Oliver Wang           create_post       own post#13  "Hi everyone! I'm Oliver Wang, an 11-year-old Health Science pro…"
+r0  Maxwell Armstrong     create_post       own post#10  "Just started reading 'The Wealth of Nations' by Adam Smith. Fas…"
+r0  Emily Hayes           create_post       own post#11  "Hello Twitter! I'm excited to join this platform and share my t…"
+r0  Oliver Robinson       create_post       own post#12  "Just started learning about Islamic architecture in Malaysia. T…"
+r0  Daniel Miller         create_post       own post#14  "Greetings everyone! As a government and public administration p…"
+r0  Daniel Rivera         create_post       own post#15  "Just joined Twitter! Looking forward to connecting with like-mi…"
+r0  Eleanor Thompson      create_post       own post#18  "Just saw an interesting article on Belize's economic growth pot…"
+r0  Bethany Davidson      create_post       own post#17  "Just started my day reviewing economic trends and exploring new…"
+r0  Isabella Thompson     create_post       own post#19  "Just started my Business Management & Administration course! Ex…"
+r0  Steven Johnson        create_post       own post#20  "I’m excited to share my thoughts on the intersection of economi…"
+r0  Victoria Greene       create_post       own post#23  "Just started reading about market trends and their impact on gl…"
+r0  James Thompson        create_post       own post#21  "Just joined Twitter! Excited to connect with fellow educators a…"
+r0  Michael Thompson      create_post       own post#24  "Hello Twitter! I'm Michael Thompson, an architect and construct…"
+r0  Luna Reyes            create_post       own post#22  "Just joined Twitter! Looking forward to connecting with fellow …"
+r0  Sophie Green          create_post       own post#25  "Hi everyone! I m Sophie Green, 17-year-old from Chile. I love i…"
+r0  Nathan Brooks         create_post       own post#26  "Hello Twitter! I'm Nathan Brooks, a Business Management student…"
+r0  Emily Thompson        create_post       own post#27  "Hello Twitter! I'm Emily Thompson, excited to share my thoughts…"
+r0  Olivia Garcia         create_post       own post#29  "Just started reading 'The New Jim Crow' by Michelle Alexander. …"
+r0  Olivia Rodriguez      create_post       own post#28  "Hi everyone! I'm Olivia Rodriguez, an aspiring educator from Ch…"
+r0  Carlos Rodriguez      create_post       own post#31  "Hey everyone! I'm Carlos Rodriguez, excited to join this social…"
+r0  Emily Watson          create_post       own post#32  "Hi everyone! I'm Emily Watson, an education professional from P…"
+r0  Henry Richardson      create_post       own post#30  "Just read an interesting article on business trends in Nepal"
+r0  Cassandra Johnson     create_post       own post#33  "Just joined Twitter! Excited to connect with fellow STEM enthus…"
+r0  Simon Greene          create_post       own post#34  "Just joined Twitter! Looking forward to connecting with fellow …"
+r1  Emma Hayes            create_comment    on post#11 by @Emily Hayes  "Hi Emily! Great to connect with another logistics enthusiast on…"
+r1  Ryan Johnson          follow            @Emma Hayes
+r1  Alexandra Whitmore    create_comment    on post#23 by @Victoria Greene  "Great insights on market trends! I'm looking forward to applyin…"
+r1  Jake Thompson         create_comment    on post#15 by @Daniel Rivera  "Welcome to Twitter Daniel Rivera! I’m Jake Thompson, an agricul…"
+r1  Simon Walker          follow            @Emma Hayes
+r1  Emily Carter          create_comment    on post#23 by @Victoria Greene  "Great insight on market trends! Would love to discuss more abou…"
+r1  Aria Thompson         follow            @Daniel Rivera
+r1  Henry Farmer          create_comment    on post#4 by @Jake Thompson  "Hi Jake, great to see you on Twitter! I’m Henry Farmer from US …"
+r1  Ethan Grayson         create_post       own post#35  "Hello everyone! I'm Ethan Grayson, a 22-year-old STEM enthusias…"
+r1  Samuel Reynolds       create_comment    on post#11 by @Emily Hayes  "Hi Emily! Great to connect with another logistics enthusiast on…"
+r1  Oliver Wang           create_comment    on post#7 by @Emma Hayes  "Hi Emma Hayes! Great to see other students of Transportation, D…"
+r1  Maxwell Armstrong     follow            @Emily Carter
+r1  Oliver Robinson       follow            @Alexandra Whitmore
+r1  Daniel Miller         create_post       own post#36  "Excited to connect with fellow professionals on health science,…"
+r1  Daniel Rivera         follow            @Jake Thompson
+r1  Eleanor Thompson      create_comment    on post#27 by @Emily Thompson  "Hello @EmilyThompson, great to see you on Twitter! What are you…"
+r1  Bethany Davidson      create_comment    on post#23 by @Victoria Greene  "Great insight on market trends! Would love to discuss more abou…"
+r1  Isabella Thompson     create_comment    on post#11 by @Emily Hayes  "Hi Emily Hayes, great to see other students of Transportation, …"
+r1  Steven Johnson        create_post       own post#37  "I'm excited to see all these interesting posts on economics, cu…"
+r1  Victoria Greene       create_comment    on post#3 by @Simon Walker  "Thanks for sharing your thoughts on agribusiness, Jake! I’m exc…"
+r1  James Thompson        follow            @Emma Hayes
+r1  Michael Thompson      create_comment    on post#11 by @Emily Hayes  "Great to connect with another architecture enthusiast on this p…"
+r1  Luna Reyes            create_comment    on post#7 by @Emma Hayes  "Hi Emma Hayes! Great to see other students of Transportation, D…"
+r1  Sophie Green          create_comment    on post#13 by @Oliver Wang  "Hi Oliver Wang! I m Sophie Green, 17-year-old from Chile. I lov…"
+r1  Nathan Brooks         like_post         post#25 by @Sophie Green  "Hi everyone! I m Sophie Green, 17-year-old fr…"
+r1  Olivia Garcia         follow            @Maxwell Armstrong
+r1  Olivia Rodriguez      create_comment    on post#27 by @Emily Thompson  "Hi Emily Thompson! Great to see another economics enthusiast on…"
+r1  Carlos Rodriguez      create_comment    on post#11 by @Emily Hayes  "Hi Emily Hayes! Great to connect with another logistics enthusi…"
+r1  Emily Watson          create_comment    on post#7 by @Emma Hayes  "Hi Emma Hayes! Great to see other education professionals on th…"
+r1  Henry Richardson      create_comment    on post#23 by @Victoria Greene  "Great insight on market trends! Would love to discuss more abou…"
+r1  Cassandra Johnson     create_comment    on post#23 by @Victoria Greene  "Great insight on market trends, Victoria! Would love to discuss…"
+r1  Simon Greene          follow            @Luna Reyes
+r2  James Miller          follow            @Simon Greene
+r2  James Miller          create_comment    on post#11 by @Emily Hayes  "Hi Emily! Great to connect with another logistics enthusiast on…"
+r2  Emma Hayes            like_comment      post#7 by @Emma Hayes  "Hi everyone! I'm Emma Hayes, logistics enthus…"
+r2  Ryan Johnson          create_comment    on post#7 by @Emma Hayes  "Great to see other students of Transportation, Distribution & L…"
+r2  Alexandra Whitmore    like_post         post#23 by @Victoria Greene  "Just started reading about market trends and …"
+r2  Jake Thompson         like_comment      post#4 by @Jake Thompson  "Just joined Twitter! Excited to share my insi…"
+r2  Simon Walker          create_comment    on post#11 by @Emily Hayes  "Hi Emily Hayes! Great to see another logistics enthusiast on th…"
+r2  Emily Carter          create_comment    on post#10 by @Maxwell Armstrong  "Great to see Maxwell on Twitter! Would love to discuss more abo…"
+r2  Henry Farmer          create_comment    on post#7 by @Emma Hayes  "Hi Emma Hayes, your post really caught my attention! I’m excite…"
+r2  Ethan Grayson         create_comment    on post#7 by @Emma Hayes  "I would love to learn more about your experiences with Transpor…"
+r2  Samuel Reynolds       follow            @Emily Hayes
+r2  Oliver Wang           follow            @Sophie Green
+r2  Maxwell Armstrong     create_comment    on post#7 by @Emma Hayes  "Hi Emma Hayes! Great to see another logistics enthusiast on thi…"
+r2  Emily Hayes           like_comment      post#11 by @Emily Hayes  "Hello Twitter! I'm excited to join this platf…"
+r2  Oliver Robinson       create_comment    on post#6 by @Alexandra Whitmore  "Great analysis on market trends! Can’t wait to see how they inf…"
+r2  Daniel Miller         create_post       own post#38  "I'm excited to see so many interesting posts on economics, cult…"
+r2  Daniel Rivera         create_comment    on post#13 by @Oliver Wang  "Hi Oliver Wang! I m Daniel Rivera, an ENFP from US with interes…"
+r2  Eleanor Thompson      create_comment    on post#23 by @Victoria Greene  "Hi @VictoriaGreen, great insights on market trends! Can you pro…"
+r2  Bethany Davidson      follow            @Victoria Greene
+r2  Isabella Thompson     like_post         post#36 by @Daniel Miller  "Excited to connect with fellow professionals …"
+r2  Steven Johnson        like_post         post#36 by @Daniel Miller  "Excited to connect with fellow professionals …"
+r2  Victoria Greene       like_comment      post#23 by @Victoria Greene  "Just started reading about market trends and …"
+r2  James Thompson        like_post         post#7 by @Emma Hayes  "Hi everyone! I'm Emma Hayes, logistics enthus…"
+r2  Michael Thompson      like_post         post#25 by @Sophie Green  "Hi everyone! I m Sophie Green, 17-year-old fr…"
+r2  Sophie Green          follow            @Oliver Wang
+r2  Nathan Brooks         like_post         post#37 by @Steven Johnson  "I'm excited to see all these interesting post…"
+r2  Emily Thompson        like_comment      post#27 by @Emily Thompson  "Hello Twitter! I'm Emily Thompson, excited to…"
+r2  Olivia Garcia         like_comment      post#10 by @Maxwell Armstrong  "Just started reading 'The Wealth of Nations' …"
+r2  Olivia Rodriguez      like_comment      post#13 by @Oliver Wang  "Hi everyone! I'm Oliver Wang, an 11-year-old …"
+r2  Carlos Rodriguez      like_post         post#36 by @Daniel Miller  "Excited to connect with fellow professionals …"
+r2  Emily Watson          like_post         post#7 by @Emma Hayes  "Hi everyone! I'm Emma Hayes, logistics enthus…"
+r2  Henry Richardson      follow            @Steven Johnson
+r2  Cassandra Johnson     follow            @Victoria Greene
+r2  Simon Greene          create_comment    on post#31 by @Carlos Rodriguez  "Hi Carlos Rodriguez! Great to see other marketers on this platf…"
+
+==============================================================================
+EXPOSURE LEDGER -- every post shown to every agent
+==============================================================================
+outcome: ACTED = they engaged with it | ignored = seen, no action
+
+rnd viewer              post   author              pos  source    score    outcome
+------------------------------------------------------------------------------
+r1  James Miller        #11    Emily Hayes         0    discovery 0.4891   ACTED
+r1  James Miller        #25    Sophie Green        1    discovery 0.4850   ignored
+r1  James Miller        #1     Aria Thompson       2    discovery 0.4849   ignored
+r1  James Miller        #34    Simon Greene        3    discovery 0.4802   ignored
+r1  James Miller        #13    Oliver Wang         4    discovery 0.4799   ignored
+r1  James Miller        #4     Jake Thompson       5    discovery 0.4797   ignored
+r1  James Miller        #10    Maxwell Armstrong   6    discovery 0.4792   ignored
+r1  James Miller        #8     Ethan Grayson       7    discovery 0.4778   ignored
+r1  James Miller        #2     Ryan Johnson        8    discovery 0.4770   ignored
+r1  James Miller        #3     Simon Walker        9    discovery 0.4759   ignored
+r1  James Miller        #15    Daniel Rivera       10   discovery 0.4675   ignored
+r1  James Miller        #9     Henry Farmer        11   discovery 0.4651   ignored
+r1  Emma Hayes          #3     Simon Walker        0    discovery 0.5329   ignored
+r1  Emma Hayes          #13    Oliver Wang         1    discovery 0.5289   ignored
+r1  Emma Hayes          #32    Emily Watson        2    discovery 0.5248   ignored
+r1  Emma Hayes          #15    Daniel Rivera       3    discovery 0.5199   ignored
+r1  Emma Hayes          #14    Daniel Miller       4    discovery 0.5127   ignored
+r1  Emma Hayes          #25    Sophie Green        5    discovery 0.5109   ignored
+r1  Emma Hayes          #24    Michael Thompson    6    discovery 0.5102   ignored
+r1  Emma Hayes          #27    Emily Thompson      7    discovery 0.5023   ignored
+r1  Emma Hayes          #28    Olivia Rodriguez    8    discovery 0.5018   ignored
+r1  Emma Hayes          #33    Cassandra Johnson   9    discovery 0.5011   ignored
+r1  Emma Hayes          #11    Emily Hayes         10   discovery 0.4956   ACTED
+r1  Emma Hayes          #4     Jake Thompson       11   discovery 0.4839   ignored
+r1  Ryan Johnson        #33    Cassandra Johnson   0    discovery 0.5346   ignored
+r1  Ryan Johnson        #7     Emma Hayes          1    discovery 0.5328   ACTED
+r1  Ryan Johnson        #3     Simon Walker        2    discovery 0.5262   ignored
+r1  Ryan Johnson        #11    Emily Hayes         3    discovery 0.5238   ignored
+r1  Ryan Johnson        #19    Isabella Thompson   4    discovery 0.5219   ignored
+r1  Ryan Johnson        #13    Oliver Wang         5    discovery 0.5215   ignored
+r1  Ryan Johnson        #32    Emily Watson        6    discovery 0.5209   ignored
+r1  Ryan Johnson        #34    Simon Greene        7    discovery 0.5191   ignored
+r1  Ryan Johnson        #31    Carlos Rodriguez    8    discovery 0.5187   ignored
+r1  Ryan Johnson        #4     Jake Thompson       9    discovery 0.5186   ignored
+r1  Ryan Johnson        #12    Oliver Robinson     10   discovery 0.4768   ignored
+r1  Ryan Johnson        #1     Aria Thompson       11   discovery 0.5067   ignored
+r1  Alexandra Whitmore  #23    Victoria Greene     0    discovery 0.5281   ACTED
+r1  Alexandra Whitmore  #31    Carlos Rodriguez    1    discovery 0.5242   ignored
+r1  Alexandra Whitmore  #4     Jake Thompson       2    discovery 0.5137   ignored
+r1  Alexandra Whitmore  #22    Luna Reyes          3    discovery 0.5120   ignored
+r1  Alexandra Whitmore  #34    Simon Greene        4    discovery 0.5111   ignored
+r1  Alexandra Whitmore  #11    Emily Hayes         5    discovery 0.5105   ignored
+r1  Alexandra Whitmore  #3     Simon Walker        6    discovery 0.5105   ignored
+r1  Alexandra Whitmore  #17    Bethany Davidson    7    discovery 0.5081   ignored
+r1  Alexandra Whitmore  #19    Isabella Thompson   8    discovery 0.5070   ignored
+r1  Alexandra Whitmore  #7     Emma Hayes          9    discovery 0.5068   ignored
+r1  Alexandra Whitmore  #15    Daniel Rivera       10   discovery 0.4956   ignored
+r1  Alexandra Whitmore  #33    Cassandra Johnson   11   discovery 0.5017   ignored
+r1  Jake Thompson       #15    Daniel Rivera       0    discovery 0.5310   ACTED
+r1  Jake Thompson       #5     Emily Carter        1    discovery 0.5284   ignored
+r1  Jake Thompson       #3     Simon Walker        2    discovery 0.5280   ignored
+r1  Jake Thompson       #7     Emma Hayes          3    discovery 0.5254   ignored
+r1  Jake Thompson       #19    Isabella Thompson   4    discovery 0.5200   ignored
+r1  Jake Thompson       #14    Daniel Miller       5    discovery 0.5138   ignored
+r1  Jake Thompson       #33    Cassandra Johnson   6    discovery 0.5134   ignored
+r1  Jake Thompson       #2     Ryan Johnson        7    discovery 0.5126   ignored
+r1  Jake Thompson       #13    Oliver Wang         8    discovery 0.5125   ignored
+r1  Jake Thompson       #11    Emily Hayes         9    discovery 0.5117   ignored
+r1  Jake Thompson       #8     Ethan Grayson       10   discovery 0.4604   ignored
+r1  Jake Thompson       #28    Olivia Rodriguez    11   discovery 0.4731   ignored
+r1  Simon Walker        #7     Emma Hayes          0    discovery 0.5512   ignored
+r1  Simon Walker        #11    Emily Hayes         1    discovery 0.5371   ACTED
+r1  Simon Walker        #13    Oliver Wang         2    discovery 0.5358   ignored
+r1  Simon Walker        #27    Emily Thompson      3    discovery 0.5356   ignored
+r1  Simon Walker        #4     Jake Thompson       4    discovery 0.5296   ignored
+r1  Simon Walker        #14    Daniel Miller       5    discovery 0.5283   ignored
+r1  Simon Walker        #26    Nathan Brooks       6    discovery 0.5273   ignored
+r1  Simon Walker        #24    Michael Thompson    7    discovery 0.5239   ignored
+r1  Simon Walker        #33    Cassandra Johnson   8    discovery 0.5235   ignored
+r1  Simon Walker        #31    Carlos Rodriguez    9    discovery 0.5227   ignored
+r1  Simon Walker        #15    Daniel Rivera       10   discovery 0.5185   ignored
+r1  Simon Walker        #29    Olivia Garcia       11   discovery 0.4743   ignored
+r1  Emily Carter        #15    Daniel Rivera       0    discovery 0.5352   ignored
+r1  Emily Carter        #10    Maxwell Armstrong   1    discovery 0.5266   ACTED
+r1  Emily Carter        #4     Jake Thompson       2    discovery 0.5228   ignored
+r1  Emily Carter        #7     Emma Hayes          3    discovery 0.5225   ignored
+r1  Emily Carter        #13    Oliver Wang         4    discovery 0.5221   ignored
+r1  Emily Carter        #19    Isabella Thompson   5    discovery 0.5203   ignored
+r1  Emily Carter        #3     Simon Walker        6    discovery 0.5194   ignored
+r1  Emily Carter        #23    Victoria Greene     7    discovery 0.5194   ACTED
+r1  Emily Carter        #14    Daniel Miller       8    discovery 0.5169   ignored
+r1  Emily Carter        #20    Steven Johnson      9    discovery 0.5141   ignored
+r1  Emily Carter        #34    Simon Greene        10   discovery 0.4920   ignored
+r1  Emily Carter        #28    Olivia Rodriguez    11   discovery 0.4751   ignored
+r1  Aria Thompson       #15    Daniel Rivera       0    discovery 0.5308   ignored
+r1  Aria Thompson       #7     Emma Hayes          1    discovery 0.5221   ignored
+r1  Aria Thompson       #5     Emily Carter        2    discovery 0.5218   ignored
+r1  Aria Thompson       #13    Oliver Wang         3    discovery 0.5191   ignored
+r1  Aria Thompson       #14    Daniel Miller       4    discovery 0.5126   ignored
+r1  Aria Thompson       #10    Maxwell Armstrong   5    discovery 0.5109   ignored
+r1  Aria Thompson       #25    Sophie Green        6    discovery 0.5086   ignored
+r1  Aria Thompson       #11    Emily Hayes         7    discovery 0.5072   ignored
+r1  Aria Thompson       #29    Olivia Garcia       8    discovery 0.5049   ignored
+r1  Aria Thompson       #23    Victoria Greene     9    discovery 0.5046   ignored
+r1  Aria Thompson       #26    Nathan Brooks       10   discovery 0.4762   ignored
+r1  Aria Thompson       #32    Emily Watson        11   discovery 0.4989   ignored
+r1  Henry Farmer        #7     Emma Hayes          0    discovery 0.5255   ACTED
+r1  Henry Farmer        #3     Simon Walker        1    discovery 0.5232   ignored
+r1  Henry Farmer        #14    Daniel Miller       2    discovery 0.5191   ignored
+r1  Henry Farmer        #4     Jake Thompson       3    discovery 0.5184   ACTED
+r1  Henry Farmer        #15    Daniel Rivera       4    discovery 0.5171   ignored
+r1  Henry Farmer        #13    Oliver Wang         5    discovery 0.5133   ignored
+r1  Henry Farmer        #23    Victoria Greene     6    discovery 0.5131   ignored
+r1  Henry Farmer        #11    Emily Hayes         7    discovery 0.5115   ignored
+r1  Henry Farmer        #25    Sophie Green        8    discovery 0.5110   ignored
+r1  Henry Farmer        #5     Emily Carter        9    discovery 0.5078   ignored
+r1  Henry Farmer        #6     Alexandra Whitmore  10   discovery 0.4686   ignored
+r1  Henry Farmer        #29    Olivia Garcia       11   discovery 0.4901   ignored
+r1  Ethan Grayson       #7     Emma Hayes          0    discovery 0.5374   ACTED
+r1  Ethan Grayson       #33    Cassandra Johnson   1    discovery 0.5241   ignored
+r1  Ethan Grayson       #15    Daniel Rivera       2    discovery 0.5237   ignored
+r1  Ethan Grayson       #13    Oliver Wang         3    discovery 0.5220   ignored
+r1  Ethan Grayson       #32    Emily Watson        4    discovery 0.5207   ignored
+r1  Ethan Grayson       #3     Simon Walker        5    discovery 0.5203   ignored
+r1  Ethan Grayson       #2     Ryan Johnson        6    discovery 0.5143   ignored
+r1  Ethan Grayson       #25    Sophie Green        7    discovery 0.5131   ignored
+r1  Ethan Grayson       #14    Daniel Miller       8    discovery 0.5100   ignored
+r1  Ethan Grayson       #23    Victoria Greene     9    discovery 0.5063   ignored
+r1  Ethan Grayson       #26    Nathan Brooks       10   discovery 0.4978   ignored
+r1  Ethan Grayson       #6     Alexandra Whitmore  11   discovery 0.4701   ignored
+r1  Sophia Nguyen       #3     Simon Walker        0    discovery 0.5193   ignored
+r1  Sophia Nguyen       #7     Emma Hayes          1    discovery 0.5101   ignored
+r1  Sophia Nguyen       #5     Emily Carter        2    discovery 0.5091   ignored
+r1  Sophia Nguyen       #1     Aria Thompson       3    discovery 0.5075   ignored
+r1  Sophia Nguyen       #10    Maxwell Armstrong   4    discovery 0.5060   ignored
+r1  Sophia Nguyen       #15    Daniel Rivera       5    discovery 0.5039   ignored
+r1  Sophia Nguyen       #25    Sophie Green        6    discovery 0.5020   ignored
+r1  Sophia Nguyen       #33    Cassandra Johnson   7    discovery 0.4996   ignored
+r1  Sophia Nguyen       #19    Isabella Thompson   8    discovery 0.4973   ignored
+r1  Sophia Nguyen       #13    Oliver Wang         9    discovery 0.4960   ignored
+r1  Sophia Nguyen       #20    Steven Johnson      10   discovery 0.4887   ignored
+r1  Sophia Nguyen       #34    Simon Greene        11   discovery 0.4848   ignored
+r1  Samuel Reynolds     #31    Carlos Rodriguez    0    discovery 0.5404   ignored
+r1  Samuel Reynolds     #11    Emily Hayes         1    discovery 0.5381   ACTED
+r1  Samuel Reynolds     #2     Ryan Johnson        2    discovery 0.5359   ignored
+r1  Samuel Reynolds     #19    Isabella Thompson   3    discovery 0.5354   ignored
+r1  Samuel Reynolds     #34    Simon Greene        4    discovery 0.5343   ignored
+r1  Samuel Reynolds     #22    Luna Reyes          5    discovery 0.5314   ignored
+r1  Samuel Reynolds     #3     Simon Walker        6    discovery 0.5264   ignored
+r1  Samuel Reynolds     #33    Cassandra Johnson   7    discovery 0.5252   ignored
+r1  Samuel Reynolds     #23    Victoria Greene     8    discovery 0.5246   ignored
+r1  Samuel Reynolds     #4     Jake Thompson       9    discovery 0.5234   ignored
+r1  Samuel Reynolds     #17    Bethany Davidson    10   discovery 0.5212   ignored
+r1  Samuel Reynolds     #25    Sophie Green        11   discovery 0.5160   ignored
+r1  Oliver Wang         #3     Simon Walker        0    discovery 0.4781   ignored
+r1  Oliver Wang         #7     Emma Hayes          1    discovery 0.4726   ACTED
+r1  Oliver Wang         #27    Emily Thompson      2    discovery 0.4724   ignored
+r1  Oliver Wang         #32    Emily Watson        3    discovery 0.4687   ignored
+r1  Oliver Wang         #33    Cassandra Johnson   4    discovery 0.4632   ignored
+r1  Oliver Wang         #15    Daniel Rivera       5    discovery 0.4629   ignored
+r1  Oliver Wang         #25    Sophie Green        6    discovery 0.4606   ignored
+r1  Oliver Wang         #24    Michael Thompson    7    discovery 0.4586   ignored
+r1  Oliver Wang         #20    Steven Johnson      8    discovery 0.4577   ignored
+r1  Oliver Wang         #11    Emily Hayes         9    discovery 0.4562   ignored
+r1  Oliver Wang         #26    Nathan Brooks       10   discovery 0.4506   ignored
+r1  Oliver Wang         #17    Bethany Davidson    11   discovery 0.4085   ignored
+r1  Maxwell Armstrong   #7     Emma Hayes          0    discovery 0.5278   ACTED
+r1  Maxwell Armstrong   #5     Emily Carter        1    discovery 0.5128   ignored
+r1  Maxwell Armstrong   #3     Simon Walker        2    discovery 0.5124   ignored
+r1  Maxwell Armstrong   #27    Emily Thompson      3    discovery 0.5100   ignored
+r1  Maxwell Armstrong   #19    Isabella Thompson   4    discovery 0.5094   ignored
+r1  Maxwell Armstrong   #23    Victoria Greene     5    discovery 0.5088   ignored
+r1  Maxwell Armstrong   #13    Oliver Wang         6    discovery 0.5081   ignored
+r1  Maxwell Armstrong   #4     Jake Thompson       7    discovery 0.5037   ignored
+r1  Maxwell Armstrong   #25    Sophie Green        8    discovery 0.5006   ignored
+r1  Maxwell Armstrong   #15    Daniel Rivera       9    discovery 0.4997   ignored
+r1  Maxwell Armstrong   #2     Ryan Johnson        10   discovery 0.4942   ignored
+r1  Maxwell Armstrong   #28    Olivia Rodriguez    11   discovery 0.4642   ignored
+r1  Emily Hayes         #3     Simon Walker        0    discovery 0.5458   ignored
+r1  Emily Hayes         #7     Emma Hayes          1    discovery 0.5446   ignored
+r1  Emily Hayes         #14    Daniel Miller       2    discovery 0.5376   ignored
+r1  Emily Hayes         #15    Daniel Rivera       3    discovery 0.5359   ignored
+r1  Emily Hayes         #13    Oliver Wang         4    discovery 0.5323   ignored
+r1  Emily Hayes         #27    Emily Thompson      5    discovery 0.5310   ignored
+r1  Emily Hayes         #4     Jake Thompson       6    discovery 0.5302   ignored
+r1  Emily Hayes         #5     Emily Carter        7    discovery 0.5269   ignored
+r1  Emily Hayes         #31    Carlos Rodriguez    8    discovery 0.5266   ignored
+r1  Emily Hayes         #20    Steven Johnson      9    discovery 0.5259   ignored
+r1  Emily Hayes         #6     Alexandra Whitmore  10   discovery 0.4807   ignored
+r1  Emily Hayes         #1     Aria Thompson       11   discovery 0.4962   ignored
+r1  Oliver Robinson     #7     Emma Hayes          0    discovery 0.4927   ignored
+r1  Oliver Robinson     #25    Sophie Green        1    discovery 0.4915   ignored
+r1  Oliver Robinson     #13    Oliver Wang         2    discovery 0.4904   ignored
+r1  Oliver Robinson     #23    Victoria Greene     3    discovery 0.4892   ignored
+r1  Oliver Robinson     #5     Emily Carter        4    discovery 0.4885   ignored
+r1  Oliver Robinson     #10    Maxwell Armstrong   5    discovery 0.4869   ignored
+r1  Oliver Robinson     #19    Isabella Thompson   6    discovery 0.4856   ignored
+r1  Oliver Robinson     #1     Aria Thompson       7    discovery 0.4796   ignored
+r1  Oliver Robinson     #15    Daniel Rivera       8    discovery 0.4793   ignored
+r1  Oliver Robinson     #4     Jake Thompson       9    discovery 0.4783   ignored
+r1  Oliver Robinson     #6     Alexandra Whitmore  10   discovery 0.4499   ACTED
+r1  Oliver Robinson     #24    Michael Thompson    11   discovery 0.4689   ignored
+r1  Daniel Miller       #7     Emma Hayes          0    discovery 0.5478   ignored
+r1  Daniel Miller       #3     Simon Walker        1    discovery 0.5270   ignored
+r1  Daniel Miller       #13    Oliver Wang         2    discovery 0.5245   ignored
+r1  Daniel Miller       #25    Sophie Green        3    discovery 0.5237   ignored
+r1  Daniel Miller       #32    Emily Watson        4    discovery 0.5180   ignored
+r1  Daniel Miller       #11    Emily Hayes         5    discovery 0.5169   ignored
+r1  Daniel Miller       #27    Emily Thompson      6    discovery 0.5160   ignored
+r1  Daniel Miller       #15    Daniel Rivera       7    discovery 0.5144   ignored
+r1  Daniel Miller       #19    Isabella Thompson   8    discovery 0.5127   ignored
+r1  Daniel Miller       #24    Michael Thompson    9    discovery 0.5116   ignored
+r1  Daniel Miller       #9     Henry Farmer        10   discovery 0.4694   ignored
+r1  Daniel Miller       #21    James Thompson      11   discovery 0.4788   ignored
+r1  Daniel Rivera       #7     Emma Hayes          0    discovery 0.5349   ignored
+r1  Daniel Rivera       #13    Oliver Wang         1    discovery 0.5326   ACTED
+r1  Daniel Rivera       #5     Emily Carter        2    discovery 0.5218   ignored
+r1  Daniel Rivera       #3     Simon Walker        3    discovery 0.5188   ignored
+r1  Daniel Rivera       #14    Daniel Miller       4    discovery 0.5185   ignored
+r1  Daniel Rivera       #32    Emily Watson        5    discovery 0.5161   ignored
+r1  Daniel Rivera       #2     Ryan Johnson        6    discovery 0.5136   ignored
+r1  Daniel Rivera       #33    Cassandra Johnson   7    discovery 0.5129   ignored
+r1  Daniel Rivera       #25    Sophie Green        8    discovery 0.5129   ignored
+r1  Daniel Rivera       #4     Jake Thompson       9    discovery 0.5121   ignored
+r1  Daniel Rivera       #22    Luna Reyes          10   discovery 0.4834   ignored
+r1  Daniel Rivera       #8     Ethan Grayson       11   discovery 0.4826   ignored
+r1  Eleanor Thompson    #23    Victoria Greene     0    discovery 0.5364   ACTED
+r1  Eleanor Thompson    #27    Emily Thompson      1    discovery 0.5260   ACTED
+r1  Eleanor Thompson    #19    Isabella Thompson   2    discovery 0.5259   ignored
+r1  Eleanor Thompson    #10    Maxwell Armstrong   3    discovery 0.5257   ignored
+r1  Eleanor Thompson    #17    Bethany Davidson    4    discovery 0.5254   ignored
+r1  Eleanor Thompson    #2     Ryan Johnson        5    discovery 0.5253   ignored
+r1  Eleanor Thompson    #11    Emily Hayes         6    discovery 0.5251   ignored
+r1  Eleanor Thompson    #3     Simon Walker        7    discovery 0.5226   ignored
+r1  Eleanor Thompson    #13    Oliver Wang         8    discovery 0.5193   ignored
+r1  Eleanor Thompson    #1     Aria Thompson       9    discovery 0.5167   ignored
+r1  Eleanor Thompson    #26    Nathan Brooks       10   discovery 0.5162   ignored
+r1  Eleanor Thompson    #33    Cassandra Johnson   11   discovery 0.5117   ignored
+r1  Bethany Davidson    #23    Victoria Greene     0    discovery 0.5361   ACTED
+r1  Bethany Davidson    #19    Isabella Thompson   1    discovery 0.5250   ignored
+r1  Bethany Davidson    #4     Jake Thompson       2    discovery 0.5247   ignored
+r1  Bethany Davidson    #7     Emma Hayes          3    discovery 0.5236   ignored
+r1  Bethany Davidson    #5     Emily Carter        4    discovery 0.5230   ignored
+r1  Bethany Davidson    #15    Daniel Rivera       5    discovery 0.5215   ignored
+r1  Bethany Davidson    #14    Daniel Miller       6    discovery 0.5211   ignored
+r1  Bethany Davidson    #3     Simon Walker        7    discovery 0.5188   ignored
+r1  Bethany Davidson    #2     Ryan Johnson        8    discovery 0.5151   ignored
+r1  Bethany Davidson    #11    Emily Hayes         9    discovery 0.5143   ignored
+r1  Bethany Davidson    #8     Ethan Grayson       10   discovery 0.4797   ignored
+r1  Bethany Davidson    #12    Oliver Robinson     11   discovery 0.4789   ignored
+r1  Isabella Thompson   #7     Emma Hayes          0    discovery 0.5383   ignored
+r1  Isabella Thompson   #14    Daniel Miller       1    discovery 0.5337   ignored
+r1  Isabella Thompson   #15    Daniel Rivera       2    discovery 0.5265   ignored
+r1  Isabella Thompson   #2     Ryan Johnson        3    discovery 0.5264   ignored
+r1  Isabella Thompson   #4     Jake Thompson       4    discovery 0.5255   ignored
+r1  Isabella Thompson   #3     Simon Walker        5    discovery 0.5239   ignored
+r1  Isabella Thompson   #13    Oliver Wang         6    discovery 0.5236   ignored
+r1  Isabella Thompson   #11    Emily Hayes         7    discovery 0.5208   ACTED
+r1  Isabella Thompson   #25    Sophie Green        8    discovery 0.5189   ignored
+r1  Isabella Thompson   #32    Emily Watson        9    discovery 0.5175   ignored
+r1  Isabella Thompson   #1     Aria Thompson       10   discovery 0.5066   ignored
+r1  Isabella Thompson   #20    Steven Johnson      11   discovery 0.5059   ignored
+r1  Steven Johnson      #27    Emily Thompson      0    discovery 0.5485   ignored
+r1  Steven Johnson      #5     Emily Carter        1    discovery 0.5433   ignored
+r1  Steven Johnson      #11    Emily Hayes         2    discovery 0.5384   ignored
+r1  Steven Johnson      #14    Daniel Miller       3    discovery 0.5364   ignored
+r1  Steven Johnson      #15    Daniel Rivera       4    discovery 0.5357   ignored
+r1  Steven Johnson      #13    Oliver Wang         5    discovery 0.5357   ignored
+r1  Steven Johnson      #4     Jake Thompson       6    discovery 0.5354   ignored
+r1  Steven Johnson      #7     Emma Hayes          7    discovery 0.5330   ignored
+r1  Steven Johnson      #3     Simon Walker        8    discovery 0.5323   ignored
+r1  Steven Johnson      #19    Isabella Thompson   9    discovery 0.5292   ignored
+r1  Steven Johnson      #31    Carlos Rodriguez    10   discovery 0.5075   ignored
+r1  Steven Johnson      #23    Victoria Greene     11   discovery 0.5217   ignored
+r1  Victoria Greene     #15    Daniel Rivera       0    discovery 0.4938   ignored
+r1  Victoria Greene     #3     Simon Walker        1    discovery 0.4888   ACTED
+r1  Victoria Greene     #13    Oliver Wang         2    discovery 0.4861   ignored
+r1  Victoria Greene     #7     Emma Hayes          3    discovery 0.4845   ignored
+r1  Victoria Greene     #27    Emily Thompson      4    discovery 0.4841   ignored
+r1  Victoria Greene     #4     Jake Thompson       5    discovery 0.4835   ignored
+r1  Victoria Greene     #20    Steven Johnson      6    discovery 0.4807   ignored
+r1  Victoria Greene     #5     Emily Carter        7    discovery 0.4799   ignored
+r1  Victoria Greene     #33    Cassandra Johnson   8    discovery 0.4791   ignored
+r1  Victoria Greene     #10    Maxwell Armstrong   9    discovery 0.4789   ignored
+r1  Victoria Greene     #31    Carlos Rodriguez    10   discovery 0.4611   ignored
+r1  Victoria Greene     #26    Nathan Brooks       11   discovery 0.4701   ignored
+r1  James Thompson      #7     Emma Hayes          0    discovery 0.5441   ACTED
+r1  James Thompson      #32    Emily Watson        1    discovery 0.5325   ignored
+r1  James Thompson      #33    Cassandra Johnson   2    discovery 0.5318   ignored
+r1  James Thompson      #3     Simon Walker        3    discovery 0.5278   ignored
+r1  James Thompson      #13    Oliver Wang         4    discovery 0.5266   ignored
+r1  James Thompson      #14    Daniel Miller       5    discovery 0.5246   ignored
+r1  James Thompson      #15    Daniel Rivera       6    discovery 0.5236   ignored
+r1  James Thompson      #19    Isabella Thompson   7    discovery 0.5198   ignored
+r1  James Thompson      #25    Sophie Green        8    discovery 0.5194   ignored
+r1  James Thompson      #24    Michael Thompson    9    discovery 0.5176   ignored
+r1  James Thompson      #10    Maxwell Armstrong   10   discovery 0.4955   ignored
+r1  James Thompson      #28    Olivia Rodriguez    11   discovery 0.5120   ignored
+r1  Michael Thompson    #7     Emma Hayes          0    discovery 0.5361   ignored
+r1  Michael Thompson    #3     Simon Walker        1    discovery 0.5303   ignored
+r1  Michael Thompson    #15    Daniel Rivera       2    discovery 0.5146   ignored
+r1  Michael Thompson    #13    Oliver Wang         3    discovery 0.5114   ignored
+r1  Michael Thompson    #32    Emily Watson        4    discovery 0.5091   ignored
+r1  Michael Thompson    #14    Daniel Miller       5    discovery 0.5089   ignored
+r1  Michael Thompson    #25    Sophie Green        6    discovery 0.5086   ACTED
+r1  Michael Thompson    #11    Emily Hayes         7    discovery 0.5069   ACTED
+r1  Michael Thompson    #26    Nathan Brooks       8    discovery 0.5026   ignored
+r1  Michael Thompson    #5     Emily Carter        9    discovery 0.4983   ignored
+r1  Michael Thompson    #34    Simon Greene        10   discovery 0.4918   ignored
+r1  Michael Thompson    #2     Ryan Johnson        11   discovery 0.4883   ignored
+r1  Luna Reyes          #7     Emma Hayes          0    discovery 0.5378   ACTED
+r1  Luna Reyes          #33    Cassandra Johnson   1    discovery 0.5267   ignored
+r1  Luna Reyes          #34    Simon Greene        2    discovery 0.5248   ignored
+r1  Luna Reyes          #23    Victoria Greene     3    discovery 0.5240   ignored
+r1  Luna Reyes          #3     Simon Walker        4    discovery 0.5231   ignored
+r1  Luna Reyes          #31    Carlos Rodriguez    5    discovery 0.5208   ignored
+r1  Luna Reyes          #15    Daniel Rivera       6    discovery 0.5167   ignored
+r1  Luna Reyes          #32    Emily Watson        7    discovery 0.5137   ignored
+r1  Luna Reyes          #2     Ryan Johnson        8    discovery 0.5133   ignored
+r1  Luna Reyes          #11    Emily Hayes         9    discovery 0.5131   ignored
+r1  Luna Reyes          #16    Samuel Reynolds     10   discovery 0.4730   ignored
+r1  Luna Reyes          #12    Oliver Robinson     11   discovery 0.4742   ignored
+r1  Sophie Green        #13    Oliver Wang         0    discovery 0.5349   ACTED
+r1  Sophie Green        #7     Emma Hayes          1    discovery 0.5284   ignored
+r1  Sophie Green        #32    Emily Watson        2    discovery 0.5242   ignored
+r1  Sophie Green        #15    Daniel Rivera       3    discovery 0.5187   ignored
+r1  Sophie Green        #3     Simon Walker        4    discovery 0.5181   ignored
+r1  Sophie Green        #27    Emily Thompson      5    discovery 0.5162   ignored
+r1  Sophie Green        #11    Emily Hayes         6    discovery 0.5160   ignored
+r1  Sophie Green        #14    Daniel Miller       7    discovery 0.5150   ignored
+r1  Sophie Green        #24    Michael Thompson    8    discovery 0.5114   ignored
+r1  Sophie Green        #31    Carlos Rodriguez    9    discovery 0.5057   ignored
+r1  Sophie Green        #2     Ryan Johnson        10   discovery 0.5053   ignored
+r1  Sophie Green        #20    Steven Johnson      11   discovery 0.5000   ignored
+r1  Nathan Brooks       #3     Simon Walker        0    discovery 0.5349   ignored
+r1  Nathan Brooks       #27    Emily Thompson      1    discovery 0.5349   ignored
+r1  Nathan Brooks       #13    Oliver Wang         2    discovery 0.5291   ignored
+r1  Nathan Brooks       #7     Emma Hayes          3    discovery 0.5280   ignored
+r1  Nathan Brooks       #11    Emily Hayes         4    discovery 0.5252   ignored
+r1  Nathan Brooks       #32    Emily Watson        5    discovery 0.5243   ignored
+r1  Nathan Brooks       #31    Carlos Rodriguez    6    discovery 0.5228   ignored
+r1  Nathan Brooks       #25    Sophie Green        7    discovery 0.5218   ACTED
+r1  Nathan Brooks       #19    Isabella Thompson   8    discovery 0.5178   ignored
+r1  Nathan Brooks       #14    Daniel Miller       9    discovery 0.5155   ignored
+r1  Nathan Brooks       #16    Samuel Reynolds     10   discovery 0.4678   ignored
+r1  Nathan Brooks       #29    Olivia Garcia       11   discovery 0.4781   ignored
+r1  Emily Thompson      #7     Emma Hayes          0    discovery 0.5413   ignored
+r1  Emily Thompson      #13    Oliver Wang         1    discovery 0.5404   ignored
+r1  Emily Thompson      #14    Daniel Miller       2    discovery 0.5333   ignored
+r1  Emily Thompson      #3     Simon Walker        3    discovery 0.5325   ignored
+r1  Emily Thompson      #11    Emily Hayes         4    discovery 0.5296   ignored
+r1  Emily Thompson      #20    Steven Johnson      5    discovery 0.5287   ignored
+r1  Emily Thompson      #25    Sophie Green        6    discovery 0.5185   ignored
+r1  Emily Thompson      #32    Emily Watson        7    discovery 0.5164   ignored
+r1  Emily Thompson      #15    Daniel Rivera       8    discovery 0.5147   ignored
+r1  Emily Thompson      #2     Ryan Johnson        9    discovery 0.5141   ignored
+r1  Emily Thompson      #21    James Thompson      10   discovery 0.4879   ignored
+r1  Emily Thompson      #10    Maxwell Armstrong   11   discovery 0.5092   ignored
+r1  Olivia Garcia       #10    Maxwell Armstrong   0    discovery 0.5127   ACTED
+r1  Olivia Garcia       #13    Oliver Wang         1    discovery 0.5073   ignored
+r1  Olivia Garcia       #15    Daniel Rivera       2    discovery 0.5049   ignored
+r1  Olivia Garcia       #7     Emma Hayes          3    discovery 0.5039   ignored
+r1  Olivia Garcia       #25    Sophie Green        4    discovery 0.4993   ignored
+r1  Olivia Garcia       #5     Emily Carter        5    discovery 0.4970   ignored
+r1  Olivia Garcia       #27    Emily Thompson      6    discovery 0.4967   ignored
+r1  Olivia Garcia       #14    Daniel Miller       7    discovery 0.4962   ignored
+r1  Olivia Garcia       #32    Emily Watson        8    discovery 0.4954   ignored
+r1  Olivia Garcia       #3     Simon Walker        9    discovery 0.4951   ignored
+r1  Olivia Garcia       #20    Steven Johnson      10   discovery 0.4845   ignored
+r1  Olivia Garcia       #24    Michael Thompson    11   discovery 0.4904   ignored
+r1  Olivia Rodriguez    #32    Emily Watson        0    discovery 0.5587   ignored
+r1  Olivia Rodriguez    #13    Oliver Wang         1    discovery 0.5530   ACTED
+r1  Olivia Rodriguez    #7     Emma Hayes          2    discovery 0.5496   ignored
+r1  Olivia Rodriguez    #25    Sophie Green        3    discovery 0.5380   ignored
+r1  Olivia Rodriguez    #27    Emily Thompson      4    discovery 0.5370   ACTED
+r1  Olivia Rodriguez    #31    Carlos Rodriguez    5    discovery 0.5354   ignored
+r1  Olivia Rodriguez    #33    Cassandra Johnson   6    discovery 0.5339   ignored
+r1  Olivia Rodriguez    #14    Daniel Miller       7    discovery 0.5332   ignored
+r1  Olivia Rodriguez    #11    Emily Hayes         8    discovery 0.5323   ignored
+r1  Olivia Rodriguez    #3     Simon Walker        9    discovery 0.5321   ignored
+r1  Olivia Rodriguez    #15    Daniel Rivera       10   discovery 0.5186   ignored
+r1  Olivia Rodriguez    #20    Steven Johnson      11   discovery 0.5204   ignored
+r1  Carlos Rodriguez    #7     Emma Hayes          0    discovery 0.5243   ignored
+r1  Carlos Rodriguez    #3     Simon Walker        1    discovery 0.5204   ignored
+r1  Carlos Rodriguez    #24    Michael Thompson    2    discovery 0.5190   ignored
+r1  Carlos Rodriguez    #34    Simon Greene        3    discovery 0.5175   ignored
+r1  Carlos Rodriguez    #11    Emily Hayes         4    discovery 0.5167   ACTED
+r1  Carlos Rodriguez    #32    Emily Watson        5    discovery 0.5142   ignored
+r1  Carlos Rodriguez    #26    Nathan Brooks       6    discovery 0.5136   ignored
+r1  Carlos Rodriguez    #13    Oliver Wang         7    discovery 0.5136   ignored
+r1  Carlos Rodriguez    #22    Luna Reyes          8    discovery 0.5117   ignored
+r1  Carlos Rodriguez    #33    Cassandra Johnson   9    discovery 0.5052   ignored
+r1  Carlos Rodriguez    #5     Emily Carter        10   discovery 0.4658   ignored
+r1  Carlos Rodriguez    #8     Ethan Grayson       11   discovery 0.4863   ignored
+r1  Emily Watson        #7     Emma Hayes          0    discovery 0.5546   ACTED
+r1  Emily Watson        #13    Oliver Wang         1    discovery 0.5433   ignored
+r1  Emily Watson        #15    Daniel Rivera       2    discovery 0.5352   ignored
+r1  Emily Watson        #25    Sophie Green        3    discovery 0.5321   ignored
+r1  Emily Watson        #3     Simon Walker        4    discovery 0.5319   ignored
+r1  Emily Watson        #28    Olivia Rodriguez    5    discovery 0.5294   ignored
+r1  Emily Watson        #14    Daniel Miller       6    discovery 0.5263   ignored
+r1  Emily Watson        #33    Cassandra Johnson   7    discovery 0.5255   ignored
+r1  Emily Watson        #24    Michael Thompson    8    discovery 0.5208   ignored
+r1  Emily Watson        #26    Nathan Brooks       9    discovery 0.5181   ignored
+r1  Emily Watson        #27    Emily Thompson      10   discovery 0.5154   ignored
+r1  Emily Watson        #17    Bethany Davidson    11   discovery 0.4636   ignored
+r1  Henry Richardson    #23    Victoria Greene     0    discovery 0.5052   ACTED
+r1  Henry Richardson    #10    Maxwell Armstrong   1    discovery 0.4911   ignored
+r1  Henry Richardson    #4     Jake Thompson       2    discovery 0.4903   ignored
+r1  Henry Richardson    #5     Emily Carter        3    discovery 0.4860   ignored
+r1  Henry Richardson    #11    Emily Hayes         4    discovery 0.4826   ignored
+r1  Henry Richardson    #17    Bethany Davidson    5    discovery 0.4820   ignored
+r1  Henry Richardson    #19    Isabella Thompson   6    discovery 0.4790   ignored
+r1  Henry Richardson    #1     Aria Thompson       7    discovery 0.4782   ignored
+r1  Henry Richardson    #15    Daniel Rivera       8    discovery 0.4764   ignored
+r1  Henry Richardson    #13    Oliver Wang         9    discovery 0.4760   ignored
+r1  Henry Richardson    #9     Henry Farmer        10   discovery 0.4382   ignored
+r1  Henry Richardson    #14    Daniel Miller       11   discovery 0.4730   ignored
+r1  Cassandra Johnson   #7     Emma Hayes          0    discovery 0.5428   ignored
+r1  Cassandra Johnson   #15    Daniel Rivera       1    discovery 0.5327   ignored
+r1  Cassandra Johnson   #3     Simon Walker        2    discovery 0.5326   ignored
+r1  Cassandra Johnson   #13    Oliver Wang         3    discovery 0.5315   ignored
+r1  Cassandra Johnson   #32    Emily Watson        4    discovery 0.5296   ignored
+r1  Cassandra Johnson   #2     Ryan Johnson        5    discovery 0.5214   ignored
+r1  Cassandra Johnson   #19    Isabella Thompson   6    discovery 0.5138   ignored
+r1  Cassandra Johnson   #21    James Thompson      7    discovery 0.5131   ignored
+r1  Cassandra Johnson   #26    Nathan Brooks       8    discovery 0.5095   ignored
+r1  Cassandra Johnson   #4     Jake Thompson       9    discovery 0.5091   ignored
+r1  Cassandra Johnson   #23    Victoria Greene     10   discovery 0.5062   ACTED
+r1  Cassandra Johnson   #34    Simon Greene        11   discovery 0.5034   ignored
+r1  Simon Greene        #22    Luna Reyes          0    discovery 0.5203   ignored
+r1  Simon Greene        #31    Carlos Rodriguez    1    discovery 0.5178   ACTED
+r1  Simon Greene        #11    Emily Hayes         2    discovery 0.5169   ignored
+r1  Simon Greene        #15    Daniel Rivera       3    discovery 0.5107   ignored
+r1  Simon Greene        #2     Ryan Johnson        4    discovery 0.5094   ignored
+r1  Simon Greene        #7     Emma Hayes          5    discovery 0.5049   ignored
+r1  Simon Greene        #23    Victoria Greene     6    discovery 0.5036   ignored
+r1  Simon Greene        #13    Oliver Wang         7    discovery 0.5025   ignored
+r1  Simon Greene        #33    Cassandra Johnson   8    discovery 0.5022   ignored
+r1  Simon Greene        #25    Sophie Green        9    discovery 0.5009   ignored
+r1  Simon Greene        #1     Aria Thompson       10   discovery 0.4831   ignored
+r1  Simon Greene        #17    Bethany Davidson    11   discovery 0.4816   ignored
+r2  James Miller        #37    Steven Johnson      0    discovery 0.4661   ignored
+r2  James Miller        #36    Daniel Miller       1    discovery 0.4613   ignored
+r2  James Miller        #35    Ethan Grayson       2    discovery 0.4491   ignored
+r2  James Miller        #11    Emily Hayes         3    discovery 0.0000   ACTED
+r2  James Miller        #25    Sophie Green        4    discovery 0.0000   ignored
+r2  James Miller        #1     Aria Thompson       5    discovery 0.0000   ignored
+r2  James Miller        #34    Simon Greene        6    discovery 0.0000   ignored
+r2  James Miller        #13    Oliver Wang         7    discovery 0.0000   ignored
+r2  James Miller        #4     Jake Thompson       8    discovery 0.0000   ignored
+r2  James Miller        #10    Maxwell Armstrong   9    discovery 0.0000   ignored
+r2  James Miller        #2     Ryan Johnson        10   discovery 0.0000   ignored
+r2  James Miller        #32    Emily Watson        11   discovery 0.0000   ignored
+r2  Emma Hayes          #35    Ethan Grayson       0    discovery 0.5274   ignored
+r2  Emma Hayes          #36    Daniel Miller       1    discovery 0.5001   ignored
+r2  Emma Hayes          #37    Steven Johnson      2    discovery 0.4882   ignored
+r2  Emma Hayes          #3     Simon Walker        3    discovery 0.0000   ignored
+r2  Emma Hayes          #13    Oliver Wang         4    discovery 0.0000   ignored
+r2  Emma Hayes          #32    Emily Watson        5    discovery 0.0000   ignored
+r2  Emma Hayes          #15    Daniel Rivera       6    discovery 0.0000   ignored
+r2  Emma Hayes          #14    Daniel Miller       7    discovery 0.0000   ignored
+r2  Emma Hayes          #25    Sophie Green        8    discovery 0.0000   ignored
+r2  Emma Hayes          #24    Michael Thompson    9    discovery 0.0000   ignored
+r2  Emma Hayes          #10    Maxwell Armstrong   10   discovery 0.0000   ignored
+r2  Emma Hayes          #28    Olivia Rodriguez    11   discovery 0.0000   ignored
+r2  Ryan Johnson        #7     Emma Hayes          0    network   0.0000   ACTED
+r2  Ryan Johnson        #35    Ethan Grayson       1    discovery 0.5246   ignored
+r2  Ryan Johnson        #37    Steven Johnson      2    discovery 0.5080   ignored
+r2  Ryan Johnson        #36    Daniel Miller       3    discovery 0.4939   ignored
+r2  Ryan Johnson        #33    Cassandra Johnson   4    discovery 0.0000   ignored
+r2  Ryan Johnson        #3     Simon Walker        5    discovery 0.0000   ignored
+r2  Ryan Johnson        #11    Emily Hayes         6    discovery 0.0000   ignored
+r2  Ryan Johnson        #19    Isabella Thompson   7    discovery 0.0000   ignored
+r2  Ryan Johnson        #13    Oliver Wang         8    discovery 0.0000   ignored
+r2  Ryan Johnson        #32    Emily Watson        9    discovery 0.0000   ignored
+r2  Ryan Johnson        #17    Bethany Davidson    10   discovery 0.0000   ignored
+r2  Ryan Johnson        #23    Victoria Greene     11   discovery 0.0000   ignored
+r2  Alexandra Whitmore  #37    Steven Johnson      0    discovery 0.4997   ignored
+r2  Alexandra Whitmore  #35    Ethan Grayson       1    discovery 0.4917   ignored
+r2  Alexandra Whitmore  #36    Daniel Miller       2    discovery 0.4735   ignored
+r2  Alexandra Whitmore  #23    Victoria Greene     3    discovery 0.0000   ACTED
+r2  Alexandra Whitmore  #31    Carlos Rodriguez    4    discovery 0.0000   ignored
+r2  Alexandra Whitmore  #4     Jake Thompson       5    discovery 0.0000   ignored
+r2  Alexandra Whitmore  #22    Luna Reyes          6    discovery 0.0000   ignored
+r2  Alexandra Whitmore  #34    Simon Greene        7    discovery 0.0000   ignored
+r2  Alexandra Whitmore  #11    Emily Hayes         8    discovery 0.0000   ignored
+r2  Alexandra Whitmore  #3     Simon Walker        9    discovery 0.0000   ignored
+r2  Alexandra Whitmore  #18    Eleanor Thompson    10   discovery 0.0000   ignored
+r2  Alexandra Whitmore  #13    Oliver Wang         11   discovery 0.0000   ignored
+r2  Jake Thompson       #36    Daniel Miller       0    discovery 0.5186   ignored
+r2  Jake Thompson       #37    Steven Johnson      1    discovery 0.5142   ignored
+r2  Jake Thompson       #35    Ethan Grayson       2    discovery 0.5032   ignored
+r2  Jake Thompson       #15    Daniel Rivera       3    discovery 0.0000   ACTED
+r2  Jake Thompson       #5     Emily Carter        4    discovery 0.0000   ignored
+r2  Jake Thompson       #3     Simon Walker        5    discovery 0.0000   ignored
+r2  Jake Thompson       #7     Emma Hayes          6    discovery 0.0000   ignored
+r2  Jake Thompson       #19    Isabella Thompson   7    discovery 0.0000   ignored
+r2  Jake Thompson       #14    Daniel Miller       8    discovery 0.0000   ignored
+r2  Jake Thompson       #33    Cassandra Johnson   9    discovery 0.0000   ignored
+r2  Jake Thompson       #26    Nathan Brooks       10   discovery 0.0000   ignored
+r2  Jake Thompson       #24    Michael Thompson    11   discovery 0.0000   ignored
+r2  Simon Walker        #7     Emma Hayes          0    network   0.0000   ignored
+r2  Simon Walker        #35    Ethan Grayson       1    discovery 0.5231   ignored
+r2  Simon Walker        #37    Steven Johnson      2    discovery 0.5186   ignored
+r2  Simon Walker        #36    Daniel Miller       3    discovery 0.5072   ignored
+r2  Simon Walker        #11    Emily Hayes         4    discovery 0.0000   ACTED
+r2  Simon Walker        #13    Oliver Wang         5    discovery 0.0000   ignored
+r2  Simon Walker        #27    Emily Thompson      6    discovery 0.0000   ignored
+r2  Simon Walker        #4     Jake Thompson       7    discovery 0.0000   ignored
+r2  Simon Walker        #14    Daniel Miller       8    discovery 0.0000   ignored
+r2  Simon Walker        #26    Nathan Brooks       9    discovery 0.0000   ignored
+r2  Simon Walker        #28    Olivia Rodriguez    10   discovery 0.0000   ignored
+r2  Simon Walker        #1     Aria Thompson       11   discovery 0.0000   ignored
+r2  Emily Carter        #36    Daniel Miller       0    discovery 0.5199   ignored
+r2  Emily Carter        #37    Steven Johnson      1    discovery 0.5171   ignored
+r2  Emily Carter        #35    Ethan Grayson       2    discovery 0.4994   ignored
+r2  Emily Carter        #15    Daniel Rivera       3    discovery 0.0000   ignored
+r2  Emily Carter        #10    Maxwell Armstrong   4    discovery 0.0000   ACTED
+r2  Emily Carter        #4     Jake Thompson       5    discovery 0.0000   ignored
+r2  Emily Carter        #7     Emma Hayes          6    discovery 0.0000   ignored
+r2  Emily Carter        #13    Oliver Wang         7    discovery 0.0000   ignored
+r2  Emily Carter        #19    Isabella Thompson   8    discovery 0.0000   ignored
+r2  Emily Carter        #3     Simon Walker        9    discovery 0.0000   ignored
+r2  Emily Carter        #1     Aria Thompson       10   discovery 0.0000   ignored
+r2  Emily Carter        #2     Ryan Johnson        11   discovery 0.0000   ignored
+r2  Aria Thompson       #15    Daniel Rivera       0    network   0.0000   ignored
+r2  Aria Thompson       #4     Jake Thompson       1    fof       0.0000   ignored
+r2  Aria Thompson       #36    Daniel Miller       2    discovery 0.5079   ignored
+r2  Aria Thompson       #35    Ethan Grayson       3    discovery 0.5036   ignored
+r2  Aria Thompson       #37    Steven Johnson      4    discovery 0.4996   ignored
+r2  Aria Thompson       #7     Emma Hayes          5    discovery 0.0000   ignored
+r2  Aria Thompson       #5     Emily Carter        6    discovery 0.0000   ignored
+r2  Aria Thompson       #13    Oliver Wang         7    discovery 0.0000   ignored
+r2  Aria Thompson       #14    Daniel Miller       8    discovery 0.0000   ignored
+r2  Aria Thompson       #10    Maxwell Armstrong   9    discovery 0.0000   ignored
+r2  Aria Thompson       #11    Emily Hayes         10   discovery 0.0000   ignored
+r2  Aria Thompson       #2     Ryan Johnson        11   discovery 0.0000   ignored
+r2  Henry Farmer        #37    Steven Johnson      0    discovery 0.5044   ignored
+r2  Henry Farmer        #35    Ethan Grayson       1    discovery 0.5021   ignored
+r2  Henry Farmer        #36    Daniel Miller       2    discovery 0.5017   ignored
+r2  Henry Farmer        #7     Emma Hayes          3    discovery 0.0000   ACTED
+r2  Henry Farmer        #3     Simon Walker        4    discovery 0.0000   ignored
+r2  Henry Farmer        #14    Daniel Miller       5    discovery 0.0000   ignored
+r2  Henry Farmer        #4     Jake Thompson       6    discovery 0.0000   ACTED
+r2  Henry Farmer        #15    Daniel Rivera       7    discovery 0.0000   ignored
+r2  Henry Farmer        #13    Oliver Wang         8    discovery 0.0000   ignored
+r2  Henry Farmer        #23    Victoria Greene     9    discovery 0.0000   ignored
+r2  Henry Farmer        #12    Oliver Robinson     10   discovery 0.0000   ignored
+r2  Henry Farmer        #22    Luna Reyes          11   discovery 0.0000   ignored
+r2  Ethan Grayson       #36    Daniel Miller       0    discovery 0.4994   ignored
+r2  Ethan Grayson       #37    Steven Johnson      1    discovery 0.4993   ignored
+r2  Ethan Grayson       #7     Emma Hayes          2    discovery 0.0000   ACTED
+r2  Ethan Grayson       #32    Emily Watson        3    discovery 0.0000   ignored
+r2  Ethan Grayson       #3     Simon Walker        4    discovery 0.0000   ignored
+r2  Ethan Grayson       #13    Oliver Wang         5    discovery 0.0000   ignored
+r2  Ethan Grayson       #33    Cassandra Johnson   6    discovery 0.0000   ignored
+r2  Ethan Grayson       #25    Sophie Green        7    discovery 0.0000   ignored
+r2  Ethan Grayson       #24    Michael Thompson    8    discovery 0.0000   ignored
+r2  Ethan Grayson       #14    Daniel Miller       9    discovery 0.0000   ignored
+r2  Ethan Grayson       #5     Emily Carter        10   discovery 0.0000   ignored
+r2  Ethan Grayson       #10    Maxwell Armstrong   11   discovery 0.0000   ignored
+r2  Sophia Nguyen       #36    Daniel Miller       0    discovery 0.5005   ignored
+r2  Sophia Nguyen       #35    Ethan Grayson       1    discovery 0.4896   ignored
+r2  Sophia Nguyen       #37    Steven Johnson      2    discovery 0.4834   ignored
+r2  Sophia Nguyen       #3     Simon Walker        3    discovery 0.0000   ignored
+r2  Sophia Nguyen       #7     Emma Hayes          4    discovery 0.0000   ignored
+r2  Sophia Nguyen       #5     Emily Carter        5    discovery 0.0000   ignored
+r2  Sophia Nguyen       #1     Aria Thompson       6    discovery 0.0000   ignored
+r2  Sophia Nguyen       #10    Maxwell Armstrong   7    discovery 0.0000   ignored
+r2  Sophia Nguyen       #15    Daniel Rivera       8    discovery 0.0000   ignored
+r2  Sophia Nguyen       #25    Sophie Green        9    discovery 0.0000   ignored
+r2  Sophia Nguyen       #4     Jake Thompson       10   discovery 0.0000   ignored
+r2  Sophia Nguyen       #22    Luna Reyes          11   discovery 0.0000   ignored
+r2  Samuel Reynolds     #35    Ethan Grayson       0    discovery 0.5123   ignored
+r2  Samuel Reynolds     #37    Steven Johnson      1    discovery 0.5119   ignored
+r2  Samuel Reynolds     #36    Daniel Miller       2    discovery 0.4992   ignored
+r2  Samuel Reynolds     #31    Carlos Rodriguez    3    discovery 0.0000   ignored
+r2  Samuel Reynolds     #11    Emily Hayes         4    discovery 0.0000   ACTED
+r2  Samuel Reynolds     #2     Ryan Johnson        5    discovery 0.0000   ignored
+r2  Samuel Reynolds     #19    Isabella Thompson   6    discovery 0.0000   ignored
+r2  Samuel Reynolds     #34    Simon Greene        7    discovery 0.0000   ignored
+r2  Samuel Reynolds     #22    Luna Reyes          8    discovery 0.0000   ignored
+r2  Samuel Reynolds     #3     Simon Walker        9    discovery 0.0000   ignored
+r2  Samuel Reynolds     #33    Cassandra Johnson   10   discovery 0.0000   ignored
+r2  Samuel Reynolds     #27    Emily Thompson      11   discovery 0.0000   ignored
+r2  Oliver Wang         #35    Ethan Grayson       0    discovery 0.4699   ignored
+r2  Oliver Wang         #37    Steven Johnson      1    discovery 0.4601   ignored
+r2  Oliver Wang         #36    Daniel Miller       2    discovery 0.4496   ignored
+r2  Oliver Wang         #3     Simon Walker        3    discovery 0.0000   ignored
+r2  Oliver Wang         #7     Emma Hayes          4    discovery 0.0000   ACTED
+r2  Oliver Wang         #27    Emily Thompson      5    discovery 0.0000   ignored
+r2  Oliver Wang         #32    Emily Watson        6    discovery 0.0000   ignored
+r2  Oliver Wang         #33    Cassandra Johnson   7    discovery 0.0000   ignored
+r2  Oliver Wang         #15    Daniel Rivera       8    discovery 0.0000   ignored
+r2  Oliver Wang         #25    Sophie Green        9    discovery 0.0000   ignored
+r2  Oliver Wang         #20    Steven Johnson      10   discovery 0.0000   ignored
+r2  Oliver Wang         #19    Isabella Thompson   11   discovery 0.0000   ignored
+r2  Maxwell Armstrong   #5     Emily Carter        0    network   0.0000   ignored
+r2  Maxwell Armstrong   #35    Ethan Grayson       1    discovery 0.5007   ignored
+r2  Maxwell Armstrong   #37    Steven Johnson      2    discovery 0.4964   ignored
+r2  Maxwell Armstrong   #36    Daniel Miller       3    discovery 0.4769   ignored
+r2  Maxwell Armstrong   #7     Emma Hayes          4    discovery 0.0000   ACTED
+r2  Maxwell Armstrong   #3     Simon Walker        5    discovery 0.0000   ignored
+r2  Maxwell Armstrong   #27    Emily Thompson      6    discovery 0.0000   ignored
+r2  Maxwell Armstrong   #19    Isabella Thompson   7    discovery 0.0000   ignored
+r2  Maxwell Armstrong   #23    Victoria Greene     8    discovery 0.0000   ignored
+r2  Maxwell Armstrong   #13    Oliver Wang         9    discovery 0.0000   ignored
+r2  Maxwell Armstrong   #11    Emily Hayes         10   discovery 0.0000   ignored
+r2  Maxwell Armstrong   #2     Ryan Johnson        11   discovery 0.0000   ignored
+r2  Emily Hayes         #37    Steven Johnson      0    discovery 0.5246   ignored
+r2  Emily Hayes         #35    Ethan Grayson       1    discovery 0.5219   ignored
+r2  Emily Hayes         #36    Daniel Miller       2    discovery 0.5213   ignored
+r2  Emily Hayes         #3     Simon Walker        3    discovery 0.0000   ignored
+r2  Emily Hayes         #7     Emma Hayes          4    discovery 0.0000   ignored
+r2  Emily Hayes         #14    Daniel Miller       5    discovery 0.0000   ignored
+r2  Emily Hayes         #15    Daniel Rivera       6    discovery 0.0000   ignored
+r2  Emily Hayes         #13    Oliver Wang         7    discovery 0.0000   ignored
+r2  Emily Hayes         #27    Emily Thompson      8    discovery 0.0000   ignored
+r2  Emily Hayes         #4     Jake Thompson       9    discovery 0.0000   ignored
+r2  Emily Hayes         #26    Nathan Brooks       10   discovery 0.0000   ignored
+r2  Emily Hayes         #23    Victoria Greene     11   discovery 0.0000   ignored
+r2  Oliver Robinson     #6     Alexandra Whitmore  0    network   0.0000   ACTED
+r2  Oliver Robinson     #37    Steven Johnson      1    discovery 0.4748   ignored
+r2  Oliver Robinson     #35    Ethan Grayson       2    discovery 0.4733   ignored
+r2  Oliver Robinson     #36    Daniel Miller       3    discovery 0.4597   ignored
+r2  Oliver Robinson     #7     Emma Hayes          4    discovery 0.0000   ignored
+r2  Oliver Robinson     #25    Sophie Green        5    discovery 0.0000   ignored
+r2  Oliver Robinson     #13    Oliver Wang         6    discovery 0.0000   ignored
+r2  Oliver Robinson     #23    Victoria Greene     7    discovery 0.0000   ignored
+r2  Oliver Robinson     #5     Emily Carter        8    discovery 0.0000   ignored
+r2  Oliver Robinson     #10    Maxwell Armstrong   9    discovery 0.0000   ignored
+r2  Oliver Robinson     #26    Nathan Brooks       10   discovery 0.0000   ignored
+r2  Oliver Robinson     #2     Ryan Johnson        11   discovery 0.0000   ignored
+r2  Daniel Miller       #35    Ethan Grayson       0    discovery 0.5134   ignored
+r2  Daniel Miller       #37    Steven Johnson      1    discovery 0.5099   ignored
+r2  Daniel Miller       #15    Daniel Rivera       2    discovery 0.0000   ignored
+r2  Daniel Miller       #7     Emma Hayes          3    discovery 0.0000   ignored
+r2  Daniel Miller       #3     Simon Walker        4    discovery 0.0000   ignored
+r2  Daniel Miller       #13    Oliver Wang         5    discovery 0.0000   ignored
+r2  Daniel Miller       #5     Emily Carter        6    discovery 0.0000   ignored
+r2  Daniel Miller       #19    Isabella Thompson   7    discovery 0.0000   ignored
+r2  Daniel Miller       #4     Jake Thompson       8    discovery 0.0000   ignored
+r2  Daniel Miller       #33    Cassandra Johnson   9    discovery 0.0000   ignored
+r2  Daniel Miller       #26    Nathan Brooks       10   discovery 0.0000   ignored
+r2  Daniel Miller       #29    Olivia Garcia       11   discovery 0.0000   ignored
+r2  Daniel Rivera       #4     Jake Thompson       0    network   0.0000   ignored
+r2  Daniel Rivera       #36    Daniel Miller       1    discovery 0.5580   ignored
+r2  Daniel Rivera       #35    Ethan Grayson       2    discovery 0.5138   ignored
+r2  Daniel Rivera       #37    Steven Johnson      3    discovery 0.5108   ignored
+r2  Daniel Rivera       #7     Emma Hayes          4    discovery 0.0000   ignored
+r2  Daniel Rivera       #13    Oliver Wang         5    discovery 0.0000   ACTED
+r2  Daniel Rivera       #5     Emily Carter        6    discovery 0.0000   ignored
+r2  Daniel Rivera       #3     Simon Walker        7    discovery 0.0000   ignored
+r2  Daniel Rivera       #14    Daniel Miller       8    discovery 0.0000   ignored
+r2  Daniel Rivera       #32    Emily Watson        9    discovery 0.0000   ignored
+r2  Daniel Rivera       #2     Ryan Johnson        10   discovery 0.0000   ignored
+r2  Daniel Rivera       #10    Maxwell Armstrong   11   discovery 0.0000   ignored
+r2  Eleanor Thompson    #37    Steven Johnson      0    discovery 0.5193   ignored
+r2  Eleanor Thompson    #35    Ethan Grayson       1    discovery 0.5008   ignored
+r2  Eleanor Thompson    #36    Daniel Miller       2    discovery 0.4945   ignored
+r2  Eleanor Thompson    #23    Victoria Greene     3    discovery 0.0000   ACTED
+r2  Eleanor Thompson    #27    Emily Thompson      4    discovery 0.0000   ACTED
+r2  Eleanor Thompson    #19    Isabella Thompson   5    discovery 0.0000   ignored
+r2  Eleanor Thompson    #10    Maxwell Armstrong   6    discovery 0.0000   ignored
+r2  Eleanor Thompson    #17    Bethany Davidson    7    discovery 0.0000   ignored
+r2  Eleanor Thompson    #2     Ryan Johnson        8    discovery 0.0000   ignored
+r2  Eleanor Thompson    #11    Emily Hayes         9    discovery 0.0000   ignored
+r2  Eleanor Thompson    #26    Nathan Brooks       10   discovery 0.0000   ignored
+r2  Eleanor Thompson    #4     Jake Thompson       11   discovery 0.0000   ignored
+r2  Bethany Davidson    #37    Steven Johnson      0    discovery 0.5028   ignored
+r2  Bethany Davidson    #36    Daniel Miller       1    discovery 0.5013   ignored
+r2  Bethany Davidson    #35    Ethan Grayson       2    discovery 0.4979   ignored
+r2  Bethany Davidson    #23    Victoria Greene     3    discovery 0.0000   ACTED
+r2  Bethany Davidson    #19    Isabella Thompson   4    discovery 0.0000   ignored
+r2  Bethany Davidson    #4     Jake Thompson       5    discovery 0.0000   ignored
+r2  Bethany Davidson    #7     Emma Hayes          6    discovery 0.0000   ignored
+r2  Bethany Davidson    #5     Emily Carter        7    discovery 0.0000   ignored
+r2  Bethany Davidson    #15    Daniel Rivera       8    discovery 0.0000   ignored
+r2  Bethany Davidson    #14    Daniel Miller       9    discovery 0.0000   ignored
+r2  Bethany Davidson    #33    Cassandra Johnson   10   discovery 0.0000   ignored
+r2  Bethany Davidson    #32    Emily Watson        11   discovery 0.0000   ignored
+r2  Isabella Thompson   #36    Daniel Miller       0    discovery 0.5173   ACTED
+r2  Isabella Thompson   #35    Ethan Grayson       1    discovery 0.5137   ignored
+r2  Isabella Thompson   #37    Steven Johnson      2    discovery 0.5111   ignored
+r2  Isabella Thompson   #7     Emma Hayes          3    discovery 0.0000   ignored
+r2  Isabella Thompson   #14    Daniel Miller       4    discovery 0.0000   ignored
+r2  Isabella Thompson   #15    Daniel Rivera       5    discovery 0.0000   ignored
+r2  Isabella Thompson   #2     Ryan Johnson        6    discovery 0.0000   ignored
+r2  Isabella Thompson   #4     Jake Thompson       7    discovery 0.0000   ignored
+r2  Isabella Thompson   #3     Simon Walker        8    discovery 0.0000   ignored
+r2  Isabella Thompson   #13    Oliver Wang         9    discovery 0.0000   ignored
+r2  Isabella Thompson   #25    Sophie Green        10   discovery 0.0000   ignored
+r2  Isabella Thompson   #10    Maxwell Armstrong   11   discovery 0.0000   ignored
+r2  Steven Johnson      #36    Daniel Miller       0    discovery 0.5230   ACTED
+r2  Steven Johnson      #35    Ethan Grayson       1    discovery 0.5068   ignored
+r2  Steven Johnson      #5     Emily Carter        2    discovery 0.0000   ignored
+r2  Steven Johnson      #27    Emily Thompson      3    discovery 0.0000   ignored
+r2  Steven Johnson      #13    Oliver Wang         4    discovery 0.0000   ignored
+r2  Steven Johnson      #15    Daniel Rivera       5    discovery 0.0000   ignored
+r2  Steven Johnson      #11    Emily Hayes         6    discovery 0.0000   ignored
+r2  Steven Johnson      #7     Emma Hayes          7    discovery 0.0000   ignored
+r2  Steven Johnson      #14    Daniel Miller       8    discovery 0.0000   ignored
+r2  Steven Johnson      #4     Jake Thompson       9    discovery 0.0000   ignored
+r2  Steven Johnson      #3     Simon Walker        10   discovery 0.0000   ignored
+r2  Steven Johnson      #33    Cassandra Johnson   11   discovery 0.0000   ignored
+r2  Victoria Greene     #37    Steven Johnson      0    discovery 0.4809   ignored
+r2  Victoria Greene     #36    Daniel Miller       1    discovery 0.4760   ignored
+r2  Victoria Greene     #35    Ethan Grayson       2    discovery 0.4654   ignored
+r2  Victoria Greene     #15    Daniel Rivera       3    discovery 0.0000   ignored
+r2  Victoria Greene     #3     Simon Walker        4    discovery 0.0000   ACTED
+r2  Victoria Greene     #13    Oliver Wang         5    discovery 0.0000   ignored
+r2  Victoria Greene     #7     Emma Hayes          6    discovery 0.0000   ignored
+r2  Victoria Greene     #27    Emily Thompson      7    discovery 0.0000   ignored
+r2  Victoria Greene     #4     Jake Thompson       8    discovery 0.0000   ignored
+r2  Victoria Greene     #20    Steven Johnson      9    discovery 0.0000   ignored
+r2  Victoria Greene     #10    Maxwell Armstrong   10   discovery 0.0000   ignored
+r2  Victoria Greene     #26    Nathan Brooks       11   discovery 0.0000   ignored
+r2  James Thompson      #7     Emma Hayes          0    network   0.0000   ACTED
+r2  James Thompson      #35    Ethan Grayson       1    discovery 0.5405   ignored
+r2  James Thompson      #36    Daniel Miller       2    discovery 0.5114   ignored
+r2  James Thompson      #37    Steven Johnson      3    discovery 0.5006   ignored
+r2  James Thompson      #32    Emily Watson        4    discovery 0.0000   ignored
+r2  James Thompson      #33    Cassandra Johnson   5    discovery 0.0000   ignored
+r2  James Thompson      #3     Simon Walker        6    discovery 0.0000   ignored
+r2  James Thompson      #13    Oliver Wang         7    discovery 0.0000   ignored
+r2  James Thompson      #14    Daniel Miller       8    discovery 0.0000   ignored
+r2  James Thompson      #15    Daniel Rivera       9    discovery 0.0000   ignored
+r2  James Thompson      #5     Emily Carter        10   discovery 0.0000   ignored
+r2  James Thompson      #10    Maxwell Armstrong   11   discovery 0.0000   ignored
+r2  Michael Thompson    #35    Ethan Grayson       0    discovery 0.5174   ignored
+r2  Michael Thompson    #36    Daniel Miller       1    discovery 0.4988   ignored
+r2  Michael Thompson    #37    Steven Johnson      2    discovery 0.4900   ignored
+r2  Michael Thompson    #7     Emma Hayes          3    discovery 0.0000   ignored
+r2  Michael Thompson    #3     Simon Walker        4    discovery 0.0000   ignored
+r2  Michael Thompson    #15    Daniel Rivera       5    discovery 0.0000   ignored
+r2  Michael Thompson    #13    Oliver Wang         6    discovery 0.0000   ignored
+r2  Michael Thompson    #32    Emily Watson        7    discovery 0.0000   ignored
+r2  Michael Thompson    #14    Daniel Miller       8    discovery 0.0000   ignored
+r2  Michael Thompson    #25    Sophie Green        9    discovery 0.0000   ACTED
+r2  Michael Thompson    #28    Olivia Rodriguez    10   discovery 0.0000   ignored
+r2  Michael Thompson    #11    Emily Hayes         11   discovery 0.0000   ACTED
+r2  Luna Reyes          #35    Ethan Grayson       0    discovery 0.5228   ignored
+r2  Luna Reyes          #37    Steven Johnson      1    discovery 0.4952   ignored
+r2  Luna Reyes          #36    Daniel Miller       2    discovery 0.4934   ignored
+r2  Luna Reyes          #7     Emma Hayes          3    discovery 0.0000   ACTED
+r2  Luna Reyes          #33    Cassandra Johnson   4    discovery 0.0000   ignored
+r2  Luna Reyes          #34    Simon Greene        5    discovery 0.0000   ignored
+r2  Luna Reyes          #23    Victoria Greene     6    discovery 0.0000   ignored
+r2  Luna Reyes          #3     Simon Walker        7    discovery 0.0000   ignored
+r2  Luna Reyes          #31    Carlos Rodriguez    8    discovery 0.0000   ignored
+r2  Luna Reyes          #15    Daniel Rivera       9    discovery 0.0000   ignored
+r2  Luna Reyes          #10    Maxwell Armstrong   10   discovery 0.0000   ignored
+r2  Luna Reyes          #5     Emily Carter        11   discovery 0.0000   ignored
+r2  Sophie Green        #35    Ethan Grayson       0    discovery 0.5188   ignored
+r2  Sophie Green        #36    Daniel Miller       1    discovery 0.5026   ignored
+r2  Sophie Green        #37    Steven Johnson      2    discovery 0.4979   ignored
+r2  Sophie Green        #13    Oliver Wang         3    discovery 0.0000   ACTED
+r2  Sophie Green        #7     Emma Hayes          4    discovery 0.0000   ignored
+r2  Sophie Green        #32    Emily Watson        5    discovery 0.0000   ignored
+r2  Sophie Green        #15    Daniel Rivera       6    discovery 0.0000   ignored
+r2  Sophie Green        #3     Simon Walker        7    discovery 0.0000   ignored
+r2  Sophie Green        #27    Emily Thompson      8    discovery 0.0000   ignored
+r2  Sophie Green        #11    Emily Hayes         9    discovery 0.0000   ignored
+r2  Sophie Green        #1     Aria Thompson       10   discovery 0.0000   ignored
+r2  Sophie Green        #24    Michael Thompson    11   discovery 0.0000   ignored
+r2  Nathan Brooks       #35    Ethan Grayson       0    discovery 0.5205   ignored
+r2  Nathan Brooks       #37    Steven Johnson      1    discovery 0.5090   ACTED
+r2  Nathan Brooks       #36    Daniel Miller       2    discovery 0.4880   ignored
+r2  Nathan Brooks       #3     Simon Walker        3    discovery 0.0000   ignored
+r2  Nathan Brooks       #27    Emily Thompson      4    discovery 0.0000   ignored
+r2  Nathan Brooks       #13    Oliver Wang         5    discovery 0.0000   ignored
+r2  Nathan Brooks       #7     Emma Hayes          6    discovery 0.0000   ignored
+r2  Nathan Brooks       #11    Emily Hayes         7    discovery 0.0000   ignored
+r2  Nathan Brooks       #32    Emily Watson        8    discovery 0.0000   ignored
+r2  Nathan Brooks       #31    Carlos Rodriguez    9    discovery 0.0000   ignored
+r2  Nathan Brooks       #33    Cassandra Johnson   10   discovery 0.0000   ignored
+r2  Nathan Brooks       #18    Eleanor Thompson    11   discovery 0.0000   ignored
+r2  Emily Thompson      #37    Steven Johnson      0    discovery 0.5232   ignored
+r2  Emily Thompson      #35    Ethan Grayson       1    discovery 0.5177   ignored
+r2  Emily Thompson      #36    Daniel Miller       2    discovery 0.4960   ignored
+r2  Emily Thompson      #7     Emma Hayes          3    discovery 0.0000   ignored
+r2  Emily Thompson      #13    Oliver Wang         4    discovery 0.0000   ignored
+r2  Emily Thompson      #14    Daniel Miller       5    discovery 0.0000   ignored
+r2  Emily Thompson      #3     Simon Walker        6    discovery 0.0000   ignored
+r2  Emily Thompson      #11    Emily Hayes         7    discovery 0.0000   ignored
+r2  Emily Thompson      #20    Steven Johnson      8    discovery 0.0000   ignored
+r2  Emily Thompson      #25    Sophie Green        9    discovery 0.0000   ignored
+r2  Emily Thompson      #4     Jake Thompson       10   discovery 0.0000   ignored
+r2  Emily Thompson      #32    Emily Watson        11   discovery 0.0000   ignored
+r2  Olivia Garcia       #10    Maxwell Armstrong   0    network   0.0000   ACTED
+r2  Olivia Garcia       #5     Emily Carter        1    fof       0.0000   ignored
+r2  Olivia Garcia       #35    Ethan Grayson       2    discovery 0.5012   ignored
+r2  Olivia Garcia       #36    Daniel Miller       3    discovery 0.4878   ignored
+r2  Olivia Garcia       #37    Steven Johnson      4    discovery 0.4815   ignored
+r2  Olivia Garcia       #13    Oliver Wang         5    discovery 0.0000   ignored
+r2  Olivia Garcia       #15    Daniel Rivera       6    discovery 0.0000   ignored
+r2  Olivia Garcia       #7     Emma Hayes          7    discovery 0.0000   ignored
+r2  Olivia Garcia       #25    Sophie Green        8    discovery 0.0000   ignored
+r2  Olivia Garcia       #27    Emily Thompson      9    discovery 0.0000   ignored
+r2  Olivia Garcia       #21    James Thompson      10   discovery 0.0000   ignored
+r2  Olivia Garcia       #26    Nathan Brooks       11   discovery 0.0000   ignored
+r2  Olivia Rodriguez    #35    Ethan Grayson       0    discovery 0.5480   ignored
+r2  Olivia Rodriguez    #37    Steven Johnson      1    discovery 0.5148   ignored
+r2  Olivia Rodriguez    #36    Daniel Miller       2    discovery 0.5068   ignored
+r2  Olivia Rodriguez    #32    Emily Watson        3    discovery 0.0000   ignored
+r2  Olivia Rodriguez    #13    Oliver Wang         4    discovery 0.0000   ACTED
+r2  Olivia Rodriguez    #7     Emma Hayes          5    discovery 0.0000   ignored
+r2  Olivia Rodriguez    #25    Sophie Green        6    discovery 0.0000   ignored
+r2  Olivia Rodriguez    #27    Emily Thompson      7    discovery 0.0000   ACTED
+r2  Olivia Rodriguez    #31    Carlos Rodriguez    8    discovery 0.0000   ignored
+r2  Olivia Rodriguez    #33    Cassandra Johnson   9    discovery 0.0000   ignored
+r2  Olivia Rodriguez    #34    Simon Greene        10   discovery 0.0000   ignored
+r2  Olivia Rodriguez    #14    Daniel Miller       11   discovery 0.0000   ignored
+r2  Carlos Rodriguez    #35    Ethan Grayson       0    discovery 0.5171   ignored
+r2  Carlos Rodriguez    #37    Steven Johnson      1    discovery 0.4819   ignored
+r2  Carlos Rodriguez    #36    Daniel Miller       2    discovery 0.4610   ACTED
+r2  Carlos Rodriguez    #7     Emma Hayes          3    discovery 0.0000   ignored
+r2  Carlos Rodriguez    #3     Simon Walker        4    discovery 0.0000   ignored
+r2  Carlos Rodriguez    #24    Michael Thompson    5    discovery 0.0000   ignored
+r2  Carlos Rodriguez    #34    Simon Greene        6    discovery 0.0000   ignored
+r2  Carlos Rodriguez    #11    Emily Hayes         7    discovery 0.0000   ACTED
+r2  Carlos Rodriguez    #32    Emily Watson        8    discovery 0.0000   ignored
+r2  Carlos Rodriguez    #26    Nathan Brooks       9    discovery 0.0000   ignored
+r2  Carlos Rodriguez    #16    Samuel Reynolds     10   discovery 0.0000   ignored
+r2  Carlos Rodriguez    #14    Daniel Miller       11   discovery 0.0000   ignored
+r2  Emily Watson        #35    Ethan Grayson       0    discovery 0.5548   ignored
+r2  Emily Watson        #36    Daniel Miller       1    discovery 0.5213   ignored
+r2  Emily Watson        #37    Steven Johnson      2    discovery 0.5003   ignored
+r2  Emily Watson        #7     Emma Hayes          3    discovery 0.0000   ACTED
+r2  Emily Watson        #13    Oliver Wang         4    discovery 0.0000   ignored
+r2  Emily Watson        #15    Daniel Rivera       5    discovery 0.0000   ignored
+r2  Emily Watson        #25    Sophie Green        6    discovery 0.0000   ignored
+r2  Emily Watson        #3     Simon Walker        7    discovery 0.0000   ignored
+r2  Emily Watson        #28    Olivia Rodriguez    8    discovery 0.0000   ignored
+r2  Emily Watson        #14    Daniel Miller       9    discovery 0.0000   ignored
+r2  Emily Watson        #27    Emily Thompson      10   discovery 0.0000   ignored
+r2  Emily Watson        #19    Isabella Thompson   11   discovery 0.0000   ignored
+r2  Henry Richardson    #37    Steven Johnson      0    discovery 0.4776   ignored
+r2  Henry Richardson    #36    Daniel Miller       1    discovery 0.4563   ignored
+r2  Henry Richardson    #35    Ethan Grayson       2    discovery 0.4432   ignored
+r2  Henry Richardson    #23    Victoria Greene     3    discovery 0.0000   ACTED
+r2  Henry Richardson    #10    Maxwell Armstrong   4    discovery 0.0000   ignored
+r2  Henry Richardson    #4     Jake Thompson       5    discovery 0.0000   ignored
+r2  Henry Richardson    #5     Emily Carter        6    discovery 0.0000   ignored
+r2  Henry Richardson    #11    Emily Hayes         7    discovery 0.0000   ignored
+r2  Henry Richardson    #17    Bethany Davidson    8    discovery 0.0000   ignored
+r2  Henry Richardson    #19    Isabella Thompson   9    discovery 0.0000   ignored
+r2  Henry Richardson    #12    Oliver Robinson     10   discovery 0.0000   ignored
+r2  Henry Richardson    #3     Simon Walker        11   discovery 0.0000   ignored
+r2  Cassandra Johnson   #35    Ethan Grayson       0    discovery 0.5398   ignored
+r2  Cassandra Johnson   #36    Daniel Miller       1    discovery 0.5239   ignored
+r2  Cassandra Johnson   #37    Steven Johnson      2    discovery 0.5009   ignored
+r2  Cassandra Johnson   #7     Emma Hayes          3    discovery 0.0000   ignored
+r2  Cassandra Johnson   #15    Daniel Rivera       4    discovery 0.0000   ignored
+r2  Cassandra Johnson   #3     Simon Walker        5    discovery 0.0000   ignored
+r2  Cassandra Johnson   #13    Oliver Wang         6    discovery 0.0000   ignored
+r2  Cassandra Johnson   #32    Emily Watson        7    discovery 0.0000   ignored
+r2  Cassandra Johnson   #2     Ryan Johnson        8    discovery 0.0000   ignored
+r2  Cassandra Johnson   #19    Isabella Thompson   9    discovery 0.0000   ignored
+r2  Cassandra Johnson   #11    Emily Hayes         10   discovery 0.0000   ignored
+r2  Cassandra Johnson   #10    Maxwell Armstrong   11   discovery 0.0000   ignored
+r2  Simon Greene        #22    Luna Reyes          0    network   0.0000   ignored
+r2  Simon Greene        #37    Steven Johnson      1    discovery 0.5006   ignored
+r2  Simon Greene        #35    Ethan Grayson       2    discovery 0.4913   ignored
+r2  Simon Greene        #36    Daniel Miller       3    discovery 0.4864   ignored
+r2  Simon Greene        #31    Carlos Rodriguez    4    discovery 0.0000   ACTED
+r2  Simon Greene        #11    Emily Hayes         5    discovery 0.0000   ignored
+r2  Simon Greene        #15    Daniel Rivera       6    discovery 0.0000   ignored
+r2  Simon Greene        #2     Ryan Johnson        7    discovery 0.0000   ignored
+r2  Simon Greene        #7     Emma Hayes          8    discovery 0.0000   ignored
+r2  Simon Greene        #23    Victoria Greene     9    discovery 0.0000   ignored
+r2  Simon Greene        #13    Oliver Wang         10   discovery 0.0000   ignored
+r2  Simon Greene        #32    Emily Watson        11   discovery 0.0000   ignored

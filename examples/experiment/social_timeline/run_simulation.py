@@ -186,6 +186,7 @@ async def run(args):
                                lean=getattr(args, 'lean_actions', False))
     agent_graph = await generate_timeline_agents(
         terse_tools=getattr(args, "terse_tools", True),
+        shared_prefix=getattr(args, "shared_prefix", True),
         profile_path=os.path.join(REPO_ROOT, args.personas),
         model=model,
         available_actions=actions,
@@ -261,6 +262,7 @@ async def run(args):
             "request_timeout": getattr(args, "request_timeout", None),
             "max_tokens": getattr(args, "max_tokens", None),
             "terse_tools": getattr(args, "terse_tools", True),
+            "shared_prefix": getattr(args, "shared_prefix", True),
             "actions": [a.value for a in actions],
         },
         "algorithm": {
@@ -556,6 +558,13 @@ def main():
                         "Group instructions are injected into every prompt "
                         "ahead of the feed and crowd out content engagement "
                         "-- see finding F-14.")
+    p.add_argument("--persona-in-system", action="store_false",
+                   dest="shared_prefix",
+                   help="keep the persona in the system message, as upstream "
+                        "does. F-66: that gives every agent a different prompt "
+                        "prefix, so Ollama's prefix cache never hits and each "
+                        "agent pays ~5.5s to re-read the same tool block. "
+                        "Hoisting it into the user turn is the default.")
     p.add_argument("--verbose-tools", action="store_false", dest="terse_tools",
                    help="ship each action's full docstring as its tool "
                         "description, as upstream does. F-64: that is ~3,000 "

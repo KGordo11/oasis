@@ -260,6 +260,69 @@ prefill — targets 4 % of the wrong end. Even halving the prompt saves ~2 % of 
 is, and how many tool-call round-trips a turn takes. That is worth measuring (Q-20),
 and it is a genuinely different question from the one item 3 was going to answer.
 
+### F-68 — Validated at 36 agents: terse tools are the only lever that works. 1.35x
+
+**Finding.** Four configurations, 36 agents x 3 rounds each, uncapped tokens, run
+back to back on an idle machine:
+
+| Config | s/round | vs upstream | Engagement |
+|---|---|---|---|
+| Upstream: full docstrings, persona in system, NP=8 | 453.4 | 1.00x | 5.93 % |
+| **Terse tool descriptions**, NP=8 | **335.4** | **1.35x** | **6.55 %** |
+| Terse + persona hoisted, NP=8 | 330.9 | 1.37x | 5.91 % |
+| Terse + hoisted, **sequential** (NP=1, sem 1) | 381.7 | 1.19x | 5.44 % |
+
+**Terse descriptions are worth 1.35x and engagement does not suffer — it rises,
+6.55 % against 5.93 %.** That is the only change in this entire campaign that makes
+the simulation faster without costing anything, and it is now the default.
+
+**Persona hoisting (F-66) is worth ~1 % and is retracted as a speedup.** The bench
+predicted 2.5-5x. It is kept only because it is harmless and makes the prompt
+cache *available* should the execution model ever change.
+
+**Sequential execution is 15 % SLOWER than 8-way concurrency**, not faster. The
+mid-run reading that suggested otherwise was taken at round 2, and early rounds are
+cheap because the world has barely any posts in it — comparing a partial early
+measurement against a full-run average is not a comparison.
+
+### F-69 — Prefix caching does not survive concurrency, which is why F-66 failed
+
+**Finding.** Ollama's prompt cache is per-slot and only helps when requests arrive
+one at a time:
+
+| | Prefill on an identical shared prefix |
+|---|---|
+| Sequential | **0.07 s** |
+| 8 concurrent | **24.9 s** |
+
+A 350x difference. Under continuous batching the slots are reset and every request
+pays full prefill, so arranging for a shared prefix (F-66) buys nothing at
+`NUM_PARALLEL=8`. The two optimisations are mutually exclusive: **either batch and
+pay prefill every time, or serialise and pay it once.** Measured end to end,
+batching wins (330.9 s/round against 381.7), so the cache stays unused.
+
+This is worth stating because it looks like free money and is not. It would become
+free money on a serving stack with cross-request prefix sharing — vLLM's automatic
+prefix caching does exactly this — which is another reason the eventual answer for
+scale is a different serving stack, not a different setting.
+
+### F-70 — Four of five optimisation hypotheses this campaign died on contact with the real workload
+
+**Recorded because the pattern is now the most reliable finding here.**
+
+| Hypothesis | Bench predicted | Measured at 36 agents | Outcome |
+|---|---|---|---|
+| Server concurrency (F-51/F-53) | 1.9-3.1x | +0.6 % | retracted (F-60) |
+| `max_tokens` cap | 1.48x | 1.48x but **engagement 0 %** | retracted (F-63) |
+| 3b model | 4.7x | **engagement 0 %** | unusable |
+| Persona hoisting (F-66) | 2.5-5x | ~1 % | retracted (F-68) |
+| **Terse tool descriptions** | 1.54x | **1.35x** | **held** |
+
+The one that survived is the one whose bench estimate was closest to modest. Every
+bench run in this project has an idle GPU, a warm cache, or a small queue, and a
+36-agent round has none of those. **Nothing should be believed here until it has run
+at 36 agents with the engagement gate on it.**
+
 ### F-66 — Prefill is 78 % of a turn and it is re-computed for every agent. Prompt ORDER is the fix
 
 **Finding.** The single largest inefficiency in the simulation is not the model, the

@@ -84,17 +84,24 @@ At the measured 22.7 s per agent-turn (F-96), every agent acting every round:
 
     1,100 agents x 100 rounds = 110,000 agent-turns = ~29 DAYS
 
-**But the collusion paper does not activate every agent.** Its agents act with a
-Bernoulli probability averaging **0.02**. That is how 1,000 x 100 is affordable
-at all, and it sits in their appendix rather than being sold as a method:
+**CORRECTED 2026-09-13 by F-99 -- the 0.02 below was wrong.** The earlier note
+here said Collusion activates agents with probability 0.02 and that 1,100 x 100
+was therefore ~2,200 agent-turns and "one overnight". **It is 0.19 and ~21,000
+agent-turns.** The 0.02 is the value in their CSV column; `agents_generator.py`
+renormalises it by the global max and floors the zeros at 0.1 before the
+simulation ever reads it, a 9.5x inflation. Verified against their own shipped
+population files. See F-99 in section 6.
 
-    1,100 x 100 at 2 % activation = 2,200 agent-turns = ~14 hours
+    Collusion 1,000 x 100 @ 0.19  = ~21,000 agent-turns = ~5.5 DAYS
+    Fraud     1,100 x 100 @ 1.0   = ~113,500 calls      = ~30 DAYS
 
-**One overnight.** Sparse activation is the single parameter separating
-"impossible on this laptop" from "routine", and **neither paper treats it as a
-scientific variable** -- Collusion uses 0.02, Fraud uses 1.0, and neither asks
-whether the conclusion depends on it. That is both our route to their scale and
-a question they left open.
+Sparse activation is still the one parameter that decides whether their scale is
+reachable here, and **neither paper treats it as a scientific variable** --
+Collusion runs 0.19, Fraud runs 1.0, the same author group wrote both, neither
+reports the number, and neither asks whether the conclusion depends on it
+(F-100, Q-23). But it buys ~5x, not ~50x. The reachable target is **their
+population at fewer rounds**, not their whole run: 1,100 agents x 15 rounds at
+0.19 is ~3,135 turns, about **20 hours**. See D-18.
 
 **Not implemented here.** Every agent acts every round in this codebase. Adding
 an activation probability is a real change to the simulation and should be
@@ -167,14 +174,26 @@ run list to a handful.
 
 ### Immediately next
 
-1. Artifact `869156cd` Law 2 still shows the withdrawn 1.081 and needs the
+*Updated 2026-09-13 after the reference repositories were read end to end.*
+
+1. **Decide the scale claim (D-18).** F-99 reprices the head-on target: matching
+   Collusion's 1,000 x 100 is ~5.5 days of this machine, Fraud's is ~30. The
+   reachable version is **their population at fewer rounds** -- 1,100 agents x 15
+   rounds at 0.19 activation is ~20 hours. This is Gordon's call, not mine.
+2. **Persona generation (F-103).** The binding constraint, and the cheapest place
+   we beat them: their 1,100-agent population has 633 unique names and 58 exact
+   duplicate personalities. Prerequisite for anything above 99 agents.
+3. **The activation parameter (Q-23).** Both the engineering route to their scale
+   and the variable neither paper examines. Not implemented -- every agent acts
+   every round here. Brainstorm before building.
+4. Artifact `869156cd` Law 2 still shows the withdrawn 1.081 and needs the
    settled 0.991 at 22.7 s per agent-turn, plus the B-28 row in its
    reproducibility table.
-2. `docs/superpowers/specs/2026-09-11-research-agenda.md` -- the flagship
+5. `docs/superpowers/specs/2026-09-11-research-agenda.md` -- the flagship
    proposal is a shuffled-feed arm testing whether the ranker contributes
    anything beyond allocating attention. Its costings assume the bank's rate,
    which B-28 confirms is correct.
-3. The five artifact deletions.
+6. The five artifact deletions.
 
 ### The task, as given
 
@@ -279,18 +298,24 @@ Fraud at 110 and 1,100.
 
 | file | why |
 |---|---|
-| `MultiAgent4Collusion/agents_init.py` | `sample_activity_level_frequency()`, the bernoulli branch. **Mean activation 0.02** is what makes 1,000 x 100 affordable. This is the single lever between "29 days" and "one overnight" on our hardware |
+| `MultiAgent4Collusion/agents_init.py` | `sample_activity_level_frequency()`, the bernoulli branch. **READ THIS WITH `agents_generator.py:98-104`, NOT ALONE** -- the 0.02 written here is renormalised to **0.19** before the run reads it (F-99). Activation is still the lever between "a month" and "a weekend", but it is worth ~5x, not ~50x |
 | `.../agents_init.py` (same file) | also a parametric cohort generator: network topology, activation distribution, good/bad ratio, post seeding. **Persona supply is our binding constraint** (99 usable bios), and this is the shape of a generator |
 | `MultiAgent4Collusion/oasis/social_platform/post_stats.py` | in-memory shadow ledger, engagement split by actor class, snapshotted per timestep. Avoids post-hoc SQL over a growing database |
 | `.../twitter_simulation_large.py` | the run loop: reflection cadence, shared memory, interventions |
 | `.../system_prompt(static\|dynamic).json` | prompts as versioned JSON keyed by agent type |
 | `MutiAgent4Fraud/oasis/inference/inference_manager.py` | per-agent-ID model routing -- different cohorts on different models in one run |
 | `MutiAgent4Fraud/scripts/twitter_simulation/align_with_real_world/test.yaml` | the config format. **Note: not at the repo root**, contrary to an earlier note here |
-| `MultiAgent4Collusion/utils/port_forward.py` | one server, N local forwarders, N concurrent requests. A client-side concurrency multiplier |
+| `MultiAgent4Collusion/utils/port_forward.py` | a plain TCP proxy, N listen ports to one target port. It multiplies concurrency only because `InferenceThread` serves exactly one request per port at a time, so ports *are* slots (F-102's neighbourhood). Read it with `inference_thread.py` |
 
-**Neither paper reports a single wall-clock or token figure**, and neither
-records feed position. Both treat activation rate as a budget knob rather than a
-variable. Those are the three gaps our work already fills or could.
+**READ IN FULL 2026-09-13 -- see section 6.** Both repositories have now been
+read end to end and the findings are F-99 to F-104, Q-23 and D-18. The three
+gaps are confirmed and quantified: **neither reports a single wall-clock or
+token figure and neither's code can produce one** (F-102, 14 `time.time()` calls
+each, all liveness timeouts); **neither can record feed position** -- their `rec`
+table is `(user_id, post_id)` with a composite primary key, replaced every
+timestep, so F-94 is unaskable in their codebase at any scale (F-101); and both
+treat activation rate as a budget knob rather than a variable, at two different
+undisclosed values (F-99, F-100, Q-23).
 
 ### Standing warnings — these do not go stale
 
@@ -5242,3 +5267,226 @@ comparable, and the comparison has to be designed rather than assumed.
 | Run | Config | Outcome |
 |---|---|---|
 | — | — | no runs yet |
+
+---
+
+## 6. The two reference repositories, read in full
+
+*Read 2026-09-13 at `/Users/gordon/research/reference/`. Every number below was
+computed from their committed code and their committed data, not from their
+papers. Where a paper and the repository disagree, the repository wins — it is
+what actually ran.*
+
+### The starter questions, answered
+
+| question | MultiAgent4Collusion | MutiAgent4Fraud |
+|---|---|---|
+| **How many users** | 1,000 headline; CSVs shipped for 10/100/110/901/1000/1100; 5,500 on HuggingFace | 110 headline, 1,100 largest; also 210, 510 for ratio sweeps |
+| **How many rounds** | 100 timesteps (`num_timesteps: 100`) | paper says 100; **the repo pins `num_timesteps: 1`** — the headline config is not committed |
+| **What they added** | `inference/` (313+137 lines), `post_stats.py` (883), `bad_agents_generator.py` (205), `task_blackboard.py` (35), `testing/utils.py` (125); `agent.py` 321 → 994 lines | all of the above plus 7 new action types, 7 new tables, `agent.py` 321 → **1,382** lines, `platform.py` 1,642 → **2,218** |
+| **What they got rid of** | `oasis/environment/` (`make()`/`env.step()`) — see F-104, they never had it | same |
+| **What they improved** | reflection + shared reflection, per-port inference pool, in-memory engagement ledger, LLM-as-detector, intervention arms (prebunk/debunk/ban) | + private messaging, money transfer, click/submit tracking, **per-agent-ID model routing across three backends in one run** |
+| **Their time per round / per agent** | **not reported, and not measurable from the code** — see F-102 | same |
+
+### F-99 — Collusion's activation rate is 0.19, not the 0.02 its CSVs appear to say. The handoff note in §0 was wrong and this corrects it
+
+The CSV column says 0.02. The number the simulation actually uses is **0.19**,
+because the value is transformed between the file and the run.
+
+`agents_init.py::sample_activity_level_frequency()` writes, per hour:
+
+    random.choices([0, 0.2], weights=[0.9, 0.1])[0]        -> mean 0.0199
+
+`agents_generator.py:98-104` then rewrites it before the agent ever sees it:
+
+    normalized_prob = all_freq / np.max(all_freq)      # {0, 0.2} -> {0, 1.0}
+    normalized_prob[normalized_prob < 0.6] += 0.1      # the zeros become 0.1
+    prob_list = np.round(normalized_prob, 2).tolist()
+
+So the per-hour threshold is **1.0** where the Bernoulli fired (10 % of hours)
+and **0.1** where it did not (90 %). Expected activation = 0.1 x 1.0 + 0.9 x 0.1
+= **0.19**, a 9.5x inflation of the figure the CSV appears to carry.
+
+The run loop consults it at `twitter_simulation_large.py:445-456`, with
+`start_hour = 13` and `simulation_time_hour = 13 + 0.05 * timestep` — so 100
+timesteps span 5 simulated hours and only hours 13-18 are ever indexed.
+
+**Verified on their own shipped CSVs**, not on a reproduction:
+
+| file | rows | CSV mean | runtime P(act) | agent-turns at 100 ts |
+|---|---|---|---|---|
+| `test_1000_good_bad_random_bernoulli_wlx.csv` | 1,000 | 0.0196 | **0.1896** | **18,955** |
+| `scalling/test_1100_..._scalling.csv` | 1,100 | 0.0198 | **0.1896** | **20,855** |
+| `scalling/test_110_..._scalling.csv` | 110 | 0.0186 | 0.1750 | 1,925 |
+
+The transform is not neutral across distributions, which is why it went
+unnoticed: `uniform` inflates 1.1x and `multimodal` 1.3x, but `bernoulli` — the
+only one used for the headline runs — inflates **9.5x**.
+
+**What this costs us.** The handoff arithmetic said 1,100 x 100 was ~2,200
+agent-turns and "one overnight". It is **~21,000 agent-turns**, and at the
+measured 22.7 s per agent-turn (F-96) that is **132 hours — 5.5 days**, not one
+night. Fraud's 1,100 x 100 at activation 1.0 is ~113,500 calls, **~30 days**.
+Sparse activation is still the lever, but it buys 5x, not 50x, and the honest
+sentence is that **their headline run is roughly a week of our hardware**, not a
+night of it.
+
+### F-100 — Fraud DELETED that normalisation and runs at activation 1.0. Same author group, two papers, unreported
+
+`MutiAgent4Fraud/oasis/social_agent/agents_generator.py:99-108` carries the
+Collusion block commented out, with a Chinese note, and the raw value used
+instead:
+
+    # normalized_prob = all_freq / np.max(all_freq)
+    # normalized_prob[normalized_prob < 0.6] += 0.1
+    ...
+    all_freq = np.array([ast.literal_eval(fre) for fre in freq])
+    # 不做归一化，直接用原始频率        ("no normalisation, use the raw frequency")
+    prob_list: list[float] = all_freq.tolist()
+
+And their generator's `__main__` sets `good_activity_level_distribution="1.0"`,
+`bad_activity_level_distribution="1.0"`. Their shipped populations confirm it —
+`test_1100_good_bad_random_1.0_1.0_zzj.csv` has activity mean **1.000**, min
+1.00, max 1.00 across all 1,100 agents and all 24 hours.
+
+So between arXiv 2507.14660 and ICLR 2026, from an overlapping author group, the
+effective activation rate went **0.19 to 1.0** — a 5x change in how much of the
+population is live per timestep — and **neither paper reports the rate at all**.
+Whether their conclusions survive that change is not addressed in either.
+
+### Q-23 — Is activation density a scientific variable or a budget knob?
+
+This is the gap F-99 and F-100 open, and it is ours to take. Collusion runs 0.19,
+Fraud runs 1.0, the same group wrote both, neither reports the number, and
+neither asks whether the result depends on it. Yet it is the parameter that
+decides how many agents are in the room at once — which is exactly the sort of
+thing a contagion or coordination result *should* depend on.
+
+It is also the only parameter that makes their scale reachable here. That is a
+rare combination: the same knob is both our engineering route and their unexamined
+assumption. Design before building (see the note under §0) — but this is the
+strongest candidate the repo reading produced.
+
+### F-101 — Neither repo can record where a post appeared in a feed. F-94 is structurally unaskable in their codebase
+
+Both ship the same `rec` table, unchanged from upstream OASIS:
+
+    CREATE TABLE rec (
+        user_id INTEGER,
+        post_id INTEGER,
+        PRIMARY KEY(user_id, post_id),
+        ...
+    );
+
+Two columns. A composite primary key, so it is a **set**, not a sequence — there
+is no slot index, no score, no source tier, no round. And `update_rec_table()` is
+called at the top of every timestep, so it is **replaced**, not appended: after
+the run there is no history to reconstruct.
+
+Ours, `timeline_platform.py:349`:
+
+    CREATE TABLE rec_history (
+        exposure_id INTEGER PRIMARY KEY AUTOINCREMENT,
+        round INTEGER, agent_id INTEGER, post_id INTEGER,
+        author_id INTEGER, feed_position INTEGER, source TEXT, score REAL
+    );
+
+F-94 — slot position worth OR 1.48-2.15 across 24 runs — could not have been
+measured in either repository, at any scale, on any hardware. This is not a
+resource gap we are losing; it is an instrumentation gap we are winning, and it
+does not depend on agent count at all.
+
+### F-102 — Neither repo has any wall-clock or token accounting. "Their time per round" has no answer because nobody measured it
+
+Grepping both for `time.time()`, `perf_counter`, `elapsed`, `prompt_tokens`,
+`completion_tokens`: **14 matches each**, and every one is either an
+`InferenceThread` liveness timeout in `inference_manager.py` or a single
+uninstrumented section timer in `recsys.py`. There is no manifest, no per-round
+timing, no per-turn timing, no token counter, no cost figure — nothing that
+survives the process.
+
+So Gordon's question "their time rounds and time agents" has a definite answer:
+**they do not report it and their code cannot produce it.** Our `manifest.json`
+carries `rounds[].seconds`, `total_seconds`, the phase split (99.8 % LLM), and
+since B-28 the verified `server_context_length`. F-96's 22.7 s per agent-turn at
+exponent 0.991 (R² 0.9988) is a measurement neither paper has an equivalent of.
+
+### F-103 — Their agent populations have severe mode collapse, and it is measurable
+
+Both generate personas the same way: one fixed prompt, `gpt-4o`, temperature 1.0,
+five profiles per call, regex-parsed (`generate_profile.py`). No de-duplication,
+no stratification, no demographic target. The shipped result:
+
+| | profiles | unique names | unique personality text | worst repeat |
+|---|---|---|---|---|
+| Collusion `user_profiles.json` | 6,037 | 2,475 (**41.0 %**) | 6,037 (100 %) | "Aisha Patel" x **141** |
+| Fraud `user_profiles.json` | 1,100 | 633 (**57.5 %**) | 1,042 (**94.7 %**) | "Emily Chen" x 21 |
+
+Fraud's 1,100-agent population contains **58 exact-duplicate personality blocks**
+— the same agent, twice, under different ids. Age spans 16-62 with median 30 in
+both; the gender mix is ~19 % non-binary. This is what a single-prompt sampler
+produces, and it is a population, not a sample of one.
+
+**This is the cheapest place we beat them.** Persona supply is our binding
+constraint (99 usable business bios), so a generator has to be built regardless.
+Building it with stratification and exact-duplicate rejection makes it better than
+theirs by construction, and the table above is the measurement that says so.
+
+### F-104 — Both vendored an old OASIS and never rebased. Our platform is ~20 months newer than Collusion's
+
+Neither repository shares git history with `camel-ai/oasis`. Both are squashed
+code drops:
+
+    MultiAgent4Collusion   4 commits, all 2025-07-19
+    MutiAgent4Fraud        7 commits, 2025-10-20 to 2026-02-03
+
+Dating their vendored copy by `social_platform/typing.py` line count against
+upstream history: Collusion's 49 lines matches upstream `aa0d4b7` (**2025-01-08**),
+Fraud's 54 matches around `4ea129a` (**2025-04-10**). Upstream added
+`oasis/environment/` — the `make()` / `env.step()` API — on 2025-04-10, which is
+why neither has it. They drive `Platform` directly instead.
+
+Our checkout is current to 2026-09-13 (merge `ba2f0b3`, 23 upstream commits). So
+the "what did they get rid of" answer is really **"they froze, and upstream moved"**
+— including the `recsys.py` off-by-one in `get_like_post_id` that upstream later
+fixed and that both of them still carry.
+
+### What is worth taking, and what is not
+
+| their component | verdict |
+|---|---|
+| `post_stats.py` `TweetStats` — in-memory engagement ledger, deep-copied per timestep, split by actor class | **take the idea.** It avoids post-hoc SQL over a growing DB, which is exactly F-52's `_analysis.json` problem. Ours should be a Parquet append, not an in-memory dict that dies with the process |
+| `agents_init.py` cohort generator — topology (`erdos_renyi` / `barabasi_albert` / `watts_strogatz`), good/bad ratio, post seeding | **take the shape**, not the code. It is the right set of knobs. Our version must not repeat the F-99 transform |
+| `inference_manager.py` + `port_forward.py` | **understand, do not copy.** Each `InferenceThread` serves exactly one request at a time (`Busy`/`Working`/`Done` flags, 10 ms poll). Concurrency = number of ports, so `port_forward.py` — a plain TCP proxy, N listen ports to one target — manufactures concurrency by manufacturing ports. Our asyncio + `OLLAMA_NUM_PARALLEL` does the same job without a busy-wait thread per slot |
+| Per-agent-ID model routing (`PortManager`, Fraud) | **worth having eventually.** Different cohorts on different models in one run is a real capability we lack |
+| `perform_action_by_llm` re-reading and JSON-parsing the prompt file on **every activation** (~19,000 times per run) | do not copy |
+| Their `rec` table | do not copy. See F-101 |
+
+### D-18 — What "bigger than theirs" has to mean
+
+Gordon's goal is more agents and more rounds than both papers. F-99 prices it
+honestly and the head-on version does not fit on this machine:
+
+| target | agent-turns | at 22.7 s/turn |
+|---|---|---|
+| Collusion 1,000 x 100 @ 0.19 | ~21,000 | **5.5 days** |
+| Fraud 1,100 x 100 @ 1.0 | ~113,500 | **30 days** |
+| us, 36 x 15 @ 1.0 (the bank) | 540 | 170 min |
+
+So the decision is which axis to win on, and there are three that are real:
+
+1. **Match their population, not their turn count.** 1,100 agents x 15 rounds at
+   activation 1.0 is 16,500 turns — still 4 days. At activation 0.19 it is 3,135
+   turns, **~20 hours**. That is one weekend, and it is *more agents than
+   Collusion and the same as Fraud*, at a sparser activation than either reports.
+   Requires: persona generation (F-103) and the activation parameter (Q-23).
+2. **Win on instrumentation, which is already done.** F-101 and F-102: we record
+   feed position and wall clock; neither of them records either, at any scale.
+   No amount of their compute closes that.
+3. **Win on the question.** Q-23 is a variable both papers set and neither
+   examines, and we can sweep it where they cannot afford to.
+
+**The honest framing for the professor** is that (1) is a scale claim, (2) and (3)
+are scientific claims, and only (2) is currently in hand. Chasing (1) alone means
+a week of GPU time to draw level on a number neither paper actually defends.
+

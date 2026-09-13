@@ -166,7 +166,36 @@ for n in $AGENTS; do
   run_one $n
 done
 
+# ------------------------------------------------------------- post-processing
+# The charts do NOT read data/social_timeline_*.json. They read runs_index.csv
+# and round_timings.csv out of the package, which build_package.py assembles by
+# walking data/parquet/. So a run that is never exported is a run the charts
+# never see -- eight and a half hours producing nothing visible. Do it here,
+# unattended, rather than leaving it as a step to remember in the morning.
+log "--- exporting to parquet ---"
+for n in $AGENTS; do
+  lbl=${PREFIX}_a$n
+  [ -f data/social_timeline_$lbl.db ] || continue
+  if [ -d data/parquet/$lbl ]; then
+    log "  $lbl already exported, skipping"; continue
+  fi
+  $P $S/export_parquet.py --db data/social_timeline_$lbl.db > /tmp/s18_pq_$lbl.log 2>&1 \
+    && log "  $lbl exported" \
+    || log "  $lbl EXPORT FAILED -- see /tmp/s18_pq_$lbl.log"
+done
+
+log "--- rebuilding the package ---"
+$P $S/build_package.py > /tmp/s18_pkg.log 2>&1 \
+  && log "  package rebuilt -- $(grep 'runs_index.csv' /tmp/s18_pkg.log | tr -s ' ' | cut -d' ' -f3-)" \
+  || log "  build_package FAILED -- see /tmp/s18_pkg.log"
+
+log "--- regenerating the cost charts ---"
+$P $S/make_timing_charts.py 2>&1 | sed 's/^/  /'
+
 log "########## DONE ##########"
 column -t $R 2>/dev/null || cat $R
 log "results: $R"
-log "next: $P $S/make_timing_charts.py   then republish the explorer artifact"
+log "the charts are regenerated; the explorer artifact still needs republishing"
+log "  NOTE make_graph.py does not reproduce the hand-written comparison panel."
+log "  Read the live artifact and merge that block back, or it is deleted silently."
+

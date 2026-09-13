@@ -29,24 +29,159 @@ than restart, so a search for any id still lands in exactly one place:
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-03. Update at the end of every working session.*
+*Last updated 2026-09-12 05:40, overnight session. Update at the end of every session.*
 
-**All queue items done, plus three scaling defects found and fixed while
-double-checking. No full simulation has been run — only 4- and 5-agent smoke tests.**
-Branch `social-timeline-sim`, 88 test-gate checks passing.
+### Read this first: one mistake dominates the night
 
-**The pattern worth noting.** Every one of the three defects (F-57 ranking loop, F-58
-index shape, F-55 cache-contaminated benchmark) was invisible at 36 agents and squarely
-in the path at 1,000. Measuring *where time goes today* — which is what Q-16's
-instrumentation does, correctly — cannot find any of them. They only appear when you
-ask how cost scales with size, which is a different question.
+**B-28. I ran a six-point agent sweep at Ollama's 4,096-token default**, because
+I set `OLLAMA_NUM_PARALLEL=4` and not `OLLAMA_CONTEXT_LENGTH`. Every prompt was
+truncated, the feed sits at the end of the prompt so the feed was cut, and
+engagement fell to 2.50 % against the bank's 5.88-6.83 % at an otherwise
+identical configuration -- **while the wall clock improved**, which is why it
+read as a scaling result for four hours.
 
-**One thing needs your decision before anything else proceeds:** your Ollama server is
-still `OLLAMA_NUM_PARALLEL=1`, so `check_deps.py` will now *fail* and block runs until
-it is restarted as `OLLAMA_NUM_PARALLEL=8 ollama serve` (or overridden with
-`OASIS_ALLOW_SERIAL_OLLAMA=1`). That is deliberate — the misconfiguration cost 24 runs
-roughly a third of their speed and nothing caught it — but it is your machine and your
-service, so I have not restarted it.
+Three findings were written and then withdrawn on the strength of it (F-97,
+F-98, and an engagement-cost "law"). **The bank runs were correct all along.**
+The re-run at 8,192 reproduces them on cost (769 s at round 4 against 793) and
+on engagement (5.16 %). **F-81 and F-86 are vindicated, not overturned.**
+
+### Nothing is running
+
+The corrected sweep finished 07:53. `ctx8192_a12/24/36` (twitter) and
+`ctx8192_a36_reddit`, all at **8,192 context verified in each run's own log**.
+They settle F-96 below.
+
+### What stands from the night
+
+| | |
+|---|---|
+| **F-94** | Slot position is worth **OR 1.48-2.15** depending on configuration, replicating in **24 runs across three configurations and two persona files**. Raw gradient 17.0 % at slot 0 to 1.7 % at slot 10. Unaffected by B-28 -- it is a within-run comparison |
+| **F-95** | Memory does not create the connection effect, it amplifies it: removing it takes OR 3.07 to 2.05, non-overlapping intervals. Found in three runs that had never been analysed |
+| **F-96** | **SETTLED: cost is LINEAR in agents, exponent 0.991 (R² 0.9988), at 22.7 s per agent-turn.** Confirms F-91's 0.99. My earlier 1.081 was a truncation artefact and is withdrawn |
+| **F-65a** | Ollama 0.24 does NOT divide context across slots; `CONTEXT_LENGTH` is per-slot and 4,096 is simply the default. Corrects F-65's arithmetic, not its warning |
+| **B-27** | `build_package.py` published one run's timings under another's name (a `/tmp` log scrape). Now reads each manifest. Coverage 16 -> 32 runs |
+| **B-28** | The truncation above |
+| **Guard** | `server_state.py` + 8 tests. Reads `/api/ps`, refuses below 8,192, writes `server_context_length` into every manifest. Wired into `run_simulation.py` and `check_deps.py` (now 8 checks) |
+
+### Artifacts — consolidated 8 to 3
+
+`732d1879` Agent Network Formation (explorer, untouched) · `55d7c5a5` Connection
+Over Content (science; now carries F-94, the population limits, the statistics
+explainer, the likely-questions list and the glossary) · `869156cd` Sim 4
+Scaling Laws (engineering; corrected to v10 after B-28).
+
+**Five retired pages are absorbed but STILL LIVE and need the user to confirm
+deletion:** `e49bf8a7`, `d80d6149`, `45b122c4`, `b878972f`, `96788f41`.
+
+### Handoff, 2026-09-13 — read this before the next session
+
+Written to disk deliberately: the session that produced it ends here (effort
+raised to `xhigh`, which needs a restart).
+
+#### The goal, restated by Gordon
+
+**Our sims must run more agents and more rounds than the two published OASIS
+projects.** Theirs: `MultiAgent4Collusion` 1,000 agents x 100 timesteps;
+`MutiAgent4Fraud` 110 main and 1,100 largest, also 100 timesteps. And **agent
+counts move in increments of 18.**
+
+#### The arithmetic, and it does not work head-on
+
+At the measured 22.7 s per agent-turn (F-96), every agent acting every round:
+
+    1,100 agents x 100 rounds = 110,000 agent-turns = ~29 DAYS
+
+**But the collusion paper does not activate every agent.** Its agents act with a
+Bernoulli probability averaging **0.02**. That is how 1,000 x 100 is affordable
+at all, and it sits in their appendix rather than being sold as a method:
+
+    1,100 x 100 at 2 % activation = 2,200 agent-turns = ~14 hours
+
+**One overnight.** Sparse activation is the single parameter separating
+"impossible on this laptop" from "routine", and **neither paper treats it as a
+scientific variable** -- Collusion uses 0.02, Fraud uses 1.0, and neither asks
+whether the conclusion depends on it. That is both our route to their scale and
+a question they left open.
+
+**Not implemented here.** Every agent acts every round in this codebase. Adding
+an activation probability is a real change to the simulation and should be
+brainstormed before it is built.
+
+#### The binding constraint is PERSONAS, not compute
+
+Usable bios per file, counted today:
+
+| file | usable personas |
+|---|---|
+| `anonymous_topic_200_1h/False_Business_0.csv` | **99** |
+| `group_polarization/197_progressive.csv` | 193 |
+| `group_polarization/197_baoshou.csv` | 193 |
+| `reddit/user_data_36.json` | 36 |
+
+`--agents` silently truncates to the file's length (B-26), so **anything above 99
+agents on the business file is a mislabelled run.** Exceeding 1,100 agents needs
+~1,100 personas that do not exist. Both surveyed repos generate theirs with an
+LLM; Collusion's `agents_init.py` is a parametric cohort generator with
+switchable network topology and activation distribution. **Persona generation is
+a prerequisite, not a detail.**
+
+The two polarization files are politically sorted. One is a coherent population;
+both together give 386 agents with a built-in two-community structure --
+interesting, but a different experiment.
+
+#### Tonight's sweep, in increments of 18
+
+All five fit inside the 99-persona business file and continue the twitter series,
+so the exponent stays comparable:
+
+| agents | est. wall |
+|---|---|
+| 18 | ~34 min |
+| 36 | ~69 min |
+| 54 | ~103 min |
+| 72 | ~138 min |
+| 90 | ~172 min |
+
+**~8.6 hours total.** 7 rounds each, `--semaphore 4`, seed 42. Start the server
+as `OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h
+ollama serve` -- the run refuses to start otherwise (B-28).
+
+#### Built and verified, not yet used
+
+`--shuffle-feed`, F-94's experiment. Ranks and selects exactly as normal, then
+permutes the order before display: same posts, same tiers, position assigned
+rather than observed. Eight unit tests plus an in-run assertion that the feed
+CONTENTS are unchanged, which holds on a live run.
+
+**A shuffled run cannot be verified against a control run post-hoc.** Sampling at
+temperature 0.7 makes any two runs diverge whatever the feed does, so that
+comparison proves nothing. I ran it and it "failed" meaninglessly. The invariant
+is checked inside the run instead.
+
+#### Artifacts
+
+Three live. `732d1879` the explorer, now 30 runs with a **Cost & scaling tab**
+carrying all three timing charts. `55d7c5a5` science. `869156cd` engineering.
+
+**Five retired pages are absorbed but still live and need Gordon's confirmation
+to delete:** `e49bf8a7`, `d80d6149`, `45b122c4`, `b878972f`, `96788f41`.
+
+**Regenerating the explorer:** `make_graph.py` does NOT reproduce the
+hand-written comparison panel above the tabs. Read the live artifact and merge
+that block back, or republishing deletes it silently. Also remove
+`.artifact_baseline` from the data dir first, or its alphabetical filter cuts the
+run list to a handful.
+
+### Immediately next
+
+1. Artifact `869156cd` Law 2 still shows the withdrawn 1.081 and needs the
+   settled 0.991 at 22.7 s per agent-turn, plus the B-28 row in its
+   reproducibility table.
+2. `docs/superpowers/specs/2026-09-11-research-agenda.md` -- the flagship
+   proposal is a shuffled-feed arm testing whether the ranker contributes
+   anything beyond allocating attention. Its costings assume the bank's rate,
+   which B-28 confirms is correct.
+3. The five artifact deletions.
 
 ### The task, as given
 
@@ -82,7 +217,9 @@ halves fail for completely different reasons and have completely different fixes
   `OLLAMA_NUM_PARALLEL:1` — it served one request at a time and the semaphore of 4 only
   filled a queue. Fixing it is worth **~1.3× on realistic prompts**; today's config
   gains nothing at all from concurrency. F-51 is retracted; `check_deps.py` now gates it.
-- **Prefill is ~25 % of a turn** (F-55, which retracts F-54). Trimming the prompt is a
+- **Prefill is ~78 % of a turn** (F-66, which supersedes F-55). F-55's 25 % was
+  measured on a 610-token prompt; the real prompt is ~2,570 once the 22 tool
+  schemas are counted. Trimming the prompt is a
   real lever after all — but the feed is the study's independent variable, so cutting it
   changes the experiment rather than optimising it. The free version is the **8 tool
   definitions that never fire** (F-48), and that needs an A/B (Q-21).
@@ -442,6 +579,37 @@ from last night's campaign was.
 available. And F-64's shorter descriptions fix this for free by putting the prompt
 back under 1,400 tokens, where truncation cannot occur at any sensible slot count.
 
+#### F-65a — CORRECTS F-65's mechanism. Ollama 0.24 does NOT divide context across slots
+
+F-65 says *"Ollama divides its context across parallel slots. At
+`OLLAMA_NUM_PARALLEL=1` each sequence gets the whole 32,768. At
+`NUM_PARALLEL=8` each gets 4,096."* That was true of the version measured then.
+**It is not true of 0.24.0**, which is what this project runs now.
+
+Measured directly against the running server:
+
+    NUM_PARALLEL=4, CONTEXT_LENGTH unset    ->  /api/ps reports  4,096
+    NUM_PARALLEL=4, CONTEXT_LENGTH=32768    ->  /api/ps reports 32,768
+    NUM_PARALLEL=4, CONTEXT_LENGTH=8192     ->  /api/ps reports  8,192
+
+**`OLLAMA_CONTEXT_LENGTH` is the PER-SLOT window and is not divided by the slot
+count.** The 4,096 in the first row is 0.24's default, not 16,384 split four ways.
+
+**Why the distinction matters.** Under F-65's model you could leave
+`CONTEXT_LENGTH` alone and infer the per-slot window from the slot count. Under
+the real behaviour the default is small and fixed, so **raising `NUM_PARALLEL`
+does not shrink the window -- the window was already too small and nothing
+announced it.** B-28 is what that looks like in practice.
+
+**F-65's warning survives intact** and is if anything stronger: set
+`OLLAMA_CONTEXT_LENGTH` explicitly, every time, and verify it. Only its
+arithmetic falls.
+
+**Now enforced in code.** `server_state.py` reads `/api/ps` for the real
+per-slot figure; `check_deps.py` fails a run below 8,192; `run_simulation.py`
+refuses to start and writes `server_context_length` into every manifest. Eight
+unit tests, including one pinning the URL handling that broke on first attempt.
+
 ### F-62 — Cost is exactly linear in agent count, and the sim cannot exceed 36 agents
 
 **Finding.** Nothing in this project had ever measured cost against agent count —
@@ -785,6 +953,105 @@ decided before Q-16's instrumentation says what the DB write cost actually is.
 
 ---
 
+### F-71 — Tool-call rate does not predict whether a model is usable. Feed engagement does
+
+`llama3.2:3b` is 4.7x faster than `llama3.1:8b` and produced ONE engagement in
+42,336 exposures. Discovering that cost seven full runs. `eval_model.py` now
+reproduces the failure in about 80 seconds, but only after the first version of
+it failed:
+
+    n=6, first metrics          tool rate   grounded   variety
+      llama3.1:8b                    100%       100%         4
+      llama3.2:3b                    100%       100%         4
+
+Identical. A filter that passes the model it exists to catch is not a filter.
+The action mix is where the two separate:
+
+      llama3.1:8b    like_post x3, follow x3, search_posts x1, create_post x1
+      llama3.2:3b    search_posts x3, create_post x3, create_comment x1
+
+The 3b model never touches what it was shown. It is busy — it posts, it
+searches — and every one of those actions is invisible to `seen_and_acted`,
+which `analyze.py:270-295` defines as an action carrying a `post_id` the agent
+was actually exposed to. Note this excludes `follow`, which carries no post_id.
+
+Rebuilt around that definition, at n=25:
+
+    metric        llama3.1:8b   llama3.2:3b
+      tool rate          100%           88%     <- nearly useless as a gate
+      ENGAGED             64%           24%     <- the discriminator
+      grounded           100%           78%
+      tok/s               11.5          38.0
+
+**The lesson is more general than model choice.** Every cheap proxy in this
+project has measured activity when the thing that matters is engagement: B-23
+gated a campaign on activity and waved through the config with 1 engagement in
+42,336; F-63's `max_tokens=512` collapse looked healthy on every count except
+engagement; this harness reinvented the same error in its first draft. The
+proxy has to be the metric the run is scored on, or it is not a proxy.
+
+Caveat, and it is not a small one: the proxy COMPRESSES the gap. 64% vs 24% is
+2.7x where reality was ~500x. Eight to twenty-five fresh single turns cannot
+reproduce a deficit that compounds over 15 rounds of a filling feed. So a
+shortfall here is disqualifying, and a tie is only ever "worth one full run" —
+never evidence of equivalence.
+
+### F-72 — 70 % of every prompt is the same 22 tool schemas, re-sent on every call
+
+    tool schemas   7,147 chars   ~1,786 tokens   identical on EVERY call
+    persona+feed   3,124 chars   ~  781 tokens   the only part that varies
+
+Locally this is why F-66 failed: Ollama's prefix cache should make the static
+70 % nearly free, but F-69 showed the cache does not survive eight concurrent
+slots evicting each other, so the simulation pays full prefill for that block
+roughly 1,000 times per run. This is the single largest identified waste in the
+local pipeline and there is no local fix for it — the cache is the fix, and
+concurrency is what breaks the cache.
+
+On a hosted API the same number is an opportunity rather than a loss, because
+explicit prompt caching is not subject to eviction by a neighbouring slot.
+
+### F-73 — A hosted API is a ~60x wall-clock win, and the constraint stops being concurrency
+
+Measured basis, from the run ledger: a healthy 15-round run is 504 agent-turns
+(36 x 14) and ~940 trace rows, so roughly 1,000 LLM calls, at ~2,000 prompt
+tokens and ~150 output tokens each — about 2.0M in / 0.15M out per run.
+
+The local ceiling is 8 concurrent slots, and F-67 established it is a COMPUTE
+ceiling, not a memory one. **F-76 RETRACTS THAT** — it is a memory ceiling, and
+NUM_PARALLEL=16 spills catastrophically (52x slower). 36 agents through 8 slots is what makes a run take ~2 hours. A hosted
+API has no such ceiling at this scale — 36 concurrent requests is unremarkable
+for any of the three major providers — so a round becomes one wave instead of
+five, and the run becomes minutes.
+
+**What replaces it as the binding constraint is cost, and per-run cost at this
+size is small.** Order-of-magnitude, before caching, at 2.0M in / 0.15M out:
+
+    Haiku 4.5   ($1 / $5  per MTok)    ~$2.75 per run
+    Sonnet 5    ($2 / $10 per MTok)    ~$5.50 per run
+    Opus 5      ($5 / $25 per MTok)    ~$13.75 per run
+
+F-72's static 70 % is cacheable, which takes a meaningful bite out of the input
+side. Cache reads are a fraction of base input price, so a cache-aware
+implementation lands well below these figures; the exact multiplier should be
+read from current pricing rather than assumed.
+
+**This is not a recommendation to switch, and three things must be said plainly:**
+
+1. It changes the experiment. Every published Sim 4 result is `llama3.1:8b`.
+   A hosted model is a different population, and F-35's ~28pp noise floor means
+   old and new runs cannot be pooled. It would be a new baseline, not more of
+   the existing one.
+2. It sends persona and feed content to a third party. That is a supervisor's
+   call, not mine.
+3. It has a real failure mode this project has not faced: a bug that loops
+   costs money rather than time. The B-22 watchdog exists for a hang; a spend
+   cap would be its equivalent.
+
+The honest framing for the professor is that the 2-hour run is an artefact of
+one 8-slot GPU, not of the simulation design, and that the fastest available
+path to large runs is not a better local model.
+
 ## 3. What scale is actually reachable
 
 Stated plainly because the target as given is not achievable on this hardware, and
@@ -878,6 +1145,1341 @@ started.
 records the value so any run's timeout is reconstructable after the fact.
 
 ---
+
+### F-74 — Model speed does NOT scale with file size. It scales with parameter count, and I got this wrong
+
+**The error.** Comparing five candidate models on 2026-09-08 I estimated each
+one's run time by scaling measured tok/s with download size. That is the DECODE
+rule, and F-66 established decode is only 22 % of a turn. Prefill is the other
+78 %, prefill is compute-bound, and compute scales with **parameters**, not
+gigabytes.
+
+**The correct rule**, from F-66's split:
+
+    run time ratio  ~=  0.78 x (param ratio)  +  0.22 x (file-size ratio)
+
+Applied to the five candidates against llama3.1:8b (8.0B, 4.9 GB):
+
+| model | params | file | file-size est. (wrong) | correct est. |
+|---|---|---|---|---|
+| granite4.1:8b | 8.79B | 5.3 GB | 2.2 h | 2.2 h |
+| ornith:9b | 8.95B | 5.6 GB | 2.3 h | 2.2 h |
+| **gemma4:e2b** | **5.12B** | 7.2 GB | **3.0 h** | **~1.6 h** |
+| gemma4:12b | 11.9B | 7.6 GB | 3.1 h | 3.0 h |
+| qwen2.5:14b | 14.8B | 9.0 GB | 3.7 h | 3.7 h |
+
+Four of five barely move, because for dense models trained at similar quantisation
+the two ratios track each other. `gemma4:e2b` is the exception and it inverts:
+5.12B parameters in a 7.2 GB file, because embedding tables and a vision tower
+occupy bytes without doing prefill arithmetic on text. **It is the only one of the
+five plausibly FASTER than the current model, and the file-size estimate ranked it
+second-slowest.**
+
+This also retracts half of the "strictly dominated, drop it" verdict given the same
+day. The memory objection stands — 7.2 GB for 5.12B params is poor packing, and
+the vision tower is dead weight for a text-only sim. The speed objection was
+backwards.
+
+**Unresolved, and it cuts both ways.** `e2b` advertises configurable *thinking*.
+Thinking tokens are decode tokens, and enough of them would erase a prefill
+advantage. The `e` prefix also suggests effective-parameter packing, where active
+params during text inference may be lower still. Both are directly measurable by
+`eval_model.py` (real tok/s, real output length) without a sim — that test should
+precede any further claim about this model.
+
+**Method note.** This is the same failure as F-51, F-54 and F-66: a plausible
+scaling assumption applied without checking which regime the workload is in. The
+log now records the split explicitly so the next estimate starts from it.
+
+### F-75 — The break-even rule: a faster model must retain engagement in proportion to its speedup
+
+**The metric that matters is engagement events per hour, not seconds per round.**
+Baseline: 6,049 exposures per run x 5.9 % engagement = ~357 events per run, over
+2.0 h = **~179 events/hour**. A candidate is only an improvement if
+
+    (engagement rate ratio) / (run time ratio)  >  1
+
+which means a model 2.5x faster must keep >=40 % of baseline engagement merely to
+break even.
+
+**Applied to the one case with real data.** `llama3.2:3b` is 2.5x faster (3.21B
+params, F-74 rule). Using the harness's GENEROUS proxy (24 % vs 64 % ENGAGED =
+0.375) it scores 0.375 / 0.40 = **0.93 — already a net loss**. Using what the
+seven real runs produced (1 engagement in 42,336 exposures) it scores ~0.001.
+The 2.5x speedup delivered LESS data per hour, not more.
+
+**Two multipliers that make the trade worse than the rule suggests.**
+
+1. *Variance collapse, which has no alarm.* The `llama3.2:3b` failure was loud —
+   zero engagement. The dangerous version is a model that engages plenty but
+   homogeneously. Sim 4's findings are measured ACROSS 36 distinct personas; a
+   model that drifts to generic responses attenuates the effect size rather than
+   removing the data, and that reads as "the effect is weaker" instead of "the
+   model stopped differentiating". This is S-2 and nothing at run level catches it.
+
+2. *The noise floor is model-specific.* F-35's ~28pp is a `llama3.1:8b`
+   measurement (S-4). Runs-to-conclusion scales with (noise/effect)^2, so a
+   candidate whose floor is 1.5x higher needs 2.25x more runs — cancelling a 2.5x
+   speedup almost exactly.
+
+**Consequence for model selection.** On this hardware speed is bought almost
+entirely with engagement, and engagement is the dependent variable. Candidates
+worth the harness are those with a specific reason to beat the trade:
+`granite4.1:3b` (3.4B, 2.2x, trained for tool use + structured JSON — the exact
+capability llama3.2:3b lacked; needs >=45 % of baseline) and `gemma4:e2b` (5.12B,
+1.25x, needs >=80 %, but its thinking mode may erase the gain). `qwen2.5:7b` at
+1.05x is inside noise and not worth a switch.
+
+**The one lever exempt from this rule is F-72** — 70 % of every prompt is the same
+22 tool schemas, re-prefilled ~1,000 times per run. Removing that cost changes no
+model behaviour at all, which makes it the only speed available without paying for
+it in the outcome measure.
+
+### F-76 — The concurrency ceiling is MEMORY, not compute, and the optimum is 4 — not 8, and never 16
+
+**This retracts every "8-slot compute ceiling" statement in this log, including
+ones written earlier the same day.** The claim rested on `sweep_8/16/24/32`, and
+all four of those runs carry `ollama_num_parallel: (unset -> server default)` —
+a server pinned at 1. They raised a client semaphore in front of a serialising
+backend and measured nothing. F-56 tested concurrency 4 and no higher.
+
+Measured properly on 2026-09-08: server restarted per config, `NUM_PARALLEL`
+matched to client concurrency, unique prompt per call (F-55 method note), real
+22 tool schemas, real 12-post feed, llama3.1:8b, ctx 8192, flash attention on.
+
+| config | calls/s | mean latency | loaded | free RAM | swap |
+|---|---|---|---|---|---|
+| NP=4 conc 4 | **0.368** | 10.8 s | 11 GB | 4.3 GB | 775 M |
+| NP=8 conc 8 | 0.317 | 24.4 s | 17 GB | 0.8 GB | 775 M |
+| NP=16 conc 16 | **0.0071** | **2,261 s** | 30 GB | 0.4 GB | 1,264 M |
+| NP=32 conc 36 | **0** (all timed out at 600 s) | — | 56 GB | 0.5 GB | 1,264 M |
+
+**Memory scales linearly and it is the whole mechanism:**
+
+    footprint  ~=  4.9 GB weights  +  1.55 GB per slot   (ctx 8192, flash attn)
+
+NP=32 asked for 56 GB on a 32 GB machine. NP=16 asked for 30 GB and spent 37
+minutes per call thrashing. There is no compute story here at all — the GPU was
+never the constraint above 4 slots.
+
+**Consequences.**
+
+1. **NP=8 — the setting used for every run this session and in `campaign.sh` —
+   is 14 % slower than NP=4.** A free win, in the direction nobody was looking.
+2. The practical slot budget follows from the formula. With ~12 GB of desktop
+   apps resident, ollama gets ~20 GB, so `(20 - 4.9) / 1.55` is about **9 slots
+   before swapping** — and NP=8 already leaves only 0.8 GB free. Anything that
+   grows the desktop pushes the optimum down, not up.
+3. F-67's "the hardware is not being wasted" survives, but its explanation does
+   not. The chip is not saturated by 8 concurrent requests; the machine is out
+   of RAM.
+
+**Still n=1 per config.** The NP=16 and NP=32 results are so extreme that
+replication cannot reverse them. The NP=4-vs-NP=8 gap is 14 % on single
+measurements and is exactly the size of effect this project has gotten wrong
+four times (F-51, F-54, F-66, F-74). It needs Phase 0b's five replicates before
+`campaign.sh` is changed.
+
+**Method note.** Three separate assertions of a "compute ceiling" were made today
+before anyone ran the four-line benchmark that disproves them. The benchmark cost
+about twenty minutes. The assertions were built on a sweep whose own manifest
+recorded, in plain text, that the server setting was unset.
+
+### F-77 — RETRACTS F-76's 14 % concurrency win. NP=4 through NP=8 is a plateau; the case for NP=4 is variance and memory, not speed
+
+**What happened.** F-76 reported NP=4 beating NP=8 by 14 % (0.368 vs 0.317
+calls/s) on one measurement each. Phase 0b re-ran every config five times:
+
+| NP | mean c/s | sd | CV | min-max | loaded | free |
+|---|---|---|---|---|---|---|
+| 1 | 0.394 | 0.015 | 3.8 % | 0.371-0.411 | 6.3 GB | 5.1 GB |
+| 2 | 0.362 | 0.026 | 7.2 % | 0.337-0.395 | 7.9 GB | 2.2 GB |
+| 3 | 0.422 | 0.019 | 4.5 % | 0.398-0.437 | 9.5 GB | 0.6 GB |
+| **4** | **0.446** | **0.014** | **3.1 %** | 0.431-0.466 | 11 GB | 0.5 GB |
+| 6 | 0.411 | 0.045 | 10.9 % | 0.331-0.444 | 14 GB | 0.5 GB |
+| 8 | 0.418 | 0.064 | 15.3 % | 0.306-0.465 | 17 GB | 0.5 GB |
+
+**NP=8's replicated mean is 0.418, not 0.317.** F-76 caught it on a bad rep —
+0.306 is inside the observed NP=8 range, so the single measurement was not
+wrong, merely unrepresentative. NP=4 vs NP=8 is **1.07x with overlapping
+ranges: not resolvable at n=5.**
+
+**What survives from F-76, unchanged.** NP=16 at 52x slower and NP=32 failing
+outright are far too extreme for replication to reverse, and the memory formula
+holds across all six configs: `4.9 GB + ~1.55 GB per slot`. The ceiling is still
+memory, not compute. Only the 14 % claim falls.
+
+**What replicates, and it is smaller than anyone thought.** Parallelism is worth
+**1.13x** (NP=1 -> NP=4), not the 1.30x F-56 reported. Both F-56 and F-76 measured
+it once.
+
+**The real signal is variance, not throughput.** CV rises monotonically with slot
+count above 4 — 3.1 % at NP=4 against 15.3 % at NP=8 — and it tracks memory
+exactly: NP=8 holds 17 GB and leaves 0.5 GB free, so its slow reps are the machine
+swapping, not the GPU saturating. **NP=8's worst rep (0.306) is 27 % below NP=4's
+worst (0.431).**
+
+**Recommendation, stated for what it is.** Move `campaign.sh` from NP=8 to NP=4
+**for predictability and 6 GB of reclaimed RAM, not for speed.** Mean throughput
+is statistically indistinguishable. A 2-hour unattended run benefits from a
+config whose worst case is 27 % better and that leaves the desktop 6 GB, and
+that argument does not require the speed claim I made and have now withdrawn.
+
+**Method note, fifth instance.** F-51, F-54, F-66, F-74 and now F-76 were each a
+single measurement that replication overturned. Phase 0b cost 45 minutes and
+caught this one before it reached `campaign.sh`. The rule this log should have
+adopted long ago: **no configuration change on n=1, ever.**
+
+### F-78 — Phase 0d: both candidate models fail. Keep llama3.1:8b
+
+`granite4.1:3b` and `gemma4:e2b` pulled and scored on the real prompt, real 22
+tool schemas, real 12-post feed, 25 trials, NP=1 single stream.
+
+| | tool rate | ENGAGED | grounded | out tok | wall |
+|---|---|---|---|---|---|
+| llama3.1:8b | 88 % | **40 %** | 100 % | ~80 | 2.7 s |
+| granite4.1:3b | 100 % | **4 %** | 100 % | — | 1.4 s |
+| gemma4:e2b (capped 300) | 0 % | 0 % | n/a | 300 (truncated) | 4.9 s |
+| gemma4:e2b (uncapped) | 62 % | **12 %** | — | **911** | **12.1 s** |
+
+**`granite4.1:3b` answers `do_nothing` 24 times out of 25.** It emits perfectly
+formed tool calls — 100 % tool rate, the best of the three — and uses them to
+decline. This is a new failure mode, distinct from llama3.2:3b's (which acted, but
+never on the feed). It needed >=29 % ENGAGED under F-75 and scored 4 %.
+
+**`gemma4:e2b` is 4.5x SLOWER, not 1.25x faster — F-74's prediction for it is
+dead.** Its thinking mode emits **911 output tokens per turn against llama3.1:8b's
+~80**. Decode is 22 % of a turn at 80 tokens; at 911 it dominates completely and
+the low parameter count buys nothing. F-74's rule is correct as far as it goes —
+prefill scales with parameters — but it silently assumes comparable output length,
+and a reasoning model violates that by an order of magnitude. **The rule needs the
+caveat: it holds only between models with similar output-token behaviour.**
+
+**A harness bug this exposed, worth keeping.** At `max_tokens=300` gemma4:e2b
+scored 0 % tool rate with `finish_reason=length` — it spent the entire budget
+reasoning and never reached the call. That is my cap, not the model: the real sim
+runs uncapped (`--max-tokens` default 999,999,999). **`eval_model.py` is biased
+against thinking models and must be run uncapped for them.** Had this not been
+checked, a model would have been rejected for a limit the simulation does not
+impose.
+
+**Conclusion. Keep `llama3.1:8b`.** This is the outcome R5 of the run plan
+predicted on cost grounds, now confirmed on capability grounds. Neither candidate
+is worth a run, so S-1..S-6 stay unqueued and the ~8 runs of baseline-rebuilding
+overhead a model change would cost are not spent.
+
+### F-79 — The harness baseline is noisy at n=25, which softens every gate built on it
+
+`llama3.1:8b` ENGAGED, six replicates of 25 trials each:
+
+    44 %, 52 %, 60 %, 48 %, 64 %, 48 %
+    mean 52.7 %   sd 7.8   CV 14.7 %   range 44-64 %
+
+**The 64 % single reading that F-75's gates were built on is the TOP of the
+distribution, not its centre.** Every threshold quoted from it (>=29 %, >=51 %) was
+about 20 % too high. Corrected against the replicated mean: granite4.1:3b (2.2x
+faster) needs >=24 %, and gemma4:e2b — now known to be 4.5x SLOWER — would need to
+EXCEED baseline, >=53 %.
+
+**What the harness can and cannot resolve.** At sd 7.8 per 25-trial replicate,
+separating a candidate 10pp from baseline needs about 10 replicates (~240 trials),
+not one. A single 25-trial reading only reliably distinguishes gaps beyond ~20pp.
+
+**It does not change F-78's conclusion** — 4 % and 12 % sit 40pp+ below the
+replicated mean and below even the worst baseline replicate (44 %), far outside
+anything this spread could explain. But it does mean:
+
+1. Gate thresholds must be quoted against a REPLICATED baseline, not one reading.
+2. `--trials 25` is too few to separate candidates that land near the line. A
+   candidate scoring within the baseline's own spread is "worth one full run",
+   never "equivalent".
+3. This is the same lesson as F-77 one level up: the harness that catches n=1
+   errors in full runs is itself being read at n=1.
+
+### F-80 — REVISES F-69. The prefix cache DOES survive concurrency; the benefit decays with slot count rather than collapsing
+
+Block A, 3 replicates per cell, identical content in both layouts — only the
+ORDER differs, so any gap is cache and nothing else.
+
+| NP | shared prefix | persona-first (upstream) | ratio |
+|---|---|---|---|
+| 1 | 0.290 c/s | 0.179 | **1.62x** |
+| 2 | 0.349 | 0.183 | **1.91x** |
+| 4 | 0.345 | 0.208 | **1.66x** |
+| 8 | 0.312 | 0.250 | 1.25x |
+
+F-69 concluded the cache "does not survive concurrency", and F-68 retracted
+F-66's predicted 2.5-5x down to ~1 % on that basis. **Both were too pessimistic.**
+The cache survives at every slot count tested; what decays is the size of the win
+— 1.91x at NP=2 down to 1.25x at NP=8 — because more slots evict each other's
+entries faster. A gradient, not a cliff.
+
+**This does not license a change, because the shared layout is ALREADY the
+default.** `--persona-in-system` is `store_false` on `shared_prefix`, so every
+published run since F-66 already hoists the persona out of the system message.
+What this measurement does is *quantify a default that was previously believed to
+be worthless*: it is worth 1.66x at NP=4.
+
+**It also sharpens the NP choice.** With the shared layout, throughput peaks at
+NP=2 (0.349) and NP=4 (0.345) — a tie — and falls at NP=8 (0.312). The cache
+benefit is larger at low NP, so the two effects agree: **NP=2-4 is optimal, and
+NP=8 is worse for two independent reasons.** F-77 chose NP=4 on variance grounds;
+F-80 supports the same choice on throughput.
+
+### F-81 — Cost per round RAMPS for three rounds, then plateaus flat. Every estimate built on a 3-round smoke is wrong
+
+Per-round wall clock, 36 agents, 15 rounds, NP=4:
+
+    round  0    90s      <- empty world, nothing to rank
+    round  1   351s
+    round  2   546s          the ramp: the feed is filling
+    round  3   790s
+    rounds 4-14  ~790s    <- plateau, flat to the end (751-821s)
+
+**Updated 09-10 from six replicates rather than one: the plateau mean is
+769 s** (the 790 s above is a single run). The ramp replicates almost exactly --
+95 / 352 / 549 s against the original 90 / 351 / 546 -- so the SHAPE is solid
+and only the level shifts, by about 3 %. Recomputed from `round_timings.csv`
+in the data package, which any reader can verify independently.
+
+**The plateau is the operative number, and the ramp is a trap.** A 3-round smoke
+totals 986 s and looks like ~330 s/round; the true steady-state cost is 790 s/round,
+2.4x higher. That is exactly why last night's 15-round run took **174 minutes
+against my 120-minute estimate** — I scaled a 3-round measurement by 5 when the
+correct factor is 10.6.
+
+This is F-60's pattern once more (small benchmarks overpredict), but with a
+mechanism: the cost driver is how full the feed is, and a short run never fills it.
+
+**What it means for the "1000 rounds" question.** Cost per round does NOT grow
+without bound — it flattens. So long runs are predictable, just expensive:
+
+    36 agents, 1000 rounds   ~= 986 + 997 x 790  = 788,600 s  ~= 9.1 days
+
+### F-82 — 99 agents runs. Agent count scales SUBLINEARLY; this is the answer to "bigger worlds"
+
+Block E, 99 agents from the Twitter persona set, 3 rounds: **completed in 39
+minutes with 4.06 % engagement** — the first run in this project's history above
+36 agents. `personas.py:75` already loads the CSV, so this needed a flag, not code.
+
+Per-round, still inside the ramp at round 2:
+
+    36 agents:  90 / 351 / 546 -> plateau 790 s
+    99 agents: 177 / 827 / 1327 -> plateau ~1,925 s (projected by the 36-agent ramp shape)
+
+    2.44x the cost for 2.75x the agents  ->  exponent ~0.88, SUBLINEAR
+
+Sublinear in agents is the good direction and makes bigger worlds cheaper than
+feared. Extrapolating both laws:
+
+    1000 agents x 1000 rounds  ~= 790 x (1000/36)^0.88 x 1000  ~= 170 days
+
+which independently reproduces the earlier 167-day figure by a different route.
+
+**Caveat that must travel with this result.** The Twitter personas carry no age,
+gender or MBTI, so a 99-agent run is a different persona construction and cannot
+be pooled with the published nine. Engagement of 4.06 % versus the 36-agent
+smoke's 5.70 % may be that difference, the round-2 ramp, or noise — three
+confounds and one measurement. It establishes FEASIBILITY, nothing more.
+
+### B-24 — An unlocalized loop variable cost a validation run
+
+    server () { ...; for i in $(seq 1 90); do curl ... && return 0; done }
+    for i in 1 2; do server 4; run np4_val_r$i 36 15; done
+
+`server()` never declared `local i`, so its readiness poll clobbered the caller's
+counter. The server answered on its 2nd poll, leaving `i=2`; iteration one ran
+`np4_val_r2`, and iteration two found that manifest and skipped. **One of two
+validation runs silently never happened.** The resumable-by-manifest design,
+which exists to make interrupts cheap, is what converted the bug into a silent
+skip instead of a visible error. Fix: `local i` in every helper.
+
+### F-83 — The remaining lever is CALL COUNT, not call cost. 46 % of a run's model calls buy a second action that happens 1 % of the time
+
+**Per-call cost is already at its floor, and that is what points at the answer.**
+Reconciling F-80 and F-81 against the measured 790 s round:
+
+    observed   790 s/round / 67 calls / 4 slots      = 2.9 s of GPU per call
+    predicted  cached prefix 1,786 tok               ~ free (F-80)
+               varying   781 tok / 490 tok/s         = 1.6 s prefill
+               decode     80 tok /  54 tok/s         = 1.5 s
+                                                       -------
+                                                       3.1 s
+
+These agree. The prefix cache is working, the static block is already nearly
+free, and the remaining 781 tokens are persona and feed -- the experiment
+itself. **Shrinking the prompt further saves almost nothing.** What is left is
+the number of calls.
+
+**What the follow-up call actually buys.** Measured over a full 15-round run,
+504 agent turns:
+
+| | |
+|---|---|
+| turns taking 0 or 1 action | **499 (99.0 %)** |
+| turns taking 2 or more | **5 (1.0 %)** |
+| actions returning content the model must read | **0 of 431** |
+
+Every action in the entire run was terminal -- a like, a comment, a post, a
+follow. Not one `search_posts`, `search_user` or `trend`. camel's loop
+nonetheless makes a second model call after every tool call so the agent can
+react to a result it cannot use, and that follow-up is **~46 % of all LLM calls
+in a run**.
+
+**The fix, and why it is not either of the two existing flags.**
+`--smart-tool-loop` stops the loop after a TERMINAL action and continues after
+an INFORMATIONAL one, by mutating `max_iteration` inside `_aexecute_tool` --
+camel reads it immediately afterwards (`chat_agent.py:2070`), so this needs no
+upstream change (D-1 holds; it is a subclass override).
+
+    --lean-actions       removes 8 actions -> changes what an agent CAN do (F-55)
+    --max-tool-rounds 1  blunt cap -> also destroys search -> read -> act
+    --smart-tool-loop    removes neither; drops only the no-op round-trip
+
+**What is proven and what is not.** `test_smart_tool_loop.py` -- 10 checks,
+all passing, exercising the real method with only the parent stubbed -- proves
+the loop stops where intended, that all 22 tools are classified with none
+silently dropped, that search->read->act survives, that the flag off is a true
+no-op, and that a cap does not leak between turns.
+
+**It proves nothing about speed or behaviour at 36 agents.** The 46 % figure is
+a count of calls, not a measured speedup, and the 1 % of turns that lose a
+second action is exactly the kind of small effect this project has six times
+mistaken for zero. **The flag is OFF by default and needs an A/B** -- 3
+replicates per arm, engagement-gated, at 36 agents. Until then it is an
+implemented hypothesis, not a result.
+
+### F-84 — RETRACTS F-83. OASIS already caps the tool loop at 1. There was no follow-up call to remove
+
+**Measured, from the live server log rather than inferred from trace rows:**
+
+    LLM requests / agent-turn      1.25      (F-83 claimed 1.85)
+    oasis/social_agent/agent.py:69 -> max_iteration: int = 1
+
+**The follow-up call F-83 set out to eliminate was eliminated upstream before
+this project started.** F-83's 46 % came from counting rows in the `trace`
+table and assuming each implied a model call. Trace rows are ACTIONS, not
+calls. The real overhead above one call per turn is 0.25 — a ~20 % ceiling, not
+46 % — and it is not the tool loop at all (most likely retries and the round-0
+sign-up phase; not yet pinned).
+
+**The implemented flag fires and changes nothing.** `--smart-tool-loop` logged
+**60 short-circuits in 72 agent-turns**, so the hook works exactly as its 10
+tests claim. But what it does on firing is set `max_iteration = 1`, which is
+already the value. It is a correct implementation of a no-op.
+
+**Worse for the design argument: the capability F-83 claimed to preserve does
+not exist.** F-83's case against `--max-tool-rounds 1` was that it destroys
+search -> read -> act. With `max_iteration=1` upstream, **that path is already
+gone for every run this project has ever done.** An agent that calls
+`search_posts` gets its results appended and the loop stops before it can act
+on them. That is a real finding about the simulation's semantics and it is
+worth more than the optimisation was: the 22-action surface advertises a
+capability the loop cannot deliver.
+
+**Consequence. There is no remaining local optimisation.** Per-call cost is at
+its floor (F-83's arithmetic, which still holds), call count is already
+minimal, concurrency is settled at NP=4 (F-77), the prefix cache is already
+banked (F-80), and no smaller model is usable (F-78). **The system is at its
+floor on this hardware.** Remaining machine time is worth more spent on
+replicates than on optimisation.
+
+### B-25 — A reader bug aborted a 12-hour campaign and stranded 6 unrelated runs
+
+The A/B's smoke gate read short-circuits via
+`json.load(...).get("manifest", {})`. Those fields are written at the JSON TOP
+level, so it read 0 from a run that had 60, declared the flag a no-op and
+called `exit 1`.
+
+**Two compounding faults, and the second is the expensive one:**
+
+1. The reader assumed a nesting that does not exist, and had never been tested
+   against a real manifest — the same defect class as B-24.
+2. **The gate was wired to `exit 1`, which killed everything queued behind it,
+   including a 6-run replicate bank that did not depend on the flag at all.**
+   Five hours of machine time were lost to that, not to the bug. A failed gate
+   should skip its own phase and fall through to work that does not depend on
+   it. Restructured so the bank now runs as an independent script that no gate
+   can strand.
+
+#### B-27 — The shipped data package published one run's timings under another run's name
+
+**Where.** Ours, `build_package.py::round_timings()`.
+
+**Symptom.** `round_timings.csv` carried **eleven** rounds for `scale99_full` at
+89 / 337 / 521 / 732 s -- the 36-agent shape -- for a run that is 99 agents and
+five rounds. The real numbers, in the run's own manifest, are 172 / 801 / 1292 /
+1936 / 2086, which is what F-91 cites. The published sums did not even match the
+run's `total_seconds` (6,985 s against 6,288 s) and nothing checked.
+
+**Cause.** The function recovered per-round wall clock by globbing
+`/tmp/*_<label>.log` and scraping every `round N done in Xs` line from the first
+file that matched. B-26's mislabelled 36-agent run was originally *named*
+`scale99_full`; relabelling it to `bank36_mislabelled` and pulling it from the
+Parquet export never touched `/tmp`, so the stale log still matched the glob and
+the package rebuilt the wrong timings straight back in.
+
+**Why it matters more than it looks.** These are the numbers behind F-81's
+plateau and F-91's scaling exponent, and the package is the artifact a
+collaborator would be handed. The findings themselves are safe -- both were
+computed from manifests -- but anyone reproducing them from the package would
+have got a different answer and no way to tell which was wrong.
+
+**Fix.** Read `rounds[].seconds` from the run's own `manifest.json`, which is
+written by the run, is per-run by construction, and cannot be contaminated by a
+neighbour. Added a consistency assertion: round seconds must sum to within 5 %
+of `total_seconds` or the builder prints a warning. Coverage went from 16 runs
+to **24** as a side effect, because the scrape only ever found logs for runs
+whose files happened to survive in `/tmp`.
+
+**The pattern, third instance.** B-26 (`--agents` truncates silently), F-38 (a
+column that was not what its name said), and now this: **a label that stops
+meaning what it says, with no check tying it back to the thing it names.**
+
+### F-85 — The noise floor is ~5x tighter than assumed. A/B experiments are affordable after all
+
+Six runs at one genuinely identical, validated configuration (llama3.1:8b,
+NP=4, 36 agents, 15 rounds, terse tools, uncapped output):
+
+| run | wall | engagement |
+|---|---|---|
+| np4_val_r1 | 175 m | 5.99 % |
+| np4_val_r2 | 174 m | 6.98 % |
+| bank_r1 | 169 m | 7.68 % |
+| bank_r2 | 172 m | 7.37 % |
+| bank_r3 | 164 m | 7.11 % |
+| bank_r4 | 165 m | 7.15 % |
+
+    wall clock   mean 170.3 m   sd 4.71    CV 2.8 %
+    engagement   mean  7.05 %   sd 0.573   CV 8.1 %
+
+**Against the assumptions every plan in this log was sized on:**
+
+| | assumed | measured |
+|---|---|---|
+| wall-clock noise | ~15 % (`campaign.sh` power note) | **2.8 %** |
+| behavioural noise | ~28pp (F-35) | **0.57pp** |
+
+**Why the old figures were so wrong.** They were computed across runs that were
+not actually at the same configuration. The two runs behind the 15 % figure (355
+vs 408 s/round) straddled the NUM_PARALLEL masquerade described in the F-77
+correction, where a server believed to be at NP=8 was serving at NP=1. Comparing
+runs whose config differed in an unrecorded way measures the difference, not the
+noise. This is the same root cause as B-25 and F-76: **the manifest recorded our
+intention rather than the server's state.** Every variance estimate taken before
+that was fixed is suspect.
+
+**What it unlocks. At alpha .05 / power .8:**
+
+    effect                        at assumed 15%    at measured 2.8%
+    wall clock 10 % faster            35 runs/arm         1 run/arm
+    wall clock 20 % faster             9 runs/arm         1 run/arm
+
+    engagement 1.5pp shift                    —           2 runs/arm
+    engagement 1.0pp shift                    —           5 runs/arm
+    engagement 0.5pp shift                    —          21 runs/arm
+
+**Several conclusions in this log rest on the old figure and are now too
+pessimistic.** `campaign.sh`'s header states that detecting a 1pp engagement
+shift "would take far more runs than any campaign affords" — it takes five per
+arm. The run plan's R1 argued Phase 1 could not resolve a 14 % speed difference
+without ~18 runs per arm; it needs one or two. **The A/B experiments this project
+kept declining as unaffordable were affordable the whole time.**
+
+**Caveat, and it is not small.** A variance estimate from n=6 is itself
+imprecise: the 95 % interval on an sd at n=6 spans roughly 0.62x to 2.45x the
+point estimate. So engagement sd could plausibly be as high as ~1.4pp, which
+would put a 1pp detection nearer 30 runs per arm. The bank is being extended to
+n=10+ specifically to tighten this. **What is already safe to say is that the
+floor is nowhere near 28pp**, and that behavioural A/Bs belong back on the table.
+
+### F-86 — The plateau is CONTEXT ACCUMULATION, not a filling feed. This overturns F-81's mechanism and F-84's "no lever remains"
+
+Found during the 09-10 audit, by reconciling a discrepancy nobody had checked:
+the simulation is 100 % `llm_wait`, yet it achieves **1/8th the call rate the
+NP=4 benchmark achieves at the same concurrency**. Concurrency was not the
+cause — measured over all 550 requests of `bank_r5`, four are in flight **94.4 %
+of the time** and the GPU is idle 0.1 %. F-67 was right about saturation.
+
+**The cause is per-request latency, and it grows with the round:**
+
+| round | wall | mean request latency |
+|---|---|---|
+| 0 | 94 s | **10.1 s** |
+| 1 | 337 s | 35.3 s |
+| 2 | 513 s | 54.9 s |
+| 3 | 727 s | 75.6 s |
+| 4 | 851 s | 86.2 s |
+| 5-14 | ~790 s | **80-88 s, flat** |
+
+**Round 0 matches the standalone benchmark almost exactly (10.1 s vs 10.8 s),
+because at round 0 an agent has no history and its prompt is just system +
+tools + feed.** By round 4 the same call takes 8.5x longer and then stops
+growing — the signature of a context window filling to its cap and truncating.
+
+`oasis/social_agent/agent.py:184` says it outright: *"Camel can not stop
+updating the agents memory after stop and astep."* Every turn appends the user
+message, the assistant reply and the tool result to that agent memory, and all
+of it is re-prefilled on the next turn.
+
+**This overturns two earlier conclusions.**
+
+1. **F-81's mechanism was wrong.** The plateau is not the feed saturating at 12
+   slots; it is `OLLAMA_CONTEXT_LENGTH=8192` truncating an ever-growing history.
+   F-81's *numbers* stand — the ramp and the ~769 s plateau are measured — but
+   its explanation does not, and the explanation is what predicts behaviour at
+   other settings.
+2. **F-84's "there is no remaining local optimisation" was wrong.** There is,
+   and it is the largest yet found. If an agent's memory were cleared between
+   rounds, every round would cost about what round 0 costs. A 15-round run would
+   drop from ~170 min toward ~25 min — of order **6x**, against the 1.13x
+   concurrency and 1.66x prefix-cache levers.
+
+**Why this hid for so long.** Every benchmark in this project, mine included,
+issued fresh single-turn requests — which is exactly a round-0 prompt. The bench
+was measuring the cheapest round of the run and calling it representative. F-60
+recorded that small benchmarks overpredict four times running; this is the same
+error one level deeper, and it inflated the apparent cost of nothing while
+hiding the real one.
+
+**What is NOT yet established, and must not be asserted before it is tested.**
+Whether clearing memory between rounds changes agent behaviour. There is an
+argument it barely can: the context is already capped at 8192, so agents are
+already losing most of their history to truncation and receiving an arbitrary
+sliding window rather than coherent memory. But that is an argument, not a
+measurement, and this log has six entries recording what happens when those are
+confused. **It needs an A/B against the 7-run bank, which F-85 says costs 2-5
+runs, not a campaign.**
+
+### F-87 — `--fresh-context` is real and large: ~3.9x. It also halves engagement, so it is a trade, not a free win
+
+Implemented from F-86 and smoke-tested at 36 agents, 3 rounds, against the
+3-round control (`smoke_on`).
+
+| round | control | fresh-context |
+|---|---|---|
+| 0 | 94 s | 106 s |
+| 1 | 337 s | **216 s** |
+| 2 | 513 s | **203 s** |
+| 3 | 727 s | — |
+| 4-14 | ~790 s (plateau) | — |
+
+**The mechanism is confirmed and the shape is the point.** Control climbs to a
+~790 s plateau. Fresh-context has ALREADY FLATTENED at ~205 s by round 2, because
+each turn starts from the system message and nothing accumulates. 108 context
+resets were logged, exactly 36 agents x 3 rounds. Projected to 15 rounds: about
+**50 minutes against 170 — roughly 3.4x**, and ~3.9x at the plateau. That is
+larger than every other lever found combined.
+
+**And it halves engagement.**
+
+    engagement    control 5.70 %   fresh-context 2.81 %
+    action rate   control 0.792    fresh-context 0.898
+    action mix    fresh-context: create_post x89, like_post x7
+
+Agents with no memory are MORE active and engage with their feed LESS. They
+default to broadcasting rather than reacting — the F-63 signature, arrived at by
+a new route.
+
+**By F-75's own arithmetic it still passes break-even.** A config 2.5x faster
+needs 40 % of baseline engagement to break even on data per hour; it retains
+49 %, so it yields about 23 % more engagement events per hour. **That is not
+sufficient grounds to adopt it**, because engagement is not merely the sample
+size here — it is the dependent variable. Halving it changes the phenomenon
+being measured, not just the precision of the measurement.
+
+**Status: a genuine 3.9x efficiency lever with a genuine behavioural cost.**
+Both halves have to be reported. It should NOT become the default, and it is
+exactly the kind of trade a supervisor decides rather than an engineer.
+
+**Caveats on these numbers.** n=1 per arm, three rounds, and the control
+(`smoke_on`) carried `--smart-tool-loop`, which F-84 established is a no-op, so
+it is a fair control but was not run for this purpose. F-85 says a proper A/B
+costs 2-5 runs per arm. **A 15-round fresh-context run is the single most
+informative thing left to run**, because it settles both the plateau and whether
+the engagement gap widens or narrows over a full run.
+
+### F-88 — SETTLES F-87. `--fresh-context` is 3.09x faster, retains 33 % of engagement, and yields 1.02x data per hour. It is a wash
+
+The full A/B, overnight 09-10/11. Treatment n=3 at 15 rounds; control is the
+8-run validated bank at identical configuration.
+
+| arm | n | wall | engagement |
+|---|---|---|---|
+| control | 8 | 170.2 m (sd 4.18) | **6.94 %** (sd 0.523) |
+| fresh-context | 3 | **55.1 m** (sd 2.60) | **2.30 %** (sd 0.466) |
+
+    SPEEDUP        3.09x
+    ENGAGEMENT     -4.64pp   (33 % of control)
+    DATA PER HOUR  1.02x     <- F-75 break-even is exactly 1.00
+
+**The two effects cancel almost perfectly.** Three times the runs, a third of
+the engagement per run: the same number of engagement events per hour, to within
+2 %. `--fresh-context` does not buy anything. It buys *differently*.
+
+**This is a cleaner refutation than the smoke suggested.** F-87's 3-round test
+measured 49 % engagement retention and a 1.23x yield, which looked like a modest
+win. At full length the retention is 33 % and the yield is 1.02. The gap widens
+over a run, exactly as F-87 warned it might and could not then test.
+
+**What it costs, and it is not only engagement.** Fresh-context agents post
+instead of reacting. Every run's action tally is dominated by `create_post`
+while `like_post` collapses — the F-63 signature. Since Sim 4's published
+findings are all about *what agents engage with*, a configuration that cuts
+engagement to a third is not a faster version of the experiment. It is a
+different one, measured worse.
+
+**Verdict: do not adopt. The flag stays, off by default, with this result
+attached.** It is a real and correctly-implemented 3x lever whose entire gain is
+consumed by the behaviour it changes, and that is worth recording precisely so
+nobody re-derives it in six months.
+
+### F-89 — Noise floor at n=9, and it is holding
+
+**Updated with `bank_r7`:** control n=9, wall 169.5 m (sd 4.53, CV 2.7 %),
+engagement 6.94 % (sd 0.489, CV 7.0 %). The F-88 A/B with n=9 control: speedup
+3.07x, engagement 33 % of control, data per hour **1.02x** — unchanged. Measured
+plateaus: control **765 s**, fresh-context **235 s**.
+
+*Original n=8 entry follows.*
+
+### F-89a — Noise floor at n=8
+
+    wall clock   170.2 m   sd 4.18    CV 2.5 %
+    engagement     6.94 %  sd 0.523   CV 7.5 %
+
+Against n=6 (CV 2.8 % / 8.1 %) the estimate has barely moved, which is the
+reassuring outcome: the floor is stable, not an artefact of a small sample.
+F-85's headline stands and tightens slightly.
+
+    runs per arm    1.5pp engagement shift    1.9
+                    1.0pp                     4.3
+                    0.5pp                    17.2
+
+### B-26 — A missing `--personas` flag turned the headline 99-agent run into a 36-agent run
+
+`final.sh` queued `run scale99_plateau 99 8` **without** `--personas`, so it
+loaded the default `user_data_36.json`, which holds 36 records, and `--agents 99`
+silently capped at 36. The run completed, looked healthy, and produced a
+"99-agent plateau" of 736 s that matched the 36-agent 769 s exactly.
+
+**It matched because it WAS a 36-agent run.** Caught only because that agreement
+was too good: F-82 projected 1,925 s, and a 2.6x miss in the favourable direction
+is the shape of a bug, not a discovery. Verified from the database — `sign_up: 36`,
+`agent_turns_total: 288 = 36 x 8`.
+
+Two lessons. **`--agents` silently truncates to the persona file's length rather
+than failing**, which is how a mis-specified run produces plausible output. And
+an earlier version of this queue (in `supervisor.sh`) *did* carry the flag; it
+was lost when the queue was rewritten under time pressure. The run has been
+relabelled `bank36_mislabelled` and removed from the Parquet export so nothing
+downstream reads it as a 99-agent result.
+
+### F-90 — CORRECTS F-85 and F-89. The 28pp and the 0.52pp measure different things; F-35 was never overturned
+
+**The error.** F-85 reported the noise floor as "~5x tighter than assumed" and set
+0.523pp against F-35's ~28pp as though one replaced the other. **They are
+different quantities and both are correct.**
+
+| | what it measures | value |
+|---|---|---|
+| F-35 | **per-agent posting share**, SD across agents and runs | 30.7pp |
+| F-89 | **run-level aggregate engagement rate**, SD across runs | 0.52pp |
+
+F-35 asks "how differently do individual agents behave from one run to the
+next"; F-89 asks "how much does the run's headline number move". Averaging 36
+agents collapses the first into the second — this is the central limit theorem,
+not a contradiction, and a factor of ~sqrt(36)=6 plus the difference between a
+share-of-actions and a rate accounts for the rest.
+
+**What actually follows, stated correctly:**
+
+1. **Run-level comparisons are cheap.** Comparing the aggregate engagement rate
+   between two configurations needs 2-5 runs per arm (F-89). The fresh-context
+   A/B in F-88 is exactly this shape and was correctly powered at n=3 vs n=8.
+2. **Per-agent intervention studies remain expensive, exactly as F-35 said.**
+   An intervention must move posting share >=14.3pp to be visible at 36 agents,
+   and the four prompt experiments that moved it 3-5pp remain unfalsifiable at
+   this scale. **F-35 stands untouched.**
+3. F-36's refinement also stands: follow and like behaviour is far cheaper to
+   study than posting, and an intervention study should target those.
+
+**What was wrong in the artifacts, and is now fixed.** The Mechanics page was
+edited to say the 28pp figure "was computed across runs whose server settings
+differed" — that explanation belonged to the *wall-clock* 15 % figure (F-77's
+NUM_PARALLEL masquerade), not to F-35, which was measured on a byte-identical
+config pair and validated by a clean paired null. That edit has been reverted to
+a correct statement.
+
+**How it happened.** Two numbers both called "the noise floor" in a log with
+ninety findings, and I matched on the phrase rather than on the quantity. The
+tell was available: F-35 says "over 15 pairs" and "posting share", neither of
+which describes a run-level rate. **Caught by reading F-35 before overwriting a
+figure that cited it** — which is the only reason it did not reach the
+presentation.
+
+### F-91 — RETRACTS F-82's sublinear exponent. Agent scaling is LINEAR (0.992), and bigger worlds cost ~45 % more than projected
+
+The real 99-agent run finally executed — 99 agents verified in the database, 5
+rounds, twitter personas — after B-26's missing `--personas` flag was fixed.
+
+| round | 36 agents | 99 agents | ratio | implied exponent |
+|---|---|---|---|---|
+| 0 | 95 s | 172 s | 1.81 | 0.589 |
+| 1 | 352 s | 801 s | 2.28 | 0.813 |
+| 2 | 549 s | 1,292 s | 2.35 | 0.846 |
+| 3 | 745 s | 1,936 s | 2.60 | 0.944 |
+| 4 | **765 s** | **2,086 s** | **2.73** | **0.992** |
+
+**99/36 = 2.75. The cost ratio converges on exactly that.** The exponent is
+**0.992 — linear**, not the 0.88 F-82 reported.
+
+**Why F-82 was wrong, and it is the same error a third time.** Its exponent came
+from rounds 0-2, the only rounds it had. Those are ramp rounds, where neither
+world has filled its context window — and the exponent *climbs monotonically
+through the ramp* (0.589 -> 0.813 -> 0.846 -> 0.944 -> 0.992) precisely because
+context accumulation has not yet saturated. F-81 warned that estimates built on
+a 3-round run are wrong; F-86 explained the mechanism; F-91 is the third
+instance, and this time it was measured rather than projected.
+
+**Revised projections, linear in agents:**
+
+    99 agents x 15 rounds     ~2,086 s/round   ~8.7 hours
+    1000 agents x 1000 rounds ~20,680 s/round  ~239 days
+
+F-82 projected 165 days for the last of those. **The real figure is ~45 %
+higher.** Sublinearity was the one piece of good news about scaling and it does
+not survive measurement: adding agents costs exactly proportionally.
+
+**What still stands from F-82.** 99 agents run successfully; the persona file
+supports it with a flag and no code; and the twitter set cannot be pooled with
+the reddit 36. Only the exponent falls.
+
+### F-92 — The headline finding INDEPENDENTLY REPLICATES at a different configuration. This is the most scientifically valuable result of the efficiency work
+
+The nine validated-config runs were built as an *efficiency* baseline and had
+never been put through `exposure_model.py`. They should have been: they are
+54,000 fresh exposures, and — critically — **they are not a repeat of the
+published runs.** They differ in three ways at once:
+
+| | published `v10_*` | new bank runs |
+|---|---|---|
+| temperature | 0.9 | **0.7** |
+| tool descriptions | full docstrings | **terse** (F-64) |
+| prompt ordering | persona first | **shared prefix** (F-80) |
+
+That makes pooling illegitimate — and makes them something better than more data.
+**They are an independent replication.**
+
+    PRIMARY, stratified by (agent, feed slot), slots 0-4:
+      network vs discovery   OR 3.07  95% CI [2.76, 3.42]  p=7e-93  (888 strata)
+      fof     vs discovery   OR 1.86  95% CI [1.54, 2.24]  p=7e-11  (397 strata)
+
+    Per-run: positive in 9/9, individually significant in 9/9.
+      3.12, 3.50, 3.95, 2.92, 1.76, 2.71, 3.59, 3.88, 3.25
+
+**Against the published OR 3.51.** The new interval [2.76, 3.42] excludes 3.51,
+so the magnitudes are formally distinguishable — unsurprising, since temperature
+alone should move it. **The direction, the significance and the order of
+magnitude all hold across a three-way configuration change.** A result that
+survives being measured on a different prompt at a different temperature is worth
+considerably more than the same result measured twice the same way.
+
+**The fof contrast remains the weaker claim,** individually significant in only
+4/9 runs and leaning on pooling. It should be reported as suggestive, exactly as
+the original analysis said.
+
+**Method note, and it is a criticism of how this was run.** These nine runs sat
+for two days as "efficiency replicates" while the science artifacts continued to
+cite nine older runs. Nobody asked whether the new data bore on the research
+question until prompted. **Efficiency work generates real data; it should be
+analysed as data, not just as timings.**
+
+### F-93 — Terse tool descriptions did not only save time. Engagement TRIPLED, 2.29 % -> 6.94 %, and nobody checked until asked
+
+**How it was found.** Gordon asked how the efficiency changes could possibly have
+raised engagement. The expected answer was "they cannot, that is the point" -- the
+six adopted levers are all changes to *packaging*, and F-64's own note that tool
+calling "got better, not worse" had been read as a pleasant side remark. Grouping
+all 20 full-length 36x15 runs by prompt says otherwise.
+
+| tool descriptions | n | engagement | range | action rate | wall |
+|---|---|---|---|---|---|
+| full docstrings | 8 | **2.29 %** | 1.58-2.71 | 0.634 | 118 m |
+| first line only (F-64) | 9 | **6.94 %** | 5.99-7.68 | 0.776 | 169 m |
+
+Old group: `v10_register`, `v10_replicate`, `v10_rep3..6`, `baseline`, `full_8b`.
+New group: `np4_val_r1/r2`, `bank_r1..r7`. Computed from
+`data/sim4_package/runs_index.csv`; any reader can reproduce the grouping.
+
+**The ranges do not overlap and the denominator is fixed.** Exposures per run are
+6,050 (old) against 6,048 (new) -- 36 agents x 14 scored rounds x 12 slots. The
+entire difference is in the numerator: actions landing on posts the agent was
+shown.
+
+**Mechanism, and F-64 already stated it.** 3,759 of 4,761 prompt tokens were the
+22 docstrings, sitting between the feed and the instruction. F-65 supplies the
+extreme case: `full_8b` is the lowest-engagement full run ever recorded here at
+**1.576 %**, and it is the one run made at NP=8 with the long prompt, where the
+per-slot context of 4,096 silently truncated a 4,761-token prompt. **The feed is
+at the end of the prompt, so the feed is what was cut.**
+
+**It costs wall clock and is still a large net win.** Engaged agents emit more
+tool calls and more text, which accumulates into the next turn's context (F-86),
+so the run got *slower* despite the shorter prompt measuring 1.44x faster alone.
+On F-75's metric:
+
+    full docstrings    139 events / 1.97 h  =   70 events/hour
+    first line only    420 events / 2.82 h  =  149 events/hour   -> 2.1x
+
+**This is the mirror image of F-88.** `--fresh-context` buys 3.09x wall clock and
+returns 1.02x data per hour: a wash. Terse tools *cost* 1.43x wall clock and
+return 2.1x data per hour. F-75's rule works in both directions and this is the
+only entry in the ledger that comes out clearly ahead on it.
+
+**What is NOT established.** This is two groups of runs, not two arms. Terse
+descriptions (F-64) and the shared prefix (F-80) were adopted together, so their
+split is unresolved. Temperature is ruled out -- the old group spans 0.7 and 0.9
+and both sit inside the same 1.6-2.7 % band -- and the metric is ruled out:
+`git log` shows `analyze.py`'s `seen_and_acted` and `engagement_rate` untouched
+across the boundary. F-68's 3-round test measured only +0.62pp, inside the noise
+floor, so **the effect grows with round count and a short test cannot see it**
+(F-60 and F-81 a further time). At F-89's floor a 4.6pp effect needs 2 runs/arm.
+
+**The methodological point, and it is the same one as F-92.** An efficiency
+change altered the dependent variable by a factor of three and sat unexamined for
+eleven days because it was filed under performance. **Every change to the prompt
+is a change to the experiment, including the ones adopted for speed.** The
+improvement ledger below now carries engagement for every entry that has it.
+
+### F-94 — WHERE a post lands beats WHAT the post is. Slot position is worth OR 2.15 after controlling for the ranker's own score, and it replicates 9/9
+
+**The question.** Every exposure record carries `feed_position`. Nine months of
+analysis has treated it as a nuisance to stratify away -- `exposure_model.py`
+stratifies by (agent, feed slot) precisely to remove it. Nobody had estimated
+it. It turns out to be the same order of magnitude as the headline finding.
+
+**Raw, discovery tier only, 9 control runs, 25,788 first-exposures:**
+
+    slot  0   17.0 %        slot  6    3.7 %
+    slot  1   10.9 %        slot  7    3.1 %
+    slot  2    6.8 %        slot  8    2.8 %
+    slot  3    5.8 %        slot  9    2.1 %
+    slot  4    5.3 %        slot 10    1.7 %
+    slot  5    4.2 %        slot 11    2.3 %
+
+**A ten-fold spread from top to bottom of a single feed, within one tier.**
+
+**The design.** Post fixed effects remove "some posts are simply better". The
+remaining worry is that position encodes personalised affinity: a post at slot 0
+for you and slot 9 for me may differ because the ranker predicts you will like
+it more. Conditioning on the ranker's own SCORE as well as the post removes
+exactly that. The identifying variation is that two agents can see the same post
+at the same predicted relevance and still land at different slots, because each
+agent's feed has different competition.
+
+| stratification | OR | 95 % CI |
+|---|---|---|
+| post | 2.47 | — |
+| post x score decile | 2.45 | [2.02, 2.98] |
+| **post x score decile, discovery tier only** | **2.15** | **[1.75, 2.64]** |
+| agent x score decile | 2.65 | [2.25, 3.11] |
+
+**Controlling for score HARDER does not weaken it.** 5 / 10 / 20 / 40 / 80 score
+bins give 2.09 / 2.13 / 2.31 / 2.21 / 2.53. If position were a proxy for
+predicted relevance the effect would decay as the control tightens. It does not
+move.
+
+**Replication.** Positive in **9/9** runs, individually significant in 7/9:
+1.99, 3.18, 2.51, 2.04, 2.19, 1.63, 2.18, 1.46, 3.36.
+
+**Why the design works better than expected.** Spearman rho between score and
+position inside the discovery tier is only **-0.338**, and the same post lands
+at positions with a median spread of **2.88 slots** across agents. The feed is
+not a sorted list of scores -- recency scaling and tier backfill scramble it --
+so position carries a large quasi-random component. This is closer to a natural
+experiment than a regression control.
+
+**What it means, stated against the published result.** Connection beats content
+at OR 3.07 [2.76, 3.42] (F-92). Position beats relevance at OR 2.15 [1.75,
+2.64], measured on the same runs, inside one tier, after conditioning on the
+ranker's own judgement. **Roughly 70 % of the headline effect, from a variable
+the analysis was designed to erase.**
+
+**The tier confound, handled.** The three-tier feed puts network content at slot
+0 (16.8 % of slot-0 exposures are network; every slot from 8 down is 100 %
+discovery), so pooled position and source are partly the same variable. The
+discovery-only row is the one to quote. Network-tier exposures have almost no
+within-post position variation and contribute nothing.
+
+**INDEPENDENT REPLICATION, added the same night.** The ten pre-terse-prompt
+runs were put through the identical specification. They are a different
+configuration in three ways at once -- temperature 0.9 for six of them, full tool
+docstrings, persona-first prompt ordering -- and they engage at 2.71 % against
+6.08 %, less than half the rate.
+
+| runs | OR, discovery x post x score decile | 95 % CI | strata | positive |
+|---|---|---|---|---|
+| new prompt (9) | 2.15 | [1.75, 2.64] | 475 | 9/9 |
+| **old prompt (8)** | **1.99** | **[1.50, 2.64]** | 225 | **8/8** |
+
+**THIRD CONFIGURATION, final.** The seven sweep runs are a different persona
+file in six of seven cases, a different round count (7 not 15) and a much lower
+base rate (1.67 % engagement). Computed across all seven now that the sweep is
+complete:
+
+| configuration | runs | OR | 95 % CI | strata |
+|---|---|---|---|---|
+| new prompt, reddit | 9 | 2.15 | [1.75, 2.64] | 475 |
+| old prompt, reddit | 8 | 1.99 | [1.50, 2.64] | 225 |
+| **sweep, 7 rounds** | **7** | **1.48** | **[1.08, 2.04]** | 173 |
+
+**The preliminary figure was 2.26 on the first four runs and fell to 1.48 on all
+seven.** That is recorded rather than quietly replaced: an interim estimate on a
+third of the data moved by a third once the rest arrived, which is what small
+numbers of informative strata do. The sweep contributes 173 strata against the
+bank's 475, because seven short rounds at 1.67 % engagement produce few
+comparisons.
+
+**The effect still replicates, more weakly.** The interval excludes 1, and the
+raw gradient is intact: **5.34 % at slot 0 against 0.55 % at slot 11**, a ten-fold
+spread. Positive in 5 of 7 runs; `sweep_a75` returns 0.94 and `sweep_a12` has too
+few strata to estimate at all.
+
+**Twenty-four runs across three configurations and two persona files.** The
+sweep's point estimate is the lowest of the three and the honest summary is a
+range of roughly **1.5 to 2.2**, not a single number.
+
+**Seventeen of seventeen runs positive across two configurations**, with point
+estimates 2.15 and 1.99 and heavily overlapping intervals. The raw gradient
+replicates too, 5.48 % at slot 0 against 0.88 % at slot 11 -- a shallower spread
+than the new prompt's ten-fold, which is what a halved base rate predicts.
+
+This is the F-92 pattern deliberately repeated: **a result measured on a
+different prompt at a different temperature is worth more than the same result
+measured twice the same way.** Position was not an artefact of the terse prompt,
+and it was present in every run this project has ever done.
+
+**What is NOT established.** This is observational within a run, not an
+intervention. The clean test is a shuffled-slot arm: rank as normal, then
+randomise the order before display. If the effect is attention rather than any
+residual relevance the ranker knows about, engagement should flatten across
+slots and total engagement should fall. That is one run.
+
+**Method note.** Found while answering a question about the efficiency work, on
+data that had been sitting in the package for two days. Same lesson as F-92,
+third instance: **the data we already have has not been fully asked.**
+
+### F-95 — Memory does not CREATE the connection effect, it AMPLIFIES it. Removing it cuts OR 3.07 to 2.05
+
+The three `--fresh-context` runs were produced for the F-88 efficiency A/B and,
+exactly as F-92 records happening once already, were never put through
+`exposure_model.py`. They are 18,144 fresh exposures on an arm nobody had asked
+a scientific question of.
+
+| arm | n | network vs discovery, primary | engagement |
+|---|---|---|---|
+| control | 9 | **3.07** [2.76, 3.42] | 6.94 % |
+| fresh-context | 3 | **2.05** [1.56, 2.68] | 2.30 % |
+
+Primary is the published specification unchanged: Mantel-Haenszel stratified by
+(agent, feed slot), slots 0-4. **The intervals do not overlap.**
+
+**What it means.** An agent that cannot remember previous rounds still engages
+more with posts from accounts it follows -- positive in 3/3 runs, individually
+significant in 2/3, at 1.09 / 3.36 / 2.39. So the effect does not require
+memory. But it is about a third weaker without it.
+
+That is the interesting shape. The follow relationship is visible in the prompt
+every turn regardless of memory, so a purely stimulus-driven agent should show
+the full effect. It does not. **Something about accumulated history makes an
+agent treat its own connections as more worth acting on**, and that is a claim
+about what memory does socially rather than computationally.
+
+**Caveats that must travel with it.** n=3 against n=9. The fresh-context arm
+engages at a third the rate, so its estimate rests on far fewer events and its
+per-run spread is wide. The fof contrast collapses entirely under memory removal
+(0.64 [0.19, 2.20], 45 strata) and should not be read at all at this n.
+
+**Why it matters for what to do next.** It converts the memory-window proposal
+in the research agenda from "how fast does it run" into "what does memory do to
+the phenomenon", and it gives that study a second dependent variable it did not
+have. The dose-response now has two endpoints already measured.
+
+#### B-28 — I ran a six-point sweep at a 4,096-token context and called the result a scaling law
+
+**What happened.** Ollama was started at 21:24 with `OLLAMA_NUM_PARALLEL=4` and
+**no** `OLLAMA_CONTEXT_LENGTH`. Ollama 0.24's default is **4,096 tokens per
+slot**. The prompt is ~2,733 tokens before any transcript, and the transcript
+pushes it past 4,096 within one round. Every run in the sweep was truncated, and
+**the feed sits at the end of the prompt**, so the feed is what was cut.
+
+Measured directly against the running server:
+
+    prompt sent  ~2,093 tok  ->  reports  2,109
+    prompt sent  ~6,571 tok  ->  reports  4,096   TRUNCATED
+    prompt sent ~17,932 tok  ->  reports  4,096   TRUNCATED
+
+**The scientific proof.** `sweep_a36_reddit` is the same personas, prompt,
+temperature, model and seed as the control bank:
+
+| run | context | engagement |
+|---|---|---|
+| `sweep_a36_reddit` | 4,096 | **2.50 %** |
+| `ctx8192_a36_reddit` (re-run) | 8,192 | **5.16 %** |
+| `bank_r5` | larger | 5.88 % |
+| `bank_r1` | larger | 6.83 % |
+
+**Engagement halved because the agents could not see their feeds** -- while the
+wall clock IMPROVED, which is why it read as a clean scaling result for four
+hours and produced two findings that had to be withdrawn.
+
+**The re-run closes it.** At 8,192 the reddit configuration reproduces the bank on
+cost (769 s at round 4 against 793) and restores the three-round ramp exactly.
+
+**Two caps, two ramp lengths, one mechanism.** At 4,096 the window fills inside
+one round and the curve is flat from round 1. At 8,192 it fills over three rounds.
+**This is the strongest confirmation yet that the ramp is context accumulation**
+(F-86) rather than anything else, arrived at by accident.
+
+**Cause: mine, and this log warned about it.** F-65 says *"anyone raising
+`NUM_PARALLEL` must raise `OLLAMA_CONTEXT_LENGTH` with it."* I read that finding
+the same night and made the same class of mistake in the other direction.
+
+**Now enforced in code.** `server_state.py` (+8 tests) reads `/api/ps`, refuses
+below 8,192, and writes `server_context_length` into every manifest. Wired into
+`run_simulation.py` (aborts) and `check_deps.py` (now 8 checks). Override with
+`OASIS_ALLOW_SMALL_CONTEXT=1`.
+
+    OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve
+
+#### F-97 and F-98 — BOTH WITHDRAWN. Recorded so nobody re-derives them
+
+Written between 02:00 and 03:30 on the truncated data, and both are artefacts of
+B-28. Kept here because this log's value is in recording what was believed and
+why it was wrong.
+
+- **F-97 claimed the reddit bank "cost 2.2x what an identical configuration costs
+  on a verified server"**, and speculated about a serialising server. Backwards:
+  the bank cost more because it was doing more. **The bank was correct.**
+- **F-98 claimed the three-round ramp "does not exist on a verified server"**,
+  retiring F-81 as family-specific and breaking F-86's generality. Also
+  backwards: the ramp vanished because the window filled in one round. **F-81 and
+  F-86 are vindicated.**
+
+Two further claims from the same hours are withdrawn: an engagement-cost "law"
+(refuted by its own data at R^2 0.595), and an assertion that the server
+hypothesis was "killed by no discontinuity at any session boundary" (never
+verified -- server state was not recorded for any earlier run).
+
+**The pattern in all four: a mechanism proposed after two or three families
+lined up, without checking whether the variable moves WITHIN a family where
+everything else is fixed.**
+
+### F-96 — SETTLED. Cost is LINEAR in agent count (exponent 0.991) at 22.7 s per agent-turn. F-91 was right
+
+**Final measurement.** Twitter personas, `--semaphore 4`, context verified at
+8,192 per slot, plateau = mean of rounds 4-6:
+
+| agents | plateau | sd | per agent-turn |
+|---|---|---|---|
+| 12 | 276.0 s | 9.7 | 23.00 s |
+| 24 | 532.3 s | 18.0 | 22.18 s |
+| 36 | 824.8 s | 26.7 | 22.91 s |
+
+    log-log fit:  plateau proportional to agents^0.991     R^2 = 0.9988
+    per agent-turn: mean 22.70 s, sd 0.45
+
+**Cost is linear in agent count.** Not sublinear, not superlinear.
+
+#### This corrects the first version of F-96, which claimed 1.081
+
+That version was measured on the truncated sweep. When B-28 was found I kept the
+exponent and argued *"truncation applies equally at every world size, so the
+shape survives -- read the exponent, not the level."*
+
+**Withdrawn.** Truncation does **not** apply equally: a larger world produces
+more content per round, so its prompts reach the cap sooner and lose
+proportionally more. The bias is size-dependent, which is precisely what inflates
+an exponent. **1.081 truncated against 0.991 correct -- about 9 %.**
+
+*"The confound applies to every point, so the shape is safe"* is an argument, not
+a measurement. **A shape claim needs its own clean data.**
+
+#### F-91 is CONFIRMED, not superseded
+
+F-91 reported **0.99** from a 36-agent and a 99-agent run, and I wrote that F-96
+superseded it and later that it was "computed on a ramp round of a degrading
+run". Both withdrawn. **A clean three-point sweep at verified context returns
+0.991 -- F-91's figure to three decimals.** Its method was thinner and its
+99-agent run was genuinely still climbing, but its answer was right.
+
+**F-82's 0.88 remains superseded**; it came from ramp rounds.
+
+#### Planning numbers, measured rather than inferred
+
+    wall clock  ~=  agents x rounds x 22.7 s     after a three-round ramp (F-81)
+
+    36 x 15     ->  ~170 min   <- reproduces the nine-run bank exactly
+    99 x 15     ->  ~8.7 hours
+    1000 x 1000 ->  ~263 days
+
+**The cost model and the historical record now agree**, which is the check that
+matters.
+
+#### B-30 — Three edits reported success and changed nothing, and the artifact was published self-contradicting for forty minutes
+
+**Symptom.** Reading the published page end to end at 08:47 found it asserting
+both an exponent of 1.081 and 0.991 in its own headline figures; carrying the
+**withdrawn** F-98 as "Law 1 -- the ramp was an artefact" while Law 2 and the
+reproducibility section described the opposite; and a runbook still instructing
+`OLLAMA_NUM_PARALLEL=4 ... ollama serve` with no `OLLAMA_CONTEXT_LENGTH` --
+**the exact command that caused B-28**, on the page that documents B-28.
+
+**Cause.** Section replacements matched on a raw `·` while the file contained
+`&middot;`, because an earlier edit had itself introduced the entity. The loop
+found no match, copied every line through, and printed its unconditional success
+message. Three separate rewrites -- Law 1's correction, Law 2's correction, and
+one headline figure -- silently did nothing, and I reported each as done.
+
+**Why it survived several checks.** The HTML validator passed, because nothing
+was malformed. The tag-balance check passed. `grep` for new content would have
+caught it instantly and was not run. **A structural check cannot detect an edit
+that did not happen.**
+
+**Fix.** All four defects corrected and republished (v12), rebased on the live
+version rather than the local file, since the two had diverged. **Rule: after any
+scripted edit, grep for a string that only the NEW content contains.** An edit
+that reports success is not evidence; the changed bytes are.
+
+**Third instance tonight of the same class** -- B-27 (a label that stopped
+meaning what it said), B-29 (a replacement whose blast radius nobody checked),
+and now this. All three are edits whose effect was assumed rather than verified,
+which is precisely the failure B-28 was about, applied to text instead of runs.
+
+#### B-29 — I destroyed four log sections with my own edits, and only noticed two hours later
+
+Rewriting section 0 STATUS at 05:40 replaced everything between the STATUS
+heading and `### The task, as given`. F-96, F-97, F-98, B-28 and an interim note
+had all been inserted into that span earlier in the night, and all were deleted.
+Found at 08:00 when a `grep` for F-96 returned the STATUS summary line and no
+section.
+
+**Cause.** Repeated large-span `s[:start] + new + s[end:]` replacements against a
+file whose structure was changing between edits. Several of those edits also
+appended their own anchor, which is how `### Immediately next` ended up
+duplicated five times in one line earlier.
+
+**Rule.** Anchor replacements to the smallest unique span that does the job, and
+`grep` for the ids you expect to survive after any edit that spans more than one
+section. Content restored above from the session record.
+
+## 3d. The codebase: what is ours, what is upstream, where it lives
+
+Added 2026-09-11. This log had ninety findings and no inventory, so a reader had
+no way to know which code a finding referred to or whether it was ours to change.
+
+**D-1 restated: upstream OASIS is never edited.** Where behaviour had to differ
+we subclassed. `TimelineAgent(SocialAgent)`, `TimelinePlatform(Platform)`,
+`TimelineEnvironment(SocialEnvironment)`. Two consequences that have both paid
+off: upstream changes cannot silently alter our results, and any finding can be
+attributed to our code or theirs without archaeology.
+
+### Upstream (read-only)
+
+| file | lines | role |
+|---|---|---|
+| `oasis/social_platform/platform.py` | 1,642 | the platform: posts, likes, follows, schema |
+| `oasis/social_agent/agent_action.py` | 758 | the 22-action surface |
+| `oasis/social_agent/agent.py` | 321 | one agent's turn; `max_iteration=1` lives here (F-84) |
+| `oasis/social_agent/agent_graph.py` | 292 | agent collection and follow graph |
+| `oasis/social_platform/channel.py` | 71 | agent-to-platform message queue |
+
+### Ours — `examples/experiment/social_timeline/` (~9,500 lines)
+
+**Running it**
+
+| file | lines | role |
+|---|---|---|
+| `run_simulation.py` | 723 | driver; owns the manifest, the timing instrumentation and every CLI flag |
+| `timeline_platform.py` | 1,017 | three-tier personalised feed + the exposure ledger. The scientific core |
+| `timeline_agent.py` | 723 | persona to prompt; terse tools (F-64), shared prefix (F-80), `fresh_context` (F-87) |
+| `personas.py` | 265 | deterministic selection; separability measurement |
+| `embedding.py` | 147 | mean-pooled TwHIN-BERT (D-13 deviation from upstream) |
+| `check_deps.py` | 317 | pre-flight; blocks a run on a serialising server (F-56) |
+
+**Analysis**
+
+| file | lines | role |
+|---|---|---|
+| `analyze.py` | 682 | database to metrics; defines `seen_and_acted` (F-71) |
+| `exposure_model.py` | 441 | Mantel-Haenszel and cluster-robust logistic regression |
+| `compare.py` | 328 | paired, cluster-aware run comparison |
+| `dossier.py` | 848 | human-readable full-run report |
+| `make_graph.py` | 1,590 | before/after follow-graph diagram |
+| `noise_floor.py` | 166 | the F-35 replicate measurement |
+| `export_parquet.py` | 382 | 18x compaction (D-15) |
+| `build_package.py` | 327 | the handover folder; `arm` column added 09-11 |
+| `eval_model.py` | 256 | 80-second model screen (F-71, F-78) |
+
+**Tests — each exists because something failed silently**
+
+`test_instrumentation.py` (the two bugs that produced wrong data),
+`test_ranking.py` (vectorisation is bit-identical), `test_export_parquet.py`
+(no value changes under compaction), `test_exposure_model.py`,
+`test_compare.py`, `test_actions.py`, `test_smart_tool_loop.py`.
+
+### Data
+
+    data/reddit/user_data_36.json               36 personas, 9 fields each
+    data/twitter_dataset/.../False_Business_0.csv   99 scraped bios
+    data/social_timeline_<label>.db             one per run
+    data/social_timeline_<label>.json           manifest: config + timings
+    data/parquet/<label>/                       compacted, partitioned by round
+    data/sim4_package/                          the handover folder
+
+## 3e. Improvement ledger — every efficiency change, with its verdict
+
+| change | measured | verdict |
+|---|---|---|
+| Terse tool descriptions (F-64, **F-93**) | **1.44x**, and engagement **2.29 % -> 6.94 %** | **adopted.** 80 % of the prompt was docstrings. The only entry here that improved the dependent variable; 2.1x data per hour |
+| Vectorised ranking | **25-30x** on that phase | **adopted.** Bit-identical, gated by `test_ranking.py` |
+| Two composite indexes | **260x** on that lookup | **adopted** |
+| Shared prompt prefix (F-80) | **1.66x** at NP=4 | **already the default.** Believed worthless until measured |
+| Parquet export (D-15) | **18x** storage | **adopted** |
+| Concurrency 1 -> 4 (F-77) | **1.13x** | **adopted.** Also the memory sweet spot |
+| Concurrency 4 -> 8 | not resolvable | **rejected.** 5x the variance for no mean gain |
+| Concurrency 16, 32 (F-76) | 52x slower / fails | **rejected.** Memory, not compute |
+| `--smart-tool-loop` (F-83/84) | **no-op** | **rejected.** Upstream already caps the loop |
+| `--fresh-context` (F-87/88) | 3.07x, 1.02x yield | **rejected.** Real speed, entirely consumed by lost engagement |
+| Smaller models (F-78) | 2.2-4.7x | **rejected.** All three fail the engagement gate |
+| `--max-tokens` cap (F-63) | faster | **rejected.** Engagement 4.31 % -> 0.36 % |
+
+**The pattern across twelve entries: every lever that touches what the model
+says costs more engagement than it buys time.** The six adopted changes are all
+changes to how the work is *packaged* — shorter prompts, better ordering,
+smarter indexes, right-sized concurrency — and none of them changes a single
+decision an agent makes.
+
+## 3c. Deferred sim queue — questions the harness CANNOT answer
+
+Raised 2026-09-08 while comparing granite4.1:8b, ornith:9b, gemma4:e2b,
+gemma4:12b, qwen2.5:14b. `eval_model.py` settles tool-call rate, ENGAGED,
+grounding, action mix and real tok/s in ~80 s per model. Everything below needs
+a full 36-agent run and is NOT to be run without explicit permission.
+
+| # | Question | Why the harness can't answer it | Cost |
+|---|---|---|---|
+| S-1 | Does ENGAGED hold over 15 rounds as the feed fills? | F-71: the proxy compresses a 500x deficit to 2.7x. Single fresh turns cannot see a deficit that compounds. | 1 run |
+| S-2 | Does the model write *in persona*, or like its training domain? | The harness scores whether a call is well-formed and feed-grounded, never whether the prose is plausibly a 40-year-old ESTJ. Sharpest for `ornith:9b`, an RL-trained coding agent. | 1 run + read |
+| S-3 | Do the three published findings survive a model change? | Connection-beats-content (OR 3.51), repetition-beats-both (OR 2.62) are properties of the model+feed system, not the feed alone. A new model is a new population. | 3+ runs |
+| S-4 | What is the noise floor for the new model? | F-35's ~28pp is measured on llama3.1:8b ONLY. Every effect size is judged against it, so it must be re-established per model before any comparison means anything. | 5+ runs |
+| S-5 | Does gemma4's thinking mode inflate output tokens at 36 agents? | Partially harness-visible (tok/s, output length), but F-60 is unambiguous: every small bench in this project overpredicted, four times running. Confirm at 36. | 1 run |
+| S-6 | Real wall-clock per round at 36 agents through 8 slots | Single-stream tok/s ignores the contention that makes a 16.4 s call out of ~2.0 s of GPU work (F-67). | 1 run |
+
+**Order if this is ever run:** S-1 first — it is the cheapest and it gates every
+other question. A model that fails S-1 makes S-2 through S-6 moot, which is
+exactly the sequencing that seven wasted runs on llama3.2:3b did not have.
 
 ## 4. Open questions
 

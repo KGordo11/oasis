@@ -76,6 +76,7 @@ from __future__ import annotations
 
 import math
 import os
+import random
 import sys
 import time
 from collections import defaultdict
@@ -157,6 +158,47 @@ class _ResilientPlatformUtils:
         return recovered
 
 
+def shuffle_feed_order(selected_post_ids, agent_id, round_no, seed):
+    """Permute a feed's ORDER while leaving its CONTENTS untouched (F-94).
+
+    IN PLAIN WORDS
+    --------------
+    The feed is picked exactly as it normally would be, then the twelve posts
+    are dealt out in a scrambled order before the agent sees them. Same posts,
+    same sources, different places on the screen.
+
+    WHY
+    ---
+    F-94 found that where a post sits predicts whether an agent acts on it, at
+    an odds ratio of roughly 1.5-2.2 after holding the post and the ranker's own
+    score fixed, in 24 runs across two persona files. But position was never
+    ASSIGNED, so that estimate cannot separate "being seen first" from "the
+    ranker knows something its stored score does not express". Shuffling assigns
+    it, and turns an observation into an experiment.
+
+    A separate `random.Random` is used deliberately. Feed selection already
+    draws from the global `random` stream for exploration slots, so drawing from
+    it here would change WHICH posts get selected on subsequent calls -- and the
+    arm would no longer be a pure re-ordering. `test_shuffle_feed.py` pins that.
+
+    The key is (seed, agent, round) so a run is reproducible from its manifest,
+    and so two agents in the same round get different permutations. If every
+    agent got the SAME re-ordering, slot and content would stay correlated and
+    the arm would break nothing.
+    """
+    if len(selected_post_ids) < 2:
+        return list(selected_post_ids)
+    # Combined arithmetically rather than by hashing a tuple: tuple hashing of
+    # ints is stable across runs today, but it is an implementation detail and
+    # a run has to be reproducible from its manifest years from now.
+    rng = random.Random((int(seed) * 1_000_003
+                         + int(agent_id) * 10_007
+                         + int(round_no)) & 0x7FFF_FFFF)
+    out = list(selected_post_ids)
+    rng.shuffle(out)
+    return out
+
+
 class TimelinePlatform(Platform):
     """Personalized, fully instrumented platform. See module docstring."""
 
@@ -164,6 +206,8 @@ class TimelinePlatform(Platform):
                  explore_slots: int = 2, network_slots: int = 5,
                  fof_slots: int = 3, discovery_slots: int = 4,
                  feed_size: int = 12,
+                 shuffle_feed: bool = False,
+                 shuffle_seed: int = 0,
                  **kwargs):
         """recency_span_rounds: number of rounds over which a post should decay
         from brand-new to stale.
@@ -202,6 +246,10 @@ class TimelinePlatform(Platform):
         # graph did not supply, so size is constant and only
         # composition varies with how connected an agent is.
         self.feed_size = feed_size
+        # F-94's experimental arm: rank and select as normal, then permute the
+        # ORDER before display, so slot is assigned rather than observed.
+        self.shuffle_feed = shuffle_feed
+        self.shuffle_seed = shuffle_seed
         self._feed_order = {}
         # agent_id -> ids surfaced by that agent's own searches
         self._search_hits = {}
@@ -731,6 +779,34 @@ class TimelinePlatform(Platform):
                 sorted(from_network, key=lambda p: -p)
                 + [p for p in fof_pool[:self.fof_slots]]
                 + disc)
+            if self.shuffle_feed and len(selected_post_ids) > 1:
+                # After selection, before display: same posts, same tiers, only
+                # the position changes. The exposure ledger records the slot the
+                # agent actually saw, so the analysis needs no change at all.
+                #
+                # The length guard is on the counter as much as the call. A
+                # first version incremented on every attempt, so an empty-feed
+                # round read as "18 feeds shuffled" when 10 were -- the same
+                # mislabelled-counter mistake as F-38 and B-23, which is how
+                # this project has twice reported a quantity adjacent to the one
+                # that mattered.
+                before = sorted(selected_post_ids)
+                selected_post_ids = shuffle_feed_order(
+                    selected_post_ids, agent_id=agent_id,
+                    round_no=self.stats.get("rounds_ranked", 0),
+                    seed=self.shuffle_seed)
+                # Checked in-run, because it cannot be checked between runs:
+                # sampling at temperature 0.7 makes two runs diverge whatever
+                # the feed does, so a post-hoc comparison of a shuffled run
+                # against a control proves nothing about this invariant. If the
+                # arm ever re-SELECTS rather than re-ORDERS, the experiment is
+                # not a position experiment and the whole run is void.
+                if sorted(selected_post_ids) != before:
+                    raise AssertionError(
+                        f"shuffle changed the feed CONTENTS for agent "
+                        f"{agent_id}: {before} -> {sorted(selected_post_ids)}")
+                self.stats["feeds_shuffled"] = (
+                    self.stats.get("feeds_shuffled", 0) + 1)
             self._feed_order = {pid: i
                                 for i, pid in enumerate(selected_post_ids)}
             # Kept for the exposure labels below.

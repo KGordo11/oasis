@@ -222,6 +222,28 @@ def _ollama():
     return f"models={names}"
 
 
+@check("Ollama's context window can hold our prompt (B-28)")
+def _ctx_window():
+    """The window must fit the prompt, or the feed is silently cut.
+
+    B-28: a six-run sweep was made at Ollama's 4,096-token default. The prompt
+    is ~2,730 tokens before an agent has said anything and grows every turn, so
+    every prompt was truncated -- and the feed sits at the END of the prompt.
+    Engagement fell from 6.8 % to 2.5 % at an otherwise identical configuration
+    while the WALL CLOCK IMPROVED, which is why nothing caught it for six runs.
+
+    F-65 stated the rule and it was not enough. This is the control.
+    """
+    import server_state
+    st = server_state.probe()
+    ok, why = server_state.verify(st)
+    if ok:
+        return why
+    if os.environ.get("OASIS_ALLOW_SMALL_CONTEXT"):
+        return why + " -- OVERRIDDEN by OASIS_ALLOW_SMALL_CONTEXT"
+    raise ValueError(why)
+
+
 @check("Ollama batches requests (OLLAMA_NUM_PARALLEL > 1)")
 def _ollama_parallel():
     """Detect OLLAMA_NUM_PARALLEL=1, which silently serialises every agent.
@@ -298,8 +320,12 @@ def _ollama_parallel():
             verdict + " -- concurrency buys nothing, so Ollama is serialising "
             "(OLLAMA_NUM_PARALLEL=1). Every agent turn queues and the run "
             "takes roughly twice as long as it needs to. Fix:\n"
-            "      OLLAMA_NUM_PARALLEL=8 ollama serve\n"
-            "    then run with --semaphore 8 (F-53 measured 1.9x here).\n"
+            "      OLLAMA_NUM_PARALLEL=4 OLLAMA_KEEP_ALIVE=24h ollama serve\n"
+            "    then run with --semaphore 4.\n"
+            "    FOUR, not eight: F-77 replicated the sweep and eight gives 5x\n"
+            "    the wall-clock variance for no mean gain, holding 17 GB and\n"
+            "    leaving the machine 0.5 GB free. F-53's 1.9x and 8-slot advice\n"
+            "    were single measurements and are retracted.\n"
             "    To proceed anyway: OASIS_ALLOW_SERIAL_OLLAMA=1")
     return verdict + " -- batching"
 

@@ -332,6 +332,14 @@ class TimelineAgent(SocialAgent):
     # sequence gets 4,096 tokens of context and the old prompt was 4,761, so
     # prompts were being silently cut; at ~1,300 there is no slot count where
     # that can happen.
+    # F-83. Actions whose RETURN VALUE the model needs to see. Everything else
+    # is terminal: the effect is already committed to the database and the
+    # follow-up call teaches the agent nothing. `do_nothing` is terminal by
+    # definition. Keep this list conservative -- a wrongly-terminal action
+    # silently removes a capability, which is the failure --lean-actions has.
+    INFORMATIONAL = frozenset({"search_user", "search_posts", "trend",
+                               "refresh"})
+
     TERSE = {
         "create_post":          "Write a new post.",
         "create_comment":       "Reply to a post you were shown.",
@@ -372,6 +380,8 @@ class TimelineAgent(SocialAgent):
     def __init__(self, *args, terse_tools: bool = True,
                  shared_prefix: bool = True,
                  max_tool_rounds: int | None = None,
+                 smart_tool_loop: bool = False,
+                 fresh_context: bool = False,
                  include_groups: bool = False, **kwargs):
         """Set up the agent wrapper that survives errors without killing the run."""
         super().__init__(*args, **kwargs)
@@ -396,6 +406,46 @@ class TimelineAgent(SocialAgent):
         # turns average 1.70 actions. That is an A/B, not an assumption.
         if max_tool_rounds is not None:
             self.max_iteration = max_tool_rounds
+
+        # F-83. The measured version of the paragraph above, and a better fix
+        # than a blunt cap. In a full 15-round run of 504 agent turns:
+        #
+        #     turns with 0 or 1 action      499  (99.0 %)
+        #     turns with 2 or more            5  ( 1.0 %)
+        #     actions returning content the model must read:  0 of 431
+        #
+        # Every action taken was terminal -- a like, a follow, a post. The
+        # follow-up model call shows the agent a result it does not use, so it
+        # can take a second action once in a hundred turns. That follow-up is
+        # ~46 % of all LLM calls in a run.
+        #
+        # `max_tool_rounds=1` removes it, but also removes the search -> read
+        # -> act path the action surface is supposed to permit. The conditional
+        # version keeps that path and drops the rest: stop after terminal
+        # actions, keep going after informational ones. The action surface is
+        # untouched, unlike --lean-actions (F-55).
+        self.smart_tool_loop = smart_tool_loop
+
+        # F-86. Every turn appends the user message, the assistant reply and
+        # the tool result to this agent's memory, and all of it is re-prefilled
+        # next turn. Measured on bank_r5: request latency runs 10.1 s at round 0,
+        # 86.2 s by round 4, then flat -- the context filling to
+        # OLLAMA_CONTEXT_LENGTH and truncating. Round 0 costs 94 s of wall
+        # clock; rounds 4+ cost ~790 s, and the difference is re-reading
+        # history.
+        #
+        # With this on, each turn starts from the system message alone, so
+        # every round costs about what round 0 costs.
+        #
+        # The behavioural question is open and this is OFF by default. Note the
+        # agent is ALREADY losing most of its history to truncation at 8192
+        # tokens -- it gets an arbitrary sliding window, not coherent memory --
+        # so the change may be smaller than it sounds. That is an argument, not
+        # a result. A/B it against the bank (F-85: 2-5 runs, not a campaign).
+        self.fresh_context = fresh_context
+        self.context_resets = 0
+        self._base_max_iteration = self.max_iteration
+        self.short_circuits = 0
 
         self.shared_prefix = shared_prefix
         self.persona_text = None
@@ -503,8 +553,40 @@ class TimelineAgent(SocialAgent):
                 agent_log.debug("could not shorten %s: %s", name, exc)
         self.terse_tools_applied = swapped
 
+    async def _aexecute_tool(self, tool_call_request):
+        """Run the tool, then decide whether a follow-up call is worth making.
+
+        camel reads `self.max_iteration` immediately AFTER this returns
+        (chat_agent.py:2070), so mutating it here takes effect on this same
+        iteration. That is why this needs no change to upstream.
+        """
+        record = await super()._aexecute_tool(tool_call_request)
+        if self.smart_tool_loop:
+            name = getattr(tool_call_request, "tool_name", None)
+            if name in self.INFORMATIONAL:
+                # The agent asked for information; it must get a turn to read it.
+                self.max_iteration = self._base_max_iteration
+            else:
+                self.max_iteration = 1
+                self.short_circuits += 1
+        return record
+
     async def perform_action_by_llm(self):
         """Show this person their feed, ask the AI what to do, and do it."""
+        # Each turn starts from the configured budget; a previous turn's
+        # short-circuit must not leak into this one.
+        if self.smart_tool_loop:
+            self.max_iteration = self._base_max_iteration
+        if self.fresh_context:
+            # init_messages() rebuilds memory from the system message alone.
+            # The persona lives in the system message (or, when hoisted, is
+            # re-sent with the feed), so identity survives; only the transcript
+            # of previous rounds is dropped.
+            try:
+                self.init_messages()
+                self.context_resets += 1
+            except Exception as exc:  # noqa: BLE001 - never fail a turn
+                agent_log.debug("fresh_context reset failed: %s", exc)
         try:
             return await super().perform_action_by_llm()
         except Exception as exc:  # noqa: BLE001 - deliberate: never propagate
@@ -553,6 +635,8 @@ async def generate_timeline_agents(
     model=None,
     available_actions=None,
     limit: int | None = None,
+    smart_tool_loop: bool = False,
+    fresh_context: bool = False,
     include_groups: bool = False,
     diverse: bool = True,
     terse_tools: bool = True,
@@ -623,6 +707,8 @@ async def generate_timeline_agents(
             terse_tools=terse_tools,
             shared_prefix=shared_prefix,
             max_tool_rounds=max_tool_rounds,
+            smart_tool_loop=smart_tool_loop,
+            fresh_context=fresh_context,
             include_groups=include_groups,
             agent_id=i,
             user_info=user_info,

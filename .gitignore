@@ -112,3 +112,19 @@ data/overnight_logs/
 # to every diff and nothing to the record. The exporter and its fidelity gate
 # are what need to be under version control, and they are.
 data/parquet/
+
+# ---- Simulation output is DERIVED, and git is not where it belongs ----
+# `.db` and `data/parquet/` were already excluded on exactly this reasoning.
+# Everything below is regenerated from a run's `.db` by analyze.py, dossier.py,
+# export_parquet.py, build_package.py or make_timing_charts.py, and together it
+# is ~126 MB against 0.4 MB of actual code. The run manifests and analysis JSONs
+# are the durable record, so they live in the handover package and the logs --
+# not in the history of a fork of someone else's repo.
+data/runs/
+data/_archive/
+data/sim4_package/
+data/charts/
+data/social_timeline_*.json
+data/social_timeline_*.txt
+data/overnight_cmp_*.txt
+data/graph.html

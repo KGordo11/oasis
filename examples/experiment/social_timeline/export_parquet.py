@@ -349,8 +349,13 @@ def main() -> int:
     out_root = args.out or os.path.join(args.data_dir, "parquet")
 
     if args.all:
-        dbs = sorted(glob.glob(os.path.join(
-            args.data_dir, "social_timeline_*.db")))
+        # Runs live either directly in data/ or grouped under data/runs/<arm>/
+        # (and data/_archive/... ). Search recursively so the layout can change
+        # without the export silently finding nothing.
+        dbs = sorted(set(
+            glob.glob(os.path.join(args.data_dir, "social_timeline_*.db"))
+            + glob.glob(os.path.join(args.data_dir, "runs", "**",
+                                     "social_timeline_*.db"), recursive=True)))
     elif args.db:
         dbs = [args.db]
     else:

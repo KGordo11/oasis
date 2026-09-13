@@ -88,7 +88,7 @@ def build_action_set(include_groups: bool = True, lean: bool = False):
         ActionType.REPOST, ActionType.QUOTE_POST, ActionType.REPORT_POST,
         ActionType.FOLLOW, ActionType.UNFOLLOW,
         ActionType.MUTE, ActionType.UNMUTE,
-        ActionType.SEARCH_USER, ActionType.SEARCH_POSTS,
+        ActionType.SEARCH_USER, ActionType.SEARCH_POSTS,                                          
         ActionType.TREND, ActionType.REFRESH, ActionType.DO_NOTHING,
     ]
     group = [
@@ -132,6 +132,8 @@ async def run(args):
     import oasis
     from oasis import LLMAction
     from oasis.social_platform.channel import Channel
+
+    import server_state
 
     from timeline_agent import PROMPT_VERSION, generate_timeline_agents
     from timeline_platform import TimelinePlatform
@@ -188,6 +190,8 @@ async def run(args):
         terse_tools=getattr(args, "terse_tools", True),
         shared_prefix=getattr(args, "shared_prefix", True),
         max_tool_rounds=getattr(args, "max_tool_rounds", None),
+        smart_tool_loop=getattr(args, "smart_tool_loop", False),
+        fresh_context=getattr(args, "fresh_context", False),
         profile_path=os.path.join(REPO_ROOT, args.personas),
         model=model,
         available_actions=actions,
@@ -223,6 +227,8 @@ async def run(args):
         fof_slots=args.fof_slots,
         discovery_slots=args.discovery_slots,
         feed_size=args.feed_size,
+        shuffle_feed=args.shuffle_feed,
+        shuffle_seed=args.seed,
     )
 
     env = oasis.make(
@@ -234,6 +240,20 @@ async def run(args):
         semaphore=args.semaphore,
     )
 
+    # B-28: ask the server what window it actually has, and refuse to run when
+    # it cannot hold the prompt we are about to send. This check exists because
+    # a truncated run does not fail -- it gets FASTER and quietly stops being
+    # the experiment. Set OASIS_ALLOW_SMALL_CONTEXT=1 to override deliberately.
+    srv = server_state.probe(args.ollama_url or server_state.DEFAULT_URL)
+    ok, why = server_state.verify(srv)
+    if ok:
+        log.info("server context: %s", why)
+    elif os.environ.get("OASIS_ALLOW_SMALL_CONTEXT"):
+        log.warning("CONTEXT CHECK OVERRIDDEN -- %s", why)
+    else:
+        log.error("%s", why)
+        raise SystemExit(2)
+
     manifest = {
         "label": args.label,
         "started_at": datetime.now().isoformat(),
@@ -241,14 +261,20 @@ async def run(args):
             "agents": n_agents,
             "rounds": args.rounds,
             "recsys": args.recsys,
+            "shuffle_feed": args.shuffle_feed,
             "model": args.model,
             "semaphore": args.semaphore,
             # F-53: the client semaphore is meaningless without the server
             # setting, and the server setting was silently 1 for R-1..R-24.
             # Recording it makes a run's real concurrency reconstructable
             # instead of assumed.
-            "ollama_num_parallel": os.environ.get(
-                "OLLAMA_NUM_PARALLEL", "(unset -> server default)"),
+            # F-76/F-77: reading our OWN env records what we intended, not what
+            # the server does. The sweep_* runs recorded "(unset)" while a server
+            # at NP=1 served them, and that is how contaminated data looked
+            # legitimate for months. Probe the server and record both.
+            "ollama_num_parallel_client_env": os.environ.get(
+                "OLLAMA_NUM_PARALLEL", "(unset)"),
+            "ollama_server_state": _probe_ollama_server(),
             "max_rec_post_len": args.max_rec_post_len,
             "refresh_rec_post_count": args.refresh_rec_post_count,
             "following_post_count": args.following_post_count,
@@ -265,6 +291,8 @@ async def run(args):
             "terse_tools": getattr(args, "terse_tools", True),
             "shared_prefix": getattr(args, "shared_prefix", True),
             "max_tool_rounds": getattr(args, "max_tool_rounds", None),
+            "smart_tool_loop": getattr(args, "smart_tool_loop", False),
+            "fresh_context": getattr(args, "fresh_context", False),
             "actions": [a.value for a in actions],
         },
         "algorithm": {
@@ -296,6 +324,12 @@ async def run(args):
             "platform": py_platform.platform(),
             "ollama_keep_alive": os.environ.get("OLLAMA_KEEP_ALIVE",
                                                 "(unset)"),
+            # B-28: what the SERVER reports, not what we asked for. An entire
+            # six-run sweep was made at a 4,096-token window because nothing
+            # here recorded the real one; prompts were silently truncated, the
+            # feed was the part cut, and engagement fell 2.5x while the clock
+            # said the run had got faster.
+            **server_state.manifest_block(srv),
         },
         "rounds": [],
     }
@@ -365,6 +399,21 @@ async def run(args):
             k: round(100 * v / manifest["total_seconds"], 1)
             for k, v in manifest["phase_totals"].items()}
 
+    # F-83 telemetry. A flag that silently no-ops looks exactly like a flag
+    # that works and buys nothing, and this project cannot tell those apart
+    # from wall clock alone. Count the follow-up calls actually skipped.
+    try:
+        sc = sum(getattr(a, "short_circuits", 0)
+                 for _, a in env.agent_graph.get_agents())
+        manifest["context_resets"] = sum(
+            getattr(a, "context_resets", 0)
+            for _, a in env.agent_graph.get_agents())
+        manifest["tool_loop_short_circuits"] = sc
+        manifest["short_circuits_per_turn"] = (
+            round(sc / (n_agents * args.rounds), 3) if args.rounds else None)
+    except Exception as exc:  # noqa: BLE001 - telemetry must never fail a run
+        manifest["tool_loop_short_circuits"] = f"unavailable: {exc}"
+
     manifest["platform_stats"] = sim_platform.stats
     manifest["finished_at"] = datetime.now().isoformat()
 
@@ -380,6 +429,9 @@ async def run(args):
     log.info("platform stats: %s", sim_platform.stats)
     log.info("final counts: %s", manifest["final_counts"])
     log.info("actions performed: %s", manifest["action_tally"])
+    log.info("tool-loop short-circuits: %s (%s per agent-turn)",
+             manifest.get("tool_loop_short_circuits"),
+             manifest.get("short_circuits_per_turn"))
     log.info("=" * 66)
 
 
@@ -445,6 +497,36 @@ def turns_without_action(sim_platform, n_agents, n_rounds):
         }
     except Exception as exc:  # noqa: BLE001
         return {"error": str(exc)}
+
+
+def _probe_ollama_server():
+    """What the SERVER is actually doing, not what we asked for.
+
+    Ollama exposes no direct NUM_PARALLEL reading, but the loaded model's VRAM
+    footprint gives it away: F-77 measured `4.9 GB + ~1.55 GB per slot` for an
+    8B Q4 model at ctx 8192, linear across NP=1..32. Recording the raw figures
+    keeps a run reconstructable even if that formula is later refined.
+    """
+    try:
+        import urllib.request
+        with urllib.request.urlopen("http://localhost:11434/api/ps",
+                                    timeout=5) as r:
+            models = json.loads(r.read()).get("models") or []
+    except Exception as exc:  # noqa: BLE001 - a probe must never fail a run
+        return {"error": str(exc)[:80]}
+    out = []
+    for m in models:
+        vram = m.get("size_vram") or 0
+        out.append({
+            "name": m.get("name"),
+            "size_vram_gb": round(vram / 1e9, 2),
+            "context_length": (m.get("context_length")
+                               or (m.get("details") or {}).get("context_length")),
+            # inverse of F-77's formula; indicative, not authoritative
+            "implied_slots": (round((vram / 1e9 - 4.9) / 1.55)
+                              if vram and vram / 1e9 > 4.9 else None),
+        })
+    return out or [{"note": "no model resident at manifest time"}]
 
 
 def _check_server_keep_alive(ollama_url: str):
@@ -528,6 +610,14 @@ def main():
     p.add_argument("--temperature", type=float, default=0.9,
                    help="LLM sampling temperature. Previously unset and "
                         "therefore unstated; now explicit and recorded")
+    p.add_argument("--shuffle-feed", action="store_true",
+                   help="F-94's experimental arm: rank and select the feed "
+                        "exactly as normal, then PERMUTE the order before the "
+                        "agent sees it. Same posts, same tiers, position "
+                        "assigned rather than observed. Engagement flattening "
+                        "across slots with total engagement HELD means the "
+                        "ranker's ordering was worth nothing; total engagement "
+                        "FALLING means it carried real information.")
     p.add_argument("--feed-size", type=int, default=12,
                    dest="feed_size",
                    help="total posts per feed. Discovery backfills "
@@ -574,6 +664,28 @@ def main():
                         "prefix, so Ollama's prefix cache never hits and each "
                         "agent pays ~5.5s to re-read the same tool block. "
                         "Hoisting it into the user turn is the default.")
+    p.add_argument("--fresh-context", action="store_true",
+                   help="clear each agent's conversation memory between rounds. "
+                        "F-86: camel appends every message, reply and tool "
+                        "result to agent memory and re-prefills all of it next "
+                        "turn. Measured request latency runs 10.1s at round 0, "
+                        "86.2s by round 4, then flat as the 8192-token context "
+                        "fills and truncates. Round 0 costs 94s of wall clock; "
+                        "rounds 4+ cost ~790s. With this on every round should "
+                        "cost about what round 0 costs -- of order 6x. OFF by "
+                        "default: the behavioural effect is UNTESTED, though "
+                        "note agents already lose most history to truncation.")
+    p.add_argument("--smart-tool-loop", action="store_true",
+                   help="stop the tool loop after a TERMINAL action (a like, a "
+                        "follow, a post) but keep going after an informational "
+                        "one (search, trend, refresh). F-83: in a 504-turn run, "
+                        "99%% of turns took 0 or 1 action and 0 of 431 actions "
+                        "returned anything the model needed to read, so the "
+                        "follow-up call -- about 46%% of all LLM work -- buys a "
+                        "second action once in a hundred turns. Unlike "
+                        "--lean-actions this removes no action, and unlike "
+                        "--max-tool-rounds 1 it preserves search->read->act. "
+                        "OFF by default: it must be A/B'd, not assumed.")
     p.add_argument("--verbose-tools", action="store_false", dest="terse_tools",
                    help="ship each action's full docstring as its tool "
                         "description, as upstream does. F-64: that is ~3,000 "

@@ -127,5 +127,12 @@ data/charts/
 data/social_timeline_*.json
 data/social_timeline_*.txt
 data/sweep18_results.txt
+
+# Camel/OASIS runtime logs. 163 MB and 1,500 files as of 2026-09-13, one set per
+# run (oasis-*, social.agent-*, social.twitter-*, table-*). Derived output, same
+# reasoning as the .db and parquet exclusions: nothing in our tooling reads them,
+# and every fact a run produces is in its manifest. log/.gitkeep stays tracked so
+# the directory still exists on a fresh clone.
+log/*.log
 data/overnight_cmp_*.txt
 data/graph.html

@@ -7211,6 +7211,66 @@ run". Both withdrawn. **A clean three-point sweep at verified context returns
 **The cost model and the historical record now agree**, which is the check that
 matters.
 
+#### B-32 — A run measured 2.16x its own reference because the laptop was in use, and nothing said so
+
+**Symptom.** `sweep18_a36`, 2026-09-13, round 1 in **802.5 s against the reference
+run's 371.6 s**. Round 0 was 110.2 s against 95.6 s, so the ratio was *growing*.
+No error, no warning, no failed check.
+
+**It was not the simulation.** The action counts at round 1 are nearly identical
+to the reference at the same round:
+
+| | tonight | reference `ctx8192_a36` |
+|---|---|---|
+| posts | 39 | 33 |
+| comments | 3 | 4 |
+| likes | 1 | 2 |
+| **seconds** | **802.5** | **371.6** |
+
+Same work, 2.16x the clock. **It was not the configuration** either -- the
+drift gate (B-31) had passed the run's own smoke against `ctx8192_a36` on 19
+identical keys. **It was not the server**: `/api/ps` reported 8,192 context and
+11.2 GB resident, and the runner process had not restarted since 2026-09-12
+03:56.
+
+**Cause.** The laptop was in active use. Measured while the run was in flight:
+`RobloxPlayer` 85 %, `WindowServer` 41 %, `Google Chrome` 27 %, `coreaudiod` 9 %
+-- 219 % of non-simulation CPU in total.
+
+**A partial retraction of my own diagnosis, made ten minutes earlier.** I found
+Roblox first and named it as the cause. Its process start time is **18:25:25**,
+and the 802.5 s round ran **17:50-18:03**. Roblox is making things worse *now*;
+it did not cause that round. What is established is that the machine was not
+idle, not which application was responsible at which moment. The habit that
+caught it is the one the log keeps having to relearn: check the timestamps before
+naming the culprit.
+
+**Why it matters more than it sounds.** A cost-versus-agents curve measured while
+desktop load varies is not measuring agent count. This is the `scale99_full`
+shape exactly -- per-agent cost climbing monotonically because something is
+degrading, not because the world is bigger -- and that one cost a retracted
+exponent (F-96's first value) before it was understood.
+
+**Nothing scientific is affected, and this is worth stating plainly** because the
+instinct is to distrust the whole night. Tier, repeat exposure and slot position
+are odds ratios computed *within* a run. A slower machine produces identical
+behaviour more slowly. `sweep18_a18` engaged at 7.28 % and its behavioural data
+stands; only its 24.3 s per agent-turn is in doubt, and it is set aside in
+`data/contaminated/` with a note rather than deleted.
+
+**Fix.** `sweep_when_idle.sh` -- poll once a minute, require no foreground hog
+and under 40 % non-simulation CPU for ten consecutive minutes, then run the sweep
+under `caffeinate -i`. It excludes ollama and our own processes from the busy
+calculation, because once the sweep starts the machine is *supposed* to be busy
+and a naive check would never settle. Validated against a machine known to be in
+use: it read 219 % and refused to start.
+
+**The class this belongs to is now four members** (B-26, B-28, B-31, B-32), and
+the shared property is worth naming once more: **each one produces a run that is
+indistinguishable from a real one afterwards.** Three of the four made the run
+*look better* -- faster, or cleanly comparable -- which is why none of them was
+caught by looking at the output.
+
 #### B-31 — The sweep command drafted for tonight would have run 8.5 hours at the wrong sampling temperature
 
 **Symptom.** None. That is the entire problem. The command was correct in every

@@ -47,6 +47,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
+import os
 import sqlite3
 
 from oasis.social_agent.agent import SocialAgent
@@ -660,6 +661,23 @@ async def generate_timeline_agents(
     # differ, so the sample should span the population, not whatever the file
     # happened to list first. Measured effect on the twitter set at k=36:
     # mean pairwise similarity 0.689 (first-36) -> 0.637 (diverse-36).
+    # B-26: `--agents N` used to be a ceiling, not a request. When N exceeded
+    # the file, the slice below simply did not fire, the run used every persona
+    # there was, and the manifest recorded the smaller number while the run was
+    # named for the larger one -- a mislabelled run that looks exactly like a
+    # real one. Same failure shape as B-28: it does not error, it quietly stops
+    # being the experiment you asked for. Refuse instead.
+    # Set OASIS_ALLOW_PERSONA_TRUNCATION=1 to override deliberately.
+    if limit is not None and limit > len(entries):
+        why = (f"--agents {limit} needs {limit} personas but "
+               f"{profile_path} has only {len(entries)}. The run would "
+               f"silently be {len(entries)} agents (B-26). Use "
+               f"--agents {len(entries)} or fewer, or a larger persona file.")
+        if os.environ.get("OASIS_ALLOW_PERSONA_TRUNCATION"):
+            log.warning("PERSONA COUNT OVERRIDDEN -- %s", why)
+        else:
+            log.error("%s", why)
+            raise SystemExit(2)
     if limit is not None and limit < len(entries):
         entries = (select_diverse(entries, limit) if diverse
                    else entries[:limit])

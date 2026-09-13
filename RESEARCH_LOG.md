@@ -2292,6 +2292,16 @@ run list to a handful.
 
 *Updated 2026-09-13 after the reference repositories were read end to end.*
 
+0. **DONE 2026-09-13 — B-26 is now a refusal, not a truncation.** `--agents N`
+   silently degraded to "use every persona in the file" whenever N exceeded the
+   file, producing a run with fewer agents than its own name and no warning
+   anywhere. `timeline_agent.generate_timeline_agents` now raises `SystemExit(2)`
+   naming the shortfall, overridable with `OASIS_ALLOW_PERSONA_TRUNCATION=1`.
+   Seven tests in `test_persona_supply.py`, plus a live check that `--agents 108`
+   against the 99-persona business file refuses. **This nearly mattered tonight:**
+   the sweep runs 18/36/54/72/90 and 90 fits, but 108 — the next increment of 18 —
+   would have produced a "108-agent run" of 99 agents.
+
 1. **Decide the scale claim (D-18).** F-99 reprices the head-on target: matching
    Collusion's 1,000 x 100 is ~5.5 days of this machine, Fraud's is ~30. The
    reachable version is **their population at fewer rounds** -- 1,100 agents x 15

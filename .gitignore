@@ -126,5 +126,6 @@ data/sim4_package/
 data/charts/
 data/social_timeline_*.json
 data/social_timeline_*.txt
+data/sweep18_results.txt
 data/overnight_cmp_*.txt
 data/graph.html

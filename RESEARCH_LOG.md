@@ -2473,6 +2473,14 @@ in this project were drawn from one reading and later overturned. A claim about
 a mechanism needs a variable shown to move *within* a family where everything
 else is fixed, not two or three families that happen to line up.
 
+**Pass `--temperature 0.7` on every run in the twitter/ctx8192 family.** B-31:
+the bare CLI default is **0.9** and has been since `30e6144` (2026-08-30), but
+every shell script in `social_timeline/` passes 0.7 explicitly and **28 of our
+runs carry 0.7 against 7 at 0.9**. A hand-written command that omits the flag is
+not comparable to the bank or to the cost curve, and nothing warns you.
+`sweep18.sh` pins it and `assert_comparable.py` checks it against a reference
+run before the night is spent.
+
 **After any scripted edit to a document, grep for a string only the new content
 contains.** B-30: three separate edits reported success and changed nothing,
 because an anchor matched a raw character where the file held an HTML entity.
@@ -7199,6 +7207,54 @@ run". Both withdrawn. **A clean three-point sweep at verified context returns
 
 **The cost model and the historical record now agree**, which is the check that
 matters.
+
+#### B-31 — The sweep command drafted for tonight would have run 8.5 hours at the wrong sampling temperature
+
+**Symptom.** None. That is the entire problem. The command was correct in every
+visible way -- right agent counts, right rounds, right seed, right personas,
+right recommender -- and it would have produced five clean runs, five clean
+manifests and five clean charts, all of them comparable with nothing.
+
+**Cause.** `--temperature` defaults to **0.9** in `run_simulation.py`, changed
+from 0.7 in `30e6144` on 2026-08-30. Every shell script in the directory --
+`campaign.sh`, `overnight.sh`, `ab_efficiency.sh` -- passes `--temperature 0.7`
+explicitly, so the default has been shadowed for six weeks and nobody had to
+know it disagreed. Across every run we have kept: **28 at 0.7, 7 at 0.9, 2
+unset**. The runs this sweep was meant to extend -- `ctx8192_a12/a24/a36` -- are
+all 0.7. A hand-written command is the one path that does not go through a
+script, and that is the path that was about to be taken.
+
+**Found by** running a 4-agent, 1-round smoke with tonight's exact flags and
+diffing its manifest `config` block against `ctx8192_a36`'s. Thirty seconds.
+Two keys differed: `shuffle_feed` (a new manifest key with an inert default, not
+drift) and `temperature` (0.9 against 0.7).
+
+**This is the third instance of one failure shape**, and it is worth naming as a
+class rather than as three bugs:
+
+| | what silently changed | what it looked like |
+|---|---|---|
+| B-26 | `--agents N` truncated to the persona file | a run named for more agents than it had |
+| B-28 | the server truncated every prompt to 4,096 | a FASTER run with less engagement |
+| B-31 | the CLI sampled at 0.9 instead of 0.7 | a perfectly normal run comparable to nothing |
+
+None raises. None is slower. Each produces output indistinguishable afterwards
+from the real thing. **A default that disagrees with the convention every script
+enforces is not a default, it is a trap**, and the answer is not to remember
+harder.
+
+**Fix.** `assert_comparable.py` -- diff a candidate run's config against a named
+reference run, fail on any differing value, report new manifest keys without
+failing (the schema grows), and **refuse a vacuous pass** when too few keys were
+compared, because a guard that green-lights a night having compared nothing is
+worse than no guard. Ten tests. `sweep18.sh` pins every flag with a comment
+saying why, and runs the smoke-and-diff as preflight 3 of 3 before it spends the
+night.
+
+**Not fixed: the default itself.** Changing 0.9 back to 0.7 would silently move
+every future bare invocation and orphan the 7 runs at 0.9. The convention is now
+a standing warning in section 0 and a preflight that refuses; that is a check,
+not a memory.
 
 #### B-30 — Three edits reported success and changed nothing, and the artifact was published self-contradicting for forty minutes
 

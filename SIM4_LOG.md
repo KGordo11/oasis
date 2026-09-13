@@ -261,6 +261,37 @@ tuning step.
 
 ---
 
+### Reference repositories — cloned and verified 2026-09-13
+
+Two published OASIS-derived research projects, cloned locally so they can be
+read rather than re-fetched. **Outside the oasis repo deliberately**, so they
+cannot enter its git history.
+
+    /Users/gordon/research/reference/MultiAgent4Collusion    519 files, 118 py, HEAD b6daeff (2025-07-19)
+    /Users/gordon/research/reference/MutiAgent4Fraud         151 files,  94 py, HEAD 950e489 (2026-02-03)
+
+Papers: arXiv 2507.14660 (collusion) and arXiv 2511.06448 (fraud, ICLR 2026).
+Overlapping author group -- Qibing Ren is first author on both.
+
+**The files to open first, and why.** The question is not what they built, it is
+how to exceed their scale. Both run 100 timesteps; Collusion at 1,000 agents,
+Fraud at 110 and 1,100.
+
+| file | why |
+|---|---|
+| `MultiAgent4Collusion/agents_init.py` | `sample_activity_level_frequency()`, the bernoulli branch. **Mean activation 0.02** is what makes 1,000 x 100 affordable. This is the single lever between "29 days" and "one overnight" on our hardware |
+| `.../agents_init.py` (same file) | also a parametric cohort generator: network topology, activation distribution, good/bad ratio, post seeding. **Persona supply is our binding constraint** (99 usable bios), and this is the shape of a generator |
+| `MultiAgent4Collusion/oasis/social_platform/post_stats.py` | in-memory shadow ledger, engagement split by actor class, snapshotted per timestep. Avoids post-hoc SQL over a growing database |
+| `.../twitter_simulation_large.py` | the run loop: reflection cadence, shared memory, interventions |
+| `.../system_prompt(static\|dynamic).json` | prompts as versioned JSON keyed by agent type |
+| `MutiAgent4Fraud/oasis/inference/inference_manager.py` | per-agent-ID model routing -- different cohorts on different models in one run |
+| `MutiAgent4Fraud/scripts/twitter_simulation/align_with_real_world/test.yaml` | the config format. **Note: not at the repo root**, contrary to an earlier note here |
+| `MultiAgent4Collusion/utils/port_forward.py` | one server, N local forwarders, N concurrent requests. A client-side concurrency multiplier |
+
+**Neither paper reports a single wall-clock or token figure**, and neither
+records feed position. Both treat activation rate as a budget knob rather than a
+variable. Those are the three gaps our work already fills or could.
+
 ### Standing warnings — these do not go stale
 
 *Carried forward from the retired build log's status block when the two logs

@@ -26,7 +26,7 @@ Checks:
 Run:  oasis-env/bin/python examples/experiment/social_timeline/check_deps.py
 Exits non-zero on any failure.
 
-See SIM4_LOG.md (Part I) section 9 (Q-1) and the design spec section 9, stage 0.
+See RESEARCH_LOG.md (Part I) section 9 (Q-1) and the design spec section 9, stage 0.
 """
 
 import sys
@@ -64,7 +64,7 @@ def _torch_device():
     cuda = torch.cuda.is_available()
     mps = torch.backends.mps.is_available()
     # recsys.py:85 selects cuda-or-cpu only, so MPS goes unused. Recorded in
-    # SIM4_LOG.md (Part I) section 4 as a known performance ceiling.
+    # RESEARCH_LOG.md (Part I) section 4 as a known performance ceiling.
     from oasis.social_platform.recsys import device as recsys_device
 
     return (f"cuda={cuda} mps={mps}; OASIS will use device={recsys_device!r} "
@@ -95,7 +95,7 @@ PROBE_TEXTS = [
     "Wrote a lock-free queue in C today, the atomics were tricky.",
 ]
 
-# Recorded from a previous, separate process (see SIM4_LOG.md (Part I), R-2).
+# Recorded from a previous, separate process (see RESEARCH_LOG.md (Part I), R-2).
 # Mean-pooled embeddings are deterministic, so a fresh process must reproduce
 # these. Divergence means the embedding space changed underneath us — the
 # B-1 failure mode, which would make run-to-run replication meaningless.
@@ -110,7 +110,7 @@ def _mean_pooled(texts):
 
     Deliberately NOT process_batch()/pooler_output: TwHIN-BERT's checkpoint
     carries no trained pooler, so those weights are randomly re-initialized on
-    every load. See SIM4_LOG.md (Part I) bugs B-1/B-2 and decision D-13.
+    every load. See RESEARCH_LOG.md (Part I) bugs B-1/B-2 and decision D-13.
     """
     import torch
     from oasis.social_platform.recsys import get_recsys_model

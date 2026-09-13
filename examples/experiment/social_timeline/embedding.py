@@ -18,7 +18,7 @@ OASIS embeds text via `process_recsys_posts.process_batch`, which returns
 checkpoint does not contain trained pooler weights, so `from_pretrained`
 randomly re-initializes `pooler.dense.{weight,bias}` on every single load.
 
-Two measured consequences (SIM4_LOG.md (Part I), bugs B-1 and B-2):
+Two measured consequences (RESEARCH_LOG.md (Part I), bugs B-1 and B-2):
 
   B-1  The embedding space differs on every process launch. Two processes
        produced pooler weight fingerprints of sum=-6.18 and sum=+6.46, and

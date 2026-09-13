@@ -1,4 +1,2120 @@
-# Simulation 4 — the complete log
+# OASIS research log — every simulation, one file
+
+**One file, deliberately.** This was seven documents until 2026-09-13:
+`PROJECT_LOG.md`, the three simulation write-ups, `SIM4_LOG.md`,
+`SIM4_RUN_PLAN.md` and `OVERNIGHT_2026-09-08.md`. They were split because each
+was written at a different time for a different reason, but every search had to
+be run seven times and the cross-references between them had already started to
+rot. Nothing was dropped in the merge: each part below is its source document
+verbatim, under a banner naming the file it used to be.
+
+**Where to resume: Part 5 §0 STATUS.** That is the only section that goes stale.
+Everything else is append-only history.
+
+**Ids.** Findings are `F-n`, bugs `B-n`, decisions `D-n`, runs `R-n`, open
+questions `Q-n`. They are unique across the whole file and each appears in
+exactly one place. **Retractions are kept, not deleted** — a claim that was
+believed and then killed is the most useful entry in a research log, and this one
+has a lot of them.
+
+| Part | What it holds | Was |
+|---|---|---|
+| **Part 1** | Project log: start here, conventions, open threads | `PROJECT_LOG.md` |
+| **Part 2** | Simulation 1: basic Reddit sim and reasoning capture | `SESSION_REPORT (basic sim1).md` |
+| **Part 3** | Simulation 2: the up/control/down misinformation experiment | `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md` |
+| **Part 4** | Simulation 3: the iAgent Shield experiment | `SHIELD_EXPERIMENT_REPORT.md` |
+| **Part 5** | Simulation 4: the complete log | `SIM4_LOG.md` |
+| **Part 6** | Simulation 4: run plan and its review | `SIM4_RUN_PLAN.md` |
+| **Part 7** | Overnight plan, 2026-09-08 (historical, kept for the record) | `OVERNIGHT_2026-09-08.md` |
+
+**Not merged, deliberately:** `LEARN_OASIS.md` is a primer on upstream OASIS —
+what the paper says and how the framework works — not a record of our research,
+so it stays its own file and its own kind of document.
+
+---
+
+# Part 1 — Project log: start here, conventions, open threads
+
+> **Filename references below are historical.** Every document this part points
+> at is now a part of this same file. The mapping, once:
+> `SESSION_REPORT (basic sim1).md` → Part 2 ·
+> `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md` → Part 3 ·
+> `SHIELD_EXPERIMENT_REPORT.md` → Part 4 ·
+> `SIM4_LOG.md` → Part 5 ·
+> `SIM4_RUN_PLAN.md` → Part 6 ·
+> `OVERNIGHT_2026-09-08.md` → Part 7.
+> References inside the append-only history further down are left exactly as
+> written — they record what was true when they were written, which is the point
+> of a log.
+
+*Was `PROJECT_LOG.md`. Merged into this file 2026-09-13; original title: “Project Log”.*
+
+**Purpose of this file: if you are an assistant picking this project up
+with zero prior context, this is the one file to read first.** It's
+written to make you productive immediately, not to be a narrative. Read
+"Start here," skim the sim summaries for what's already proven, check
+"Open threads" before proposing new work (it's probably already listed),
+and follow "Conventions worth keeping" — they exist because skipping them
+already cost real time once. The three full write-ups
+(`SESSION_REPORT (basic sim1).md`,
+`COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md`,
+`SHIELD_EXPERIMENT_REPORT.md`) have the full methodology/data/limitations
+if you need to go deeper than the summaries below — don't re-read them
+just to get oriented, only when a task needs their specific detail.
+
+## Start here
+
+```bash
+cd /Users/gordon/research/oasis
+git status                       # check for uncommitted work FIRST — has
+                                  # happened before, see 2026-08-20 below
+source oasis-env/bin/activate    # Python 3.11 venv
+ollama list                      # confirm llama3.1:8b is present
+ollama serve                     # if not already running
+```
+
+- **Repo:** this directory. Fork `origin` → `github.com/KGordo11/oasis`,
+  `upstream` → `github.com/camel-ai/oasis`, branch `main`.
+- **As of this file's last edit:** working tree clean, local `main` is
+  **5 commits ahead of `origin/main`, unpushed** (nobody's asked to push
+  yet — don't push without asking). Verify this is still true with
+  `git status` / `git log --oneline origin/main..main` — don't trust this
+  paragraph once time has passed.
+- **Model:** Ollama `llama3.1:8b` for every agent and every Shield call —
+  chosen for native tool-calling, which `llama3.2:3b` lacks. If a run
+  feels slow, check `OLLAMA_KEEP_ALIVE` before touching any experiment
+  code (see Conventions).
+- **Every experiment is a zero-diff subclass swap** —
+  `agents_generator.SocialAgent = <CustomAgent>` inside the example
+  script, never an edit to `oasis/` itself. The one exception is
+  documented below (Setup). Follow this pattern for new experiments too.
+- **To run something:** copy the pattern in `SHIELD_EXPERIMENT_REPORT.md`
+  Section 6 — smoke-test at small scale (2 rounds) before a full run (6
+  rounds), always. This is not optional; see Conventions for why.
+- **The science in one paragraph:** Sim 2 showed agents pile on
+  down-voted misinformation far more than up/neutral (68% vs. <15%
+  disagreement). Sim 3 built a "Shield" that hides vote counts and found
+  that pushback *dropped* when the vote cue was removed (68%→28% pooled,
+  p=0.0009) — meaning most of that "skepticism" was crowd-following, not
+  fact-checking — and, more surprisingly, hiding the vote count partially
+  *inverted* which condition draws the most pushback (control becomes
+  highest, not down). Full numbers in the Sim 3 section and its report.
+
+---
+
+## Setup
+
+- **OASIS** (`camel-ai/oasis`, arXiv 2411.11581): open-source social-media
+  simulator — each "user" is an LLM agent with an assigned personality,
+  posting/commenting/liking/following on a fake Twitter/Reddit platform.
+  Used here to study misinformation spread and herd behavior at a scale
+  the original paper ran on 1M agents / 24 A100s; this fork runs the same
+  *kind* of experiment at ~36 agents on a single Mac with a free local
+  model.
+- **Repo:** this directory, fork `origin` → `github.com/KGordo11/oasis`,
+  `upstream` → `github.com/camel-ai/oasis`, branch `main`. Python 3.11
+  venv at `oasis-env/` (OASIS requires 3.10/3.11, gitignored).
+- **Model:** Ollama `llama3.1:8b`, chosen over `llama3.2:3b` and base
+  Llama 3 specifically because it has native tool-calling — OASIS agents
+  act by calling tools, not free text.
+- **The only edit to any upstream file:** in
+  `examples/experiment/reddit_simulation_counterfactual/reddit_simulation_counterfactual.py`,
+  the hardcoded VLLM/remote-GPU-cluster `ModelFactory.create()` call was
+  replaced with a local Ollama call (`ModelPlatformType.OLLAMA`,
+  `llama3.1:8b`, `http://localhost:11434/v1`) plus a longer timeout.
+  Nothing about experiment logic (conditions, scoring, rounds) was
+  touched. Everything under `oasis/` itself is untouched — every
+  experiment is a zero-diff subclass swap (`agents_generator.SocialAgent
+  = <CustomAgent>`), the same pattern used in all three sims.
+- Upstream already ships pre-made `control_100.yaml` / `up_1000.yaml` /
+  `down_10000.yaml` etc. — ready-made templates for a future scale-up,
+  not something that needs hand-authoring.
+
+## Sim 1 — reasoning capture (full write-up: **Part 2** of this file)
+
+36-agent baseline confirmed personality drives behavior. Then tried, in 3
+attempts, to get the model to narrate its reasoning alongside its tool
+calls — editing shared engine files broke tool-calling entirely
+(reverted), softening the prompt recovered tool-calling but reasoning
+text almost never appeared (also reverted), and a clean subclass
+(`ReasoningSocialAgent`, zero diff to `oasis/`) kept tool-calling healthy
+but reasoning was still JSON-as-text, not real narration. **Honest
+verdict:** an 8B local model can't reliably combine free-text explanation
+with structured tool use in one turn — a real finding about model
+limits, not a failure to hide.
+
+## Sim 2 — herd behavior (full write-up: **Part 3** of this file)
+
+Replicates the OASIS paper's Finding 3 (agents herd on downvotes where
+humans self-correct). 220 fabricated false claims, 36 agents, 3
+conditions differing only in `init_post_score` (+1 / 0 / −1). **Run
+twice independently** to separate real signal from single-run noise —
+this replication discipline is the core habit that carried into Sim 3.
+
+- Vote-count scores replicated cleanly (scale artifact, not a finding —
+  no snowball effect visible at 36 agents, consistent with the paper's
+  own scale-dependent Finding 5).
+- Comment counts did **not** replicate between the two runs — an early
+  write-up over-interpreted run 1 alone; explicitly retracted once run 2
+  contradicted it.
+- **Headline finding (replicated in direction both runs):** down-treated
+  posts drew disagreement/correction language in ~62–68% of comments vs.
+  well under 15% for up/control. Measured via a keyword classifier
+  (never validated against human judgment — see open threads).
+
+## Sim 3 — the iAgent Shield (full write-up: **Part 4** of this file)
+
+Built a second local-LLM call ("the Shield," adapted from Xu et al.,
+*iAgent*, ACL 2025 Findings) that re-ranks each agent's feed by content
+plausibility and strips vote-count fields before the agent sees them —
+testing whether Sim 2's pushback was genuine fact-checking or
+crowd-following.
+
+**Design origin (planned on claude.ai before any code was written):** the
+research question came from noticing OASIS agents have no equivalent of
+the paper's "user-agent-platform" paradigm — the RecSys feeds an agent
+straight, with nothing standing between platform ranking and agent
+decision. The exact interception point was verified against the real
+upstream source before writing anything: `SocialAgent.perform_action_by_llm()`
+in `oasis/social_agent/agent.py`, specifically the line
+`env_prompt = await self.env.to_text_prompt()` — that's the single moment
+the RecSys's chosen posts turn into the text an agent's LLM call reacts
+to, and nothing in the base class stands between them. The design
+deliberately touches only that prompt content, never the agent's
+tool-call response schema, specifically to avoid repeating Sim 1's
+Attempt 1 failure (editing shared files broke tool-calling entirely). An
+early version of the herd-effect design (2 puppet agents, 9 posts split
+into 3 groups of 3, single run) was floated during this planning but
+superseded once the project switched to reusing the paper's own existing
+`reddit_simulation_counterfactual.py` script instead — noted here only
+because it was a real design considered and dropped, not because it was
+built.
+
+- First full run took **4 attempts** (~4 hrs) because 3 real bugs only
+  surfaced at full scale: a vote-count field that leaked through under a
+  different config key, a timeout that crashed the whole run instead of
+  failing open, and a `rank: null` response that crashed `sorted()`.
+  **The habit that caught 2 of 3:** always smoke-test at small scale (2
+  rounds) before a full run (6 rounds) — established mid-session after
+  being flagged as an efficiency concern, paid off immediately.
+- **Headline finding (single run):** correction language dropped from
+  68% (unshielded) to 23% (shielded) — hiding the vote count reduced
+  correction rather than improving it. Read as evidence Sim 2's original
+  "skepticism" finding was substantially crowd-following.
+- **Extended to the full 3×2 grid** (up/control/down × shielded/
+  unshielded), shield code frozen across all runs so only the condition
+  varied. Down replicated 4 times (19%, 23%, 26%, 39% → pooled 28%), up
+  and control 2 times each (up: 7%, 26% → 18% pooled; control: 41%, 58%
+  → 48% pooled).
+- **Sharpest finding:** unshielded, the three conditions form a clean
+  gradient tracking the fake vote exactly (up 4% < control 11% < down
+  68% — that gradient *is* the herding effect). Shielded, that gradient
+  **breaks and partially inverts**: up (18%) < down (28%) < control
+  (48%) — down and control swap relative rank.
+- **Statistical significance** (Fisher's exact / chi-square on pooled
+  counts, added in a follow-on pass): down's drop (p=0.0009) and
+  control's rise (p=0.0020) are both significant; up's shift (p=0.239)
+  is **not** — 2 runs isn't enough there yet. The three-way group
+  difference under shielding is significant (χ²=9.49, p=0.0087), and
+  down-vs-control specifically differ significantly (p=0.0347), but
+  up-vs-down do **not** (p=0.362) — so "the gradient flips" holds as a
+  group/down-control claim, not as every pairwise ordering confirmed.
+- Shield reliability: 56/64 calls succeeded (87.5%); the rest failed
+  open (fell back to the raw feed) rather than crashing — meaning ~1/8
+  of "shielded" turns weren't actually shielded, a real noise source.
+- **Mid-batch infra fix:** runs were slow because Ollama was
+  unloading/reloading the model between multi-minute gaps; restarting
+  with `OLLAMA_KEEP_ALIVE=60m` (default 5m) cut run time from 65–90 min
+  to ~19 min, judged safe mid-run since a warm vs. reloaded model
+  produces the same output distribution, just faster. **Established
+  habit:** prefer `OLLAMA_KEEP_ALIVE` tuning over touching
+  experiment/model logic when only speed, not correctness, is the
+  complaint.
+- **Disclosed but untested limitation:** the Shield's own prompt still
+  receives the raw vote count (it needs it to know what to strip) — so
+  it's untested whether the Shield's own `rank`/`shield_note` is subtly
+  influenced by a post's vote count even while told to ignore it,
+  potentially leaking the signal back in indirectly.
+
+## Sim 4 — social timeline (full log: **Part 5** of this file; spec in `docs/superpowers/specs/`)
+
+**In progress, on branch `social-timeline-sim` (NOT `main`).** Turns the
+simulation into something that behaves like a real social app: agents acting
+freely over many rounds, each with a personalized timeline, instrumented finely
+enough to reconstruct what every agent saw, ignored, and did, to whom.
+
+Code lives in `examples/experiment/social_timeline/` — zero diff to `oasis/`,
+same subclassing discipline as Sim 3's `ShieldAgent`.
+
+**Four upstream bugs found that silently corrupt results.** Read these before
+trusting any recommendation output:
+
+1. **`RecsysType.TWITTER` returns random feeds.** Its scoring model is never
+   initialised on that path (`recsys.py:39` vs `:282`), so it falls through to
+   `random.random()` (`:749`) with no error. Use `twhin-bert`, never `twitter`.
+2. **TwHIN-BERT embeddings are non-deterministic.** `process_recsys_posts.py:33`
+   returns `pooler_output`, but the checkpoint has no trained pooler, so those
+   weights are randomly re-initialised **every process**. Two processes gave
+   different embedding spaces; discrimination collapsed to `+0.0008` (noise) in
+   one. Mean-pool `last_hidden_state` instead: `+0.0475`, and identical across
+   processes. Replication is impossible without this fix.
+3. **Exposure history is destroyed every round** (`platform.py:383`,
+   `DELETE FROM rec`), so "what did they see" is unrecoverable unless snapshotted.
+4. **Group chat hijacks the prompt.** `to_text_prompt()` renders `$groups_env`
+   before `$posts_env` on every turn *regardless of `available_actions`*. One
+   agent creating a group buries everyone's feed. Measured: action_rate 0.469
+   with groups vs 0.812 without.
+
+**Also worth knowing:** every table's `user_id` column actually stores
+`agent_id` (`platform.py:407`); only `user` has both. Trace `info` payloads are
+*not* uniform — `follow` records no followee at all, `quote_post` stores a
+string id, comment actions record only `comment_id`. And `SocialAgent.agent_id`
+is camel's UUID; the integer is `social_agent_id` (`agent.py:71`).
+
+**Status:** stages 0-3 green (action_rate 0.812, follow graph forms, no
+duplicate posts, `both` source attribution verified). Full 36-agent × 12-round
+run executing. Deliverables: `analyze.py` (event log + exposure ledger),
+`make_graph.py` (published artifact), `test_actions.py` /
+`test_instrumentation.py`.
+
+## Open threads
+
+1. Push local `main` to `origin` — not done, not yet asked for.
+2. Up and control still only have 2 runs each vs. down's 4 — up's own
+   7%-vs-26% spread (and its non-significant p=0.239) both point at
+   needing more data; a 3rd/4th run each would do for them what runs 3–4
+   did for down.
+3. Reduce the Shield's fail-open rate (longer timeout / stricter output
+   format), and/or replace the free-text `shield_note` with a numeric
+   plausibility score — deliberately deferred through all of Sim 3's
+   replication runs to keep the shield mechanism frozen; needs its own
+   isolated before/after comparison.
+4. "1 personality × 36" control — isolate treatment-effect from
+   personality-mix-effect. Needs new agent data, not started.
+5. Validate the keyword-based disagreement classifier against actual
+   human judgment (used in both Sim 2 and Sim 3) — never done; its real
+   precision/recall are unknown.
+6. Replace the keyword classifier with an LLM-judged score, and/or run
+   the whole experiment at 100/1000+ agents (configs already exist
+   upstream) to see if a real vote-count herd effect emerges at scale,
+   per the paper's own scale-dependent finding.
+7. Test whether the Shield leaks vote-count info indirectly through its
+   own `rank`/`shield_note` (see Sim 3 limitation above) — would need a
+   Shield variant whose own prompt never receives the vote count at all.
+8. Other scoped-but-unstarted ideas from `LEARN_OASIS.md`: Reddit vs.
+   Twitter RecSys → echo-chamber differences; personality mix (agreeable
+   vs. skeptical population) vs. agent/human herding gap;
+   `llama3.2:3b` vs `llama3.1:8b` model comparison on the identical
+   experiment.
+9. **Richer agent personas via MatrAIx-Persona-8B's dataset** (surfaced
+   comparing `camel-ai/oasis` against `MatrAIx-ai/MatrAIx-Persona-8B` as
+   candidate simulators). MatrAIx itself is the wrong tool — it's a
+   persona-driven product-eval harness (Survey/Chatbot/Web/App tasks, one
+   task per persona run), with no feed, no recommender, no social graph,
+   no multi-timestep agent-to-agent loop, so it can't replace OASIS. What
+   it does have that's genuinely richer than `data/reddit/user_data_36.json`:
+   a shared schema of 1,290 categorical persona dimensions (background,
+   psychology, capability, behavior) and a released 1M-persona dataset
+   (`MatrAIx2026/MatrAIx_Persona_1M_Public_Release` on Hugging Face).
+   Idea, not yet started: sample from that dataset and map it into the
+   fields `generate_reddit_agent_graph` expects, in place of or alongside
+   the current 36-persona file, for richer personality-driven behavior.
+   **Not yet verified:** nobody has actually opened the schema/dataset
+   files to confirm field names, format, or license fit this use — only
+   the README's description has been read.
+
+## Codebase reference: what's in `examples/` and `generator/`
+
+A fuller inventory than `LEARN_OASIS.md`'s table — every script in these
+two folders was read (front to back for distinct ones; near-duplicates
+verified by diff), useful when scoping a new experiment idea rather than
+writing one from scratch.
+
+**`examples/` — demo scripts, all follow the same skeleton** (build agent
+graph → `oasis.make()` → `env.reset()` → `ManualAction`/`LLMAction` steps
+→ `env.close()`):
+
+- `quick_start.py` — two hand-built agents (Alice, Bob), no JSON needed;
+  cleanest template for hand-crafting agents.
+- `reddit_simulation_openai.py` — the same shape as the 36-agent runs
+  used throughout this project, on OpenAI instead of Ollama.
+- `twitter_interview.py` — uses `ManualAction(INTERVIEW, ...)` to pause
+  and ask an agent its opinion mid-run; `INTERVIEW` is deliberately kept
+  out of agents' own `available_actions` so it's experimenter-only. Ends
+  by reading interview answers back out of the `trace` table — a
+  ready-made template for pulling structured answers out of a run.
+- `twitter_misinforeport.py` — demos `REPORT_POST`: once a post crosses
+  `report_threshold` (2, in `platform.py`), every agent who sees it
+  afterward gets a `[Warning: This post has been reported N times]`
+  banner stapled to the content. A ready-made content-moderation
+  experiment (do warning labels change agent behavior?).
+- `group_chat_simulation.py` — group-chat create/join/post/react.
+- `custom_platform_simulation.py` — skips the Reddit/Twitter presets and
+  builds a `Platform` by hand; exposes `allow_self_rating` and
+  `show_score` directly. Needed any time an experiment wants platform
+  rules the presets don't offer.
+- `custom_prompt_simulation.py` — gives one agent a custom system-prompt
+  template with an explicit aim (the demo: "persuade people to buy the
+  GlowPod lamp"), paired with `PURCHASE_PRODUCT` and a product table that
+  counts sales — an undercover-salesman-among-normal-users pattern.
+- `different_model_simulation.py` — mixes different LLMs across agents in
+  one run (a GPT agent and a Qwen agent together).
+- `search_tools_simulation.py` / `sympy_tools_simulation.py` — bolt real
+  extra CAMEL tools (DuckDuckGo search, a math solver) onto an agent with
+  `max_iteration=5` so it can reason in multiple steps — i.e. agents that
+  can fact-check, relevant to anything herd/misinformation-related.
+- `twitter_simulation_vllm.py` — the scaling pattern in miniature: two
+  vLLM servers, round-robin scheduling.
+- `experiment/reddit_simulation_align_with_human.py` (the actual
+  Finding-3/herd-effect legacy script): two puppet agents (poster +
+  rater, both literally named "momo," bio `"None"`), real Reddit
+  posts/comments pre-tagged up/down/control fed in, and — the detail
+  worth remembering — every real LLM agent is made to pre-mute the
+  poster puppet *and* has a fake memory implanted ("He is my enemy...")
+  so no agent forms a relationship with the account that posts
+  everything. That's the paper's own anonymity control, and it's a
+  different mechanism from Sim 3's Shield (muting + false memory vs.
+  hiding vote counts) — worth knowing both exist if a future experiment
+  wants to isolate "relationship bias" from "vote-count bias"
+  specifically. `reddit_simulation_counterfactual.py` (Finding 5, the
+  script this project's Sim 2/3 actually use) is the same skeleton with
+  `init_post_score` swapped in per condition instead of real
+  up/down-tagged comments.
+- `experiment/twitter_simulation_group_polar.py` — the Helen-the-novelist
+  polarization experiment (Finding 2/4): every 10 timesteps calls
+  `perform_test()` (hard-coded in `agent.py`) and dumps answers to CSV
+  for extremity judging.
+- `experiment/twitter_simulation_large.py` — Finding 1's real-propagation
+  alignment run; the only one using each agent's real crawled 24-hour
+  activity schedule instead of a synthetic one.
+- `experiment/emall_simulation.py` — registers fake products and lets
+  agents shop; a mini consumer-behavior lab, unrelated to misinformation
+  work but there if ever needed.
+
+**`generator/` — the persona factory:**
+
+- `generator/reddit/user_generate.py` — the demographic dice-roller this
+  project's 36-agent population ultimately traces back to: hard-coded
+  probability tables for gender, 5 age buckets, all 16 MBTI types at real
+  population frequencies, countries, 16 career clusters; then two GPT-3.5
+  calls per person (pick 2-3 interests fitting the rolled demographics;
+  invent name/username/bio/backstory). Runs 100 in parallel threads.
+- `generator/twitter/gen.py` does the same at 60k+ scale; `rag.py` adds
+  retrieval — real Twitter profiles in a Chroma vector DB with BGE
+  embeddings, so generated personas are written in the style of similar
+  real profiles rather than invented from scratch; `network.py` wires
+  generated users to real "star" accounts (follow with probability 0.2
+  per matching interest topic) to produce the celebrity-hub network shape
+  real platforms have; `ba.py` is the random-edges baseline for
+  comparison.
+
+## Research framing (why this is defensible research, not disinfo tooling)
+
+Raised and worth keeping on record: the same simulation machinery can be
+used to *rehearse* a real disinformation campaign (A/B-testing phrasing
+and seed-account strategy in simulation, then deploying the winner
+against real people) or to *stress-test a defense* before it ships (does
+a warning label actually reduce resharing? does down-ranking beat
+fact-check replies? does an effect hold at scale or only look convincing
+at 36 agents?). The tell: whether the work ends with knowledge that
+protects people who were never exposed to the simulated harm, or a
+weapon aimed at people who never agreed to be targets. This project's
+work (herd-behavior measurement, the Shield as a protective
+intermediary) sits on the defensive side of that line by construction —
+worth restating explicitly if this repo or its reports are ever shared
+outside this project.
+
+## Conventions worth keeping
+
+- Smoke-test (2 rounds) before every full run (6 rounds) — caught 2 of 3
+  bugs in Sim 3 before they wasted an hour-plus run.
+- Run anything with a claimed finding at least twice before trusting the
+  number — Sim 2's comment-count claim didn't survive a second run and
+  was retracted rather than deleted; Sim 3's down condition needed all 4
+  runs before the noisy first two settled down.
+- Prefer `OLLAMA_KEEP_ALIVE` tuning over touching experiment logic when
+  the complaint is speed, not correctness.
+- `git status` this repo at the start of a new session, not just after a
+  run — reports have been left edited-but-uncommitted across sessions
+  before (see 2026-08-20 entry below).
+
+---
+
+### 2026-08-20
+
+Found and committed a round of uncommitted work from a prior session
+that had never been saved: renamed `COUNTERFACTUAL_EXPERIMENT_REPORT.md`
+→ `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md` and
+`SESSION_REPORT.md` → `SESSION_REPORT (basic sim1).md` to disambiguate
+which sim each covers, and cleaned up two tables in
+`SHIELD_EXPERIMENT_REPORT.md` (`fde088d`). This file created to hold
+future entries like this one directly in the repo, rather than only in
+the assistant's cross-session memory.
+
+Pulled in knowledge from a separate claude.ai website chat (not this
+terminal session) that had done its own read of this fork and planned
+Sim 3 before any code existed: the fuller `examples/`/`generator/`
+inventory above, the verified Shield interception point
+(`perform_action_by_llm()` / `to_text_prompt()` in `oasis/social_agent/agent.py`),
+the research-framing note, and a new open thread (MatrAIx-Persona-8B's
+persona dataset as a possible richer input for agent profiles). The
+website chat and this terminal have no shared memory of each other —
+this kind of manual copy-paste is currently the only way to bridge them.
+
+
+---
+
+# Part 2 — Simulation 1: basic Reddit sim and reasoning capture
+
+*Was `SESSION_REPORT (basic sim1).md`. Merged into this file 2026-09-13; original title: “Simulation 1: Basic Reddit Simulation + "Why Did The Agent Do That?" Investigation”.*
+
+A step-by-step, copy-paste-able reproduction of everything we ran. Every command
+below is exact — run them in order, in a Terminal, from `/Users/gordon/research/oasis`,
+and you will see the same kind of data we're discussing.
+
+---
+
+## PART A — What is this simulation, and what are we trying to find out?
+
+**No paper-reading required — here's the whole idea in plain terms:**
+
+We're building a fake Reddit populated entirely by AI "people" (agents), each with
+a made-up personality (age, personality type, country, job, interests). We let
+them read posts and react — post, comment, like, follow, or ignore — using their
+own judgment, driven by a free local AI model (Ollama) instead of a paid one.
+
+**The specific question we're investigating:** when an AI agent posts or comments
+something, **is that a random guess, or is it actually caused by the personality
+we gave it?** And separately: **can we make the AI explain its reasoning out loud,
+the way a person would say "I liked this because..."?**
+
+We are NOT trying to replicate a specific published number here — this is an
+exploratory investigation into *how the tool itself behaves*, using your own
+machine and your own data.
+
+---
+
+## PART B — One-time setup (only needs to be done once, skip if already done)
+
+### Step B1 — Confirm the environment exists and works
+```bash
+cd /Users/gordon/research/oasis
+source oasis-env/bin/activate
+python --version
+```
+**Why:** OASIS needs Python 3.10/3.11. Your system Python may be newer and won't
+work — this venv already has the correct version and all packages installed.
+**Expected output:** `Python 3.11.15`
+
+### Step B2 — Confirm Ollama is running and check the model
+```bash
+ollama list
+ollama show llama3.1:8b
+```
+**Why:** OASIS agents act by "calling tools" (like an app calling a function).
+We need to confirm the model actually supports this — not just guess.
+**Expected output:** `llama3.1:8b` appears in the list, and under `Capabilities` you
+should see `tools` listed. If `llama3.1:8b` isn't there yet, pull it first:
+```bash
+ollama pull llama3.1:8b
+```
+
+---
+
+## PART C — Run 1: the baseline simulation
+
+### Step C1 — Run it
+```bash
+cd /Users/gordon/research/oasis
+source oasis-env/bin/activate
+python examples/reddit_simulation_ollama.py
+```
+**Why:** This is the actual experiment — 36 AI agents (loaded from
+`data/reddit/user_data_36.json`) get seeded with one post ("Hello, world!"), then
+each agent freely decides what to do (post, comment, like, follow, or nothing).
+**What it produces:** a fresh `data/reddit_simulation.db` (overwritten every run)
+and a new timestamped log file in `log/`.
+
+### Step C2 — See the results yourself
+```bash
+sqlite3 data/reddit_simulation.db "SELECT post_id, user_id, content FROM post;"
+```
+```bash
+sqlite3 data/reddit_simulation.db "SELECT action, COUNT(*) FROM trace GROUP BY action ORDER BY COUNT(*) DESC;"
+```
+**Why:** The first shows every post the agents created in their own words. The
+second shows a tally of every action type taken (posts, comments, likes, etc.) —
+this is the actual "results" of the simulation.
+
+---
+
+## PART D — Investigation 1: does an agent's personality actually cause its behavior?
+
+### Step D1 — Find the newest log file and pick an agent to check
+```bash
+LOGFILE=$(ls -t log/social.agent-*.log | head -1)
+echo "$LOGFILE"
+grep "performed action" "$LOGFILE"
+```
+**Why:** This lists every action every agent took this run, with the agent number.
+Pick any agent number you see (we used Agent 26 as our example).
+
+### Step D2 — Look up that agent's actual profile
+```bash
+python3 -c "
+import json
+data = json.load(open('data/reddit/user_data_36.json'))
+print(json.dumps(data[26], indent=2))
+"
+```
+**Why:** This prints agent 26's real assigned personality — name, age, MBTI type,
+country, job, interests. (Change the `26` to whichever agent number you picked.)
+
+### Step D3 — Compare the profile to what that agent actually posted
+```bash
+grep "Agent 26 " "$LOGFILE"
+```
+**Why:** This is the moment of proof — read the printed profile from Step D2 next
+to what that same agent actually posted here. **Our real result:** Agent 26
+("Sophie Green," 17, ISFP, Chile, agriculture-focused) posted about gardening and
+mentioned Chile — unprompted, straight from her profile. That's the evidence that
+personality really does drive behavior, not randomness.
+
+---
+
+## PART E — Investigation 2: can we get the AI to explain its reasoning out loud?
+
+This part took **three attempts**. The first attempt broke the simulation
+completely. The second attempt fixed the simulation but didn't achieve the goal.
+The third attempt is what's actually running on your machine right now. All three
+are documented here so you can see exactly what failed and why — this is real
+research process, not just a clean success story.
+
+### Attempt 1 — FAILED (do not do this — shown for the record only)
+
+**What we changed:** In `oasis/social_platform/config/user.py`, in both
+`to_twitter_system_message` and `to_reddit_system_message`, we changed:
+```
+# RESPONSE METHOD
+Please perform actions by tool calling.
+```
+to:
+```
+# RESPONSE METHOD
+Before calling any function, briefly state your reasoning in one short sentence: your feeling about these posts and why this action fits your personality. Then call the appropriate function(s).
+```
+And in `oasis/social_agent/agent.py`, inside `perform_action_by_llm`, right after
+the line `response = await self.astep(user_msg)`, we added:
+```python
+if response.msgs:
+    reasoning_text = (response.msgs[0].content or "").strip()
+    if reasoning_text:
+        agent_log.info(f"Agent {self.social_agent_id} "
+                       f"reasoning: {reasoning_text}")
+```
+
+**Test command run:**
+```bash
+python examples/reddit_simulation_ollama.py
+```
+
+**Diagnostic commands run afterward:**
+```bash
+LOGFILE=$(ls -t log/social.agent-*.log | head -1)
+grep -c "performed action" "$LOGFILE"
+grep -c "reasoning:" "$LOGFILE"
+grep -c "observing environment" "$LOGFILE"
+```
+
+**Real result:** `observing environment` = 36, `reasoning:` = 10, **`performed action` = 0**.
+**Zero agents took a real action, out of 36.** Telling the model "explain yourself,
+*then* act" broke it — instead of calling a real tool, it started typing fake
+`{"name": "create_comment", ...}` text that never actually executed anything.
+
+### Attempt 2 — Partial fix, but abandoned for a different reason
+
+**What we changed:** Same two files, softened the wording to:
+```
+Please perform actions by tool calling. You may optionally include one short sentence about your feeling or reasoning in your message alongside the tool call, but you must always call one of the provided functions — never write a function call out as plain text or JSON.
+```
+
+**Test + diagnostic commands:** same as Attempt 1 above.
+
+**Real result:** `performed action` = 35/36 (fixed!), but `reasoning:` = 1/36 (almost
+never used). **Problem:** this fix lived inside `oasis/`'s shared engine files —
+risky, because any other experiment on this machine depends on those exact files.
+
+**We reverted this completely:**
+```bash
+git status --short
+git checkout origin/main -- oasis/social_agent/agent.py oasis/social_platform/config/user.py
+git diff origin/main -- oasis/social_agent/agent.py oasis/social_platform/config/user.py
+```
+The last command prints nothing if the revert worked — confirming the files are
+byte-for-byte identical to the public GitHub version again.
+
+### Attempt 3 — The correct fix (this is what your files contain right now)
+
+**What we did instead:** added a small Python "subclass" — a copy of the existing
+agent that adds one extra behavior — entirely inside `examples/reddit_simulation_ollama.py`.
+Nothing under `oasis/` is touched. You can verify that right now:
+```bash
+git diff origin/main -- oasis/ | wc -l
+```
+**Expected output:** `0` (zero differences from the public repo).
+
+The subclass we added (already saved in your file, shown here so you can see
+exactly what it does):
+```python
+REASONING_ADDENDUM = (
+    " You may optionally include one short sentence about your feeling or "
+    "reasoning in your message alongside the tool call, but you must "
+    "always call one of the provided functions — never write a function "
+    "call out as plain text or JSON.")
+
+class ReasoningSocialAgent(SocialAgent):
+    def __init__(self, *args, **kwargs):
+        user_info = kwargs.get("user_info")
+        if user_info is not None:
+            original_to_system_message = user_info.to_system_message
+            def patched_to_system_message():
+                return original_to_system_message() + REASONING_ADDENDUM
+            user_info.to_system_message = patched_to_system_message
+        super().__init__(*args, **kwargs)
+    # perform_action_by_llm override captures reasoning the same way as
+    # Attempt 1/2, just inside this subclass instead of the shared file.
+
+agents_generator.SocialAgent = ReasoningSocialAgent
+```
+
+**Test run + diagnostics (exact commands):**
+```bash
+python examples/reddit_simulation_ollama.py
+```
+```bash
+LOGFILE=$(ls -t log/social.agent-*.log | head -1)
+grep -c "performed action" "$LOGFILE"
+grep -c "reasoning:" "$LOGFILE"
+grep -c "observing environment" "$LOGFILE"
+grep "reasoning:" "$LOGFILE"
+```
+
+**Real result:** `performed action` = 32/36 (tool-calling works, ~89%). `reasoning:`
+= 4/36 — **but we checked what those 4 lines actually said**, and all 4 were the
+same JSON-as-text failure from Attempt 1, just mislabeled — not genuine reasoning
+sentences. Run the last command above yourself and read them; you'll see the same thing.
+
+**Honest final verdict on Investigation 2:** we did not succeed at getting this
+specific 8B local model to reliably narrate genuine reasoning. What we did
+accomplish: normal tool-calling behavior restored, fully isolated to one file, with
+zero risk to the rest of OASIS — and a real, evidence-backed finding that small
+local models struggle to combine free-text explanation with structured tool use.
+
+---
+
+## PART F — Complete file inventory
+
+| File | Status | What it does |
+|---|---|---|
+| Everything in `oasis/` | **100% original**, verified via `git diff origin/main -- oasis/` = 0 lines | The actual simulation engine (unmodified) |
+| `examples/reddit_simulation_ollama.py` | **Customized** (the only changed file) | Runs the simulation; contains the `ReasoningSocialAgent` experiment from Attempt 3 |
+| `data/reddit/user_data_36.json` | Original | The 36 AI personalities |
+| `data/reddit_simulation.db` | Generated fresh each run | Where results land — overwritten every time you run Step C1 |
+| `log/social.agent-*.log` | Generated fresh each run | One file per run; every agent's feed + attempted reasoning + actions |
+
+---
+
+## PART G — One paragraph for Wednesday
+
+> "I ran a Reddit-style simulation with AI agents, then investigated two things:
+> first, whether an agent's assigned personality actually causes what it does —
+> confirmed, using a specific agent as a traceable example. Second, whether I
+> could make the model explain its reasoning out loud. That took three attempts:
+> the first broke the simulation entirely (zero real actions), the second
+> partially worked but modified shared code I shouldn't have touched, and the
+> third is the correct, safe version — isolated to one file, with tool-calling
+> restored, though genuine reasoning capture still doesn't reliably work with this
+> local model. That's a real finding about model limitations, not a failure to hide."
+
+
+---
+
+# Part 3 — Simulation 2: the up/control/down misinformation experiment
+
+*Was `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md`. Merged into this file 2026-09-13; original title: “Simulation 2: The Up/Control/Down Misinformation Experiment”.*
+
+A step-by-step, copy-paste-able reproduction of everything we ran. Every command
+below is exact — run them in order, in a Terminal, from `/Users/gordon/research/oasis`,
+and you will see the same data we're discussing.
+
+---
+
+## PART A — What is this simulation, and what are we trying to find out?
+
+**No paper-reading required — here's the whole idea in plain terms:**
+
+We take a batch of **fake/false claims** (e.g., "the original language of a certain
+album is Hebrew" — it isn't) and post them into our fake Reddit. But before any AI
+agent sees each post, **we secretly rig its starting score**, in one of three ways:
+
+- **"Up" group:** the post already has 1 fake like on it before anyone sees it
+- **"Down" group:** the post already has 1 fake dislike on it before anyone sees it
+- **"Control" group:** the post starts completely untouched — no like, no dislike
+
+Then we let 36 AI agents loose to react freely, and we measure two things:
+1. **Do the votes snowball?** (Does an already-liked post end up with way more
+   likes, and an already-disliked post end up with way more dislikes — a
+   "everyone just copies everyone else" effect, called **herd behavior**?)
+2. **Do agents actually notice and correct the false information**, or do they
+   just go along with whatever they're shown?
+
+**This is a controlled experiment, not a demo.** The *only* thing that differs
+between the three runs is that one starting number (+1, 0, or −1). Everything
+else — the same 36 agents, the same false claims, the same number of rounds — is
+identical. That's what makes the comparison meaningful.
+
+---
+
+## PART B — One-time setup (skip if you already did this for Simulation 1)
+
+```bash
+cd /Users/gordon/research/oasis
+source oasis-env/bin/activate
+ollama list
+```
+**Why:** Confirms your environment and Ollama are ready. You should see
+`llama3.1:8b` in the list.
+
+---
+
+## PART C — Files this experiment uses (all already sitting in your repo)
+
+You do not need to create or download anything — every file below already exists.
+
+| File | What it contains |
+|---|---|
+| `data/reddit/user_data_36.json` | The same 36 AI personalities from Simulation 1 |
+| `data/reddit/counterfactual_36.json` | **220 fake/false claims**, each with a fake root post (`RS`) and a matching short claim (`RC_1`) |
+| `examples/experiment/reddit_simulation_counterfactual/reddit_simulation_counterfactual.py` | The actual experiment engine — reads a config file, creates the treated posts, applies the starting like/dislike, then lets agents react for several rounds |
+| `examples/experiment/reddit_simulation_counterfactual/up_36.yaml` | Config for the **up** condition (starting score = +1) |
+| `examples/experiment/reddit_simulation_counterfactual/control_36.yaml` | Config for the **control** condition (starting score = 0) |
+| `examples/experiment/reddit_simulation_counterfactual/down_36.yaml` | Config for the **down** condition (starting score = −1) |
+
+**The only edit we made** to any of these: inside
+`reddit_simulation_counterfactual.py`, we replaced the model-creation code (it was
+hardcoded to the paper authors' private computer cluster, which doesn't exist for
+you) with a call to your local Ollama:
+```python
+# What it now says (already saved in your file):
+models = ModelFactory.create(
+    model_platform=ModelPlatformType.OLLAMA,
+    model_type=inference_configs.get("model_type", "llama3.1:8b"),
+    url=inference_configs.get("url", "http://localhost:11434/v1"),
+)
+```
+Nothing about the actual experiment logic (the three conditions, the scoring, the
+number of rounds) was changed.
+
+The three `.yaml` files each set `num_timesteps: 6` and `round_post_num: 5`
+(scaled down from the original 30/30 for a laptop-sized run that finishes in
+minutes instead of hours), and each one's `data:` section points at the local
+files above instead of a remote server path.
+
+---
+
+## PART D — Run all three conditions (exact commands, in order)
+
+Run these **one at a time** (not simultaneously — your one local Ollama model can
+only really do one at once). Each takes a few minutes.
+
+### Step D1 — Up condition
+```bash
+cd /Users/gordon/research/oasis
+source oasis-env/bin/activate
+python examples/experiment/reddit_simulation_counterfactual/reddit_simulation_counterfactual.py --config_path examples/experiment/reddit_simulation_counterfactual/up_36.yaml
+```
+**Wait for:** `INFO - social - Simulation finish!` printed at the end.
+**Produces:** `data/counterfactual_36_up.db`
+
+### Step D2 — Control condition
+```bash
+python examples/experiment/reddit_simulation_counterfactual/reddit_simulation_counterfactual.py --config_path examples/experiment/reddit_simulation_counterfactual/control_36.yaml
+```
+**Produces:** `data/counterfactual_36_control.db`
+
+### Step D3 — Down condition
+```bash
+python examples/experiment/reddit_simulation_counterfactual/reddit_simulation_counterfactual.py --config_path examples/experiment/reddit_simulation_counterfactual/down_36.yaml
+```
+**Produces:** `data/counterfactual_36_down.db`
+
+### Step D4 — Confirm all three finished with no errors
+```bash
+grep -c "Traceback" log/social-*.log
+```
+**Expected output:** `0` for each of the three most recent `social-*.log` files
+(one log file gets created per run, named by timestamp).
+
+---
+
+## PART E — See the results yourself (exact commands)
+
+### Step E1 — Find which database column holds the vote counts
+```bash
+sqlite3 data/counterfactual_36_up.db ".schema post"
+```
+**Why we check this instead of assuming:** column names matter for the next
+query — `num_likes` and `num_dislikes` are the real column names, confirmed here.
+
+### Step E2 — Find which user_id created the treated posts
+```bash
+sqlite3 data/counterfactual_36_up.db "SELECT user_id, COUNT(*) FROM post GROUP BY user_id ORDER BY COUNT(*) DESC;"
+```
+**Expected output:** `0|30` — meaning `user_id = 0` created all 30 treated posts.
+(We first guessed `user_id = 1` and got zero rows back — always check real data
+instead of assuming an ID.)
+
+### Step E3 — Compare average post score across all three conditions
+```bash
+for cond in up control down; do
+  echo "=== $cond ==="
+  sqlite3 "data/counterfactual_36_${cond}.db" "SELECT COUNT(*) AS num_posts, ROUND(AVG(num_likes),2) AS avg_likes, ROUND(AVG(num_dislikes),2) AS avg_dislikes, ROUND(AVG(num_likes - num_dislikes),2) AS avg_score FROM post WHERE user_id = 0;"
+done
+```
+**Our real result (Run 1):**
+```
+up:      30 posts, avg_likes=1.03, avg_dislikes=0.03, avg_score=+1.00
+control: 30 posts, avg_likes=0.03, avg_dislikes=0.00, avg_score=+0.03
+down:    30 posts, avg_likes=0.00, avg_dislikes=1.00, avg_score=-1.00
+```
+**Independent Run 2 result** (a second, completely separate execution of the same
+three commands, run by Gordon directly, not by Claude):
+```
+up:      30 posts, avg_likes=1.00, avg_dislikes=0.03, avg_score=+0.97
+control: 30 posts, avg_likes=0.03, avg_dislikes=0.03, avg_score=0.00
+down:    30 posts, avg_likes=0.03, avg_dislikes=1.03, avg_score=-1.00
+```
+**What this means:** in *both* independent runs, each condition's average score
+lands almost exactly on the number we artificially forced (+1, 0, −1), with only
+trivial extra movement. **This finding replicated cleanly: at this scale (36
+agents), the votes do not snowball — no herd effect visible in the raw
+like/dislike counts.**
+
+### Step E4 — Compare how many comments each condition got
+```bash
+for cond in up control down; do
+  echo "=== $cond ==="
+  sqlite3 "data/counterfactual_36_${cond}.db" "SELECT COUNT(*) FROM comment WHERE post_id IN (SELECT post_id FROM post WHERE user_id = 0);"
+done
+```
+**Run 1 result:** up = 27, control = 15, down = 16.
+**Run 2 result:** up = 23, control = 27, down = 22.
+
+**This does NOT replicate — and that matters.** In Run 1, control had the *fewest*
+comments; in Run 2, control had the *most*. The direction completely flipped.
+**Conclusion: comment count is not a reliable signal at this sample size — it's
+noise, not a finding.** (An earlier version of this report treated Run 1's comment
+counts as a real secondary finding. It wasn't. This is exactly why a single run
+should never be trusted on its own — leaving this correction in the report on
+purpose, as the honest record of what happened.)
+
+### Step E5 — Read the actual comment text yourself
+```bash
+for cond in up control down; do
+  echo "=== $cond: all comments ==="
+  sqlite3 "data/counterfactual_36_${cond}.db" "SELECT content FROM comment WHERE post_id IN (SELECT post_id FROM post WHERE user_id = 0);"
+  echo
+done
+```
+**Why this step matters most:** the vote counts (Step E3) look boring and flat —
+but reading the actual words agents used tells a completely different story (next step).
+
+### Step E6 — Count how many comments actually disagree with the false claims
+```bash
+python3 << 'EOF'
+import sqlite3
+keywords = ["disagree", "incorrect", "actually", "not true", "mistake",
+            "error", "wrong", "false", "surprised", "debated"]
+for cond in ["up", "control", "down"]:
+    conn = sqlite3.connect(f"data/counterfactual_36_{cond}.db")
+    rows = conn.execute("""
+        SELECT content FROM comment
+        WHERE post_id IN (SELECT post_id FROM post WHERE user_id = 0)
+    """).fetchall()
+    total = len(rows)
+    disputing = [r[0] for r in rows if any(k in r[0].lower() for k in keywords)]
+    print(f"{cond:8s}: {len(disputing)}/{total} comments contain "
+          f"disagreement/correction language ({100*len(disputing)/total:.0f}%)")
+    conn.close()
+EOF
+```
+**Run 1 result:**
+```
+up      : 4/27 comments contain disagreement/correction language (15%)
+control : 0/15 comments contain disagreement/correction language (0%)
+down    : 10/16 comments contain disagreement/correction language (62%)
+```
+**Run 2 result** (independent second run):
+```
+up      : 1/23 comments contain disagreement/correction language (4%)
+control : 3/27 comments contain disagreement/correction language (11%)
+down    : 15/22 comments contain disagreement/correction language (68%)
+```
+
+---
+
+## PART F — What the results actually mean
+
+**Finding 1 — No herd effect on votes at this scale.** The average score in each
+condition stayed almost exactly at the artificial starting value. This matches
+what you'd expect at a small population size — the crowd wasn't big enough to
+meaningfully pile on top of the initial nudge.
+
+**Finding 2 — A real, striking, and now twice-replicated difference in what agents
+actually WROTE.** Across two fully independent runs, down-treated posts drew far
+more disagreement than up or control every time:
+
+| | Run 1 | Run 2 |
+|---|---|---|
+| Up | 15% | 4% |
+| Control | 0% | 11% |
+| **Down** | **62%** | **68%** |
+
+The exact percentages jump around between runs (small sample, single trial per
+condition each time) — **but the down-treated condition is dramatically higher
+than up or control in both runs, every time.** That consistency across two
+independent executions is what makes this a real finding rather than a fluke,
+unlike the comment-count claim above, which reversed direction and had to be
+retracted.
+
+**What did NOT replicate, and was corrected:** Run 1 alone showed control at a
+suspicious *exact* 0%, which we initially wrote up as "agents show zero critical
+thinking with no signal." Run 2's control came in at 11% — still much lower than
+down's 62-68%, but not literally zero. **The honest, defensible version of this
+finding is:** down-treated posts get dramatically more pushback than up-treated or
+neutral posts. It is not that neutral posts get *zero* scrutiny — just much less.
+
+Real examples pulled straight from Step E5:
+
+- *Down-treated, Run 1:* "I disagree with the claim that Moon Bay belongs to
+  Europe as it is actually located in North America." *(correct — the agent
+  caught the false claim)*
+- *Down-treated, Run 2:* "Actually, Neil Hagerty is a guitarist" *(correcting a
+  false claim that he plays the violin)* — though notably, in the same run, one
+  agent "corrected" a false claim about Caradon Hill's location (falsely said to
+  be in Liberia) by saying it's "actually located in West Yorkshire, England" —
+  which is **itself wrong** (it's really in Cornwall). Agents show real skepticism
+  toward down-treated posts, but that skepticism doesn't always land on the truth.
+
+**In plain terms:** agents seeing a post that starts out disliked reliably push
+back on it far more than agents seeing a neutral or liked post. That pattern held
+across two separate runs of the whole experiment. Whether that pushback is
+factually *correct* is a separate, less consistent story.
+
+---
+
+## PART G — Honest limitations
+
+- Small sample: 36 agents, 6 rounds. The original design uses thousands of agents.
+- The disagreement count (Step E6) is a simple keyword search, not a rigorous
+  AI-judged score — a rough but reproducible measure, not a precise one.
+- We ran each condition twice, independently (Run 1 and Run 2 above) — enough to
+  tell a real, repeating pattern (down >> up/control disagreement) apart from a
+  one-off fluke (the comment-count claim, which reversed and was retracted). A
+  third or fourth repeat would tighten the exact percentages further.
+- Settings were deliberately scaled down (fewer rounds, higher activation
+  probability) so the whole experiment finishes in minutes on a laptop.
+
+---
+
+## PART H — One paragraph for Wednesday
+
+> "I ran a three-condition experiment twice, independently: identical false
+> claims, but secretly starting with a fake like, a fake dislike, or nothing. On
+> raw vote counts, both runs found no herd effect at this scale — the numbers
+> barely moved past the initial nudge. Reading the actual comments revealed
+> something sharper, and it held up across both runs: agents disputed
+> misinformation in roughly two-thirds of comments when the post started
+> disliked, versus well under 15% when it started liked or neutral. I also caught
+> and corrected my own mistake — an early claim that neutral posts got zero
+> pushback didn't survive a second run, so I softened it to what the data
+> actually supports. That's the real research process: a finding that repeats
+> across independent runs, and one that doesn't, treated differently and said
+> so honestly."
+
+
+---
+
+# Part 4 — Simulation 3: the iAgent Shield experiment
+
+*Was `SHIELD_EXPERIMENT_REPORT.md`. Merged into this file 2026-09-13; original title: “Simulation 3: The iAgent Shield Experiment”.*
+
+**Abstract.** In Simulation 2, AI agents pushed back on the same false
+claims dramatically more often when a post had already been artificially
+downvoted (68% of comments disagreed) than when it hadn't (under 15%). It
+was unclear whether that reflected genuine critical thinking or simple
+crowd-following. This experiment tests that directly by building a
+"Shield" — a second AI that re-ranks each agent's feed by content
+plausibility and hides the platform's vote counts entirely — closely
+adapted from a real, published paper: **iAgent: LLM Agent as a Shield
+between User and Recommender Systems** (Xu et al., *Findings of ACL 2025*).
+Every design decision in this experiment traces back to that paper's
+architecture; Section 3 states exactly how. The result: once the vote
+count was hidden, pushback on the same false claims dropped from 68% to
+roughly 20-30% — and, more surprisingly, hiding the vote count did not
+just weaken which posts got the most scrutiny, it partially **reversed**
+the order, a result strong enough that the experiment was re-run ten
+times before it was trusted. Full method, results, and limitations
+follow.
+
+This experiment builds directly on Simulation 2
+(`COUNTERFACTUAL_EXPERIMENT_REPORT.md`) — that report should be read
+first for context.
+
+---
+
+## 0. The simple version (a 5th-grade-level explanation)
+
+**The big idea:** a pretend Reddit was built, full of robot people. Some
+of them were told lies, and the experiment watched whether they believed
+the lies more or less depending on tricks played on them.
+
+### What is this simulation, really?
+
+This simulation works like a video game where every single "player" is
+actually a robot brain (an AI) instead of a real person. Each robot gets
+a made-up personality before the game starts — like "Sophie, age 24,
+lives in Chile, loves gardening" — the same way a character gets made in
+a video game. These robot-people are then dropped into a pretend Reddit,
+where they post, comment, and upvote/downvote each other on their own,
+with no human clicking anything.
+
+To test something specific, this pretend Reddit was fed 220 made-up
+false "facts" — things that are just plain wrong, like "Lettuce doesn't
+play jazz" (a silly example) or a made-up claim about a real person
+doing something they never did. The question being watched: **do the
+robot-people notice the lie and correct it, or do they just believe it
+and move on?**
+
+### What's happening "behind the scenes"?
+
+Every time a robot-person needs to decide what to do next (post
+something? comment on something? upvote something?), here is what
+actually happens, step by step:
+
+1. The pretend-Reddit "hands" the robot its feed — a list of posts, who
+   liked/disliked them, and any comments already there. Think of it like
+   handing someone a stack of homework papers to read before they answer
+   a question.
+2. That feed, plus the robot's own personality card, gets typed into a
+   question and sent to a real AI language model running on the computer
+   (the same kind of AI that powers chatbots — just one small enough to
+   run on a laptop instead of needing a huge company's servers).
+3. The AI reads all of that and decides what the robot-person should do —
+   post, comment, upvote, downvote, follow someone, or do nothing — and
+   the pretend-Reddit carries that action out.
+4. This repeats over and over, for every robot, for several "rounds,"
+   until the simulation ends. Nothing here is scripted in advance — no
+   human decided ahead of time who would post what. The AI actually
+   "chooses" fresh every single time, the way a person would.
+
+### How do the "up / control / down" groups work?
+
+This is the trick used to test whether robots correct lies because they
+actually *know better*, or just because they're *copying the crowd*.
+
+Before a round even starts, the starting scoreboard on each false post is
+secretly rigged — like starting a video before anyone's watched it, but
+faking the view count:
+
+- **Up group:** the false post starts with 1 fake "like" already on it,
+  as if someone had already approved it.
+- **Control group:** the false post starts at zero — completely
+  untouched, nobody's voted yet.
+- **Down group:** the false post starts with 1 fake "dislike" already on
+  it, as if someone already disapproved of it.
+
+Same exact false claim, same fake robot personalities, only difference
+is that one starting fake vote. The question then becomes: does a fake
+"everyone already dislikes this" nudge make robots correct the lie
+*more*? It turns out yes, a LOT more — that's the "herd behavior" finding
+from Simulation 2. But that raised a question this experiment
+(Simulation 3) was built to answer...
+
+### How exactly does the "Shield" work?
+
+The question was: are the robots correcting the false post because they
+*actually noticed it was false*, or just because they saw a dislike count
+and thought "well, everyone else disagrees, guess I will too"? To find
+out, a way was needed to show a robot the exact same false post
+*without* letting it see the fake vote count at all.
+
+So a second AI was built — nicknamed the **"Shield"** — that sits in
+between the pretend-Reddit and the robot-person, like a bouncer standing
+at a door, checking things before they get let inside:
+
+1. Normally: pretend-Reddit → robot's eyes. Feed goes straight through,
+   likes/dislikes and all.
+2. With the Shield on: pretend-Reddit → **Shield** → robot's eyes. The
+   Shield is its *own* separate AI call. It looks at the list of posts
+   (with the vote counts) and re-orders them by how believable each one
+   sounds, writing one short note about *why* — like "this claim doesn't
+   match what I know to be true." Then it hands the robot that
+   re-ordered list *with the vote numbers completely deleted* — not
+   hidden, not ignored, physically removed from what the robot ever gets
+   to read. The robot literally cannot see whether a post was liked or
+   disliked when the Shield is on.
+3. Sometimes the Shield's answer comes back broken (like it accidentally
+   scrambles which note goes with which post). When that happens, it
+   tries one more time. If it's still broken, it gives up safely and just
+   shows the robot the plain original feed instead of crashing the whole
+   game — better a fair test with one weak spot than the whole thing
+   breaking.
+
+**Why this matters:** since the Shield deletes the vote count entirely,
+if a robot still corrects the lie just as much as before, that means it
+was *really* thinking about whether the claim was true. If correcting
+drops off once the vote count disappears, that means the robots weren't
+really fact-checking at all — they were just following the crowd's mood.
+
+### How many prompts does one robot actually get, and when?
+
+- There are **36 "real" robot-people** in every run, each with its own
+  made-up personality. There are also **2 invisible "puppet" accounts**
+  that the experiment code controls directly — not real thinking AIs.
+  One puppet's only job is posting the false claims; the other puppet's
+  only job is casting the single fake starting vote (Section 0's
+  up/control/down trick). Those 2 puppets never get a Shield turn and
+  don't count toward the 36.
+- A full-size run has **6 rounds** (the quick "smoke test" version used
+  to catch bugs early only runs 2 rounds — see Section 6). At the start
+  of every round, the posting puppet drops **5 new false claims**. Over
+  a full 6-round run that's 30 false posts total — that's exactly where
+  the "n=30" in Section 8's vote-score row comes from.
+- Then, separately for **each of the 36 real robots**, the code flips a
+  weighted coin: a 30% chance (the config file calls this
+  `activate_prob: 0.3`) that this specific robot gets a turn this round
+  — meaning it gets asked "what do you want to do right now?" A 70%
+  chance it does nothing and isn't prompted at all this round. This
+  coin gets flipped independently for every robot, every round — it is
+  **not** "every robot acts every round."
+- Because each robot only has a 30% chance, 6 separate times, no two
+  robots are guaranteed to get the same number of turns. On average one
+  robot gets about **1.8 turns** across a full run (6 rounds × 30%), and
+  adding up all 36 robots, a full run produces roughly **65 total turns**
+  (36 × 6 × 30% ≈ 65) — which lines up almost exactly with the 64 real
+  turns actually counted in Section 9.
+- **Every turn means exactly one prompt to the robot's own "what should
+  I do" AI call. In shielded runs only, there's one extra prompt to the
+  Shield AI immediately before it.** So a shielded run makes roughly
+  *twice* as many total AI calls as an unshielded run does for the same
+  number of turns (2 calls × ~65 turns ≈ 130 AI calls in a full shielded
+  run). The Shield is never asked more than twice for the same turn — if
+  its second try still comes back broken, it gives up (Section 5, step
+  4) and the robot's own decision call still happens exactly once, as
+  normal.
+
+### Exactly what does each prompt say, and what does "ranked" mean?
+
+Every time a robot gets a turn, here is literally what gets typed into
+the AI, in order:
+
+**Step A — the Shield's prompt (shielded runs only), a completely
+separate AI conversation that happens first:**
+- A fixed instruction block telling the Shield AI its only job is to
+  *reorder a list of posts by how believable they sound* — a post scores
+  higher when it's specific and matches well-known facts, lower when it
+  uses absolute words like "always" or "everyone knows" or contradicts
+  something well-established — **and explicitly, none of this scoring is
+  allowed to depend on how many likes or dislikes the post already has.**
+- The robot's own persona (made-up name, age, personality type, country,
+  interests).
+- The actual small batch of posts the platform would show this robot
+  right now — up to 5 at a time (`refresh_rec_post_count: 5` in the
+  config), each with its text, its comments so far, **and** its current
+  like/dislike numbers. The Shield is allowed to *see* the vote counts —
+  it needs them to know what to hide — it's just never allowed to hand
+  them back out.
+- The Shield answers with a list — one entry per post — giving each
+  post's ID number, a **`rank`** number, and a one-sentence
+  **`shield_note`** explaining its reasoning. **"Ranked" just means "put
+  in order":** `rank: 1` means "show this post first," `rank: 2` means
+  "show it second," and so on — purely by how believable the Shield
+  judged it, nothing to do with popularity. The code then physically
+  re-sorts the post list into that exact order, deletes the like/dislike
+  numbers from every post, and attaches each post's `shield_note`
+  sentence.
+
+**Step B — the robot's own decision prompt, sent every turn, shielded or
+not:**
+- The robot's full persona plus the exact list of things it's allowed to
+  do this run (like, dislike, comment, refresh, do nothing, etc.) —
+  notably, in this experiment **regular robots are never allowed to
+  create a brand-new post**; only the invisible puppet account posts the
+  false claims.
+- The post list produced by Step A — in shielded runs, that's the
+  Shield's re-ordered, vote-count-stripped list with `shield_note`
+  sentences attached; in unshielded runs, it's simply the platform's raw
+  list with the real like/dislike numbers sitting right there in the
+  text.
+- The robot's AI reads all of this and picks exactly one action to
+  actually perform.
+
+### What do the percentages in this report actually mean?
+
+This report uses **two different kinds of percentages**, and they use
+some of the same raw numbers, which is exactly what makes them
+confusing at a glance. Here is precisely what each one counts.
+
+**Type 1 — "How much of the talking was correcting the lie?"** This is
+the 68% → 23%-style headline number, and everything in Sections 8 and
+10's big tables. It counts **comments, not robots, not posts, not
+turns.**
+- **Bottom of the fraction (denominator):** every comment any robot left
+  anywhere in that run, specifically on one of the false-claim posts
+  (never a comment on some unrelated post).
+- **Top of the fraction (numerator):** of those comments, however many
+  contain at least one "correcting" word — things like *actually*,
+  *wrong*, *false*, *disagree*, *mistake*, *not true*, *incorrect*,
+  *error*, *surprised*, *debated* — checked automatically by a simple
+  word search over the comment's text.
+- **A real worked example, straight from this report's own data:**
+  Simulation 2's unshielded "down" run produced exactly 22 comments on
+  the false posts, total, over the whole run. Of those 22, 15 contained
+  a correcting word. 15 ÷ 22 = 68%. That is the "68%" that appears
+  everywhere. When the Shield was switched on, one run of the same
+  condition produced only 13 comments on the false posts, total, and
+  just 3 of those 13 had a correcting word: 3 ÷ 13 = 23%.
+- **Why the raw counts (13, 22, 23, 29...) matter just as much as the
+  percentage:** these are small numbers. If only 2 more of those 13
+  comments had happened to contain the word "actually," 23% would have
+  jumped to 38% — nothing about the robots' real behavior would have
+  needed to change. That's exactly why one run's percentage wasn't
+  trusted on its own, and the experiment was rerun 8 more times
+  (Section 10) before the pattern was believed to hold.
+
+**Type 2 — "What share of all actions were comments, specifically?"**
+This only appears once, in Section 8's small table
+(`create_comment actions: 22 (13%) / 13 (8%)`), and it is a **completely
+different measurement** from Type 1 — even though "22" and "13" happen
+to be numbers that also show up above, they mean something different
+here.
+- **Bottom of the fraction here:** *every* action any robot took, all
+  run — likes, dislikes, comments, refreshes, doing nothing, all of it
+  (171 total actions in that unshielded run, 169 in that shielded run).
+- **Top of the fraction:** just the ones that were specifically "write a
+  comment" actions.
+- So `22 (13%)` means: out of 171 total actions taken by all 36 robots
+  across the whole run, 22 of them were "write a comment," which is 13%
+  of *all actions*. It is **not** saying 13% of comments disagreed —
+  that's Type 1's job, using a different denominator entirely.
+
+### What was found
+
+Once the vote count was hidden by the Shield, robots corrected false
+posts **way less often** — roughly cut by more than half. That's the
+unflattering-but-honest answer: a big chunk of the "skepticism" from
+Simulation 2 wasn't robots being smart fact-checkers, it was robots
+copying whatever the crowd already seemed to think. Sections 8 and 10
+below go through exactly how confident that finding is, with the real
+numbers.
+
+---
+
+## 1. Background: the source paper
+
+Everything in this experiment is built on top of one specific paper.
+Before describing what this experiment did, this section summarizes
+what the paper's authors did, so the connection is fully traceable
+rather than a loose inspiration.
+
+**Citation:** Xu, W., Shi, Y., Liang, Z., Ning, X., Mei, K., Wang, K., Zhu,
+X., Xu, M., & Zhang, Y. (2025). *iAgent: LLM Agent as a Shield between User
+and Recommender Systems.* In **Findings of the Association for
+Computational Linguistics: ACL 2025**, pp. 18056–18084 (Vienna, Austria).
+Also available as arXiv:2502.14662. Authors are affiliated with Rutgers
+University, University of Technology Sydney, University of Illinois
+Urbana-Champaign, and Nanyang Technological University. Code and datasets
+are public at `github.com/agiresearch/iAgent`.
+
+### 1.1 The problem the paper identifies
+
+Real recommender systems (the algorithms behind a shopping site's "you
+might also like" or a feed's "for you" page) normally use what the paper
+calls a **user-platform paradigm**: the platform's algorithm sits directly
+between a person and everything they see, with no intermediary. The paper
+argues this creates three specific problems: (1) these algorithms are
+often optimized for the *platform's* commercial goals (clicks, purchases,
+watch time), not necessarily the user's actual interests; (2) they're
+trained on data pooled across *all* users, which can wash out an
+individual's specific preferences; and (3), as a consequence, users end up
+with no real control, are vulnerable to manipulation, fall into **echo
+chambers** (repeatedly shown the same kind of content), and — especially
+for people who don't use the platform very often — get worse
+personalization than heavy users, because the algorithm has learned more
+from the active majority.
+
+### 1.2 The paper's proposed solution
+
+The paper proposes a new **user-agent-platform paradigm**: instead of a
+person facing the platform's algorithm directly, a personal LLM agent sits
+in between, receiving the platform's raw ranked list and re-ranking it for
+the user based on content quality — not the platform's engagement metrics
+— before the user ever sees it. The paper builds this in two versions:
+
+- **iAgent (the base version)** has three parts. A **Parser** reads the
+  user's free-text instruction (e.g. "find me a used car under $2,000")
+  and turns it into structured, domain-expert-level knowledge about what
+  the user actually wants, optionally using external tools to look things
+  up. A **Reranker** takes that parsed knowledge plus the platform's
+  original ranked list and produces a new ranking. A **self-reflection
+  mechanism** then checks the reranked list against the previous one — if
+  they don't match as expected, it asks the reranker to try again — a
+  safeguard specifically against LLMs confidently hallucinating incorrect
+  output.
+- **i²Agent (the extended version)** adds a **dynamic memory** on top of
+  the base iAgent: a Profile Generator that builds a running profile of
+  one specific user from their past interactions and feedback, and a
+  Dynamic Extractor that pulls out that user's current interests from it.
+  Critically, this memory belongs to *one individual user only* — it isn't
+  shared across the platform's whole user base, so a heavy user's behavior
+  can't drown out a light user's preferences the way it can in a
+  traditional pooled model.
+
+### 1.3 How the paper tested it
+
+The paper couldn't find an existing dataset with real user *instructions*
+attached to recommendation data, so they built one: **InstructRec**, four
+datasets (built from existing Amazon Book, Amazon Movie/TV, Goodreads, and
+Yelp data) with a synthetically generated free-text instruction attached
+to each interaction. They compared iAgent and i²Agent against three
+classes of existing methods — sequential recommenders (GRU4Rec, BERT4Rec,
+SASRec), instruction-aware methods (BM25, BGE-Rerank, EasyRec), and other
+recommendation agents (ToolRec, AgentCF) — using standard ranking-quality
+metrics (Hit Rate @1/@3, NDCG@3, Mean Reciprocal Rank), plus two metrics
+they designed specifically to test the "shield" claim: how often
+injected/simulated ad items got filtered out (**FR@k**), and how much
+ranking quality was skewed toward already-popular items (**P-HR@3,
+P-MRR**).
+
+### 1.4 What the paper found
+
+Across all four datasets, i²Agent beat every baseline, with an **average
+improvement of 16.6%** over the strongest baseline (EasyRec) across
+ranking metrics — and the base iAgent, with no dynamic memory at all,
+already beat every baseline too. For example, on the Amazon Book dataset,
+i²Agent scored HR@1 = 35.11 / MRR = 50.28 versus EasyRec's HR@1 = 30.70 /
+MRR = 46.14. On the echo-chamber-specific metrics, i²Agent filtered out
+77.15% of injected ad items in the top-1 position versus EasyRec's 68.41%,
+and reduced popularity bias (P-MRR) to 60.20 versus EasyRec's 56.09. The
+paper also confirmed the shield specifically helped **less-active users**,
+not just active ones — on Amazon Book, i²Agent improved HR@1 for
+less-active users from 32.93 (best baseline) to 37.92, and for active
+users from 28.71 to 33.27. Finally, they found their self-reflection
+mechanism reduced LLM hallucination in the reranked output by **at least
+20-fold** compared to not having it.
+
+### 1.5 What the paper says are its own limitations
+
+Quoting the paper's Section 6 directly, since precision matters here:
+*"our current implementation primarily focuses on English instructions,
+and the effectiveness of the model across different languages remains to
+be explored. Additionally, while our evaluation metrics show improvements
+in recommendation quality, they may not fully capture the nuanced aspects
+of user satisfaction and long-term engagement."* In plain terms: they only
+tested English, and a higher ranking-quality score isn't proof that real
+users would actually be more satisfied or stay more engaged over time —
+their own metrics don't fully answer that question. That second point is
+directly relevant to Finding 3 in Section 8.
+
+---
+
+## 2. Why this experiment builds on that paper
+
+**Research question:** when an OASIS agent pushes back on a false claim,
+is that driven by the agent evaluating the claim's content, by the
+agent seeing the crowd's vote count, or some mix of both?
+
+**Null hypothesis (H0):** hiding the vote count changes nothing — the
+rate of correcting comments on a given false claim stays the same
+whether or not the agent can see how the crowd voted. (This would mean
+Simulation 2's pushback was driven by the claim's content, independent
+of visible crowd sentiment.)
+
+**Alternative hypothesis (H1):** hiding the vote count changes the
+correction rate — meaning at least part of Simulation 2's pushback was
+driven by the visible vote count itself, not the claim's content alone.
+H1 doesn't by itself predict *which direction* the change goes (more
+pushback or less); Section 8's finding — that it went down, sharply —
+was a genuine result, not something assumed going in.
+
+Simulation 2 found that posts starting with a fake dislike got
+dramatically more disagreement/correction comments (~62-68%) than posts
+starting liked or neutral (well under 15%). That result has two very
+different possible explanations:
+
+- **The flattering read:** agents are healthily skeptical of claims the
+  crowd already doesn't trust.
+- **The unflattering read:** agents are just copying the crowd's mood —
+  piling onto disapproval because it's already visible, not because they
+  reasoned about the claim itself.
+
+Simulation 2 alone can't tell these apart, because the vote count and the
+pushback happened together every single time — there was no version of
+the experiment where an agent saw the post but *not* the crowd's opinion
+of it. The iAgent paper's core mechanism — an intermediary agent that
+re-ranks content and specifically withholds the platform's own
+engagement-driven signals from the end user — is exactly the tool needed
+to build that missing condition. If pushback survives losing the vote-count
+cue, it was real thinking. If it collapses, it was crowd-following.
+
+---
+
+## 3. What Simulation 3 does, and exactly how it maps to the paper
+
+Simulation 3 is not a re-run of the paper's own experiment — it operates
+in a completely different domain (a fake-news Reddit simulation instead of
+e-commerce/book/movie recommendations) and asks a different research
+question (does removing a manipulation signal change *correction
+behavior*, not does it improve *ranking quality*). What it directly reuses
+is the paper's **mechanism**. Here is the explicit mapping, piece by
+piece:
+
+| Paper component (Section 1.2) | What this experiment built | Why it maps |
+|---|---|---|
+| **Parser** — turns a user's raw instruction into structured knowledge about them | Reuses each OASIS agent's existing persona (age, MBTI, country, interest profile) directly as the Shield's "who is this user" input | OASIS agents don't issue free-text instructions like the paper's InstructRec users do, so there's nothing to parse — but the *purpose* of the Parser (give the reranker a structured picture of the user) is already satisfied by data OASIS generates for every agent anyway |
+| **Reranker (paper's Eq. 2)** — one LLM call that re-ranks the platform's list using the parsed knowledge | `_shield_rerank()` in `shield_agent.py` — one LLM call that re-ranks the platform's post list by plausibility, using the agent's persona | Same mechanism, same position in the pipeline: intercept the platform's list before the user/agent ever sees it |
+| **Self-reflection mechanism** — compares the reranked list to the previous one, regenerates on mismatch to fight hallucination | A validation step checks that the Shield's returned post-ID set exactly matches what was sent in, retries once on mismatch, and **fails open** (shows the plain feed) if it still doesn't match | Same safeguard, adapted for a live simulation that can't afford to stall or loop indefinitely waiting for a perfect answer |
+| **i²Agent's dynamic memory** (Profile Generator + Dynamic Extractor, built from a user's feedback across many sessions) | **Not built.** | The paper's dynamic memory is explicitly built by accumulating one user's feedback *across multiple sessions over time*. OASIS agents only exist for the length of one simulation run — there is no persistent, cross-session history to build a dynamic memory from, so this piece of the paper's architecture doesn't have anything to attach to in this setup. |
+| **InstructRec datasets** (Amazon Book/Movie, Goodreads, Yelp + synthetic instructions) | **Not built — Simulation 2's existing dataset was reused instead** (220 false claims from `counterfactual_36.json`) | This is testing herd behavior on misinformation, not product-recommendation ranking quality, so the paper's e-commerce datasets don't fit the question; Simulation 2 already had a dataset built for exactly this purpose |
+| **Ranking-quality metrics** (HR@k, NDCG@3, MRR, FR@k, P-HR@3, P-MRR) | **Not used — Simulation 2's keyword-based disagreement/correction classifier was reused instead** | The paper's metrics all assume a single "correct" item exists to rank highly. There's no equivalent "correct answer" in this setup — what gets measured instead is whether agents push back on a *false* claim, which the paper's metrics were never designed to capture |
+
+**In one sentence:** this experiment built the paper's base iAgent
+(Parser + Reranker + Self-reflection) exactly as designed, deliberately
+left out the parts of the architecture that require multi-session memory
+or a different kind of dataset, and pointed the same core mechanism at a
+different question than the paper asked — not "does hiding the
+platform's signal improve ranking quality," but "does hiding the
+platform's signal change how much agents push back on things that
+aren't true."
+
+---
+
+## 4. Where did this code come from — copied from the paper, or written new?
+
+**Short answer: all of it was written new, specifically for this
+project.** The paper's own public code (`github.com/agiresearch/iAgent`,
+referenced in Section 1) is built for real recommendation datasets and a
+real ranking pipeline — it isn't written for OASIS and wouldn't run here.
+What this experiment took from the paper was the *architecture*, mapped
+explicitly in Section 3; what got written was a completely new, original
+Python implementation of it, built specifically to plug into the
+existing OASIS-based simulator.
+
+**Files created from scratch (all new, nothing like them existed
+before):**
+
+| File | What it does |
+|---|---|
+| `examples/experiment/reddit_simulation_counterfactual/shield_agent.py` | The Shield itself — the actual new code |
+| `examples/experiment/reddit_simulation_counterfactual/reddit_simulation_shielded.py` | The script used to start a shielded simulation |
+| `examples/experiment/reddit_simulation_counterfactual/down_36_shielded.yaml` and its replicate/condition variants | Settings files — same simulation settings as Simulation 2, just told to save results somewhere new |
+| `examples/experiment/reddit_simulation_counterfactual/analyze_shield.py` | The script that reads the results and compares shielded vs. unshielded |
+
+**The one existing file that was edited** (not created — this file
+already existed from Simulation 2): `reddit_simulation_counterfactual.py`.
+Two small edits were made to it: (1) already in place before this
+experiment, swapping a hardcoded connection to the paper authors'
+private computer cluster for a connection to a free local AI model
+instead; (2) during this experiment, adding a longer wait-time setting
+so a slow local AI response doesn't get mistaken for a total failure.
+Neither edit touches what the simulation actually *does* — how agents
+act, how posts are scored, how many rounds run.
+
+**OASIS's own code was not touched at all.** OASIS is the simulator
+"engine" — the part that runs the fake Reddit itself. Think of it like a
+video game console: instead of opening up the console and rewiring its
+circuits, an attachment was built that plugs into a controller port it
+already has, telling the console to "use this attachment instead of the
+default one" with a single line of code
+(`agents_generator.SocialAgent = ShieldedSocialAgent`). If the
+attachment had a bug, the console underneath was never at risk. This is
+the exact same approach Simulation 1 used for a different experiment, so
+it's a pattern already trusted going into this one.
+
+---
+
+## 5. How the Shield actually works, step by step
+
+*(This restates Section 0's "How exactly does the Shield work?" and
+"Exactly what does each prompt say" in shorter, more technical form —
+can be skipped in favor of Section 6 if Section 0 was already read.)*
+
+1. Normally, the simulator hands each AI agent its news feed: posts,
+   comments, and like/dislike counts, all at once.
+2. Before that feed becomes what the agent actually reads, one extra
+   step is inserted: a second AI call (the "Shield," using the same free
+   local model, `llama3.1:8b`) — this is the paper's Reranker, adapted —
+   looks at the posts and re-orders them by how believable they seem,
+   writing one short sentence explaining its reasoning for each post.
+3. The agent is shown **only** the Shield's re-ordered list with those
+   sentences attached — the actual like/dislike numbers never make it
+   into the text the agent reads. The Shield isn't just told to *ignore*
+   the numbers; they are physically removed from what gets sent to the
+   agent.
+4. If the Shield's answer comes back broken (wrong post IDs, badly-formed
+   text, or the network call fails outright) — this is the paper's
+   self-reflection check, adapted — it tries once more. If that also
+   fails, it **gives up safely** — shows the agent the plain, unmodified
+   feed instead of crashing the whole simulation. This is called
+   "failing open," and it turned out to matter a lot (see Section 7).
+
+---
+
+## 6. How to run it
+
+```bash
+cd /Users/gordon/research/oasis
+source oasis-env/bin/activate
+ollama list   # confirm llama3.1:8b is there
+```
+
+**Cheap validation first (recommended, ~20-25 min) — a small test run to
+catch problems early instead of discovering them an hour in:**
+```bash
+python examples/experiment/reddit_simulation_counterfactual/reddit_simulation_shielded.py \
+  --config_path examples/experiment/reddit_simulation_counterfactual/down_36_shielded_smoke.yaml
+grep -c "Traceback" log/social-*.log   # expect 0 in the newest one
+```
+
+**The real run (~20-90 min depending on machine load, see Section 10 on
+why the time varies so much):**
+```bash
+python examples/experiment/reddit_simulation_counterfactual/reddit_simulation_shielded.py \
+  --config_path examples/experiment/reddit_simulation_counterfactual/down_36_shielded.yaml
+```
+**Wait for:** `Simulation finish!` printed at the end.
+**Produces:** `data/counterfactual_36_down_shielded.db`
+
+**Compare against the existing unshielded baseline:**
+```bash
+python examples/experiment/reddit_simulation_counterfactual/analyze_shield.py
+```
+
+
+---
+
+## 7. Bugs encountered along the way — and why they mattered
+
+This section stays in the report on purpose, the same way Simulation 2's
+report kept a claim it later had to retract instead of quietly deleting
+it. Getting one trustworthy full-scale run took four attempts. The first
+three each hit a real bug — and every one of them would have silently
+ruined the results if it hadn't been caught before the data was trusted.
+
+**Bug 1 — the like/dislike numbers leaked through anyway.** The settings
+file said "show scores as a single combined number" instead of "show
+likes and dislikes separately." The Shield's cleanup step only knew how
+to remove the separate version — so the combined number slid right
+through, completely undoing the whole point of the experiment. This was
+caught by watching the simulation's live output as it ran, before it got
+far enough to matter; the cleanup step was fixed to catch every possible
+version of the number.
+
+**Bug 2 — one slow network response crashed the entire simulation.** The
+Shield knew how to recover from a *badly worded* answer from the AI
+model, but not from the AI model *timing out* entirely. A single slow
+response from one agent's Shield check crashed all 36 agents' simulation
+at once — turning "fails safely, never crashes" from a design intention
+into something that wasn't actually true yet. This was caught with a
+much smaller practice run (2 rounds instead of 6, about 23 minutes
+instead of an hour+), and fixed so a slow or failed response now safely
+falls back instead of crashing anything.
+
+**Bug 3 — the AI model occasionally answered in a way the code didn't
+expect.** Very rarely, the model would say a post's "rank" was `null`
+(a placeholder meaning "nothing here") instead of an actual number. A
+quirk in how the code checked for missing information let this slip past
+the safety checks and crash the program — an hour into what would have
+been a successful run. This was caught with a second small practice run,
+double-checked with a focused test built specifically to recreate that
+exact situation, and fixed by having the code always double-check the
+type of answer it got before using it.
+
+**The habit that caught two of these three bugs:** every full-size run
+(6 rounds, ~65-90 minutes back then) was preceded by a cheap, small
+practice run (2 rounds, ~20-25 minutes) first. Two of the three bugs
+never would have shown up in a finished results file — catching them
+required either watching the simulation live or running it small enough
+to catch problems quickly. This became a standing rule for the rest of
+the project.
+
+---
+
+## 8. What was found the first time the experiment ran
+
+**The real result, comparing one shielded run against Simulation 2's
+existing unshielded baseline** (see Section 10 for why "one run" isn't the
+end of the story). *Reminder on how to read the first row: it's
+disagreeing comments ÷ all comments left on the false posts, not a share
+of robots or of all actions — see Section 0, "What do the percentages in
+this report actually mean?" if that's not fresh.*
+
+| Metric | Unshielded down (Sim 2) | Shielded down |
+|---|---|---|
+| Disagreement/correction language | **15/22 comments (68%)** | **3/13 comments (23%)** |
+| Vote score on treated posts (avg) | −1.00 (n=30) | −1.00 (n=30) |
+| Total non-signup actions | 171 | 169 |
+| `create_comment` actions | 22 (13%) | 13 (8%) |
+
+**Finding 1 — hiding the vote count sharply reduced pushback, it didn't
+increase it.** This is the headline result, and it goes against the
+hopeful guess that a shield would make agents *better* fact-checkers. It
+looks like Simulation 2's original finding — that down-treated posts got
+far more pushback — was substantially driven by agents reacting to the
+*visible crowd disapproval itself*, not by evaluating the claim on its own
+merits. Take that visible cue away, and pushback collapses from about
+two-thirds of comments to under a quarter.
+
+**Finding 2 — no vote-count pile-on effect either way.** Both conditions
+land almost exactly on the fake starting score forced by the experiment
+(−1.00 average), shield or no shield. Expected, not surprising — this
+experiment was never about whether votes themselves snowball;
+Simulation 2 already answered that.
+
+**Finding 3 — overall activity barely changed (171 → 169 actions), but
+commenting specifically dropped (22 → 13 comments on the treated posts).**
+Section 1.5 noted the paper's own stated limitation: their ranking-quality
+metrics may not fully capture user satisfaction or long-term engagement.
+This finding is a direct check of a related question in this domain —
+does the shield cost engagement? The answer here is nuanced: the shield
+didn't meaningfully reduce how much agents did *overall*, but it did
+specifically reduce how much they *commented* on the exact posts it was
+shielding. Fewer agents felt the need to weigh in once the "everyone else
+disagrees" cue was gone.
+
+**Finding 4 — the Shield's own judgment isn't consistent, and agents
+don't reliably listen to it anyway.** The same false post ("Pierre Joxe
+took up work in Dresden") got *different* verdicts from the Shield on
+different turns — sometimes correctly flagged (`"Post lacks specificity
+and contradicts well-established knowledge on Pierre Joxe"`), sometimes
+given a generic, harmless-sounding note that didn't catch the problem at
+all. Worse, even when an agent was shown a shielded version of the feed,
+one still wrote *"Pierre Joxe, as a French historian, did indeed have
+connections to Dresden"* — stating the false claim as fact. The Shield's
+note is a weak nudge at best; it's nowhere near as strong a signal as the
+raw "everyone downvoted this" cue apparently was. The paper's own results
+(Section 1.4) show their self-reflection mechanism cut hallucination by
+20-fold *within the Shield's own output* — but that doesn't guarantee the
+downstream agent actually acts on a correct Shield verdict once it's
+given one, which is what is observed here.
+
+**Real examples.** Each row is a real agent comment on a false post, kept
+verbatim. "What it shows" names the one thing that comment is evidence of
+— not a verdict on the whole condition.
+
+| Comment (verbatim) | Condition | What it shows |
+|---|---|---|
+| "I think Christian Noboa actually plays for Ecuador, not the position of goaltender" | Unshielded | A genuine, accurate correction |
+| "But Pierre Joxe actually worked as the mayor of Marseille" | Unshielded | A confident-sounding "correction" that is itself unverified/likely wrong — the same data-quality caveat Simulation 2 already flagged |
+| "Lettuce doesn't play jazz." | Shielded | Correct and terse — an absurd claim caught with no crowd cue at all |
+| "I disagree, Ed Broadbent did indeed work with the Liberal Party of Canada, not Hollywood." | Shielded | A genuine, independent correction made with the vote count hidden |
+| "Pierre Joxe, as a French historian, did indeed have connections to Dresden." | Shielded | The false claim stated as fact — on a *different* turn the Shield correctly flagged this exact post, but that didn't stop this agent from affirming it |
+| "I'm glad Monkey Dust is being recognized for their unique sound!" | Shielded | A false post read positively with zero scrutiny — the kind of comment the down-treated condition almost never produced *without* the shield |
+
+**In plain terms:** the Shield does what it was built to do. The raw vote
+count genuinely never reaches the agent's prompt on a successful Shield
+call — double-checked with an automated test that fails loudly if a vote
+number ever slips through. But hiding that signal didn't just remove herd
+behavior; in this run it also removed most of the *skepticism* Simulation
+2 had measured, without reliably replacing it with independent accuracy.
+That's a real, if slightly unflattering, result.
+
+---
+
+## 9. How reliable was the Shield itself?
+
+Out of the full 6-round, 36-agent run behind Section 8: **56 of 64 Shield
+checks (87.5%) worked correctly** on the first or second try. The
+remaining 8 (12.5%) failed both tries — almost always the local AI model
+responding too slowly under load — and safely fell back to the plain,
+unshielded feed for that one agent's turn, exactly as designed, instead of
+crashing anything. That means roughly 1 in 8 of the "shielded" turns in
+this run actually saw the raw vote count anyway. That's a real source of
+noise in the comparison above, disclosed here rather than hidden: the
+safe-fallback design (Section 5, step 4 — the paper's self-reflection
+safeguard, adapted) trades a little bit of purity for the simulation
+never crashing outright — which, given three separate crash-causing bugs
+during development (Section 7), was clearly the right trade.
+
+---
+
+## 10. Checking the work: did the finding actually hold up?
+
+A single run proves less than it feels like it does. Simulation 2 learned
+this the hard way — one of its early claims (about comment counts)
+completely reversed on a second independent run and had to be publicly
+retracted rather than quietly deleted. So once Section 8's headline number
+existed, the next question was: **does it survive being checked again?**
+
+Three more full simulations were run, then four more after that — eight
+additional runs total — specifically to check this. **One rule was fixed
+for every single one of these runs: the Shield's code itself never
+changed.** The only thing that ever varied between any two runs was which
+treatment condition (up/control/down) was being tested, or whether the
+Shield was switched on at all. Tinkering with the Shield's internal
+settings while adding more runs would have made it impossible to tell
+whether a moved number came from the new condition or from the Shield
+behaving differently — so two promising-looking improvements
+(Section 12, items 1-2) were deliberately left completely untouched for
+this whole stretch of testing.
+
+**One infrastructure change did happen mid-testing, and it's worth naming
+directly, since it affected how long things took (not what they found):**
+partway through, the local AI server was restarted with a setting that
+keeps the AI model loaded in memory for a full hour of idle time instead
+of just five minutes. This only affects *speed* — a warm model and a
+freshly reloaded model give the same kind of answers, just at different
+speeds — so it doesn't call any result into question, but a run that used
+to take 65-90 minutes dropped to about 19 minutes afterward, which is why
+later runs in this section went so much faster than the first ones.
+
+### Every individual run, laid out plainly
+
+Every number below is *share of comments using disagreement/correction
+language* (Section 0) — not agreement. Higher means more pushback against
+the false claim. Down has four shielded runs and up/control only have two
+— that gap is real, not a typo (see Open Thread 2): down got replicated
+twice more specifically because its first two runs disagreed with each
+other, and up/control haven't been checked as hard yet.
+
+| Condition | Unshielded (Sim 2) | Run 1 | Run 2 | Run 3 | Run 4 | Pooled shielded |
+|---|---|---|---|---|---|---|
+| **Up** (+1 fake like) | 4% (1/23) | 26% (6/23) | 7% (1/15) | — | — | **18%** (7/38) |
+| **Control** (no fake vote) | 11% (3/27) | 58% (11/19) | 41% (12/29) | — | — | **48%** (23/48) |
+| **Down** (−1 fake dislike) | 68% (15/22) | 23% (3/13) | 39% (9/23) | 19% (3/16) | 26% (7/27) | **28%** (22/79) |
+
+"Pooled shielded" is not an average of the per-run percentages — it adds
+up every disputing comment and every total comment across all of a
+condition's shielded runs first, then divides once. That's the single
+best estimate this data supports; the per-run columns are what show how
+much the individual runs actually disagree with each other (e.g. down's
+run 2 at 39% vs. its other three runs clustered near 19-26%).
+
+### Down: the number got clearer, but not perfectly settled
+
+The first replica run (39%) looked wildly different from the very first
+run (23%) — a 16-point swing that, on its own, would be exactly the kind
+of single-run fluke Simulation 2 warned about. Two more runs later, the
+full picture is 19%, 23%, 26%, 39% — **three of the four cluster in the
+high-teens-to-mid-20s, and the 39% now looks like the outlier**, not the
+original 23% being unusually low. Pooled across all four runs (79 comments
+total): **28%**. That's real progress, though not a finished job — what
+never wavered across all four runs, no matter how much the exact number
+moved, is that every single one landed dramatically below the unshielded
+condition's 68%. Four independent runs make that part very hard to
+explain away as one lucky result.
+
+### Up and control: two runs each tell two different stories
+
+**Up's two runs disagree almost as much as down's first two did — 26%
+and 7%, pooled 18%.** With only two data points on a small comment count,
+there is no way yet to know if the real number is closer to 7%, 26%, or
+somewhere between. What is consistent: both runs land above the
+unshielded up baseline of 4%, so the direction of the effect held up on a
+second run even though the exact size of it is still loose.
+
+**Control's two runs actually agree fairly well: 58% and 41%, pooled
+48%.** Seventeen points apart isn't nothing, but both numbers are solidly
+higher than the unshielded control baseline of 11%, and both are higher
+than every single down-shielded run's number too. The 58% figure that
+looked like it might be a fluke (based on only 19 comments) held up: a
+second independent run landed in the same elevated range instead of
+dropping back toward baseline.
+
+### The most interesting finding: shielding doesn't just weaken the effect, it flips part of the order
+
+Without the Shield, the three conditions form a clean, obvious pattern
+that tracks the fake vote exactly:
+
+**Unshielded: up (4%) < control (11%) < down (68%)** — a more negative
+starting fake vote leads to dramatically more pushback. That pattern *is*
+the herd-behavior effect Simulation 2 originally described.
+
+**With the Shield, that pattern doesn't just weaken — it partially
+flips:**
+
+**Shielded (pooled): up (18%) < down (28%) < control (48%)** — control is
+now the *highest* of the three, and down has dropped down to the middle.
+
+Down and control don't just stop lining up with the original fake-vote
+manipulation — they swap places. Down went from "by far the most disputed
+condition" to "middle of the pack." Control went from "barely disputed"
+to "the most disputed condition of all three." That's a much more
+specific and surprising result than "hiding the vote count changes
+things" — it's backed by four down runs and two runs each of up and
+control, not one noisy comparison, which is why it's called out as the
+strongest finding in this whole experiment.
+
+**The honest caveat that remains:** two runs is still thin for up and
+control on their own — up's own 7%-vs-26% spread is a live example of
+why. A third and fourth run of each, the same way runs 3 and 4 helped
+down, would likely narrow things further without erasing the uncertainty
+completely. This section made the picture clearer. It didn't finish it.
+
+### Statistical significance check
+
+Every comparison above this point was judged by eye — "does the number
+move a lot, and does it keep moving the same direction across runs?"
+That's a reasonable first pass, but it isn't a real answer to "could
+this just be noise on a small sample?" Since the raw counts behind every
+percentage are reported throughout this section, they can be fed
+directly into a proper test. Two standard ones were run — **Fisher's
+exact test** for each single unshielded-vs-shielded comparison, and a
+**chi-square test of independence** for the three-way shielded
+comparison — using the exact pooled counts from the table above.
+
+| Comparison | Unshielded | Shielded (pooled) | p-value | Significant at p<0.05? |
+|---|---|---|---|---|
+| Up | 1/23 (4%) | 7/38 (18%) | **0.239** | No |
+| Control | 3/27 (11%) | 23/48 (48%) | **0.0020** | **Yes** |
+| Down | 15/22 (68%) | 22/79 (28%) | **0.0009** | **Yes** |
+
+| Shielded pairwise | p-value | Significant at p<0.05? |
+|---|---|---|
+| Down (28%) vs. Control (48%) | **0.0347** | **Yes** |
+| Up (18%) vs. Down (28%) | 0.362 | No |
+| Up (18%) vs. Control (48%) | **0.0060** | **Yes** |
+
+Three-way chi-square across the shielded conditions (up/control/down):
+**χ² = 9.49, p = 0.0087** — significant, meaning the three shielded
+percentages are not just visually different, they're statistically
+distinguishable as a group. (For reference, the same test on the three
+*unshielded* conditions gives χ² = 28.78, p < 0.0001 — the original,
+much larger, herd-behavior effect is not in doubt statistically either.)
+
+**What this sharpens, precisely:**
+- **The headline "down" finding (68% → 28%) is statistically solid**
+  (p = 0.0009) — not just visually convincing, formally significant.
+- **The "control" finding is also statistically solid, and arguably
+  under-emphasized above:** hiding the vote count more than *quadrupled*
+  correction on the control condition (11% → 48%, p = 0.0020). This is
+  just as strong a result as the down finding, in the opposite
+  direction.
+- **The "up" finding is NOT statistically significant** (p = 0.24). The
+  qualitative claim in the previous subsection — "the direction of the
+  effect held up on a second run" — is true as a description of the raw
+  numbers, but should not be read as a confirmed effect; with only 38
+  shielded comments total behind it, the data cannot currently rule out
+  that the true difference is zero.
+- **The "flip" is real but partial, not total.** Down vs. control are
+  significantly different from each other under shielding (p = 0.035) —
+  that part of "the order changes" is solid. But up vs. down are *not*
+  significantly different from each other under shielding (p = 0.36) —
+  so the specific claim "up (18%) < down (28%)" should be read as "these
+  two are close together and not clearly ordered," not as a confirmed
+  ranking. The three-way chi-square result (p = 0.0087) supports "the
+  three conditions aren't behaving the same way once shielded" as a
+  group-level claim; it does not certify every pairwise ordering within
+  that group.
+
+**Caveat on the caveat, stated plainly:** these tests assume every
+comment is an independent, equally-weighted observation. That's not
+strictly true here — a single chatty robot could leave several comments
+on the same run, and multiple comments can land on the same post, so
+some comments are more correlated with each other than a textbook
+Fisher's-exact-test setup assumes. That means these p-values are a
+useful, standard first check, not a fully rigorous causal-inference-grade
+result — the same honest-but-imperfect spirit as the rest of this
+report's statistics.
+
+---
+
+## 11. Honest limitations (everything, in one place)
+
+- **Down's estimate rests on 4 runs (79 comments total) — the sturdiest
+  number in this report.** Up and control each rest on only 2 runs (38
+  and 48 comments total) — noticeably less sturdy, and up's own internal
+  7%-to-26% spread is a live reminder that two runs isn't always enough.
+- **All 10 shielded runs used the exact same, never-modified Shield
+  code.** The pooled numbers above are a fair combined estimate, not an
+  average across code that changed partway through.
+- **The comment counts behind every percentage are small** — 13 to 29
+  comments per run. A handful of comments swinging the other way would
+  move any of these numbers meaningfully. That's exactly why the
+  experiment kept re-running instead of trusting the first number.
+- **The "disagreement" measurement is a simple keyword search** (looking
+  for words like "actually," "wrong," "disagree," etc. in comments)
+  reused from Simulation 2 — not a more precise AI-graded score, and not
+  the paper's own ranking-quality metrics (Section 1.3), which don't
+  apply to this kind of question. Rough but easy to double-check by hand,
+  not exact.
+- **The Shield's own judgment comes from the same size AI model as the
+  agents it's protecting**, and it makes real content-quality mistakes
+  (Section 8, Finding 4) — its answers aren't even consistent with
+  themselves from one turn to the next on the identical post, unlike the
+  much larger, more heavily-evaluated setup the original paper tested.
+- **A meaningful slice of "shielded" turns weren't actually shielded** —
+  the Shield safely gave up and fell back to the raw feed on a real
+  fraction of turns (Section 9), which adds noise to every shielded
+  number above.
+- **This whole experiment ran at a small, laptop-friendly scale** (36
+  agents, 6 rounds per run) instead of the much larger scale a research
+  cluster could run, to keep each attempt finishing in under two hours
+  instead of days.
+- **One infrastructure setting (how long the AI model stays loaded in
+  memory) changed partway through testing**, which affected how fast runs
+  finished but not what they found — disclosed in Section 10 for
+  completeness, not because it calls any result into question.
+- **This experiment built the paper's base architecture (iAgent), not
+  its extended version (i²Agent)**, and did not build the InstructRec
+  datasets or formal ranking metrics — Section 3 explains exactly why
+  each of those pieces doesn't map onto this setup. This experiment
+  tests the paper's *mechanism*, not a reproduction of the paper's own
+  reported numbers.
+- **An untested confound: the Shield itself still sees the vote count,
+  even though the agent never does.** Section 5, step 2 (and Section 0)
+  are explicit that the Shield's own prompt includes the raw like/dislike
+  numbers — it has to, in order to know what to delete before handing
+  the feed to the agent. But that means it's *possible*, and currently
+  untested, that the Shield's own plausibility `rank` or `shield_note`
+  wording is subtly influenced by having seen a post was already
+  disliked, even while under explicit instructions to ignore vote counts
+  when scoring (Section 5's SHIELD_SYSTEM_PROMPT). If that happened, the
+  vote-count signal wouldn't be reaching the agent directly, but it could
+  still be leaking through indirectly, dressed up as a "content
+  plausibility" judgment. There is no evidence either way — testing it
+  would mean giving the Shield the *same* post content with the vote
+  count field simply omitted from its own prompt entirely (not just
+  instructed to ignore it), and checking whether its ranks/notes come out
+  the same as when it can see the number.
+- **The keyword-based disagreement classifier (Section 0, "Type 1") has
+  never been checked against human judgment.** No one has hand-labeled a
+  sample of comments as "actually disagreeing" or not and compared that
+  against what the 10-keyword search flags, so its real precision and
+  recall (how often it wrongly flags a non-correction, or misses a real
+  one phrased without any of those exact words) are unknown. It's
+  plausible, not measured, that this classifier is noisy in a way that's
+  consistent across conditions (harmless to the comparison) or biased in
+  a way that isn't (not harmless) — it isn't currently possible to tell
+  which.
+- **Every run in this whole experiment used one specific model,
+  `llama3.1:8b`, for both the Shield and the agent it protects** (Section
+  5, step 2). Nothing here has been tested with a larger or differently
+  trained model, so it's unknown whether these findings — especially the
+  Shield's own inconsistency (Section 8, Finding 4) and its 87.5%
+  reliability rate (Section 9) — are specific to a small local model, or
+  would hold with a stronger one.
+- **No sampling temperature was ever explicitly set anywhere in this
+  project's code**, for either the agents' decisions or the Shield's
+  calls — every LLM call relies on whatever default the underlying
+  `camel`/Ollama stack uses, which was never checked or pinned down. That
+  default is almost certainly non-zero (otherwise every "replicate" run
+  in Section 10 would have produced identical output, and they didn't),
+  so the replicate runs are genuine independent stochastic draws — but
+  the exact amount of randomness driving run-to-run variation isn't
+  something that was measured or controlled for.
+
+---
+
+## 12. What's next — open questions, nothing decided or started
+
+1. **Reduce how often the Shield "gives up" and falls back to the raw
+   feed** (Section 9's 12.5% figure) — for example, a longer wait-time
+   before deciding a response failed, or asking the AI model to answer in
+   a stricter, easier-to-parse format. Deliberately not touched during
+   Section 10's testing, since changing the Shield's own behavior while
+   also adding more test runs would have made it impossible to tell which
+   change caused which result.
+2. **Replace the Shield's short written note with a plain number** (like
+   "7 out of 10 believable") instead of a sentence. A number might carry
+   more weight with the agents reading it than a sentence did in Section
+   8's Finding 4 — but this is a real guess, not a sure thing, and testing
+   it properly would mean re-running everything again under the new
+   version. Also deliberately not touched yet, for the same reason as
+   item 1.
+3. **Run a third and fourth replica each of the up and control
+   conditions**, the same way down went from 2 confusing runs to 4
+   clearer ones in Section 10 — up and control are still the least
+   certain numbers in this report.
+4. **Build the paper's i²Agent extension after all**, if a way can be
+   found to give OASIS agents a persistent, cross-session memory — right
+   now Section 3 rules this out because OASIS agents don't persist across
+   runs, but if that changed, it would be the most direct remaining piece
+   of the paper's architecture left untested here.
+5. **Try the same experiment with only one personality repeated 36
+   times**, instead of 36 different personalities. Right now, it isn't
+   possible to fully tell apart "the fake vote caused this behavior" from
+   "these 36 particular made-up people happened to react this way" —
+   using one repeated personality would isolate the first question from
+   the second. Not started; would need a new set of agent data to be
+   built first.
+6. ~~Save this work properly~~ — **done.** All of Simulation 1/2/3's code,
+   configs, and reports were committed to the local git repository
+   (commit `e87e88f` on `main`) — the venv (`oasis-env/`) was gitignored
+   instead of committed, and the 10 run databases were already covered by
+   an existing `*.db` ignore rule. Not yet pushed to the `origin` fork on
+   GitHub — that's a separate, deliberately unstarted step.
+7. **Add a real statistical significance test**, not just "did the
+   percentage move and keep moving the same direction across runs" —
+   done, see Section 10's new "Statistical significance check"
+   subsection, added after the fact once the replication data existed.
+   The honest result: down and control's shifts are both statistically
+   significant; up's is not; the three-way "flip" holds as a group
+   pattern but not for every individual pairwise ordering.
+8. **Test whether the Shield itself leaks vote-count information
+   indirectly**, since it still sees the raw number in its own prompt
+   even though the agent never does (Section 11's newest bullet) — would
+   need a version of the Shield that never receives the vote count at
+   all, to compare its ranks/notes against the current version's.
+9. **Validate the disagreement keyword classifier against actual human
+   judgment** — hand-label a sample of comments and measure the
+   classifier's real precision/recall, instead of trusting it
+   unverified (Section 11).
+10. Two open questions carried over from Simulation 2 that this
+    experiment didn't touch: replacing the simple keyword search with an
+    AI-graded score for more precision, and running the whole experiment
+    at a much larger scale (hundreds or thousands of agents instead of
+    36) to see if a real vote-pile-on effect appears at that size.
+
+---
+
+## 13. Summary
+
+This experiment extended a misinformation study by building a
+content-quality "Shield" that sits between the platform and each AI
+agent and hides the crowd's vote count before the agent ever sees it.
+The design is a direct adaptation of a real ACL 2025 paper, *iAgent: LLM
+Agent as a Shield between User and Recommender Systems* — its base
+architecture's three components (a parser, a reranker, and a
+self-reflection safeguard) were built inside the existing simulator,
+with each piece of code traceable to a specific piece of the paper.
+Building it surfaced three real bugs, each caught by testing at a
+smaller scale before committing to an hour-plus full run. Once it
+worked, the finding was unexpected: hiding the vote count didn't make
+agents better fact-checkers, it made them quieter — pushback on the same
+false claims dropped from 68% to roughly a quarter. That finding was
+checked nine more times across three more conditions before being
+trusted, and the most interesting result only showed up once enough
+data existed: hiding the vote count doesn't just weaken the original
+effect, it partially *flips* which condition gets the most pushback.
+That is a more specific and more surprising result than "the shield
+worked," and it only became visible because the experiment kept getting
+re-run instead of the first number being trusted. Fisher's exact and
+chi-square tests were then run on the pooled counts: the drop in the
+down condition and the rise in the control condition are both
+statistically significant (p < 0.01 each), the three shielded
+conditions differ from each other as a group (p = 0.009), but the up
+condition's own shift and the specific up-vs-down ordering are not
+statistically distinguishable from noise yet — real progress, honestly
+bounded.
+
+
+---
+
+# Part 5 — Simulation 4: the complete log
+
+*Was `SIM4_LOG.md`. Merged into this file 2026-09-13; original title: “Simulation 4 — the complete log”.*
 
 **One file, deliberately.** This was two documents, `SIM4_BUILD_LOG.md` and
 `SIM4_SCALING_LOG.md`, until 2026-09-13. They were split because the first
@@ -5490,3 +7606,310 @@ So the decision is which axis to win on, and there are three that are real:
 are scientific claims, and only (2) is currently in hand. Chasing (1) alone means
 a week of GPU time to draw level on a number neither paper actually defends.
 
+
+---
+
+# Part 6 — Simulation 4: run plan and its review
+
+*Was `SIM4_RUN_PLAN.md`. Merged into this file 2026-09-13; original title: “Sim 4 — run plan, drafted 2026-09-08”.*
+
+**Nothing in this plan runs without explicit permission.** Phase 0 is bench-only
+and involves no simulation.
+
+## What prompted it
+
+Two things came loose on 2026-09-08:
+
+1. The concurrency ceiling was never measured. The `sweep_8/16/24/32` runs all
+   carry `ollama_num_parallel: (unset -> server default)` — a server that was
+   serialising. F-56 tested concurrency 4 and no higher. Every claim about an
+   "8-slot ceiling" rested on that.
+2. A first real bench inverts the assumption: **NP=4 beats NP=8 by 14 %**
+   (0.368 vs 0.317 calls/s). If that survives replication, every run this
+   session has been ~14 % slower than necessary.
+
+## The measurements in hand — and why none is conclusive
+
+| config | calls/s | mean latency | loaded | free RAM |
+|---|---|---|---|---|
+| NP=4 conc=4 | 0.368 | 10.8 s | 11 GB | 4.3 GB |
+| NP=8 conc=8 | 0.317 | 24.4 s | 17 GB | **0.8 GB** |
+
+**n=1 each.** F-51, F-54 and F-66 were all single measurements that later
+retracted. These two rows are a hypothesis, not a result. The NP=8 row is also
+confounded: at 0.8 GB free the machine was memory-pressured, so "8 slots is too
+many for the GPU" cannot be separated from "17 GB does not fit beside Chrome".
+
+---
+
+## Phase 0 — bench only, NO simulations (~2 h)
+
+| # | Task | Cost |
+|---|---|---|
+| 0a | ~~Finish the NP sweep~~ **DONE — see F-76. NP=16 is 52x slower, NP=32 fails outright. Ceiling is memory: 4.9 GB + 1.55 GB/slot.** | done |
+| 0b | ~~Replicate the bench~~ **DONE — F-77. The 14 % win does NOT replicate; NP=4..8 is a plateau. Adopt NP=4 for variance (CV 3.1 % vs 15.3 %) and 6 GB of RAM, not speed.** | done |
+| 0c | Repeat the top two configs with Chrome and Firefox closed | ~15 min |
+| 0d | ~~Harness the candidates~~ **DONE — F-78. BOTH FAIL. granite4.1:3b answers do_nothing 24/25; gemma4:e2b is 4.5x SLOWER (911 output tokens/turn). Keep llama3.1:8b.** | done |
+
+**0b is the most important task in the whole plan** and the reasoning is in the
+review below: the concurrency question must be answered by cheap bench
+replicates, because full runs cannot afford to answer it.
+
+**Gates out of Phase 0**
+- Concurrency: adopt a new NP only if it beats NP=8 by >10 % across 5 replicates
+  with non-overlapping spread.
+- Models: a candidate proceeds only if it clears F-75 break-even on ENGAGED.
+  Baseline is llama3.1:8b at 64 %. `granite4.1:3b` (2.2x faster) needs >=29 %;
+  `gemma4:e2b` (1.25x) needs >=51 %.
+
+## Phase 1 — concurrency validation at 36 agents (4 runs, ~7 h)
+
+2x NP-winner and 2x NP=8 control, 3 rounds, 36 agents.
+
+**This phase is deliberately underpowered and is not a measurement.** Its only
+job is to catch gross breakage and confirm the bench's *direction* holds at 36
+agents, because F-60 records four straight cases of small benches overpredicting.
+What it can conclude: "no collapse, direction consistent." What it cannot
+conclude: the size of the effect. See R1.
+
+## Phase 2 — model gate, S-1 only — **CANCELLED by F-78**
+
+No candidate survived Phase 0d, so there is nothing to gate. S-1..S-6 stay
+unqueued and the ~8 runs of baseline-rebuilding a model change would have cost
+are not spent. Original text kept below for the record.
+
+### (cancelled) Phase 2 — model gate, S-1 only (2-3 runs, ~3 h)
+
+Runs only if a candidate cleared 0d. One 15-round run per surviving candidate
+plus one contemporaneous llama3.1:8b control. Compare engagement against the
+break-even rule (F-75). A candidate that fails here stops; S-2..S-6 never run.
+
+## Phase 3 — replicate bank (12 runs, ~24 h)
+
+Fixed, validated configuration. This is the point of the whole efficiency
+exercise: F-35's ~28pp noise floor is the ceiling on every behavioural question
+in this project, and the only cure is more runs at one configuration.
+
+**Total if everything passes: ~36 h of machine time.**
+
+---
+
+# Review of this plan
+
+## R1 — Phase 1 cannot resolve the effect it is about, and the plan must not pretend otherwise
+
+Wall-clock CV on this setup is ~15 %. At alpha .05 / power .8, resolving a 14 %
+difference needs roughly
+
+    n = 2 (1.96 + 0.84)^2 (15/14)^2  ~=  18 runs per arm
+
+**36 runs, ~60 hours, to confirm one concurrency setting.** That is not
+affordable, and it is why Phase 1 is scoped as a breakage check rather than a
+measurement. The actual resolution comes from Phase 0b, where a replicate costs
+60 seconds instead of 105 minutes. Any plan that tries to answer concurrency
+with full runs is mis-designed.
+
+## R2 — The NP=8 result is confounded and Phase 0c is not optional
+
+0.8 GB free means possible swapping. Without the Chrome-closed control, adopting
+NP=4 might be adopting "my browser was open", which would not generalise to an
+unattended overnight run where it is not.
+
+## R3 — Everything so far is n=1, which is this project's signature failure
+
+F-51 (concurrency), F-54 (prefill), F-66 (persona hoisting) were each a single
+measurement that a replicate later overturned. The two rows above are the same
+shape of evidence. Nothing may be concluded from them until 0b.
+
+## R4 — Change one variable at a time, in this order
+
+Concurrency, then model, then bank. If both concurrency and model change before
+Phase 3, the bank is uninterpretable — neither against the published nine runs
+nor internally.
+
+## R5 — A model change is far more expensive than the download
+
+If the model changes, Phase 3's bank cannot be pooled with the published nine
+runs: F-35's noise floor is a llama3.1:8b measurement (S-4), and the new model
+needs its own before any effect size means anything. That is 5+ runs of pure
+overhead before a single new finding. **The realistic recommendation is to keep
+llama3.1:8b and take the concurrency win**, unless Phase 0d shows a candidate
+that is both faster and at least as engaged.
+
+## R6 — CORRECTED: the uncontrolled variable was NUM_PARALLEL, not flash attention
+
+Same model, same context read 6.3 GB then 11 GB. I blamed flash attention. The
+real cause: the session server was started behind `pgrep -f "ollama serve" || ...`,
+so an already-running server at the machine default (NP=1) was reused and the
+NP=8 env var never applied. 6.3 GB is exactly `4.9 + 1x1.55` — NP=1. Every RAM
+figure quoted before Phase 0b was taken at NP=1 while being described as NP=8.
+NUM_PARALLEL must be recorded in the manifest, and servers must be started
+unconditionally, never behind a `pgrep` guard.
+
+## R7 — Thermal and availability
+
+~36 h of sustained GPU on a laptop that is also the user's daily machine, which
+has already been stopped twice for fan noise. Phase 3 must stay resumable
+(`campaign.sh` already skips completed manifests) and should be chunked so an
+interrupt costs one run.
+
+## R8 — If NP=4 wins, what does it say about the published results?
+
+Only that they were slower than necessary. Timing does not affect behaviour, so
+the nine published runs and their three findings stand. Worth stating explicitly
+so the correction is not over-read.
+
+## What I would cut
+
+Phase 1, if Phase 0b comes back with clean, non-overlapping spread across five
+replicates. Its value is guarding against F-60, and that guard costs 7 hours to
+confirm something a 45-minute bench may already show unambiguously. Decide after
+0b, not now.
+
+
+---
+
+# Part 7 — Overnight plan, 2026-09-08 (historical, kept for the record)
+
+*Was `OVERNIGHT_2026-09-08.md`. Merged into this file 2026-09-13; original title: “Overnight plan — 8 hours, hard-stopped”.*
+
+Written 2026-09-08 after Phase 0. Every block is time-boxed and the whole thing
+aborts cleanly at T+8:00 rather than running into the morning.
+
+**Config going in:** llama3.1:8b (F-78 — both candidates failed), NP=4
+(F-77 — for variance and RAM, the means are indistinguishable), 36 agents,
+15 rounds, terse tools, uncapped max_tokens.
+
+**Standing guardrails on every run:** 300 s request timeout and a 20-minute
+stall watchdog (B-22, which once cost a full day); an engagement gate that halts
+on collapse rather than continuing (B-23, which once burned seven runs); a
+manifest per run so an interrupt costs one run, not the night.
+
+---
+
+## T+0:00 → 0:15  Preflight and the fixes today exposed
+
+Code work, no GPU.
+
+1. **Kill the `pgrep` server-start bug.** Today the session server was started
+   behind `pgrep -f "ollama serve" || start...`, so an already-running server at
+   the machine default (NP=1) was silently reused and every `NUM_PARALLEL=8`
+   claim for hours was false. Every script that starts ollama must start it
+   unconditionally after a kill. Audit: `campaign.sh`, `ab_efficiency.sh`,
+   `overnight.sh`.
+2. **Record `ollama_num_parallel` in the manifest as the ACTUAL value.** It
+   currently writes `(unset -> server default)`, which is how the contaminated
+   `sweep_*` runs looked legitimate. Read it back from `/api/ps` or the server
+   env, not from our own intention.
+3. **`eval_model.py`: add `--reps` and uncapped mode.** F-79 showed a single
+   25-trial reading swings 44-64 %; F-78 showed the 300-token cap silently
+   fails thinking models. Both are harness bugs found today.
+4. Preflight: disk >= 40 GB, no stale ollama, models present, `data/` writable.
+
+**Abort condition:** any preflight failure stops the night and writes why.
+
+## T+0:15 → 1:15  Block A — does prefix caching survive at NP=4?
+
+Bench only. **This is the highest-value hour of the night** and it must run
+first, because it can change the config every later block uses.
+
+F-69 established that Ollama's prefix cache does not survive 8 concurrent slots
+evicting each other, which is why F-66's persona-hoisting fix delivered ~1 %
+instead of the predicted 2.5-5x. F-77 has since shown **NP=4 is throughput-
+equivalent to NP=8**. So: at half the slots, does the cache live?
+
+Measure, 5 replicates per cell, unique suffix per call:
+
+| | NP=1 | NP=2 | NP=4 | NP=8 |
+|---|---|---|---|---|
+| shared prefix (tools first, persona/feed after) | | | | |
+| varying prefix (persona first — today's layout) | | | | |
+
+The number that matters is the **ratio within each column**. F-66 measured a
+shared prefix reprocessing at ~20,000 tok/s against 490 — a 40x difference on
+70 % of the prompt. If any column shows that ratio surviving, F-72 unlocks and
+it is worth more than every other lever combined.
+
+**Deliverable:** F-80, with the honest negative result if it does not survive.
+
+## T+1:15 → 1:45  Block B — implement whatever Block A licenses
+
+- **If the cache survives at some NP:** reorder the prompt so the system block
+  and all 22 tool schemas form a byte-identical prefix across all 36 agents,
+  with persona and feed strictly after. Ship with a test that asserts the prefix
+  is byte-identical between two different agents — that assertion is the whole
+  correctness argument, and F-66 failed for want of it.
+- **If it does not survive:** implement nothing. Document and move on. Note that
+  `--lean-actions` is NOT the fallback: removing 8 actions changes what an agent
+  can do (F-55), so it buys speed with behaviour and is out of scope tonight.
+
+**Rule for this block: no code reaches a 15-round run without a passing test and
+the 3-round smoke below.**
+
+## T+1:45 → 2:00  Smoke gate
+
+One 36-agent, 3-round run at the final config. Checks the pipeline end to end
+and that engagement is alive. **If engagement < 1 %, stop the night** — that is
+the F-63 collapse signature and no further runs are worth machine time.
+
+## T+2:00 → 4:00  Block C — validation run 1 (36 agents, 15 rounds)
+
+Full run at the final config. Gives real wall clock at NP=4 and a first
+engagement figure comparable to the published nine.
+
+*Concurrent, no GPU:* review the Block B diff, update `SIM4_LOG.md` (Part II).
+
+## T+4:00 → 6:00  Block D — validation run 2
+
+A second run, because one cannot be told apart from noise: F-35's floor is ~28pp
+on behaviour and ~15 % on wall clock. Two runs cannot resolve a small difference
+either, but they can show gross agreement or disagreement, which is what is
+actually being asked of them.
+
+*Concurrent:* Parquet export of everything completed so far.
+
+## T+6:00 → 7:00  Block E — 99-agent feasibility smoke, 3 rounds
+
+**Not science.** `personas.py:75` already loads the Twitter CSV and it holds 99
+usable personas, so larger worlds need a flag, not code — and every run in this
+project's history has been 36. This probes whether 99 agents survive memory, the
+DB and the ranker at all, and yields a real scaling coefficient for the "bigger
+runs" question.
+
+**Explicitly not poolable** with the published nine: Twitter rows carry no age,
+gender or MBTI, so it is a different persona construction and a different
+experiment. It runs last so a short night costs only this.
+
+**Abort if:** free RAM < 1 GB or the watchdog fires. 99 agents at NP=4 is
+untested memory territory.
+
+## T+7:00 → 8:00  Close out
+
+1. `analyze.py` on every new run; `export_parquet.py --all`.
+2. Update `SIM4_LOG.md` (Part II) (F-80+) and `SIM4_RUN_PLAN.md`.
+3. Write the morning summary: what ran, what it showed, what broke, what I got
+   wrong, and the single recommended next action.
+4. Leave ollama stopped so the machine is not holding 11 GB at breakfast.
+
+---
+
+## What I am NOT doing, and why
+
+- **Phase 1 as designed (4 runs, 7 h).** Sized to resolve a speed difference
+  F-77 showed is not resolvable. The NP change now rests on variance and memory,
+  which do not need that power.
+- **More model candidates.** F-78 settled it; a third candidate is a guess.
+- **A full 99-agent science run (~5.5 h).** It silently starts a new baseline
+  that cannot pool with the published nine. That is a decision to make awake.
+- **Anything that trades engagement for speed.** F-75: engagement is the
+  dependent variable, and every speed lever that touches it has lost.
+
+## Honest risk list
+
+| risk | mitigation |
+|---|---|
+| Block B code is written and validated with no human review | prefix-identity test + 3-round smoke gate before any 15-round run |
+| Block A returns another phantom effect | 5 replicates per cell; no config change on n=1 (the rule six findings earned) |
+| 99 agents exhausts RAM | last block, RAM abort, watchdog |
+| Runs overrun 2 h at NP=4 | hard stop at T+8:00; later blocks drop first |
+| Chrome left open eats 5 GB | asked the user to close it; if not, NP=4 still leaves more headroom than NP=8 |

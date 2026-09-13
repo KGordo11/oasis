@@ -3,7 +3,7 @@
 **Date:** 2026-08-24
 **Status:** Approved design, pending implementation
 **Context:** Simulation 4 in the OASIS project. Follows Sim 1 (reasoning capture),
-Sim 2 (herd behavior), Sim 3 (iAgent shield). See `PROJECT_LOG.md`.
+Sim 2 (herd behavior), Sim 3 (iAgent shield). See `RESEARCH_LOG.md` (Part 1).
 
 ---
 
@@ -422,7 +422,7 @@ not trivially small.
 
 Recorded after building. The design above is left as originally written; this
 section states where reality diverged and why. Full evidence in
-`SIM4_LOG.md` (Part I).
+`RESEARCH_LOG.md` (Part I).
 
 ### 11.1 The embedding path had to be replaced (D-13)
 

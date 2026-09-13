@@ -56,7 +56,7 @@ import concurrent.futures as cf
 
 sys.path.insert(0, __file__.rsplit("/", 1)[0])
 
-# Measured on this machine, for comparison. See SIM4_LOG.md (Part II) F-86, F-88.
+# Measured on this machine, for comparison. See RESEARCH_LOG.md (Part II) F-86, F-88.
 LOCAL = {
     "calls_per_run": 550,
     "concurrency": 4,

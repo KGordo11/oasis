@@ -68,7 +68,7 @@ def build_action_set(include_groups: bool = True, lean: bool = False):
     regardless of available_actions (agent_environment.py:118-135). Once any
     group exists, every agent's prompt opens with group instructions and group
     messages, burying the feed -- and each new group message makes the next
-    prompt more group-heavy still. Measured in R-5; see SIM4_BUILD_LOG.md F-14.
+    prompt more group-heavy still. Measured in R-5; see SIM4_LOG.md (Part I) F-14.
 
     ActionType has 30 members. Excluded, with cause:
       EXIT, SIGNUP, UPDATE_REC_TABLE -- internal plumbing, not user behaviour.

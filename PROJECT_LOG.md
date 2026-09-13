@@ -187,7 +187,7 @@ built.
   influenced by a post's vote count even while told to ignore it,
   potentially leaking the signal back in indirectly.
 
-## Sim 4 — social timeline (`SIM4_BUILD_LOG.md`, spec in `docs/superpowers/specs/`)
+## Sim 4 — social timeline (`SIM4_LOG.md` (Part I), spec in `docs/superpowers/specs/`)
 
 **In progress, on branch `social-timeline-sim` (NOT `main`).** Turns the
 simulation into something that behaves like a real social app: agents acting

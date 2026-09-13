@@ -84,7 +84,7 @@ the F-63 collapse signature and no further runs are worth machine time.
 Full run at the final config. Gives real wall clock at NP=4 and a first
 engagement figure comparable to the published nine.
 
-*Concurrent, no GPU:* review the Block B diff, update `SIM4_SCALING_LOG.md`.
+*Concurrent, no GPU:* review the Block B diff, update `SIM4_LOG.md` (Part II).
 
 ## T+4:00 → 6:00  Block D — validation run 2
 
@@ -113,7 +113,7 @@ untested memory territory.
 ## T+7:00 → 8:00  Close out
 
 1. `analyze.py` on every new run; `export_parquet.py --all`.
-2. Update `SIM4_SCALING_LOG.md` (F-80+) and `SIM4_RUN_PLAN.md`.
+2. Update `SIM4_LOG.md` (Part II) (F-80+) and `SIM4_RUN_PLAN.md`.
 3. Write the morning summary: what ran, what it showed, what broke, what I got
    wrong, and the single recommended next action.
 4. Leave ollama stopped so the machine is not holding 11 GB at breakfast.

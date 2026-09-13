@@ -422,7 +422,7 @@ not trivially small.
 
 Recorded after building. The design above is left as originally written; this
 section states where reality diverged and why. Full evidence in
-`SIM4_BUILD_LOG.md`.
+`SIM4_LOG.md` (Part I).
 
 ### 11.1 The embedding path had to be replaced (D-13)
 

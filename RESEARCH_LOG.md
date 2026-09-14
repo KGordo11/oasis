@@ -7211,6 +7211,41 @@ run". Both withdrawn. **A clean three-point sweep at verified context returns
 **The cost model and the historical record now agree**, which is the check that
 matters.
 
+#### B-33 — The guard written to prevent B-32 would never have fired, and would have logged that it was working
+
+**Symptom.** `sweep_when_idle.sh` waits for a quiet machine, then runs the sweep.
+Left running for 45 minutes it reported `still waiting: 2 foreground app(s)
+running` every five minutes. One of the two was real (Roblox Studio's helper).
+The other was **our own inference server**.
+
+**Cause.** The hog list included a bare `obs`, for OBS Studio. `pgrep -f` matches
+the whole command line, and the ollama runner's is:
+
+    ollama runner --model /Users/gordon/.ollama/models/blobs/sha256-667b0c...
+
+`obs` is inside `blobs`. So the watcher saw a foreground application every single
+minute, reset its streak every single minute, and **would have waited until
+morning without ever starting the sweep** — on a machine that had gone quiet
+hours earlier.
+
+**Why it would not have been noticed.** The reset line only prints when a streak
+was already building, and a streak never began, so the only output was the
+heartbeat — which said "still waiting", which was true, and which is exactly what
+a correctly-working watcher on a genuinely busy machine also prints. Adding that
+heartbeat an hour earlier is what made this visible at all; without it the log
+would have been silent and the failure indistinguishable from a machine in use.
+
+**Fix.** Anchor the patterns to executable paths: `/RobloxPlayer`, `/OBS `,
+`/Blender`. Verified after the change that the pattern still matches Roblox
+Studio and no longer matches the ollama runner.
+
+**The lesson is narrower than the usual one and worth keeping separate.**
+`pgrep -f` is a substring match against an entire command line, and command lines
+contain paths, and paths contain words. A three-letter pattern will find itself
+somewhere. This is not a variant of "record your settings" — it is: **an
+unanchored substring is not a check, and a guard is exactly the code where a
+false negative is invisible**, because its silence looks like success.
+
 #### B-32 — A run measured 2.16x its own reference because the laptop was in use, and nothing said so
 
 **Symptom.** `sweep18_a36`, 2026-09-13, round 1 in **802.5 s against the reference

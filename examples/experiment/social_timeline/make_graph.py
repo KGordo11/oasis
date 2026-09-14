@@ -405,10 +405,11 @@ HTML = """<title>Agent Network Formation</title>
   </section>
 
   <section class="panel" id="panel-cost" hidden>
-    <p class="lede">What a run costs, measured rather than projected. Every
-    figure here comes from a run whose inference server reported a context
-    window large enough to hold its own prompt &mdash; a check added after a
-    sweep was silently truncated and read as a speed-up.</p>
+    <p class="lede">What a run costs, and what it measures, both taken from
+    runs rather than projected. Every figure here comes from a run whose
+    inference server reported a context window large enough to hold its own
+    prompt &mdash; a check added after a sweep was silently truncated and read
+    as a speed-up.</p>
     __COST_CHARTS__
   </section>
 
@@ -1568,9 +1569,30 @@ COST_CAPTIONS = {
                          "longer, which is what a context window filling at a "
                          "fixed per-turn rate predicts."),
     "agents": ("Plateau cost against world size",
-               "Linear in agent count: the fitted exponent is 0.991 at 22.7 "
-               "seconds per agent-turn. Wall clock is agents x rounds x 22.7 s "
+               "Linear in agent count across a 7.5x range: eight points from 12 "
+               "to 90 agents give an exponent of 1.005, R2 0.9993, at 21.44 "
+               "seconds per agent-turn. Wall clock is agents x rounds x 21.4 s "
                "after the ramp."),
+}
+
+# F-105. Kept in a separate table because these answer a different question:
+# not what a run costs, but what it measures. The two chart sets also have
+# different admission rules -- a cost chart must exclude a run whose server was
+# misconfigured, an engagement chart must exclude a run on a different prompt.
+ENGAGEMENT_CAPTIONS = {
+    "engagement_by_agents": (
+        "Engagement against world size",
+        "Engagement halves from 18 agents to 90. The dashed line is not a fit: "
+        "it is one constant (0.389 feed actions per agent-turn) divided by an "
+        "independently measured quantity. Its error, 10.2%, sits inside the "
+        "~12% run-to-run noise, so this cannot separate a constant action "
+        "budget from a mildly declining one."),
+    "engagement_decomposition": (
+        "Why it falls: the denominator, not the agents",
+        "The feed is twelve slots and full in every run. What grows is how many "
+        "of the twelve are NEW. Repetition and feed composition were both "
+        "checked and excluded: the gap survives inside first sightings, and "
+        "discovery is 98.9-99.3% of exposures in every run."),
 }
 
 
@@ -1591,9 +1613,22 @@ def cost_charts():
             svg = fh.read()
         out.append(f"<figure><h3>{title}</h3>\n{svg}\n"
                    f"<figcaption>{caption}</figcaption></figure>")
+    for key, (title, caption) in ENGAGEMENT_CAPTIONS.items():
+        path = os.path.join(COST_CHART_DIR, f"{key}.svg")
+        if not os.path.exists(path):
+            continue
+        with open(path) as fh:
+            svg = fh.read()
+        # The engagement charts are drawn against a palette variable this page
+        # does not define; map it onto the one it does rather than editing the
+        # generator that writes them, which also feeds the scaling write-up.
+        svg = svg.replace("var(--accent)", "var(--measured)")
+        out.append(f"<figure><h3>{title}</h3>\n{svg}\n"
+                   f"<figcaption>{caption}</figcaption></figure>")
     if not out:
         return ("<p class='lede'>No cost charts found. Run "
-                "<code>make_timing_charts.py</code> first.</p>")
+                "<code>make_timing_charts.py</code> and "
+                "<code>make_engagement_charts.py</code> first.</p>")
     return "\n".join(out)
 
 

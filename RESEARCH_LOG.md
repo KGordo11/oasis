@@ -2319,11 +2319,30 @@ carrying all three timing charts. `55d7c5a5` science. `869156cd` engineering.
 **Five retired pages are absorbed but still live and need Gordon's confirmation
 to delete:** `e49bf8a7`, `d80d6149`, `45b122c4`, `b878972f`, `96788f41`.
 
-**Regenerating the explorer:** `make_graph.py` does NOT reproduce the
-hand-written comparison panel above the tabs. Read the live artifact and merge
-that block back, or republishing deletes it silently. Also remove
-`.artifact_baseline` from the data dir first, or its alphabetical filter cuts the
-run list to a handful.
+**Regenerating the explorer (`732d1879`) — four traps, all of them silent:**
+
+1. `make_graph.py`'s `discover()` globs `data/social_timeline_*_analysis.json`
+   **non-recursively**, and almost every run now lives in `data/runs/<arm>/`. Left
+   to itself it finds 8 runs, two of which are the B-28 truncated ones. **Always
+   pass `--analysis` explicitly.**
+2. `data/.artifact_baseline` names `v4_full`, whose analysis file is no longer in
+   `data/`, so `_started()` returns `""` and the cutoff silently degrades to
+   filename ordering. Park the file while generating.
+3. **The hand-written comparison panel above the tabs is not generated.** Read the
+   live artifact, extract the `<div style="background:var(--panel,#fff)...">`
+   block before `<nav class="tabs">`, and merge it back, or republishing deletes
+   it without a word.
+4. **A 13.5 MB single-file publish times out (408), twice.** The page is 88 KB and
+   the run data is 13.4 MB on one line. Split `const ALL = {...}` into
+   `run_data.js` and publish it via `files` — a top-level `const` in a classic
+   script is visible to the inline script that follows it, so nothing else
+   changes. The artifact is now two files; keep it that way.
+
+Also: passing a newline-separated list unquoted in **zsh does not word-split**, so
+`--analysis $FILES` arrives as one argument, `make_graph.py` skips every file, and
+it still writes a 75 KB page reporting `0 run(s)` and exits 0. Use
+`${(f)"$(...)"}` into an array. A generator that succeeds at producing nothing is
+the same shape as every other bug in this log.
 
 ### Immediately next
 

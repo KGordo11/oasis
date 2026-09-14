@@ -86,15 +86,26 @@ log "                   sustained for ${IDLE_MINUTES} consecutive minutes"
 log "  then runs: agents $AGENTS"
 log "  cancel with: pkill -f sweep_when_idle.sh"
 
+# A watcher that prints nothing while it waits is indistinguishable from a dead
+# one, and this project has spent a night on exactly that class of mistake. So it
+# reports every HEARTBEAT_MINUTES even when there is nothing to say.
+HEARTBEAT_MINUTES=${HEARTBEAT_MINUTES:-15}
+
 streak=0
+ticks=0
 while true; do
   cpu=$(other_cpu)
+  ticks=$((ticks+1))
   if hog_running; then
     [ $streak -gt 0 ] && log "  reset: a foreground app is running (was ${streak}/${IDLE_MINUTES})"
     streak=0
+    [ $((ticks % HEARTBEAT_MINUTES)) -eq 0 ] && \
+      log "  still waiting: $(pgrep -f "$HOGS" | wc -l | xargs) foreground app(s) running, other CPU ${cpu}%"
   elif [ "$cpu" -ge "$BUSY_PCT" ]; then
     [ $streak -gt 0 ] && log "  reset: other-process CPU ${cpu}% >= ${BUSY_PCT}% (was ${streak}/${IDLE_MINUTES})"
     streak=0
+    [ $((ticks % HEARTBEAT_MINUTES)) -eq 0 ] && \
+      log "  still waiting: other CPU ${cpu}% >= ${BUSY_PCT}%"
   else
     streak=$((streak+1))
     log "  idle ${streak}/${IDLE_MINUTES}  (other CPU ${cpu}%)"

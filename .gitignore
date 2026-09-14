@@ -127,6 +127,8 @@ data/charts/
 data/social_timeline_*.json
 data/social_timeline_*.txt
 data/sweep18_results.txt
+data/load_*.csv
+data/night_queue.txt
 
 # Camel/OASIS runtime logs. 163 MB and 1,500 files as of 2026-09-13, one set per
 # run (oasis-*, social.agent-*, social.twitter-*, table-*). Derived output, same

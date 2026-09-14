@@ -7634,6 +7634,70 @@ effective activation rate went **0.19 to 1.0** — a 5x change in how much of th
 population is live per timestep — and **neither paper reports the rate at all**.
 Whether their conclusions survive that change is not addressed in either.
 
+### F-105 — Engagement rate falls by half from 18 to 90 agents, and the agents are not doing anything differently
+
+**The observation.** Five runs, one configuration, 7 rounds, seed 42, business
+personas, verified 8,192 context. Engagement falls monotonically apart from the
+top point:
+
+| agents | 18 | 36 | 54 | 72 | 90 |
+|---|---|---|---|---|---|
+| engagement | 7.18 % | 6.18 % | 5.45 % | 3.18 % | 3.98 % |
+
+**It is not the metric.** `analyze.py:295` defines engagement over *distinct*
+posts (`seen_post_ids & acted`), while the exposures table counts every exposure
+event, and the two diverge as a function of world size — which is the variable
+under test, so this had to be checked rather than assumed. Both give the same
+answer: the deduplicated spread is 2.26x, the event-level spread 2.22x.
+
+**It is not repetition.** Repeat exposure does fall with world size, 2.25
+sightings per distinct post at 18 agents to 1.19 at 90, and F-43 establishes that
+repetition raises engagement — so this was the obvious candidate. It is wrong.
+**The gap survives whole inside the first-sighting stratum** (7.18 % -> 3.98 %,
+the same 2.26x), and engagement on *repeat* sightings is flat or rising with
+world size: 2nd sighting 9.49 / 12.62 / 10.03 / 9.88 / 9.86 %. Repetition pushes
+against the decline, not for it.
+
+**It is not feed composition.** Network-tier posts engage far better than
+discovery (F-92, OR 3.07-3.51), so a shift toward discovery would do it. There is
+no shift to find: **discovery is 98.9-99.3 % of first-sighting exposures in every
+one of the five runs** — seven rounds is not enough for a follow graph to form —
+and the decline is intact within discovery alone, 6.73 % -> 3.86 %.
+
+**What it is: the denominator grows and the numerator does not.**
+
+| | 18 agents | 90 agents | spread |
+|---|---|---|---|
+| feed actions per agent-turn | 0.380 | 0.402 | **1.35x, no trend** |
+| DISTINCT posts shown per agent-turn | 5.29 | 10.10 | **1.95x, monotonic** |
+| engagement | 7.18 % | 3.98 % | 2.26x |
+
+Exposures per turn are pinned at the 12-slot feed cap in every run. What changes
+is how many of those twelve are *new*: in a small world there is too little
+content, so the ranker re-shows posts and distinct-per-turn is 5.3; at 90 agents
+there is enough to fill the feed with fresh material and it is 10.1.
+
+A **one-parameter model** — engagement = K / (distinct posts per turn), with
+K = 0.389 feed-actions per agent-turn held constant across all five sizes —
+reproduces the series with a **mean absolute error of 10.2 %**, against
+**run-to-run noise of ~12 %** measured directly from the `s43` replicate at 18
+agents (7.18 % vs 6.39 %).
+
+**What this does NOT establish.** The model's error sits inside the noise floor,
+which means this data **cannot distinguish a genuinely constant action budget
+from a mildly declining one**. Five points, one replicate. The claim that
+survives is the decomposition — the fall is in the denominator, and the two known
+behavioural drivers are excluded — not that agent propensity is provably
+invariant. Nor does it explain *why* output per turn is near-constant; that is
+measured here, not accounted for.
+
+**Why it matters for the scale plan.** Engagement rate will keep falling as the
+population grows, for arithmetic reasons, and **that must not be read as agents
+becoming less social at scale.** Any cross-scale comparison should quote feed
+actions per agent-turn, which is flat, rather than engagement rate, which is a
+supply artefact. This directly affects how a 1,100-agent run gets reported (D-18)
+and it is the kind of number a reader will otherwise take as a finding.
+
 ### Q-23 — Is activation density a scientific variable or a budget knob?
 
 This is the gap F-99 and F-100 open, and it is ours to take. Collusion runs 0.19,

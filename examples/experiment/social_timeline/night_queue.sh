@@ -48,8 +48,12 @@
 #   tail -f /tmp/night_queue.log
 #   cat data/night_queue.txt            # one line per completed run, with load
 #
-#   PASSES=2 ...      stop after two passes instead of running forever
+#   PASSES=2 ...        stop after two passes instead of running forever
 #   AGENTS="18 36" ...  a shorter sweep
+#   ROUNDS=15 ...       a longer run (sweep18.sh reads this from the environment)
+#   PREFIX=r15 ...      name the campaign. REQUIRED when re-running a size that
+#                       already has a manifest under the default prefix, since
+#                       sweep18.sh skips those and the pass would do nothing.
 #
 # To stop: pkill -f night_queue.sh   (also kill the sweep: pkill -f sweep18.sh)
 # =============================================================================
@@ -89,8 +93,14 @@ while true; do
 
   seed=$((BASE_SEED + pass - 1))
   # Pass 1 keeps the historical prefix so the runs already planned keep their
-  # names; later passes are replicates and are labelled by their seed.
-  if [ $pass -eq 1 ]; then prefix="sweep18"; else prefix="sweep18_s${seed}"; fi
+  # names; later passes are replicates and are labelled by their seed. PREFIX
+  # overrides pass 1 outright, which is how a differently-shaped campaign (a
+  # longer round count, say) reuses this queue's load sampling without colliding
+  # with an existing run's label -- sweep18.sh skips anything whose manifest
+  # exists, so a reused prefix would silently do nothing at all.
+  if [ -n "${PREFIX:-}" ]; then
+    prefix="$PREFIX"; [ $pass -gt 1 ] && prefix="${PREFIX}_s${seed}"
+  elif [ $pass -eq 1 ]; then prefix="sweep18"; else prefix="sweep18_s${seed}"; fi
 
   log "########## PASS $pass -- prefix=$prefix seed=$seed agents=$AGENTS ##########"
 

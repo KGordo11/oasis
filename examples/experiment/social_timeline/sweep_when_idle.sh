@@ -62,7 +62,13 @@ S=examples/experiment/social_timeline
 IDLE_MINUTES=${IDLE_MINUTES:-10}
 BUSY_PCT=${BUSY_PCT:-40}
 AGENTS=${AGENTS:-"18 36 54 72 90"}
-HOGS=${HOGS:-"RobloxPlayer|RobloxStudio|Minecraft|Steam|obs|Final Cut|Premiere|Blender"}
+# Anchored to the executable name. The first version listed a bare "obs" for OBS
+# Studio, and `pgrep -f` matched the ollama runner, whose model path contains
+# ".ollama/models/blobs/" -- "obs" inside "blobs". The watcher therefore saw a
+# foreground app every single minute and would never have started the sweep, all
+# night, while logging that it was working. Substring patterns against full
+# command lines need anchors.
+HOGS=${HOGS:-"/RobloxPlayer|/RobloxStudio|/Minecraft|/Steam|/OBS |/Final Cut|/Premiere|/Blender"}
 
 log(){ echo "[$(date '+%m-%d %H:%M:%S')] $*"; }
 

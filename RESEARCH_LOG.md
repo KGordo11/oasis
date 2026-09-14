@@ -2141,7 +2141,41 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-12 05:40, overnight session. Update at the end of every session.*
+*Last updated 2026-09-14 morning. Update at the end of every session.*
+
+### 2026-09-14 — the agent sweep landed, and it settled two things
+
+**The 18/36/54/72/90 sweep completed overnight.** Combined with
+`ctx8192_a12/a24/a36` that is **eight points from 12 to 90 agents, a 7.5x
+range: exponent 1.005, R^2 0.9993, 21.44 s per agent-turn (sd 0.37)**. Cost is
+linear and the largest verified point is no longer 36. Every projection on this
+page previously extrapolated ~30x beyond its evidence; it now extrapolates ~12x.
+
+**F-105 — engagement halves from 18 to 90 agents and the agents are unchanged.**
+7.18 / 6.18 / 5.45 / 3.18 / 3.98 %. Not the metric (dedup 2.26x, event-level
+2.22x), not repetition (the gap survives whole inside first sightings, and repeat
+engagement is flat or rising), not tier composition (discovery is 98.9-99.3 %
+everywhere). It is the denominator: distinct posts shown per turn grows 5.29 ->
+10.10 while feed actions per turn stay at 1.06x. **Quote feed actions per
+agent-turn across scales, never engagement rate.**
+
+**B-32 and B-33** — a run cost 2.16x its reference because the laptop was in use,
+and the guard written to catch that would never have fired because a bare `obs`
+in its hog pattern matched `.ollama/models/blobs/`. Machine load is now sampled
+every 30 s per run into `data/load_<prefix>.csv` with a verdict in
+`data/night_queue.txt`.
+
+**Artifact `869156cd` is at version 13** with the eight-point curve, F-105 and
+both new charts. `732d1879` (explorer) and `55d7c5a5` (science) are NOT yet
+updated with the new runs.
+
+**Nothing is running.** `night_queue.sh` was stopped for a lid close; pass 2
+(seed 43 replicates) had completed `s43_a18` and was interrupted during
+`s43_a36`, whose partials were cleared. Restart with:
+`nohup caffeinate -i examples/experiment/social_timeline/night_queue.sh > /tmp/night_queue.log 2>&1 &`
+
+---
+
 
 ### Read this first: one mistake dominates the night
 

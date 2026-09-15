@@ -122,7 +122,7 @@ def round_timings(run_dir: str, label: str) -> pd.DataFrame | None:
     return df
 
 
-def manifest_row(run_dir: str, label: str) -> dict:
+def manifest_row(run_dir: str, label: str, counts_by_action: dict | None = None) -> dict:
     row = {"run": label}
     mpath = os.path.join(run_dir, "manifest.json")
     if not os.path.exists(mpath):
@@ -145,6 +145,18 @@ def manifest_row(run_dir: str, label: str) -> dict:
     tw = m.get("turns_without_action") or {}
     row["action_rate"] = tw.get("action_rate")
     row["agent_turns_total"] = tw.get("agent_turns_total")
+    # Two different denominators, and shipping only the first was a trap.
+    # `agent_turns_total` is agents x rounds -- every turn the agent was
+    # invoked, INCLUDING round 0, where agents post and create groups but are
+    # shown no feed. `feed_turns` is agents x (rounds-1): the turns on which a
+    # feed was actually served, counted from the `refresh` actions rather than
+    # assumed. Every per-turn rate in the analysis from F-105 onward uses the
+    # SECOND, so a reader handed only the first computes rates 7 % low at 15
+    # rounds and 17 % low at 7 -- and the error varies with round count, so it
+    # corrupts exactly the cross-run comparison the package exists for. Same
+    # shape as B-34.
+    cnt = counts_by_action.get(label, {}) if counts_by_action else {}
+    row["feed_turns"] = cnt.get("refresh")
     ps = m.get("phase_share") or {}
     for k, v in ps.items():
         row[f"phase_pct_{k}"] = v
@@ -197,11 +209,22 @@ def main() -> int:
         return 1
     os.makedirs(args.out, exist_ok=True)
 
+    # Feed-serving turns, counted from the actions table rather than inferred.
+    counts_by_action: dict[str, dict[str, int]] = {}
+    for label in runs:
+        ap = os.path.join(args.parquet_dir, label, "actions", "part.parquet")
+        if os.path.exists(ap):
+            try:
+                a = pd.read_parquet(ap, columns=["action"])
+                counts_by_action[label] = a["action"].value_counts().to_dict()
+            except Exception:  # noqa: BLE001
+                pass
+
     index, timings = [], []
     tables: dict[str, list[pd.DataFrame]] = {}
     for label in runs:
         run_dir = os.path.join(args.parquet_dir, label)
-        row = manifest_row(run_dir, label)
+        row = manifest_row(run_dir, label, counts_by_action)
         row["engagement_pct"] = engagement(label, args.data_dir)
         row["validated_config"] = bool(VALIDATED.match(label))
         # A run still in flight exports partially. Flag it rather than leaving
@@ -224,8 +247,16 @@ def main() -> int:
             tables.setdefault(table, []).append(d)
 
     idx = pd.DataFrame(index)
+
+    # Keep whole-number columns whole. A CSV that reads "504.0" invites the
+    # next reader to treat a count as a float, and pandas floats any column
+    # that has one missing value.
+    for col in ("feed_turns", "agent_turns_total"):
+        if col in idx.columns:
+            idx[col] = idx[col].astype("Int64")
+
     front = [c for c in ("run", "arm", "validated_config", "complete", "agents", "rounds",
-                         "model", "total_seconds", "engagement_pct")
+                         "feed_turns", "model", "total_seconds", "engagement_pct")
              if c in idx.columns]
     idx = idx[front + [c for c in idx.columns if c not in front]]
     idx.to_csv(os.path.join(args.out, "runs_index.csv"), index=False)
@@ -274,7 +305,9 @@ One row per run ({len(idx)} runs, {n_val} at the validated configuration).
 | `model` | the language model that drove the agents |
 | `total_seconds` | wall clock for the whole run |
 | `engagement_pct` | share of posts shown to an agent that the agent acted on. **The study's dependent variable** |
-| `action_rate` | share of agent-turns producing any action |
+| `action_rate` | share of agent-turns producing any action (denominator `agent_turns_total`) |
+| `agent_turns_total` | `agents x rounds` — every turn the agent was invoked, **including round 0**, where agents post but are shown no feed |
+| `feed_turns` | `agents x (rounds-1)` — turns on which a feed was actually served, counted from `refresh` actions. **This is the denominator for any per-turn engagement rate**; using `agent_turns_total` instead reads 7 % low at 15 rounds and 17 % low at 7 |
 | `phase_pct_*` | share of run time in each pipeline phase |
 | `lean_actions`, `terse_tools`, `shared_prefix`, `max_tool_rounds`, `smart_tool_loop` | configuration switches |
 

@@ -9159,6 +9159,68 @@ Nothing depends on the old string, so this is safe whenever it is applied.
 ---
 
 
+### B-37 — The package shipped the turn count nobody wanted, and said nothing about which one it was
+
+**Found by asking what `agent_turns_total` actually counts**, after F-105's
+denominator trap was logged but never fixed.
+
+**It is not wrong. It is the other quantity, unlabelled.** `agent_turns_total` is
+`agents x rounds` — every turn an agent was invoked. That includes **round 0**,
+where agents post and create groups but are shown **no feed**: verified, 66 real
+actions in round 0 of `r15_a90`, 31 in `bank_r1`, and zero refreshes in either.
+So it is a correct count of agent turns.
+
+The denominator every per-turn rate from F-105 onward actually uses is different:
+**feed-serving turns**, `agents x (rounds-1)`, equal to the `refresh` count.
+
+**The defect is that the package shipped only the first, and defined neither.** A
+reader computing engagement per turn from `runs_index.csv` gets a figure **7 %
+low at 15 rounds and 17 % low at 7** — and because the error scales with round
+count, it corrupts precisely the cross-run comparison the package exists to
+support. That is the same shape as B-34, one column over.
+
+**Fix.** `feed_turns` is now a first-class column, placed next to `rounds`,
+counted from the `refresh` actions rather than inferred, and written as an
+integer (pandas had floated it to `504.0` because one run lacks it).
+`DATA_DICTIONARY.md` now defines both and says which to use for what. Verified
+across 44 runs: **zero mismatches against the refresh count.**
+
+#### And the gate that should have existed
+
+`build_package.py` had two defects before this one — **B-27** published one run's
+timings under another's name, and **B-34**'s other half left the index disagreeing
+with the tables shipped beside it — and it had **no test of its own**. Every one
+of those is invisible from inside: they would all pass a test that only asked
+whether the builder ran.
+
+`test_build_package.py` (9 checks) compares the package against something
+computed a **different way** every time — tables against index, index against
+manifests. It caught a real failure on its first run.
+
+#### B-38 — Phantom comment-likes, the comment analogue of B-10
+
+The new gate flagged `like_comment` actions with no resolvable post. Diagnosed
+rather than patched around:
+
+| action | total | unresolved |
+|---|---|---|
+| `create_comment` | 3,292 | **0** |
+| `like_comment` | 1,362 | **14 (1.03 %)**, across 11 runs |
+
+`create_comment` always resolves, as it must — the run just created that comment.
+`like_comment` sometimes does not: **the model liked a `comment_id` that never
+existed.** That is B-10's phantom follows in another guise, and a fourth entry in
+F-111's ledger of actions that leave no effect.
+
+At 1.03 % it changes nothing quantitatively. It is recorded because **the first
+version of the gate asserted these must always resolve, and that assertion was
+wrong** — the exporter was right and the test was too strict. A gate that forbids
+a real phenomenon trains its owner to ignore it. The check now bounds the rate at
+5 % instead, so a broken join still fails while the known behaviour does not.
+
+---
+
+
 # Part 6 — Simulation 4: run plan and its review
 
 *Was `SIM4_RUN_PLAN.md`. Merged into this file 2026-09-13; original title: “Sim 4 — run plan, drafted 2026-09-08”.*

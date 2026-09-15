@@ -2335,16 +2335,26 @@ right now — they are the direct test of F-108's fof result and of F-109 — bu
 the fuller campaign is the sweep at 15 rounds, which fills in the round-count
 comparison at every size and lets the graph form at each.
 
-**To switch, after the current run lands** (killing the queue mid-run loses the
-fold-in, so wait for `sweep18.sh` to exit):
+**To switch, use `switch_campaign.sh`** (added 2026-09-14). It can be started
+at any time, including mid-round: it waits for `sweep18.sh` to exit — which is
+what completes the fold-in — then stops the old queue and starts the new one,
+holding a caffeinate assertion throughout so the laptop cannot sleep during the
+wait.
 
-    pkill -f night_queue.sh; pkill -f sweep18.sh
-    cd /Users/gordon/research/oasis && ROUNDS=15 AGENTS="18 36 54 72 90" PREFIX=r15 \
-      nohup caffeinate -i examples/experiment/social_timeline/night_queue.sh \
-      > /tmp/night_queue.log 2>&1 &
+    ROUNDS=15 AGENTS="18 36 54 72 90" PREFIX=r15 \
+      nohup caffeinate -i examples/experiment/social_timeline/switch_campaign.sh \
+      > /tmp/switch_campaign.log 2>&1 &
 
-`sweep18.sh` skips any run whose manifest exists, so `r15_a90` is not repeated
-and the pass resumes at 18 agents. One pass is roughly 21 h. Launched through
+**Why not just `pkill` and relaunch:** `sweep18.sh` runs export_parquet →
+build_package → the two chart generators *after* the simulation returns. Killing
+the queue mid-run throws that away for a run that has already cost seven hours,
+and leaves its database un-exported and missing from the package. The script
+also refuses to relaunch if a new `run_simulation.py` appeared during the
+handover, rather than orphaning it.
+
+`sweep18.sh` skips any run whose manifest exists, so `r15_a90` and
+`r15_s43_a90` are not repeated and the pass resumes at 18 agents. One pass is
+roughly 21 h. Launched through
 `night_queue.sh` with `PASSES=0`, so **it continues on its own**: when `r15_a90`
 finishes, pass 2 starts `r15_s43_a90`, and so on indefinitely until killed.
 

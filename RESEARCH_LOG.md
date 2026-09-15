@@ -2141,7 +2141,7 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-14 21:20. Update at the end of every session.*
+*Last updated 2026-09-14 21:35. Update at the end of every session.*
 
 ---
 
@@ -2353,7 +2353,32 @@ bank (different action surface).
 **Tool-error evidence preserved** to `data/logs/` (10.5 MB of raw lines trimmed
 to 46 KB), so `/tmp` can be cleared safely.
 
-### RUNNING as of 2026-09-14 21:20 — `r15_s43_a90`
+**F-112 — similarity is NOT null. It is small, needs two controls to see, and is
+positive in 16 of 16 runs.** Top vs bottom cosine quartile, **first sightings
+only** (closes the repeat channel, worth 2.35-2.62) and **feed slot fixed**
+(closes the position effect, worth 2.15): **MH OR 1.33 [1.14, 1.60]**,
+bootstrapped over *runs*, 49,561 first-sighting exposures. **Sign test
+p=3.05e-05.** The ordering is untouched — connection 3.51 > repetition 2.62 >
+position 2.15 > similarity 1.33 — so this is a qualification, not a retraction:
+what is no longer accurate is "content does not predict engagement at all".
+
+**Retire the per-unit-cosine odds ratio.** Cosine spans ~0.73, so "per unit"
+extrapolates past the data: fitted run by run it returns 0.50, 1.23, 3.78,
+11.92, 46.76, 56.22, **142.94**. Every published similarity figure here used
+that scale, including the retracted F-38 and the 1.143 it was replaced with.
+
+**F-49's prediction confirmed on data collected afterwards.** It explained the
+null by corpus uniformity and said a more separable persona file would leave
+room. Twitter file OR 5.16 [1.77, 15.1] p=0.0027 vs reddit 1.50 [0.99, 2.30]
+p=0.058. Bio echo is also 6x larger there (+0.109 vs +0.015), and **flat across
+all 15 rounds** (r=+0.043, p=0.51) — agents restate their persona in round 14 as
+much as round 0. **Note F-24 is therefore live again for the current campaign,
+which runs on the twitter file; F-49 retired it only for the reddit bank.**
+
+`55d7c5a5` is at **v15** with §04 qualified, the standfirst, stat card, forest
+caption and the likely-questions answer all made consistent with it.
+
+### RUNNING as of 2026-09-14 21:35 — `r15_s43_a90`
 
 **Pass 2: 90 agents x 15 rounds, seed 43.** `r15_a90` finished 17:41 at 7.21 h
 and was folded in automatically by `sweep18.sh` — using the FIXED exporter, so it
@@ -8671,6 +8696,80 @@ else, and are still volatile.
 database — an interrupted run from the seed-43 pass that the r15 campaign
 replaced. It is excluded from every figure above; noted so nobody counts it
 later.
+
+---
+
+
+### F-112 — Similarity is not null. It is small, it needs two controls to see, and it is positive in 16 of 16 runs
+
+**This qualifies a headline claim, so the caveats come first.** The published
+position — *"the graph carries the personalisation in this simulation, the
+embedding does not"* — rests on OR **1.143 [0.524, 2.495], p=0.74** per unit
+cosine. That number is not wrong. It is **unstable**, for a reason worth naming.
+
+**Retire the per-unit-cosine odds ratio.** Cosine spans about 0.73 in these runs,
+so "per unit" extrapolates beyond the observed range and the estimate becomes
+wild: fitted run by run on the twitter persona file it returns 0.50, 1.23, 3.78,
+11.92, 46.76, 56.22 and **142.94**. Those are not seven measurements of one
+quantity, they are one quantity divided by a lever arm shorter than the units it
+is quoted in. Every published similarity figure in this project has used that
+scale, including the retracted F-38.
+
+**On a stable scale, with the two controls the earlier analysis lacked, there is
+an effect.** Top versus bottom cosine quartile, **first sightings only** (so the
+repeat-exposure channel of F-43/F-110, worth 2.35-2.62, is closed by
+construction), **feed slot held fixed** (so the F-94 position effect, worth 2.15,
+cannot leak in), Mantel-Haenszel across 16 runs:
+
+> **OR 1.33, 95% CI [1.14, 1.60]** — bootstrapped over **runs**, which is the
+> correct resampling unit and the mistake the build log already records twice.
+> **Positive in 16 of 16 runs. Sign test p = 3.05e-05.**
+
+49,561 first-sighting discovery exposures, 2,651 engagements, both persona files.
+
+**Why it was missed.** Three things had to line up. Without the first-sighting
+restriction, repeat exposure — an effect twice the size — sits on top of it.
+Without slot held fixed, the ranker's own ordering does. And on the per-unit
+scale the confidence interval is so wide that a real 1.33 is indistinguishable
+from nothing.
+
+**What does NOT change.** The ordering of effects is untouched and the headline
+survives:
+
+| effect | magnitude |
+|---|---|
+| connection (network vs discovery) | **3.51** |
+| repetition (seen before) | **2.62** |
+| position (top vs bottom half) | **2.15** |
+| **similarity (top vs bottom quartile)** | **1.33** |
+
+Connection still beats content by a wide margin. What is no longer accurate is
+*"content does not predict engagement at all"*. It predicts it weakly, and
+consistently.
+
+**The persona file matters, and that was predicted.** F-49 explained the null by
+corpus uniformity — *"when everything resembles everything, resembling your own
+bio adds almost nothing"* — and said the effect had room to show on the more
+separable twitter personas. It does. Pooled within file, first sightings, slot
+controlled: twitter **OR 5.16 [1.77, 15.1], p=0.0027**; reddit **1.50
+[0.99, 2.30], p=0.058** (per-unit scale, so read the direction, not the number).
+Post-corpus spread is 0.606-0.847 on twitter against 0.565-0.902 on reddit, and
+mean pairwise post cosine 0.738 against 0.790. **A prediction made when the null
+was published has been confirmed by data collected afterwards on the other file.**
+
+**What this is not.** Observational. Cosine determines ranking, so high-cosine
+posts differ systematically from low-cosine ones in ways beyond cosine — length
+and specificity are the obvious candidates and neither is controlled. The
+first-sighting restriction and the slot control remove the two known channels;
+they do not make it an experiment. **1.33 is also small enough that it would be
+invisible in any single run**, which is exactly why 16-of-16 consistency rather
+than any one p-value is what carries it.
+
+**Consequence for the write-up.** Artifact `55d7c5a5` §04 is titled *"The
+recommender's signal does nothing"* and states the similarity decile table is
+flat. That table is computed over all exposures on the reddit file without the
+slot control, and it is flat as reported. The section needs the qualification,
+not a retraction: the signal is weak, real, and swamped by three larger effects.
 
 ---
 

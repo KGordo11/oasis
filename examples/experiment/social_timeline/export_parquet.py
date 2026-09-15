@@ -45,6 +45,16 @@ Two of the schema traps in the build log are fixed here rather than passed on:
     `schema.json` says so.
   * `created_at` on a post is the round number, not a timestamp. It is
     exported as `round` (int) so nothing downstream parses it as a date.
+  * a trace row does not say what it acted on. `create_comment` and
+    `like_comment` name only a `comment_id` (B-4) and `follow` names only the
+    row it just created (B-6), so the target is reachable only through another
+    table. `analyze.py` has resolved this since B-4; the export did not, and
+    that omission is B-34: engagement computed from the exported tables came
+    out at 41-65 % of its true value, by a factor that varied per run, while
+    `runs_index.csv` carried the correct number from `analyze.py`. The
+    `comment` table is now exported, and `actions` carries resolved
+    `target_post_id` / `target_agent_id` columns so a reader never has to know
+    any of this.
 
 Usage
 -----
@@ -65,6 +75,7 @@ import glob
 import json
 import logging
 import os
+import shutil
 import sqlite3
 import sys
 import time
@@ -91,7 +102,11 @@ DTYPES = {
     "posts": {"post_id": "int64", "agent_id": "int32", "round": "int32",
               "original_post_id": "Int64", "num_likes": "int32",
               "num_dislikes": "int32", "num_shares": "int32"},
-    "actions": {"agent_id": "int32", "round": "int32", "action": "category"},
+    "actions": {"agent_id": "int32", "round": "int32", "action": "category",
+                "target_post_id": "Int64", "target_agent_id": "Int32"},
+    "comments": {"comment_id": "int64", "post_id": "int64",
+                 "agent_id": "int32", "round": "int32",
+                 "num_likes": "int32", "num_dislikes": "int32"},
     "agents": {"agent_id": "int32", "num_followings": "int32",
                "num_followers": "int32"},
     "follows": {"follow_id": "int64", "follower_id": "int32",
@@ -126,9 +141,94 @@ QUERIES = {
           FROM follow""",
     "rounds": """
         SELECT round, n_posts, n_follows FROM round_boundary""",
+    # Exported so the comment -> post link survives the export at all. Without
+    # this table the link exists only inside the SQLite file (B-34).
+    "comments": """
+        SELECT comment_id, post_id, user_id AS agent_id, content,
+               created_at AS round, num_likes, num_dislikes
+          FROM comment""",
 }
 
 PARTITIONED = {"exposures", "candidates"}
+
+# Where a trace `info` payload may name the post that was acted on. These are
+# NOT uniform across action types -- the reason B-4 existed, and the reason
+# B-34 recreated it one layer down. Kept identical to analyze.py:58 on
+# purpose: two resolvers that disagree are worse than one that is wrong.
+POST_KEYS = ("post_id", "original_post_id", "quoted_id", "quoted_post_id",
+             "reposted_id")
+USER_KEYS = ("followee_id", "mutee_id", "target_id")
+# Name a comment, not a post; the post is reachable only via the comment table.
+COMMENT_ACTIONS = {"create_comment", "like_comment", "unlike_comment",
+                   "dislike_comment", "undo_dislike_comment"}
+# Names only the follow row it created, never the followee.
+FOLLOW_ACTIONS = {"follow"}
+# `create_post` puts the id of the post it just WROTE under the `post_id` key.
+# That is an output, not a target, so it must not become a `target_post_id` --
+# otherwise "posts this agent acted on" silently includes the agent's own.
+# (It happens to be harmless for engagement, because an agent is never shown
+# its own post -- verified on three runs -- but only by luck.)
+SELF_POST_ACTIONS = {"create_post"}
+
+
+def _coerce_int(value):
+    """Return an int for 3 or "3", else None. Trace payloads mix both:
+    `quote_post` stores its target id as a STRING."""
+    if isinstance(value, bool):
+        return None
+    if isinstance(value, int):
+        return value
+    if isinstance(value, str):
+        try:
+            return int(value.strip())
+        except ValueError:
+            return None
+    return None
+
+
+def _resolve_action_targets(df: pd.DataFrame, conn) -> pd.DataFrame:
+    """Add `target_post_id` and `target_agent_id` to the actions table.
+
+    This is the whole of the B-34 fix. Without it the exported package cannot
+    reproduce the study's own dependent variable, because comment actions --
+    56-59 % of all post-directed actions in a bank run -- carry no post id.
+    """
+    comment_to_post = dict(conn.execute(
+        "SELECT comment_id, post_id FROM comment"))
+    follow_to_followee = dict(conn.execute(
+        "SELECT follow_id, followee_id FROM follow"))
+
+    posts, users = [], []
+    for action, raw in zip(df["action"], df["info"]):
+        try:
+            info = json.loads(raw) if raw else {}
+        except (json.JSONDecodeError, TypeError):
+            info = {}
+        if not isinstance(info, dict):
+            info = {}
+
+        if action in SELF_POST_ACTIONS:
+            post_id = None
+        else:
+            post_id = next((_coerce_int(info[k]) for k in POST_KEYS
+                            if _coerce_int(info.get(k)) is not None), None)
+            if post_id is None and action in COMMENT_ACTIONS:
+                post_id = comment_to_post.get(
+                    _coerce_int(info.get("comment_id")))
+
+        user_id = next((_coerce_int(info[k]) for k in USER_KEYS
+                        if _coerce_int(info.get(k)) is not None), None)
+        if user_id is None and action in FOLLOW_ACTIONS:
+            user_id = follow_to_followee.get(
+                _coerce_int(info.get("follow_id")))
+
+        posts.append(post_id)
+        users.append(user_id)
+
+    df = df.copy()
+    df["target_post_id"] = posts
+    df["target_agent_id"] = users
+    return df
 
 
 def _coerce(df: pd.DataFrame, name: str) -> pd.DataFrame:
@@ -212,6 +312,16 @@ def export_run(db_path: str, out_root: str, also_csv: bool = False) -> dict:
     t0 = time.time()
 
     for name, sql in QUERIES.items():
+        # Clear the table's directory first. Partitioned tables write one file
+        # per round, so re-exporting a run that got SHORTER -- or exporting a
+        # different run under a label that was used before -- used to MERGE
+        # with whatever partitions were already on disk instead of replacing
+        # them. That is how `scale99_full` (99 agents x 5 rounds) came to hold
+        # rounds 5-11 of a 36-agent run at 432 rows each: B-27's mislabelling
+        # was corrected in the timings and left untouched in the data, where it
+        # sat in the published package for three days. Nothing warns you --
+        # the stale rows are valid Parquet with the right schema.
+        shutil.rmtree(os.path.join(out, name), ignore_errors=True)
         try:
             df = pd.read_sql(sql, conn)
         except Exception as exc:  # noqa: BLE001
@@ -220,6 +330,9 @@ def export_run(db_path: str, out_root: str, also_csv: bool = False) -> dict:
             log.warning("  %-11s skipped (%s)", name, exc)
             summary["tables"][name] = {"rows": 0, "skipped": str(exc)}
             continue
+
+        if name == "actions":
+            df = _resolve_action_targets(df, conn)
 
         df = _coerce(df, name)
         rows = len(df)
@@ -303,6 +416,23 @@ def _write_schema(out: str, summary: dict) -> None:
                       "both. The two vocabularies are NOT interchangeable -- "
                       "see manifest.algorithm.feed_model to tell which "
                       "builder produced this run.",
+            "target_post_id": "The post an action acted ON, already "
+                              "resolved. Do NOT derive this from `info`: "
+                              "comment actions name only a comment_id and "
+                              "have to be joined through `comments`, and "
+                              "`quote_post` stores its target as a string. "
+                              "Engagement computed without that join comes "
+                              "out at 41-65 % of its true value (B-34). It "
+                              "is NULL for create_post, whose payload names "
+                              "the post it wrote, not one it acted on.",
+            "engagement": "The study's dependent variable, and the one "
+                          "number worth reproducing before trusting "
+                          "anything else here: for each agent, the share of "
+                          "DISTINCT posts it was shown that it also acted "
+                          "on. Join exposures to actions on "
+                          "(agent_id, post_id = target_post_id), count "
+                          "distinct pairs on each side. It should match "
+                          "`engagement_pct` in runs_index.csv.",
             "sim_vs_score": "`sim` is cosine similarity; `score` is "
                             "sim * recency. They are stored separately on "
                             "purpose. Collapsing them is what produced the "
@@ -318,7 +448,10 @@ def _write_schema(out: str, summary: dict) -> None:
             "posts": "Every post written. `round` is when it was written.",
             "actions": "Every action attempted, including ones later "
                        "rejected. `info` is a JSON string whose shape varies "
-                       "by action.",
+                       "by action -- use the resolved `target_post_id` / "
+                       "`target_agent_id` columns instead of parsing it.",
+            "comments": "Every reply written. Carries the comment -> post "
+                        "link that comment actions depend on.",
             "agents": "The personas as the run saw them.",
             "follows": "Directed edges, with the round they formed.",
             "rounds": "Per-round boundaries.",

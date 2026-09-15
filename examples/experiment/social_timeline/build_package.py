@@ -23,6 +23,8 @@ WHAT IT WRITES
                           agent, with feed position, tier and score.
     actions.parquet       every action every agent took.
     posts.parquet         post text and engagement counts.
+    comments.parquet      every reply, and the comment -> post link that
+                          comment actions depend on (B-34).
     agents.parquet        the 36 (or 99) personas.
     candidates.parquet    the full ranker input -- large, Parquet only.
     DATA_DICTIONARY.md    what every column means.
@@ -58,7 +60,8 @@ VALIDATED = re.compile(r"^(np4_val_r\d+|bank_r\d+)$")
 ARMS = {"fc_full": "fresh_context", "lean_": "lean_actions",
         "scale99_full": "scale_99agents"}
 
-CSV_TABLES = ("exposures", "actions", "posts", "agents", "rounds", "follows")
+CSV_TABLES = ("exposures", "actions", "posts", "agents", "rounds", "follows",
+              "comments")
 
 
 def read_table(run_dir: str, table: str) -> pd.DataFrame | None:
@@ -213,7 +216,7 @@ def main() -> int:
             timings.append(t)
 
         for table in ("exposures", "actions", "posts", "agents", "rounds",
-                      "follows", "candidates"):
+                      "follows", "candidates", "comments"):
             d = read_table(run_dir, table)
             if d is None or d.empty:
                 continue
@@ -301,7 +304,45 @@ Every post shown to every agent.
 | column | meaning |
 |---|---|
 | `agent_id`, `round`, `action` | who did what, when |
-| `info` | JSON payload; contains `post_id` for post-directed actions |
+| `target_post_id` | the post this action acted ON, already resolved. **Use this** |
+| `target_agent_id` | the agent this action was aimed at, already resolved |
+| `info` | raw JSON payload, kept for provenance. **Do not parse it to find the target** |
+
+`info` is not uniform across action types and cannot be read generically:
+`create_comment` and `like_comment` name only a `comment_id`, `follow` names
+only the row it created, `quote_post` stores its target as a *string*, and
+`create_post` puts the id of the post it just WROTE under the `post_id` key.
+Resolving engagement from `info` alone returns 41-65 % of the true value, by a
+factor that varies per run. `target_post_id` and `target_agent_id` already do
+all of that; they are NULL for `create_post`, `refresh` and `sign_up`, which
+act on nothing.
+
+### Reproducing `engagement_pct` — do this first
+It is the study's dependent variable, and getting it right is the check that
+everything else here is being read correctly:
+
+```python
+ex = pd.read_parquet("exposures.parquet")
+ac = pd.read_parquet("actions.parquet")
+run = "bank_r1"
+seen  = set(zip(*ex[ex.run == run][["agent_id", "post_id"]].values.T))
+acted = set(zip(*ac[(ac.run == run) & ac.target_post_id.notna()]
+                  [["agent_id", "target_post_id"]].values.T))
+100 * len(seen & acted) / len(seen)      # -> 7.681, matching runs_index.csv
+```
+
+Note it counts DISTINCT (agent, post) pairs, not exposure events: an agent
+shown the same post three times and acting once is one engagement out of one
+opportunity, not one out of three.
+
+## comments.parquet / .csv.gz
+| column | meaning |
+|---|---|
+| `comment_id`, `post_id` | the reply, and the post it replies to |
+| `agent_id`, `round`, `content` | who wrote it, when, and what it said |
+
+Replies are where most engagement happens -- comment actions are 56-59 % of all
+post-directed actions -- so this table is not an extra, it is half the ledger.
 
 ## posts.parquet, agents.parquet, rounds.parquet, follows.parquet
 Post text and like/share counts; persona records; per-round post and follow

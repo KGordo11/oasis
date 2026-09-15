@@ -9041,6 +9041,71 @@ because a warning that always fires is not a warning.
 ---
 
 
+### D-19 — The machine-load verdict is replaced by a cost verdict. A warning that always fires is not a warning
+
+**The old rule.** `night_queue.sh` labels each pass CLEAN / BUSY / HEAVILY
+LOADED from median non-simulation CPU, thresholds 40 % and 100 %, inherited from
+`sweep_when_idle.sh`. That script answers *"is the machine free right now"*,
+which is a different question from *"was this run contaminated"*, and the
+thresholds do not transfer.
+
+**What the data says.** Every pass with a load trace:
+
+| pass | median other-CPU | peak | runs in it, s/agent-turn |
+|---|---|---|---|
+| `sweep18` | 130 % | 317 % | 22.05 21.73 22.06 21.46 21.59 22.31 |
+| `r15` | 137 % | 329 % | 21.12 22.47 20.98 21.61 |
+| `r15_s43` | 136 % | 554 % | 21.00 |
+
+**Every pass flagged HEAVILY LOADED. Every run within 4 % of the 21.44
+s/agent-turn curve.** Acting on the verdict would mean discarding every run in
+the bank.
+
+**The deeper fault is the resource.** B-32 — the only run that genuinely cost
+2.16x its reference — was contended by a **GPU**-heavy foreground application.
+`other_cpu` barely sees that, and B-32 predates load sampling, so the record
+contains **~14 observations of "loaded and harmless" and zero of "loaded and
+harmful"**. The proxy has never once predicted the thing it exists to predict.
+
+**The replacement.** `load_verdict.py` judges the outcome instead: plateau cost
+per agent-turn against the curve, which is measured per run anyway and known to
+0.37 s. B-32 would have registered as a **+116 %** deviation, unmissable. Load is
+still printed, as context, never as the verdict. Bands: **SUSPECT at 10 %,
+CONTAMINATED at 25 %** — 3 sd is ~5 %, above the widest honest spread across 16
+runs, and 25 % sits far below B-32 while staying unambiguous.
+
+**A fault found by running it, worth recording.** The first version judged every
+run and declared fifteen of them CONTAMINATED: the B-28 truncated sweeps at
+−54 to −62 %, and the pre-terse-tools `v10` runs at −34 to −41 %. **None was
+contaminated.** They were cheaper because their agents did less — B-28 because
+the feed was cut, `v10` because the prompt buried it (F-93). **A run at another
+configuration is not slow, it is a different experiment.** The tool now gates on
+`terse_tools` and recorded context and marks everything else `n/a` with the
+reason. Result: **11 comparable runs, all OK, spread +0.1 % to +7.3 %.**
+
+Gated by `test_load_verdict.py`, 14 checks, including a regression that fails if
+load is ever allowed to drive the verdict again.
+
+#### STAGED, NOT APPLIED — `night_queue.sh` must not be edited while it is running
+
+Bash reads a script incrementally from disk as it executes, so editing a live
+`night_queue.sh` can corrupt a pass mid-flight — a six-hour run lost to a text
+edit. The campaign is running now, so the change below is **staged for the next
+time the queue is down**:
+
+    # in night_queue.sh, the summary heredoc -- replace the verdict line
+    - verdict = "CLEAN" if med < 40 else ("BUSY" if med < 100 else "HEAVILY LOADED")
+    + verdict = "context only -- see load_verdict.py for the cost verdict"
+
+and add after the pass completes:
+
+    $P $S/load_verdict.py >> data/night_queue.txt
+
+Nothing depends on the old string, so this is safe whenever it is applied.
+
+---
+
+
 # Part 6 — Simulation 4: run plan and its review
 
 *Was `SIM4_RUN_PLAN.md`. Merged into this file 2026-09-13; original title: “Sim 4 — run plan, drafted 2026-09-08”.*

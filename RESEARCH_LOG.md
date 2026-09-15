@@ -2141,7 +2141,7 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-15 00:50. Update at the end of every session.*
+*Last updated 2026-09-15 02:15. Update at the end of every session.*
 
 ---
 
@@ -2378,7 +2378,26 @@ which runs on the twitter file; F-49 retired it only for the reddit bank.**
 `55d7c5a5` is at **v15** with §04 qualified, the standfirst, stat card, forest
 caption and the likely-questions answer all made consistent with it.
 
-### RUNNING as of 2026-09-15 00:50 — `r15_a18`, and the handover half-fired
+**F-113 — a small world is SATURATED, not scaled down.** `r15_a18` landed 02:07.
+**18 agents over 15 rounds make 48 posts in total, and each agent has seen 40 of
+them (83 %) about four times over.** Its 9.90 % engagement is the highest in the
+project and is **mostly repetition** — distinct posts per agent-turn falls
+5.29 → 2.85 while sightings per pair nearly doubles, and F-110 puts repeat
+exposure at OR 2.35-2.62. At 90 agents the same run length still leaves 55 % of
+the world unseen. **Cost law confirmed out-of-sample a second time: 21.12
+s/agent-turn** (curve 21.44 sd 0.37; F-107 got 21.61 at 90x15), so the 7-round
+fit now reproduces at 15 rounds at both ends of the size range. **F-109 replicates
+in direction across a 5x size range** (combined chi2=6.19, df=2, p=0.045). **And
+the follow graph saturates too** — network tier goes 5.1 % → 4.17 % with more
+rounds at 18 agents, against 2.48 % → 9.54 % at 90. **F-108's "run length is what
+makes connection studiable" holds only where the population is big enough for the
+graph to keep growing.**
+
+**Reporting rule this adds:** engagement at N agents cannot be compared across N
+without also quoting **how much of the world each agent has seen**. Population
+size and novelty supply are entangled by construction.
+
+### RUNNING as of 2026-09-15 02:15 — `r15_a36`
 
 **`r15_s43_a90` LANDED 00:41**, 15 rounds, 25,136 s, context 8,192 verified,
 folded in automatically. **Engagement 4.711 % against `r15_a90`'s 4.454 %** —
@@ -2411,8 +2430,8 @@ PREFIX=r15`. Dependency gate 8/8, smoke passed, **comparability check confirms 1
 config keys identical to `ctx8192_a36`**. `r15_a90` is skipped (manifest exists),
 so pass 1 runs 18/36/54/72.
 
-**Expected landings** at 21.4 s/agent-turn: `r15_a18` ~02:15, `r15_a36` ~05:15,
-`r15_a54` ~09:45, `r15_a72` ~15:45. Note `sweep18.sh` exports and rebuilds the
+**Landed:** `r15_a18` at 02:07 — 4,963 s, 21.12 s/agent-turn, engagement 9.90 %.
+**Expected remaining:** `r15_a36` ~05:10, `r15_a54` ~09:40, `r15_a72` ~15:40. Note `sweep18.sh` exports and rebuilds the
 package **only after all five sizes finish**, so per-run `analysis.json` appears
 as each run ends but parquet/package lag to the end of the pass.
 
@@ -8809,6 +8828,85 @@ recommender's signal does nothing"* and states the similarity decile table is
 flat. That table is computed over all exposures on the reddit file without the
 slot control, and it is flat as reported. The section needs the qualification,
 not a retraction: the signal is weak, real, and swamped by three larger effects.
+
+---
+
+
+### F-113 — A small world is not a scaled-down large one. It is a SATURATED one, and that is a different regime
+
+`r15_a18` (18 agents x 15 rounds) landed 02:07. Read next to its 7-round twin and
+to the 90-agent pair, it settles three things and raises a methodological one
+that affects every cross-size comparison in this project.
+
+**1. The cost law holds out-of-sample a second time.** Plateau **380.2 s/round
+(sd 13.3, n=11)** at 18 agents = **21.12 s per agent-turn**, against the
+eight-point curve's 21.44 (sd 0.37) and F-107's 21.61 at 90x15. The curve was
+fitted entirely on **7-round** runs; it now reproduces at 15 rounds at **both
+ends** of the size range, 0.9 % low here and 0.8 % high there. Treat the law as
+validated for run length, not merely assumed.
+
+**2. The world runs out of content, and at 18 agents it runs out completely.**
+
+| run | posts existing | distinct seen per agent | share of world seen | sightings per (agent, post) |
+|---|---|---|---|---|
+| `sweep18_a18` 7 rd | 38 | 31.7 | **83 %** | 2.25 |
+| **`r15_a18` 15 rd** | **48** | **39.8** | **83 %** | **4.18** |
+| `sweep18_a90` 7 rd | 148 | 60.6 | 41 % | 1.19 |
+| `r15_a90` 15 rd | 237 | 107.3 | 45 % | 1.57 |
+
+**Eighteen agents over fifteen rounds produce forty-eight posts in total, and
+every agent has seen forty of them, each about four times.** The feed has nothing
+left to show. At 90 agents the same run length leaves 55 % of the world unseen.
+
+**3. So `r15_a18`'s 9.90 % engagement is mostly repetition, not sociability.**
+It is the highest engagement of any run in the project, and against its 7-round
+twin at 7.18 % it looks like longer runs make agents more social. They do not.
+Distinct posts shown per agent-turn **falls 5.29 → 2.85** while sightings per
+pair nearly doubles, and F-110 puts repeat exposure at OR 2.35-2.62. This is
+F-105's mechanism running in reverse: engagement is set by the supply of *novel*
+content relative to feed capacity, and that supply collapses in a small world
+left running.
+
+**4. F-109 now replicates in direction across a 5x size range.** Feed actions per
+agent-turn, 7 rounds → 15 rounds:
+
+| | 7 rd | 15 rd | ratio | chi2 | p |
+|---|---|---|---|---|---|
+| 18 agents | 0.380 | 0.282 | 0.74 | 2.33 | 0.127 |
+| 90 agents | 0.402 | 0.341 | 0.85 | 3.86 | 0.050 |
+| **combined** | | | | **6.19** | **0.045** (df=2) |
+
+Still n=1 against n=1 at each size, so this is a consistent direction rather than
+an established effect — but it is no longer a single pair.
+
+**5. The follow graph saturates too, and this is the surprise.** Network-tier
+share does **not** grow with run length at 18 agents: **5.1 % at 7 rounds,
+4.17 % at 15.** At 90 agents the same change takes it 2.48 % → 9.54 %. With
+seventeen possible targets the graph is finished early and extra rounds add
+nothing; with eighty-nine it is still forming at round 14. **F-108's finding that
+run length is what makes connection studiable holds only where the population is
+large enough to keep the graph growing.**
+
+#### The methodological consequence, which is the point of this entry
+
+**Population size and novelty supply are entangled by construction in every run
+here.** A small world is not a large world with fewer agents — it is a world
+where everyone has seen nearly everything, several times, and where the social
+graph completed long ago. Those are different regimes, not different points on
+one axis.
+
+This does not invalidate the cross-size work: F-105/F-106 are explicitly about
+the denominator, and every tier and repetition estimate is a **within-run**
+contrast, immune to it. What it does mean is that **"engagement at N agents" is
+not a quantity that can be compared across N without saying how much of the world
+had been seen** — and that the honest cross-scale report is F-105's
+recommendation plus this one: quote feed actions per agent-turn, *and* quote the
+share of the world each agent has seen.
+
+**Practical.** If a future design needs a small population *without* saturation,
+the lever is run length, not agent count — stop at 7 rounds — or seed a post
+corpus. Nothing here is a reason to avoid small runs; it is a reason to stop
+reading their engagement rates as behaviour.
 
 ---
 

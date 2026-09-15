@@ -8881,8 +8881,17 @@ validated for run length, not merely assumed.
 | `r15_a90` 15 rd | 237 | 107.3 | 45 % | 1.57 |
 
 **Eighteen agents over fifteen rounds produce forty-eight posts in total, and
-every agent has seen forty of them, each about four times.** The feed has nothing
-left to show. At 90 agents the same run length leaves 55 % of the world unseen.
+every agent has seen forty of them, each about four times.** At 90 agents the
+same run length leaves 55 % of the world unseen.
+
+**Precisely what "saturated" means here, because the looser version is wrong.**
+An earlier draft of this entry said the feed "has nothing left to show". It is
+not that. Checked directly: `r15_a18` is the only run in the campaign whose
+exposure count falls short of `agents x (rounds-1) x 12`, and the entire
+shortfall — 29 exposures — sits in **round 1**, when the world holds fewer than
+twelve posts. From round 2 onward the feed is full in every round. **The feed
+is always fillable; it is filled with repeats.** Saturation here is a statement
+about the ratio of novel to repeated content, not about empty slots.
 
 **3. So `r15_a18`'s 9.90 % engagement is mostly repetition, not sociability.**
 It is the highest engagement of any run in the project, and against its 7-round

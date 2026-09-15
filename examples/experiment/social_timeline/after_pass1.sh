@@ -35,12 +35,20 @@ NQ=$S/night_queue.sh
 log(){ echo "[$(date '+%m-%d %H:%M:%S')] $*"; }
 
 # ---------- 1. wait for pass 1 ----------
-pid=$(pgrep -f "sweep18\.sh" | head -1)
-if [ -n "$pid" ]; then
+# Wait for EVERY sweep18 process, not a single pid. sweep18.sh spawns a
+# per-run subshell, so at any moment there are two: the pass (started when the
+# campaign began) and the current run's child. `pgrep | head -1` returns them
+# in no defined order -- it gave the parent one night and the child the next --
+# and waiting on the child releases as soon as the RUN ends, which is before
+# the pass has exported, rebuilt the package and drawn the charts. Killing the
+# queue there destroys the fold-in for the whole pass. Waiting for all of them
+# to be gone is the only condition that means "the pass is finished".
+if pgrep -f "sweep18\.sh" >/dev/null; then
   cur=$(ps -eo command | grep run_simulation | grep -v grep | grep -oE '\-\-label [^ ]+' | awk '{print $2}')
-  log "pass 1 still running (sweep18 pid $pid, current run ${cur:-unknown})"
-  log "waiting -- this includes its export/package/charts step"
-  while kill -0 "$pid" 2>/dev/null; do sleep 120; done
+  n=$(pgrep -f "sweep18\.sh" | tr '\n' ' ')
+  log "pass 1 still running (sweep18 pids: $n; current run ${cur:-unknown})"
+  log "waiting for ALL of them -- the last to exit is the fold-in"
+  while pgrep -f "sweep18\.sh" >/dev/null; do sleep 120; done
   log "pass 1 finished and folded in"
   sleep 3
 else

@@ -2141,7 +2141,7 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-15 09:25. Update at the end of every session.*
+*Last updated 2026-09-15 12:55 — SESSION ENDED HERE. Update at the end of every session.*
 
 ---
 
@@ -2420,7 +2420,60 @@ claim is CORRECTED:** feed actions per turn is 0.282 / 0.250 / **0.384** / 0.341
 and the 1.54x spread beats both the 8.4 % replicate gap and F-106's 4.4 % CV, so
 it is real. **Not constant, and not a function of world size either.**
 
-### RUNNING as of 2026-09-15 09:25 — `r15_a72`, last of pass 1
+### HANDOFF — session ended 2026-09-15 13:00. Nothing needs a human.
+
+**The campaign is self-sufficient.** `night_queue.sh` (pid 85026) has parent
+pid 1 and holds its own `caffeinate`; it does not depend on any session. It
+continues indefinitely, one pass per seed, until killed.
+
+**In flight:** `r15_a72`, round 9 of 15 at 12:51, 21.67 s/agent-turn — on curve.
+Lands **~15:30**, and that ends pass 1.
+
+**WHEN PASS 1 ENDS, `sweep18.sh` DOES THE FOLD-IN** — export_parquet for all five
+sizes, then build_package, then both chart generators. **That is the first moment
+the package and explorer see any of this campaign.** Until then `runs_index.csv`
+is at 45 runs and the explorer at 37; afterwards expect 49 and 41. Nothing is
+lost in the meantime — each run's `analysis.json` and manifest are written as it
+finishes.
+
+**Then pass 2 starts automatically** at seed 43: `r15_s43_a18/a36/a54/a72`
+(a90 exists, skipped). **That is exactly the replication F-114 needs** — every
+15-round size currently has n=1 except 90.
+
+#### First things to do next session
+
+1. **Fold in and check pass 1** once it has landed:
+   `load_verdict.py` (new — gives OK / SUSPECT / CONTAMINATED per run against the
+   cost curve, and ignores runs at other configurations), then confirm
+   `runs_index.csv` reached 49 runs and that the B-34 engagement check still
+   reconciles for the new runs.
+2. **Run Q-24** — `examples/experiment/social_timeline/q24_nogroups.sh`. It is
+   the highest-value experiment queued, it costs ~3 h, and it refuses to start
+   while anything else is running. **It must not join the cost bank**; the script
+   already declines to rebuild the package.
+3. **Apply the staged `night_queue.sh` edit** (D-19) — only while the queue is
+   down. Editing a live bash script can corrupt a pass mid-flight.
+
+#### What changed today, in one list
+
+F-107 cost law out-of-sample · F-108 connection replicates at 90 agents, `fof`
+individually significant for the first time · F-109 budget falls with run length
+· **F-110** repetition replicates at 90 agents, its two supports moving opposite
+ways · **F-111** engagement counts only actions that SUCCEEDED; 43.8 % of
+intended actions were malformed in old runs · **F-112** similarity is NOT null,
+1.33 [1.14, 1.60], positive 16/16, verified by permutation p=0.002 · **F-113** a
+small world is saturated, not scaled down · **F-114** cost law replicates
+independently at 15 rounds, F-106's constant budget does not · **B-34/B-35**
+package could not reproduce its own dependent variable, and a re-export merged
+with stale partitions · **D-19** load verdict replaced by a cost verdict ·
+**Q-24** prepared and runnable.
+
+**Two self-corrections made during verification, both pushed:** F-113 overstated
+("the feed has nothing left to show" — the shortfall is 29 exposures, all in
+round 1), and F-114's first directional claim was wrong (`r15_a54` showed the
+budget is heterogeneous, not monotone in size).
+
+### Superseded — running note as of 2026-09-15 09:25
 
 **`r15_s43_a90` LANDED 00:41**, 15 rounds, 25,136 s, context 8,192 verified,
 folded in automatically. **Engagement 4.711 % against `r15_a90`'s 4.454 %** —

@@ -2141,7 +2141,7 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-15 05:15. Update at the end of every session.*
+*Last updated 2026-09-15 09:25. Update at the end of every session.*
 
 ---
 
@@ -2411,7 +2411,16 @@ give seed-43 runs at 18 and 36 without any new decision.
 **Reporting rule narrowed: F-105's "quote feed actions per agent-turn" was
 established at 7 rounds and does not hold across round counts.**
 
-### RUNNING as of 2026-09-15 05:15 — `r15_a54`
+**`r15_a54` landed 09:16 — 15,078 s, 20.98 s/agent-turn, engagement 5.59 %.**
+**Cost law with five 15-round points: exponent 0.995 (se 0.024), R² 0.9982,
+21.44 s/agent-turn — the 7-round curve's number exactly.** **F-114's directional
+claim is CORRECTED:** feed actions per turn is 0.282 / 0.250 / **0.384** / 0.341
+/ 0.371 across 18/36/54/90/90 — heterogeneous, **not** monotone in size
+(Spearman p=0.32). The constant-budget rejection strengthens to **p=0.00034**,
+and the 1.54x spread beats both the 8.4 % replicate gap and F-106's 4.4 % CV, so
+it is real. **Not constant, and not a function of world size either.**
+
+### RUNNING as of 2026-09-15 09:25 — `r15_a72`, last of pass 1
 
 **`r15_s43_a90` LANDED 00:41**, 15 rounds, 25,136 s, context 8,192 verified,
 folded in automatically. **Engagement 4.711 % against `r15_a90`'s 4.454 %** —
@@ -2444,9 +2453,11 @@ PREFIX=r15`. Dependency gate 8/8, smoke passed, **comparability check confirms 1
 config keys identical to `ctx8192_a36`**. `r15_a90` is skipped (manifest exists),
 so pass 1 runs 18/36/54/72.
 
-**Landed:** `r15_a18` 02:07 (4,963 s, 21.12 s/agent-turn, 9.90 %) and `r15_a36`
-05:04 (10,639 s, 22.47 s/agent-turn, 4.54 %). **Expected:** `r15_a54` ~09:40,
-`r15_a72` ~15:40. Package and parquet rebuild only when the whole pass ends. Note `sweep18.sh` exports and rebuilds the
+**Landed:** `r15_a18` 02:07 (9.90 %), `r15_a36` 05:04 (4.54 %), `r15_a54` 09:16
+(5.59 %). **`r15_a72` running, expected ~15:15** — last of pass 1. Package and
+parquet rebuild only when the whole pass ends, so the explorer gains nothing
+until then. Pass 2 (seed 43) then fills in 18/36/54/72, which is what F-114
+needs. Note `sweep18.sh` exports and rebuilds the
 package **only after all five sizes finish**, so per-run `analysis.json` appears
 as each run ends but parquet/package lag to the end of the pass.
 
@@ -8941,8 +8952,10 @@ fitted entirely on **7-round** runs. Four **15-round** runs, fitted on their own
 | `r15_a36` | 36 | 808.9 s | 22.47 |
 | `r15_a90` | 90 | 1,944.9 s | 21.61 |
 | `r15_s43_a90` | 90 | 1,890.4 s | 21.00 |
+| `r15_a54` *(added 09:25)* | 54 | 1,133.1 s | 20.98 |
 
-**Exponent 0.996 (se 0.028), R² 0.9985, mean 21.55 s per agent-turn.** That is
+**With five points: exponent 0.995 (se 0.024), R² 0.9982, mean 21.44 s per
+agent-turn — the 7-round curve's figure to the decimal.** That is
 not an extrapolation checked at one point (F-107, F-113) — it is the whole law
 refitted on independent data and landing on the same two numbers. Cost is linear
 in agents and flat in round count after the ramp. Treat it as settled.
@@ -8958,9 +8971,25 @@ in agents and flat in round count after the ramp. Treat it as settled.
 
 Constant-rate fit: **chi2 = 10.44, df = 2, p = 0.0054** on the three seed-42
 points, and **17.97, df = 3, p = 0.0004** including the replicate. At 7 rounds
-the same test gave **p = 0.098, not rejected** (F-106). The direction is also
-opposite to the intuition F-113 sets up: at 15 rounds **larger** worlds spend
-**more** per turn, not less.
+the same test gave **p = 0.098, not rejected** (F-106).
+
+> **CORRECTED 09:25, when `r15_a54` landed.** This entry first said *"at 15
+> rounds larger worlds spend more per turn, not less"*. **That was wrong** — it
+> was a direction read off three points. `r15_a54` returns **0.384**, the
+> highest of the five, from the middle of the size range. The full series is
+> 0.282 (18), 0.250 (36), **0.384 (54)**, 0.341 (90), 0.371 (90):
+> **heterogeneous, not monotone.** Spearman rho vs agents = +0.564, p=0.32;
+> Pearson r = +0.689, p=0.20. There is no trend in size — there is a spread.
+>
+> The rejection gets *stronger* with the extra point: **chi2 = 18.57, df = 3,
+> p = 0.00034** (four seed-42 sizes), **21.90, df = 4, p = 0.00021** (all five).
+> And the spread is real rather than noise: 1.54x from lowest to highest,
+> against an 8.4 % gap between the two replicate runs at 90 agents and F-106's
+> 4.4 % CV across nine identical runs.
+>
+> So: **the budget is not constant at 15 rounds, and it is not a function of
+> world size either.** Whatever drives it is not captured by any variable
+> measured here.
 
 **Two mechanisms tested, both ruled out.** Reported because the negative results
 are what stop the next person re-deriving them:

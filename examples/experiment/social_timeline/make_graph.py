@@ -1584,9 +1584,13 @@ ENGAGEMENT_CAPTIONS = {
         "Engagement against world size",
         "Engagement halves from 18 agents to 90. The dashed line is not a fit: "
         "it is one constant (0.389 feed actions per agent-turn) divided by an "
-        "independently measured quantity. Its error, 10.2%, sits inside the "
-        "~12% run-to-run noise, so this cannot separate a constant action "
-        "budget from a mildly declining one."),
+        "independently measured quantity. F-106: tested as counts rather than "
+        "against a percentage noise floor, a constant budget across the five "
+        "sizes is NOT rejected (chi2=7.83, df=4, p=0.098), and the whole of the "
+        "residual is the 72-agent run. Nine identical runs put run-to-run "
+        "variation at 7.1% on engagement and 4.4% on feed actions per "
+        "agent-turn, not the ~12% this caption previously quoted from a single "
+        "replicate pair."),
     "engagement_decomposition": (
         "Why it falls: the denominator, not the agents",
         "The feed is twelve slots and full in every run. What grows is how many "

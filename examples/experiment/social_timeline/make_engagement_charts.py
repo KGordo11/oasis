@@ -21,11 +21,18 @@ WHAT IT DRAWS
    per agent-turn nearly doubles. Both are normalised to their value at 18 agents
    so they share an axis and the divergence is the whole story.
 
-READ WITH THE CAVEAT IN F-105. The model's error (10.2%) sits inside the
-run-to-run noise (~12%, measured from the s43 replicate), so these charts show
-that the denominator accounts for the decline. They do NOT show that agent
-propensity is exactly constant -- five points and one replicate cannot separate
-"flat" from "mildly declining", and the chart must not be read as if they could.
+READ WITH F-106, WHICH SUPERSEDES F-105's CAVEAT HERE. That caveat compared the
+model's 10.2% error against ~12% run-to-run noise taken from a SINGLE replicate
+pair. Nine identical runs give 7.1% (engagement) and 4.4% (feed actions per
+agent-turn) -- but the percentage comparison is the wrong test either way, since
+these are counts and the runs differ 5x in size. Fitted as counts, a constant
+budget is NOT rejected: chi2=7.83, df=4, p=0.098, and the entire residual is the
+72-agent run (drop it and p=0.71). Feed-action totals are also under-dispersed
+relative to Poisson (phi=0.385, p=0.071, directional).
+
+Still not shown: that agent propensity is exactly constant. "Not rejected" is not
+"constant", and one replicate at 72 agents would settle it. The chart must not be
+read as proof of invariance.
 """
 from __future__ import annotations
 import json

@@ -2141,7 +2141,7 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-15 02:15. Update at the end of every session.*
+*Last updated 2026-09-15 05:15. Update at the end of every session.*
 
 ---
 
@@ -2397,7 +2397,21 @@ graph to keep growing.**
 without also quoting **how much of the world each agent has seen**. Population
 size and novelty supply are entangled by construction.
 
-### RUNNING as of 2026-09-15 02:15 — `r15_a36`
+**F-114 — the cost law replicates independently at 15 rounds; F-106's constant
+budget does NOT.** Four 15-round runs refit the cost law on their own:
+**exponent 0.996 (se 0.028), R² 0.9985, 21.55 s/agent-turn** against the 7-round
+curve's 1.005 / 21.44. Not an extrapolation spot-checked — the whole law, refitted
+on independent data. **Settled.** But the constant feed-action budget gives
+**chi2=10.44, df=2, p=0.0054** at 15 rounds (7.83/p=0.098 at 7 rounds), with
+larger worlds spending **more** per turn: 0.282 / 0.250 / 0.341 / 0.371.
+**Two mechanisms tested and RULED OUT** — wasted slots on already-acted posts
+(a36 has the lowest waste and lowest rate) and F-111's loss channels (a36 lowest
+again). Unexplained; `r15_a36` at 0.250 does most of the work, and pass 2 will
+give seed-43 runs at 18 and 36 without any new decision.
+**Reporting rule narrowed: F-105's "quote feed actions per agent-turn" was
+established at 7 rounds and does not hold across round counts.**
+
+### RUNNING as of 2026-09-15 05:15 — `r15_a54`
 
 **`r15_s43_a90` LANDED 00:41**, 15 rounds, 25,136 s, context 8,192 verified,
 folded in automatically. **Engagement 4.711 % against `r15_a90`'s 4.454 %** —
@@ -2430,8 +2444,9 @@ PREFIX=r15`. Dependency gate 8/8, smoke passed, **comparability check confirms 1
 config keys identical to `ctx8192_a36`**. `r15_a90` is skipped (manifest exists),
 so pass 1 runs 18/36/54/72.
 
-**Landed:** `r15_a18` at 02:07 — 4,963 s, 21.12 s/agent-turn, engagement 9.90 %.
-**Expected remaining:** `r15_a36` ~05:10, `r15_a54` ~09:40, `r15_a72` ~15:40. Note `sweep18.sh` exports and rebuilds the
+**Landed:** `r15_a18` 02:07 (4,963 s, 21.12 s/agent-turn, 9.90 %) and `r15_a36`
+05:04 (10,639 s, 22.47 s/agent-turn, 4.54 %). **Expected:** `r15_a54` ~09:40,
+`r15_a72` ~15:40. Package and parquet rebuild only when the whole pass ends. Note `sweep18.sh` exports and rebuilds the
 package **only after all five sizes finish**, so per-run `analysis.json` appears
 as each run ends but parquet/package lag to the end of the pass.
 
@@ -8907,6 +8922,83 @@ share of the world each agent has seen.
 the lever is run length, not agent count — stop at 7 rounds — or seed a post
 corpus. Nothing here is a reason to avoid small runs; it is a reason to stop
 reading their engagement rates as behaviour.
+
+---
+
+
+### F-114 — The cost law replicates independently at 15 rounds. F-106's constant action budget does NOT
+
+Two results from the same four runs, pulling in opposite directions. The
+engineering law gets stronger; the behavioural one breaks.
+
+**The cost law is now independently established on a second round count.** The
+eight-point curve (exponent 1.005, R² 0.9993, 21.44 s/agent-turn, sd 0.37) was
+fitted entirely on **7-round** runs. Four **15-round** runs, fitted on their own:
+
+| run | agents | plateau | per agent-turn |
+|---|---|---|---|
+| `r15_a18` | 18 | 380.2 s | 21.12 |
+| `r15_a36` | 36 | 808.9 s | 22.47 |
+| `r15_a90` | 90 | 1,944.9 s | 21.61 |
+| `r15_s43_a90` | 90 | 1,890.4 s | 21.00 |
+
+**Exponent 0.996 (se 0.028), R² 0.9985, mean 21.55 s per agent-turn.** That is
+not an extrapolation checked at one point (F-107, F-113) — it is the whole law
+refitted on independent data and landing on the same two numbers. Cost is linear
+in agents and flat in round count after the ramp. Treat it as settled.
+
+**F-106's constant feed-action budget fails at 15 rounds.**
+
+| run | agents | turns | feed actions | per turn |
+|---|---|---|---|---|
+| `r15_a18` | 18 | 252 | 71 | 0.282 |
+| `r15_a36` | 36 | 504 | 126 | **0.250** |
+| `r15_a90` | 90 | 1,260 | 430 | 0.341 |
+| `r15_s43_a90` | 90 | 1,260 | 467 | 0.371 |
+
+Constant-rate fit: **chi2 = 10.44, df = 2, p = 0.0054** on the three seed-42
+points, and **17.97, df = 3, p = 0.0004** including the replicate. At 7 rounds
+the same test gave **p = 0.098, not rejected** (F-106). The direction is also
+opposite to the intuition F-113 sets up: at 15 rounds **larger** worlds spend
+**more** per turn, not less.
+
+**Two mechanisms tested, both ruled out.** Reported because the negative results
+are what stop the next person re-deriving them:
+
+1. **Feed slots wasted on posts the agent already acted on** — you can only like
+   something once, so a repetitive feed should suppress the numerator. Measured
+   directly: 9.2 % of exposures at `r15_a18`, **3.4 % at `r15_a36`**, 4.0 % at
+   both 90-agent runs. `r15_a36` has the *lowest* waste and the *lowest*
+   actions per turn. **Ruled out.**
+2. **F-111's silent-loss channels** — malformed calls, blind rejections, invalid
+   follows. Loss rates: 11.2 % / **9.9 %** / 18.6 % / 14.1 %. Again `r15_a36` is
+   the *lowest* and the 90-agent runs the highest, which is backwards. Both
+   15-round runs at 18 and 36 agents recorded **zero** malformed calls.
+   **Ruled out.**
+
+**So the 15-round budget failure stands unexplained**, and `r15_a36` at 0.250 is
+the point doing most of the work. n=1 per size at 18 and 36; the only replicated
+size is 90, where the two runs agree closely (0.341, 0.371). **The obvious next
+data is a seed-43 run at 18 and 36, which pass 2 of the current campaign will
+produce without any new decision.**
+
+**What this does to the reporting rule.** F-105 said quote feed actions per
+agent-turn across scales because it is flat. **That was established at 7 rounds
+and does not hold at 15.** The safe version is narrower: within one round count,
+feed actions per turn is the stabler metric; across round counts nothing here is
+stable, and engagement least of all.
+
+**Engagement at 15 rounds has a different shape from 7 rounds**, worth recording
+for anyone reading the series: 9.90 % (18), 4.54 % (36), 4.45 % / 4.71 % (90) —
+a sharp fall then flat, against the 7-round curve's slower monotone decline
+(7.18 / 6.18 / 5.45 / 3.18 / 3.98). F-113 accounts for the 18-agent point as
+saturation; the flatness from 36 to 90 is not accounted for.
+
+**Machine load, third instance.** The pass ran at median 136 % non-simulation CPU
+with a 329 % peak — **"HEAVILY LOADED"** by the queue's own threshold — and cost
+came in at 21.12 / 22.47 / 21.61, dead on the curve. That verdict has now
+over-flagged three times running. It should be recalibrated or demoted to a note,
+because a warning that always fires is not a warning.
 
 ---
 

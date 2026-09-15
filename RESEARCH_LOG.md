@@ -2141,7 +2141,7 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-14 20:20. Update at the end of every session.*
+*Last updated 2026-09-14 21:10. Update at the end of every session.*
 
 ---
 
@@ -2321,12 +2321,26 @@ the split upload 408s on the first attempt at 15 MB and succeeds on retry, and
 **the run set cannot be recovered by globbing** — six of the 37 live in
 `_archive/superseded/` and two same-looking runs are deliberately excluded.
 
-### RUNNING as of 2026-09-14 20:20 — `r15_s43_a90`
+**F-110 — repetition also replicates at 90 agents.** OR **2.351** [1.986, 2.782]
+against the bank's 2.62, dose-response 4.05 → 8.84 → 13.85 → 21.62 %. **Its two
+supporting arguments move in opposite directions:** the first-sightings reversal
+that F-45 downgraded to directional comes back at **0.267 [0.122, 0.586],
+p=0.00099**, while the **network-tier replication — the check the causal reading
+leans on — is NOT significant here** (1.438 [0.901, 2.296], n=1,442,
+underpowered rather than contrary). Two of the three headline results have now
+survived a simultaneous change of scale, run length and persona file; the third
+(similarity null) needs no scale test.
+
+### RUNNING as of 2026-09-14 21:10 — `r15_s43_a90`
 
 **Pass 2: 90 agents x 15 rounds, seed 43.** `r15_a90` finished 17:41 at 7.21 h
 and was folded in automatically by `sweep18.sh` — using the FIXED exporter, so it
 carries the comments table and the resolved target columns. Pass 2 started 17:42;
-at 20:20 it was through **round 5 of 15** at ~1,920 s/round, landing ~01:05.
+at 21:07 it was through **round 8 of 15** at 1,913 s/round (plateau, rounds 4-7),
+so it lands **~00:50**. `switch_campaign.sh` is running and waiting on it (pid
+52711), holding its own caffeinate; when that sweep exits it stops the old queue
+and starts `ROUNDS=15 AGENTS="18 36 54 72 90" PREFIX=r15`. Expected landings:
+r15_a18 ~02:25, r15_a36 ~05:15, r15_a54 ~09:25, r15_a72 ~15:00.
 
 **THE QUEUE IS STILL 90-ONLY.** It was launched with `AGENTS="90"`, and
 `night_queue.sh` reads `AGENTS` once at startup, so every further pass is another
@@ -8416,6 +8430,65 @@ one thing being tested, so it is an observation, not a finding. `r15_s43_a90`
 flat" is a statement about **population**, not about run length. F-105's
 recommendation stands for cross-scale comparison and must not be stretched into
 cross-length comparison.
+
+---
+
+
+### F-110 — Repetition replicates at 90 agents, but its two supporting arguments move in opposite directions
+
+`r15_a90` (90 agents x 15 rounds, twitter personas, 15,120 exposures) run through
+`recency_check.py` unchanged. **The headline replicates.**
+
+| | bank, 36 agents, 9 runs | `r15_a90`, 90 agents, 1 run |
+|---|---|---|
+| seen-before vs first sighting, by feed | 2.62 [2.18, 3.15] | **2.351 [1.986, 2.782]** p=2.8e-23 |
+| strata | 3,047 | 1,058 |
+
+Intervals overlap. The dose-response is cleaner and steeper than the bank's:
+
+| prior sightings | 0 | 1 | 2 | 3 |
+|---|---|---|---|---|
+| engagement | 4.05 % | 8.84 % | 13.85 % | 21.62 % |
+| distinct posts | 224 | 198 | 127 | 28 |
+
+Absolute scale: **4.05 % → 9.58 %, a 5.53 pp difference** (2.37x the raw rate).
+Quote that alongside the odds ratio, which overstates at a low base rate.
+
+**Supporting argument 1 STRENGTHENS, and this is the more interesting half.**
+F-45 downgraded the "reverses inside first sightings" check to directional only
+when nine runs took it from 0.55 [0.31, 0.97] to **0.70 [0.46, 1.07], p=0.097**.
+In this run the same test returns **OR 0.267 [0.122, 0.586], p=0.00099** on 464
+feeds — clearly significant and well below 1. Closing the repeat channel by
+construction does reverse the stale-post advantage here.
+
+**Supporting argument 2 WEAKENS, and it is the one the causal reading leans on.**
+The network tier is where the similarity score plays no part in feed
+construction at all, so a replication there is what makes the effect hard to
+dismiss as a ranker artefact. The bank gives 1.64 [1.33, 2.03]. This run gives
+**1.438 [0.901, 2.296], p=0.128 — not significant**, on n=1,442. `fof` is null
+as it is in the bank (0.848 [0.357, 2.015]).
+
+That is not a contradiction: the point estimate is in the right place and the
+interval contains the bank's. It is an **underpowered** tier, not a contrary
+one — 1,442 exposures against the discovery tier's 12,936. But it means this run
+does **not** independently reproduce the check that carried the causal argument,
+and that should be said rather than glossed.
+
+**One number moved a lot and is worth watching.** Adding feed slot to the
+stratification barely moves the bank estimate (2.62 → 2.45). Here it more than
+doubles it: **(agent, slot) gives 5.784 [4.642, 7.206]** against 2.351 by feed.
+The mechanism is stated in the output and is the same one as the bank's, only
+stronger: re-shown posts rank LOWER (mean slot 7.60 against 6.40), so position
+biases *against* the result and removing it uncovers more. Why the gap is larger
+at 15 rounds and 90 agents is not established — more content per round means a
+longer feed tail for stale posts to fall into, which is a plausible account and
+nothing more.
+
+**Net.** Repetition is now the second of the three headline results to survive a
+change of scale, run length and persona file at once (F-108 is the other). Its
+status is unchanged: **observational**, since prior sightings are an outcome of
+the ranker, and Q-15 — a designed run that re-injects a fixed set of posts on a
+controlled schedule — remains the test that would settle it.
 
 ---
 

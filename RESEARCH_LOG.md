@@ -2141,7 +2141,7 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-14 21:35. Update at the end of every session.*
+*Last updated 2026-09-15 00:50. Update at the end of every session.*
 
 ---
 
@@ -2378,9 +2378,48 @@ which runs on the twitter file; F-49 retired it only for the reddit bank.**
 `55d7c5a5` is at **v15** with §04 qualified, the standfirst, stat card, forest
 caption and the likely-questions answer all made consistent with it.
 
-### RUNNING as of 2026-09-14 21:35 — `r15_s43_a90`
+### RUNNING as of 2026-09-15 00:50 — `r15_a18`, and the handover half-fired
 
-**Pass 2: 90 agents x 15 rounds, seed 43.** `r15_a90` finished 17:41 at 7.21 h
+**`r15_s43_a90` LANDED 00:41**, 15 rounds, 25,136 s, context 8,192 verified,
+folded in automatically. **Engagement 4.711 % against `r15_a90`'s 4.454 %** —
+the first replicate at 90x15, and a tight one. Package now 45 runs.
+
+#### The handover stopped one step short, by design. Read this before trusting `switch_campaign.sh`.
+
+`switch_campaign.sh` did four of its five steps and then refused the fifth:
+
+    00:41:23  night_queue starts PASS 3 (r15_s44) -- s43's sweep18 had just exited
+    00:41:54  watcher sees pid 52711 gone, "the run is folded in"
+    00:41:56  stops night_queue.sh
+    00:41:57  stops sweep18.sh  (the NEW one, for s44)
+    00:41:59  sees a live run_simulation.py -- REFUSES to relaunch
+
+**The guard fired correctly and the design held.** The race it was written for is
+real and is tighter than assumed: `night_queue` starts its next pass **within
+seconds** of `sweep18` exiting — 31 s here — so by the time a 60 s polling loop
+notices, a new pass has already begun its preflight. The script saw the s44
+4-agent smoke still running and chose to stop rather than orphan it or start a
+competing campaign. That is the right trade, and it is why nothing was corrupted.
+
+**Cost of the guard:** the machine sat idle from 00:42 to 00:43. **Fix for next
+time:** poll far more often once `sweep18` is close to done, or better, have
+`night_queue` itself take the new `AGENTS` from a file it re-reads each pass, so
+the campaign can be reshaped without any kill at all.
+
+**Restarted by hand at 00:43:52** with `ROUNDS=15 AGENTS="18 36 54 72 90"
+PREFIX=r15`. Dependency gate 8/8, smoke passed, **comparability check confirms 19
+config keys identical to `ctx8192_a36`**. `r15_a90` is skipped (manifest exists),
+so pass 1 runs 18/36/54/72.
+
+**Expected landings** at 21.4 s/agent-turn: `r15_a18` ~02:15, `r15_a36` ~05:15,
+`r15_a54` ~09:45, `r15_a72` ~15:45. Note `sweep18.sh` exports and rebuilds the
+package **only after all five sizes finish**, so per-run `analysis.json` appears
+as each run ends but parquet/package lag to the end of the pass.
+
+**One stray:** `data/social_timeline_r15_s44_smoke.db/.json` from the aborted
+pass 3. A 4-agent smoke, harmless, not in the package.
+
+**Superseded: pass 2 detail.** `r15_a90` finished 17:41 at 7.21 h
 and was folded in automatically by `sweep18.sh` — using the FIXED exporter, so it
 carries the comments table and the resolved target columns. Pass 2 started 17:42;
 at 21:07 it was through **round 8 of 15** at 1,913 s/round (plateau, rounds 4-7),

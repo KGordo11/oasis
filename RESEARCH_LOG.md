@@ -2141,7 +2141,7 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-15 12:55 — SESSION ENDED HERE. Update at the end of every session.*
+*Last updated 2026-09-15 13:10 — SESSION ENDED HERE. Update at the end of every session.*
 
 ---
 
@@ -2420,7 +2420,17 @@ claim is CORRECTED:** feed actions per turn is 0.282 / 0.250 / **0.384** / 0.341
 and the 1.54x spread beats both the 8.4 % replicate gap and F-106's 4.4 % CV, so
 it is real. **Not constant, and not a function of world size either.**
 
-### HANDOFF — session ended 2026-09-15 13:00. Nothing needs a human.
+### HANDOFF — session ended 2026-09-15 13:10. Nothing needs a human.
+
+**Fixed at the end of the session (B-37/B-38):** the package now ships
+`feed_turns` — the denominator every per-turn rate actually uses — alongside
+`agent_turns_total`, with both defined. Reading the old column as a per-turn
+denominator was 7 % low at 15 rounds and 17 % at 7. `test_build_package.py`
+added (9 checks); `build_package.py` had had two defects and no gate. It caught
+a real failure on its first run, which turned out to be a genuine phenomenon
+(phantom comment-likes, 1.03 %) and a too-strict assertion of mine, not an
+exporter bug. **`build_package.py` changed, so the fold-in at ~15:30 will pick
+`feed_turns` up automatically.**
 
 **The campaign is self-sufficient.** `night_queue.sh` (pid 85026) has parent
 pid 1 and holds its own `caffeinate`; it does not depend on any session. It

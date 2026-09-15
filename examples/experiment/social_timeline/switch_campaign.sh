@@ -40,14 +40,19 @@ log(){ echo "[$(date '+%m-%d %H:%M:%S')] $*"; }
 log "will switch to: ROUNDS=$ROUNDS AGENTS='$AGENTS' PREFIX=$PREFIX"
 
 # --- 1. wait for the in-flight sweep, if any -------------------------------
-pid=$(pgrep -f "sweep18\.sh" | head -1)
-if [ -n "$pid" ]; then
+# Wait for EVERY sweep18 process. There are always two -- the pass, and a
+# per-run subshell -- and `pgrep | head -1` returns them in no defined order.
+# This script originally took head -1 and happened to get the parent; the same
+# line in after_pass1.sh later got the child, which exits when the RUN ends
+# rather than when the pass does, i.e. before the fold-in. Waiting for all of
+# them is the only condition that means "the pass has finished".
+if pgrep -f "sweep18\.sh" >/dev/null; then
   cur=$(ps -o command= -p "$(pgrep -f 'run_simulation\.py' | head -1)" 2>/dev/null \
         | grep -oE '\-\-label [^ ]+' | awk '{print $2}')
-  log "sweep18.sh is running as pid $pid (current run: ${cur:-unknown})"
-  log "waiting for it to finish -- this includes its export/package/charts step"
-  while kill -0 "$pid" 2>/dev/null; do sleep 60; done
-  log "sweep18.sh exited; the run is folded in"
+  log "sweep18.sh running as pids: $(pgrep -f "sweep18\.sh" | tr '\n' ' ')(current run: ${cur:-unknown})"
+  log "waiting for ALL of them -- the last to exit is the fold-in"
+  while pgrep -f "sweep18\.sh" >/dev/null; do sleep 60; done
+  log "every sweep18 exited; the pass is folded in"
   # night_queue starts its next pass within seconds of sweep18 exiting, so give
   # it no chance to launch a simulation we are about to orphan.
   sleep 2

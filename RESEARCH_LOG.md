@@ -2141,7 +2141,7 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-14 21:10. Update at the end of every session.*
+*Last updated 2026-09-14 21:20. Update at the end of every session.*
 
 ---
 
@@ -2331,7 +2331,29 @@ underpowered rather than contrary). Two of the three headline results have now
 survived a simultaneous change of scale, run length and persona file; the third
 (similarity null) needs no scale test.
 
-### RUNNING as of 2026-09-14 21:10 — `r15_s43_a90`
+**F-111 — engagement counts actions that SUCCEEDED, and many never did.** Three
+silent-loss channels: malformed tool calls (no trace row, run log only), blind
+actions rejected, invalid follow targets. **43.8 % of intended actions were
+malformed in the nine old-prompt runs**; that is now a median of 0.0 % (range
+0-11 %) against 37.0 % (12.4-75.9 %), Mann-Whitney p=0.00047, run as the unit.
+**A concrete candidate mechanism for F-93** alongside the published one, not a
+replacement — the same confound applies. **Loss grows with world size** (1.0 % at
+18 agents to 18.6 % in r15_a90; logistic slope +1.435, z=5.32, p=1e-07), so
+successful actions per turn declines while **intended** actions per turn does
+not. Agents are not less active at scale, they are less accurate.
+
+**Q-24 — the cheapest high-value run on the board.** 111 of 193 current-era
+errors are `follow`, and **76 are `follow(group_id=...)`**, a parameter it has
+never had. Groups exist only in the 27-action set and B-9 already records them
+hijacking the prompt. **In `r15_a90` only 45.2 % of attempted follows
+succeeded** — the graph behind F-108 is less than half what the agents tried to
+build. One `--no-groups` run with the log kept tests it. Must NOT join the cost
+bank (different action surface).
+
+**Tool-error evidence preserved** to `data/logs/` (10.5 MB of raw lines trimmed
+to 46 KB), so `/tmp` can be cleared safely.
+
+### RUNNING as of 2026-09-14 21:20 — `r15_s43_a90`
 
 **Pass 2: 90 agents x 15 rounds, seed 43.** `r15_a90` finished 17:41 at 7.21 h
 and was folded in automatically by `sweep18.sh` — using the FIXED exporter, so it
@@ -8600,6 +8622,32 @@ builds the network tier, which is the substrate of F-92/F-108, the project's
 headline result. That makes this cheap (one run) and unusually well-motivated:
 it is not a prompt tweak chasing a 3-5 pp behavioural shift against a 14 pp
 floor, it is a malformed-call rate of 57 % on one action with a named cause.
+
+**And the cost of this is measurable on the headline result itself.** Tracing
+`follow` end to end in the runs whose logs survive:
+
+| run | succeeded | malformed | invalid target | attempted | success rate | network tier |
+|---|---|---|---|---|---|---|
+| `sweep18_a72` | 28 | 12 | 7 | 47 | 59.6 % | 2.93 % |
+| `sweep18_a90` | 28 | 0 | 6 | 34 | 82.4 % | 2.48 % |
+| **`r15_a90`** | **71** | **77** | **9** | **157** | **45.2 %** | **9.54 %** |
+
+**`r15_a90` is the run that carries F-108** — the 90-agent replication of
+connection-over-content — and **its follow graph is less than half of what its
+agents tried to build.** 77 of those 157 attempts died as malformed calls, the
+majority of them `follow(group_id=...)`.
+
+That is not a threat to F-108's validity: a smaller graph makes the network tier
+*thinner*, which costs statistical power, and the effect was found anyway. It is
+a statement about **power left on the table**. The network tier is 9.54 % of
+exposures; with a working `follow` it would plausibly be close to double, and
+the checks that are currently underpowered — F-110's network-tier repetition
+replication at n=1,442, the `fof` contrast that has needed pooling since it was
+first reported — are exactly the ones that would benefit.
+
+**So the binding constraint on the headline result right now is a tool-calling
+bug, not the science.** That is what makes Q-24 worth a run ahead of anything
+else on the list.
 
 **Do not fold such a run into the cost bank** — `--no-groups` is a different
 action surface and therefore a different experimental condition (the B-26/B-28

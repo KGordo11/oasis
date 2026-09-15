@@ -8493,6 +8493,140 @@ controlled schedule — remains the test that would settle it.
 ---
 
 
+### F-111 — Engagement counts actions that SUCCEEDED. Up to 44 % of intended actions never happened, and the loss grows with world size
+
+Prompted by the open item "14 of 21 actions never fire". That framing is wrong
+twice over: across 44 runs **17 of 21 actions fire at least once**, and the
+interesting structure is not which fire but how many intended actions never
+became anything at all.
+
+**The action repertoire is an extreme power law, not a wall.** 15,199 chosen
+actions across 44 runs: `create_post` 44.5 %, `create_comment` 19.9 %,
+`like_post` 14.5 %, `follow` 9.2 %, `like_comment` 8.1 % — **five actions are
+96.2 % of everything**, and twelve more share the remaining 3.8 %.
+
+**There are THREE silent-loss channels, and only one of them is visible without
+the run's log.**
+
+| channel | what it is | where recorded |
+|---|---|---|
+| malformed tool call | agent chose an action and got the arguments wrong; leaves **no trace row** | run log only |
+| blind action rejected | action named a post the agent was never shown; refused by the honesty gate | `manifest.platform_stats` |
+| invalid follow target | followee id does not exist (B-10) | `manifest.platform_stats` |
+
+Across all 44 runs: **891 blind rejections (5.5 % of intended post-directed
+actions) and 109 invalid follows.** Malformed calls are only measurable for the
+16 runs whose log survives.
+
+**In the nine old-prompt runs that recorded them, 43.8 % of intended actions
+were malformed** — 2,624 against 3,368 that succeeded. `follow` is the worst by
+far: **1,268 malformed against 558 successful, a 69.4 % failure rate.** That is
+the mechanism that builds the follow graph, which is the substrate the entire
+connection result (F-92/F-108) rests on. **The graphs in those runs are roughly
+a third of what the agents tried to build.** 89 % of the errors are "unexpected
+keyword argument".
+
+**That rate has collapsed at the current configuration.** Run as the unit, which
+is the right unit here:
+
+| | runs | median | range |
+|---|---|---|---|
+| old prompt | 9 | **37.0 %** | 12.4 – 75.9 % |
+| current | 7 | **0.0 %** | 0.0 – 11.0 % |
+
+Mann-Whitney U=63, one-sided **p=0.00047**, and the ranges do not overlap. (A
+two-proportion test on the raw call counts returns p≈1e-267; that figure is
+meaningless because calls are clustered within agent and run — the ICC here runs
+0.26-0.38. The run-level test is the honest one.)
+
+**This is a candidate mechanism for F-93, and it is more concrete than the
+published one.** F-93 records engagement tripling (2.29 % → 6.94 %) when the tool
+documentation was cut, explained as *the feed was no longer buried behind 78 % of
+prompt spent on API reference*. That explanation is inferential. This one is
+measured: **the agents stopped getting the call wrong.** Both can be true and
+they are not separable here — the descriptions, the prompt order and the
+temperature all changed together, exactly the "two groups, not two arms" caveat
+F-93 already carries. **It is a hypothesis with a number attached, not a
+replacement explanation.**
+
+**The loss grows steeply with world size, and that is new.**
+
+| agents | 18 | 36 | 54 | 72 | 90 |
+|---|---|---|---|---|---|
+| intended actions | 100 | 229 | 315 | 445 | 541 |
+| lost | 1.0 % | 6.6 % | 4.1 % | 15.5 % | 14.0 % |
+
+Logistic fit on log(agents): slope **+1.435**, se 0.270, **z=5.32, p=1.0e-07** —
+the odds of an action being lost multiply by **4.2x per e-fold** in population.
+`r15_a90` (90 agents x 15 rounds) loses **18.6 %**, the highest of any run.
+
+**The consequence, and it matters for how scale is reported.** Successful
+actions per agent-turn *declines* across the sweep — 0.917, 0.991, 0.932, 0.870,
+0.861 — with corr(log agents, success rate) = **-0.856** (p=0.064, n=5).
+Intended actions per agent-turn does not: 0.926, 1.060, 0.972, 1.030, 1.002. A
+constant-rate fit gives **chi2=3.71, p=0.45 on successes and chi2=1.94, p=0.75
+on intent**. So **agent output intent looks scale-invariant while execution
+success does not** — the agents are not becoming less active in bigger worlds,
+they are becoming less accurate.
+
+**What this does NOT do.** It does not rescue F-106's `sweep18_a72` outlier.
+Blind rejections are by definition *not* feed actions — the post was never
+shown — so they cannot be added back into F-106's numerator, and a72's twelve
+malformed calls were all `follow`, which is not a feed action either. The a72
+deviation stands unexplained.
+
+**The current-era failures have one dominant signature, and it points at a
+specific cause.** Of 193 malformed calls in the logged current runs, **111 are
+`follow`** — and the commonest single error, **76 of them, is
+`follow() got an unexpected keyword argument 'group_id'`**. Another 24 pass
+`post_id` to `follow` and 11 pass `content`. The rest are `like_post` called
+with no `post_id` (68) and `create_comment` given a `comment_id` (14).
+
+`group_id` is not a parameter `follow` has ever had. The agent is reaching for a
+group action and landing on `follow`. **Group actions exist only in the 27-action
+set** — `create_group` fires 226 times and `join_group` 40, both confined to runs
+that have groups enabled — and B-9 already records that the group environment
+hijacks the prompt (`$groups_env` renders before `$posts_env` regardless of
+`available_actions`), which is why `campaign.sh` and `overnight.sh` pass
+`--no-groups` while `sweep18.sh` deliberately does not.
+
+#### Q-24 — Do groups break `follow`, and therefore the graph?
+
+Every logged current-era run has groups ON, so the contrast cannot be drawn from
+data in hand. **One run at the current configuration with `--no-groups`, log
+kept, tests it directly.** If the `group_id` errors vanish, then enabling groups
+costs roughly half of all `follow` attempts — and `follow` is the mechanism that
+builds the network tier, which is the substrate of F-92/F-108, the project's
+headline result. That makes this cheap (one run) and unusually well-motivated:
+it is not a prompt tweak chasing a 3-5 pp behavioural shift against a 14 pp
+floor, it is a malformed-call rate of 57 % on one action with a named cause.
+
+**Do not fold such a run into the cost bank** — `--no-groups` is a different
+action surface and therefore a different experimental condition (the B-26/B-28
+lesson).
+
+**Operational.** 28 of 44 runs cannot be checked for the malformed channel at
+all, because `/tmp/s18_<label>.log` is gone. **The run log is the only record of
+an action the agent chose and fumbled**, and it is currently the one artifact
+the pipeline does not preserve. Everything else — database, manifest, parquet,
+package — survives. That should change.
+
+**Partly closed now.** The error lines from every surviving log are extracted to
+`data/logs/<label>_toolerrors.txt` with a parsed summary in
+`data/logs/tool_errors_index.json`. The raw lines carry the whole argument dump
+and came to 10.5 MB for ten runs; trimmed to tool name plus reason they are
+**46 KB**, which is small enough to keep permanently. `/tmp` can now be cleared
+without losing the evidence. The full logs remain the only source for anything
+else, and are still volatile.
+
+**One stray.** `/tmp/s18_sweep18_s43_a36.log` exists with 14 errors but has no
+database — an interrupted run from the seed-43 pass that the r15 campaign
+replaced. It is excluded from every figure above; noted so nobody counts it
+later.
+
+---
+
+
 # Part 6 — Simulation 4: run plan and its review
 
 *Was `SIM4_RUN_PLAN.md`. Merged into this file 2026-09-13; original title: “Sim 4 — run plan, drafted 2026-09-08”.*

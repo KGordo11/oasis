@@ -1,0 +1,106 @@
+{
+  "r15_a90": {
+    "total": 119,
+    "by_action": {
+      "follow": 77,
+      "like_post": 29,
+      "create_comment": 13
+    },
+    "by_reason": {
+      "unexpected keyword argument": 90,
+      "missing required argument": 29
+    },
+    "source_log": "/tmp/s18_r15_a90.log",
+    "source_bytes": 183055911,
+    "extracted_lines": 119
+  },
+  "r15_s43_a90": {
+    "total": 22,
+    "by_action": {
+      "follow": 22
+    },
+    "by_reason": {
+      "unexpected keyword argument": 22
+    },
+    "source_log": "/tmp/s18_r15_s43_a90.log",
+    "source_bytes": 55506438,
+    "extracted_lines": 22
+  },
+  "sweep18_a18": {
+    "total": 0,
+    "by_action": {},
+    "by_reason": {},
+    "source_log": "/tmp/s18_sweep18_a18.log",
+    "source_bytes": 6439472,
+    "extracted_lines": 0
+  },
+  "sweep18_a36": {
+    "total": 0,
+    "by_action": {},
+    "by_reason": {},
+    "source_log": "/tmp/s18_sweep18_a36.log",
+    "source_bytes": 13808294,
+    "extracted_lines": 0
+  },
+  "sweep18_a54": {
+    "total": 0,
+    "by_action": {},
+    "by_reason": {},
+    "source_log": "/tmp/s18_sweep18_a54.log",
+    "source_bytes": 21930821,
+    "extracted_lines": 0
+  },
+  "sweep18_a72": {
+    "total": 12,
+    "by_action": {
+      "follow": 12
+    },
+    "by_reason": {
+      "unexpected keyword argument": 12
+    },
+    "source_log": "/tmp/s18_sweep18_a72.log",
+    "source_bytes": 29888100,
+    "extracted_lines": 12
+  },
+  "sweep18_a90": {
+    "total": 26,
+    "by_action": {
+      "like_post": 26
+    },
+    "by_reason": {
+      "missing required argument": 26
+    },
+    "source_log": "/tmp/s18_sweep18_a90.log",
+    "source_bytes": 39387225,
+    "extracted_lines": 26
+  },
+  "sweep18_s43_a18": {
+    "total": 0,
+    "by_action": {},
+    "by_reason": {},
+    "source_log": "/tmp/s18_sweep18_s43_a18.log",
+    "source_bytes": 6945548,
+    "extracted_lines": 0
+  },
+  "sweep18_s43_a36": {
+    "total": 14,
+    "by_action": {
+      "like_post": 13,
+      "create_comment": 1
+    },
+    "by_reason": {
+      "missing required argument": 14
+    },
+    "source_log": "/tmp/s18_sweep18_s43_a36.log",
+    "source_bytes": 12411359,
+    "extracted_lines": 14
+  },
+  "sweeptest_a4": {
+    "total": 0,
+    "by_action": {},
+    "by_reason": {},
+    "source_log": "/tmp/s18_sweeptest_a4.log",
+    "source_bytes": 152128,
+    "extracted_lines": 0
+  }
+}

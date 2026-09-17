@@ -2141,7 +2141,53 @@ and this one has a lot of them.
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-15 13:10 — SESSION ENDED HERE. Update at the end of every session.*
+*Last updated 2026-09-16 — see the 2026-09-16 entry below before anything else.*
+
+### 2026-09-16 — the campaign is DOWN, pass 1 never finished, and the cost law has two estimators
+
+**THE QUEUE IS DEAD AND HAS BEEN SINCE 2026-09-15 13:39.** `night_queue.sh`,
+`sweep18.sh` and `run_simulation.py` are all gone, `/tmp/night_queue.log` no
+longer exists, and pass 2 (seed 43) never started. Roughly 24 h of machine time
+was lost. Nothing is corrupted.
+
+**`r15_a72` was killed at round 11 of 15.** `round_boundary` stops at 11; there
+is a truncated `.db` but no manifest and no `analysis.json`. It never reached
+the fold-in. **Re-running it is safe** — `run_simulation.py:145-147` removes a
+pre-existing database before it starts, so the partial file cannot contaminate
+a rerun. `sweep18.sh` skips on the *manifest*, which does not exist, so it will
+re-run a72 unprompted on the next pass.
+
+**The pass-1 fold-in never ran.** It has now been done by hand: `export_parquet`
+for `r15_a18/a36/a54`, then `build_package.py`. **Package is at 48 runs**
+(the handoff predicted 49, which assumed a72 landing). All three new runs pass
+`load_verdict.py` — `-1.5 %`, `+4.8 %`, `-2.1 %` against the curve — and the
+B-34 engagement reconciliation is exact for all 37 runs that carry a recorded
+value. F-113 and F-114 were written from `analysis.json` directly and are
+unaffected; it was only the shipped artifacts that were behind.
+
+**B-39 — the published cost law and the code that enforces it use different
+plateau windows.** Found by the project's own gate: the 15-round curve
+reproduced first try, the 7-round curve did not. The published 1.005 / R² 0.9993
+/ 21.44 sd 0.37 is `round >= 3`, per run — reproduced to three decimals.
+`make_timing_charts.py`, `DATA_DICTIONARY.md` and `load_verdict.py` all use
+`round >= 4`, which reads **+3.3 % hot on every 7-round run** and -0.0 % at 15
+rounds. Full write-up in the defects section. **Not patched** — it re-scores 14
+runs and moves a headline, so it needs its own change and its own gate.
+
+**New artifact: the field guide** — `A3ZygLd7BsJPs9Cb612Wp1`, v1. Plain-language
+walkthrough of all four simulations for a reader who has never seen the project:
+what one round actually does (surface and behind the scenes), the 61-run ledger,
+the cost law, the novelty/engagement puzzle stated as arithmetic rather than
+psychology, the twelve-entry improvement ledger, Q-24, and the 128 GB
+projections with the measured/projected line drawn explicitly.
+
+**Open, unchanged:** Q-24 is still the highest-value queued run. D-19's staged
+`night_queue.sh` edit is still unapplied, and the queue being down is the window
+for it.
+
+---
+
+*Previous session marker: 2026-09-15 13:10.*
 
 ---
 
@@ -9230,6 +9276,56 @@ a real phenomenon trains its owner to ignore it. The check now bounds the rate a
 
 ---
 
+
+### B-39 — The published cost law and the code that enforces it use different plateau windows
+
+**Found by the project's own gate:** reproduce a published number before
+building on it. The 15-round curve reproduced on the first try. The 7-round
+curve did not, and chasing the gap found a real inconsistency.
+
+**The published law was fitted on `round >= 3`, per run.** Reproduced exactly:
+
+| plateau window | points | exponent | R² | s/agent-turn |
+|---|---|---|---|---|
+| **`round >= 3`, per run** | **9** | **1.005** | **0.9994** | **21.44 (sd 0.37)** |
+| `round >= 4`, per run | 9 | 0.976 | 0.9993 | 22.14 (sd 0.54) |
+| `round >= 4`, aggregated by size | 7 | 0.973 | 0.9998 | 22.11 (sd 0.51) |
+
+The first line is the published 1.005 / R² 0.9993 / 21.44 sd 0.37, to three
+decimals. **Three downstream consumers use the second or third.**
+
+- `make_timing_charts.py:179` — `plateau = [v for k, v in rd.items() if k >= 4]`,
+  then aggregates by agent count. So the plotted curve and the quoted exponent
+  are not the same estimator.
+- `DATA_DICTIONARY.md` — tells every reader of the package to "filter to
+  `round >= 4` for a plateau figure".
+- `load_verdict.py` — computes each run at `round >= 4` and compares it to
+  `CURVE_MEAN = 21.44`, which was fitted at `round >= 3`.
+
+**The last one is the one that bites.** The bias is a function of run length:
+
+    7-round runs:   r>=3  21.44  ->  r>=4  22.14   = +3.3 % against CURVE_MEAN
+    15-round runs:  r>=3  21.37  ->  r>=4  21.44   = -0.0 % against CURVE_MEAN
+
+At 15 rounds the two windows agree to a rounding error, which is **why this
+survived** — every recent run is 15 rounds. At 7 rounds `r>=4` reads **3.3 %
+hot on every run**, before any real deviation exists. SUSPECT fires at 10 %, so
+a third of the warning budget is already spent on an estimator mismatch, on
+7-round runs only. No verdict currently flips: the worst 7-round run is
+`sweep18_a54` at +2.9 %, which would be -0.4 % on the published window.
+
+**`r>=3` is also the better estimator, not merely the published one.** Its
+exponent is 1.005 at 7 rounds and 1.004 at 15 — the same law measured twice.
+At `r>=4` the two disagree, 0.976 against 0.995, because with only three rounds
+left in a 7-round run the window sits on the tail of the ramp rather than the
+plateau, and cost per round is still drifting up as the feed fills.
+
+**Not fixed in this session, deliberately.** Changing `CURVE_MEAN` or the window
+re-scores 14 runs and moves a published headline; that belongs in one change
+with its own gate, not folded into an unrelated task. What is recorded here is
+which number is which, and that the enforcement is 3.3 % tight at 7 rounds.
+
+---
 
 # Part 6 — Simulation 4: run plan and its review
 

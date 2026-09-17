@@ -2466,6 +2466,29 @@ claim is CORRECTED:** feed actions per turn is 0.282 / 0.250 / **0.384** / 0.341
 and the 1.54x spread beats both the 8.4 % replicate gap and F-106's 4.4 % CV, so
 it is real. **Not constant, and not a function of world size either.**
 
+### 2026-09-17 06:25 — `r15_a99` LANDED. The cost law holds at the ceiling; the formula on top of it did not
+
+**99 agents x 15 rounds, 28,184 s = 7.83 h, engagement 4.17 %.** Exported and
+folded in automatically; **package is at 49 runs**. B-34 engagement check is
+exact (index 4.167, recomputed 4.167).
+
+**The law holds at the largest world this project can build: 21.39 s per
+agent-turn against the curve's 21.44, a 0.2 % miss.** The measured curve now
+runs 12 to 99 agents, an 8.25x range, and 99 is a hard ceiling set by the
+persona file, not the laptop.
+
+**F-115 — but the projection was an hour long, and the error was systematic.**
+`agents x rounds x 21.44` prices the three ramp rounds at plateau rate and reads
+11.8 % high on every 15-round run. Corrected: **`21.44 x agents x (rounds - 1.7)`**,
+which is within 3.4 % everywhere and 0.2 % on `r15_a99`. The 1.7-round shortfall
+has **sd 0.04 across a 5.5x size range**. Full write-up below; it also produces
+an independent confirmation of B-28 from a direction unrelated to finding it.
+
+**Both plateau windows agree on this run** (21.39 vs 21.40), as B-39 predicts at
+15 rounds.
+
+---
+
 ### 2026-09-16 22:35 — `r15_a99` LAUNCHED: the largest world the persona file allows
 
 **99 agents x 15 rounds, seed 42, started 22:35, projected 8.84 h (lands ~07:25).**
@@ -2486,7 +2509,27 @@ dead is the most likely cause of `r15_a72` dying mid-run on 2026-09-15.
 Both `ollama serve` and `sweep18.sh` verified at **ppid 1** with `caffeinate -i`
 held — the run does not depend on any session.
 
-**New artifact: the cost graphs** — `D9hRUTfdJHPFEDC6jVBUuq`, v1. Both laws
+**Artifacts brought up to date, and a layout bug found in one.**
+`D9hRUTfdJHPFEDC6jVBUuq` v2 (cost graphs) — three charts now, the third being the
+per-round ramp that caught F-115; every statistic glossed in place. `A3ZygLd7BsJPs9Cb612Wp1`
+v2 (field guide) — 62 runs, 99-agent row, a what-changed table, vocabulary panel.
+`HcnaY2LNDib7c22RbAS8Js` v15 (scaling) — 49 runs, 99-agent point, F-115, B-39
+disclosed, B-40 in the runbook, and the agents chart **redrawn on `round >= 3`
+so it finally matches the table beneath it** (it had plotted one window and
+tabulated the other, disagreeing with itself by 6 % at 12 agents).
+
+**B-41 — the scaling artifact closed `<div class="wrap">` immediately after the
+header**, so every section below it rendered outside the wrapper: no `max-width`,
+no side padding, full-bleed to the viewport edge. Reported by Gordon as "covering
+the graphs". One stray `</div>` at line 215, present since the page was first
+published. The other two artifacts were checked and are balanced.
+
+**Still stale:** the explorer (`FDuJDpmkvZLbg7BQZhobCE`) is at 37 runs and needs a
+`make_graph.py` regeneration with the hand-written comparison panel merged back —
+four documented traps, so it wants its own pass. `55d7c5a5` (science) is accurate
+for the corpus it claims but predates `r15_a18/a36/a54` and `r15_a99`.
+
+**Original note: the cost graphs** — `D9hRUTfdJHPFEDC6jVBUuq`, v1. Both laws
 drawn large: time against agents, time against rounds, with tonight's run marked
 as the only projected point on either graph.
 
@@ -9395,6 +9438,49 @@ on 2026-09-15 and the campaign never reaching pass 2. Restarted with
 order the parallel check first, rather than depending on a warm server. Left
 alone for now — the operational fix is to warm the model before launching, and
 the import fix means a future failure at least says what it found.
+
+---
+
+### F-115 — `agents x rounds x 21.44` overestimates wall clock by 12 %. The ramp is worth 1.7 free rounds
+
+**Found by projecting `r15_a99` and being wrong by an hour.** The projection was
+8.84 h; it landed in **7.83 h**. The cost law was not wrong — the formula built
+on top of it was.
+
+**The plateau is dead on.** `r15_a99` runs at **21.39 s per agent-turn** against
+the curve's 21.44, a **0.2 % miss at the largest world the project can build**.
+Both plateau windows agree here (21.39 at `r>=3`, 21.40 at `r>=4`), which is
+B-39's prediction for a 15-round run.
+
+**What was wrong is the total.** `agents x rounds x 21.44` prices every round at
+plateau, but rounds 0-2 are the ramp and are much cheaper — in `r15_a99`, 233 s,
+1,016 s and 1,522 s against a plateau of 2,118 s. Across all six 15-round runs
+at the validated configuration the naive formula reads **-11.8 % (sd 2.3)**.
+
+**The correction is a constant, and a remarkably stable one.** Expressing each
+run as *effective rounds* = total / plateau:
+
+    15-round runs   13.27 of 15   sd 0.04   shortfall 1.73 rounds
+     7-round runs    5.74 of 7    sd 0.61   shortfall 1.26 rounds
+
+A shortfall of **1.73 rounds with sd 0.04 across a 5.5x range in world size**.
+
+    total  ~=  21.44 x agents x (rounds - 1.7)
+
+Against every validated run: +3.4 %, -3.4 %, +2.2 %, -1.2 %, **+0.2 %**, -0.9 %,
+-0.9 %. The naive form was systematically an hour long at 90-99 agents.
+
+**An independent confirmation of B-28 falls out of it.** The pre-B-28 `sweep_*`
+runs show a shortfall of only **0.26-0.76 rounds** — they barely ramp at all,
+because a 4,096-token window fills inside a single round and there is no
+transcript accumulation left to pay for. The runs that were truncated are
+exactly the runs with no ramp, measured here from a direction that had nothing
+to do with finding the bug.
+
+**Where the bad formula is published:** the scaling artifact's Law 2 box carries
+`wall clock ~= agents x rounds x 21.4 s  after the ramp`. The qualifier is doing
+real work but the arithmetic as written is the naive form. Corrected there and
+in the cost-graphs artifact.
 
 ---
 

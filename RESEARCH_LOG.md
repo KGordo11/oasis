@@ -2524,10 +2524,35 @@ no side padding, full-bleed to the viewport edge. Reported by Gordon as "coverin
 the graphs". One stray `</div>` at line 215, present since the page was first
 published. The other two artifacts were checked and are balanced.
 
-**Still stale:** the explorer (`FDuJDpmkvZLbg7BQZhobCE`) is at 37 runs and needs a
-`make_graph.py` regeneration with the hand-written comparison panel merged back —
-four documented traps, so it wants its own pass. `55d7c5a5` (science) is accurate
-for the corpus it claims but predates `r15_a18/a36/a54` and `r15_a99`.
+**Explorer regenerated — `FDuJDpmkvZLbg7BQZhobCE` v28, 42 runs** (was 37). All six
+documented traps were live and all six fired or were avoided:
+
+- **Trap 1 (explicit `--analysis`)** — honoured; the 37-run list was recovered from
+  the published `run_index.js` via `list_files`/`read_file`, not from disk.
+- **Trap 2 (`.artifact_baseline`)** — parked during generation, restored after.
+- **Trap 3 (the hand-written panel)** — extracted from the live page first
+  (7,530 chars, balanced), merged back after generation, then updated for 42 runs.
+  **This is the one that silently deletes.**
+- **Trap 4/5 (single-file 408)** — data split and minified: 18.4 MB inline became
+  **15.4 MB across four chunks** (three at 37 runs; adding runs added a chunk
+  rather than growing a file, exactly as designed). Published first attempt, no
+  timeout. Chunks 1 and 2 are **byte-identical** to the previous version, which is
+  the expected result of deterministic chunking over an unchanged prefix.
+- **Trap 6 (not discoverable from disk)** — confirmed: the set includes six runs
+  from `_archive/superseded/` and deliberately excludes `sweep_a12`/`sweep_a24`.
+- **The zsh word-splitting trap fired for real.** `mapfile` does not exist in zsh,
+  so `"${FILES[@]}"` expanded empty and `make_graph.py` **wrote an 83 KB page
+  reporting `0 run(s)` and exited 0.** BSD `xargs` has no `-a` either. A Python
+  `subprocess` wrapper was used instead. *A generator that succeeds at producing
+  nothing is still the same shape as every other bug in this log.*
+
+Chunk validation re-run: 42 in `ALL.order`, 42 reassembled, no overlap, no missing
+run. Spot-checked `r15_a99` — 99 agents, 65 follow edges (matches its
+`analysis.json`), 16,632 exposures = 99 × 14 × 12.
+
+**Still stale:** `55d7c5a5` (science) is accurate for the corpus it claims but
+predates `r15_a18/a36/a54` and `r15_a99`. Adding them is not an edit — it means
+re-running `exposure_model.py`.
 
 **Original note: the cost graphs** — `D9hRUTfdJHPFEDC6jVBUuq`, v1. Both laws
 drawn large: time against agents, time against rounds, with tonight's run marked

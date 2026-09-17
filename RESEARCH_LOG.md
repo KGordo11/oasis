@@ -2550,9 +2550,17 @@ Chunk validation re-run: 42 in `ALL.order`, 42 reassembled, no overlap, no missi
 run. Spot-checked `r15_a99` — 99 agents, 65 follow edges (matches its
 `analysis.json`), 16,632 exposures = 99 × 14 × 12.
 
-**Still stale:** `55d7c5a5` (science) is accurate for the corpus it claims but
-predates `r15_a18/a36/a54` and `r15_a99`. Adding them is not an edit — it means
-re-running `exposure_model.py`.
+**ALL FIVE ARTIFACTS ARE NOW CURRENT.** `55d7c5a5` (science) **v16** — the six-run
+replication block, the fof qualification rewritten (see below), the network-tier
+repetition check upgraded, four limits and three likely-questions answers revised,
+and the companion-artifact list extended to five.
+
+**`exposure_model.py` and `recency_check.py` re-run on the six new 15-round runs
+— see F-116 below.** Both headline results replicate; fof reproduces its point
+estimate to 0.02 and is individually significant in 4 of 5 runs against the
+bank's 3 of 7; and the network-tier repetition check that F-110 could not confirm
+is now significant at p=0.0002. **The "fof leans on pooling" wording is now false
+and needs revising wherever it appears.**
 
 **Original note: the cost graphs** — `D9hRUTfdJHPFEDC6jVBUuq`, v1. Both laws
 drawn large: time against agents, time against rounds, with tonight's run marked
@@ -9506,6 +9514,60 @@ to do with finding the bug.
 `wall clock ~= agents x rounds x 21.4 s  after the ramp`. The qualifier is doing
 real work but the arithmetic as written is the naive form. Corrected there and
 in the cost-graphs artifact.
+
+---
+
+### F-116 — Both headline results replicate on an independent 15-round corpus, and fof is no longer leaning on pooling
+
+**Six 15-round runs spanning 18 to 99 agents, twitter personas, 64,987 exposures,
+387 agents** — `r15_a18/a36/a54/a90/s43_a90/a99`. None of this data existed when
+the published estimates were made, and it changes persona file, population and
+run length at once.
+
+| contrast | published bank | this corpus | per-run significance |
+|---|---|---|---|
+| network vs discovery | 3.51 [3.06, 4.04] | **3.33 [2.96, 3.75]** | bank 9/9 → **6/6** |
+| fof vs discovery | 2.34 [1.64, 3.35] | **2.32 [1.88, 2.87]** | bank 3/7 → **4/5** |
+| seen-before vs first sighting | 2.62 [2.18, 3.15] | **2.05 [1.89, 2.22]** | bank 8/9 → **5/6** |
+
+**The fof point estimate reproduces to 0.02** across a complete change of
+population, and the per-run rate goes from 3-of-7 to 4-of-5. Direction is positive
+in 4 of the 5 runs that have fof strata and **contrary in none** — `r15_a36` is
+0.56 [0.18, 1.69], null rather than opposed. `r15_a18` has no fof strata at all.
+
+**Two single runs now carry fof unaided**: `r15_a90` at 3.12 [2.09, 4.66] and
+`r15_a99` at 1.90 [1.09, 3.30]. The standing wording — *"suggestive rather than
+established, and pooling is what makes it significant"* — **is no longer accurate
+and should be revised.** It is not yet "established" on the strength of one
+corpus, but "leans on pooling" is now false.
+
+**The check F-110 could not confirm is now significant.** F-110 flagged that the
+repeat-exposure replication *in the network tier* — where the similarity score
+plays no part in feed construction, so it is the tier that carries the causal
+reading — was **not significant at 90 agents alone** (1.438 [0.901, 2.296],
+n=1,442, underpowered rather than contrary). Pooled over this corpus:
+
+    network tier   OR 1.636  [1.261, 2.123]  p=0.000215   n=5,360
+    fof tier       OR 1.095  [0.692, 1.734]  p=0.7        n=2,669
+    discovery      OR 2.050  [1.894, 2.219]  p=1.5e-70    n=56,958
+
+**The first-sightings reversal is emphatic here**: 0.248 [0.168, 0.367],
+p=3.46e-12 on 38,131 first sightings. F-45 had downgraded this to directional on
+nine runs (0.70 [0.46, 1.07]); F-110 saw it return at 90 agents; it now holds on
+six runs.
+
+**`r15_a18` is the one run where repetition is null** (1.13 [0.83, 1.54], p=0.44)
+— and that is the prediction F-113 makes, not a failure. In an 18-agent world
+each agent has seen 83 % of everything ever posted about four times over, so
+there is almost no first-sighting stratum left to contrast against. **The run
+where repetition should be hardest to measure is the run where it is not
+measurable.**
+
+**Slot still biases against the result**: re-shown posts rank lower (mean slot
+7.60 vs 6.40), and holding slot fixed *raises* the estimate to 4.60 [4.16, 5.08].
+
+**Absolute scale, which the odds ratio overstates at a low base rate:** first
+sighting 4.41 %, repeat 9.58 % — a 5.17 pp difference, 2.17x the raw rate.
 
 ---
 

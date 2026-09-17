@@ -2466,6 +2466,32 @@ claim is CORRECTED:** feed actions per turn is 0.282 / 0.250 / **0.384** / 0.341
 and the 1.54x spread beats both the 8.4 % replicate gap and F-106's 4.4 % CV, so
 it is real. **Not constant, and not a function of world size either.**
 
+### 2026-09-16 22:35 — `r15_a99` LAUNCHED: the largest world the persona file allows
+
+**99 agents x 15 rounds, seed 42, started 22:35, projected 8.84 h (lands ~07:25).**
+99 is the hard ceiling: `False_Business_0.csv` has 121 rows and cleans to
+exactly **99 usable personas**. The laptop is not the constraint — the cost law
+has no knee anywhere on 12-90 and memory is comfortable at 4 slots.
+
+All three preflights passed: **8/8 dependency checks, 4-agent smoke, and 19
+config keys identical to `ctx8192_a36`** — so it joins the cost bank and extends
+the measured curve from 90 to 99. `sweep18.sh` will export and fold it in
+automatically on completion.
+
+**It took two attempts. See B-40:** Ollama was not running at all, the B-28
+guard crashed with `NameError` instead of saying so, and the guard fails on a
+cold server because it probes `api/ps` before anything is loaded. Ollama being
+dead is the most likely cause of `r15_a72` dying mid-run on 2026-09-15.
+
+Both `ollama serve` and `sweep18.sh` verified at **ppid 1** with `caffeinate -i`
+held — the run does not depend on any session.
+
+**New artifact: the cost graphs** — `D9hRUTfdJHPFEDC6jVBUuq`, v1. Both laws
+drawn large: time against agents, time against rounds, with tonight's run marked
+as the only projected point on either graph.
+
+---
+
 ### HANDOFF — session ended 2026-09-15 13:10. Nothing needs a human.
 
 **Fixed at the end of the session (B-37/B-38):** the package now ships
@@ -9324,6 +9350,51 @@ plateau, and cost per round is still drifting up as the feed fills.
 re-scores 14 runs and moves a published headline; that belongs in one change
 with its own gate, not folded into an unrelated task. What is recorded here is
 which number is which, and that the enforcement is 3.3 % tight at 7 rounds.
+
+---
+
+### B-40 — The B-28 context guard crashes instead of reporting, and fails on a cold server
+
+**Found by trying to launch `r15_a99`.** `check_deps.py` failed its B-28 check
+with `NameError: name 'os' is not defined` — not a failed check, a crashed one.
+
+**Two separate defects, and the first hides the second.**
+
+`check_deps.py` imports only `sys` and `time`. The B-28 check ends:
+
+    if os.environ.get("OASIS_ALLOW_SMALL_CONTEXT"):
+        return why + " -- OVERRIDDEN by ..."
+    raise ValueError(why)
+
+`os` is never imported, so the moment `server_state.verify()` returns not-ok the
+check raises `NameError` and **the real diagnostic is never printed**. The
+`OASIS_ALLOW_SMALL_CONTEXT` escape hatch is dead code that has never once been
+reachable. Fixed: `import os` added.
+
+**The reason it failed at all is a cold-start race.** `server_state.probe()`
+reads Ollama's `api/ps` — the list of **loaded** models, not configured
+settings. A server started seconds earlier has nothing loaded, so
+`context_length` is unknown and `verify()` correctly returns not-ok. The check
+that *does* load the model is `_ollama_parallel`, which runs **after** it.
+
+Probed by hand once the model was warm:
+
+    {'context_length': 8192, 'source': 'api/ps', 'model': 'llama3.1:8b'}
+    ok = True   "server context 8192 tokens per slot (need 8192)"
+
+**Why this never fired before:** every previous campaign started against an
+Ollama that was already warm. This is the first launch in the project against a
+cold server, because the server had died — see below.
+
+**Ollama was down, and had been.** No `ollama serve` process, API refusing
+connections. That is the most likely cause of `r15_a72` dying at round 11 of 15
+on 2026-09-15 and the campaign never reaching pass 2. Restarted with
+`OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h`.
+
+**Worth fixing properly later:** the guard should warm the model itself, or
+order the parallel check first, rather than depending on a warm server. Left
+alone for now — the operational fix is to warm the model before launching, and
+the import fix means a future failure at least says what it found.
 
 ---
 

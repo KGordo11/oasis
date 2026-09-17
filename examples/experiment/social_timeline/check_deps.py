@@ -29,6 +29,7 @@ Exits non-zero on any failure.
 See RESEARCH_LOG.md (Part I) section 9 (Q-1) and the design spec section 9, stage 0.
 """
 
+import os
 import sys
 import time
 

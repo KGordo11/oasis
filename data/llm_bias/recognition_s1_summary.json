@@ -1,0 +1,63 @@
+{
+ "n": 276,
+ "models": [
+  "gemma4:e2b",
+  "granite4.1:3b",
+  "llama3.1:8b",
+  "llama3.2:3b",
+  "mistral:7b",
+  "phi4-mini:3.8b",
+  "qwen2.5:7b"
+ ],
+ "per_model": {
+  "gemma4:e2b": {
+   "n": 40,
+   "claims_own": 0.225,
+   "chance": 0.14285714285714285,
+   "others_claim_this_author": 0.21157407407407405,
+   "did": 0.013425925925925952
+  },
+  "granite4.1:3b": {
+   "n": 40,
+   "claims_own": 0.15,
+   "chance": 0.14285714285714285,
+   "others_claim_this_author": 0.19814814814814816,
+   "did": -0.04814814814814816
+  },
+  "llama3.1:8b": {
+   "n": 40,
+   "claims_own": 0.175,
+   "chance": 0.14285714285714285,
+   "others_claim_this_author": 0.13703703703703704,
+   "did": 0.03796296296296295
+  },
+  "llama3.2:3b": {
+   "n": 40,
+   "claims_own": 0.2,
+   "chance": 0.14285714285714285,
+   "others_claim_this_author": 0.06296296296296296,
+   "did": 0.13703703703703707
+  },
+  "mistral:7b": {
+   "n": 40,
+   "claims_own": 0.3,
+   "chance": 0.14285714285714285,
+   "others_claim_this_author": 0.23425925925925928,
+   "did": 0.06574074074074071
+  },
+  "phi4-mini:3.8b": {
+   "n": 40,
+   "claims_own": 0.1,
+   "chance": 0.14285714285714285,
+   "others_claim_this_author": 0.06805555555555555,
+   "did": 0.031944444444444456
+  },
+  "qwen2.5:7b": {
+   "n": 36,
+   "claims_own": 0.027777777777777776,
+   "chance": 0.14285714285714285,
+   "others_claim_this_author": 0.05833333333333334,
+   "did": -0.030555555555555565
+  }
+ }
+}

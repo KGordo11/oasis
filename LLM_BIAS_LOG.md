@@ -382,3 +382,27 @@ granite 94 → 98, mistral 88 → 89, phi4-mini 20 → 26: essentially none.
 Favourite at position 1 (chance 14 %): granite 65 %, phi4-mini 59 % (pilot 68 %,
 49 %). qwen2.5 leans last (27 %). The shuffle keeps these from biasing the
 self-preference estimate.
+
+### LF-8 — (PROVISIONAL, k=4) Models do not recognise their own posts
+
+Self-recognition probe on seed 1 (no persona; "one of these is yours — which?";
+10 slots x 4 shuffles, 276/276 valid, chance 14.3 %). Share of tries where the
+model claimed its own post, and the difference from how often OTHER models claim
+that author's post:
+
+| model | claims own | others claim it | difference |
+|---|---|---|---|
+| mistral:7b | 30 % | 23 % | +7 |
+| gemma4:e2b | 22 % | 21 % | +1 |
+| llama3.2:3b | 20 % | 6 % | +14 |
+| llama3.1:8b | 18 % | 14 % | +4 |
+| granite4.1:3b | 15 % | 20 % | −5 |
+| phi4-mini:3.8b | 10 % | 7 % | +3 |
+| qwen2.5:7b | 3 % | 6 % | −3 |
+
+Answers are driven by screen position (llama3.2 names the last post 28/40 times;
+gemma the last 21/40), not authorship. **gemma — the strongest self-preferring
+judge (+13.9) — shows +1 on recognition.** Reading so far: the bias is *shared
+taste* (a model likes a style it also writes in), not knowing self-favouritism.
+n = 40 per model is too small to be firm; `night1_queue2.sh` extends to k = 20
+after the cars run.

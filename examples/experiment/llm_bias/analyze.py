@@ -176,44 +176,56 @@ def clogit_self(df):
 
 
 def _clogit_design(df):
-    """Dense design for the fast conditional logit: rows grouped by decision, K options each."""
-    df = df.sort_values(["dec", "pos"])
-    K = df.groupby("dec").size()
-    if K.nunique() != 1:
-        raise ValueError("fast clogit needs equal-size choice sets")
-    k = int(K.iloc[0])
+    """Dense design for the fast conditional logit, padded to K options per decision.
+
+    Choice sets can differ in size (a slot where one author's post failed generation
+    shows 6 posts, not 7 -- seed 1 round 6). Padded options get mask 0 and can
+    never be chosen.
+    """
+    df = df.sort_values(["dec", "pos"]).reset_index(drop=True)
+    sizes = df.groupby("dec", sort=True).size()
+    k = int(sizes.max())
     ref = set(df.groupby("slot")["post"].min())
     posts = sorted(p for p in df["post"].unique() if p not in ref)
     pidx = {p: i for i, p in enumerate(posts)}
-    n = len(df)
-    D = np.zeros((n, 1 + len(posts) + (k - 1)))
-    D[:, 0] = df["self"].values
-    for r, p in enumerate(df["post"].values):
+    decs = sizes.index.values
+    n = len(decs)
+    drow = {d: i for i, d in enumerate(decs)}
+    within = df.groupby("dec").cumcount().values
+    row = np.array([drow[d] for d in df["dec"].values]) * k + within
+    P = 1 + len(posts) + (k - 1)
+    D = np.zeros((n * k, P))
+    Y = np.zeros(n * k)
+    M = np.zeros(n * k)
+    D[row, 0] = df["self"].values
+    for r, p in zip(row, df["post"].values):
         if p in pidx:
             D[r, 1 + pidx[p]] = 1.0
-    pos = df["pos"].values
-    for r, q in enumerate(pos):
+    for r, q in zip(row, df["pos"].values):
         if q > 0:
             D[r, 1 + len(posts) + q - 1] = 1.0
-    decs = df["dec"].values.reshape(-1, k)[:, 0]
-    return D, df["chosen"].values.reshape(-1, k), k, decs, df
+    Y[row] = df["chosen"].values
+    M[row] = 1.0
+    return D, Y.reshape(n, k), k, decs, df, M.reshape(n, k)
 
 
-def fast_clogit(D, Y, k, w=None, ridge=1e-4):
+def fast_clogit(D, Y, k, w=None, ridge=1e-4, M=None):
     """Weighted conditional logit by L-BFGS. Returns beta vector (beta[0] = self)."""
     from scipy.optimize import minimize
     n = Y.shape[0]
     w = np.ones(n) if w is None else w
+    M = np.ones_like(Y) if M is None else M
     pen = np.full(D.shape[1], ridge)
     pen[0] = 0.0
+    neg = np.where(M > 0, 0.0, -1e9)
 
     def f(theta):
-        U = (D @ theta).reshape(n, k)
+        U = (D @ theta).reshape(n, k) + neg
         U = U - U.max(axis=1, keepdims=True)
         lse = np.log(np.exp(U).sum(axis=1, keepdims=True))
         logp = U - lse
-        ll = (w[:, None] * Y * logp).sum()
-        P = np.exp(logp)
+        ll = (w[:, None] * Y * np.where(M > 0, logp, 0.0)).sum()
+        P = np.exp(logp) * M
         G = (w[:, None] * (Y - P)).reshape(-1)
         grad = D.T @ G
         return -ll + 0.5 * (pen * theta ** 2).sum(), -grad + pen * theta
@@ -228,7 +240,7 @@ def clogit_cluster_bootstrap(df, B=300, seed=1):
     personas and posts, so that p-value is too small. This one is not.
     """
     try:
-        D, Y, k, decs, sdf = _clogit_design(df)
+        D, Y, k, decs, sdf, M = _clogit_design(df)
     except ValueError as e:
         return {"error": str(e)}
     first = sdf.groupby("dec").first()
@@ -238,7 +250,7 @@ def clogit_cluster_bootstrap(df, B=300, seed=1):
     sc = pd.Categorical(slo).codes
     npers, nslot = pc.max() + 1, sc.max() + 1
     rng = np.random.default_rng(seed)
-    beta0 = fast_clogit(D, Y, k)[0]
+    beta0 = fast_clogit(D, Y, k, M=M)[0]
     bs = []
     for _ in range(B):
         wp = rng.multinomial(npers, np.ones(npers) / npers)
@@ -246,7 +258,7 @@ def clogit_cluster_bootstrap(df, B=300, seed=1):
         w = (wp[pc] * ws[sc]).astype(float)
         if w.sum() == 0:
             continue
-        bs.append(fast_clogit(D, Y, k, w)[0])
+        bs.append(fast_clogit(D, Y, k, w, M=M)[0])
     bs = np.array(bs)
     lo, hi = np.percentile(bs, [2.5, 97.5])
     p = float(min(1.0, 2 * min((bs <= 0).mean(), (bs >= 0).mean())))

@@ -3,6 +3,7 @@
     ./oasis-env/bin/python -m pytest examples/experiment/llm_bias -q
 """
 
+import json
 import os
 import random
 import sys
@@ -163,8 +164,23 @@ def test_generous_judge_is_not_mistaken_for_self_preference_on_upvotes():
 def test_fast_clogit_matches_statsmodels():
     df = analyze.long_table(synth(0.5, n_personas=30, n_slots=6))
     sm = analyze.clogit_self(df)
-    D, Y, k, _, _ = analyze._clogit_design(df)
-    assert abs(analyze.fast_clogit(D, Y, k, ridge=0.0)[0] - sm["beta_self"]) < 0.01
+    D, Y, k, _, _, M = analyze._clogit_design(df)
+    assert abs(analyze.fast_clogit(D, Y, k, ridge=0.0, M=M)[0] - sm["beta_self"]) < 0.01
+
+
+def test_fast_clogit_handles_unequal_choice_sets():
+    data = synth(0.5, n_personas=30, n_slots=6)
+    for d in data:  # drop author C's post from slot 0 -> 2-post choice sets there
+        if d["round"] == 0 and d["favorite_key"] != "r0|t|C":
+            keep = [i for i, a in enumerate(d["shown_authors"]) if a != "C"]
+            d["shown_keys"] = [d["shown_keys"][i] for i in keep]
+            d["shown_authors"] = [d["shown_authors"][i] for i in keep]
+            d["n_posts"] = len(keep)
+    data = [d for d in data if d["favorite_key"] in d["shown_keys"]]
+    df = analyze.long_table(data)
+    sm = analyze.clogit_self(df)
+    D, Y, k, _, _, M = analyze._clogit_design(df)
+    assert abs(analyze.fast_clogit(D, Y, k, ridge=0.0, M=M)[0] - sm["beta_self"]) < 0.02
 
 
 def test_cluster_bootstrap_clogit_null_and_planted():
@@ -173,3 +189,30 @@ def test_cluster_bootstrap_clogit_null_and_planted():
     assert lo < 1 < hi
     planted = analyze.clogit_cluster_bootstrap(analyze.long_table(synth(0.7)), B=150)
     assert planted["or_ci_cluster"][0] > 1
+
+
+def test_recognition_probe_offline(tmp_path, monkeypatch):
+    import recognize
+    seed = 777
+    monkeypatch.setattr(authors, "DATA", str(tmp_path))
+    monkeypatch.setattr(recognize, "DATA", str(tmp_path))
+    models = ["m1", "m2", "m3"]
+    with open(authors.bank_path(seed), "w") as f:
+        for r in range(2):
+            for m in models:
+                f.write(json.dumps({"key": authors.key(r, "cars", m), "round": r, "topic": "cars", "author": m,
+                                    "ok": True, "title": f"t {m}", "body": f"body by {m}"}) + "\n")
+    monkeypatch.setattr(llm, "warm", lambda m: None)
+
+    def fake(model, system, user, validate=None, **kw):
+        # m1 always finds its own post; others always claim post 1
+        blocks = user.split("[Post ")[1:]
+        pick = next(i for i, b in enumerate(blocks) if f"body by {model}" in b) + 1 if model == "m1" else 1
+        return validate({"mine": pick, "confidence": 50}), {"latency_s": 0.1, "raw": ""}
+    monkeypatch.setattr(llm, "chat_json", fake)
+    recognize.run(seed, models, k=3, log=lambda *a: None)
+    recognize.run(seed, models, k=3, log=lambda *a: None)  # resumable: second call adds nothing
+    s = recognize.summarize(seed)
+    assert s["n"] == 3 * 2 * 3
+    assert s["per_model"]["m1"]["claims_own"] == 1.0
+    assert s["per_model"]["m1"]["did"] > 0.5

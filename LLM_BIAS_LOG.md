@@ -16,19 +16,20 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-23 23:10.*
+*Last updated 2026-09-24 06:00.*
 
-Night 1 (set-up night). Harness built and tested (15 tests). Pilot done (LR-1,
-seed 101) — **suggestive, not established: +5.8 share points, clustered p ≈ 0.12**
-(LF-1). **Main run LR-2 is running**: seed 1, 99 personas x 10 rounds x 7 judges,
-launched 22:59, ETA ~05:30, log `data/llm_bias/campaign_main_s1.log`.
-`night1_queue.sh` is waiting behind it and will run the self-recognition probe
-(LQ-2, seed 1) and then a second-topic campaign (cars, seed 2, 99 x 3).
+**LF-5: the hypothesis is supported on the main run** (seed 1, 99 personas x 10
+rounds x 7 judges, 6,928 valid decisions): pooled self-preference **+5.8 share
+points [+2.9, +8.7]**, cluster-bootstrap p < 0.001; conditional logit **odds
+ratio 1.49 [1.28, 1.76]** with the clustered bootstrap. Robust to dropping any
+judge (+4.2 to +7.1) and positive in 9 of 10 rounds.
 
-Artifact: **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9** (v1, pilot
-numbers). Regenerate with `make_artifact.py --seeds 1,101,2` once runs land.
+Queue (`night1_queue.sh`): self-recognition probe on seed 1 running since 05:46,
+then the cars campaign (seed 2, 99 x 3), ETA ~08:10. Do not start other
+inference until `data/llm_bias/night1_queue.log` says "cars campaign done".
 
-**Do not start any other inference while the queue runs (B-32).**
+Artifact: **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9** — regenerate with
+`make_artifact.py --seeds 1,101,2`.
 
 ---
 
@@ -220,6 +221,13 @@ checks 1000 personas get 1000 distinct seeds. Caught before any real run.
 per author from one slot, so that slot's post dummies sum to 1 inside the set.
 Fixed by dropping one reference post per slot. Caught by the planted-effect test.
 
+**LB-5 — The fast conditional logit assumed every choice set had 7 posts.** In seed
+1, qwen2.5's round-6 post failed all 5 generation attempts (it returned a title
+and no body), so round 6 showed 6 posts (693 decisions). The difference-in-
+differences was unaffected (rates are over what was shown); the clustered logit
+refused to run. Fixed by padding to 7 with masked options that can never be
+chosen; a test with unequal choice sets checks it against statsmodels.
+
 **LB-4 — The upvote self-preference measure would have credited generosity.** A judge
 that upvotes 80 % of everything (granite) looked self-preferring next to one that
 upvotes 22 % (phi4-mini). Up/down rates now use a double difference (each judge's
@@ -250,7 +258,7 @@ model calls, ~14 s. The important ones are the analysis tests on synthetic data:
 |---|---|---|---|---|---|
 | LR-0 | `smoke1`, `smoke7_*` | 900 | 5x2, 8x2 | 1, then 7 | smoke only; excluded from analysis |
 | LR-1 | `pilot_s101_a30_r3_*` | 101 | 30 x 3 | 7 | done 22:10-22:49, 629/630 valid |
-| LR-2 | `main_s1_a99_r10_*` | 1 | 99 x 10 | 7 | running (launched 22:59) |
+| LR-2 | `main_s1_a99_r10_*` | 1 | 99 x 10 | 7 | done 22:59-05:44 (6 h 45 m), 6928/6930 valid |
 | LR-3 | recognition probe | 1 | 10 slots x 4 shuffles | 7 | queued behind LR-2 |
 | LR-4 | `cars_s2_a99_r3_*` (topic: cars) | 2 | 99 x 3 | 7 | queued behind LR-3 |
 
@@ -321,3 +329,56 @@ and phi4-mini carry less information about authorship per decision.
 
 llama3.1 → llama3.2 −6.7 points; llama3.2 → llama3.1 +4.6. No sign of family
 preference yet; too small to say.
+
+### LF-5 — MAIN RESULT: models playing personas favour their own posts (seed 1)
+
+99 personas x 10 rounds x 7 judges, one topic (personal finance), 70 posts,
+6,928 valid decisions of 6,930 (100.0 %). Chance share per author 14.3 %.
+
+| judge | self-preference, favourite share points [95 % CI] |
+|---|---|
+| gemma4:e2b | **+13.9 [+5.3, +23.0]** |
+| mistral:7b | **+13.8 [+5.6, +23.0]** |
+| llama3.1:8b | +8.2 [−1.2, +18.2] |
+| phi4-mini:3.8b | +2.4 [−1.8, +6.9] |
+| llama3.2:3b | +1.5 [−1.8, +4.9] |
+| qwen2.5:7b | +1.3 [−2.8, +5.7] |
+| granite4.1:3b | −0.5 [−6.8, +5.1] |
+| **pooled** | **+5.8 [+2.9, +8.7], p < 0.001** |
+
+* **Conditional logit** (post + position fixed effects): odds ratio **1.49**,
+  two-way cluster bootstrap **[1.28, 1.76]**, 0/300 resamples at or below 1.
+  A post's odds of being a persona's favourite are about half again higher when
+  the model playing the persona wrote it.
+* **Votes agree.** Upvote double-difference +5.1 points [+1.6, +8.6], p = 0.006;
+  downvote −4.0 [−6.5, −1.7], p < 0.001. llama3.1 is the clearest here (+19.7 up,
+  −13.5 down, both clear of zero) even though its favourite effect misses 0.05.
+* **Robustness.** Leave-one-judge-out pooled estimate stays between +4.2 (without
+  gemma or mistral) and +7.1. Per round, 9 of 10 slots are positive (range −1.9 to
+  +12.0).
+* **Which judges show it.** The two with the strongest effect (gemma, mistral) are
+  NOT the ones that follow persona interest (LF-6) — they are generous upvoters
+  with mild position habits. The two with the strongest position habits (granite
+  65 % post 1, phi4-mini 59 %) show essentially none: a judge that mostly picks by
+  position has little room left to pick by author.
+* **Family (LQ-1).** llama3.1 → llama3.2 +1.2, llama3.2 → llama3.1 +5.7 points.
+  No clear family preference from one sibling pair.
+* **Length.** All judges favour longer posts (favourites average 71.6 words against
+  64.5 shown). Common to every judge, so the post fixed effects absorb it; it
+  does not explain the diagonal.
+* **Honest limits.** One topic, one post bank (70 posts, 10 slots), and one
+  generation per slot per author. The slot dimension is the thin one. A second
+  topic (cars, LR-4) is the first replication.
+
+### LF-6 — Persona fidelity, full interest range (seed 1, updates LF-2)
+
+Upvote rate from personas who dislike personal finance (−2) to those who love it
+(+2): qwen2.5 **12 → 63 %** (downvotes 69 → 24 %) — the only model that plays the
+interest strongly. llama3.1 52 → 61, llama3.2 58 → 63, gemma4 78 → 87: mild.
+granite 94 → 98, mistral 88 → 89, phi4-mini 20 → 26: essentially none.
+
+### LF-7 — Screen-position habits replicate (seed 1)
+
+Favourite at position 1 (chance 14 %): granite 65 %, phi4-mini 59 % (pilot 68 %,
+49 %). qwen2.5 leans last (27 %). The shuffle keeps these from biasing the
+self-preference estimate.

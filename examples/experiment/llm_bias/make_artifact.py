@@ -111,6 +111,46 @@ def forest(res, key="sp_chosen", unit="share points"):
         f'own posts beyond what the other judges think they deserve.</p>'
 
 
+def author_ranking(seed, res):
+    """Column view: whose posts everyone likes, judged only by the OTHER models (so no self-vote counts)."""
+    fm = res["favorite_matrix"]
+    bank = authors.load_bank(seed)
+    rows = []
+    for a in res["authors"]:
+        others = [fm[a][j] for j in res["judges"] if j != a and fm[a].get(j) is not None]
+        words = [r["words"] for r in bank.values() if r["author"] == a and r["ok"]]
+        rows.append((a, sum(others) / len(others) if others else 0, sum(words) / len(words) if words else 0))
+    rows.sort(key=lambda r: -r[1])
+    mx = max(r[1] for r in rows) or 1
+    body = "".join(
+        f"<tr><td><code>{E(a)}</code></td><td class='bar'><span style='width:{100 * v / mx:.0f}%'></span></td>"
+        f"<td class='num'>{v * 100:.1f}</td><td class='num'>{w:.0f}</td></tr>" for a, v, w in rows)
+    return (f"<h3>Whose posts do the other models like?</h3><p>Average favourite share each author gets from the "
+            f"<em>other six</em> judges, so a model's vote for itself never counts. This is post quality as the models "
+            f"see it. The last column is the author's average post length.</p>"
+            f"<div class='scroll'><table class='plain rank'><thead><tr><th>author</th><th></th>"
+            f"<th class='num'>% of picks</th><th class='num'>words</th></tr></thead><tbody>{body}</tbody></table></div>")
+
+
+def recognition_section(seed):
+    p = os.path.join(DATA, f"recognition_s{seed}_summary.json")
+    if not os.path.exists(p):
+        return ""
+    s = json.load(open(p))
+    rows = "".join(
+        f"<tr><td><code>{E(m)}</code></td><td class='num'>{v['n']}</td><td class='num'>{v['claims_own'] * 100:.0f}</td>"
+        f"<td class='num'>{(v['others_claim_this_author'] or 0) * 100:.0f}</td>"
+        f"<td class='num'>{(v['did'] or 0) * 100:+.0f}</td></tr>" for m, v in s["per_model"].items())
+    chance = next(iter(s["per_model"].values()))["chance"]
+    return f"""<section><h2>Can a model spot its own post?</h2>
+<p>A separate test with no personas. Each model was shown one round's posts, shuffled, and told “one of these is yours:
+which?”. Guessing would be right {chance * 100:.0f} % of the time. The last column subtracts how often the <em>other</em>
+models claim that same author's post, so a model that just claims the best-written post does not score. If a model prefers
+its own posts but cannot pick them out, it likes a style it shares rather than knowingly favouring itself.</p>
+<div class="scroll"><table class="plain"><thead><tr><th>model</th><th class="num">tries</th><th class="num">% claims own</th>
+<th class="num">% others claim it</th><th class="num">difference</th></tr></thead><tbody>{rows}</tbody></table></div></section>"""
+
+
 def verdict(res):
     sp = res["sp_chosen"].get("_pooled")
     cl = res.get("clogit", {})
@@ -168,6 +208,7 @@ def results_section(seed, res, mans, title):
   {E(verdict(res))}</div>
   <h3>Who picked whose post</h3>
   {heatmap(res)}
+  {author_ranking(seed, res)}
   <h3>Self-preference, judge by judge</h3>
   {forest(res)}
   <details><summary>Same test on upvotes and downvotes</summary>
@@ -227,8 +268,11 @@ def build(seeds):
     for s in seeds:
         res = load_analysis(s)
         mans = manifests(s)
-        label = "Pilot" if s >= 100 else "Main run"
-        sections.append(results_section(s, res, mans, f"{label} results (seed {s})"))
+        topic = TOPICS[mans[0]["config"]["topics"][0]]["name"] if mans else ""
+        label = "Pilot" if s >= 100 else "Main run" if s == main_seed else "Second topic"
+        sections.append(results_section(s, res, mans, f"{label}: {topic} (seed {s})"))
+        if s == main_seed:
+            sections.append(recognition_section(s))
     bank = persona_mod.load_bank()
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     topic_list = "".join(
@@ -304,6 +348,8 @@ summary:focus-visible {{ outline:2px solid var(--accent); }}
 .formula {{ font:15px/1.5 var(--mono); background:var(--paper); border:1px solid var(--rule); border-radius:6px; padding:12px 14px; overflow-x:auto; }}
 .brief {{ background:var(--accent-soft); padding:10px 14px; border-radius:6px; }}
 ul,ol {{ max-width:68ch; }}
+table.rank td.bar {{ width:45%; min-width:80px; }}
+table.rank td.bar span {{ display:block; height:12px; background:var(--accent); border-radius:2px; }}
 </style>
 <div class="wrap">
 <p class="kicker">LLM Bias · OASIS · local models only · updated {now}</p>

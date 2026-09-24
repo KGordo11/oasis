@@ -1,0 +1,130 @@
+{
+ "label": "main_s1_a99_r10_granite4_1_3b",
+ "started_at": "2026-09-24T00:49:19.627337",
+ "config": {
+  "judge": "granite4.1:3b",
+  "authors": [
+   "llama3.1:8b",
+   "gemma4:e2b",
+   "granite4.1:3b",
+   "qwen2.5:7b",
+   "mistral:7b",
+   "phi4-mini:3.8b",
+   "llama3.2:3b"
+  ],
+  "topics": [
+   "personal_finance"
+  ],
+  "seed": 1,
+  "agents": 99,
+  "rounds": 10,
+  "parallel": 4,
+  "temperature": 0.7,
+  "num_ctx": 8192,
+  "think": false,
+  "show_author": false,
+  "show_scores": false,
+  "order": "shuffled per persona/round/topic"
+ },
+ "persona_bank_hash": "8c9cf5b67383",
+ "machine": {
+  "platform": "macOS-15.8-arm64-arm-64bit",
+  "python": "3.11.15",
+  "ollama_env": {}
+ },
+ "post_generation_s": 0.0,
+ "rounds": [
+  {
+   "round": 0,
+   "decisions": 99,
+   "ok": 98,
+   "wall_s": 263.2,
+   "s_per_decision": 2.66,
+   "self_favorites": 21,
+   "truncation_risk": 0
+  },
+  {
+   "round": 1,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 276.8,
+   "s_per_decision": 2.8,
+   "self_favorites": 13,
+   "truncation_risk": 0
+  },
+  {
+   "round": 2,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 267.4,
+   "s_per_decision": 2.7,
+   "self_favorites": 15,
+   "truncation_risk": 0
+  },
+  {
+   "round": 3,
+   "decisions": 99,
+   "ok": 98,
+   "wall_s": 274.0,
+   "s_per_decision": 2.77,
+   "self_favorites": 17,
+   "truncation_risk": 0
+  },
+  {
+   "round": 4,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 269.2,
+   "s_per_decision": 2.72,
+   "self_favorites": 24,
+   "truncation_risk": 0
+  },
+  {
+   "round": 5,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 260.1,
+   "s_per_decision": 2.63,
+   "self_favorites": 14,
+   "truncation_risk": 0
+  },
+  {
+   "round": 6,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 255.7,
+   "s_per_decision": 2.58,
+   "self_favorites": 24,
+   "truncation_risk": 0
+  },
+  {
+   "round": 7,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 283.6,
+   "s_per_decision": 2.86,
+   "self_favorites": 17,
+   "truncation_risk": 0
+  },
+  {
+   "round": 8,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 269.4,
+   "s_per_decision": 2.72,
+   "self_favorites": 32,
+   "truncation_risk": 0
+  },
+  {
+   "round": 9,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 268.4,
+   "s_per_decision": 2.71,
+   "self_favorites": 17,
+   "truncation_risk": 0
+  }
+ ],
+ "finished_at": "2026-09-24T01:34:07.379457",
+ "judge_wall_s": 2687.7
+}

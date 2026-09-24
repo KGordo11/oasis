@@ -1,0 +1,38 @@
+2026-09-23 22:59:52 campaign start seed=1 agents=99 rounds=10 topics=personal_finance judges=llama3.1:8b,gemma4:e2b,granite4.1:3b,qwen2.5:7b,mistral:7b,phi4-mini:3.8b,llama3.2:3b
+2026-09-23 22:59:52 start main_s1_a99_r10_llama3_1_8b
+00:18:36 round 8: 99/99 valid, 486s (4.91 s/decision), judge picked its own post 11x (chance 14.1)
+00:27:03 round 9: 99/99 valid, 507s (5.12 s/decision), judge picked its own post 37x (chance 14.1)
+00:27:03 done: /Users/gordon/research/oasis/data/llm_bias/runs/main_s1_a99_r10_llama3_1_8b
+2026-09-24 00:27:04 end main_s1_a99_r10_llama3_1_8b rc=0
+2026-09-24 00:27:04 start main_s1_a99_r10_gemma4_e2b
+00:46:59 round 8: 99/99 valid, 130s (1.32 s/decision), judge picked its own post 7x (chance 14.1)
+00:49:11 round 9: 99/99 valid, 132s (1.34 s/decision), judge picked its own post 49x (chance 14.1)
+00:49:11 done: /Users/gordon/research/oasis/data/llm_bias/runs/main_s1_a99_r10_gemma4_e2b
+2026-09-24 00:49:12 end main_s1_a99_r10_gemma4_e2b rc=0
+2026-09-24 00:49:12 start main_s1_a99_r10_granite4_1_3b
+01:29:39 round 8: 99/99 valid, 269s (2.72 s/decision), judge picked its own post 32x (chance 14.1)
+01:34:07 round 9: 99/99 valid, 268s (2.71 s/decision), judge picked its own post 17x (chance 14.1)
+01:34:07 done: /Users/gordon/research/oasis/data/llm_bias/runs/main_s1_a99_r10_granite4_1_3b
+2026-09-24 01:34:07 end main_s1_a99_r10_granite4_1_3b rc=0
+2026-09-24 01:34:07 start main_s1_a99_r10_qwen2_5_7b
+02:40:33 round 8: 99/99 valid, 450s (4.54 s/decision), judge picked its own post 15x (chance 14.1)
+02:47:46 round 9: 99/99 valid, 433s (4.37 s/decision), judge picked its own post 3x (chance 14.1)
+02:47:46 done: /Users/gordon/research/oasis/data/llm_bias/runs/main_s1_a99_r10_qwen2_5_7b
+2026-09-24 02:47:47 end main_s1_a99_r10_qwen2_5_7b rc=0
+2026-09-24 02:47:47 start main_s1_a99_r10_mistral_7b
+03:52:40 round 8: 99/99 valid, 424s (4.28 s/decision), judge picked its own post 7x (chance 14.1)
+03:59:44 round 9: 99/99 valid, 424s (4.28 s/decision), judge picked its own post 28x (chance 14.1)
+03:59:44 done: /Users/gordon/research/oasis/data/llm_bias/runs/main_s1_a99_r10_mistral_7b
+2026-09-24 03:59:44 end main_s1_a99_r10_mistral_7b rc=0
+2026-09-24 03:59:44 start main_s1_a99_r10_phi4-mini_3_8b
+04:54:07 round 8: 99/99 valid, 359s (3.63 s/decision), judge picked its own post 14x (chance 14.1)
+05:00:19 round 9: 99/99 valid, 372s (3.76 s/decision), judge picked its own post 9x (chance 14.1)
+05:00:19 done: /Users/gordon/research/oasis/data/llm_bias/runs/main_s1_a99_r10_phi4-mini_3_8b
+2026-09-24 05:00:20 end main_s1_a99_r10_phi4-mini_3_8b rc=0
+2026-09-24 05:00:20 start main_s1_a99_r10_llama3_2_3b
+05:39:57 round 8: 99/99 valid, 263s (2.65 s/decision), judge picked its own post 2x (chance 14.1)
+05:44:13 round 9: 99/99 valid, 256s (2.59 s/decision), judge picked its own post 14x (chance 14.1)
+05:44:13 done: /Users/gordon/research/oasis/data/llm_bias/runs/main_s1_a99_r10_llama3_2_3b
+2026-09-24 05:44:13 end main_s1_a99_r10_llama3_2_3b rc=0
+2026-09-24 05:44:13 campaign end
+analysis written: data/llm_bias/analysis_s1.txt

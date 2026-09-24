@@ -63,7 +63,8 @@ def to_long(df):
     """analyze.did/cluster_bootstrap expect: judge, author, persona, slot, post, up, down."""
     ok = df[df["outcome"] == "chose"].copy()
     ok["persona"] = ok["agent_id"]
-    ok["post"] = ok["post_key"]
+    # post_key repeats across post sets (r0|cooking|gemma4:e2b exists in every seed); the seed makes it unique
+    ok["post"] = ok["seed"].astype(str) + "|" + ok["post_key"]
     ok["up"] = (ok["action"] == "like").astype(int)
     ok["down"] = (ok["action"] == "dislike").astype(int)
     ok["nothing"] = (ok["action"] == "nothing").astype(int)
@@ -100,7 +101,7 @@ def analyze_worlds(df, B=2000):
     L = to_long(df)
     res = {"n_decisions": len(df), "n_valid": len(L), "judges": sorted(df["judge"].unique()),
            "authors": sorted(df["author"].unique()), "worlds": sorted(df["label"].unique()),
-           "personas": int(df["agent_id"].nunique()), "posts": int(df["post_key"].nunique())}
+           "personas": int(df["agent_id"].nunique()), "posts": int((df["seed"].astype(str) + "|" + df["post_key"]).nunique())}
     for col in ("up", "down", "nothing"):
         res[f"rate_{col}"] = (L.pivot_table(index="judge", columns="author", values=col, aggfunc="mean")
                               .round(4).to_dict())

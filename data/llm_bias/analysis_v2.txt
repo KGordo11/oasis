@@ -1,43 +1,43 @@
-worlds ['v2_s10_w0', 'v2_s10_w1']
-99 personas, 50 posts, 9900/9900 valid decisions
+worlds ['v2_s10_w0', 'v2_s10_w1', 'v2_s11_w0', 'v2_s11_w1']
+99 personas, 100 posts, 19800/19800 valid decisions
 personas played by both models: 99
 
 LIKE RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b
-gemma4:e2b         76.8         82.6
-llama3.1:8b        63.7         66.5
+gemma4:e2b         75.4         73.0
+llama3.1:8b        65.4         67.2
 
 DISLIKE RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b
-gemma4:e2b          7.4          5.8
-llama3.1:8b         3.9          4.0
+gemma4:e2b          7.8         13.0
+llama3.1:8b         4.0          4.6
 
 NOTHING RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b
-gemma4:e2b         15.8         11.6
-llama3.1:8b        32.4         29.5
+gemma4:e2b         16.8         14.0
+llama3.1:8b        30.6         28.3
 
 SELF-PREFERENCE on like rate (double difference, percentage points):
-  gemma4:e2b     -3.0  95% CI [-9.7, +3.9]
-  llama3.1:8b    -3.0  95% CI [-9.7, +3.9]
-  _pooled        -3.0  95% CI [-9.7, +3.9]
-  pooled bootstrap p = 0.4040
+  gemma4:e2b     +4.2  95% CI [-2.8, +11.2]
+  llama3.1:8b    +4.2  95% CI [-2.8, +11.2]
+  _pooled        +4.2  95% CI [-2.8, +11.2]
+  pooled bootstrap p = 0.2650
 
 SELF-PREFERENCE on dislike rate (double difference, percentage points):
-  gemma4:e2b     +1.7  95% CI [-1.9, +5.5]
-  llama3.1:8b    +1.7  95% CI [-1.9, +5.5]
-  _pooled        +1.7  95% CI [-1.9, +5.5]
-  pooled bootstrap p = 0.3060
+  gemma4:e2b     -4.7  95% CI [-10.4, +0.5]
+  llama3.1:8b    -4.7  95% CI [-10.4, +0.5]
+  _pooled        -4.7  95% CI [-10.4, +0.5]
+  pooled bootstrap p = 0.0830
 
 WHY 'NOTHING'? per model:
-  gemma4:e2b: like 79.7%  dislike 6.6%  nothing 13.7%  failed 0.0% | outcomes {'chose': 4950} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 32.3, -1: 23.3, 0: 10.8, 1: 6.8, 2: 7.9}
-     sample reasons for nothing: ['Too much fluff', 'Too much text', 'Too much noise', 'Too vague', 'Too much noise', 'Too vague']
-  llama3.1:8b: like 65.1%  dislike 3.9%  nothing 31.0%  failed 0.0% | outcomes {'chose': 4950} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 73.2, -1: 89.8, 0: 14.1, 1: 8.5, 2: 8.2}
-     sample reasons for nothing: ['Not really my jam', 'not my cup of tea', 'Not really my thing, but some people love that stuff', 'Not my niche', 'Not my thing', 'Not sure what the problem is yet']
+  gemma4:e2b: like 74.2%  dislike 10.4%  nothing 15.4%  failed 0.0% | outcomes {'chose': 9900} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 30.5, -1: 22.8, 0: 12.8, 1: 10.4, 2: 10.8}
+     sample reasons for nothing: ['Too much detail', 'Too much noise', 'Too vague', 'Too much rambling', 'too much choice', 'Too vague']
+  llama3.1:8b: like 66.3%  dislike 4.3%  nothing 29.5%  failed 0.0% | outcomes {'chose': 9900} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 73.3, -1: 88.0, 0: 12.0, 1: 7.7, 2: 6.0}
+     sample reasons for nothing: ['boring personal finance stuff', 'Too vague and generic', 'boring topic', 'seems okay, but too vague for my taste', 'Not my cup of tea', "Basic questions, but I'm curious to see the answers"]
 
 LIKE % by persona interest in the topic:
                -2    -1     0     1     2
-gemma4:e2b   57.7  68.9  82.9  87.5  87.0
-llama3.1:8b   4.5   2.5  85.2  90.9  91.5
+gemma4:e2b   54.3  64.4  77.5  80.8  80.3
+llama3.1:8b   5.3   2.8  86.9  91.9  93.1

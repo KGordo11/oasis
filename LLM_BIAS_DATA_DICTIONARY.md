@@ -50,7 +50,8 @@ The main table: what every user did with every post.
 | `user_id` | the user's number, 0–98 (same person in every run) |
 | `username`, `user_name` | the user's handle and name |
 | `controlling_model` | **the model controlling this user** for this reaction |
-| `post_key` | the post's permanent id: `r<slot-1>\|<topic>\|<author model>` |
+| `post_uid` | **the post's unique id across all post sets**: `s<seed>\|r<slot-1>\|<topic>\|<author model>` |
+| `post_key` | the post's id within its post set (repeats across sets — use `post_uid` to join or count) |
 | `oasis_post_id` | the post's id inside that world's OASIS database |
 | `post_author_model` | **the model that wrote the post** |
 | `same_model` | 1 if the author model is the controlling model, else 0 |
@@ -72,7 +73,8 @@ The main table: what every user did with every post.
 
 | column | meaning |
 |---|---|
-| `post_key` | permanent id (as above) |
+| `post_uid` | unique id across all post sets (join key to reactions.csv) |
+| `post_key` | id within its post set |
 | `post_set_seed`, `topic`, `subreddit`, `slot` | where the post belongs |
 | `author_model` | **who wrote it** |
 | `oasis_post_id` | id inside the OASIS database |

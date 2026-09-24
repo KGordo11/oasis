@@ -52,6 +52,14 @@ RUNS = os.path.join(REPO, "data", "llm_bias", "worlds")
 DEFAULT_AUTHORS = ["llama3.1:8b", "gemma4:e2b"]  # Gordon 2026-09-24: two models, write AND judge
 
 
+class _nullctx:
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *exc):
+        return False
+
+
 def assign(persona_id, judges, world):
     return judges[(persona_id + world) % len(judges)]
 
@@ -175,11 +183,13 @@ async def run(a):
                    "topics": topics, "posts_per_topic": a.posts_per_topic, "agents": a.agents,
                    "parallel": a.parallel, "temperature": a.temperature, "num_ctx": llm.NUM_CTX,
                    "think": False, "show_author": False, "show_scores": False,
-                   "assignment": "persona i -> judges[(i + world) % len(judges)]"},
+                   "assignment": "persona i -> judges[(i + world) % len(judges)]",
+                   "scheduler": a.scheduler},
         "persona_bank_hash": persona_mod.PINNED_BANK_HASH,
         "core99_hash": persona_mod.PINNED_CORE99_HASH,
         "persona_ids": [p["id"] for p in bank],
         "post_generation_s": round(gen_s, 1),
+        "ollama_server": llm.server_config(),
         "machine": {"platform": _platform.platform(),
                     "ollama_env": {k: v for k, v in os.environ.items() if k.startswith("OLLAMA_")}},
         "judges": {}}
@@ -206,7 +216,7 @@ async def run(a):
         async def decide(p, item):
             nonlocal n_done
             rank, t, pos, post = item
-            async with sem:
+            async with (sem if a.scheduler == "interleaved" else _nullctx()):
                 system = agents[p["id"]].system_message.content
                 user = scroll.render_user(t, post)
                 obj, meta = await loop.run_in_executor(pool, lambda: llm.chat_json(
@@ -236,7 +246,26 @@ async def run(a):
                 log(f"  {judge}: {n_done}/{len(jobs)} ({el / n_done:.2f} s/decision, "
                     f"ETA {(len(jobs) - n_done) * el / n_done / 60:.0f} min) {dict(counts)}")
 
-        await asyncio.gather(*[decide(p, item) for p, item in jobs])
+        if a.scheduler == "interleaved":
+            # original order: every call in one pool, up to 2x parallel in flight
+            await asyncio.gather(*[decide(p, item) for p, item in jobs])
+        else:
+            # per-user: `parallel` workers, each takes one user and sends that user's whole
+            # scroll back-to-back, so consecutive requests share the same personality text
+            # and Ollama can reuse it from its prompt cache instead of re-reading it.
+            queue = asyncio.Queue()
+            by_user = {}
+            for p, item in jobs:
+                by_user.setdefault(p["id"], (p, []))[1].append(item)
+            for pid in sorted(by_user):
+                queue.put_nowait(by_user[pid])
+
+            async def worker():
+                while not queue.empty():
+                    p, items = queue.get_nowait()
+                    for item in items:
+                        await decide(p, item)
+            await asyncio.gather(*[worker() for _ in range(a.parallel)])
         wall = time.time() - t_j
         prev = manifest["judges"].get(judge, {"decisions": 0, "wall_s": 0.0, "counts": {}})
         prev["decisions"] += len(jobs)
@@ -270,6 +299,9 @@ def main():
     ap.add_argument("--temperature", type=float, default=0.7)
     ap.add_argument("--num-predict", type=int, default=80)
     ap.add_argument("--log-every", type=int, default=250)
+    ap.add_argument("--scheduler", choices=["per-user", "interleaved"], default="per-user",
+                    help="per-user: each worker sends one user's whole scroll back-to-back (prompt-cache friendly); "
+                         "interleaved: the original single pool (runs before 2026-09-24 12:00)")
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--overwrite", action="store_true")
     asyncio.run(run(ap.parse_args()))

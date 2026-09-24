@@ -147,3 +147,28 @@ def stable_seed(*parts):
     """Reproducible 31-bit seed from any parts (Python's hash() is salted per process)."""
     import hashlib
     return int(hashlib.sha256("|".join(map(str, parts)).encode()).hexdigest()[:8], 16) % (2**31)
+
+
+def server_config(log_path=None):
+    """The running Ollama server's own settings, read from the config line it logs at start-up.
+
+    Records what the SERVER used (flash attention, parallel slots, context), which the
+    client's environment cannot tell us. Returns {} if the log is not found.
+    """
+    import os
+    import re as _re
+    log_path = log_path or os.environ.get("OLLAMA_SERVE_LOG", "/tmp/ollama_serve.log")
+    try:
+        lines = [ln for ln in open(log_path, errors="replace") if "server config" in ln]
+    except OSError:
+        return {}
+    if not lines:
+        return {}
+    keys = ("OLLAMA_FLASH_ATTENTION", "OLLAMA_NUM_PARALLEL", "OLLAMA_CONTEXT_LENGTH", "OLLAMA_KV_CACHE_TYPE",
+            "OLLAMA_KEEP_ALIVE", "OLLAMA_MAX_LOADED_MODELS")
+    out = {}
+    for k in keys:
+        m = _re.search(rf"{k}:(\S*)", lines[-1])
+        if m:
+            out[k] = m.group(1).rstrip("]")
+    return out

@@ -136,7 +136,8 @@ def main():
             reactions.append({
                 "round": rnd, "world_label": lab, "post_set_seed": seed, "world": d["world"],
                 "user_id": d["agent_id"], "username": u.get("username"), "user_name": u.get("realname"),
-                "controlling_model": d["judge"], "post_key": d["post_key"], "oasis_post_id": pid.get(d["post_key"]),
+                "controlling_model": d["judge"], "post_uid": f"s{seed}|{d['post_key']}", "post_key": d["post_key"],
+                "oasis_post_id": pid.get(d["post_key"]),
                 "post_author_model": d["author"], "same_model": d["self"], "topic": d["topic"],
                 "user_interest_in_topic": d["affinity"], "topic_order": d["topic_rank"] + 1,
                 "position_in_topic": d["pos_in_topic"] + 1,
@@ -147,7 +148,7 @@ def main():
         for k, r in pbank.items():
             if r.get("ok") and r["topic"] in cfg["topics"] and r["author"] in cfg["authors"] \
                     and r["round"] < cfg["posts_per_topic"]:
-                posts.setdefault(k, {"post_key": k, "post_set_seed": seed, "topic": r["topic"],
+                posts.setdefault(f"s{seed}|{k}", {"post_uid": f"s{seed}|{k}", "post_key": k, "post_set_seed": seed, "topic": r["topic"],
                                      "subreddit": TOPICS[r["topic"]]["sub"], "slot": r["round"] + 1,
                                      "author_model": r["author"], "oasis_post_id": pid.get(k),
                                      "post_type": r["brief"]["ptype"], "subject": r["brief"]["angle"],
@@ -172,10 +173,10 @@ def main():
     R.to_csv(os.path.join(OUT, "reactions.csv"), index=False)
 
     P = pd.DataFrame(posts.values())
-    agg = R.groupby(["post_key", "controlling_model", "action"]).size().unstack(["controlling_model", "action"],
+    agg = R.groupby(["post_uid", "controlling_model", "action"]).size().unstack(["controlling_model", "action"],
                                                                                  fill_value=0)
     agg.columns = [f"{a}_by_{m}_users" for m, a in agg.columns]
-    P = P.merge(agg, left_on="post_key", right_index=True, how="left").fillna(0)
+    P = P.merge(agg, left_on="post_uid", right_index=True, how="left").fillna(0)
     P.to_csv(os.path.join(OUT, "posts.csv"), index=False)
 
     U = []

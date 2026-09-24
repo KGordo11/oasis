@@ -606,3 +606,33 @@ played by both models. Rounds took 64.7 and 66.4 min (llama 51-52 min at
   compares, not when it rates alone. This is consistent with self-preference
   studies that find it strongest in pairwise judgements. Five more post sets are
   queued (seeds 11-15).
+
+### LF-13 — Two post sets (seeds 10-11, 19,800/19,800 valid): leaning self-preferring, not significant
+
+| like rate | llama's posts | gemma's posts |
+|---|---|---|
+| users controlled by llama | 67.2 % | 65.4 % |
+| users controlled by gemma | 73.0 % | 75.4 % |
+
+Like self-preference **+4.2 points [−2.8, +11.2]**, p = 0.27; dislike **−4.7
+[−10.4, +0.5]**, p = 0.08 (negative = self-preferring). Post set 11 reversed set
+10's pattern: gemma-controlled users disliked llama's set-11 posts heavily. The
+slot-to-slot swing is large, so more post sets are the only fix.
+
+**LB-6 — `post_key` is not unique across post sets.** `r0|cooking|gemma4:e2b`
+exists in every seed. The self-preference numbers were unaffected (they group
+by model and by slot, and slots carry the seed), but `analyze_world` counted 50
+posts instead of 100, and **`export_world` dropped set 11 from `posts.csv`**
+and merged its counts into set 10's. Fixed: `post_uid = s<seed>|<post_key>` in
+the analysis and both exports; the dictionary documents it. Re-exported: 100
+posts, 100 unique ids.
+
+**Speed work (Gordon, 2026-09-24): campaign PAUSED at 14:00 after post set 11**
+(4 worlds done, all finished — nothing partial). Benchmark `bench_speed.sh`
+running: scheduler (interleaved vs new per-user) x flash attention (off/on),
+users 0-7 on post set 10. `run_world.py` now defaults to `--scheduler per-user`
+(each worker sends one user's whole scroll back-to-back so the personality text
+can be reused from Ollama's prompt cache), and every manifest records the
+server's own settings (`ollama_server`, read from its start-up log). MLX
+deliberately not tried: it needs separately converted model weights, so it would
+no longer be the same llama3.1/gemma4 as every run so far.

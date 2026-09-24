@@ -138,3 +138,8 @@ data/night_queue.txt
 log/*.log
 data/overnight_cmp_*.txt
 data/graph.html
+
+# LLM Bias: oasis.db files are covered by *.db above; decisions/manifests/post banks ARE committed
+# (small, and the only record of what each judge chose). Smoke runs are throwaway.
+data/llm_bias/runs/smoke*/
+data/llm_bias/postbank_s900.jsonl

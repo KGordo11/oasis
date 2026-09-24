@@ -1,0 +1,38 @@
+2026-09-23 22:10:35 campaign start seed=101 agents=30 rounds=3 topics=personal_finance judges=llama3.1:8b,gemma4:e2b,granite4.1:3b,qwen2.5:7b,mistral:7b,phi4-mini:3.8b,llama3.2:3b
+2026-09-23 22:10:35 start pilot_s101_a30_r3_llama3_1_8b
+2026-09-23 22:19:54,796 - camel.camel.agents.chat_agent - WARNING - Message with 43 tokens exceeds remaining budget of 5. Slicing into smaller chunks.
+22:19:54 round 2: 30/30 valid, 147s (4.88 s/decision), judge picked its own post 8x (chance 4.3)
+22:19:54 done: /Users/gordon/research/oasis/data/llm_bias/runs/pilot_s101_a30_r3_llama3_1_8b
+2026-09-23 22:19:55 end pilot_s101_a30_r3_llama3_1_8b rc=0
+2026-09-23 22:19:55 start pilot_s101_a30_r3_gemma4_e2b
+2026-09-23 22:22:07,627 - camel.camel.agents.chat_agent - WARNING - Message with 43 tokens exceeds remaining budget of 5. Slicing into smaller chunks.
+22:22:07 round 2: 30/30 valid, 40s (1.32 s/decision), judge picked its own post 9x (chance 4.3)
+22:22:07 done: /Users/gordon/research/oasis/data/llm_bias/runs/pilot_s101_a30_r3_gemma4_e2b
+2026-09-23 22:22:08 end pilot_s101_a30_r3_gemma4_e2b rc=0
+2026-09-23 22:22:08 start pilot_s101_a30_r3_granite4_1_3b
+2026-09-23 22:26:23,779 - camel.camel.agents.chat_agent - WARNING - Message with 43 tokens exceeds remaining budget of 5. Slicing into smaller chunks.
+22:26:23 round 2: 30/30 valid, 79s (2.62 s/decision), judge picked its own post 7x (chance 4.3)
+22:26:23 done: /Users/gordon/research/oasis/data/llm_bias/runs/pilot_s101_a30_r3_granite4_1_3b
+2026-09-23 22:26:24 end pilot_s101_a30_r3_granite4_1_3b rc=0
+2026-09-23 22:26:24 start pilot_s101_a30_r3_qwen2_5_7b
+2026-09-23 22:33:24,607 - camel.camel.agents.chat_agent - WARNING - Message with 43 tokens exceeds remaining budget of 5. Slicing into smaller chunks.
+22:33:24 round 2: 30/30 valid, 131s (4.35 s/decision), judge picked its own post 5x (chance 4.3)
+22:33:24 done: /Users/gordon/research/oasis/data/llm_bias/runs/pilot_s101_a30_r3_qwen2_5_7b
+2026-09-23 22:33:25 end pilot_s101_a30_r3_qwen2_5_7b rc=0
+2026-09-23 22:33:25 start pilot_s101_a30_r3_mistral_7b
+2026-09-23 22:40:04,377 - camel.camel.agents.chat_agent - WARNING - Message with 43 tokens exceeds remaining budget of 5. Slicing into smaller chunks.
+22:40:04 round 2: 30/30 valid, 122s (4.08 s/decision), judge picked its own post 1x (chance 4.3)
+22:40:04 done: /Users/gordon/research/oasis/data/llm_bias/runs/pilot_s101_a30_r3_mistral_7b
+2026-09-23 22:40:04 end pilot_s101_a30_r3_mistral_7b rc=0
+2026-09-23 22:40:04 start pilot_s101_a30_r3_phi4-mini_3_8b
+2026-09-23 22:45:41,151 - camel.camel.agents.chat_agent - WARNING - Message with 43 tokens exceeds remaining budget of 5. Slicing into smaller chunks.
+22:45:41 round 2: 30/30 valid, 108s (3.60 s/decision), judge picked its own post 4x (chance 4.3)
+22:45:41 done: /Users/gordon/research/oasis/data/llm_bias/runs/pilot_s101_a30_r3_phi4-mini_3_8b
+2026-09-23 22:45:41 end pilot_s101_a30_r3_phi4-mini_3_8b rc=0
+2026-09-23 22:45:41 start pilot_s101_a30_r3_llama3_2_3b
+2026-09-23 22:49:52,263 - camel.camel.agents.chat_agent - WARNING - Message with 43 tokens exceeds remaining budget of 16. Slicing into smaller chunks.
+22:49:52 round 2: 30/30 valid, 78s (2.59 s/decision), judge picked its own post 2x (chance 4.3)
+22:49:52 done: /Users/gordon/research/oasis/data/llm_bias/runs/pilot_s101_a30_r3_llama3_2_3b
+2026-09-23 22:49:52 end pilot_s101_a30_r3_llama3_2_3b rc=0
+2026-09-23 22:49:52 campaign end
+analysis written: data/llm_bias/analysis_s101.txt

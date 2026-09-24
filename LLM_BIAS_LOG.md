@@ -16,12 +16,19 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-23 22:15.*
+*Last updated 2026-09-23 23:10.*
 
-Night 1 (set-up night). Harness built, tested (13 tests), smoke-tested on all 7
-local judge models (100 % valid JSON after LB-1). **Pilot campaign running:** seed
-101, 30 personas x 3 rounds x 7 judges, launched 22:10, log
-`data/llm_bias/campaign_pilot.log`.
+Night 1 (set-up night). Harness built and tested (15 tests). Pilot done (LR-1,
+seed 101) — **suggestive, not established: +5.8 share points, clustered p ≈ 0.12**
+(LF-1). **Main run LR-2 is running**: seed 1, 99 personas x 10 rounds x 7 judges,
+launched 22:59, ETA ~05:30, log `data/llm_bias/campaign_main_s1.log`.
+`night1_queue.sh` is waiting behind it and will run the self-recognition probe
+(LQ-2, seed 1) and then a second-topic campaign (cars, seed 2, 99 x 3).
+
+Artifact: **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9** (v1, pilot
+numbers). Regenerate with `make_artifact.py --seeds 1,101,2` once runs land.
+
+**Do not start any other inference while the queue runs (B-32).**
 
 ---
 
@@ -242,7 +249,14 @@ model calls, ~14 s. The important ones are the analysis tests on synthetic data:
 | id | label | seed | agents x rounds | judges | status |
 |---|---|---|---|---|---|
 | LR-0 | `smoke1`, `smoke7_*` | 900 | 5x2, 8x2 | 1, then 7 | smoke only; excluded from analysis |
-| LR-1 | `pilot_s101_a30_r3_*` | 101 | 30 x 3 | 7 | running (launched 22:10) |
+| LR-1 | `pilot_s101_a30_r3_*` | 101 | 30 x 3 | 7 | done 22:10-22:49, 629/630 valid |
+| LR-2 | `main_s1_a99_r10_*` | 1 | 99 x 10 | 7 | running (launched 22:59) |
+| LR-3 | recognition probe | 1 | 10 slots x 4 shuffles | 7 | queued behind LR-2 |
+| LR-4 | `cars_s2_a99_r3_*` (topic: cars) | 2 | 99 x 3 | 7 | queued behind LR-3 |
+
+**Parallelism check (22:50):** `OLLAMA_NUM_PARALLEL=8` / `--parallel 8` gives no
+speed-up over 4 (llama3.1 5.10 vs 5.11 s/decision, llama3.2 2.71 vs 2.61). The GPU
+is saturated at 4. Server stays at 4.
 
 **Smoke observations (16 decisions per judge — machinery check, not results):**
 granite put 13/16 favourites on whatever was shown first (strong position bias;
@@ -262,3 +276,48 @@ downvotes 47 %, granite upvotes 80 %.
 * **LQ-4** Mixed population: personas split across judge models in one world.
 * **LQ-5** Does topic interest matter? Manipulation check: upvote rate should rise with
   the persona's interest score.
+
+---
+
+## 10. Findings
+
+### LF-1 — Pilot (seed 101, 30 personas x 3 rounds x 7 judges): suggestive, not established
+
+629 of 630 decisions valid. Chance share per author 14.3 %.
+
+* **Pooled self-preference +5.8 share points** (95 % cluster-bootstrap interval
+  −1.3 to +13.7, p = 0.125). Six of seven judges point positive; llama3.2 is the
+  exception (−3.4).
+* **Conditional logit odds ratio 1.46.** Its model-based p is 0.0003, but that
+  treats 629 picks as independent. With the same two-way cluster bootstrap the
+  interval is **0.92–2.19, p = 0.12** — the two methods agree on direction and size,
+  and the naive p-value was an artefact of ignoring clustering. **Always quote the
+  clustered numbers.**
+* Strongest single judge: **llama3.1:8b, +12.8 points on favourites**, and its
+  upvote/downvote double-differences are both individually significant (+25 upvote
+  points, −21 downvote points toward its own posts).
+* Only 3 slots (21 posts) — the slot dimension dominates the interval. That is why
+  LR-2 runs 10 rounds.
+
+### LF-2 — Most models barely play the persona's interests
+
+Manipulation check: upvote rate by the persona's interest in personal finance
+(−2 → +1; no +2 persona in the first 30). **Only qwen2.5 shows a clean gradient**
+(upvotes 20 → 57 %, downvotes 59 → 27 %). gemma4, granite and mistral upvote ~90 %
+of everything regardless of who they are playing; phi4-mini ~20 % regardless.
+This is a finding about persona fidelity in small models, and it matters for any
+OASIS-style simulation: for most of these models the "persona" changes the tone
+of the reason, not the vote.
+
+### LF-3 — Strong, model-specific screen-position habits
+
+Favourite rate by screen position (chance 14 %): granite picks post 1 **68 %** of
+the time, phi4-mini **49 %**; qwen2.5 favours the last post (38 %); gemma4 and
+llama3.2 almost never pick post 1 (2 %). Because order is shuffled per persona,
+these habits spread evenly over authors — they add noise, not bias — but granite
+and phi4-mini carry less information about authorship per decision.
+
+### LF-4 — Family (LQ-1), pilot only
+
+llama3.1 → llama3.2 −6.7 points; llama3.2 → llama3.1 +4.6. No sign of family
+preference yet; too small to say.

@@ -1,0 +1,67 @@
+{
+ "label": "pilot_s101_a30_r3_mistral_7b",
+ "started_at": "2026-09-23T22:33:29.266058",
+ "config": {
+  "judge": "mistral:7b",
+  "authors": [
+   "llama3.1:8b",
+   "gemma4:e2b",
+   "granite4.1:3b",
+   "qwen2.5:7b",
+   "mistral:7b",
+   "phi4-mini:3.8b",
+   "llama3.2:3b"
+  ],
+  "topics": [
+   "personal_finance"
+  ],
+  "seed": 101,
+  "agents": 30,
+  "rounds": 3,
+  "parallel": 4,
+  "temperature": 0.7,
+  "num_ctx": 8192,
+  "think": false,
+  "show_author": false,
+  "show_scores": false,
+  "order": "shuffled per persona/round/topic"
+ },
+ "persona_bank_hash": "8c9cf5b67383",
+ "machine": {
+  "platform": "macOS-15.8-arm64-arm-64bit",
+  "python": "3.11.15",
+  "ollama_env": {}
+ },
+ "post_generation_s": 0.0,
+ "rounds": [
+  {
+   "round": 0,
+   "decisions": 30,
+   "ok": 30,
+   "wall_s": 135.7,
+   "s_per_decision": 4.52,
+   "self_favorites": 5,
+   "truncation_risk": 0
+  },
+  {
+   "round": 1,
+   "decisions": 30,
+   "ok": 30,
+   "wall_s": 136.9,
+   "s_per_decision": 4.56,
+   "self_favorites": 11,
+   "truncation_risk": 0
+  },
+  {
+   "round": 2,
+   "decisions": 30,
+   "ok": 30,
+   "wall_s": 122.5,
+   "s_per_decision": 4.08,
+   "self_favorites": 1,
+   "truncation_risk": 0
+  }
+ ],
+ "finished_at": "2026-09-23T22:40:04.378713",
+ "judge_wall_s": 395.1
+}

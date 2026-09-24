@@ -68,7 +68,7 @@ def build_world(bank, n_agents, author_list, judge_model, db_path):
     # The agents never call this backend (decisions go through judge.py); OASIS
     # needs one to construct a SocialAgent, and it records which model plays them.
     model = ModelFactory.create(model_platform=ModelPlatformType.OLLAMA, model_type=judge_model,
-                                url=llm.OLLAMA_URL + "/v1", model_config_dict={"temperature": 0.7, "max_tokens": 300})
+                                url=llm.OLLAMA_URL + "/v1", model_config_dict={"temperature": 0.7, "max_tokens": 4096})
     g = AgentGraph()
     personas_ = []
     for p in bank[:n_agents]:

@@ -158,3 +158,18 @@ def test_generous_judge_is_not_mistaken_for_self_preference_on_upvotes():
     res, _ = analyze.analyze(data, B=300)
     lo, hi = res["sp_up"]["A"]["ci95"]
     assert lo < 0 < hi, res["sp_up"]["A"]
+
+
+def test_fast_clogit_matches_statsmodels():
+    df = analyze.long_table(synth(0.5, n_personas=30, n_slots=6))
+    sm = analyze.clogit_self(df)
+    D, Y, k, _, _ = analyze._clogit_design(df)
+    assert abs(analyze.fast_clogit(D, Y, k, ridge=0.0)[0] - sm["beta_self"]) < 0.01
+
+
+def test_cluster_bootstrap_clogit_null_and_planted():
+    null = analyze.clogit_cluster_bootstrap(analyze.long_table(synth(0.0)), B=150)
+    lo, hi = null["or_ci_cluster"]
+    assert lo < 1 < hi
+    planted = analyze.clogit_cluster_bootstrap(analyze.long_table(synth(0.7)), B=150)
+    assert planted["or_ci_cluster"][0] > 1

@@ -175,6 +175,100 @@ def clogit_self(df):
             "p": float(res.pvalues[0]), "n_choices": int(df["dec"].nunique())}
 
 
+def _clogit_design(df):
+    """Dense design for the fast conditional logit: rows grouped by decision, K options each."""
+    df = df.sort_values(["dec", "pos"])
+    K = df.groupby("dec").size()
+    if K.nunique() != 1:
+        raise ValueError("fast clogit needs equal-size choice sets")
+    k = int(K.iloc[0])
+    ref = set(df.groupby("slot")["post"].min())
+    posts = sorted(p for p in df["post"].unique() if p not in ref)
+    pidx = {p: i for i, p in enumerate(posts)}
+    n = len(df)
+    D = np.zeros((n, 1 + len(posts) + (k - 1)))
+    D[:, 0] = df["self"].values
+    for r, p in enumerate(df["post"].values):
+        if p in pidx:
+            D[r, 1 + pidx[p]] = 1.0
+    pos = df["pos"].values
+    for r, q in enumerate(pos):
+        if q > 0:
+            D[r, 1 + len(posts) + q - 1] = 1.0
+    decs = df["dec"].values.reshape(-1, k)[:, 0]
+    return D, df["chosen"].values.reshape(-1, k), k, decs, df
+
+
+def fast_clogit(D, Y, k, w=None, ridge=1e-4):
+    """Weighted conditional logit by L-BFGS. Returns beta vector (beta[0] = self)."""
+    from scipy.optimize import minimize
+    n = Y.shape[0]
+    w = np.ones(n) if w is None else w
+    pen = np.full(D.shape[1], ridge)
+    pen[0] = 0.0
+
+    def f(theta):
+        U = (D @ theta).reshape(n, k)
+        U = U - U.max(axis=1, keepdims=True)
+        lse = np.log(np.exp(U).sum(axis=1, keepdims=True))
+        logp = U - lse
+        ll = (w[:, None] * Y * logp).sum()
+        P = np.exp(logp)
+        G = (w[:, None] * (Y - P)).reshape(-1)
+        grad = D.T @ G
+        return -ll + 0.5 * (pen * theta ** 2).sum(), -grad + pen * theta
+    res = minimize(f, np.zeros(D.shape[1]), jac=True, method="L-BFGS-B", options={"maxiter": 500})
+    return res.x
+
+
+def clogit_cluster_bootstrap(df, B=300, seed=1):
+    """Two-way (persona x slot) cluster bootstrap of the conditional-logit self coefficient.
+
+    The plain clogit standard error treats every pick as independent; picks share
+    personas and posts, so that p-value is too small. This one is not.
+    """
+    try:
+        D, Y, k, decs, sdf = _clogit_design(df)
+    except ValueError as e:
+        return {"error": str(e)}
+    first = sdf.groupby("dec").first()
+    per = first.loc[decs, "persona"].values
+    slo = first.loc[decs, "slot"].values
+    pc = pd.Categorical(per).codes
+    sc = pd.Categorical(slo).codes
+    npers, nslot = pc.max() + 1, sc.max() + 1
+    rng = np.random.default_rng(seed)
+    beta0 = fast_clogit(D, Y, k)[0]
+    bs = []
+    for _ in range(B):
+        wp = rng.multinomial(npers, np.ones(npers) / npers)
+        ws = rng.multinomial(nslot, np.ones(nslot) / nslot)
+        w = (wp[pc] * ws[sc]).astype(float)
+        if w.sum() == 0:
+            continue
+        bs.append(fast_clogit(D, Y, k, w)[0])
+    bs = np.array(bs)
+    lo, hi = np.percentile(bs, [2.5, 97.5])
+    p = float(min(1.0, 2 * min((bs <= 0).mean(), (bs >= 0).mean())))
+    return {"beta_self": float(beta0), "odds_ratio": float(np.exp(beta0)),
+            "or_ci_cluster": [float(np.exp(lo)), float(np.exp(hi))], "p_cluster": p, "B": len(bs)}
+
+
+def family_preference(df):
+    """LQ-1: does a judge favour its SIBLING model's posts? (llama3.1 <-> llama3.2)"""
+    fam = {"llama3.1:8b": "llama", "llama3.2:3b": "llama"}
+    out = {}
+    judges = sorted(df["judge"].unique())
+    rate = df.groupby(["judge", "author"])["chosen"].mean().to_dict()
+    for J in judges:
+        sibs = [A for A in judges if A != J and fam.get(A) and fam.get(A) == fam.get(J)]
+        for S in sibs:
+            others = [rate[(K, S)] for K in judges if K not in (J, S) and (K, S) in rate]
+            if (J, S) in rate and others:
+                out[f"{J} -> {S}"] = rate[(J, S)] - float(np.mean(others))
+    return out
+
+
 def analyze(decisions, B=2000):
     df = long_table(decisions)
     n_dec = len(decisions)
@@ -198,6 +292,8 @@ def analyze(decisions, B=2000):
         res[f"sp_{col}"] = {k: {"est": v, "ci95": ci.get(k)} for k, v in point.items()}
         res[f"sp_{col}_pooled_p"] = p
     res["clogit"] = clogit_self(df)
+    res["clogit_cluster"] = clogit_cluster_bootstrap(df, B=min(B, 300)) if res["clogit"].get("odds_ratio") else {}
+    res["family"] = family_preference(df)
     res["up_by_affinity"] = df.groupby(["judge", "affinity"])["up"].mean().unstack().round(3).to_dict()
     res["down_by_affinity"] = df.groupby(["judge", "affinity"])["down"].mean().unstack().round(3).to_dict()
     res["favorite_by_position"] = df.groupby(["judge", "pos"])["chosen"].mean().unstack().round(3).to_dict()
@@ -221,6 +317,8 @@ def fmt(res):
         if res.get(f"sp_{col}_pooled_p") is not None:
             L.append(f"  pooled bootstrap p = {res[f'sp_{col}_pooled_p']:.4f}")
     L.append(f"\nCONDITIONAL LOGIT (post + position fixed effects): {res['clogit']}")
+    L.append(f"  with two-way cluster bootstrap: {res.get('clogit_cluster')}")
+    L.append(f"\nFAMILY (judge -> sibling author, diff-in-diff on favourite share): {res.get('family')}")
     return "\n".join(L)
 
 

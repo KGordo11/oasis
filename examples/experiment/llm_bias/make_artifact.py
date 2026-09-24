@@ -114,7 +114,9 @@ def forest(res, key="sp_chosen", unit="share points"):
 def author_ranking(seed, res):
     """Column view: whose posts everyone likes, judged only by the OTHER models (so no self-vote counts)."""
     fm = res["favorite_matrix"]
-    bank = authors.load_bank(seed)
+    bank = {}
+    for sd in ((1, 2) if seed == "both" else (seed,)):
+        bank.update(authors.load_bank(sd))
     rows = []
     for a in res["authors"]:
         others = [fm[a][j] for j in res["judges"] if j != a and fm[a].get(j) is not None]
@@ -140,7 +142,11 @@ def recognition_section(seed):
     rows = "".join(
         f"<tr><td><code>{E(m)}</code></td><td class='num'>{v['n']}</td><td class='num'>{v['claims_own'] * 100:.0f}</td>"
         f"<td class='num'>{(v['others_claim_this_author'] or 0) * 100:.0f}</td>"
-        f"<td class='num'>{(v['did'] or 0) * 100:+.0f}</td></tr>" for m, v in s["per_model"].items())
+        f"<td class='num'>{(v['did'] or 0) * 100:+.0f}</td>"
+        f"<td class='num'>{(v['did_ci95'][0] * 100):+.0f} to {(v['did_ci95'][1] * 100):+.0f}</td></tr>"
+        if v.get('did_ci95') else
+        f"<td class='num'>{(v['did'] or 0) * 100:+.0f}</td><td></td></tr>"
+        for m, v in s["per_model"].items())
     chance = next(iter(s["per_model"].values()))["chance"]
     return f"""<section><h2>Can a model spot its own post?</h2>
 <p>A separate test with no personas. Each model was shown one round's posts, shuffled, and told “one of these is yours:
@@ -148,12 +154,19 @@ which?”. Guessing would be right {chance * 100:.0f} % of the time. The last co
 models claim that same author's post, so a model that just claims the best-written post does not score. If a model prefers
 its own posts but cannot pick them out, it likes a style it shares rather than knowingly favouring itself.</p>
 <div class="scroll"><table class="plain"><thead><tr><th>model</th><th class="num">tries</th><th class="num">% claims own</th>
-<th class="num">% others claim it</th><th class="num">difference</th></tr></thead><tbody>{rows}</tbody></table></div></section>"""
+<th class="num">% others claim it</th><th class="num">difference</th><th class="num">95 % interval</th></tr></thead><tbody>{rows}</tbody></table></div></section>"""
+
+
+def few_rounds_note(rounds):
+    if not rounds or rounds > 3:
+        return ""
+    return (f'<p class="cap"><b>Read the intervals here with care.</b> Only {rounds} rounds means only {rounds} sets of posts. '
+            f'A resampling interval over so few groups cannot capture how much results vary from one set of posts to the next, '
+            f'so it comes out too narrow. Treat this as a check on direction and size, not a separate significance test.</p>')
 
 
 def verdict(res):
     sp = res["sp_chosen"].get("_pooled")
-    cl = res.get("clogit", {})
     if not sp or not sp.get("ci95"):
         return "Not enough judges yet to test."
     lo, hi = sp["ci95"]
@@ -163,13 +176,17 @@ def verdict(res):
         s = "Reversed: judges pick their own posts LESS than other judges do."
     else:
         s = "Not supported at this sample size: the pooled interval includes zero."
-    if "odds_ratio" in cl:
-        s += (f" The choice model agrees on direction if its odds ratio is on the same side of 1: "
-              f"{cl['odds_ratio']:.2f} (95 % {cl['or_ci'][0]:.2f}–{cl['or_ci'][1]:.2f}, p = {cl['p']:.3g}).")
+    cc = res.get("clogit_cluster") or {}
+    if "or_ci_cluster" in cc:
+        pc = cc["p_cluster"]
+        ptxt = f"p < {1 / cc['B']:.3f}" if pc == 0 else f"p = {pc:.2f}"
+        s += (f" Choice model: a post's odds of being picked are multiplied by {cc['odds_ratio']:.2f} when "
+              f"the judge wrote it (95 % interval {cc['or_ci_cluster'][0]:.2f}–{cc['or_ci_cluster'][1]:.2f}, {ptxt}, "
+              f"clustered the same way).")
     return s
 
 
-def results_section(seed, res, mans, title):
+def results_section(seed, res, mans, title, meta=None):
     if not res:
         return f'<section><h2>{E(title)}</h2><p class="muted">No analysis for seed {seed} yet.</p></section>'
     cfg = mans[0]["config"] if mans else {}
@@ -201,11 +218,12 @@ def results_section(seed, res, mans, title):
     return f"""
 <section id="results-{seed}">
   <h2>{E(title)}</h2>
-  <p class="meta">Seed {seed} · {n_personas} personas × {rounds} rounds × {len(res['judges'])} judge models ·
+  <p class="meta">{meta or f"Seed {seed} · {n_personas} personas × {rounds} rounds"} × {len(res['judges'])} judge models ·
   {res['n_valid']:,} valid decisions of {res['n_decisions']:,} ({res['valid_rate'] * 100:.1f} %)</p>
   <div class="verdict"><strong>Pooled self-preference: {sp['est'] * 100:+.1f} share points</strong>
   {f"(95 % interval {sp['ci95'][0] * 100:+.1f} to {sp['ci95'][1] * 100:+.1f})" if sp.get('ci95') else ""}.
   {E(verdict(res))}</div>
+  {few_rounds_note(rounds)}
   <h3>Who picked whose post</h3>
   {heatmap(res)}
   {author_ranking(seed, res)}
@@ -262,9 +280,29 @@ def persona_cards():
     return "".join(out)
 
 
+def bottom_line(res):
+    if not res:
+        return ""
+    sp = res["sp_chosen"]["_pooled"]
+    cc = res.get("clogit_cluster") or {}
+    pos = sum(1 for k, v in res["sp_chosen"].items() if k != "_pooled" and v["est"] > 0)
+    return f"""<div class="verdict"><strong>Bottom line so far: yes, with a modest effect.</strong> Across both topics,
+a model playing a persona picks its own post {sp['est'] * 100:.1f} percentage points more often than the other models pick that
+same post (95 % interval {sp['ci95'][0] * 100:.1f} to {sp['ci95'][1] * 100:.1f}; chance share is {res['chance_share'] * 100:.1f} %).
+Put another way, being the judge's own writing multiplies a post's odds of being picked by about {cc.get('odds_ratio', 0):.2f}.
+{pos} of {len(res['judges'])} models point the same way. Two catches: the models cannot tell which post they wrote
+(so this looks like shared taste, not deliberate self-favouring), and the effect shows up in which post a persona chooses to read
+more reliably than in how it votes.</div>"""
+
+
 def build(seeds):
     main_seed = seeds[0]
     sections = []
+    comb = os.path.join(DATA, "analysis_combined_s1_s2.json")
+    comb_res = json.load(open(comb)) if os.path.exists(comb) else None
+    if comb_res:
+        sections.append(results_section("both", comb_res, manifests(1) + manifests(2),
+                                        "Both topics together", meta="Personal finance (10 rounds) + cars (3 rounds) · 99 personas"))
     for s in seeds:
         res = load_analysis(s)
         mans = manifests(s)
@@ -280,7 +318,7 @@ def build(seeds):
         + (" — <em>active now</em>" if t in DEFAULT_ACTIVE else "") + "</li>" for t in PRIMARY)
     extra = ", ".join(TOPICS[t]["name"] for t in TOPICS if t not in PRIMARY)
     model_rows = "".join(f"<tr><td><code>{E(m)}</code></td><td>{E(f)}</td></tr>" for m, f in FAMILY.items())
-    return TEMPLATE.format(now=now, sections="".join(sections), sample=sample_slot(main_seed),
+    return TEMPLATE.format(now=now, sections=bottom_line(comb_res) + "".join(sections), sample=sample_slot(main_seed),
                            personas=persona_cards(), n_bank=len(bank), topic_list=topic_list, extra=E(extra),
                            model_rows=model_rows, bank_hash=persona_mod.bank_hash(bank))
 

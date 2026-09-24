@@ -16,20 +16,18 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-24 08:10.*
+*Last updated 2026-09-24 08:35.*
 
-**Night 1 is done except the extended recognition probe (LR-5, running since
-08:02, ~30 min).** Results:
-* **LF-5** main (personal finance, 99 x 10 x 7): self-preference **+5.8 pts
-  [+2.9, +8.7]**, OR **1.49 [1.28, 1.76]**.
-* **LF-9** cars (99 x 3 x 7): favourites replicate (+4.9, OR 1.47); votes do not.
-* **LF-10** both topics pooled: **+5.6 pts [+3.4, +7.8]**, OR **1.48 [1.26, 1.71]**,
-  all 7 judges positive.
-* **LF-8** (provisional): models cannot pick out their own posts; the preference
-  looks like shared taste, not self-recognition.
+**Night 1 complete. Nothing is running.** Read §11 (morning report) first.
+* **LF-10** both topics pooled: self-preference **+5.6 pts [+3.4, +7.8]**, OR
+  **1.48 [1.26, 1.71]**, all 7 judges positive. Main run LF-5, cars LF-9.
+* **LF-8 (final)**: recognition is weak and does not track preference — shared
+  taste, not self-recognition.
+* Open decisions for Gordon: §11 questions 1-6. Default if no answer: the three
+  remaining primary topics as 99 x 10 campaigns, one per night.
 
-Artifact: **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9**. Next-step
-questions for Gordon are in the 2026-09-24 morning report (§11).
+Artifact: **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9**.
+Ollama is running with NUM_PARALLEL=4, CONTEXT_LENGTH=8192.
 
 ---
 
@@ -261,7 +259,7 @@ model calls, ~14 s. The important ones are the analysis tests on synthetic data:
 | LR-2 | `main_s1_a99_r10_*` | 1 | 99 x 10 | 7 | done 22:59-05:44 (6 h 45 m), 6928/6930 valid |
 | LR-3 | recognition probe | 1 | 10 slots x 4 shuffles | 7 | done 05:46-05:53, 276/276 valid |
 | LR-4 | `cars_s2_a99_r3_*` (topic: cars) | 2 | 99 x 3 | 7 | done 05:53-08:01, 2077/2079 valid |
-| LR-5 | recognition probe extended | 1 | 10 slots x 20 shuffles | 7 | running from 08:02 |
+| LR-5 | recognition probe extended | 1 | 10 slots x 20 shuffles | 7 | done 08:02-08:29, 1379 tries |
 
 **Parallelism check (22:50):** `OLLAMA_NUM_PARALLEL=8` / `--parallel 8` gives no
 speed-up over 4 (llama3.1 5.10 vs 5.11 s/decision, llama3.2 2.71 vs 2.61). The GPU
@@ -437,3 +435,56 @@ Every judge's point estimate is positive: mistral +14.1 and gemma +10.4
 (individually significant), llama3.1 +7.1 [−0.5, +14.5], llama3.2 +2.2, phi4-mini
 +2.5, granite +1.9, qwen +1.0. Upvote +3.2 [−0.3, +6.6], p = 0.07.
 File: `data/llm_bias/analysis_combined_s1_s2.txt`.
+
+### LF-8 (final, k = 20) — Models favour their own posts without being able to pick them out
+
+1,379 tries (200 per model; qwen 180 — its round-6 post is missing). Difference =
+P(model claims its own post) − P(other models claim that author's post); 95 %
+interval from a bootstrap over the 10 rounds.
+
+| model | claims own | others claim it | difference [95 %] | judge self-preference (LF-10) |
+|---|---|---|---|---|
+| llama3.2:3b | 16.1 % | 7.1 % | **+9.0 [+2.7, +13.9]** | +2.2 |
+| phi4-mini:3.8b | 13.0 % | 8.0 % | **+5.0 [+2.5, +8.0]** | +2.5 |
+| gemma4:e2b | 24.0 % | 19.2 % | +4.8 [−4.9, +14.2] | **+10.4** |
+| mistral:7b | 26.0 % | 21.2 % | +4.8 [−4.8, +14.3] | **+14.1** |
+| granite4.1:3b | 21.0 % | 20.8 % | +0.2 [−9.3, +8.8] | +1.9 |
+| llama3.1:8b | 12.5 % | 13.0 % | −0.5 [−7.5, +8.4] | +7.1 |
+| qwen2.5:7b | 5.0 % | 7.7 % | −2.7 [−7.0, +3.0] | +1.0 |
+
+Recognition is weak everywhere, and it does not line up with preference. The two
+models that recognise themselves beyond noise (llama3.2, phi4-mini) barely favour
+themselves as judges; the two that favour themselves most (mistral, gemma) do not
+recognise their posts beyond noise. **The bias looks like shared taste — a model
+likes the style it writes in — not knowing self-favouritism.** The k = 4 table
+above is superseded.
+
+---
+
+## 11. Morning report, 2026-09-24 (night 1)
+
+**Done overnight, unattended, no failures:** 5 campaigns/probes, 11,655 persona
+decisions (≈ 100 % valid) + 1,379 recognition tries, 8 commits pushed to
+`origin/llm-bias`. Machine time 22:10 → 08:30.
+
+**Answer to the hypothesis so far: yes, modestly.** A model playing a persona picks
+its own post 5.6 share points more often than other models pick that post
+(chance 14.3 %), odds ratio 1.48. It replicates across two topics and survives
+dropping any judge. It is carried by the *choice* measure; on votes it
+replicated on personal finance but not cars. And it is not self-recognition.
+
+**Questions for Gordon** (each changes what runs next):
+1. **Agents vs posts.** Statistics here are limited by the number of distinct posts
+   (slots), not personas: 99 personas already give tight per-slot numbers. For
+   the same hours, 99 personas x 20 rounds beats 1000 personas x 2 rounds. 1000
+   personas is possible, but one round of all 7 judges over 1000 personas takes
+   about 6.5 h. Do you want maximum agents or more rounds?
+2. **Topics:** run the remaining three (farming, cooking, tech) one at a time as
+   separate campaigns, or all five on screen per round (5x the time per round)?
+3. **Posts per round:** 1 per model per topic now (7 on screen). Raise to 2 (14 on
+   screen)? Longer prompts strengthen the position habits (LF-7).
+4. **Herding arm (LQ-3):** show vote counts to see if self-preference snowballs?
+5. **Mixed population (LQ-4):** one world where personas are split across the 7
+   models, closer to a real OASIS sim.
+6. More model families? Any Ollama model can join (e.g. deepseek, olmo, cohere
+   command-r7b); each adds an author and a judge.

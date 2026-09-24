@@ -109,6 +109,32 @@ def summarize(seed):
         out["per_model"][m] = {"n": tot[m], "claims_own": own, "chance": 1 / n_posts,
                                "others_claim_this_author": sum(others) / len(others) if others else None,
                                "did": own - (sum(others) / len(others)) if others else None}
+    # bootstrap over slots (rounds): claims within a slot share the same posts
+    import numpy as np
+    rng = np.random.default_rng(0)
+    slots = sorted({(r["round"], r["topic"]) for r in rows})
+    by_slot = defaultdict(list)
+    for r in rows:
+        by_slot[(r["round"], r["topic"])].append(r)
+    draws = defaultdict(list)
+    for _ in range(1000):
+        pick = [slots[i] for i in rng.integers(0, len(slots), len(slots))]
+        c = defaultdict(lambda: defaultdict(int))
+        t = defaultdict(int)
+        for sl in pick:
+            for r in by_slot[sl]:
+                c[r["model"]][r["claimed_author"]] += 1
+                t[r["model"]] += 1
+        for m in models:
+            if not t[m]:
+                continue
+            oth = [c[o][m] / t[o] for o in models if o != m and t[o]]
+            if oth:
+                draws[m].append(c[m][m] / t[m] - sum(oth) / len(oth))
+    for m in models:
+        if draws[m]:
+            out["per_model"][m]["did_ci95"] = [float(np.percentile(draws[m], 2.5)),
+                                               float(np.percentile(draws[m], 97.5))]
     return out
 
 

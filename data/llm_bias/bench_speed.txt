@@ -1,0 +1,11 @@
+speed_A_inter_fa0 14:06:47 llama3.1:8b: done 200 in 4.3 min (1.30 s/decision) {'nothing': 72, 'like': 116, 'dislike': 12}
+speed_A_inter_fa0 14:08:03 gemma4:e2b: done 200 in 1.2 min (0.35 s/decision) {'nothing': 31, 'dislike': 7, 'like': 162}
+speed_B_user_fa0 14:12:39 llama3.1:8b: done 200 in 4.4 min (1.32 s/decision) {'like': 116, 'nothing': 74, 'dislike': 10}
+speed_B_user_fa0 14:13:49 gemma4:e2b: done 200 in 1.1 min (0.34 s/decision) {'nothing': 31, 'like': 162, 'dislike': 7}
+speed_C_user_fa1 14:18:05 llama3.1:8b: done 200 in 4.0 min (1.19 s/decision) {'like': 117, 'nothing': 73, 'dislike': 10}
+speed_C_user_fa1 14:19:16 gemma4:e2b: done 200 in 1.1 min (0.33 s/decision) {'nothing': 30, 'like': 162, 'dislike': 8}
+speed_D_inter_fa1 14:23:31 llama3.1:8b: done 200 in 4.0 min (1.21 s/decision) {'nothing': 74, 'like': 116, 'dislike': 10}
+speed_D_inter_fa1 14:24:36 gemma4:e2b: done 200 in 1.1 min (0.33 s/decision) {'nothing': 31, 'like': 162, 'dislike': 7}
+speed_A2_inter_fa0 14:29:10 llama3.1:8b: done 200 in 4.3 min (1.28 s/decision) {'nothing': 71, 'like': 117, 'dislike': 12}
+speed_A2_inter_fa0 14:30:25 gemma4:e2b: done 200 in 1.2 min (0.35 s/decision) {'nothing': 31, 'like': 162, 'dislike': 7}
+BENCH_DONE

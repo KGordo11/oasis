@@ -299,7 +299,7 @@ def main():
     ap.add_argument("--temperature", type=float, default=0.7)
     ap.add_argument("--num-predict", type=int, default=80)
     ap.add_argument("--log-every", type=int, default=250)
-    ap.add_argument("--scheduler", choices=["per-user", "interleaved"], default="per-user",
+    ap.add_argument("--scheduler", choices=["per-user", "interleaved"], default="interleaved",
                     help="per-user: each worker sends one user's whole scroll back-to-back (prompt-cache friendly); "
                          "interleaved: the original single pool (runs before 2026-09-24 12:00)")
     ap.add_argument("--resume", action="store_true")

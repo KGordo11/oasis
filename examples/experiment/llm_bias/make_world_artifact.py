@@ -214,6 +214,9 @@ def timing_section():
         lab = j["label"]
         if not (lab.startswith(("sweep_", "v2_")) or lab == "bench_v2") or "finished_at" not in j:
             continue
+        # compare like with like: flash attention (on from post set 12, LF-14) is ~7 % faster
+        if j.get("ollama_server", {}).get("OLLAMA_FLASH_ATTENTION", "false") != "true":
+            continue
         n = j["config"]["agents"]
         mins = 0.0
         for m, v in j.get("judges", {}).items():
@@ -227,7 +230,8 @@ def timing_section():
                          for n in sizes)
         out.append("<h3>Whole runs at different sizes</h3><p>Each point is a complete run with that many users, split between the "
                    "two models, each user scrolling all 50 posts. This shows what a bigger population actually costs: "
-                   f"{ttxt} in total (both models together).</p>")
+                   f"{ttxt} in total (both models together). Only runs with flash attention on are compared here (on since "
+                   "post set 12; it makes runs about 7 % faster), so the sizes are measured under the same settings.</p>")
         out.append(line_chart(pts, "users (agents) in the run", "minutes (this model's share)", fmt_x=lambda v: f"{v:.0f}",
                               title="Minutes per run vs number of users"))
     return "".join(out)

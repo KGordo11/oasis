@@ -636,3 +636,38 @@ can be reused from Ollama's prompt cache), and every manifest records the
 server's own settings (`ollama_server`, read from its start-up log). MLX
 deliberately not tried: it needs separately converted model weights, so it would
 no longer be the same llama3.1/gemma4 as every run so far.
+
+### LF-14 — Speed work: flash attention on (~7 % faster); per-user ordering gives nothing
+
+`bench_speed.sh`, users 0-7 on post set 10, 400 decisions per run
+(`data/llm_bias/bench_speed.txt`, runs `speed_*`):
+
+| run | llama3.1 s/decision | gemma4 s/decision | answers identical to A |
+|---|---|---|---|
+| A interleaved, FA off | 1.304 | 0.350 | — |
+| A2 repeat of A (noise) | 1.282 | 0.348 | 99.8 % |
+| B per-user, FA off | 1.319 | 0.345 | 99.5 % |
+| C per-user, FA on | 1.194 | 0.328 | 99.0 % |
+| D interleaved, FA on | 1.215 | 0.327 | 99.5 % |
+
+* **Per-user ordering (Gordon's #4): no gain**, within the A/A2 noise (1.7 %).
+  The interleaved queue was already persona-ordered with 8 requests in flight,
+  so Ollama very likely reused the personality prefix already. Default reverted
+  to `--scheduler interleaved` (fewer changes); per-user kept as an option.
+* **Flash attention (#5): llama −7 %, gemma −6 %.** Answers change on ~1 % of
+  decisions (vs 0.2 % between two identical runs) — behaviourally negligible, and
+  both worlds of a post set always share one setting, so the within-set
+  self-preference comparison is unaffected.
+* **Adopted: `OLLAMA_FLASH_ATTENTION=1` from post set 12 on** (server restarted
+  14:31). Every manifest now records `ollama_server`. Post sets 10-11: FA off;
+  12-15 and the agent sweep: FA on. The whole-runs chart compares only FA-on runs.
+* MLX not tried (different model weights → not the same models). Expected gain
+  from both levers together is small (a 99-user round ~65 → ~61 min); the big
+  lever is a GPU machine (SSH plan).
+* Campaign resumed 14:31 (post sets 12-15, ETA ~22:00), agent sweep re-queued
+  behind it.
+
+**Start Ollama like this from now on:**
+
+    OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 \
+      OLLAMA_KEEP_ALIVE=24h ollama serve > /tmp/ollama_serve.log 2>&1

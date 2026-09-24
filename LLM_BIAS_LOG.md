@@ -16,27 +16,35 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-24 09:40.*
+*Last updated 2026-09-24 15:05 — PAUSED at Gordon's request ("get to a stopping point").*
 
-**Design v2 is running** (Gordon, 2026-09-24 morning — see §12). Two models,
-llama3.1:8b and gemma4:e2b, both write posts AND play personas, in one shared
-OASIS world; every persona scrolls all 50 posts (5 topics x 5 posts x 2 models)
-and likes / dislikes / does nothing, one post at a time. Vote counts hidden.
-**The same 99 pinned personas every run** (fingerprint `964462b96652`, enforced in
-code — `personas.core99()` refuses to run if any persona changed).
+**Nothing is running.** Design v2 campaign paused at 15:04 part-way through
+`v2_s12_w0` (1,399 of 4,950 decisions, all on disk). Post sets 10 and 11 are
+complete (4 worlds, 19,800 decisions). Ollama is still up with flash attention on.
 
-Campaign: `world_campaign.sh`, SEEDS 10-15, two rotation worlds per seed (~2.2 h
-per seed), launched 09:32, log `data/llm_bias/campaign_v2.log`. First result
-after seed 10 (~11:45); analysis refreshes to `data/llm_bias/analysis_v2.txt`
-after every seed. Resumable: re-launching skips finished worlds and resumes a
-half-done one.
+**To resume** (picks up v2_s12_w0 where it stopped, skips finished worlds, then
+runs post sets 13-15; the size sweep waits behind it):
 
-**LF-12 (post set 10, 9,900/9,900 valid): no own-model like boost so far, −3.0
-points [−9.7, +3.9].** Design-v2 page: **https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx**
-(refresh: `export_world.py` then `make_world_artifact.py`, republish).
+    cd /Users/gordon/research/oasis
+    SEEDS="10 11 12 13 14 15" nohup caffeinate -i examples/experiment/llm_bias/world_campaign.sh \
+      >> data/llm_bias/campaign_v2.log 2>&1 &
+    nohup caffeinate -i examples/experiment/llm_bias/agent_sweep.sh >> data/llm_bias/agent_sweep.log 2>&1 &
 
-Night-1 results (design v1, 7 models, pick-a-favourite) are §10-11 and stay valid
-as a separate design.
+If Ollama is down, start it first (LF-14):
+`OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve > /tmp/ollama_serve.log 2>&1 &`
+
+**Where the result stands (LF-13, 2 post sets):** like self-preference +4.2 points
+[−2.8, +11.2]; dislike −4.7 [−10.4, +0.5], p = 0.08. Leaning toward the
+hypothesis, not significant. Night-1 design (pick-a-favourite, 7 models) found
++5.6 [+3.4, +7.8] (LF-10).
+
+Pages: design v2 **https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx** · design v1
+**https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9**. Data: `data/llm_bias/export/`,
+explained in `LLM_BIAS_DATA_DICTIONARY.md`.
+
+**Next, when resumed:** finish post sets 12-15 (~5.5 h) → refresh export and page →
+agent sweep (~1.75 h) for the time-vs-agents chart. Later: SSH/GPU machine
+(record model digests in manifests first).
 
 ---
 

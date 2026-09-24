@@ -1,0 +1,52 @@
+decisions 2079, valid 2077 (99.9%)
+judges ['gemma4:e2b', 'granite4.1:3b', 'llama3.1:8b', 'llama3.2:3b', 'mistral:7b', 'phi4-mini:3.8b', 'qwen2.5:7b']
+authors ['gemma4:e2b', 'granite4.1:3b', 'llama3.1:8b', 'llama3.2:3b', 'mistral:7b', 'phi4-mini:3.8b', 'qwen2.5:7b']
+chance share per author = 0.143
+
+FAVOURITE SHARE (rows judge, cols author):
+                gemma4:e2b  granite4.1:3b  llama3.1:8b  llama3.2:3b  mistral:7b  phi4-mini:3.8b  qwen2.5:7b
+gemma4:e2b           0.067          0.306        0.051        0.115       0.172           0.226       0.064
+granite4.1:3b        0.020          0.417        0.172        0.047       0.195           0.081       0.067
+llama3.1:8b          0.155          0.370        0.138        0.111       0.185           0.020       0.020
+llama3.2:3b          0.118          0.323        0.148        0.125       0.158           0.044       0.084
+mistral:7b           0.010          0.353        0.024        0.017       0.340           0.195       0.061
+phi4-mini:3.8b       0.064          0.215        0.189        0.087       0.178           0.135       0.131
+qwen2.5:7b           0.095          0.356        0.051        0.095       0.254           0.078       0.071
+
+SELF-PREFERENCE (diff-in-diff) on favourite rate:
+  gemma4:e2b       -0.0096  95% CI [-0.0567, +0.0526]
+  granite4.1:3b    +0.0967  95% CI [-0.0337, +0.2432]
+  llama3.1:8b      +0.0325  95% CI [-0.0391, +0.1363]
+  llama3.2:3b      +0.0459  95% CI [-0.0168, +0.1094]
+  mistral:7b       +0.1495  95% CI [-0.0657, +0.3746]
+  phi4-mini:3.8b   +0.0274  95% CI [-0.1397, +0.1667]
+  qwen2.5:7b       -0.0001  95% CI [-0.0438, +0.0539]
+  _pooled          +0.0489  95% CI [+0.0297, +0.0703]
+  pooled bootstrap p = 0.0000
+
+SELF-PREFERENCE (diff-in-diff) on upvote rate:
+  gemma4:e2b       -0.0956  95% CI [-0.2265, +0.0168]
+  granite4.1:3b    -0.0912  95% CI [-0.1947, +0.0085]
+  llama3.1:8b      -0.0366  95% CI [-0.1199, +0.0476]
+  llama3.2:3b      +0.0602  95% CI [-0.0052, +0.1282]
+  mistral:7b       -0.0760  95% CI [-0.2228, +0.0922]
+  phi4-mini:3.8b   +0.0682  95% CI [-0.0833, +0.2190]
+  qwen2.5:7b       -0.0539  95% CI [-0.1387, +0.0297]
+  _pooled          -0.0321  95% CI [-0.0772, +0.0168]
+  pooled bootstrap p = 0.2070
+
+SELF-PREFERENCE (diff-in-diff) on downvote rate:
+  gemma4:e2b       +0.0910  95% CI [+0.0262, +0.1682]
+  granite4.1:3b    +0.0631  95% CI [+0.0127, +0.1224]
+  llama3.1:8b      +0.0236  95% CI [-0.0621, +0.1115]
+  llama3.2:3b      -0.0045  95% CI [-0.0958, +0.0993]
+  mistral:7b       +0.0164  95% CI [-0.0745, +0.1439]
+  phi4-mini:3.8b   -0.0339  95% CI [-0.1440, +0.1137]
+  qwen2.5:7b       +0.0313  95% CI [-0.0473, +0.1034]
+  _pooled          +0.0267  95% CI [-0.0157, +0.0741]
+  pooled bootstrap p = 0.2490
+
+CONDITIONAL LOGIT (post + position fixed effects): {'beta_self': 0.38203114442808755, 'se': 0.06350140896496212, 'odds_ratio': 1.4652577190359954, 'or_ci': [1.2937802803469796, 1.659462750984865], 'p': 1.7866370007767642e-09, 'n_choices': 2077}
+  with two-way cluster bootstrap: {'beta_self': 0.382161102122559, 'odds_ratio': 1.4654481529248744, 'or_ci_cluster': [1.2553476453179149, 1.720495080555022], 'p_cluster': 0.0, 'B': 300}
+
+FAMILY (judge -> sibling author, diff-in-diff on favourite share): {'llama3.1:8b -> llama3.2:3b': 0.03892940706500028, 'llama3.2:3b -> llama3.1:8b': 0.051109969754037546}

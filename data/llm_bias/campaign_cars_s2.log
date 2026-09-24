@@ -1,0 +1,38 @@
+2026-09-24 05:53:19 campaign start seed=2 agents=99 rounds=3 topics=cars judges=llama3.1:8b,gemma4:e2b,granite4.1:3b,qwen2.5:7b,mistral:7b,phi4-mini:3.8b,llama3.2:3b
+2026-09-24 05:53:19 start cars_s2_a99_r3_llama3_1_8b
+06:12:22 round 1: 99/99 valid, 515s (5.21 s/decision), judge picked its own post 4x (chance 14.1)
+06:21:03 round 2: 99/99 valid, 521s (5.26 s/decision), judge picked its own post 34x (chance 14.1)
+06:21:03 done: /Users/gordon/research/oasis/data/llm_bias/runs/cars_s2_a99_r3_llama3_1_8b
+2026-09-24 06:21:03 end cars_s2_a99_r3_llama3_1_8b rc=0
+2026-09-24 06:21:03 start cars_s2_a99_r3_gemma4_e2b
+06:25:45 round 1: 99/99 valid, 136s (1.38 s/decision), judge picked its own post 3x (chance 14.1)
+06:28:03 round 2: 99/99 valid, 138s (1.40 s/decision), judge picked its own post 0x (chance 14.1)
+06:28:03 done: /Users/gordon/research/oasis/data/llm_bias/runs/cars_s2_a99_r3_gemma4_e2b
+2026-09-24 06:28:04 end cars_s2_a99_r3_gemma4_e2b rc=0
+2026-09-24 06:28:04 start cars_s2_a99_r3_granite4_1_3b
+06:37:34 round 1: 99/99 valid, 283s (2.86 s/decision), judge picked its own post 77x (chance 14.1)
+06:42:23 round 2: 99/99 valid, 288s (2.91 s/decision), judge picked its own post 0x (chance 14.1)
+06:42:23 done: /Users/gordon/research/oasis/data/llm_bias/runs/cars_s2_a99_r3_granite4_1_3b
+2026-09-24 06:42:23 end cars_s2_a99_r3_granite4_1_3b rc=0
+2026-09-24 06:42:23 start cars_s2_a99_r3_qwen2_5_7b
+06:58:09 round 1: 99/99 valid, 467s (4.71 s/decision), judge picked its own post 10x (chance 14.1)
+07:05:43 round 2: 99/99 valid, 454s (4.59 s/decision), judge picked its own post 2x (chance 14.1)
+07:05:43 done: /Users/gordon/research/oasis/data/llm_bias/runs/cars_s2_a99_r3_qwen2_5_7b
+2026-09-24 07:05:43 end cars_s2_a99_r3_qwen2_5_7b rc=0
+2026-09-24 07:05:43 start cars_s2_a99_r3_mistral_7b
+07:21:09 round 1: 99/99 valid, 450s (4.55 s/decision), judge picked its own post 1x (chance 14.1)
+07:28:39 round 2: 99/99 valid, 450s (4.54 s/decision), judge picked its own post 79x (chance 14.1)
+07:28:39 done: /Users/gordon/research/oasis/data/llm_bias/runs/cars_s2_a99_r3_mistral_7b
+2026-09-24 07:28:39 end cars_s2_a99_r3_mistral_7b rc=0
+2026-09-24 07:28:39 start cars_s2_a99_r3_phi4-mini_3_8b
+07:41:26 round 1: 99/99 valid, 372s (3.76 s/decision), judge picked its own post 23x (chance 14.1)
+07:47:33 round 2: 99/99 valid, 367s (3.71 s/decision), judge picked its own post 1x (chance 14.1)
+07:47:33 done: /Users/gordon/research/oasis/data/llm_bias/runs/cars_s2_a99_r3_phi4-mini_3_8b
+2026-09-24 07:47:34 end cars_s2_a99_r3_phi4-mini_3_8b rc=0
+2026-09-24 07:47:34 start cars_s2_a99_r3_llama3_2_3b
+07:56:45 round 1: 99/99 valid, 273s (2.76 s/decision), judge picked its own post 10x (chance 14.1)
+08:01:19 round 2: 99/99 valid, 274s (2.77 s/decision), judge picked its own post 9x (chance 14.1)
+08:01:19 done: /Users/gordon/research/oasis/data/llm_bias/runs/cars_s2_a99_r3_llama3_2_3b
+2026-09-24 08:01:19 end cars_s2_a99_r3_llama3_2_3b rc=0
+2026-09-24 08:01:19 campaign end
+analysis written: data/llm_bias/analysis_s2.txt

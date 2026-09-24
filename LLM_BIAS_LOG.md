@@ -16,20 +16,20 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-24 06:00.*
+*Last updated 2026-09-24 08:10.*
 
-**LF-5: the hypothesis is supported on the main run** (seed 1, 99 personas x 10
-rounds x 7 judges, 6,928 valid decisions): pooled self-preference **+5.8 share
-points [+2.9, +8.7]**, cluster-bootstrap p < 0.001; conditional logit **odds
-ratio 1.49 [1.28, 1.76]** with the clustered bootstrap. Robust to dropping any
-judge (+4.2 to +7.1) and positive in 9 of 10 rounds.
+**Night 1 is done except the extended recognition probe (LR-5, running since
+08:02, ~30 min).** Results:
+* **LF-5** main (personal finance, 99 x 10 x 7): self-preference **+5.8 pts
+  [+2.9, +8.7]**, OR **1.49 [1.28, 1.76]**.
+* **LF-9** cars (99 x 3 x 7): favourites replicate (+4.9, OR 1.47); votes do not.
+* **LF-10** both topics pooled: **+5.6 pts [+3.4, +7.8]**, OR **1.48 [1.26, 1.71]**,
+  all 7 judges positive.
+* **LF-8** (provisional): models cannot pick out their own posts; the preference
+  looks like shared taste, not self-recognition.
 
-Queue (`night1_queue.sh`): self-recognition probe on seed 1 running since 05:46,
-then the cars campaign (seed 2, 99 x 3), ETA ~08:10. Do not start other
-inference until `data/llm_bias/night1_queue.log` says "cars campaign done".
-
-Artifact: **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9** — regenerate with
-`make_artifact.py --seeds 1,101,2`.
+Artifact: **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9**. Next-step
+questions for Gordon are in the 2026-09-24 morning report (§11).
 
 ---
 
@@ -259,8 +259,9 @@ model calls, ~14 s. The important ones are the analysis tests on synthetic data:
 | LR-0 | `smoke1`, `smoke7_*` | 900 | 5x2, 8x2 | 1, then 7 | smoke only; excluded from analysis |
 | LR-1 | `pilot_s101_a30_r3_*` | 101 | 30 x 3 | 7 | done 22:10-22:49, 629/630 valid |
 | LR-2 | `main_s1_a99_r10_*` | 1 | 99 x 10 | 7 | done 22:59-05:44 (6 h 45 m), 6928/6930 valid |
-| LR-3 | recognition probe | 1 | 10 slots x 4 shuffles | 7 | queued behind LR-2 |
-| LR-4 | `cars_s2_a99_r3_*` (topic: cars) | 2 | 99 x 3 | 7 | queued behind LR-3 |
+| LR-3 | recognition probe | 1 | 10 slots x 4 shuffles | 7 | done 05:46-05:53, 276/276 valid |
+| LR-4 | `cars_s2_a99_r3_*` (topic: cars) | 2 | 99 x 3 | 7 | done 05:53-08:01, 2077/2079 valid |
+| LR-5 | recognition probe extended | 1 | 10 slots x 20 shuffles | 7 | running from 08:02 |
 
 **Parallelism check (22:50):** `OLLAMA_NUM_PARALLEL=8` / `--parallel 8` gives no
 speed-up over 4 (llama3.1 5.10 vs 5.11 s/decision, llama3.2 2.71 vs 2.61). The GPU
@@ -406,3 +407,33 @@ judge (+13.9) — shows +1 on recognition.** Reading so far: the bias is *shared
 taste* (a model likes a style it also writes in), not knowing self-favouritism.
 n = 40 per model is too small to be firm; `night1_queue2.sh` extends to k = 20
 after the cars run.
+
+### LF-9 — Second topic (cars, seed 2): the favourite effect replicates, the vote effect does not
+
+99 personas x 3 rounds x 7 judges, 21 posts, 2,077 valid decisions.
+
+* **Favourites: pooled +4.9 share points; all 3 rounds positive (+5.4, +4.9, +4.4).**
+  Conditional logit odds ratio **1.47** — against 1.49 on personal finance.
+  **Caveat:** with only 3 slots the slot-cluster bootstrap cannot represent
+  between-slot variation, so the cars-only intervals ([+3.0, +7.0]; OR
+  [1.26, 1.72]) are too narrow. Read cars as a direction-and-size replication,
+  not an independent significance test.
+* **Votes do not replicate.** Upvote double-difference −3.2 [−7.7, +1.7];
+  downvote +2.7 [−1.6, +7.4]. gemma and granite *downvote* their own car posts
+  more (+9.1, +6.3). On personal finance both vote measures were significant in
+  the self-favouring direction. So far, **the robust effect is on which post a
+  persona chooses to read, not on how it votes.**
+* **Persona fidelity is stronger on cars** for llama3.1 (upvotes 29 → 54 % from
+  dislike to love; personal finance 52 → 61) and gemma4 (63 → 81 vs 78 → 87);
+  qwen2.5 again strongest (7 → 64).
+* Family: llama3.1 → llama3.2 +3.9, llama3.2 → llama3.1 +5.1 (personal finance
+  +1.2, +5.7). All four sibling estimates are positive, all small.
+
+### LF-10 — Both topics pooled (13 slots, 9,005 decisions)
+
+Favourite self-preference **+5.6 share points [+3.4, +7.8]**, p < 0.001 (0/2000
+resamples at or below zero). Clustered conditional logit **OR 1.48 [1.26, 1.71]**.
+Every judge's point estimate is positive: mistral +14.1 and gemma +10.4
+(individually significant), llama3.1 +7.1 [−0.5, +14.5], llama3.2 +2.2, phi4-mini
++2.5, granite +1.9, qwen +1.0. Upvote +3.2 [−0.3, +6.6], p = 0.07.
+File: `data/llm_bias/analysis_combined_s1_s2.txt`.

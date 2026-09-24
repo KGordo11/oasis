@@ -1,0 +1,67 @@
+{
+ "label": "cars_s2_a99_r3_llama3_1_8b",
+ "started_at": "2026-09-24T05:55:02.955061",
+ "config": {
+  "judge": "llama3.1:8b",
+  "authors": [
+   "llama3.1:8b",
+   "gemma4:e2b",
+   "granite4.1:3b",
+   "qwen2.5:7b",
+   "mistral:7b",
+   "phi4-mini:3.8b",
+   "llama3.2:3b"
+  ],
+  "topics": [
+   "cars"
+  ],
+  "seed": 2,
+  "agents": 99,
+  "rounds": 3,
+  "parallel": 4,
+  "temperature": 0.7,
+  "num_ctx": 8192,
+  "think": false,
+  "show_author": false,
+  "show_scores": false,
+  "order": "shuffled per persona/round/topic"
+ },
+ "persona_bank_hash": "8c9cf5b67383",
+ "machine": {
+  "platform": "macOS-15.8-arm64-arm-64bit",
+  "python": "3.11.15",
+  "ollama_env": {}
+ },
+ "post_generation_s": 93.1,
+ "rounds": [
+  {
+   "round": 0,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 523.8,
+   "s_per_decision": 5.29,
+   "self_favorites": 3,
+   "truncation_risk": 0
+  },
+  {
+   "round": 1,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 515.4,
+   "s_per_decision": 5.21,
+   "self_favorites": 4,
+   "truncation_risk": 0
+  },
+  {
+   "round": 2,
+   "decisions": 99,
+   "ok": 99,
+   "wall_s": 521.0,
+   "s_per_decision": 5.26,
+   "self_favorites": 34,
+   "truncation_risk": 0
+  }
+ ],
+ "finished_at": "2026-09-24T06:21:03.089211",
+ "judge_wall_s": 1560.1
+}

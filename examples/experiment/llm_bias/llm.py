@@ -68,7 +68,10 @@ def chat_json(model, system, user, *, seed=None, temperature=0.7, num_predict=40
     Each retry uses seed+attempt so it is a genuinely new sample, still reproducible.
     """
     meta = {"model": model, "backend": "ollama", "attempts": 0, "errors": [],
-            "latency_s": 0.0, "prompt_tokens": 0, "eval_tokens": 0, "truncation_risk": False}
+            "latency_s": 0.0, "prompt_tokens": 0, "eval_tokens": 0, "truncation_risk": False,
+            # why generation stopped ("stop" = finished; "length" = hit num_predict) and how much
+            # hidden reasoning came back -- the two things to check when a model "does nothing"
+            "done_reason": None, "thinking_chars": 0, "timeouts": 0}
     last_raw = None
     for attempt in range(retries + 1):
         meta["attempts"] = attempt + 1
@@ -86,6 +89,8 @@ def chat_json(model, system, user, *, seed=None, temperature=0.7, num_predict=40
             r = _post("/api/chat", payload, timeout)
         except (urllib.error.URLError, TimeoutError, OSError) as e:
             meta["errors"].append(f"transport: {e}")
+            if "timed out" in str(e).lower():
+                meta["timeouts"] += 1
             meta["latency_s"] += time.time() - t
             continue
         meta["latency_s"] += time.time() - t
@@ -94,6 +99,8 @@ def chat_json(model, system, user, *, seed=None, temperature=0.7, num_predict=40
         if meta["prompt_tokens"] >= 0.95 * NUM_CTX:
             meta["truncation_risk"] = True
         last_raw = r.get("message", {}).get("content", "")
+        meta["done_reason"] = r.get("done_reason")
+        meta["thinking_chars"] += len(r.get("message", {}).get("thinking") or "")
         meta["raw"] = last_raw
         try:
             obj = extract_json(last_raw)

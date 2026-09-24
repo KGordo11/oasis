@@ -216,3 +216,59 @@ def test_recognition_probe_offline(tmp_path, monkeypatch):
     assert s["n"] == 3 * 2 * 3
     assert s["per_model"]["m1"]["claims_own"] == 1.0
     assert s["per_model"]["m1"]["did"] > 0.5
+
+
+# ---------- design v2: scrolling shared world ----------
+
+def _toy_posts():
+    import itertools
+    return {t: [{"key": f"r{k}|{t}|{a}", "author": a, "title": "t", "body": "b", "round": k, "topic": t}
+                for k, a in itertools.product(range(5), ["A", "B", "C"])] for t in PRIMARY}
+
+
+def test_scroll_feed_order_complete_and_fixed():
+    import scroll
+    p = personas.load_bank()[7]
+    f = scroll.feed(p, _toy_posts(), seed=10)
+    assert len(f) == 5 * 15 and len({x[3]["key"] for x in f}) == 75  # every post exactly once
+    assert f == scroll.feed(p, _toy_posts(), seed=10)  # same every run
+    ranks = [p["topic_affinity"][t] for t in scroll.topic_order(p, PRIMARY)]
+    assert ranks == sorted(ranks, reverse=True)  # best-loved topic first
+    assert [x[1] for x in f][:15] == [scroll.topic_order(p, PRIMARY)[0]] * 15  # whole topic before the next
+
+
+def test_scroll_validate_and_outcome():
+    import scroll
+    assert scroll.validate({"action": "Upvote", "reason": "x"})["action"] == "like"
+    assert scroll.validate({"action": "keep scrolling"})["action"] == "nothing"
+    with pytest.raises(ValueError):
+        scroll.validate({"action": "maybe"})
+    assert scroll.outcome({"action": "nothing"}, {}) == "chose"
+    assert scroll.outcome(None, {"done_reason": "length", "raw": "{\"act"}) == "cut_off"
+    assert scroll.outcome(None, {"timeouts": 2, "raw": None}) == "timeout"
+    assert scroll.outcome(None, {"done_reason": "stop", "raw": "hmm"}) == "unreadable"
+
+
+def test_world_rotation_gives_every_persona_every_judge():
+    import run_world
+    judges = ["j1", "j2", "j3"]
+    for pid in range(10):
+        assert {run_world.assign(pid, judges, w) for w in range(3)} == set(judges)
+    # within one world the split is balanced
+    from collections import Counter
+    c = Counter(run_world.assign(pid, judges, 0) for pid in range(99))
+    assert max(c.values()) - min(c.values()) <= 1
+
+
+def test_core99_pinned_and_identical_every_time():
+    a, b = personas.core99(), personas.core99()
+    assert a == b and len(a) == 99 and [p["id"] for p in a] == list(range(99))
+    assert personas.bank_hash(a) == personas.PINNED_CORE99_HASH
+
+
+def test_core99_refuses_changed_personas(monkeypatch):
+    bank = personas.load_bank()
+    bank[5] = {**bank[5], "persona": bank[5]["persona"] + " (edited)"}
+    monkeypatch.setattr(personas, "load_bank", lambda path=None: bank)
+    with pytest.raises(personas.PersonaDrift):
+        personas.core99()

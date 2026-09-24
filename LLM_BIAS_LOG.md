@@ -16,18 +16,23 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-24 08:35.*
+*Last updated 2026-09-24 09:40.*
 
-**Night 1 complete. Nothing is running.** Read §11 (morning report) first.
-* **LF-10** both topics pooled: self-preference **+5.6 pts [+3.4, +7.8]**, OR
-  **1.48 [1.26, 1.71]**, all 7 judges positive. Main run LF-5, cars LF-9.
-* **LF-8 (final)**: recognition is weak and does not track preference — shared
-  taste, not self-recognition.
-* Open decisions for Gordon: §11 questions 1-6. Default if no answer: the three
-  remaining primary topics as 99 x 10 campaigns, one per night.
+**Design v2 is running** (Gordon, 2026-09-24 morning — see §12). Two models,
+llama3.1:8b and gemma4:e2b, both write posts AND play personas, in one shared
+OASIS world; every persona scrolls all 50 posts (5 topics x 5 posts x 2 models)
+and likes / dislikes / does nothing, one post at a time. Vote counts hidden.
+**The same 99 pinned personas every run** (fingerprint `964462b96652`, enforced in
+code — `personas.core99()` refuses to run if any persona changed).
 
-Artifact: **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9**.
-Ollama is running with NUM_PARALLEL=4, CONTEXT_LENGTH=8192.
+Campaign: `world_campaign.sh`, SEEDS 10-15, two rotation worlds per seed (~2.2 h
+per seed), launched 09:32, log `data/llm_bias/campaign_v2.log`. First result
+after seed 10 (~11:45); analysis refreshes to `data/llm_bias/analysis_v2.txt`
+after every seed. Resumable: re-launching skips finished worlds and resumes a
+half-done one.
+
+Night-1 results (design v1, 7 models, pick-a-favourite) are §10-11 and stay valid
+as a separate design.
 
 ---
 
@@ -488,3 +493,61 @@ replicated on personal finance but not cars. And it is not self-recognition.
    models, closer to a real OASIS sim.
 6. More model families? Any Ollama model can join (e.g. deepseek, olmo, cohere
    command-r7b); each adds an author and a judge.
+
+---
+
+## 12. Design v2 (2026-09-24 morning, Gordon)
+
+**What changed and why (Gordon's words, summarised):**
+* Two models only, for a fast but proven test: **llama3.1:8b** (used all night)
+  and **gemma4:e2b** (fastest). Each writes posts and plays personas. llama3.1
+  was kept as the main model because it votes selectively (~55 % likes in v1)
+  while gemma likes ~85 % of everything, which leaves little room for a bias to
+  show in likes (LF-6).
+* **Scrolling, not comparing.** Each persona sees every post, one call per post,
+  and chooses like / dislike / nothing. No favourite pick.
+* **Topic order follows the persona:** best-loved topic first, down to the most
+  disliked; ties broken by a fixed per-persona draw. Within a topic, a fixed
+  per-persona shuffle.
+* **5 posts per model per topic**, all five primary topics → 50 posts per world.
+* **One shared world**: all posts from both models are live on one OASIS
+  platform; likes/dislikes are OASIS `like_post` / `dislike_post`.
+* **Vote counts hidden** (Gordon chose this; not studying herding). This is also
+  what lets the harness run one model at a time: with no visible counts, the
+  order in which personas act cannot matter.
+* **The same 99 personas every run** — see LD-10.
+
+**LD-9 — Rotation.** Persona i is played by `judges[(i + world) % 2]`. World 0 and
+world 1 use the same post bank with the assignment swapped, so every persona is
+played by both models on identical posts. Otherwise "llama happened to get the
+finance fans" could pass for bias.
+
+**LD-10 — The 99 are pinned.** Personas #0-98 of `personas_bank.json` (the same 99
+every v1 run used). Fingerprints are constants in `personas.py`
+(`PINNED_BANK_HASH = 8c9cf5b67383`, `PINNED_CORE99_HASH = 964462b96652`);
+`core99()` raises `PersonaDrift` if either differs, and `run_world.py` will not
+start. Each manifest records the fingerprint and the persona ids. Tests check
+both the pin and that an edited persona is refused.
+
+**The test.** A 2 x 2 table of like rates (rows: model playing the persona; columns:
+model that wrote the post). Self-preference = (llama-personas' llama-vs-gemma
+gap) − (gemma-personas' llama-vs-gemma gap), reported as the double difference
+from `analyze.did` with the persona x slot cluster bootstrap
+(`analyze_world.py`). The same for dislike rates, where self-preference is
+negative.
+
+### LF-11 — Benchmark (bench_v2: 10 personas x 50 posts, seed 10): the "nothing" answers are real choices
+
+* Speed: **llama3.1 1.23 s / decision, gemma4 0.33 s** (4 parallel). A 99-persona
+  world ≈ 65 min; a rotation pair ≈ 2.2 h.
+* **500/500 valid. 0 failures, 0 timeouts, 0 replies cut off at the token limit,
+  0 characters of hidden thinking, 0 retries.** Every "nothing" carries a reason
+  ("Not really my thing", "too vague to comment", "Need real data").
+* "Nothing" follows interest: llama-played personas do nothing on **78-93 %** of
+  posts in topics they dislike (−2/−1) and **15-23 %** in topics they like. gemma
+  23-26 % vs 3-10 %.
+* Persona fidelity is far stronger in the scroll design than in v1: llama-played
+  personas like **0-5 %** of posts in disliked topics and **84-85 %** in liked
+  ones (v1 finance: 52 → 61 %).
+* The self-preference numbers from 10 personas (−2.4) are noise; bench_v2 is
+  excluded from the campaign analysis (prefix `v2_`).

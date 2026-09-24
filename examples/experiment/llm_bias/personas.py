@@ -221,6 +221,30 @@ def render_persona(p):
     )
 
 
+# PINNED (Gordon, 2026-09-24: "make sure the 99 personalities are hard coded and the same ones
+# are used EVERY SINGLE TIME"). The standard population is personas #0-98 of the committed bank.
+# Their fingerprint is fixed here; `core99()` refuses to return anything if the file has changed.
+# Never edit these two constants to make a run start -- a mismatch means the people changed.
+CORE_N = 99
+PINNED_BANK_HASH = "8c9cf5b67383"
+PINNED_CORE99_HASH = "964462b96652"
+
+
+class PersonaDrift(RuntimeError):
+    pass
+
+
+def core99():
+    """The 99 standard personas, verified byte-for-byte against the pinned fingerprint."""
+    bank = load_bank()
+    if bank_hash(bank) != PINNED_BANK_HASH:
+        raise PersonaDrift(f"personas_bank.json changed: {bank_hash(bank)} != pinned {PINNED_BANK_HASH}")
+    core = bank[:CORE_N]
+    if bank_hash(core) != PINNED_CORE99_HASH or [p["id"] for p in core] != list(range(CORE_N)):
+        raise PersonaDrift("the 99 standard personas changed")
+    return core
+
+
 def bank_hash(bank):
     return hashlib.sha256(json.dumps(bank, sort_keys=True).encode()).hexdigest()[:12]
 

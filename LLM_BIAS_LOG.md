@@ -551,3 +551,24 @@ negative.
   ones (v1 finance: 52 → 61 %).
 * The self-preference numbers from 10 personas (−2.4) are noise; bench_v2 is
   excluded from the campaign analysis (prefix `v2_`).
+
+**LD-11 — Everything per post is exported and documented (Gordon, 2026-09-24:
+"I need what users did for each post, time it took at each post, who made what
+post and who was controlling the users for each reaction; times-vs-rounds and
+time-vs-agents graphs; all documented").**
+* `export_world.py` writes `data/llm_bias/export/`: `reactions.csv` (one row per
+  user per post: action, reason, seconds, author model, controlling model, topic
+  order, scroll position, tokens, outcome), `posts.csv`, `users.csv` (with the
+  controlling model per round), `world_timing.csv`, `progress_timing.csv`.
+* Every column is defined in **`LLM_BIAS_DATA_DICTIONARY.md`** (repo root).
+* `make_world_artifact.py` builds the design-v2 page: result, "nothing" diagnosis,
+  **time per round** (minutes per model per round), **time vs agents** (elapsed
+  time every 5 users inside a round) and **whole runs at different sizes**.
+* `agent_sweep.sh` (queued behind the campaign, ~1.75 h): standalone runs at 10,
+  25, 50 and 75 users on post set 10, world 0, so the size chart uses real runs.
+  Labels `sweep_*` are never mixed into the result (analysis uses prefix `v2_`).
+* Timing note: a decision's `seconds` is that one request's duration with 4
+  requests sharing the chip; throughput (`seconds_per_decision` in
+  world_timing.csv) is ~4x lower. Both are documented.
+* Chart colours: llama3.1 = blue, gemma4 = orange, fixed; validated for
+  colour-blind separation in light and dark mode.

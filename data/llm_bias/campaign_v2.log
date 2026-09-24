@@ -1,0 +1,11 @@
+2026-09-24 09:32:02 campaign start seeds=[10 11 12 13 14 15] agents=99 judges=llama3.1:8b,gemma4:e2b
+2026-09-24 09:32:02 start v2_s10_w0 
+10:23:20 llama3.1:8b: done 2500 in 51.0 min (1.22 s/decision) {'nothing': 753, 'like': 1663, 'dislike': 84}
+10:36:53 gemma4:e2b: done 2450 in 13.5 min (0.33 s/decision) {'nothing': 355, 'like': 1931, 'dislike': 164}
+2026-09-24 10:36:54 end v2_s10_w0 rc=0
+2026-09-24 10:36:54 start v2_s10_w1 
+11:28:58 llama3.1:8b: done 2450 in 51.8 min (1.27 s/decision) {'nothing': 780, 'like': 1559, 'dislike': 111}
+11:43:29 gemma4:e2b: done 2500 in 14.4 min (0.35 s/decision) {'like': 2015, 'dislike': 164, 'nothing': 321}
+2026-09-24 11:43:30 end v2_s10_w1 rc=0
+2026-09-24 11:43:50 analysis after seed 10: data/llm_bias/analysis_v2.txt
+2026-09-24 11:43:50 start v2_s11_w0 

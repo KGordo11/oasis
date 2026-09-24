@@ -31,6 +31,10 @@ after seed 10 (~11:45); analysis refreshes to `data/llm_bias/analysis_v2.txt`
 after every seed. Resumable: re-launching skips finished worlds and resumes a
 half-done one.
 
+**LF-12 (post set 10, 9,900/9,900 valid): no own-model like boost so far, −3.0
+points [−9.7, +3.9].** Design-v2 page: **https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx**
+(refresh: `export_world.py` then `make_world_artifact.py`, republish).
+
 Night-1 results (design v1, 7 models, pick-a-favourite) are §10-11 and stay valid
 as a separate design.
 
@@ -572,3 +576,33 @@ time-vs-agents graphs; all documented").**
   world_timing.csv) is ~4x lower. Both are documented.
 * Chart colours: llama3.1 = blue, gemma4 = orange, fixed; validated for
   colour-blind separation in light and dark mode.
+
+### LF-12 — First post set (seed 10, worlds 0+1): no own-model like boost yet
+
+99 users x 50 posts x 2 worlds = 9,900 decisions, **9,900 valid**, every user
+played by both models. Rounds took 64.7 and 66.4 min (llama 51-52 min at
+1.22-1.27 s/decision; gemma 13.5-14.4 min at 0.33-0.35).
+
+| like rate | llama's posts | gemma's posts |
+|---|---|---|
+| users controlled by llama | 66.5 % | 63.7 % |
+| users controlled by gemma | 82.6 % | 76.8 % |
+
+* **Both groups prefer llama's posts** (llama users +2.8 points, gemma users
+  +5.8): llama wrote better-liked posts. Self-preference on likes = **−3.0 points
+  [−9.7, +3.9]**, p = 0.40; on dislikes +1.7 [−1.9, +5.5] (self-preference would be
+  negative). **Not supported on one post set.**
+* Exploratory split by interest (not pre-planned): liked topics −2.1 [−9.5, +5.4];
+  disliked topics −5.3 [−14.3, +2.4]. Nothing hiding in either.
+* **Persona interest dominates the vote:** llama-controlled users like 4.5 % / 2.5 %
+  of posts in topics they dislike (−2/−1) and 85-92 % in topics they are at least
+  indifferent to; gemma 58-69 % vs 83-88 %.
+* "Nothing" again fully explained: 0 failures, 100 % with reasons, tracks interest
+  (llama 73-90 % for disliked topics vs 8-14 % for liked).
+* **Contrast with night 1 (LF-5/LF-10):** when a user had to pick ONE favourite out
+  of seven side by side, the controlling model's own post won +5.6 points more often.
+  Rating posts one at a time, with no comparison, shows nothing so far. If this
+  holds over more post sets, it is itself a finding: the bias appears when a model
+  compares, not when it rates alone. This is consistent with self-preference
+  studies that find it strongest in pairwise judgements. Five more post sets are
+  queued (seeds 11-15).

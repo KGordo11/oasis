@@ -27,6 +27,11 @@ Progress: `tail data/llm_bias/campaign_v2.log`; per world `/tmp/llm_bias_<label>
 
 If it stops again, the same commands below pick up where it left off.
 
+**Side work while it runs:** LF-15 (exploration of post sets 10-11, no model calls):
+self-preference may be mostly gemma liking longer posts; the dislike signal is gemma disliking
+llama's posts; the same person played by the two models agrees only weakly (kappa 0.21).
+After the campaign: rerun `explore_world.py` on sets 10-15 and add it to the design-v2 page.
+
 **To resume** (picks up v2_s12_w0 where it stopped, skips finished worlds, then
 runs post sets 13-15; the size sweep waits behind it):
 
@@ -684,3 +689,94 @@ no longer be the same llama3.1/gemma4 as every run so far.
 
     OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 \
       OLLAMA_KEEP_ALIVE=24h ollama serve > /tmp/ollama_serve.log 2>&1
+
+### LF-15 — Exploration of post sets 10-11 (2026-09-25, while the campaign ran): what drives a reaction
+
+`explore_world.py` → `data/llm_bias/explore_v2.json` (+ `explore_v2_posts.csv`, one row per
+post). 19,800 reactions, complete post sets only. **All of this is exploratory — none of it
+was planned before seeing the data**, so the intervals describe, they do not confirm.
+"Cares" = the person's interest in the post's topic is 0, +1 or +2; "doesn't care" = −1 or −2.
+Intervals are the persona x slot cluster bootstrap (B = 2000) unless stated.
+
+**1. Where the headline comes from.** Like rate (%), people who care about the topic:
+
+| | gemma posts | llama posts |
+|---|---|---|
+| gemma-played people | 80.4 | 77.9 |
+| llama-played people | 88.8 | 90.7 |
+
+Dislike rate (%), people who care:
+
+| | gemma posts | llama posts |
+|---|---|---|
+| gemma-played people | 6.6 | **11.9** |
+| llama-played people | 0.8 | 0.9 |
+
+Each model likes its own posts a little more (+2.5 and +1.9 points). The dislike signal is
+**entirely gemma-played people disliking llama's posts** (11.9 vs 6.6 %; top reasons "too
+vague", "too much whining", "slick talk nonsense"). llama-played people who care about a topic
+almost never dislike anything. With only two models the double difference is symmetric by
+construction: it cannot say *which* model is self-preferring, only that each is relatively
+kinder to its own posts than the other model is.
+
+**2. Only where people care.** Self-preference like +4.5 [−2.4, +11.5], dislike −5.2
+[−11.4, +0.1], p = 0.058. Where they don't care: like +3.2 [−4.8, +11.6], dislike −3.3
+[−10.9, +3.6]. Slightly sharper where people care, as expected (llama answers "nothing" to
+81-85 % of posts in topics its people dislike, so those carry little signal); not a different
+conclusion.
+
+**3. By topic.** Like self-preference: tech +11.4 [+3.5, +18.9] (p = 0.003), cars +11.0
+[−7.0, +27.0], personal finance +0.7, cooking 0.0, farming −2.3. Five topics were tested, so
+tech alone would be p ≈ 0.015 after a Bonferroni correction (multiplying by 5 for the five
+tries); the per-topic intervals are wide (only 10 slots per topic).
+
+**4. Post length may explain most of the like signal.** gemma writes slightly longer posts
+(mean 85 vs 78 words). gemma-played people like longer posts more (short/medium/long terciles
+74 / 82 / 83 % where they care); llama-played people don't care about length (90 / 89 / 91 %).
+A linear model with post and person-x-model fixed effects (clustered by slot) gives a
+self-preference coefficient of +2.1 [−1.3, +5.5] points (half the double difference, so ≈ +4.2
+on the headline scale). Adding "gemma-played x post length" shrinks it to **+0.4 [−3.9, +4.7]**
+(≈ +0.7 on the headline scale), while the length term is +4.3 per standard deviation of length
+[−1.1, +9.7]. Reading: gemma's lean toward its own posts may be a taste for longer posts, which
+it happens to write. Suggestive only — the length term's interval includes zero. Worth a planned
+test on post sets 10-15.
+
+**5. The model matters more than the person.** Each person is played by both models on the same
+posts (9,900 pairs). The two versions give the same reaction 63.7 % of the time vs 54.1 %
+expected from their overall habits alone — Cohen's kappa (agreement beyond chance, 0 = none,
+1 = perfect) **0.21** (weak). Where the person cares: 0.21. Where they don't: **0.00** — llama
+ignores the post (84 % "nothing") while gemma likes 60 % of posts in topics the person dislikes.
+
+**6. The models barely agree on which posts are good.** Per-post like rate among people who
+care: Spearman rank correlation between llama-played and gemma-played = **0.32**. llama-played
+people like almost every post in a topic they care about (spread across posts: SD 9 points);
+gemma-played people discriminate far more (SD 23 points). So llama's selectivity is about
+topics, not posts. Both authors average 84 % likes where people care; llama's posts draw
+slightly more dislikes (6 vs 4 %).
+
+**7. No scroll-position effects.** Like rate is flat across positions 1-10 within a topic
+(llama 65-67 %, gemma 73-77 %) and across the scroll (no fatigue by post 50).
+
+**8. Persona traits.** Voting style dominates and is honoured by both models: "harsh" people
+like 40-42 % vs "generous" 74 % (llama) / 96 % (gemma). llama turns "harsh" into "nothing"
+(54 %); gemma turns it into dislikes (23 %). llama barely separates "generous" from "typical"
+(−3 points vs gemma's −20). Age: the raw gap (llama, under-30 like 59 % vs 60+ 72 %) vanishes
+once voting style and interest are controlled — younger personas happen to include more
+"harsh" ones. Female-played people like slightly less than male (−3.6 [−6.8, −0.5] gemma,
+−2.5 [−5.1, +0.2] llama, same controls). Only 4 non-binary personas — too few to say anything.
+
+**9. Reasons.** gemma's are 2.7 words on average, only 20 % distinct ("too vague" 708 times),
+and mention the person's own life 0.6 % of the time. llama's are 5.9 words, 73 % distinct, and
+mention the person's own life (job, city, "as a…") 24 % of the time. So gemma's persona play is
+shallow in the reasons too. Reason length and content do not differ for own vs other-model posts.
+
+**What to do with this:** (a) at the end of the campaign, rerun on post sets 10-15 and
+pre-state the length test (item 4) as the one follow-up hypothesis before looking;
+(b) report the dislike result as "gemma dislikes llama's posts", not as a symmetric bias;
+(c) the weak person-level agreement (item 5) is itself a finding for anyone using these
+models as simulated audiences: who the person is matters less than which model plays them.
+
+**LB-note:** `analysis_v2.txt` written at 12:08:56 today includes the first 1,399 decisions of
+the unfinished `v2_s12_w0` (llama-played people only), which shifts the headline to +4.5; the
+file is overwritten with clean numbers when post set 12 finishes. Use complete post sets only
+(explore_world.py enforces this).

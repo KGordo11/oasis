@@ -38,3 +38,7 @@ skip v2_s11_w1 (finished)
 2026-09-25 13:51:12 end v2_s12_w1 rc=0
 2026-09-25 13:52:20 analysis after seed 12: data/llm_bias/analysis_v2.txt
 2026-09-25 13:52:20 start v2_s13_w0 
+14:50:21 llama3.1:8b: done 2500 in 55.1 min (1.32 s/decision) {'like': 1666, 'nothing': 763, 'dislike': 71}
+15:04:59 gemma4:e2b: done 2450 in 14.6 min (0.36 s/decision) {'like': 2009, 'dislike': 186, 'nothing': 255}
+2026-09-25 15:05:00 end v2_s13_w0 rc=0
+2026-09-25 15:05:00 start v2_s13_w1 

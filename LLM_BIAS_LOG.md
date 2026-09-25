@@ -16,44 +16,39 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-25 12:10 — RESUMED.*
+*Last updated 2026-09-25 15:57 — STOPPED at Gordon's request ("come to a complete stopping point").*
 
-**Running since 2026-09-25 12:08:** `world_campaign.sh` (SEEDS 10-15) resumed
-`v2_s12_w0` at decision 1,399 (962 votes replayed into a fresh OASIS db), then
-runs post sets 13-15 (~5.5 h total). `agent_sweep.sh` is waiting behind it
-(~1.75 h). Ollama restarted with flash attention (LF-14 settings, log in
-/tmp/ollama_serve.log). Post sets 10 and 11 are complete (4 worlds, 19,800 decisions).
-Progress: `tail data/llm_bias/campaign_v2.log`; per world `/tmp/llm_bias_<label>.log`.
+**Nothing is running, and Ollama is shut down too.** Campaign, agent sweep and Ollama were all stopped.
+* Complete: post sets 10, 11, 12 (both worlds each) and `v2_s13_w0`.
+* Partial: `v2_s13_w1` — 2,337 of 4,950 reactions on disk (valid JSON; resume replays them). Not committed until finished.
+* Not started: post sets 14-15; agent sweep (10/25/50/75 people).
+* Pages are current as of post sets 10-12 (LF-16). Post set 13 is not in them yet (it's half done).
+* Note: after resuming, `v2_s13_w1`'s timing only covers the part after the restart (same as `v2_s12_w0`, LF-16).
 
-If it stops again, the same commands below pick up where it left off.
+**Latest result (LF-16, 3 post sets):** dislike self-preference −4.7 [−9.8, −0.3], p = 0.038 (mostly gemma
+disliking llama's posts); like +3.2 [−2.8, +9.5], not shown, and possibly just gemma liking longer posts.
+Refresh recipe for the pages: end of LF-16.
 
-**Latest (LF-16, 3 post sets, 29,700 reactions):** dislike self-preference −4.7 [−9.8, −0.3], p = 0.038
-(mostly gemma disliking llama's posts); like +3.2 [−2.8, +9.5], not shown — and possibly just gemma liking longer
-posts. Page rewritten for a 5th grader with a look-up tool (v3). Refresh recipe at the end of LF-16.
-Expected finish: sets 13-15 ≈ 20:20, agent sweep ≈ 22:00 (each world ≈ 65 min).
-
-**To resume** (picks up v2_s12_w0 where it stopped, skips finished worlds, then
-runs post sets 13-15; the size sweep waits behind it):
+**To resume** (start Ollama first — command below; this picks up v2_s13_w1 where it stopped, skips finished
+worlds, then runs post sets 14-15; the size sweep waits behind it; ~3.5 h + ~1.75 h):
 
     cd /Users/gordon/research/oasis
     SEEDS="10 11 12 13 14 15" nohup caffeinate -i examples/experiment/llm_bias/world_campaign.sh \
       >> data/llm_bias/campaign_v2.log 2>&1 &
     nohup caffeinate -i examples/experiment/llm_bias/agent_sweep.sh >> data/llm_bias/agent_sweep.log 2>&1 &
 
-If Ollama is down, start it first (LF-14):
+Ollama is down — start it first (LF-14):
 `OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve > /tmp/ollama_serve.log 2>&1 &`
 
-**Where the result stands (LF-13, 2 post sets):** like self-preference +4.2 points
-[−2.8, +11.2]; dislike −4.7 [−10.4, +0.5], p = 0.08. Leaning toward the
-hypothesis, not significant. Night-1 design (pick-a-favourite, 7 models) found
-+5.6 [+3.4, +7.8] (LF-10).
+Night-1 design (pick-a-favourite, 7 models) found +5.6 [+3.4, +7.8] (LF-10).
 
 Pages: design v2 **https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx** · design v1
 **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9**. Data: `data/llm_bias/export/`,
 explained in `LLM_BIAS_DATA_DICTIONARY.md`.
 
-**Next, when resumed:** finish post sets 12-15 (~5.5 h) → refresh export and page →
-agent sweep (~1.75 h) for the time-vs-agents chart. Later: SSH/GPU machine
+**Next, when resumed:** finish post sets 13-15 → refresh export, analysis, exploration and both
+pages (recipe at end of LF-16) → agent sweep for the time-vs-agents chart → rerun the length test as a
+pre-stated check on sets 10-15 (LF-15/16). Later: SSH/GPU machine
 (record model digests in manifests first).
 
 ---

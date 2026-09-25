@@ -133,6 +133,23 @@ One row every 250 decisions (= every 5 users), read from each run's log.
 Post banks: `data/llm_bias/postbank_s<seed>.jsonl` — every post ever generated
 for that seed, with the raw model output, the brief, attempts and timing.
 Analysis: `data/llm_bias/analysis_v2.txt` / `.json` (refreshed after every post set).
+Only **finished** worlds are exported, and the analysis counts a post set only when **both** of its rotation
+worlds are finished (a half-done set has one model's people only). A world that was paused and resumed keeps
+all its reactions, but its `world_timing.csv` minutes cover only the part after the restart (compare
+`decisions` with users x 50); the page's timing charts leave such rounds out.
+
+Exploration: `data/llm_bias/explore_v2.json` (numbers behind the page's "What else we found": self-preference by
+topic and by whether the person cares, same-person agreement, per-post agreement, post length, scroll position,
+persona traits, reasons) and `explore_v2_posts.csv` (one row per post: like rate among people who care about the
+topic, separately for llama-played and gemma-played people, plus author, topic, words). Made by `explore_world.py`;
+exploratory, complete post sets only.
+
+Page data: `world_data.js`, written next to the page by `make_world_artifact.py` and published with it. It is
+reactions.csv/posts.csv/users.csv packed for the look-up tool: `posts` (s = post set, t = topic, a = author 0 llama /
+1 gemma, ti = title, b = body, w = words, k = kind of post), `users` (i = id, n = name, age, g = gender, pl = place,
+job, st = voting style, in = interest -2..+2 per primary topic, d = the exact persona text), `reasons` (every
+distinct reason once) and `R` = one row per reaction `[post index, user id, playing model 0/1, action 0 like /
+1 dislike / 2 nothing, reason index, seconds]`.
 
 ---
 

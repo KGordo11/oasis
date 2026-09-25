@@ -16,11 +16,16 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-24 15:05 — PAUSED at Gordon's request ("get to a stopping point").*
+*Last updated 2026-09-25 12:10 — RESUMED.*
 
-**Nothing is running.** Design v2 campaign paused at 15:04 part-way through
-`v2_s12_w0` (1,399 of 4,950 decisions, all on disk). Post sets 10 and 11 are
-complete (4 worlds, 19,800 decisions). Ollama is still up with flash attention on.
+**Running since 2026-09-25 12:08:** `world_campaign.sh` (SEEDS 10-15) resumed
+`v2_s12_w0` at decision 1,399 (962 votes replayed into a fresh OASIS db), then
+runs post sets 13-15 (~5.5 h total). `agent_sweep.sh` is waiting behind it
+(~1.75 h). Ollama restarted with flash attention (LF-14 settings, log in
+/tmp/ollama_serve.log). Post sets 10 and 11 are complete (4 worlds, 19,800 decisions).
+Progress: `tail data/llm_bias/campaign_v2.log`; per world `/tmp/llm_bias_<label>.log`.
+
+If it stops again, the same commands below pick up where it left off.
 
 **To resume** (picks up v2_s12_w0 where it stopped, skips finished worlds, then
 runs post sets 13-15; the size sweep waits behind it):

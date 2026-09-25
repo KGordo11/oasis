@@ -62,6 +62,8 @@ def worlds(prefix, include):
         lab = os.path.basename(os.path.dirname(m))
         if lab.startswith(prefix) or lab in include:
             j = json.load(open(m))
+            if "finished_at" not in j:  # a world still running would show a half round in every table and chart
+                continue
             out.append((j.get("started_at", ""), lab, j))
     out.sort()
     return [(i + 1, lab, j) for i, (_, lab, j) in enumerate(out)]

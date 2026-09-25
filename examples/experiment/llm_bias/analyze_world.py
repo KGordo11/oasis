@@ -47,7 +47,14 @@ REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 WORLDS = os.path.join(REPO, "data", "llm_bias", "worlds")
 
 
-def load(labels=None, prefix=None):
+def finished(lab):
+    m = os.path.join(WORLDS, lab, "manifest.json")
+    return os.path.exists(m) and "finished_at" in json.load(open(m))
+
+
+def load(labels=None, prefix=None, include_unfinished=False):
+    """Unfinished worlds are skipped by default: half a world has only one model's people so far,
+    which tilts every comparison (LF-15 LB-note: analysis_v2.txt of 2026-09-25 12:08 mixed one in)."""
     rows = []
     for f in sorted(glob.glob(os.path.join(WORLDS, "*", "decisions.jsonl"))):
         lab = os.path.basename(os.path.dirname(f))
@@ -55,8 +62,19 @@ def load(labels=None, prefix=None):
             continue
         if prefix and not lab.startswith(prefix):
             continue
+        if not include_unfinished and not finished(lab):
+            print(f"skipping unfinished world {lab}", file=sys.stderr)
+            continue
         rows += [json.loads(l) for l in open(f) if l.strip()]
-    return pd.DataFrame(rows)
+    df = pd.DataFrame(rows)
+    if len(df) and not include_unfinished:
+        # a post set counts only when BOTH rotation worlds are done (each person played by both models)
+        full = df.groupby("seed")["world"].nunique()
+        drop = sorted(full[full < 2].index)
+        if drop:
+            print(f"skipping post sets with only one finished world: {drop}", file=sys.stderr)
+            df = df[~df["seed"].isin(drop)]
+    return df
 
 
 def to_long(df):
@@ -151,8 +169,9 @@ def main():
     ap.add_argument("--prefix")
     ap.add_argument("--out")
     ap.add_argument("--B", type=int, default=2000)
+    ap.add_argument("--include-unfinished", action="store_true")
     a = ap.parse_args()
-    df = load(a.labels.split(",") if a.labels else None, a.prefix)
+    df = load(a.labels.split(",") if a.labels else None, a.prefix, a.include_unfinished)
     res = analyze_worlds(df, B=a.B)
     print(fmt(res))
     if a.out:

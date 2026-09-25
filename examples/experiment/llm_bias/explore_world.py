@@ -148,7 +148,9 @@ def length_effects(R):
     d["pj"] = d["persona"].astype(str) + "|" + d["judge"]
     out = {"words_by_author": words.to_dict(), "like_%_by_length_cares": by.to_dict()}
     for name, f in (("self_only", "up ~ self + C(post) + C(pj)"),
-                    ("self_plus_judge_x_length", "up ~ self + g_judge:z_words + C(post) + C(pj)")):
+                    ("self_plus_judge_x_length", "up ~ self + g_judge:z_words + C(post) + C(pj)"),
+                    ("dislike_self_only", "down ~ self + C(post) + C(pj)"),
+                    ("dislike_self_plus_judge_x_length", "down ~ self + g_judge:z_words + C(post) + C(pj)")):
         m = smf.ols(f, data=d).fit(cov_type="cluster", cov_kwds={"groups": pd.factorize(d["slot"])[0]})
         keep = [k for k in ("self", "g_judge:z_words") if k in m.params]
         out[name] = {k: {"coef_pts": round(100 * m.params[k], 2),

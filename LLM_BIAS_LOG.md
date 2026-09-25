@@ -27,10 +27,10 @@ Progress: `tail data/llm_bias/campaign_v2.log`; per world `/tmp/llm_bias_<label>
 
 If it stops again, the same commands below pick up where it left off.
 
-**Side work while it runs:** LF-15 (exploration of post sets 10-11, no model calls):
-self-preference may be mostly gemma liking longer posts; the dislike signal is gemma disliking
-llama's posts; the same person played by the two models agrees only weakly (kappa 0.21).
-After the campaign: rerun `explore_world.py` on sets 10-15 and add it to the design-v2 page.
+**Latest (LF-16, 3 post sets, 29,700 reactions):** dislike self-preference −4.7 [−9.8, −0.3], p = 0.038
+(mostly gemma disliking llama's posts); like +3.2 [−2.8, +9.5], not shown — and possibly just gemma liking longer
+posts. Page rewritten for a 5th grader with a look-up tool (v3). Refresh recipe at the end of LF-16.
+Expected finish: sets 13-15 ≈ 20:20, agent sweep ≈ 22:00 (each world ≈ 65 min).
 
 **To resume** (picks up v2_s12_w0 where it stopped, skips finished worlds, then
 runs post sets 13-15; the size sweep waits behind it):
@@ -780,3 +780,52 @@ models as simulated audiences: who the person is matters less than which model p
 the unfinished `v2_s12_w0` (llama-played people only), which shifts the headline to +4.5; the
 file is overwritten with clean numbers when post set 12 finishes. Use complete post sets only
 (explore_world.py enforces this).
+
+### LF-16 — Post set 12 done (3 sets, 29,700 reactions): the DISLIKE self-preference is now clear of zero; the like one isn't
+
+Clean analysis (both rotation worlds of sets 10-12, `analyze_world.py --prefix v2_`):
+
+| | estimate | 95 % range | p |
+|---|---|---|---|
+| like self-preference | **+3.2** points | −2.8 to +9.5 | 0.33 |
+| dislike self-preference | **−4.7** points | −9.8 to −0.3 | **0.038** |
+
+(`explore_world.py` with its own bootstrap draws: like +3.2 [−3.2, +9.6]; dislike −4.7 [−9.7, −0.1], p = 0.044.)
+Like rates: llama-played 68.0 % on llama posts / 65.7 % on gemma posts; gemma-played 74.2 / 75.1.
+Dislike rates: llama-played 4.2 / 3.9; gemma-played **12.7 / 7.6**.
+
+**LF-15 re-run on sets 10-12** (all still exploratory):
+* **Length story got stronger for likes:** self term +3.2 → **−1.0** (double-difference scale) once gemma-played x
+  post length is added; the length term is now **+5.5 per SD [+0.9, +10.1]** (was +4.3 [−1.1, +9.7]). gemma writes
+  86 vs 79 words. **Length does NOT explain dislikes:** −4.7 → −4.0, length term −1.0 [−4.1, +2.2]. So: the like
+  signal looks like "gemma likes long posts"; the dislike signal is "gemma dislikes llama's posts" for other reasons
+  (top: "too vague", "too much whining", "waste of time", "too much fuss").
+* **Tech's +11 (LF-15 item 3) shrank to +5.9 [−5.5, +15.6]** — the small-sample fluke we warned about. No topic
+  now clears zero.
+* Stable: same-person agreement kappa 0.21 (0.01 where the person doesn't care); per-post agreement between the
+  AIs rho 0.31; voting style honoured; no scroll fatigue; gemma reasons 2.8 words vs llama 5.9.
+
+**Pipeline fixes (same session):**
+* `analyze_world.py` now skips unfinished worlds AND post sets with only one finished world (fixes the LF-15
+  LB-note contamination for good; `--include-unfinished` to override).
+* `export_world.py` exports finished worlds only (a running world would show a half round in every table).
+* Timing charts leave out a paused-and-resumed round: `v2_s12_w0`'s llama clock covers only the 1,101 reactions
+  after the restart (22.9 min, not ~51). Shown in the table view, excluded from the charts, and said so on the page.
+  **Resumed worlds' `wall_s` is post-restart time only** — never use it as a round's cost.
+
+**Design-v2 page rewritten for a 5th grader (Gordon, 2026-09-25)** — https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx
+v3. Plain-words answer first, "For grown-ups" numbers second; "How we keep it fair" worked through with the real
+like rates; new **What else we found** (length bars, dislike bars, same-person match bars with a real example,
+per-post scatter, per-topic whiskers, voting style bars, scroll fatigue, reasons); new **Look it up yourself** tool:
+pick any post → all 99 people with both AIs' reaction + reason side by side (disagreements shaded), or pick any
+person → profile, the exact description the AI got, and every choice they made. The tool reads `world_data.js`
+(1.3 MB now, ~2.6 MB at 6 sets), written next to the page by `make_world_artifact.py`; publish both files.
+
+**Refresh recipe (every post set):**
+
+    P=./oasis-env/bin/python; S=examples/experiment/llm_bias
+    $P $S/export_world.py
+    $P $S/analyze_world.py --prefix v2_ --out data/llm_bias/analysis_v2.json > data/llm_bias/analysis_v2.txt
+    $P $S/explore_world.py --out data/llm_bias/explore_v2.json > /dev/null
+    $P $S/make_world_artifact.py --out <dir>/scroll_test.html     # also writes <dir>/world_data.js
+    # publish scroll_test.html to PEMNidbCam72v6qKC3GNBx with files={"world_data.js": ...}

@@ -829,3 +829,7 @@ person → profile, the exact description the AI got, and every choice they made
     $P $S/explore_world.py --out data/llm_bias/explore_v2.json > /dev/null
     $P $S/make_world_artifact.py --out <dir>/scroll_test.html     # also writes <dir>/world_data.js
     # publish scroll_test.html to PEMNidbCam72v6qKC3GNBx with files={"world_data.js": ...}
+
+**Design-v1 page rewritten for a 5th grader too (2026-09-25)** — https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9 v4.
+Data unchanged (night 1: seeds 1, 2, 101 + combined). Plain answer first, grown-up numbers second; statistics moved
+into a "For grown-ups" fold; links to the design-v2 page. Rebuild: `make_artifact.py --seeds 1,2,101 --out <file>`.

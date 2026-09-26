@@ -1024,3 +1024,14 @@ lost), and keep post length in the analysis model regardless.
 
 Post set 16 (same design, harness unchanged in behaviour; now records model digests) started 05:36 — more post
 sets are what narrows the answer (LF-19).
+
+### LD-13 — Gordon's decisions, 2026-09-26 ~05:50 (before leaving for the day)
+
+1. **Match post lengths** in all new post sets: ask 75-85 words, reject and retry outside 65-95 (LF-21/22).
+   Old sets 10-16 stay as they are; length-matched sets are reported separately.
+2. **First 50 of the same pinned 99 people** per world (`--agents 50` = `core99()[:50]`), to fit more post
+   sets per day (LF-19: posts, not people, drive the uncertainty).
+3. **Run the side-by-side vs scroll A/B** (tests whether the display format creates the bias: night 1
+   side-by-side +5.6 vs scroll ~0). Not chosen for now: third AI, more sets of the current design.
+4. No GPU machine yet — everything stays on this Mac.
+"Else keep going all day."

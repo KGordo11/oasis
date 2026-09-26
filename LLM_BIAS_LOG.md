@@ -1076,3 +1076,23 @@ Other: side by side makes llama far harsher (its people dislike 21 % of posts vs
 and people pick the post shown first 72 % of the time (order shuffled, so noise not bias). Gemma-played
 people pick gemma's post 57 %, llama-played pick llama's 48 %.
 Page v12 shows the A/B section. Export `data/llm_bias/export_ab/`.
+
+### LF-25 — A/B after 2 post sets (20-21; 18,800 reactions)
+
+Set 21: 2 llama money posts never landed in 65-95 words after 9 tries → slots (personal_finance r1, r2)
+dropped from all 4 worlds. All worlds PASS.
+
+| measure | estimate | 95 % range | p |
+|---|---|---|---|
+| scroll likes | **+7.6** | +1.4 to +14.3 | 0.019 |
+| scroll dislikes | −3.3 | −10.2 to +3.1 | 0.32 |
+| side-by-side likes | **+10.0** | +1.7 to +18.1 | 0.019 |
+| side-by-side dislikes | −2.0 | −8.3 to +3.6 | 0.52 |
+| side-by-side favourite | +4.8 | −0.3 to +10.1 | 0.07 |
+| **format effect, likes** | +2.3 | −6.2 to +10.7 | 0.59 |
+| format effect, dislikes | +1.3 | −5.9 to +8.4 | 0.71 |
+
+**No format effect.** Both formats now show a positive like number with length-matched posts — i.e. matching
+length did NOT remove the lean. Caution: the old design also read +4 after its first 2 sets and settled near +2
+over 7 (LF-18/19); two sets are two draws. Favourite shares: gemma-played pick gemma 55 %, llama-played pick
+llama 50 %. Position 1 picked 73 %. Page v13.

@@ -829,3 +829,24 @@ person → profile, the exact description the AI got, and every choice they made
 **Design-v1 page rewritten for a 5th grader too (2026-09-25)** — https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9 v4.
 Data unchanged (night 1: seeds 1, 2, 101 + combined). Plain answer first, grown-up numbers second; statistics moved
 into a "For grown-ups" fold; links to the design-v2 page. Rebuild: `make_artifact.py --seeds 1,2,101 --out <file>`.
+
+### LF-17 — Post set 13 done (4 sets, 39,600 reactions): dislike holds, like edges toward zero-clear; length story repeats
+
+Health check (`check_world.py`, new tonight: counts, duplicates, rotation, persona pin, OASIS db = log, cut-offs,
+like-rate and speed vs other worlds): all 8 v2 worlds PASS.
+
+| | estimate | 95 % range | p |
+|---|---|---|---|
+| like self-preference | +4.5 | −0.5 to +9.5 | 0.07 |
+| dislike self-preference | **−4.0** | **−8.0 to −0.3** | **0.031** |
+
+(analyze_world, B = 2000; explore_world B = 1000 gives +4.5 [−0.5, +9.4] and −4.0 [−8.1, −0.2].)
+* **Length again explains most of the like signal** (self term 2.27 → 0.82, i.e. +4.5 → +1.6 on the headline
+  scale) **and none of the dislike signal** (−1.98 → −2.06).
+* **Cumulative dislike number:** after set 10 +1.7 [−2.0, +5.7]; after 11 −4.7; after 12 −4.7; after 13 −4.0
+  [−8.1, −0.2]. Set 10 alone pointed the other way; it has been stable near −4 to −5 since.
+* Topic likes: tech +8.3, cars +6.1, farming +4.3, money +4.3, cooking −0.3 (all wide).
+* Same person, two AIs: kappa 0.215 (65 % agree vs 56 % by chance), unchanged.
+* Page v4 adds "Is the answer settling down?" (cumulative and per-set whisker charts).
+* Operational: exploration refreshes now run under `taskpolicy -b` (efficiency cores) so they do not slow the
+  campaign; that made the refresh take 17 min — the bootstrap is being vectorised.

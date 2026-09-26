@@ -211,6 +211,9 @@ def main():
            "people": int(R["persona"].nunique()), "posts": int(R["post"].nunique())}
     res["headline"] = sp(R, a.B)
     res["by_topic"] = {t: sp(g, a.B) for t, g in R.groupby("topic")}
+    sets = sorted(R["post_set_seed"].unique())
+    res["by_set"] = {str(k): sp(R[R["post_set_seed"] == k], a.B) for k in sets}
+    res["cumulative"] = {str(k): sp(R[R["post_set_seed"] <= k], a.B) for k in sets}
     res["by_caring"] = {("cares" if k else "does_not_care"): sp(g, a.B) for k, g in R.groupby("cares")}
     res["rates_cares"] = rates(R[R["cares"]])
     res["rates_does_not_care"] = rates(R[~R["cares"]])

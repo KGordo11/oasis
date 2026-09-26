@@ -381,6 +381,25 @@ looked strong at +11; with more data it shrank. That is why one big number from 
 {whisker_chart(rows, "Likes its own posts, by topic", "extra likes per 100 for the AI's own posts")}
 </div>""")
 
+    # 5b. does the answer settle down as post sets are added?
+    if ex.get("cumulative") and len(ex["cumulative"]) >= 2:
+        cu, bs = ex["cumulative"], ex["by_set"]
+        rows_c = [(f"sets up to {k}", v["down"]["est"], *v["down"]["ci95"]) for k, v in cu.items()]
+        rows_s = [(f"set {k} alone", v["down"]["est"], *v["down"]["ci95"]) for k, v in bs.items()]
+        rows_l = [(f"sets up to {k}", v["up"]["est"], *v["up"]["ci95"]) for k, v in cu.items()]
+        last = list(cu.values())[-1]
+        out.append(f"""<div class="find"><h3>Is the answer settling down?</h3>
+<p>Every new post set is a fresh test with 50 new posts. Here is the “fewer dislikes for its own posts” number
+after each set is added (top) and for each set on its own (bottom). As more sets come in, the range usually gets
+narrower, because there is more data. Right now, with all {len(cu)} sets together, it is
+{last['down']['est']:+.1f} (95 % range {last['down']['ci95'][0]:+.1f} to {last['down']['ci95'][1]:+.1f}). Below zero means
+kinder to its own posts.</p>
+{whisker_chart(rows_c, "Dislike number as post sets are added", "change in dislikes per 100 for the AI's own posts")}
+{whisker_chart(rows_s, "Dislike number, each post set on its own", "change in dislikes per 100 for the AI's own posts")}
+<details><summary>The same for likes</summary>
+{whisker_chart(rows_l, "Like number as post sets are added", "extra likes per 100 for the AI's own posts")}
+</details></div>""")
+
     # 6. voting style
     vs = ex["traits"]["voting_style"]
     styles = [("generous", "easy to please"), ("typical", "normal"), ("harsh", "hard to please")]

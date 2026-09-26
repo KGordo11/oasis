@@ -1098,3 +1098,19 @@ over 7 (LF-18/19); two sets are two draws. Favourite shares: gemma-played pick g
 llama 50 %. Position 1 picked 73 %. Page v13.
 *LF-25 check:* old design (sets 10-16) restricted to the first 50 people: like +2.6 [−1.1, +6.3], dislike −1.1 —
 same as all 99 (+2.4 / −1.2). The A/B's higher like numbers are not from using 50 people.
+
+### LF-26 — A/B after 3 post sets (20-22; 28,800 reactions): still no format effect; scroll like lean steady
+
+| measure | estimate | 95 % range | p |
+|---|---|---|---|
+| scroll likes | **+6.9** | +1.6 to +12.6 | 0.013 |
+| scroll dislikes | −2.8 | −8.1 to +2.2 | 0.29 |
+| side-by-side likes | +6.2 | −1.1 to +13.4 | 0.11 |
+| side-by-side favourite | +3.5 | −1.1 to +8.1 | 0.13 |
+| **format effect, likes** | **−0.6** | −7.1 to +5.8 | 0.85 |
+
+Per set (scroll likes / pair likes / pair favourite; words llama vs gemma):
+20: +10.5 / +9.3 / +5.2 (69 vs 75) · 21: +4.6 / +10.6 / +4.3 (69 vs 72) · 22: +5.4 / −0.8 / +1.0 (69 vs 72).
+The scroll like number is positive in every length-matched set so far, with the word gap down to 3-6 words.
+So far: **the display format makes no difference**, and length matching has not removed the own-post like
+lean. The earlier "length explains it" reading (LF-15..20) looks at best partial. Page v14.

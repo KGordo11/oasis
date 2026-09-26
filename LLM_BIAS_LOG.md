@@ -864,3 +864,22 @@ cannot confirm it. Sets 14 and 15 are held out. Predictions, tested on sets 14+1
   cannot give a narrow range).
 Held-out sets are small (2 x 50 posts), so a failed P2/P3 with a wide interval is "not confirmed", not
 "refuted". Whatever happens is reported.
+
+### LF-18 — Post set 14 done (5 sets, 49,500 reactions): the dislike result WEAKENS; post sets differ a lot
+
+Health check: v2_s14_w0/w1 PASS (llama 1.22 s, gemma 0.33 s per decision — normal).
+
+| | estimate | 95 % range | p |
+|---|---|---|---|
+| like self-preference | +3.8 | −0.6 to +8.0 | 0.086 |
+| dislike self-preference | −2.2 | **−5.6 to +1.0** | 0.19 |
+
+**The dislike result (LF-16/17) is no longer clear of zero.** Each post set on its own (dislike double difference):
+set 10 +1.7, set 11 **−11.1**, set 12 −4.8, set 13 −1.7, set 14 **+5.0** [+0.3, +11.3]. Likes: −3.0, +11.3, +1.4,
++8.4, +0.7. So the "clear of zero" at 3-4 sets leaned heavily on set 11. The effect depends strongly on which
+50 posts get written — between-set variation is large next to the within-set interval. Implications:
+(a) more post sets are worth more than more people; (b) any single-set result (including night 1's 3-round cars
+run, LF-9) should be read as one draw; (c) the page now says this in plain words.
+Dislike rates where people care (sets 10-14): gemma-played 6.6 % on gemma posts vs 8.4 % on llama posts;
+llama-played 1.1 vs 0.5.
+**LD-12 held-out length test is NOT looked at yet** (needs sets 14+15; set 15 running, ETA ~02:15).

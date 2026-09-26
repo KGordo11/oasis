@@ -393,7 +393,9 @@ looked strong at +11; with more data it shrank. That is why one big number from 
 after each set is added (top) and for each set on its own (bottom). As more sets come in, the range usually gets
 narrower, because there is more data. Right now, with all {len(cu)} sets together, it is
 {last['down']['est']:+.1f} (95 % range {last['down']['ci95'][0]:+.1f} to {last['down']['ci95'][1]:+.1f}). Below zero means
-kinder to its own posts.</p>
+kinder to its own posts. Each post set on its own swings a lot, from {min(v['down']['est'] for v in bs.values()):+.1f}
+to {max(v['down']['est'] for v in bs.values()):+.1f}: the answer depends a great deal on which 50 posts happen to be
+written. That is why one post set is never enough, and why more post sets matter more than more people.</p>
 {whisker_chart(rows_c, "Dislike number as post sets are added", "change in dislikes per 100 for the AI's own posts")}
 {whisker_chart(rows_s, "Dislike number, each post set on its own", "change in dislikes per 100 for the AI's own posts")}
 <details><summary>The same for likes</summary>

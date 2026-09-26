@@ -59,3 +59,12 @@ skip v2_s13_w0 (finished)
 2026-09-25 21:54:20 end v2_s13_w1 rc=0
 2026-09-25 21:55:57 analysis after seed 13: data/llm_bias/analysis_v2.txt
 2026-09-25 21:55:57 start v2_s14_w0 
+22:49:40 llama3.1:8b: done 2500 in 50.9 min (1.22 s/decision) {'like': 1669, 'nothing': 751, 'dislike': 80}
+23:03:16 gemma4:e2b: done 2450 in 13.6 min (0.33 s/decision) {'like': 2011, 'dislike': 150, 'nothing': 289}
+2026-09-25 23:03:16 end v2_s14_w0 rc=0
+2026-09-25 23:03:16 start v2_s14_w1 
+23:53:17 llama3.1:8b: done 2450 in 49.8 min (1.22 s/decision) {'nothing': 759, 'like': 1578, 'dislike': 113}
+00:07:08 gemma4:e2b: done 2500 in 13.9 min (0.33 s/decision) {'like': 2112, 'nothing': 244, 'dislike': 144}
+2026-09-26 00:07:09 end v2_s14_w1 rc=0
+2026-09-26 00:09:17 analysis after seed 14: data/llm_bias/analysis_v2.txt
+2026-09-26 00:09:17 start v2_s15_w0 

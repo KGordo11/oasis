@@ -92,7 +92,7 @@ def check(lab, baseline):
         like = 100 * np.mean([d["action"] == "like" for d in g])
         spd = man.get("judges", {}).get(j, {})
         notes.append(f"{j}: like {like:.0f}%  {spd.get('s_per_decision', float('nan')):.2f} s/decision"
-                     f"{' (resumed: timing covers only part)' if spd.get('decisions', 0) < len(g) else ''}")
+                     f"{' (resumed: timing covers only part)' if spd.get('rows', spd.get('decisions', 0)) < len(g) else ''}")
         if baseline.get(j):
             b_like = np.mean([x[0] for x in baseline[j]])
             b_sd = max(3.0, float(np.std([x[0] for x in baseline[j]])) if len(baseline[j]) > 1 else 3.0)
@@ -122,7 +122,7 @@ def main():
         for j, v in man.get("judges", {}).items():
             g = [d for d in dec if d["judge"] == j]
             if g:
-                full = v.get("decisions", 0) >= len(g)
+                full = v.get("rows", v.get("decisions", 0)) >= len(g)
                 base.setdefault(j, []).append((100 * np.mean([d["action"] == "like" for d in g]),
                                                v.get("s_per_decision") if (fa and full) else None))
     worst = 0

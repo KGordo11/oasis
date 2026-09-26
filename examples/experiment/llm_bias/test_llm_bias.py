@@ -294,3 +294,34 @@ def test_fast_bootstrap_matches_cluster_bootstrap():
         ci, p = analyze.cluster_bootstrap(df, col, B=150)
         fci, fp = explore_world.fast_bootstrap(df, col, B=150, chunk=40)
         assert np.allclose(ci["_pooled"], fci) and p == fp
+
+
+def test_pair_feed_covers_every_slot_once_and_is_model_independent():
+    import pair
+    per = personas.core99()[0]
+    posts = {t: [{"key": authors.key(r, t, au), "round": r, "topic": t, "author": au, "title": "x", "body": "y"}
+                 for r in range(5) for au in ("gemma4:e2b", "llama3.1:8b")] for t in PRIMARY}
+    f1, f2 = pair.feed(per, posts, 20), pair.feed(per, posts, 20)
+    assert f1 == f2 and len(f1) == 25
+    seen = [(t, two[0]["round"]) for _, t, _, two in f1]
+    assert len(set(seen)) == 25
+    assert all({q["author"] for q in two} == {"gemma4:e2b", "llama3.1:8b"} for *_, two in f1)
+    firsts = [two[0]["author"] for *_, two in f1]
+    assert 0 < firsts.count("llama3.1:8b") < 25  # both authors appear in position 1 somewhere
+
+
+def test_pair_validate():
+    import pair
+    v = pair.validate({"post_1": "Like", "post_2": "nothing", "favorite": "1", "reason": "ok"})
+    assert v["actions"] == ["like", "nothing"] and v["favorite"] == 1
+    assert pair.validate({"post_1": "dislike", "post_2": "upvote", "favorite": 2})["actions"] == ["dislike", "like"]
+    for bad in ({"post_1": "like", "post_2": "like", "favorite": 3}, {"post_1": "meh", "post_2": "like", "favorite": 1}):
+        with pytest.raises(ValueError):
+            pair.validate(bad)
+
+
+def test_length_rule_guard(tmp_path, monkeypatch):
+    monkeypatch.setattr(authors, "bank_path", lambda seed: str(tmp_path / f"b{seed}.jsonl"))
+    (tmp_path / "b5.jsonl").write_text(json.dumps({"key": "r0|cars|x", "length_rule": ""}) + "\n")
+    with pytest.raises(SystemExit):
+        authors.generate(5, 1, ["cars"], ["x"], band=(75, 85), enforce=(65, 95))

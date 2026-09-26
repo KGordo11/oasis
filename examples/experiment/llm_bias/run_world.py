@@ -44,6 +44,7 @@ sys.path.insert(0, HERE)
 import authors  # noqa: E402
 import llm  # noqa: E402
 import personas as persona_mod  # noqa: E402
+import pair  # noqa: E402
 import scroll  # noqa: E402
 from topics import PRIMARY, TOPICS  # noqa: E402
 
@@ -64,7 +65,7 @@ def assign(persona_id, judges, world):
     return judges[(persona_id + world) % len(judges)]
 
 
-async def build_world(bank_personas, author_list, judges, world, db_path):
+async def build_world(bank_personas, author_list, judges, world, db_path, template=None):
     import oasis
     from camel.models import ModelFactory
     from camel.types import ModelPlatformType
@@ -85,7 +86,7 @@ async def build_world(bank_personas, author_list, judges, world, db_path):
     for p in bank_personas:
         ui = UserInfo(user_name=p["username"], name=p["realname"], description=p["bio"],
                       profile={"persona": p["persona"]}, recsys_type="reddit")
-        a = SocialAgent(agent_id=p["id"], user_info=ui, user_info_template=scroll.SYSTEM_TEMPLATE,
+        a = SocialAgent(agent_id=p["id"], user_info=ui, user_info_template=template or scroll.SYSTEM_TEMPLATE,
                         model=backends[assign(p["id"], judges, world)], agent_graph=g,
                         available_actions=[ActionType.LIKE_POST, ActionType.DISLIKE_POST,
                                            ActionType.DO_NOTHING])
@@ -134,7 +135,10 @@ async def run(a):
 
     # 1. posts (incremental; shared by every world on this seed)
     t0 = time.time()
-    pbank = authors.generate(a.seed, a.posts_per_topic, topics, author_list, log=log)
+    band = tuple(map(int, a.length_band.split(","))) if a.length_band else None
+    enforce = tuple(map(int, a.length_enforce.split(","))) if a.length_enforce else None
+    pbank = authors.generate(a.seed, a.posts_per_topic, topics, author_list, log=log,
+                             band=band, enforce=enforce, retries=a.post_retries)
     gen_s = time.time() - t0
     posts = [pbank[authors.key(k, t, au)] for t in topics for k in range(a.posts_per_topic)
              for au in author_list]
@@ -142,6 +146,15 @@ async def run(a):
     posts = [p for p in posts if p.get("ok")]
     if bad:
         log(f"WARNING {len(bad)} posts failed generation and are left out: {bad[:5]}")
+    if a.complete_slots:
+        # A/B (LD-13): keep a slot only if every author's post exists, so both formats see identical post pairs
+        full = {(p["topic"], p["round"]) for p in posts
+                if all(any(q["topic"] == p["topic"] and q["round"] == p["round"] and q["author"] == au for q in posts)
+                       for au in author_list)}
+        dropped = sorted({(p["topic"], p["round"]) for p in posts} - full)
+        posts = [p for p in posts if (p["topic"], p["round"]) in full]
+        if dropped:
+            log(f"WARNING {len(dropped)} slots dropped (a post is missing): {dropped}")
 
     # 2. world
     # The SAME 99 hard-coded personas every run (pinned fingerprint; refuses to run if changed).
@@ -152,7 +165,8 @@ async def run(a):
     db_path = os.path.join(out, "oasis.db")
     if os.path.exists(db_path):
         os.remove(db_path)  # rebuilt from scratch on resume; votes are replayed below
-    env, agents, posters = await build_world(bank, author_list, judges, a.world, db_path)
+    env, agents, posters = await build_world(bank, author_list, judges, a.world, db_path,
+                                             template=pair.SYSTEM_TEMPLATE if a.format == "pair" else None)
     post_id = {}
     for p in posts:  # sequential, so ids are stable across resumes
         r = await posters[p["author"]].perform_action_by_data(
@@ -184,7 +198,8 @@ async def run(a):
                    "parallel": a.parallel, "temperature": a.temperature, "num_ctx": llm.NUM_CTX,
                    "think": False, "show_author": False, "show_scores": False,
                    "assignment": "persona i -> judges[(i + world) % len(judges)]",
-                   "scheduler": a.scheduler, "draw": a.draw},
+                   "scheduler": a.scheduler, "draw": a.draw, "format": a.format,
+                   "length_rule": authors.length_rule(band, enforce), "complete_slots": a.complete_slots},
         "persona_bank_hash": persona_mod.PINNED_BANK_HASH,
         "core99_hash": persona_mod.PINNED_CORE99_HASH,
         "persona_ids": [p["id"] for p in bank],
@@ -203,8 +218,12 @@ async def run(a):
     # 3. one judge model at a time (vote counts are hidden, so turn order cannot matter)
     for judge in judges:
         mine = [p for p in bank if assign(p["id"], judges, a.world) == judge]
-        jobs = [(p, item) for p in mine for item in scroll.feed(p, by_topic, a.seed)
-                if (p["id"], item[3]["key"]) not in done]
+        if a.format == "pair":
+            jobs = [(p, item) for p in mine for item in pair.feed(p, by_topic, a.seed)
+                    if any((p["id"], q["key"]) not in done for q in item[3])]
+        else:
+            jobs = [(p, item) for p in mine for item in scroll.feed(p, by_topic, a.seed)
+                    if (p["id"], item[3]["key"]) not in done]
         if not jobs:
             continue
         llm.warm(judge)
@@ -217,31 +236,49 @@ async def run(a):
         async def decide(p, item):
             nonlocal n_done
             rank, t, pos, post = item
+            two = post if a.format == "pair" else [post]
             async with (sem if a.scheduler == "interleaved" else _nullctx()):
                 system = agents[p["id"]].system_message.content
-                user = scroll.render_user(t, post)
+                if a.format == "pair":
+                    user, val = pair.render_user(t, two), pair.validate
+                    parts = (a.seed, p["id"], f"{t}|{two[0]['round']}", "pair")
+                else:
+                    user, val = scroll.render_user(t, post), scroll.validate
+                    parts = (a.seed, p["id"], post["key"], "scroll")  # the original formula, unchanged
+                seed = llm.stable_seed(*parts) if not a.draw else llm.stable_seed(*parts, a.draw)
                 obj, meta = await loop.run_in_executor(pool, lambda: llm.chat_json(
-                    judge, system, user, seed=(llm.stable_seed(a.seed, p["id"], post["key"], "scroll") if not a.draw
-                         else llm.stable_seed(a.seed, p["id"], post["key"], "scroll", a.draw)),
-                    temperature=a.temperature, num_predict=a.num_predict, validate=scroll.validate,
-                    retries=2))
+                    judge, system, user, seed=seed, temperature=a.temperature, num_predict=a.num_predict,
+                    validate=val, retries=2))
             oc = scroll.outcome(obj, meta)
-            act = obj["action"] if obj else None
-            d = {"label": a.label, "seed": a.seed, "world": a.world, "judge": judge, "agent_id": p["id"],
-                 "voting_style": p["voting"], "affinity": p["topic_affinity"][t], "topic": t,
-                 "topic_rank": rank, "pos_in_topic": pos, "post_key": post["key"], "author": post["author"],
-                 "slot": f"{a.seed}|{post['round']}|{t}", "self": int(post["author"] == judge),
-                 "action": act, "outcome": oc, "reason": obj["reason"] if obj else None,
-                 "attempts": meta["attempts"], "errors": meta["errors"], "done_reason": meta["done_reason"],
-                 "thinking_chars": meta["thinking_chars"], "latency_s": round(meta["latency_s"], 2),
-                 "prompt_tokens": meta["prompt_tokens"], "eval_tokens": meta["eval_tokens"],
-                 "truncation_risk": meta["truncation_risk"], "raw": meta.get("raw")}
-            if act in ("like", "dislike"):
-                at = ActionType.LIKE_POST if act == "like" else ActionType.DISLIKE_POST
-                await agents[p["id"]].perform_action_by_data(at, post_id=post_id[post["key"]])
-            dec_f.write(json.dumps(d) + "\n")
+            rows = []
+            for n, q in enumerate(two):
+                if a.format == "pair":
+                    act = obj["actions"][n] if obj else None
+                else:
+                    act = obj["action"] if obj else None
+                d = {"label": a.label, "seed": a.seed, "world": a.world, "judge": judge, "agent_id": p["id"],
+                     "voting_style": p["voting"], "affinity": p["topic_affinity"][t], "topic": t,
+                     "topic_rank": rank, "pos_in_topic": pos, "post_key": q["key"], "author": q["author"],
+                     "slot": f"{a.seed}|{q['round']}|{t}", "self": int(q["author"] == judge),
+                     "action": act, "outcome": oc, "reason": obj["reason"] if obj else None,
+                     "attempts": meta["attempts"], "errors": meta["errors"], "done_reason": meta["done_reason"],
+                     "thinking_chars": meta["thinking_chars"], "latency_s": round(meta["latency_s"], 2),
+                     "prompt_tokens": meta["prompt_tokens"], "eval_tokens": meta["eval_tokens"],
+                     "truncation_risk": meta["truncation_risk"], "raw": meta.get("raw"), "format": a.format}
+                if a.format == "pair":
+                    # one call covers both posts: latency and tokens belong to the call, not to each row
+                    d.update({"pair_pos": n + 1, "chosen": int(bool(obj) and obj["favorite"] == n + 1),
+                              "call_rows": 2, "pair_keys": [x["key"] for x in two]})
+                rows.append(d)
+            # write every row of this call first, so an interruption never leaves half a pair on disk
+            for d in rows:
+                dec_f.write(json.dumps(d) + "\n")
             dec_f.flush()
-            counts[act or oc] += 1
+            for d in rows:
+                counts[d["action"] or oc] += 1
+                if d["action"] in ("like", "dislike"):
+                    at = ActionType.LIKE_POST if d["action"] == "like" else ActionType.DISLIKE_POST
+                    await agents[p["id"]].perform_action_by_data(at, post_id=post_id[d["post_key"]])
             n_done += 1
             if n_done % a.log_every == 0:
                 el = time.time() - t_j
@@ -270,7 +307,8 @@ async def run(a):
             await asyncio.gather(*[worker() for _ in range(a.parallel)])
         wall = time.time() - t_j
         prev = manifest["judges"].get(judge, {"decisions": 0, "wall_s": 0.0, "counts": {}})
-        prev["decisions"] += len(jobs)
+        prev["decisions"] += len(jobs)  # calls; a pair call covers two posts
+        prev["rows"] = prev.get("rows", 0) + len(jobs) * (2 if a.format == "pair" else 1)
         prev["wall_s"] = round(prev["wall_s"] + wall, 1)
         prev["counts"] = dict(Counter(prev["counts"]) + counts)
         prev["s_per_decision"] = round(prev["wall_s"] / max(1, prev["decisions"]), 3)
@@ -304,6 +342,12 @@ def main():
     ap.add_argument("--scheduler", choices=["per-user", "interleaved"], default="interleaved",
                     help="per-user: each worker sends one user's whole scroll back-to-back (prompt-cache friendly); "
                          "interleaved: the original single pool (runs before 2026-09-24 12:00)")
+    ap.add_argument("--format", choices=["scroll", "pair"], default="scroll",
+                    help="scroll: one post per call (design v2); pair: the two posts of one brief side by side (LD-13)")
+    ap.add_argument("--length-band", help="lo,hi words asked for in the post prompt (default: 60 to 120)")
+    ap.add_argument("--length-enforce", help="lo,hi: reject and retry posts outside this range")
+    ap.add_argument("--post-retries", type=int, default=4)
+    ap.add_argument("--complete-slots", action="store_true", help="drop a slot if any author's post is missing")
     ap.add_argument("--draw", type=int, default=0,
                     help="0 = the standard random draw; any other number = a fresh, reproducible draw (retest)")
     ap.add_argument("--resume", action="store_true")

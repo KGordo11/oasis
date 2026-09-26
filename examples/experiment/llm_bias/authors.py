@@ -121,10 +121,35 @@ def key(rnd, topic, author):
     return f"r{rnd}|{topic}|{author}"
 
 
-def generate(seed, rounds, topics, authors, temperature=0.8, log=print):
+def length_rule(band=None, enforce=None):
+    """The length instruction and the accepted range, as one comparable label ('' = the original 60-120 rule)."""
+    if not band and not enforce:
+        return ""
+    return f"ask {band[0]}-{band[1]}" + (f", enforce {enforce[0]}-{enforce[1]}" if enforce else "")
+
+
+def generate(seed, rounds, topics, authors, temperature=0.8, log=print, band=None, enforce=None, retries=4):
+    """band=(lo, hi): the word range written in the prompt (default "60 to 120").
+    enforce=(lo, hi): also reject and retry posts whose body falls outside it (LD-13 length matching).
+    A bank remembers its rule; mixing rules in one bank is refused."""
     os.makedirs(DATA, exist_ok=True)
     bank = load_bank(seed)
     path = bank_path(seed)
+    rule = length_rule(band, enforce)
+    have = {r.get("length_rule", "") for r in bank.values()}
+    if bank and have != {rule}:
+        raise SystemExit(f"post bank for seed {seed} was written with length rule {have}, not {rule!r}; "
+                         "use a new seed for a different rule")
+    user_tmpl = AUTHOR_USER if not band else AUTHOR_USER.replace("- Body: 60 to 120 words.",
+                                                                 f"- Body: {band[0]} to {band[1]} words.")
+    check = validate_post
+    if enforce:
+        def check(obj):
+            v = validate_post(obj)
+            n = len(v["body"].split())
+            if not enforce[0] <= n <= enforce[1]:
+                raise ValueError(f"body {n} words (want {enforce[0]}-{enforce[1]})")
+            return v
     # author-major order: one model does all its posts before the next loads (no swapping)
     for author in authors:
         todo = [(r, t) for r in range(rounds) for t in topics if key(r, t, author) not in bank]
@@ -134,12 +159,12 @@ def generate(seed, rounds, topics, authors, temperature=0.8, log=print):
         t0 = time.time()
         for r, t in todo:
             b = slot_brief(seed, r, t)
-            user = AUTHOR_USER.format(sub=TOPICS[t]["sub"], topic_name=TOPICS[t]["name"], **b)
+            user = user_tmpl.format(sub=TOPICS[t]["sub"], topic_name=TOPICS[t]["name"], **b)
             obj, meta = llm.chat_json(author, AUTHOR_SYSTEM, user, seed=hash_seed(seed, r, t),
                                       temperature=temperature, num_predict=500,
-                                      validate=validate_post, retries=4)
+                                      validate=check, retries=retries)
             rec = {"key": key(r, t, author), "seed": seed, "round": r, "topic": t, "author": author,
-                   "brief": b, "ok": obj is not None,
+                   "brief": b, "ok": obj is not None, "length_rule": rule,
                    "title": obj["title"] if obj else None, "body": obj["body"] if obj else None,
                    "words": len(obj["body"].split()) if obj else None,
                    "raw": meta.get("raw"), "attempts": meta["attempts"], "errors": meta["errors"],

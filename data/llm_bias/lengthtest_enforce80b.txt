@@ -1,0 +1,55 @@
+  llama3.1:8b      r0 personal_finance ok=False words=None tries=5 15.42s
+  llama3.1:8b      r0 cars             ok=False words=None tries=5 18.25s
+  llama3.1:8b      r0 farming          ok=False words=None tries=5 16.68s
+  llama3.1:8b      r0 cooking          ok=False words=None tries=5 17.67s
+  llama3.1:8b      r0 tech             ok=True words=80 tries=2 8.09s
+  llama3.1:8b      r1 personal_finance ok=True words=83 tries=4 15.16s
+  llama3.1:8b      r1 cars             ok=True words=76 tries=3 11.81s
+  llama3.1:8b      r1 farming          ok=True words=74 tries=1 4.14s
+  llama3.1:8b      r1 cooking          ok=True words=75 tries=4 15.21s
+  llama3.1:8b      r1 tech             ok=True words=72 tries=3 10.96s
+  llama3.1:8b      r2 personal_finance ok=False words=None tries=5 17.91s
+  llama3.1:8b      r2 cars             ok=True words=72 tries=5 17.84s
+  llama3.1:8b      r2 farming          ok=True words=75 tries=3 11.57s
+  llama3.1:8b      r2 cooking          ok=False words=None tries=5 17.61s
+  llama3.1:8b      r2 tech             ok=True words=70 tries=1 4.2s
+  llama3.1:8b      r3 personal_finance ok=False words=None tries=5 16.73s
+  llama3.1:8b      r3 cars             ok=True words=80 tries=4 15.49s
+  llama3.1:8b      r3 farming          ok=False words=None tries=5 17.42s
+  llama3.1:8b      r3 cooking          ok=True words=72 tries=1 4.3s
+  llama3.1:8b      r3 tech             ok=True words=71 tries=1 3.89s
+  llama3.1:8b      r4 personal_finance ok=True words=76 tries=4 15.24s
+  llama3.1:8b      r4 cars             ok=False words=None tries=5 17.2s
+  llama3.1:8b      r4 farming          ok=True words=87 tries=2 8.33s
+  llama3.1:8b      r4 cooking          ok=True words=71 tries=3 10.49s
+  llama3.1:8b      r4 tech             ok=True words=71 tries=1 4.11s
+llama3.1:8b: 25 posts in 316s
+  gemma4:e2b       r0 personal_finance ok=True words=77 tries=1 1.66s
+  gemma4:e2b       r0 cars             ok=True words=76 tries=1 1.55s
+  gemma4:e2b       r0 farming          ok=True words=76 tries=1 1.6s
+  gemma4:e2b       r0 cooking          ok=True words=79 tries=3 4.53s
+  gemma4:e2b       r0 tech             ok=False words=None tries=5 7.26s
+  gemma4:e2b       r1 personal_finance ok=True words=86 tries=1 1.75s
+  gemma4:e2b       r1 cars             ok=True words=73 tries=1 1.63s
+  gemma4:e2b       r1 farming          ok=True words=75 tries=1 1.65s
+  gemma4:e2b       r1 cooking          ok=True words=76 tries=2 3.01s
+  gemma4:e2b       r1 tech             ok=True words=72 tries=1 1.5s
+  gemma4:e2b       r2 personal_finance ok=True words=82 tries=1 1.61s
+  gemma4:e2b       r2 cars             ok=True words=71 tries=2 3.02s
+  gemma4:e2b       r2 farming          ok=True words=71 tries=1 1.54s
+  gemma4:e2b       r2 cooking          ok=True words=70 tries=2 2.86s
+  gemma4:e2b       r2 tech             ok=True words=73 tries=1 1.55s
+  gemma4:e2b       r3 personal_finance ok=True words=76 tries=2 3.05s
+  gemma4:e2b       r3 cars             ok=True words=72 tries=3 4.25s
+  gemma4:e2b       r3 farming          ok=True words=83 tries=1 1.74s
+  gemma4:e2b       r3 cooking          ok=True words=70 tries=1 1.56s
+  gemma4:e2b       r3 tech             ok=True words=73 tries=1 1.5s
+  gemma4:e2b       r4 personal_finance ok=True words=72 tries=2 3.04s
+  gemma4:e2b       r4 cars             ok=True words=75 tries=3 4.27s
+  gemma4:e2b       r4 farming          ok=True words=71 tries=3 4.39s
+  gemma4:e2b       r4 cooking          ok=True words=72 tries=1 1.55s
+  gemma4:e2b       r4 tech             ok=True words=70 tries=1 1.54s
+gemma4:e2b: 25 posts in 64s
+      set 10: gemma4:e2b 81.7±6.8 [72-99] n=25  llama3.1:8b 76.6±8.6 [62-92] n=25  | gap 5.1
+  enforce80b: gemma4:e2b 74.6±4.2 [70-86] n=24  llama3.1:8b 75.3±4.7 [70-87] n=16  | gap 0.7
+attempts per post 2.58, failed 10

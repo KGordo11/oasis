@@ -1,0 +1,42 @@
+{
+ "people": 20,
+ "pairs": 2000,
+ "self_gemma4:e2b": {
+  "kappa": 0.875,
+  "agree_%": 96.1,
+  "chance_%": 68.7,
+  "pairs": 1000,
+  "cares": {
+   "kappa": 0.87,
+   "agree_%": 97.0,
+   "chance_%": 77.0
+  },
+  "does_not_care": {
+   "kappa": 0.873,
+   "agree_%": 94.2,
+   "chance_%": 54.7
+  }
+ },
+ "self_llama3.1:8b": {
+  "kappa": 0.748,
+  "agree_%": 86.9,
+  "chance_%": 48.0,
+  "pairs": 1000,
+  "cares": {
+   "kappa": 0.581,
+   "agree_%": 90.4,
+   "chance_%": 77.2
+  },
+  "does_not_care": {
+   "kappa": 0.257,
+   "agree_%": 79.7,
+   "chance_%": 72.7
+  }
+ },
+ "cross_model": {
+  "kappa": 0.18,
+  "agree_%": 61.1,
+  "chance_%": 52.6,
+  "pairs": 1000
+ }
+}

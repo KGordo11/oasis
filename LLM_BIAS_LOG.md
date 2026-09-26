@@ -979,3 +979,34 @@ works. A third variant (ask 85-100, enforce 68-95) is running to cut the retries
 **Harness (applied 04:53, after the campaign and sweep; default behaviour unchanged, 23/23 tests pass):**
 `run_world.py --draw N` (fresh reproducible random draw; 0 = original seed formula) and every manifest now
 records `ollama_models` digests (llama3.1:8b 46e0c10c…, gemma4:e2b 7fbdbf8f…). Needed for the GPU move.
+
+### LF-22 — Retest: each AI agrees with itself; the gap between AIs is real (and more length variants)
+
+`rt_s13_w0/w1`: people 0-19 of post set 13, both worlds, same model per person, `--draw 1` (new random draw);
+both PASS check_world; like/dislike/nothing rates match the originals for the same 20 people (llama 58.7 vs
+59.0 % like, gemma 81.8 vs 81.9 %). `retest_compare.py` → `data/llm_bias/retest_s13.json`:
+
+| pair (same people, same posts) | agree | by chance | kappa |
+|---|---|---|---|
+| gemma vs gemma (new draw) | 96.1 % | 68.7 % | **0.88** |
+| llama vs llama (new draw) | 86.9 % | 48.0 % | **0.75** |
+| llama vs gemma | 61.1 % | 52.6 % | **0.18** |
+
+llama's self-agreement is lower on topics the person dislikes (kappa 0.26 there vs 0.58 where they care): its
+"skip vs like" on uninteresting topics is the noisy part. **Conclusion: the cross-AI disagreement (LF-15, kappa
+~0.2) is a real difference between the models, not sampling noise.** For simulation users: the persona text
+constrains behaviour far less than the choice of model does. Page v9 shows this in the "same person" card.
+
+Length variants (set 10 briefs, 50 posts each):
+
+| variant | gemma | llama | gap | tries/post | failed |
+|---|---|---|---|---|---|
+| ask 85-100, reject outside 68-95 | 86.4 | 76.1 | 10.3 | 1.28 | 0 |
+| ask 75-85, reject outside 70-90 | 74.6 | 75.3 | **0.7** | 2.58 | **10** (9 llama) |
+| ask 75-85, reject outside 65-95 (LF-21) | 72.2 | 69.8 | 2.4 | 1.86 | 2 |
+
+**Recommended for the next campaign:** ask 75-85, reject outside 65-95, allow more retries (so no post is
+lost), and keep post length in the analysis model regardless.
+
+Post set 16 (same design, harness unchanged in behaviour; now records model digests) started 05:36 — more post
+sets are what narrows the answer (LF-19).

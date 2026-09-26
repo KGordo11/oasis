@@ -272,6 +272,23 @@ the “likes its own posts” number above.</p>
 {res['personas']} people to {res['posts']} posts; every person has been played by both AIs.</p>"""
 
 
+def retest_note():
+    """Is the cross-AI gap just noise? Each AI re-run on the same people and posts with a new random draw."""
+    p = os.path.join(DATA, "retest_s13.json")
+    if not os.path.exists(p):
+        return ""
+    r = json.load(open(p))
+    sl, sg, cx = r["self_llama3.1:8b"], r["self_gemma4:e2b"], r["cross_model"]
+    return (f"<p><b>Is that just randomness?</b> AIs roll dice a little when they answer. So we re-ran {r['people']} of the "
+            f"people on the same posts with the same AI and new dice. Llama agreed with itself {sl['agree_%']:.0f} times in 100 "
+            f"and gemma with itself {sg['agree_%']:.0f} times in 100, but llama and gemma agreed only {cx['agree_%']:.0f} times "
+            f"in 100 on those same people. So each AI is quite steady; they are just different from each other.</p>"
+            + match_bars([("llama vs llama", sl["agree_%"], sl["chance_%"]), ("gemma vs gemma", sg["agree_%"], sg["chance_%"]),
+                          ("llama vs gemma", cx["agree_%"], cx["chance_%"])])
+            + f"<p class='grown'>Retest (post set 13, people 0-{r['people'] - 1}, both worlds, run_world.py --draw 1): kappa "
+            f"llama {sl['kappa']:.2f}, gemma {sg['kappa']:.2f}; across AIs on the same pairs {cx['kappa']:.2f}.</p>")
+
+
 def slot_note(L):
     """Post by post: the own-post like boost where gemma's post is much longer vs about the same length."""
     b = L.get("by_slot")
@@ -383,6 +400,7 @@ doesn't like, they match no more often than luck. So which AI is playing matters
 {match_bars([("All posts", sp['all']['agree_%'], sp['all']['chance_%']),
              ("Topics the person likes", sp['cares']['agree_%'], sp['cares']['chance_%']),
              ("Topics the person dislikes", sp['does_not_care']['agree_%'], sp['does_not_care']['chance_%'])])}
+{retest_note()}
 <p class="grown">For grown-ups: Cohen's kappa (agreement beyond chance; 0 = none, 1 = perfect) {sp['all']['kappa']:.2f}
 overall, {sp['cares']['kappa']:.2f} where the person cares, {sp['does_not_care']['kappa']:.2f} where they don't;
 {sp['pairs']:,} person-post pairs.</p></div>""")

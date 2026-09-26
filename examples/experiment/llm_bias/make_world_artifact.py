@@ -538,8 +538,10 @@ def timing_section():
                   f"({r['seconds_per_decision']:.2f} s per reaction)") for _, r in full[full.model == m].iterrows()]
              for m in MODELS}
         avg = full.groupby("model")["minutes"].mean()
-        note = (f" Round {', '.join(map(str, cut))} was paused partway and restarted, so only part of it was timed; it is left "
-                "out of the chart." if cut else "")
+        rw = (f"Round {cut[0]} was" if len(cut) == 1 else
+              f"Rounds {', '.join(map(str, cut[:-1]))} and {cut[-1]} were") if cut else ""
+        note = (f" {rw} paused partway and restarted, so only part {'of it was' if len(cut) == 1 else 'of each was'} timed; "
+                f"{'it is' if len(cut) == 1 else 'they are'} left out of the chart." if cut else "")
         out.append(f"<h3>Time per round</h3><p>How many minutes each AI needed to get its half of the people through all 50 posts. "
                    f"Llama is a bigger AI, so it is slower: about {avg.get('llama3.1:8b', float('nan')):.0f} minutes. Gemma takes "
                    f"about {avg.get('gemma4:e2b', float('nan')):.0f}. A whole round is the two added together.{note}</p>")
@@ -597,7 +599,32 @@ def timing_section():
     else:
         out.append("<h3>Whole runs with different numbers of people</h3><p class='muted'>Runs with 10, 25, 50 and 75 people are "
                    "queued after the main test. This chart appears when they finish.</p>")
+    out.append(speed_card())
     return "".join(out)
+
+
+def speed_card():
+    """'Can it go faster?' from the bench_cc_* run records (bench_concurrency.sh)."""
+    def wall(lab):
+        p = os.path.join(DATA, "worlds", lab, "manifest.json")
+        if not os.path.exists(p):
+            return None
+        return sum(v["wall_s"] for v in json.load(open(p))["judges"].values())
+    a, b = wall("bench_cc_A_llama"), wall("bench_cc_B_gemma")
+    c = [wall("bench_cc_C_llama"), wall("bench_cc_C_gemma")]
+    d = [wall("bench_cc_D_llama10"), wall("bench_cc_D_llama11")]
+    if None in (a, b) or None in c or None in d:
+        return ""
+    seq, tog = a + b, max(c)
+    dseq, dtog = 2 * a, max(d)
+    return f"""<h3>Can it go faster?</h3>
+<p>We tried running things at the same time on this computer. Running llama and gemma <em>together</em> instead of one after
+the other took {tog / 60:.1f} minutes instead of {seq / 60:.1f}: only {100 * (1 - tog / seq):.0f} in 100 faster. Running two
+whole llama jobs at once took {dtog / 60:.1f} minutes instead of {dseq / 60:.1f}: just {100 * (1 - dtog / dseq):.0f} in 100 faster.
+The computer's graphics chip is already working flat out, so two sims at once mostly just share it. The big speed-up will
+come from a computer with a bigger graphics card.</p>
+<p class="grown">For grown-ups: 8 people x 50 posts per job (400 decisions), same posts; wall clock summed over each job's
+judges and taking the slower of two simultaneous jobs; Ollama NUM_PARALLEL 4, flash attention on.</p>"""
 
 
 def data_section():

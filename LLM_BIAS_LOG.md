@@ -850,3 +850,17 @@ like-rate and speed vs other worlds): all 8 v2 worlds PASS.
 * Page v4 adds "Is the answer settling down?" (cumulative and per-set whisker charts).
 * Operational: exploration refreshes now run under `taskpolicy -b` (efficiency cores) so they do not slow the
   campaign; that made the refresh take 17 min — the bootstrap is being vectorised.
+
+### LD-12 — Pre-stated test on UNSEEN post sets 14-15 (written 2026-09-25 22:25, before set 14 finished; set 15 not yet generated)
+
+The length explanation (LF-15) was found by looking at sets 10-11 and re-checked on 12-13, so those sets
+cannot confirm it. Sets 14 and 15 are held out. Predictions, tested on sets 14+15 ONLY with
+`explore_world.py`'s length models (post + person-x-AI fixed effects, clustered by slot):
+* **P1** gemma writes longer posts than llama in sets 14-15 (mean words).
+* **P2** the gemma-played x post-length term on likes is positive.
+* **P3** adding it shrinks the like self-preference term by at least half.
+* **P4** it does NOT shrink the dislike self-preference term by half (dislikes are not about length).
+* **P5** the dislike self-preference double difference on sets 14-15 is negative (direction only; 2 sets
+  cannot give a narrow range).
+Held-out sets are small (2 x 50 posts), so a failed P2/P3 with a wide interval is "not confirmed", not
+"refuted". Whatever happens is reported.

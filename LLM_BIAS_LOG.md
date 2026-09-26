@@ -16,29 +16,45 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-25 21:45 — RUNNING overnight (Gordon away until 08:00).*
+*Last updated 2026-09-26 05:45 — MORNING REPORT for Gordon (overnight 21:37-08:00). Post set 16 running.*
 
-**Running:** campaign resumed 21:37 (`v2_s13_w1` from 2,337, then post sets 14-15, ETA ~02:15); agent sweep
-queued behind it (ETA ~04:00). Ollama up with LF-14 settings.
+**Running:** post set 16 (same design), started 05:36, ETA ~07:50. Nothing else.
 
-**Overnight plan (Gordon: keep running, keep interpreting, find speed-ups, improve the sim, smoke-test):**
-1. After each post set: validate the new worlds, refresh analysis/exploration/pages, log, push.
-2. While timing-sensitive runs are going: NO other inference (B-32). Write and test tooling only.
-3. ~04:00-07:30, machine free: (a) concurrency benchmark: llama alone vs llama+gemma together vs 2x llama,
-   same people and posts; (b) retest noise: same model, same person and post, new seed, which shows
-   whether cross-model agreement (kappa 0.21) is low or just noisy; (c) length-controlled post-bank smoke
-   test; (d) record Ollama model digests in manifests (+ tests). Each starts as a small smoke test.
-4. 08:00 morning report here and in chat.
+**What got done overnight** (every world PASSes `check_world.py`; everything pushed; page v9):
+* Campaign finished: post sets 13-15 → **6 sets, 59,400 reactions** (LF-17..19). Agent sweep 10/25/50/75 done (LF-21).
+* **Answer (LF-19): in the scroll design there is no reliable self-preference.** Like +2.7 [−1.2, +6.6];
+  dislike −1.5 [−4.6, +1.3]. The mid-campaign "significant" dislike result did not survive sets 14-15.
+  Per-set results swing widely (like −3 to +11); the small lean that exists tracks **post length** (gemma
+  writes longer posts and gemma-played people like longer posts; where gemma's post is ~21 words longer the
+  own-post boost is +8.7, where lengths match it is −0.6; LF-20). Pre-stated held-out test on sets 14-15
+  (LD-12): gemma longer — yes; length taste — right direction, not confirmed; no self-preference there at all.
+* **Same person, two AIs: they really do behave differently** (LF-22 retest): each AI agrees with itself
+  (kappa 0.75 llama, 0.88 gemma) but not with the other (0.18). The model matters more than the persona.
+* **~94 % of the uncertainty is which posts got written, not which people** (LF-19): more post sets help,
+  more people barely do.
+* **Speed (LF-21):** two full sims at once = ~5 % faster (chip already full); llama+gemma at the same time
+  inside a world = ~8 %. Time is linear: 0.65 min per person per world. The real lever is the GPU machine.
+  Analysis refresh made ~45x faster (same numbers); refreshes run on efficiency cores so runs aren't slowed.
+* Harness: `--draw` (retests) and Ollama model digests in every manifest (needed before the GPU move).
 
-**To resume** (start Ollama first — command below; this picks up v2_s13_w1 where it stopped, skips finished
-worlds, then runs post sets 14-15; the size sweep waits behind it; ~3.5 h + ~1.75 h):
+**Decisions for Gordon (nothing changed without you):**
+1. **Match post lengths** in future post sets: ask 75-85 words, reject outside 65-95 (gap 5 → 2.4 words; LF-22).
+2. **More post sets instead of more people** — e.g. the first 50 of the same pinned 99 and twice the post
+   sets for the same time (~30 % narrower ranges). You said the 99 must never change; this keeps the same
+   people, only fewer of them. Your call.
+3. **Add a third model**: with two, the fair test can't say WHICH model favours itself.
+4. **Side-by-side vs scrolling**: night 1 (pick a favourite of 7 side by side) found +5.6 [+3.4, +7.8];
+   scrolling one at a time finds ~0. A direct A/B on identical posts and people would show whether the
+   format itself creates the bias.
+
+**To resume after a stop** (start Ollama first — command below; re-running skips finished worlds and resumes
+an unfinished one; set SEEDS to the post sets wanted):
 
     cd /Users/gordon/research/oasis
-    SEEDS="10 11 12 13 14 15" nohup caffeinate -i examples/experiment/llm_bias/world_campaign.sh \
+    SEEDS="16" nohup caffeinate -i examples/experiment/llm_bias/world_campaign.sh \
       >> data/llm_bias/campaign_v2.log 2>&1 &
-    nohup caffeinate -i examples/experiment/llm_bias/agent_sweep.sh >> data/llm_bias/agent_sweep.log 2>&1 &
 
-Ollama is down — start it first (LF-14):
+Start Ollama like this (LF-14):
 `OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve > /tmp/ollama_serve.log 2>&1 &`
 
 Night-1 design (pick-a-favourite, 7 models) found +5.6 [+3.4, +7.8] (LF-10).
@@ -47,10 +63,8 @@ Pages: design v2 **https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx** · design
 **https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9**. Data: `data/llm_bias/export/`,
 explained in `LLM_BIAS_DATA_DICTIONARY.md`.
 
-**Next, when resumed:** finish post sets 13-15 → refresh export, analysis, exploration and both
-pages (recipe at end of LF-16) → agent sweep for the time-vs-agents chart → rerun the length test as a
-pre-stated check on sets 10-15 (LF-15/16). Later: SSH/GPU machine
-(record model digests in manifests first).
+**Next:** Gordon's decisions 1-4 above → next campaign design. After every post set: `check_world.py`,
+then the refresh recipe at the end of LF-16. Later: SSH/GPU machine (model digests are now recorded).
 
 ---
 

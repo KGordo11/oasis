@@ -78,7 +78,7 @@ def load(sets=None):
     return R, P, U1
 
 
-def fast_bootstrap(df, col, B=2000, seed=0, chunk=200):
+def fast_bootstrap(df, col, B=2000, seed=0, chunk=200, mode="both", sd_only=False):
     """analyze.cluster_bootstrap, vectorised: SAME random draws (same generator, same order), same pooled
     double difference, ~50x faster. Checked equal to the original in test_llm_bias.py."""
     rng = np.random.default_rng(seed)
@@ -97,6 +97,10 @@ def fast_bootstrap(df, col, B=2000, seed=0, chunk=200):
         for _ in range(min(chunk, B - start)):
             wp = rng.multinomial(len(personas), np.ones(len(personas)) / len(personas))
             ws = rng.multinomial(len(slots), np.ones(len(slots)) / len(slots))
+            if mode == "posts":
+                wp = np.ones(len(personas))
+            if mode == "people":
+                ws = np.ones(len(slots))
             W.append(wp[p_idx] * ws[s_idx])
         W = np.asarray(W, dtype=float)
         with np.errstate(invalid="ignore", divide="ignore"):
@@ -116,6 +120,8 @@ def fast_bootstrap(df, col, B=2000, seed=0, chunk=200):
             if np.isfinite(v):
                 draws.append(v)
     d = np.array(draws)
+    if sd_only:
+        return float(np.std(d))
     ci = (float(np.percentile(d, 2.5)), float(np.percentile(d, 97.5)))
     p = float(min(1.0, 2 * min((d <= 0).mean(), (d >= 0).mean())))
     return ci, p
@@ -261,6 +267,9 @@ def main():
     sets = sorted(R["post_set_seed"].unique())
     res["by_set"] = {str(k): sp(R[R["post_set_seed"] == k], a.B) for k in sets}
     res["cumulative"] = {str(k): sp(R[R["post_set_seed"] <= k], a.B) for k in sets}
+    # where does the uncertainty come from? resample only people, only posts (slots), or both
+    res["uncertainty_sd_points"] = {col: {m: round(100 * fast_bootstrap(R, col, B=min(a.B, 500), mode=m, sd_only=True), 2)
+                                          for m in ("people", "posts", "both")} for col in ("up", "down")}
     res["by_caring"] = {("cares" if k else "does_not_care"): sp(g, a.B) for k, g in R.groupby("cares")}
     res["rates_cares"] = rates(R[R["cares"]])
     res["rates_does_not_care"] = rates(R[~R["cares"]])

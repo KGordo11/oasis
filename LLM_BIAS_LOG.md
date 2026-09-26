@@ -883,3 +883,38 @@ run, LF-9) should be read as one draw; (c) the page now says this in plain words
 Dislike rates where people care (sets 10-14): gemma-played 6.6 % on gemma posts vs 8.4 % on llama posts;
 llama-played 1.1 vs 0.5.
 **LD-12 held-out length test is NOT looked at yet** (needs sets 14+15; set 15 running, ETA ~02:15).
+
+### LF-19 — Campaign complete (6 post sets, 59,400 reactions): no clear self-preference in the scroll design; the held-out length test
+
+All 12 v2 worlds PASS `check_world.py`. Campaign ended 02:23; agent sweep started 02:23.
+
+**Final headline (sets 10-15, analyze_world B = 2000):**
+
+| | estimate | 95 % range | p |
+|---|---|---|---|
+| like self-preference | +2.7 | −1.2 to +6.6 | 0.17 |
+| dislike self-preference | −1.5 | −4.6 to +1.3 | 0.30 |
+
+Per post set (like / dislike): 10: −3.0 / +1.7 · 11: +11.3 / −11.1 · 12: +1.4 / −4.8 · 13: +8.4 / −1.7 ·
+14: +0.7 / +5.0 · 15: −2.9 / +1.7. **Conclusion for design v2: no reliable self-preference.** Any lean is small
+(a few points per 100) and swings with the particular posts; the mid-campaign "clear of zero" dislike result
+(LF-16/17) did not survive sets 14-15. Contrast night 1 (pick-a-favourite among 7): +5.6 [+3.4, +7.8] — the
+comparison format may matter (choosing between side-by-side posts vs reacting to one post at a time).
+
+**LD-12 held-out test (sets 14+15 only, written 22:23 before they existed; `heldout_s14_15.json`):**
+P1 gemma longer — **yes** (87 vs 80 words). P2 gemma-played x length on likes positive — **direction yes, not
+confirmed** (+1.5 per SD [−1.9, +4.8]). P3 halves the like self term — **not testable**: no like self-preference
+in 14-15 (self term −0.54 [−2.95, +1.88]; double difference −1.1 [−6.0, +4.4]). P4 dislike term not shrunk by
+length — **yes** (+1.67 → +1.80). P5 dislike double difference negative — **no** (+3.3 [−0.6, +7.6]).
+On all six sets, allowing for length takes the like number +2.7 → +0.3 (self 1.34 → 0.13).
+
+**Where the uncertainty comes from** (bootstrap SD, points; resample people only / posts only / both):
+likes 0.45 / 1.84 / 1.95; dislikes 0.30 / 1.46 / 1.55. **~94 % of the variance is which posts got written.**
+More people barely helps; more post sets (slots) does. Halving the interval needs ~4x the slots.
+
+Stable descriptive results (6 sets): same person, two AIs, kappa 0.22 (66 % agree vs 56 % by chance);
+per-post agreement between the AIs rho 0.32; like rates where people care: gemma-played 84.2 / 83.0 (own / llama),
+llama-played 90.8 / 88.8; dislike gemma-played 6.3 on gemma posts vs 7.9 on llama posts.
+
+Page v6 (PEMNidbCam72v6qKC3GNBx): all 6 sets, held-out check shown under the length card, new "More posts would
+help much more than more people" card.

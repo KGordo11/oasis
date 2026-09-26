@@ -1,0 +1,687 @@
+{
+ "post_sets": [
+  14,
+  15
+ ],
+ "reactions": 19800,
+ "people": 99,
+ "posts": 100,
+ "headline": {
+  "up": {
+   "est": -1.1,
+   "ci95": [
+    -6.0,
+    4.4
+   ],
+   "p": 0.688
+  },
+  "down": {
+   "est": 3.3,
+   "ci95": [
+    -0.6,
+    7.6
+   ],
+   "p": 0.096
+  },
+  "n": 19800
+ },
+ "by_topic": {
+  "cars": {
+   "up": {
+    "est": -1.5,
+    "ci95": [
+     -17.4,
+     15.9
+    ],
+    "p": 0.856
+   },
+   "down": {
+    "est": 6.6,
+    "ci95": [
+     -4.0,
+     19.7
+    ],
+    "p": 0.3
+   },
+   "n": 3960
+  },
+  "cooking": {
+   "up": {
+    "est": 3.0,
+    "ci95": [
+     -10.1,
+     18.3
+    ],
+    "p": 0.678
+   },
+   "down": {
+    "est": -1.3,
+    "ci95": [
+     -5.7,
+     3.0
+    ],
+    "p": 0.57
+   },
+   "n": 3960
+  },
+  "farming": {
+   "up": {
+    "est": 2.1,
+    "ci95": [
+     -3.5,
+     7.6
+    ],
+    "p": 0.442
+   },
+   "down": {
+    "est": -1.9,
+    "ci95": [
+     -9.7,
+     2.9
+    ],
+    "p": 0.656
+   },
+   "n": 3960
+  },
+  "personal_finance": {
+   "up": {
+    "est": 0.2,
+    "ci95": [
+     -4.4,
+     4.8
+    ],
+    "p": 0.916
+   },
+   "down": {
+    "est": 1.7,
+    "ci95": [
+     -0.2,
+     4.0
+    ],
+    "p": 0.07
+   },
+   "n": 3960
+  },
+  "tech": {
+   "up": {
+    "est": -9.2,
+    "ci95": [
+     -16.9,
+     -1.7
+    ],
+    "p": 0.01
+   },
+   "down": {
+    "est": 11.6,
+    "ci95": [
+     2.7,
+     22.4
+    ],
+    "p": 0.002
+   },
+   "n": 3960
+  }
+ },
+ "by_set": {
+  "14": {
+   "up": {
+    "est": 0.7,
+    "ci95": [
+     -5.9,
+     7.6
+    ],
+    "p": 0.942
+   },
+   "down": {
+    "est": 5.0,
+    "ci95": [
+     0.3,
+     11.3
+    ],
+    "p": 0.028
+   },
+   "n": 9900
+  },
+  "15": {
+   "up": {
+    "est": -2.9,
+    "ci95": [
+     -10.1,
+     4.5
+    ],
+    "p": 0.42
+   },
+   "down": {
+    "est": 1.7,
+    "ci95": [
+     -3.8,
+     7.8
+    ],
+    "p": 0.548
+   },
+   "n": 9900
+  }
+ },
+ "cumulative": {
+  "14": {
+   "up": {
+    "est": 0.7,
+    "ci95": [
+     -5.9,
+     7.6
+    ],
+    "p": 0.942
+   },
+   "down": {
+    "est": 5.0,
+    "ci95": [
+     0.3,
+     11.3
+    ],
+    "p": 0.028
+   },
+   "n": 9900
+  },
+  "15": {
+   "up": {
+    "est": -1.1,
+    "ci95": [
+     -6.0,
+     4.4
+    ],
+    "p": 0.688
+   },
+   "down": {
+    "est": 3.3,
+    "ci95": [
+     -0.6,
+     7.6
+    ],
+    "p": 0.096
+   },
+   "n": 19800
+  }
+ },
+ "by_caring": {
+  "does_not_care": {
+   "up": {
+    "est": -5.7,
+    "ci95": [
+     -13.2,
+     2.2
+    ],
+    "p": 0.142
+   },
+   "down": {
+    "est": 6.6,
+    "ci95": [
+     0.7,
+     12.6
+    ],
+    "p": 0.03
+   },
+   "n": 5400
+  },
+  "cares": {
+   "up": {
+    "est": 0.7,
+    "ci95": [
+     -4.0,
+     6.0
+    ],
+    "p": 0.756
+   },
+   "down": {
+    "est": 2.1,
+    "ci95": [
+     -1.5,
+     6.2
+    ],
+    "p": 0.254
+   },
+   "n": 14400
+  }
+ },
+ "rates_cares": {
+  "up": {
+   "gemma people": {
+    "gemma posts": 86.4,
+    "llama posts": 88.2
+   },
+   "llama people": {
+    "gemma posts": 87.8,
+    "llama posts": 90.2
+   }
+  },
+  "down": {
+   "gemma people": {
+    "gemma posts": 6.2,
+    "llama posts": 3.7
+   },
+   "llama people": {
+    "gemma posts": 1.5,
+    "llama posts": 1.1
+   }
+  },
+  "nothing": {
+   "gemma people": {
+    "gemma posts": 7.4,
+    "llama posts": 8.1
+   },
+   "llama people": {
+    "gemma posts": 10.7,
+    "llama posts": 8.7
+   }
+  }
+ },
+ "rates_does_not_care": {
+  "up": {
+   "gemma people": {
+    "gemma posts": 66.8,
+    "llama posts": 74.1
+   },
+   "llama people": {
+    "gemma posts": 1.7,
+    "llama posts": 3.3
+   }
+  },
+  "down": {
+   "gemma people": {
+    "gemma posts": 11.7,
+    "llama posts": 7.0
+   },
+   "llama people": {
+    "gemma posts": 10.3,
+    "llama posts": 12.1
+   }
+  },
+  "nothing": {
+   "gemma people": {
+    "gemma posts": 21.5,
+    "llama posts": 18.9
+   },
+   "llama people": {
+    "gemma posts": 88.0,
+    "llama posts": 84.5
+   }
+  }
+ },
+ "same_person": {
+  "pairs": 9900,
+  "crosstab_rows_llama_cols_gemma": {
+   "dislike": {
+    "dislike": 131,
+    "like": 175,
+    "nothing": 301
+   },
+   "like": {
+    "dislike": 173,
+    "like": 5947,
+    "nothing": 2071
+   },
+   "nothing": {
+    "dislike": 94,
+    "like": 354,
+    "nothing": 654
+   }
+  },
+  "all": {
+   "kappa": 0.242,
+   "agree_%": 68.0,
+   "chance_%": 57.8
+  },
+  "cares": {
+   "kappa": 0.314,
+   "agree_%": 85.3,
+   "chance_%": 78.5
+  },
+  "does_not_care": {
+   "kappa": 0.021,
+   "agree_%": 21.9,
+   "chance_%": 20.2
+  }
+ },
+ "post_agreement": {
+  "posts": 100,
+  "spearman": 0.345,
+  "pearson": 0.555,
+  "sd_like_rate_llama": 11.9,
+  "sd_like_rate_gemma": 19.7
+ },
+ "length": {
+  "words_by_author": {
+   "mean": {
+    "gemma4:e2b": 87.0,
+    "llama3.1:8b": 80.0
+   },
+   "50%": {
+    "gemma4:e2b": 88.0,
+    "llama3.1:8b": 80.0
+   },
+   "min": {
+    "gemma4:e2b": 72.0,
+    "llama3.1:8b": 60.0
+   },
+   "max": {
+    "gemma4:e2b": 103.0,
+    "llama3.1:8b": 105.0
+   }
+  },
+  "like_%_by_length_cares": {
+   "short": {
+    "gemma4:e2b": 85.7,
+    "llama3.1:8b": 89.6
+   },
+   "medium": {
+    "gemma4:e2b": 87.7,
+    "llama3.1:8b": 87.5
+   },
+   "long": {
+    "gemma4:e2b": 88.8,
+    "llama3.1:8b": 89.8
+   }
+  },
+  "self_only": {
+   "self": {
+    "coef_pts": -0.54,
+    "ci95": [
+     -2.95,
+     1.88
+    ]
+   }
+  },
+  "self_plus_judge_x_length": {
+   "self": {
+    "coef_pts": -1.08,
+    "ci95": [
+     -3.77,
+     1.61
+    ]
+   },
+   "g_judge:z_words": {
+    "coef_pts": 1.5,
+    "ci95": [
+     -1.85,
+     4.84
+    ]
+   }
+  },
+  "dislike_self_only": {
+   "self": {
+    "coef_pts": 1.67,
+    "ci95": [
+     -0.23,
+     3.57
+    ]
+   }
+  },
+  "dislike_self_plus_judge_x_length": {
+   "self": {
+    "coef_pts": 1.8,
+    "ci95": [
+     -0.07,
+     3.67
+    ]
+   },
+   "g_judge:z_words": {
+    "coef_pts": -0.37,
+    "ci95": [
+     -1.68,
+     0.94
+    ]
+   }
+  }
+ },
+ "position": {
+  "like_%_by_position_in_topic": {
+   "1": {
+    "gemma4:e2b": 83.9,
+    "llama3.1:8b": 66.4
+   },
+   "2": {
+    "gemma4:e2b": 83.2,
+    "llama3.1:8b": 66.2
+   },
+   "3": {
+    "gemma4:e2b": 82.6,
+    "llama3.1:8b": 67.0
+   },
+   "4": {
+    "gemma4:e2b": 81.8,
+    "llama3.1:8b": 65.9
+   },
+   "5": {
+    "gemma4:e2b": 83.1,
+    "llama3.1:8b": 65.5
+   },
+   "6": {
+    "gemma4:e2b": 83.2,
+    "llama3.1:8b": 65.2
+   },
+   "7": {
+    "gemma4:e2b": 82.8,
+    "llama3.1:8b": 63.3
+   },
+   "8": {
+    "gemma4:e2b": 83.2,
+    "llama3.1:8b": 64.3
+   },
+   "9": {
+    "gemma4:e2b": 81.8,
+    "llama3.1:8b": 64.9
+   },
+   "10": {
+    "gemma4:e2b": 81.5,
+    "llama3.1:8b": 65.6
+   }
+  },
+  "like_%_by_scroll_position_cares": {
+   "1-10": {
+    "gemma4:e2b": 89.1,
+    "llama3.1:8b": 91.9
+   },
+   "11-20": {
+    "gemma4:e2b": 86.9,
+    "llama3.1:8b": 88.2
+   },
+   "21-30": {
+    "gemma4:e2b": 86.6,
+    "llama3.1:8b": 87.2
+   },
+   "31-40": {
+    "gemma4:e2b": 86.6,
+    "llama3.1:8b": 89.0
+   },
+   "41-50": {
+    "gemma4:e2b": 85.8,
+    "llama3.1:8b": 85.6
+   }
+  }
+ },
+ "traits": {
+  "voting_style": {
+   "up": {
+    "generous": {
+     "gemma4:e2b": 97.1,
+     "llama3.1:8b": 73.1
+    },
+    "harsh": {
+     "gemma4:e2b": 53.9,
+     "llama3.1:8b": 38.3
+    },
+    "typical": {
+     "gemma4:e2b": 82.5,
+     "llama3.1:8b": 68.2
+    }
+   },
+   "down": {
+    "generous": {
+     "gemma4:e2b": 1.3,
+     "llama3.1:8b": 0.2
+    },
+    "harsh": {
+     "gemma4:e2b": 14.4,
+     "llama3.1:8b": 4.1
+    },
+    "typical": {
+     "gemma4:e2b": 6.6,
+     "llama3.1:8b": 6.0
+    }
+   },
+   "nothing": {
+    "generous": {
+     "gemma4:e2b": 1.6,
+     "llama3.1:8b": 26.7
+    },
+    "harsh": {
+     "gemma4:e2b": 31.7,
+     "llama3.1:8b": 57.6
+    },
+    "typical": {
+     "gemma4:e2b": 10.9,
+     "llama3.1:8b": 25.8
+    }
+   }
+  },
+  "gender": {
+   "up": {
+    "female": {
+     "gemma4:e2b": 80.8,
+     "llama3.1:8b": 67.8
+    },
+    "male": {
+     "gemma4:e2b": 85.2,
+     "llama3.1:8b": 63.8
+    },
+    "non-binary": {
+     "gemma4:e2b": 74.0,
+     "llama3.1:8b": 59.2
+    }
+   },
+   "down": {
+    "female": {
+     "gemma4:e2b": 6.4,
+     "llama3.1:8b": 3.4
+    },
+    "male": {
+     "gemma4:e2b": 5.7,
+     "llama3.1:8b": 4.4
+    },
+    "non-binary": {
+     "gemma4:e2b": 8.5,
+     "llama3.1:8b": 6.0
+    }
+   },
+   "nothing": {
+    "female": {
+     "gemma4:e2b": 12.8,
+     "llama3.1:8b": 28.8
+    },
+    "male": {
+     "gemma4:e2b": 9.2,
+     "llama3.1:8b": 31.9
+    },
+    "non-binary": {
+     "gemma4:e2b": 17.5,
+     "llama3.1:8b": 34.8
+    }
+   }
+  },
+  "age_band": {
+   "up": {
+    "<30": {
+     "gemma4:e2b": 81.0,
+     "llama3.1:8b": 58.1
+    },
+    "30-44": {
+     "gemma4:e2b": 81.2,
+     "llama3.1:8b": 65.5
+    },
+    "45-59": {
+     "gemma4:e2b": 82.8,
+     "llama3.1:8b": 64.1
+    },
+    "60+": {
+     "gemma4:e2b": 85.2,
+     "llama3.1:8b": 71.5
+    }
+   },
+   "down": {
+    "<30": {
+     "gemma4:e2b": 7.0,
+     "llama3.1:8b": 3.2
+    },
+    "30-44": {
+     "gemma4:e2b": 6.6,
+     "llama3.1:8b": 5.2
+    },
+    "45-59": {
+     "gemma4:e2b": 5.6,
+     "llama3.1:8b": 3.4
+    },
+    "60+": {
+     "gemma4:e2b": 5.3,
+     "llama3.1:8b": 4.0
+    }
+   }
+  }
+ },
+ "reasons": {
+  "mean_words": {
+   "gemma4:e2b": 2.7,
+   "llama3.1:8b": 5.9
+  },
+  "generic_%": {
+   "gemma4:e2b": 26.9,
+   "llama3.1:8b": 42.6
+  },
+  "mentions_own_life_%": {
+   "gemma4:e2b": 0.6,
+   "llama3.1:8b": 24.4
+  },
+  "distinct_reasons_%": {
+   "gemma4:e2b": 19.9,
+   "llama3.1:8b": 73.8
+  },
+  "top_reasons": {
+   "gemma4:e2b": {
+    "makes sense": 565,
+    "too vague": 470,
+    "sounds practical": 251,
+    "practical advice needed": 224,
+    "too much fluff": 205,
+    "relatable struggle": 146,
+    "too much whining": 121,
+    "sounds frustrating": 120
+   },
+   "llama3.1:8b": {
+    "not my thing": 456,
+    "not really my thing": 294,
+    "not my cup of tea": 265,
+    "not my area of interest": 79,
+    "practical solution to a common problem": 65,
+    "not really my cup of tea": 49,
+    "not my jam": 41,
+    "relatable struggle": 33
+   }
+  },
+  "own_vs_other_post": {
+   "gemma|other": {
+    "rlen": 2.726,
+    "personal": 0.005
+   },
+   "gemma|own": {
+    "rlen": 2.714,
+    "personal": 0.006
+   },
+   "llama|other": {
+    "rlen": 5.832,
+    "personal": 0.261
+   },
+   "llama|own": {
+    "rlen": 5.992,
+    "personal": 0.227
+   }
+  }
+ }
+}

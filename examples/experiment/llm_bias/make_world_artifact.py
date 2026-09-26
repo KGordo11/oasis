@@ -272,6 +272,25 @@ the “likes its own posts” number above.</p>
 {res['personas']} people to {res['posts']} posts; every person has been played by both AIs.</p>"""
 
 
+def heldout_note():
+    """The pre-stated test of the length idea on post sets nobody had looked at (LD-12)."""
+    p = os.path.join(DATA, "heldout_s14_15.json")
+    if not os.path.exists(p):
+        return ""
+    h = json.load(open(p))
+    L = h["length"]
+    w = L["words_by_author"]["mean"]
+    t = L["self_plus_judge_x_length"]["g_judge:z_words"]
+    up = h["headline"]["up"]
+    sure = t["ci95"][0] > 0
+    return (f"<p class='example'><b>Checked on fresh data.</b> We wrote this idea down before post sets "
+            f"{' and '.join(map(str, h['post_sets']))} existed, then tested it only on them. Gemma again wrote longer posts "
+            f"({w['gemma4:e2b']:.0f} vs {w['llama3.1:8b']:.0f} words) and people played by gemma again leaned toward long posts, "
+            f"{'clearly' if sure else 'but too weakly to be sure'} ({t['coef_pts']:+.1f} per step of length, 95 % range "
+            f"{t['ci95'][0]:+.1f} to {t['ci95'][1]:+.1f}). And in those two sets there was no “likes its own posts” effect to "
+            f"explain at all ({up['est']:+.1f}, range {up['ci95'][0]:+.1f} to {up['ci95'][1]:+.1f}).</p>")
+
+
 def findings(ex, res):
     """'What else we found': every number comes from explore_v2.json or the export."""
     if not ex:
@@ -299,6 +318,7 @@ person, that person likes long posts {lc['long']['gemma4:e2b']:.0f} times in 100
 posts” may really be “gemma likes long posts”, and it happens to write long ones. Once we allow for length, the likes
 number drops from about {s0:+.1f} to about {s1:+.1f}. The dislike number barely moves ({d0:+.1f} to {d1:+.1f}), so
 length does not explain the dislikes.</p>
+{heldout_note()}
 {bar_chart(cats, [(CLS[m], f"people played by {NICE[m]}", [lc[k][m] for k in ('short', 'medium', 'long')]) for m in MODELS],
            "likes per 100", "Likes by post length", tip=lambda s, c, v: f"{s}, {c}: {v:.1f} likes per 100")}
 <p class="grown">For grown-ups: people who care about the topic only; posts split into three equal-sized length groups.
@@ -401,6 +421,21 @@ written. That is why one post set is never enough, and why more post sets matter
 <details><summary>The same for likes</summary>
 {whisker_chart(rows_l, "Like number as post sets are added", "extra likes per 100 for the AI's own posts")}
 </details></div>""")
+
+    # 5c. people vs posts: where the uncertainty comes from
+    if ex.get("uncertainty_sd_points"):
+        u = ex["uncertainty_sd_points"]
+        share = 100 * u["up"]["posts"] ** 2 / max(1e-9, u["up"]["posts"] ** 2 + u["up"]["people"] ** 2)
+        out.append(f"""<div class="find"><h3>More posts would help much more than more people</h3>
+<p>Our answer is fuzzy for two reasons: we only have so many people, and we only have so many posts. We can test which
+matters by pretending to redo the study many times, once shuffling only the people and once shuffling only the posts.
+Shuffling people moves the “likes its own posts” number by about {u['up']['people']:.1f} points; shuffling posts moves it
+by about {u['up']['posts']:.1f}. So about {share:.0f} in 100 parts of the fuzziness come from <em>which posts got written</em>.
+To get a sharper answer, the next runs should add post sets, not people.</p>
+<p class="grown">For grown-ups: standard deviation of the bootstrap double difference (points), resampling persons only /
+slots only / both: likes {u['up']['people']:.2f} / {u['up']['posts']:.2f} / {u['up']['both']:.2f}; dislikes
+{u['down']['people']:.2f} / {u['down']['posts']:.2f} / {u['down']['both']:.2f}. Halving the range needs about four times as
+many slots.</p></div>""")
 
     # 6. voting style
     vs = ex["traits"]["voting_style"]

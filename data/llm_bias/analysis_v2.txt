@@ -1,43 +1,43 @@
-worlds ['v2_s10_w0', 'v2_s10_w1', 'v2_s11_w0', 'v2_s11_w1', 'v2_s12_w0', 'v2_s12_w1', 'v2_s13_w0', 'v2_s13_w1', 'v2_s14_w0', 'v2_s14_w1']
-99 personas, 250 posts, 49500/49500 valid decisions
+worlds ['v2_s10_w0', 'v2_s10_w1', 'v2_s11_w0', 'v2_s11_w1', 'v2_s12_w0', 'v2_s12_w1', 'v2_s13_w0', 'v2_s13_w1', 'v2_s14_w0', 'v2_s14_w1', 'v2_s15_w0', 'v2_s15_w1']
+99 personas, 300 posts, 59400/59400 valid decisions
 personas played by both models: 99
 
 LIKE RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b
-gemma4:e2b         78.9         77.3
-llama3.1:8b        65.4         67.5
+gemma4:e2b         79.2         78.4
+llama3.1:8b        65.3         67.2
 
 DISLIKE RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b
-gemma4:e2b          7.7          9.8
-llama3.1:8b         3.9          3.8
+gemma4:e2b          7.5          9.2
+llama3.1:8b         3.8          4.0
 
 NOTHING RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b
-gemma4:e2b         13.4         13.0
-llama3.1:8b        30.7         28.6
+gemma4:e2b         13.4         12.4
+llama3.1:8b        30.9         28.8
 
 SELF-PREFERENCE on like rate (double difference, percentage points):
-  gemma4:e2b     +3.8  95% CI [-0.6, +8.0]
-  llama3.1:8b    +3.8  95% CI [-0.6, +8.0]
-  _pooled        +3.8  95% CI [-0.6, +8.0]
-  pooled bootstrap p = 0.0860
+  gemma4:e2b     +2.7  95% CI [-1.2, +6.6]
+  llama3.1:8b    +2.7  95% CI [-1.2, +6.6]
+  _pooled        +2.7  95% CI [-1.2, +6.6]
+  pooled bootstrap p = 0.1720
 
 SELF-PREFERENCE on dislike rate (double difference, percentage points):
-  gemma4:e2b     -2.2  95% CI [-5.6, +1.0]
-  llama3.1:8b    -2.2  95% CI [-5.6, +1.0]
-  _pooled        -2.2  95% CI [-5.6, +1.0]
-  pooled bootstrap p = 0.1940
+  gemma4:e2b     -1.5  95% CI [-4.6, +1.3]
+  llama3.1:8b    -1.5  95% CI [-4.6, +1.3]
+  _pooled        -1.5  95% CI [-4.6, +1.3]
+  pooled bootstrap p = 0.2980
 
 WHY 'NOTHING'? per model:
-  gemma4:e2b: like 78.1%  dislike 8.7%  nothing 13.2%  failed 0.0% | outcomes {'chose': 24750} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 27.7, -1: 20.4, 0: 11.4, 1: 7.7, 2: 8.2}
-     sample reasons for nothing: ['Too much detail', 'Too basic', 'Boring details', 'Too basic', 'Too vague', 'Too much whining']
-  llama3.1:8b: like 66.4%  dislike 3.9%  nothing 29.7%  failed 0.0% | outcomes {'chose': 24750} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 76.8, -1: 88.5, 0: 12.2, 1: 6.6, 2: 5.9}
-     sample reasons for nothing: ['Not my thing', 'Not my thing, no expertise here', 'too vague, needs details about the shop and what went wrong', 'Not my jam', 'not interested in this topic', 'Not my thing, not boring but not really relevant to me']
+  gemma4:e2b: like 78.8%  dislike 8.3%  nothing 12.9%  failed 0.0% | outcomes {'chose': 29700} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 27.3, -1: 19.9, 0: 11.3, 1: 7.5, 2: 7.8}
+     sample reasons for nothing: ['Too vague', 'Too much worry', 'Too much text', 'Not relevant', 'Too much noise', 'Too much whining']
+  llama3.1:8b: like 66.2%  dislike 3.9%  nothing 29.8%  failed 0.0% | outcomes {'chose': 29700} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 76.7, -1: 88.7, 0: 12.3, 1: 7.0, 2: 6.2}
+     sample reasons for nothing: ['Not my thing', 'Not really my thing', 'Not really my thing', 'Not my cup of tea', 'boring farm story', 'Not exactly a personal finance victory, more of a customer service win']
 
 LIKE % by persona interest in the topic:
                -2    -1     0     1     2
-gemma4:e2b   58.2  68.8  81.3  84.8  83.9
-llama3.1:8b   4.9   2.6  86.8  92.9  93.2
+gemma4:e2b   58.9  69.7  81.7  85.5  84.8
+llama3.1:8b   4.9   2.6  86.6  92.5  92.9

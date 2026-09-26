@@ -1114,3 +1114,22 @@ Per set (scroll likes / pair likes / pair favourite; words llama vs gemma):
 The scroll like number is positive in every length-matched set so far, with the word gap down to 3-6 words.
 So far: **the display format makes no difference**, and length matching has not removed the own-post like
 lean. The earlier "length explains it" reading (LF-15..20) looks at best partial. Page v14.
+
+### LF-27 — A/B after 4 post sets (20-23; 38,800 reactions): the format makes no difference
+
+| measure | estimate | 95 % range | p |
+|---|---|---|---|
+| scroll likes | **+5.4** | +0.7 to +10.5 | 0.028 |
+| scroll dislikes | −2.1 | −5.9 to +1.9 | 0.30 |
+| side-by-side likes | +5.8 | −0.8 to +12.5 | 0.075 |
+| side-by-side dislikes | −1.3 | −5.4 to +2.2 | 0.50 |
+| side-by-side favourite | **+4.3** | +0.2 to +8.5 | 0.042 |
+| **format effect, likes** | **+0.4** | **−5.5 to +6.2** | 0.94 |
+| format effect, dislikes | +0.8 | −3.8 to +5.3 | 0.73 |
+
+Reading: with length-matched posts, **both formats show the same small own-post like lean (~+5 per 100)**, and
+the side-by-side favourite number (+4.3) is close to night 1's +5.6. The format effect is ~0 with a range that
+now excludes differences bigger than about ±6. So night 1 vs scroll (+5.6 vs ~0 in the old design) is not
+explained by format; the old design's scroll lean (+2.4 over 7 sets) and this one (+5.4 over 4) overlap.
+Favourite shares: gemma-played pick gemma 54 %, llama-played pick llama 50 % — the lean is mostly gemma's.
+Page v15.

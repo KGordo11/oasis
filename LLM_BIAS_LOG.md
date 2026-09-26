@@ -16,18 +16,19 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-25 15:57 — STOPPED at Gordon's request ("come to a complete stopping point").*
+*Last updated 2026-09-25 21:45 — RUNNING overnight (Gordon away until 08:00).*
 
-**Nothing is running, and Ollama is shut down too.** Campaign, agent sweep and Ollama were all stopped.
-* Complete: post sets 10, 11, 12 (both worlds each) and `v2_s13_w0`.
-* Partial: `v2_s13_w1` — 2,337 of 4,950 reactions on disk (valid JSON; resume replays them). Not committed until finished.
-* Not started: post sets 14-15; agent sweep (10/25/50/75 people).
-* Pages are current as of post sets 10-12 (LF-16). Post set 13 is not in them yet (it's half done).
-* Note: after resuming, `v2_s13_w1`'s timing only covers the part after the restart (same as `v2_s12_w0`, LF-16).
+**Running:** campaign resumed 21:37 (`v2_s13_w1` from 2,337, then post sets 14-15, ETA ~02:15); agent sweep
+queued behind it (ETA ~04:00). Ollama up with LF-14 settings.
 
-**Latest result (LF-16, 3 post sets):** dislike self-preference −4.7 [−9.8, −0.3], p = 0.038 (mostly gemma
-disliking llama's posts); like +3.2 [−2.8, +9.5], not shown, and possibly just gemma liking longer posts.
-Refresh recipe for the pages: end of LF-16.
+**Overnight plan (Gordon: keep running, keep interpreting, find speed-ups, improve the sim, smoke-test):**
+1. After each post set: validate the new worlds, refresh analysis/exploration/pages, log, push.
+2. While timing-sensitive runs are going: NO other inference (B-32). Write and test tooling only.
+3. ~04:00-07:30, machine free: (a) concurrency benchmark: llama alone vs llama+gemma together vs 2x llama,
+   same people and posts; (b) retest noise: same model, same person and post, new seed, which shows
+   whether cross-model agreement (kappa 0.21) is low or just noisy; (c) length-controlled post-bank smoke
+   test; (d) record Ollama model digests in manifests (+ tests). Each starts as a small smoke test.
+4. 08:00 morning report here and in chat.
 
 **To resume** (start Ollama first — command below; this picks up v2_s13_w1 where it stopped, skips finished
 worlds, then runs post sets 14-15; the size sweep waits behind it; ~3.5 h + ~1.75 h):

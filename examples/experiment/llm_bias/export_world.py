@@ -115,7 +115,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--prefix", default="v2_")
     ap.add_argument("--include", default="")
+    ap.add_argument("--out", help="output folder (default data/llm_bias/export; the A/B uses data/llm_bias/export_ab)")
     a = ap.parse_args()
+    global OUT
+    if a.out:
+        OUT = a.out if os.path.isabs(a.out) else os.path.join(REPO, a.out)
     include = set(filter(None, a.include.split(",")))
     os.makedirs(OUT, exist_ok=True)
     W = worlds(a.prefix, include)
@@ -146,7 +150,9 @@ def main():
                 "scroll_position": None,  # filled below, after sorting
                 "action": d["action"] if d["action"] else "FAILED", "reason": d["reason"],
                 "seconds": d["latency_s"], "prompt_tokens": d["prompt_tokens"], "output_tokens": d["eval_tokens"],
-                "attempts": d["attempts"], "outcome": d["outcome"], "stop_reason": d["done_reason"]})
+                "attempts": d["attempts"], "outcome": d["outcome"], "stop_reason": d["done_reason"],
+                "format": d.get("format", "scroll"),
+                "side_by_side_position": d.get("pair_pos"), "picked_as_favourite": d.get("chosen")})
         for k, r in pbank.items():
             if r.get("ok") and r["topic"] in cfg["topics"] and r["author"] in cfg["authors"] \
                     and r["round"] < cfg["posts_per_topic"]:
@@ -160,6 +166,7 @@ def main():
         day = man.get("started_at", "")[:10]
         for jm, jv in man.get("judges", {}).items():
             timing.append({"round": rnd, "world_label": lab, "post_set_seed": seed, "world": cfg["world"],
+                           "format": cfg.get("format", "scroll"), "calls": jv["decisions"],
                            "model": jm, "users": sum(1 for i in man.get("persona_ids", range(cfg["agents"]))
                                                      if assign(i, cfg["judges"], cfg["world"]) == jm),
                            "decisions": jv["decisions"], "minutes": round(jv["wall_s"] / 60, 2),
@@ -175,9 +182,14 @@ def main():
     R.to_csv(os.path.join(OUT, "reactions.csv"), index=False)
 
     P = pd.DataFrame(posts.values())
-    agg = R.groupby(["post_uid", "controlling_model", "action"]).size().unstack(["controlling_model", "action"],
-                                                                                 fill_value=0)
-    agg.columns = [f"{a}_by_{m}_users" for m, a in agg.columns]
+    if R["format"].nunique() > 1:
+        agg = R.groupby(["post_uid", "format", "controlling_model", "action"]).size().unstack(
+            ["format", "controlling_model", "action"], fill_value=0)
+        agg.columns = [f"{a}_by_{m}_users_{f}" for f, m, a in agg.columns]
+    else:
+        agg = R.groupby(["post_uid", "controlling_model", "action"]).size().unstack(["controlling_model", "action"],
+                                                                                     fill_value=0)
+        agg.columns = [f"{a}_by_{m}_users" for m, a in agg.columns]
     P = P.merge(agg, left_on="post_uid", right_index=True, how="left").fillna(0)
     P.to_csv(os.path.join(OUT, "posts.csv"), index=False)
 

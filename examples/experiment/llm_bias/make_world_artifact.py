@@ -324,6 +324,63 @@ def heldout_note():
             f"explain at all ({up['est']:+.1f}, range {up['ci95'][0]:+.1f} to {up['ci95'][1]:+.1f}).</p>")
 
 
+def ab_section():
+    """LD-13: side by side vs one at a time, same posts, same 50 people (analyze_ab.py -> analysis_ab.json)."""
+    head = """<h2>New test: does seeing posts side by side change things?</h2>
+<p>Our first test (night 1) showed each pretend person several posts <em>next to each other</em> and asked for a favourite.
+There, the AIs clearly picked their own posts more often (+5.6 in 100). In the scrolling test above, where people see
+<em>one post at a time</em>, we find about zero. Is it the way the posts are shown that makes the difference? To find out, the
+same 50 people now see the same posts both ways: once one at a time, and once with llama's and gemma's versions of each post
+side by side, where they react to each and pick a favourite. The posts in this test were written to about the same length,
+so length can't explain the result.</p>"""
+    p = os.path.join(DATA, "analysis_ab.json")
+    log = os.path.join(DATA, "ab_campaign.log")
+    if not os.path.exists(p):
+        done = sum(1 for l in open(log) if " end ab_" in l) if os.path.exists(log) else 0
+        return head + f"<p class='muted'>Running now: {done} of the first post set's 4 runs are finished. Results appear here as soon as one post set is complete.</p>"
+    r = json.load(open(p))
+    e = r["effects_points"]
+    words = {}
+    for sd in r["post_sets"]:
+        for line in open(os.path.join(DATA, f"postbank_s{sd}.jsonl")):
+            x = json.loads(line)
+            if x.get("ok"):
+                words.setdefault(x["author"], []).append(x["words"])
+    w = {k: sum(v) / len(v) for k, v in words.items()}
+
+    def say(k, what):
+        v = e[k]
+        lo, hi = v["ci95"]
+        if lo > 0:
+            return f"{what}: <b>{v['est']:+.1f}</b> in 100, and we are fairly sure it is above zero."
+        if hi < 0:
+            return f"{what}: <b>{v['est']:+.1f}</b> in 100, and we are fairly sure it is below zero."
+        return f"{what}: <b>{v['est']:+.1f}</b> in 100, which could just be luck."
+    rows = [("1 at a time: likes", e["scroll_up"]), ("side by side: likes", e["pair_up"]),
+            ("side by side: favourite", e["pair_chosen"]), ("1 at a time: dislikes", e["scroll_down"]),
+            ("side by side: dislikes", e["pair_down"])]
+    fe = e["format_effect_up"]
+    verdict = ("Showing the posts side by side <b>does</b> make the AIs favour their own posts more."
+               if fe["ci95"][0] > 0 else
+               "Showing the posts side by side makes the AIs favour their own posts <b>less</b>." if fe["ci95"][1] < 0 else
+               "So far, the way the posts are shown <b>does not clearly change</b> how much the AIs favour their own posts.")
+    return head + f"""
+<div class="verdict"><p class="q">After {len(r['post_sets'])} post set{'s' if len(r['post_sets']) > 1 else ''} ({r['reactions']:,} reactions from {r['people']} people)</p>
+<p class="a">{verdict}</p>
+<p class="grown">For grown-ups: format effect on likes (side by side minus one at a time) {fe['est']:+.1f} points, 95 % range
+{fe['ci95'][0]:+.1f} to {fe['ci95'][1]:+.1f}; on dislikes {e['format_effect_down']['est']:+.1f}
+({e['format_effect_down']['ci95'][0]:+.1f} to {e['format_effect_down']['ci95'][1]:+.1f}). One bootstrap resamples people and briefs
+for both formats together.</p></div>
+<ul><li>{say('scroll_up', 'One at a time, extra likes for the AI’s own posts')}</li>
+<li>{say('pair_up', 'Side by side, extra likes for the AI’s own posts')}</li>
+<li>{say('pair_chosen', 'Side by side, extra favourite picks for the AI’s own post')}</li></ul>
+{whisker_chart([(n, v['est'], *v['ci95']) for n, v in rows], "Own-post boost by format", "extra reactions per 100 for the AI's own posts")}
+<p class="cap">Dislike rows: below zero means fewer dislikes for the AI's own posts. Post lengths in this test: llama about
+{w.get('llama3.1:8b', float('nan')):.0f} words, gemma about {w.get('gemma4:e2b', float('nan')):.0f}. When both posts are shown, people pick
+the one shown first {r.get('pair', {}).get('position_1_picked_%', float('nan')):.0f} times in 100; the order is shuffled, so that habit
+lands on both AIs equally.</p>"""
+
+
 def findings(ex, res):
     """'What else we found': every number comes from explore_v2.json or the export."""
     if not ex:
@@ -923,6 +980,8 @@ In the second round the two AIs swap, so every person gets played by both AIs on
 <li><b>Scrolling.</b> Each person sees every post, one at a time, starting with their favourite topic. For each post they
 pick like, dislike or skip, and say why in a few words.</li>
 </ol>
+
+{ab_section()}
 
 <h2>What else we found</h2>
 {findings(ex, res)}

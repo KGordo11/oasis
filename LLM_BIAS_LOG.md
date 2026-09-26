@@ -1042,3 +1042,15 @@ v2_s16_w0/w1 PASS (first worlds with Ollama model digests in the manifest). Like
 dislike −1.2 [−3.9, +1.5] (p 0.39). Length again takes the like term 1.19 → 0.46 (≈ +2.4 → +0.9 headline);
 slot-level: gemma much longer +7.2, similar length +0.4 (rho 0.14, p 0.06). Posts still ~95 % of the
 uncertainty. Page v10. **This closes the old design (60-120 words, 99 people).** Next: LD-13 A/B.
+
+### LR — A/B campaign (LD-13) launched 2026-09-26 08:52
+
+`ab_campaign.sh`, seeds 20-26, 50 people (first 50 of the pinned 99), length rule "ask 75-85, reject outside
+65-95, up to 9 tries", `--complete-slots`. Per seed: scroll w0/w1 + pair w0/w1 (order alternates by seed).
+~2 h per seed. Labels `ab_s<seed>_<format>_w<world>`; analysis `analyze_ab.py` → `data/llm_bias/analysis_ab.json`;
+export `export_world.py --prefix ab_ --out data/llm_bias/export_ab`; checks appended to `data/llm_bias/ab_checks.txt`.
+Smoke tests before launch: scroll regression on set 13 (2 people) 99 % identical answers (new code leaves scroll
+unchanged); pair smoke on seed 20 (2 people): 96/96 valid rows, llama 2.2 s and gemma 0.6 s per call (2 posts).
+Seed 20 bank: llama 69.3 words (65-84), gemma 74.9 (67-88) — gap 5.6 (llama undershoots; kept Gordon's rule as
+approved); 1 llama post failed after 9 tries → slot (cars, r1) dropped from both formats.
+Pair format: people pick the post shown first 60 % of the time (smoke); order is shuffled per person and slot.

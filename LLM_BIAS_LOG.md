@@ -1133,3 +1133,12 @@ now excludes differences bigger than about ±6. So night 1 vs scroll (+5.6 vs ~0
 explained by format; the old design's scroll lean (+2.4 over 7 sets) and this one (+5.4 over 4) overlap.
 Favourite shares: gemma-played pick gemma 54 %, llama-played pick llama 50 % — the lean is mostly gemma's.
 Page v15.
+
+### LF-28 — A/B after 5 post sets (20-24; 48,000 reactions)
+
+Set 24: 2 cooking slots dropped (a llama post outside 65-95 after 9 tries). All worlds PASS.
+Scroll likes **+5.4 [+0.9, +10.0]** (p 0.02); scroll dislikes −1.5 [−5.2, +2.4]; side-by-side likes +5.1
+[−0.8, +11.0]; favourite +3.6 [−0.1, +7.4] (p 0.058); **format effect likes −0.2 [−5.4, +5.0], dislikes −0.1
+[−4.0, +3.9]**. The format makes no difference; the like lean holds at ~+5 with length-matched posts.
+Favourite shares: gemma-played pick gemma 52.8 %, llama-played pick llama 50.7 %. Position 1 picked 74 %.
+Dropped slots so far: 1 + 2 + 0 + 0 + 2 = 5 of 125 (all llama posts that stayed short). Page v16.

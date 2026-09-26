@@ -1,0 +1,42 @@
+{
+ "label": "prompt80",
+ "band": "75,85",
+ "enforce": null,
+ "seed": 10,
+ "real": {
+  "gemma4:e2b": {
+   "n": 25,
+   "mean": 81.7,
+   "sd": 6.8,
+   "min": 72,
+   "max": 99
+  },
+  "llama3.1:8b": {
+   "n": 25,
+   "mean": 76.6,
+   "sd": 8.6,
+   "min": 62,
+   "max": 92
+  }
+ },
+ "real_gap": 5.1,
+ "test": {
+  "gemma4:e2b": {
+   "n": 25,
+   "mean": 71.3,
+   "sd": 6.3,
+   "min": 60,
+   "max": 86
+  },
+  "llama3.1:8b": {
+   "n": 25,
+   "mean": 61.8,
+   "sd": 7.2,
+   "min": 46,
+   "max": 74
+  }
+ },
+ "test_gap": 9.5,
+ "mean_attempts": 1,
+ "failed": 0
+}

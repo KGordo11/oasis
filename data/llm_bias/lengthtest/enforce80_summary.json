@@ -1,0 +1,42 @@
+{
+ "label": "enforce80",
+ "band": "75,85",
+ "enforce": "65,95",
+ "seed": 10,
+ "real": {
+  "gemma4:e2b": {
+   "n": 25,
+   "mean": 81.7,
+   "sd": 6.8,
+   "min": 72,
+   "max": 99
+  },
+  "llama3.1:8b": {
+   "n": 25,
+   "mean": 76.6,
+   "sd": 8.6,
+   "min": 62,
+   "max": 92
+  }
+ },
+ "real_gap": 5.1,
+ "test": {
+  "gemma4:e2b": {
+   "n": 25,
+   "mean": 72.2,
+   "sd": 5.4,
+   "min": 65,
+   "max": 86
+  },
+  "llama3.1:8b": {
+   "n": 23,
+   "mean": 69.8,
+   "sd": 4.6,
+   "min": 65,
+   "max": 83
+  }
+ },
+ "test_gap": 2.4,
+ "mean_attempts": 1.86,
+ "failed": 2
+}

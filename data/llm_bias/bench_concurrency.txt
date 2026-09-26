@@ -1,0 +1,13 @@
+2026-09-26 04:07:54 bench start N=8
+A llama alone: 495.073 s
+B gemma alone: 142.273 s
+C llama+gemma together: 588.558 s
+D two llama jobs together: 944.107 s
+bench_cc_A_llama {'llama3.1:8b': (400, 483.3, 1.208)}
+bench_cc_B_gemma {'gemma4:e2b': (400, 131.0, 0.328)}
+bench_cc_C_llama {'llama3.1:8b': (400, 576.7, 1.442)}
+bench_cc_C_gemma {'gemma4:e2b': (400, 229.9, 0.575)}
+bench_cc_D_llama10 {'llama3.1:8b': (400, 932.1, 2.33)}
+bench_cc_D_llama11 {'llama3.1:8b': (400, 931.1, 2.328)}
+2026-09-26 04:44:05 bench end
+2026-09-26 04:50:58 overnight queue done

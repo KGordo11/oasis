@@ -137,6 +137,12 @@ def available_models():
     return [m["name"] for m in _post_get("/api/tags").get("models", [])]
 
 
+def model_digests(names):
+    """Exact Ollama build of each model (name -> digest), so a run can be tied to the weights it used."""
+    tags = {m["name"]: m.get("digest") for m in _post_get("/api/tags").get("models", [])}
+    return {n: tags.get(n) for n in names}
+
+
 def warm(model):
     """Load a model before timing anything (B-40: a cold model inflates the first round)."""
     _post("/api/generate", {"model": model, "prompt": "hi", "stream": False,

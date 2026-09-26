@@ -184,12 +184,13 @@ async def run(a):
                    "parallel": a.parallel, "temperature": a.temperature, "num_ctx": llm.NUM_CTX,
                    "think": False, "show_author": False, "show_scores": False,
                    "assignment": "persona i -> judges[(i + world) % len(judges)]",
-                   "scheduler": a.scheduler},
+                   "scheduler": a.scheduler, "draw": a.draw},
         "persona_bank_hash": persona_mod.PINNED_BANK_HASH,
         "core99_hash": persona_mod.PINNED_CORE99_HASH,
         "persona_ids": [p["id"] for p in bank],
         "post_generation_s": round(gen_s, 1),
         "ollama_server": llm.server_config(),
+        "ollama_models": llm.model_digests(sorted(set(judges + author_list))),
         "machine": {"platform": _platform.platform(),
                     "ollama_env": {k: v for k, v in os.environ.items() if k.startswith("OLLAMA_")}},
         "judges": {}}
@@ -220,7 +221,8 @@ async def run(a):
                 system = agents[p["id"]].system_message.content
                 user = scroll.render_user(t, post)
                 obj, meta = await loop.run_in_executor(pool, lambda: llm.chat_json(
-                    judge, system, user, seed=llm.stable_seed(a.seed, p["id"], post["key"], "scroll"),
+                    judge, system, user, seed=(llm.stable_seed(a.seed, p["id"], post["key"], "scroll") if not a.draw
+                         else llm.stable_seed(a.seed, p["id"], post["key"], "scroll", a.draw)),
                     temperature=a.temperature, num_predict=a.num_predict, validate=scroll.validate,
                     retries=2))
             oc = scroll.outcome(obj, meta)
@@ -302,6 +304,8 @@ def main():
     ap.add_argument("--scheduler", choices=["per-user", "interleaved"], default="interleaved",
                     help="per-user: each worker sends one user's whole scroll back-to-back (prompt-cache friendly); "
                          "interleaved: the original single pool (runs before 2026-09-24 12:00)")
+    ap.add_argument("--draw", type=int, default=0,
+                    help="0 = the standard random draw; any other number = a fresh, reproducible draw (retest)")
     ap.add_argument("--resume", action="store_true")
     ap.add_argument("--overwrite", action="store_true")
     asyncio.run(run(ap.parse_args()))

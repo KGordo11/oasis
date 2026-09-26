@@ -1,0 +1,72 @@
+{
+ "label": "bench_cc_A_llama",
+ "design": "v2-scroll-shared-world",
+ "started_at": "2026-09-26T04:08:05.920791",
+ "config": {
+  "seed": 10,
+  "world": 0,
+  "judges": [
+   "llama3.1:8b"
+  ],
+  "authors": [
+   "llama3.1:8b",
+   "gemma4:e2b"
+  ],
+  "topics": [
+   "personal_finance",
+   "cars",
+   "farming",
+   "cooking",
+   "tech"
+  ],
+  "posts_per_topic": 5,
+  "agents": 8,
+  "parallel": 4,
+  "temperature": 0.7,
+  "num_ctx": 8192,
+  "think": false,
+  "show_author": false,
+  "show_scores": false,
+  "assignment": "persona i -> judges[(i + world) % len(judges)]",
+  "scheduler": "interleaved"
+ },
+ "persona_bank_hash": "8c9cf5b67383",
+ "core99_hash": "964462b96652",
+ "persona_ids": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7
+ ],
+ "post_generation_s": 0.0,
+ "ollama_server": {
+  "OLLAMA_FLASH_ATTENTION": "true",
+  "OLLAMA_NUM_PARALLEL": "4",
+  "OLLAMA_CONTEXT_LENGTH": "8192",
+  "OLLAMA_KV_CACHE_TYPE": "",
+  "OLLAMA_KEEP_ALIVE": "24h0m0s",
+  "OLLAMA_MAX_LOADED_MODELS": "0"
+ },
+ "machine": {
+  "platform": "macOS-15.8.1-arm64-arm-64bit",
+  "ollama_env": {}
+ },
+ "judges": {
+  "llama3.1:8b": {
+   "decisions": 400,
+   "wall_s": 483.3,
+   "counts": {
+    "nothing": 140,
+    "like": 229,
+    "dislike": 31
+   },
+   "s_per_decision": 1.208
+  }
+ },
+ "n_posts": 50,
+ "finished_at": "2026-09-26T04:16:09.448463"
+}

@@ -935,3 +935,47 @@ signals, while the regression (LF-15..19) said length explains likes but not dis
 differently (regression: continuous words, all people; this: slot means, carers only). Found after looking, on
 all sets, so exploratory. **Design implication: match post lengths (length_test.py tonight) before the next
 campaign, or put length in the analysis model from the start.** Page v7 shows it in the length card.
+
+### LF-21 — Overnight speed and design tests (machine otherwise idle, 02:23-04:51)
+
+**Agent sweep (time vs number of people; post set 10, world 0, flash attention on):**
+
+| people | llama min | gemma min | total min | llama s/decision |
+|---|---|---|---|---|
+| 10 | 5.2 | 1.4 | 6.5 | 1.24 |
+| 25 | 13.2 | 3.3 | 16.5 | 1.22 |
+| 50 | 25.0 | 6.8 | 31.8 | 1.20 |
+| 75 | 38.0 | 10.1 | 48.1 | 1.20 |
+| 99 (sets 14-15) | ~50 | ~13.8 | ~64 | 1.22 |
+
+Perfectly linear: **~0.65 min per person per 50-post world**; per-decision cost does not change with size.
+
+**Can two sims share the machine? (`bench_concurrency.sh`, 8 people, 400 decisions per job)**
+
+| setup | wall | vs one-after-the-other |
+|---|---|---|
+| A llama alone | 495 s | |
+| B gemma alone | 142 s | A+B = 637 s |
+| C llama + gemma at once | 589 s | **−7.6 %** |
+| D two llama jobs at once | 944 s | vs 990 s: **−4.6 %** |
+
+The chip is already saturated at NUM_PARALLEL 4: a second full sim gives ~5 %, not 2x. Running a world's two
+judges at the same time instead of in turn saves ~8 % (~5 min per world). Per-decision latency under C: llama
+1.44 s (vs 1.21), gemma 0.58 s (vs 0.33) — they share the chip. **Recommendation: not worth changing the harness
+now; the real speed lever is the GPU machine.** (If adopted later: a `--concurrent-judges` flag; answers would
+shift ~1 % from batching, like flash attention, so never switch mid-comparison.)
+
+**Can post length be matched? (`length_test.py`, set 10's exact briefs, separate bank `data/llm_bias/lengthtest/`)**
+
+| variant | gemma words | llama words | gap | cost |
+|---|---|---|---|---|
+| real set 10 ("60 to 120") | 81.7 ± 6.8 | 76.6 ± 8.6 | 5.1 | |
+| prompt "75 to 85" only | 71.3 ± 6.3 | 61.8 ± 7.2 | **9.5 (worse)** | 1 try/post |
+| prompt "75 to 85" + reject outside 65-95 | 72.2 ± 5.4 | 69.8 ± 4.6 | **2.4** | 1.86 tries/post, 2 of 50 failed |
+
+Both models undershoot a stated word range (llama much more), so asking alone widens the gap; asking + rejecting
+works. A third variant (ask 85-100, enforce 68-95) is running to cut the retries.
+
+**Harness (applied 04:53, after the campaign and sweep; default behaviour unchanged, 23/23 tests pass):**
+`run_world.py --draw N` (fresh reproducible random draw; 0 = original seed formula) and every manifest now
+records `ollama_models` digests (llama3.1:8b 46e0c10c…, gemma4:e2b 7fbdbf8f…). Needed for the GPU move.

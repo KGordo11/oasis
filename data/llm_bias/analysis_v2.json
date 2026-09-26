@@ -1,6 +1,6 @@
 {
- "n_decisions": 59400,
- "n_valid": 59400,
+ "n_decisions": 69300,
+ "n_valid": 69300,
  "judges": [
   "gemma4:e2b",
   "llama3.1:8b"
@@ -21,142 +21,144 @@
   "v2_s14_w0",
   "v2_s14_w1",
   "v2_s15_w0",
-  "v2_s15_w1"
+  "v2_s15_w1",
+  "v2_s16_w0",
+  "v2_s16_w1"
  ],
  "personas": 99,
- "posts": 300,
+ "posts": 350,
  "rate_up": {
   "gemma4:e2b": {
-   "gemma4:e2b": 0.7918,
-   "llama3.1:8b": 0.6531
+   "gemma4:e2b": 0.7954,
+   "llama3.1:8b": 0.6555
   },
   "llama3.1:8b": {
-   "gemma4:e2b": 0.7837,
-   "llama3.1:8b": 0.6717
+   "gemma4:e2b": 0.7885,
+   "llama3.1:8b": 0.6725
   }
  },
  "rate_down": {
   "gemma4:e2b": {
-   "gemma4:e2b": 0.0746,
-   "llama3.1:8b": 0.0383
+   "gemma4:e2b": 0.072,
+   "llama3.1:8b": 0.0376
   },
   "llama3.1:8b": {
-   "gemma4:e2b": 0.0918,
-   "llama3.1:8b": 0.0401
+   "gemma4:e2b": 0.0851,
+   "llama3.1:8b": 0.0391
   }
  },
  "rate_nothing": {
   "gemma4:e2b": {
-   "gemma4:e2b": 0.1336,
-   "llama3.1:8b": 0.3086
+   "gemma4:e2b": 0.1326,
+   "llama3.1:8b": 0.3069
   },
   "llama3.1:8b": {
-   "gemma4:e2b": 0.1245,
-   "llama3.1:8b": 0.2881
+   "gemma4:e2b": 0.1264,
+   "llama3.1:8b": 0.2884
   }
  },
  "sp_up": {
   "gemma4:e2b": {
-   "est": 0.026734006734006832,
+   "est": 0.02389610389610386,
    "ci95": [
-    -0.012392255892255899,
-    0.06619528619528625
+    -0.01310245310245306,
+    0.06181962481962487
    ]
   },
   "llama3.1:8b": {
-   "est": 0.026734006734006832,
+   "est": 0.02389610389610386,
    "ci95": [
-    -0.012392255892255899,
-    0.06619528619528625
+    -0.01310245310245306,
+    0.06181962481962487
    ]
   },
   "_pooled": {
-   "est": 0.026734006734006832,
+   "est": 0.02389610389610386,
    "ci95": [
-    -0.012392255892255899,
-    0.06619528619528625
+    -0.01310245310245306,
+    0.06181962481962487
    ]
   }
  },
- "sp_up_p": 0.172,
+ "sp_up_p": 0.177,
  "sp_down": {
   "gemma4:e2b": {
-   "est": -0.015353535353535355,
+   "est": -0.011601731601731599,
    "ci95": [
-    -0.04599494949494949,
-    0.012668350168350112
+    -0.039480519480519484,
+    0.015122655122655121
    ]
   },
   "llama3.1:8b": {
-   "est": -0.015353535353535355,
+   "est": -0.011601731601731599,
    "ci95": [
-    -0.04599494949494949,
-    0.012668350168350112
+    -0.039480519480519484,
+    0.015122655122655121
    ]
   },
   "_pooled": {
-   "est": -0.015353535353535355,
+   "est": -0.011601731601731599,
    "ci95": [
-    -0.04599494949494949,
-    0.012668350168350112
+    -0.039480519480519484,
+    0.015122655122655121
    ]
   }
  },
- "sp_down_p": 0.298,
+ "sp_down_p": 0.386,
  "personas_played_by_both": 99,
  "like_by_interest": {
   "-2": {
-   "gemma4:e2b": 58.9,
-   "llama3.1:8b": 4.9
+   "gemma4:e2b": 59.4,
+   "llama3.1:8b": 4.7
   },
   "-1": {
-   "gemma4:e2b": 69.7,
-   "llama3.1:8b": 2.6
+   "gemma4:e2b": 70.4,
+   "llama3.1:8b": 2.5
   },
   "0": {
-   "gemma4:e2b": 81.7,
-   "llama3.1:8b": 86.6
+   "gemma4:e2b": 82.0,
+   "llama3.1:8b": 86.9
   },
   "1": {
-   "gemma4:e2b": 85.5,
-   "llama3.1:8b": 92.5
+   "gemma4:e2b": 85.8,
+   "llama3.1:8b": 92.7
   },
   "2": {
-   "gemma4:e2b": 84.8,
-   "llama3.1:8b": 92.9
+   "gemma4:e2b": 85.3,
+   "llama3.1:8b": 93.3
   }
  },
  "like_by_topic_rank": {
   "0": {
-   "gemma4:e2b": 84.2,
-   "llama3.1:8b": 92.0
+   "gemma4:e2b": 84.8,
+   "llama3.1:8b": 92.2
   },
   "1": {
-   "gemma4:e2b": 83.7,
-   "llama3.1:8b": 87.2
+   "gemma4:e2b": 83.8,
+   "llama3.1:8b": 87.4
   },
   "2": {
-   "gemma4:e2b": 82.1,
-   "llama3.1:8b": 77.9
+   "gemma4:e2b": 82.4,
+   "llama3.1:8b": 78.1
   },
   "3": {
-   "gemma4:e2b": 78.6,
-   "llama3.1:8b": 55.1
+   "gemma4:e2b": 79.1,
+   "llama3.1:8b": 55.3
   },
   "4": {
-   "gemma4:e2b": 65.3,
-   "llama3.1:8b": 19.1
+   "gemma4:e2b": 65.9,
+   "llama3.1:8b": 19.0
   }
  },
  "nothing": {
   "gemma4:e2b": {
-   "decisions": 29700,
-   "like_%": 78.8,
-   "dislike_%": 8.3,
+   "decisions": 34650,
+   "like_%": 79.2,
+   "dislike_%": 7.9,
    "nothing_%": 12.9,
    "failed_%": 0.0,
    "outcomes": {
-    "chose": 29700
+    "chose": 34650
    },
    "needed_retry_%": 0.0,
    "cut_off_at_token_limit": 0,
@@ -164,29 +166,29 @@
    "mean_output_tokens": 15.2,
    "nothing_with_a_reason_%": 100.0,
    "nothing_%_by_interest": {
-    "-2": 27.3,
-    "-1": 19.9,
-    "0": 11.3,
-    "1": 7.5,
+    "-2": 27.0,
+    "-1": 19.8,
+    "0": 11.5,
+    "1": 7.6,
     "2": 7.8
    },
    "sample_nothing_reasons": [
     "Too vague",
-    "Too much worry",
-    "Too much text",
-    "Not relevant",
+    "Not useful",
+    "Too specific",
     "Too much noise",
-    "Too much whining"
+    "Not relevant",
+    "Too vague"
    ]
   },
   "llama3.1:8b": {
-   "decisions": 29700,
-   "like_%": 66.2,
-   "dislike_%": 3.9,
+   "decisions": 34650,
+   "like_%": 66.4,
+   "dislike_%": 3.8,
    "nothing_%": 29.8,
    "failed_%": 0.0,
    "outcomes": {
-    "chose": 29700
+    "chose": 34650
    },
    "needed_retry_%": 0.0,
    "cut_off_at_token_limit": 0,
@@ -194,19 +196,19 @@
    "mean_output_tokens": 22.2,
    "nothing_with_a_reason_%": 100.0,
    "nothing_%_by_interest": {
-    "-2": 76.7,
-    "-1": 88.7,
-    "0": 12.3,
-    "1": 7.0,
-    "2": 6.2
+    "-2": 77.4,
+    "-1": 88.8,
+    "0": 12.1,
+    "1": 6.7,
+    "2": 6.0
    },
    "sample_nothing_reasons": [
+    "Not really my thing",
+    "Not really a tech expert, don't want to get into it",
     "Not my thing",
-    "Not really my thing",
-    "Not really my thing",
+    "too vague and complaining",
     "Not my cup of tea",
-    "boring farm story",
-    "Not exactly a personal finance victory, more of a customer service win"
+    "not my interest"
    ]
   }
  }

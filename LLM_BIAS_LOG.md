@@ -1035,3 +1035,10 @@ sets are what narrows the answer (LF-19).
    side-by-side +5.6 vs scroll ~0). Not chosen for now: third AI, more sets of the current design.
 4. No GPU machine yet — everything stays on this Mac.
 "Else keep going all day."
+
+### LF-23 — Post set 16 (7 sets, 69,300 reactions): same answer
+
+v2_s16_w0/w1 PASS (first worlds with Ollama model digests in the manifest). Like +2.4 [−1.3, +6.2] (p 0.18),
+dislike −1.2 [−3.9, +1.5] (p 0.39). Length again takes the like term 1.19 → 0.46 (≈ +2.4 → +0.9 headline);
+slot-level: gemma much longer +7.2, similar length +0.4 (rho 0.14, p 0.06). Posts still ~95 % of the
+uncertainty. Page v10. **This closes the old design (60-120 words, 99 people).** Next: LD-13 A/B.

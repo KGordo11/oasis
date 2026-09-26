@@ -5,125 +5,126 @@
   12,
   13,
   14,
-  15
+  15,
+  16
  ],
- "reactions": 59400,
+ "reactions": 69300,
  "people": 99,
- "posts": 300,
+ "posts": 350,
  "headline": {
   "up": {
-   "est": 2.7,
+   "est": 2.4,
    "ci95": [
-    -1.1,
-    6.3
+    -1.4,
+    6.2
    ],
-   "p": 0.168
+   "p": 0.202
   },
   "down": {
-   "est": -1.5,
+   "est": -1.2,
    "ci95": [
-    -4.9,
-    1.3
+    -3.8,
+    1.7
    ],
-   "p": 0.296
+   "p": 0.41
   },
-  "n": 59400
+  "n": 69300
  },
  "by_topic": {
   "cars": {
    "up": {
-    "est": 3.6,
+    "est": -0.6,
     "ci95": [
-     -7.6,
-     14.4
+     -11.6,
+     9.3
     ],
-    "p": 0.548
+    "p": 0.884
    },
    "down": {
-    "est": -4.0,
+    "est": -1.3,
     "ci95": [
-     -11.7,
-     3.8
+     -9.6,
+     8.1
     ],
-    "p": 0.336
+    "p": 0.816
    },
-   "n": 11880
+   "n": 13860
   },
   "cooking": {
    "up": {
-    "est": 0.8,
+    "est": 1.7,
     "ci95": [
-     -6.7,
-     9.4
+     -5.2,
+     8.8
     ],
-    "p": 0.856
+    "p": 0.602
    },
    "down": {
-    "est": 0.6,
+    "est": -0.4,
     "ci95": [
-     -6.3,
-     6.8
+     -6.4,
+     5.3
     ],
-    "p": 0.886
+    "p": 0.774
    },
-   "n": 11880
+   "n": 13860
   },
   "farming": {
    "up": {
-    "est": 3.6,
+    "est": 2.0,
     "ci95": [
-     -5.2,
-     14.0
+     -5.7,
+     10.8
     ],
-    "p": 0.482
+    "p": 0.648
    },
    "down": {
-    "est": -6.3,
+    "est": -5.7,
     "ci95": [
-     -14.8,
-     0.1
+     -12.6,
+     -0.3
     ],
-    "p": 0.056
+    "p": 0.034
    },
-   "n": 11880
+   "n": 13860
   },
   "personal_finance": {
    "up": {
-    "est": 2.9,
+    "est": 2.1,
     "ci95": [
-     -2.3,
-     8.8
+     -3.0,
+     7.2
     ],
-    "p": 0.294
+    "p": 0.464
    },
    "down": {
-    "est": -1.5,
+    "est": -1.3,
     "ci95": [
-     -4.8,
+     -4.3,
      1.4
     ],
-    "p": 0.324
+    "p": 0.338
    },
-   "n": 11880
+   "n": 13860
   },
   "tech": {
    "up": {
-    "est": 2.5,
+    "est": 6.8,
     "ci95": [
-     -4.6,
-     9.4
+     -0.5,
+     15.6
     ],
-    "p": 0.508
+    "p": 0.08
    },
    "down": {
-    "est": 3.6,
+    "est": 2.9,
     "ci95": [
-     -2.8,
-     10.6
+     -2.6,
+     8.4
     ],
-    "p": 0.286
+    "p": 0.292
    },
-   "n": 11880
+   "n": 13860
   }
  },
  "by_set": {
@@ -238,6 +239,25 @@
      7.8
     ],
     "p": 0.548
+   },
+   "n": 9900
+  },
+  "16": {
+   "up": {
+    "est": 0.7,
+    "ci95": [
+     -10.6,
+     12.7
+    ],
+    "p": 0.88
+   },
+   "down": {
+    "est": 1.1,
+    "ci95": [
+     -5.2,
+     10.0
+    ],
+    "p": 0.84
    },
    "n": 9900
   }
@@ -356,165 +376,184 @@
     "p": 0.296
    },
    "n": 59400
+  },
+  "16": {
+   "up": {
+    "est": 2.4,
+    "ci95": [
+     -1.4,
+     6.2
+    ],
+    "p": 0.202
+   },
+   "down": {
+    "est": -1.2,
+    "ci95": [
+     -3.8,
+     1.7
+    ],
+    "p": 0.41
+   },
+   "n": 69300
   }
  },
  "uncertainty_sd_points": {
   "up": {
-   "people": 0.45,
+   "people": 0.41,
    "posts": 1.84,
-   "both": 1.95
+   "both": 1.91
   },
   "down": {
-   "people": 0.3,
-   "posts": 1.46,
-   "both": 1.55
+   "people": 0.28,
+   "posts": 1.41,
+   "both": 1.43
   }
  },
  "by_caring": {
   "does_not_care": {
    "up": {
-    "est": 1.0,
+    "est": 0.6,
     "ci95": [
-     -4.1,
-     5.6
+     -3.9,
+     5.5
     ],
-    "p": 0.734
+    "p": 0.842
    },
    "down": {
-    "est": -0.7,
+    "est": -0.4,
     "ci95": [
-     -4.7,
-     3.4
+     -4.3,
+     3.7
     ],
-    "p": 0.756
+    "p": 0.852
    },
-   "n": 16200
+   "n": 18900
   },
   "cares": {
    "up": {
-    "est": 3.3,
+    "est": 3.1,
     "ci95": [
-     -0.7,
-     7.2
+     -0.8,
+     6.9
     ],
-    "p": 0.09
+    "p": 0.11
    },
    "down": {
-    "est": -1.9,
+    "est": -1.5,
     "ci95": [
-     -4.9,
-     1.0
+     -4.1,
+     1.3
     ],
-    "p": 0.18
+    "p": 0.318
    },
-   "n": 43200
+   "n": 50400
   }
  },
  "rates_cares": {
   "up": {
    "gemma people": {
-    "gemma posts": 84.2,
-    "llama posts": 83.0
+    "gemma posts": 84.6,
+    "llama posts": 83.3
    },
    "llama people": {
-    "gemma posts": 88.8,
-    "llama posts": 90.8
+    "gemma posts": 89.2,
+    "llama posts": 91.0
    }
   },
   "down": {
    "gemma people": {
-    "gemma posts": 6.3,
-    "llama posts": 7.9
+    "gemma posts": 6.0,
+    "llama posts": 7.2
    },
    "llama people": {
-    "gemma posts": 1.0,
+    "gemma posts": 0.9,
     "llama posts": 0.7
    }
   },
   "nothing": {
    "gemma people": {
-    "gemma posts": 9.5,
-    "llama posts": 9.1
+    "gemma posts": 9.4,
+    "llama posts": 9.5
    },
    "llama people": {
-    "gemma posts": 10.2,
-    "llama posts": 8.4
+    "gemma posts": 9.9,
+    "llama posts": 8.3
    }
   }
  },
  "rates_does_not_care": {
   "up": {
    "gemma people": {
-    "gemma posts": 65.7,
-    "llama posts": 66.1
+    "gemma posts": 66.2,
+    "llama posts": 66.9
    },
    "llama people": {
-    "gemma posts": 2.7,
-    "llama posts": 4.1
+    "gemma posts": 2.6,
+    "llama posts": 3.9
    }
   },
   "down": {
    "gemma people": {
-    "gemma posts": 10.6,
-    "llama posts": 12.6
+    "gemma posts": 10.4,
+    "llama posts": 11.9
    },
    "llama people": {
-    "gemma posts": 11.4,
-    "llama posts": 12.8
+    "gemma posts": 11.3,
+    "llama posts": 12.4
    }
   },
   "nothing": {
    "gemma people": {
-    "gemma posts": 23.7,
-    "llama posts": 21.3
+    "gemma posts": 23.4,
+    "llama posts": 21.1
    },
    "llama people": {
-    "gemma posts": 85.9,
-    "llama posts": 83.2
+    "gemma posts": 86.1,
+    "llama posts": 83.6
    }
   }
  },
  "same_person": {
-  "pairs": 29700,
+  "pairs": 34650,
   "crosstab_rows_llama_cols_gemma": {
    "dislike": {
-    "dislike": 311,
-    "like": 1092,
-    "nothing": 1068
+    "dislike": 326,
+    "like": 1199,
+    "nothing": 1196
    },
    "like": {
-    "dislike": 491,
-    "like": 17218,
-    "nothing": 5687
+    "dislike": 566,
+    "like": 20214,
+    "nothing": 6662
    },
    "nothing": {
-    "dislike": 363,
-    "like": 1363,
-    "nothing": 2107
+    "dislike": 436,
+    "like": 1595,
+    "nothing": 2456
    }
   },
   "all": {
-   "kappa": 0.224,
-   "agree_%": 66.1,
-   "chance_%": 56.4
+   "kappa": 0.222,
+   "agree_%": 66.4,
+   "chance_%": 56.7
   },
   "cares": {
-   "kappa": 0.246,
-   "agree_%": 81.9,
-   "chance_%": 76.0
+   "kappa": 0.253,
+   "agree_%": 82.5,
+   "chance_%": 76.5
   },
   "does_not_care": {
-   "kappa": 0.017,
-   "agree_%": 24.0,
-   "chance_%": 22.6
+   "kappa": 0.013,
+   "agree_%": 23.4,
+   "chance_%": 22.4
   }
  },
  "post_agreement": {
-  "posts": 300,
-  "spearman": 0.317,
-  "pearson": 0.314,
-  "sd_like_rate_llama": 9.7,
-  "sd_like_rate_gemma": 21.8
+  "posts": 350,
+  "spearman": 0.338,
+  "pearson": 0.317,
+  "sd_like_rate_llama": 9.5,
+  "sd_like_rate_gemma": 21.7
  },
  "length": {
   "words_by_author": {
@@ -531,35 +570,35 @@
     "llama3.1:8b": 57.0
    },
    "max": {
-    "gemma4:e2b": 108.0,
-    "llama3.1:8b": 105.0
+    "gemma4:e2b": 109.0,
+    "llama3.1:8b": 113.0
    }
   },
   "like_%_by_length_cares": {
    "short": {
-    "gemma4:e2b": 80.4,
-    "llama3.1:8b": 90.3
+    "gemma4:e2b": 81.2,
+    "llama3.1:8b": 90.4
    },
    "medium": {
-    "gemma4:e2b": 84.6,
-    "llama3.1:8b": 87.8
+    "gemma4:e2b": 85.6,
+    "llama3.1:8b": 88.4
    },
    "long": {
-    "gemma4:e2b": 86.3,
-    "llama3.1:8b": 91.3
+    "gemma4:e2b": 85.4,
+    "llama3.1:8b": 91.4
    }
   },
   "by_slot": {
-   "slots": 150,
-   "gemma_longer_%": 70.7,
-   "mean_word_gap": 7.8,
+   "slots": 175,
+   "gemma_longer_%": 72.6,
+   "mean_word_gap": 8.0,
    "up": {
-    "spearman": 0.186,
-    "p": 0.0228,
+    "spearman": 0.143,
+    "p": 0.0589,
     "dd_by_gap_tercile": {
-     "similar": -0.6,
-     "middle": 2.2,
-     "gemma_much_longer": 8.7
+     "similar": 0.4,
+     "middle": 1.6,
+     "gemma_much_longer": 7.2
     },
     "gap_tercile_words": {
      "similar": -5.0,
@@ -568,12 +607,12 @@
     }
    },
    "down": {
-    "spearman": -0.16,
-    "p": 0.0512,
+    "spearman": -0.122,
+    "p": 0.108,
     "dd_by_gap_tercile": {
-     "similar": -0.1,
-     "middle": 1.7,
-     "gemma_much_longer": -7.4
+     "similar": -0.6,
+     "middle": 3.0,
+     "gemma_much_longer": -6.7
     },
     "gap_tercile_words": {
      "similar": -5.0,
@@ -584,51 +623,51 @@
   },
   "self_only": {
    "self": {
-    "coef_pts": 1.34,
+    "coef_pts": 1.19,
     "ci95": [
-     -0.5,
-     3.17
+     -0.58,
+     2.97
     ]
    }
   },
   "self_plus_judge_x_length": {
    "self": {
-    "coef_pts": 0.13,
+    "coef_pts": 0.46,
     "ci95": [
-     -2.17,
-     2.42
+     -1.95,
+     2.88
     ]
    },
    "g_judge:z_words": {
-    "coef_pts": 3.02,
+    "coef_pts": 1.84,
     "ci95": [
-     0.15,
-     5.89
+     -1.23,
+     4.9
     ]
    }
   },
   "dislike_self_only": {
    "self": {
-    "coef_pts": -0.77,
+    "coef_pts": -0.58,
     "ci95": [
-     -2.2,
-     0.66
+     -1.92,
+     0.76
     ]
    }
   },
   "dislike_self_plus_judge_x_length": {
    "self": {
-    "coef_pts": -0.7,
+    "coef_pts": -0.71,
     "ci95": [
-     -2.29,
-     0.89
+     -2.16,
+     0.74
     ]
    },
    "g_judge:z_words": {
-    "coef_pts": -0.17,
+    "coef_pts": 0.33,
     "ci95": [
-     -1.97,
-     1.64
+     -1.26,
+     1.91
     ]
    }
   }
@@ -636,66 +675,66 @@
  "position": {
   "like_%_by_position_in_topic": {
    "1": {
-    "gemma4:e2b": 78.7,
-    "llama3.1:8b": 67.0
-   },
-   "2": {
-    "gemma4:e2b": 78.7,
-    "llama3.1:8b": 66.4
-   },
-   "3": {
-    "gemma4:e2b": 79.0,
+    "gemma4:e2b": 79.6,
     "llama3.1:8b": 67.2
    },
+   "2": {
+    "gemma4:e2b": 78.8,
+    "llama3.1:8b": 66.5
+   },
+   "3": {
+    "gemma4:e2b": 79.6,
+    "llama3.1:8b": 67.1
+   },
    "4": {
-    "gemma4:e2b": 79.0,
-    "llama3.1:8b": 66.3
+    "gemma4:e2b": 79.5,
+    "llama3.1:8b": 66.6
    },
    "5": {
-    "gemma4:e2b": 78.8,
-    "llama3.1:8b": 66.8
+    "gemma4:e2b": 78.9,
+    "llama3.1:8b": 66.9
    },
    "6": {
-    "gemma4:e2b": 79.2,
-    "llama3.1:8b": 66.1
+    "gemma4:e2b": 79.5,
+    "llama3.1:8b": 66.3
    },
    "7": {
-    "gemma4:e2b": 79.2,
-    "llama3.1:8b": 64.9
+    "gemma4:e2b": 79.3,
+    "llama3.1:8b": 65.1
    },
    "8": {
-    "gemma4:e2b": 79.1,
-    "llama3.1:8b": 65.8
+    "gemma4:e2b": 79.3,
+    "llama3.1:8b": 66.2
    },
    "9": {
-    "gemma4:e2b": 78.2,
-    "llama3.1:8b": 65.9
+    "gemma4:e2b": 78.8,
+    "llama3.1:8b": 66.0
    },
    "10": {
-    "gemma4:e2b": 78.0,
-    "llama3.1:8b": 66.1
+    "gemma4:e2b": 78.8,
+    "llama3.1:8b": 66.0
    }
   },
   "like_%_by_scroll_position_cares": {
    "1-10": {
-    "gemma4:e2b": 84.6,
-    "llama3.1:8b": 92.9
+    "gemma4:e2b": 85.2,
+    "llama3.1:8b": 93.1
    },
    "11-20": {
-    "gemma4:e2b": 83.7,
-    "llama3.1:8b": 88.8
+    "gemma4:e2b": 83.9,
+    "llama3.1:8b": 89.1
    },
    "21-30": {
-    "gemma4:e2b": 82.5,
-    "llama3.1:8b": 88.2
+    "gemma4:e2b": 82.8,
+    "llama3.1:8b": 88.5
    },
    "31-40": {
-    "gemma4:e2b": 84.1,
-    "llama3.1:8b": 89.0
+    "gemma4:e2b": 84.4,
+    "llama3.1:8b": 89.4
    },
    "41-50": {
-    "gemma4:e2b": 81.0,
-    "llama3.1:8b": 88.5
+    "gemma4:e2b": 81.5,
+    "llama3.1:8b": 88.7
    }
   }
  },
@@ -703,126 +742,126 @@
   "voting_style": {
    "up": {
     "generous": {
-     "gemma4:e2b": 96.7,
+     "gemma4:e2b": 96.5,
      "llama3.1:8b": 74.3
     },
     "harsh": {
-     "gemma4:e2b": 47.5,
-     "llama3.1:8b": 40.0
+     "gemma4:e2b": 48.4,
+     "llama3.1:8b": 40.3
     },
     "typical": {
-     "gemma4:e2b": 77.3,
-     "llama3.1:8b": 68.6
+     "gemma4:e2b": 77.9,
+     "llama3.1:8b": 68.8
     }
    },
    "down": {
     "generous": {
-     "gemma4:e2b": 0.9,
+     "gemma4:e2b": 1.0,
      "llama3.1:8b": 0.1
     },
     "harsh": {
-     "gemma4:e2b": 19.3,
-     "llama3.1:8b": 4.4
+     "gemma4:e2b": 18.2,
+     "llama3.1:8b": 4.3
     },
     "typical": {
-     "gemma4:e2b": 9.4,
-     "llama3.1:8b": 5.8
+     "gemma4:e2b": 8.8,
+     "llama3.1:8b": 5.6
     }
    },
    "nothing": {
     "generous": {
-     "gemma4:e2b": 2.4,
+     "gemma4:e2b": 2.6,
      "llama3.1:8b": 25.6
     },
     "harsh": {
-     "gemma4:e2b": 33.2,
-     "llama3.1:8b": 55.7
+     "gemma4:e2b": 33.4,
+     "llama3.1:8b": 55.4
     },
     "typical": {
      "gemma4:e2b": 13.2,
-     "llama3.1:8b": 25.6
+     "llama3.1:8b": 25.5
     }
    }
   },
   "gender": {
    "up": {
     "female": {
-     "gemma4:e2b": 76.5,
-     "llama3.1:8b": 68.4
+     "gemma4:e2b": 77.0,
+     "llama3.1:8b": 68.7
     },
     "male": {
-     "gemma4:e2b": 81.6,
+     "gemma4:e2b": 82.0,
      "llama3.1:8b": 64.9
     },
     "non-binary": {
-     "gemma4:e2b": 68.6,
-     "llama3.1:8b": 59.2
+     "gemma4:e2b": 69.5,
+     "llama3.1:8b": 59.4
     }
    },
    "down": {
     "female": {
-     "gemma4:e2b": 9.0,
-     "llama3.1:8b": 3.3
+     "gemma4:e2b": 8.5,
+     "llama3.1:8b": 3.2
     },
     "male": {
-     "gemma4:e2b": 7.4,
-     "llama3.1:8b": 4.3
+     "gemma4:e2b": 7.0,
+     "llama3.1:8b": 4.2
     },
     "non-binary": {
-     "gemma4:e2b": 12.0,
-     "llama3.1:8b": 6.2
+     "gemma4:e2b": 11.3,
+     "llama3.1:8b": 6.3
     }
    },
    "nothing": {
     "female": {
      "gemma4:e2b": 14.5,
-     "llama3.1:8b": 28.3
+     "llama3.1:8b": 28.1
     },
     "male": {
      "gemma4:e2b": 11.0,
      "llama3.1:8b": 30.9
     },
     "non-binary": {
-     "gemma4:e2b": 19.4,
-     "llama3.1:8b": 34.6
+     "gemma4:e2b": 19.2,
+     "llama3.1:8b": 34.3
     }
    }
   },
   "age_band": {
    "up": {
     "<30": {
-     "gemma4:e2b": 77.3,
-     "llama3.1:8b": 59.3
+     "gemma4:e2b": 77.6,
+     "llama3.1:8b": 59.5
     },
     "30-44": {
-     "gemma4:e2b": 76.6,
-     "llama3.1:8b": 66.4
+     "gemma4:e2b": 77.1,
+     "llama3.1:8b": 66.5
     },
     "45-59": {
-     "gemma4:e2b": 79.2,
-     "llama3.1:8b": 65.0
+     "gemma4:e2b": 79.6,
+     "llama3.1:8b": 65.2
     },
     "60+": {
-     "gemma4:e2b": 81.4,
-     "llama3.1:8b": 72.0
+     "gemma4:e2b": 81.9,
+     "llama3.1:8b": 72.2
     }
    },
    "down": {
     "<30": {
-     "gemma4:e2b": 9.0,
-     "llama3.1:8b": 3.2
+     "gemma4:e2b": 8.5,
+     "llama3.1:8b": 3.1
     },
     "30-44": {
-     "gemma4:e2b": 9.5,
-     "llama3.1:8b": 5.1
+     "gemma4:e2b": 9.0,
+     "llama3.1:8b": 5.0
     },
     "45-59": {
-     "gemma4:e2b": 7.3,
-     "llama3.1:8b": 3.5
+     "gemma4:e2b": 6.9,
+     "llama3.1:8b": 3.4
     },
     "60+": {
-     "gemma4:e2b": 7.4,
-     "llama3.1:8b": 3.8
+     "gemma4:e2b": 7.0,
+     "llama3.1:8b": 3.7
     }
    }
   }
@@ -833,55 +872,55 @@
    "llama3.1:8b": 5.9
   },
   "generic_%": {
-   "gemma4:e2b": 26.9,
-   "llama3.1:8b": 42.3
+   "gemma4:e2b": 27.9,
+   "llama3.1:8b": 43.2
   },
   "mentions_own_life_%": {
-   "gemma4:e2b": 0.6,
-   "llama3.1:8b": 24.4
+   "gemma4:e2b": 0.5,
+   "llama3.1:8b": 24.2
   },
   "distinct_reasons_%": {
-   "gemma4:e2b": 16.8,
-   "llama3.1:8b": 69.5
+   "gemma4:e2b": 16.4,
+   "llama3.1:8b": 68.7
   },
   "top_reasons": {
    "gemma4:e2b": {
-    "too vague": 1735,
-    "makes sense": 1268,
-    "too much fluff": 767,
-    "sounds practical": 562,
-    "practical advice needed": 526,
-    "sounds frustrating": 433,
-    "too much whining": 417,
-    "relatable frustration": 352
+    "too vague": 1997,
+    "makes sense": 1513,
+    "too much fluff": 906,
+    "sounds practical": 693,
+    "practical advice needed": 617,
+    "good question": 472,
+    "sounds frustrating": 456,
+    "too much whining": 448
    },
    "llama3.1:8b": {
-    "not my thing": 1450,
-    "not really my thing": 875,
-    "not my cup of tea": 770,
-    "not my area of interest": 185,
-    "not really my cup of tea": 176,
-    "not my jam": 155,
-    "practical solution to a common problem": 121,
-    "relatable struggle": 112
+    "not my thing": 1690,
+    "not really my thing": 1024,
+    "not my cup of tea": 909,
+    "not really my cup of tea": 207,
+    "not my area of interest": 206,
+    "not my jam": 177,
+    "practical solution to a common problem": 171,
+    "relatable struggle": 123
    }
   },
   "own_vs_other_post": {
    "gemma|other": {
-    "rlen": 2.787,
-    "personal": 0.006
+    "rlen": 2.785,
+    "personal": 0.005
    },
    "gemma|own": {
-    "rlen": 2.743,
-    "personal": 0.006
+    "rlen": 2.728,
+    "personal": 0.005
    },
    "llama|other": {
-    "rlen": 5.786,
-    "personal": 0.256
+    "rlen": 5.785,
+    "personal": 0.253
    },
    "llama|own": {
-    "rlen": 5.932,
-    "personal": 0.232
+    "rlen": 5.929,
+    "personal": 0.23
    }
   }
  }

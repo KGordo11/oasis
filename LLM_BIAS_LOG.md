@@ -918,3 +918,20 @@ llama-played 90.8 / 88.8; dislike gemma-played 6.3 on gemma posts vs 7.9 on llam
 
 Page v6 (PEMNidbCam72v6qKC3GNBx): all 6 sets, held-out check shown under the length card, new "More posts would
 help much more than more people" card.
+
+### LF-20 — Post by post, the own-post boost appears where gemma's post is much longer (exploratory)
+
+150 slots (sets 10-15), people who care about the topic. For each slot, the like double difference vs the word
+gap (gemma − llama; gemma is longer in 71 % of slots, mean +7.8 words):
+
+| word-gap tercile | mean gap | like DD | dislike DD |
+|---|---|---|---|
+| similar length | −5 words | −0.6 | −0.1 |
+| middle | +9 | +2.2 | +1.7 |
+| gemma much longer | +21 | **+8.7** | **−7.4** |
+
+Spearman gap vs like DD +0.19 (p = 0.023); vs dislike DD −0.16 (p = 0.051). So at slot level length tracks BOTH
+signals, while the regression (LF-15..19) said length explains likes but not dislikes; the two views weight slots
+differently (regression: continuous words, all people; this: slot means, carers only). Found after looking, on
+all sets, so exploratory. **Design implication: match post lengths (length_test.py tonight) before the next
+campaign, or put length in the analysis model from the start.** Page v7 shows it in the length card.

@@ -549,6 +549,39 @@
     "llama3.1:8b": 91.3
    }
   },
+  "by_slot": {
+   "slots": 150,
+   "gemma_longer_%": 70.7,
+   "mean_word_gap": 7.8,
+   "up": {
+    "spearman": 0.186,
+    "p": 0.0228,
+    "dd_by_gap_tercile": {
+     "similar": -0.6,
+     "middle": 2.2,
+     "gemma_much_longer": 8.7
+    },
+    "gap_tercile_words": {
+     "similar": -5.0,
+     "middle": 9.0,
+     "gemma_much_longer": 21.0
+    }
+   },
+   "down": {
+    "spearman": -0.16,
+    "p": 0.0512,
+    "dd_by_gap_tercile": {
+     "similar": -0.1,
+     "middle": 1.7,
+     "gemma_much_longer": -7.4
+    },
+    "gap_tercile_words": {
+     "similar": -5.0,
+     "middle": 9.0,
+     "gemma_much_longer": 21.0
+    }
+   }
+  },
   "self_only": {
    "self": {
     "coef_pts": 1.34,

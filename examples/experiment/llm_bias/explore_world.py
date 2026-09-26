@@ -199,6 +199,23 @@ def length_effects(R):
     d["z_words"] = (d["words"] - d["words"].mean()) / d["words"].std()
     d["pj"] = d["persona"].astype(str) + "|" + d["judge"]
     out = {"words_by_author": words.to_dict(), "like_%_by_length_cares": by.to_dict()}
+    # slot by slot: is the double difference bigger where gemma's post is much longer than llama's?
+    from scipy import stats
+    Lm, Gm = "llama3.1:8b", "gemma4:e2b"
+    g = c.groupby(["slot", "judge", "author"])[["up", "down"]].mean().unstack(["judge", "author"])
+    if all((col, j, au) in g.columns for col in ("up", "down") for j in (Lm, Gm) for au in (Lm, Gm)):
+        dd = {col: (g[(col, Lm, Lm)] - g[(col, Lm, Gm)]) - (g[(col, Gm, Lm)] - g[(col, Gm, Gm)]) for col in ("up", "down")}
+        w = R.drop_duplicates("post").pivot_table(index="slot", columns="author", values="words")
+        gap = (w[Gm] - w[Lm]).reindex(dd["up"].index)
+        q = pd.qcut(gap, 3, labels=["similar", "middle", "gemma_much_longer"])
+        out["by_slot"] = {"slots": int(gap.notna().sum()), "gemma_longer_%": round(100 * float((gap > 0).mean()), 1),
+                          "mean_word_gap": round(float(gap.mean()), 1)}
+        for col in ("up", "down"):
+            ok = dd[col].notna() & gap.notna()
+            r, pv = stats.spearmanr(gap[ok], dd[col][ok])
+            out["by_slot"][col] = {"spearman": round(float(r), 3), "p": round(float(pv), 4),
+                                   "dd_by_gap_tercile": (100 * dd[col].groupby(q, observed=True).mean()).round(1).to_dict(),
+                                   "gap_tercile_words": gap.groupby(q, observed=True).mean().round(0).to_dict()}
     for name, f in (("self_only", "up ~ self + C(post) + C(pj)"),
                     ("self_plus_judge_x_length", "up ~ self + g_judge:z_words + C(post) + C(pj)"),
                     ("dislike_self_only", "down ~ self + C(post) + C(pj)"),

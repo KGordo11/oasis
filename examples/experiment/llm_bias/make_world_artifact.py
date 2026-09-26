@@ -272,6 +272,22 @@ the “likes its own posts” number above.</p>
 {res['personas']} people to {res['posts']} posts; every person has been played by both AIs.</p>"""
 
 
+def slot_note(L):
+    """Post by post: the own-post like boost where gemma's post is much longer vs about the same length."""
+    b = L.get("by_slot")
+    if not b:
+        return ""
+    t, gw = b["up"]["dd_by_gap_tercile"], b["up"]["gap_tercile_words"]
+    return (f"<p>We can also check this post by post. For every pair of posts written from the same instructions, "
+            f"we compared the two lengths. Where gemma's post was much longer (about {gw['gemma_much_longer']:.0f} words "
+            f"longer), the “likes its own posts” number is {t['gemma_much_longer']:+.1f}. Where the two posts were about the "
+            f"same length, it is {t['similar']:+.1f}. Gemma wrote the longer post in {b['gemma_longer_%']:.0f} of every "
+            f"100 pairs.</p><p class='grown'>For grown-ups: {b['slots']} slots, people who care about the topic; Spearman "
+            f"correlation between the word gap and the slot's like double difference {b['up']['spearman']:+.2f} "
+            f"(p = {b['up']['p']:.3f}); dislike {b['down']['spearman']:+.2f} (p = {b['down']['p']:.3f}). Found after looking, "
+            f"on all sets, so exploratory.</p>")
+
+
 def heldout_note():
     """The pre-stated test of the length idea on post sets nobody had looked at (LD-12)."""
     p = os.path.join(DATA, "heldout_s14_15.json")
@@ -318,6 +334,7 @@ person, that person likes long posts {lc['long']['gemma4:e2b']:.0f} times in 100
 posts” may really be “gemma likes long posts”, and it happens to write long ones. Once we allow for length, the likes
 number drops from about {s0:+.1f} to about {s1:+.1f}. The dislike number barely moves ({d0:+.1f} to {d1:+.1f}), so
 length does not explain the dislikes.</p>
+{slot_note(L)}
 {heldout_note()}
 {bar_chart(cats, [(CLS[m], f"people played by {NICE[m]}", [lc[k][m] for k in ('short', 'medium', 'long')]) for m in MODELS],
            "likes per 100", "Likes by post length", tip=lambda s, c, v: f"{s}, {c}: {v:.1f} likes per 100")}

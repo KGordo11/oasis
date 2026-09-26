@@ -85,6 +85,7 @@ def check(lab, baseline):
         if n_post != man.get("n_posts", 50):
             fails.append(f"OASIS db has {n_post} posts")
     # behaviour and speed against the other finished worlds
+    fmt = cfg.get("format", "scroll")
     for j in judges:
         g = [d for d in dec if d["judge"] == j]
         if not g:
@@ -93,12 +94,13 @@ def check(lab, baseline):
         spd = man.get("judges", {}).get(j, {})
         notes.append(f"{j}: like {like:.0f}%  {spd.get('s_per_decision', float('nan')):.2f} s/decision"
                      f"{' (resumed: timing covers only part)' if spd.get('rows', spd.get('decisions', 0)) < len(g) else ''}")
-        if baseline.get(j):
-            b_like = np.mean([x[0] for x in baseline[j]])
-            b_sd = max(3.0, float(np.std([x[0] for x in baseline[j]])) if len(baseline[j]) > 1 else 3.0)
+        bj = baseline.get((j, fmt))
+        if bj:
+            b_like = np.mean([x[0] for x in bj])
+            b_sd = max(3.0, float(np.std([x[0] for x in bj])) if len(bj) > 1 else 3.0)
             if abs(like - b_like) > max(10, 3 * b_sd):
                 warns.append(f"{j} like rate {like:.0f}% vs {b_like:.0f}% in other worlds")
-            b_s = np.median([x[1] for x in baseline[j] if x[1]])
+            b_s = np.median([x[1] for x in bj if x[1]]) if any(x[1] for x in bj) else None
             s = spd.get("s_per_decision")
             if s and b_s and s > 1.2 * b_s:
                 warns.append(f"{j} {s:.2f} s/decision vs usual {b_s:.2f} (machine busy? B-32)")
@@ -119,11 +121,12 @@ def main():
     for l in labs:
         man, dec = load(l)
         fa = man.get("ollama_server", {}).get("OLLAMA_FLASH_ATTENTION") == "true"
+        fmt = man["config"].get("format", "scroll")
         for j, v in man.get("judges", {}).items():
             g = [d for d in dec if d["judge"] == j]
             if g:
                 full = v.get("rows", v.get("decisions", 0)) >= len(g)
-                base.setdefault(j, []).append((100 * np.mean([d["action"] == "like" for d in g]),
+                base.setdefault((j, fmt), []).append((100 * np.mean([d["action"] == "like" for d in g]),
                                                v.get("s_per_decision") if (fa and full) else None))
     worst = 0
     for l in targets:

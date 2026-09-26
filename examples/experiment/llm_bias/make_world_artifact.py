@@ -324,6 +324,17 @@ def heldout_note():
             f"explain at all ({up['est']:+.1f}, range {up['ci95'][0]:+.1f} to {up['ci95'][1]:+.1f}).</p>")
 
 
+def tough_line(r):
+    """How much harsher each AI's people get when the two posts are side by side."""
+    def dis(fmt, m):
+        x = r.get(fmt, {}).get("rates_%", {}).get(f"{m} people", {})
+        v = [y["down"] for y in x.values()]
+        return sum(v) / len(v) if v else float("nan")
+    parts = [f"{NICE[m]}'s people dislike {dis('pair', m):.0f} in 100 posts side by side vs {dis('scroll', m):.0f} one at a time"
+             for m in MODELS]
+    return f"<p>Seeing two posts at once changes how tough people are: {'; '.join(parts)}.</p>"
+
+
 def ab_section():
     """LD-13: side by side vs one at a time, same posts, same 50 people (analyze_ab.py -> analysis_ab.json)."""
     head = """<h2>New test: does seeing posts side by side change things?</h2>
@@ -331,8 +342,8 @@ def ab_section():
 There, the AIs clearly picked their own posts more often (+5.6 in 100). In the scrolling test above, where people see
 <em>one post at a time</em>, we find about zero. Is it the way the posts are shown that makes the difference? To find out, the
 same 50 people now see the same posts both ways: once one at a time, and once with llama's and gemma's versions of each post
-side by side, where they react to each and pick a favourite. The posts in this test were written to about the same length,
-so length can't explain the result.</p>"""
+side by side, where they react to each and pick a favourite. The posts in this test were written under a length
+rule, so the two AIs' posts are much closer in length than before (see the note under the chart).</p>"""
     p = os.path.join(DATA, "analysis_ab.json")
     log = os.path.join(DATA, "ab_campaign.log")
     if not os.path.exists(p):
@@ -375,6 +386,7 @@ for both formats together.</p></div>
 <li>{say('pair_up', 'Side by side, extra likes for the AI’s own posts')}</li>
 <li>{say('pair_chosen', 'Side by side, extra favourite picks for the AI’s own post')}</li></ul>
 {whisker_chart([(n, v['est'], *v['ci95']) for n, v in rows], "Own-post boost by format", "extra reactions per 100 for the AI's own posts")}
+{tough_line(r)}
 <p class="cap">Dislike rows: below zero means fewer dislikes for the AI's own posts. Post lengths in this test: llama about
 {w.get('llama3.1:8b', float('nan')):.0f} words, gemma about {w.get('gemma4:e2b', float('nan')):.0f}. When both posts are shown, people pick
 the one shown first {r.get('pair', {}).get('position_1_picked_%', float('nan')):.0f} times in 100; the order is shuffled, so that habit

@@ -1,0 +1,8 @@
+WARN  ab_s20_pair_w0  llama3.1:8b: like 68%  2.17 s/decision | gemma4:e2b: like 72%  0.56 s/decision
+   warn: llama3.1:8b 2.17 s/decision vs usual 1.65 (machine busy? B-32)
+   warn: gemma4:e2b 0.56 s/decision vs usual 0.44 (machine busy? B-32)
+WARN  ab_s20_pair_w1  llama3.1:8b: like 64%  2.11 s/decision | gemma4:e2b: like 75%  0.56 s/decision
+   warn: llama3.1:8b 2.11 s/decision vs usual 1.65 (machine busy? B-32)
+   warn: gemma4:e2b 0.56 s/decision vs usual 0.44 (machine busy? B-32)
+PASS  ab_s20_scroll_w0  llama3.1:8b: like 63%  1.19 s/decision | gemma4:e2b: like 69%  0.33 s/decision
+PASS  ab_s20_scroll_w1  llama3.1:8b: like 61%  1.19 s/decision | gemma4:e2b: like 73%  0.33 s/decision

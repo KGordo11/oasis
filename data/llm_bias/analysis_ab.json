@@ -1,0 +1,133 @@
+{
+ "post_sets": [
+  20
+ ],
+ "reactions": 9600,
+ "people": 50,
+ "slots": 24,
+ "pair": {
+  "rates_%": {
+   "gemma4:e2b people": {
+    "gemma4:e2b posts": {
+     "up": 78.6,
+     "down": 2.5,
+     "nothing": 18.9
+    },
+    "llama3.1:8b posts": {
+     "up": 68.4,
+     "down": 9.1,
+     "nothing": 22.5
+    }
+   },
+   "llama3.1:8b people": {
+    "gemma4:e2b posts": {
+     "up": 66.0,
+     "down": 16.8,
+     "nothing": 17.2
+    },
+    "llama3.1:8b posts": {
+     "up": 65.2,
+     "down": 24.3,
+     "nothing": 10.5
+    }
+   }
+  },
+  "favourite_share_%": {
+   "gemma4:e2b people": {
+    "gemma4:e2b posts": 57.2,
+    "llama3.1:8b posts": 42.8
+   },
+   "llama3.1:8b people": {
+    "gemma4:e2b posts": 52.0,
+    "llama3.1:8b posts": 48.0
+   }
+  },
+  "position_1_picked_%": 71.9
+ },
+ "scroll": {
+  "rates_%": {
+   "gemma4:e2b people": {
+    "gemma4:e2b posts": {
+     "up": 75.2,
+     "down": 5.5,
+     "nothing": 19.3
+    },
+    "llama3.1:8b posts": {
+     "up": 66.7,
+     "down": 11.5,
+     "nothing": 21.8
+    }
+   },
+   "llama3.1:8b people": {
+    "gemma4:e2b posts": {
+     "up": 60.8,
+     "down": 4.8,
+     "nothing": 34.5
+    },
+    "llama3.1:8b posts": {
+     "up": 62.7,
+     "down": 5.5,
+     "nothing": 31.8
+    }
+   }
+  }
+ },
+ "effects_points": {
+  "scroll_up": {
+   "est": 10.5,
+   "ci95": [
+    2.92,
+    18.92
+   ],
+   "p": 0.005
+  },
+  "scroll_down": {
+   "est": -5.25,
+   "ci95": [
+    -12.67,
+    0.92
+   ],
+   "p": 0.111
+  },
+  "pair_up": {
+   "est": 9.33,
+   "ci95": [
+    -1.58,
+    20.5
+   ],
+   "p": 0.091
+  },
+  "pair_down": {
+   "est": 1.0,
+   "ci95": [
+    -7.42,
+    9.08
+   ],
+   "p": 0.739
+  },
+  "pair_chosen": {
+   "est": 5.17,
+   "ci95": [
+    -2.83,
+    12.75
+   ],
+   "p": 0.207
+  },
+  "format_effect_up": {
+   "est": -1.17,
+   "ci95": [
+    -12.0,
+    9.75
+   ],
+   "p": 0.825
+  },
+  "format_effect_down": {
+   "est": 6.25,
+   "ci95": [
+    -1.25,
+    14.67
+   ],
+   "p": 0.107
+  }
+ }
+}

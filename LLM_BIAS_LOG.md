@@ -1054,3 +1054,25 @@ unchanged); pair smoke on seed 20 (2 people): 96/96 valid rows, llama 2.2 s and 
 Seed 20 bank: llama 69.3 words (65-84), gemma 74.9 (67-88) — gap 5.6 (llama undershoots; kept Gordon's rule as
 approved); 1 llama post failed after 9 tries → slot (cars, r1) dropped from both formats.
 Pair format: people pick the post shown first 60 % of the time (smoke); order is shuffled per person and slot.
+
+### LF-24 — A/B post set 20 (first length-matched set; 9,600 reactions, 50 people, 24 briefs)
+
+All 4 worlds PASS (check_world now compares speeds within format; the earlier WARNs were scroll-vs-pair
+per-call speed mixing, a checker bug, fixed). Pair speed: llama 2.1-2.2 s and gemma 0.56 s per call (2 posts).
+
+| measure (double difference, points) | estimate | 95 % range | p |
+|---|---|---|---|
+| scroll likes | **+10.5** | +2.9 to +18.9 | 0.005 |
+| scroll dislikes | −5.3 | −12.7 to +0.9 | 0.11 |
+| side-by-side likes | +9.3 | −1.6 to +20.5 | 0.09 |
+| side-by-side dislikes | +1.0 | −7.4 to +9.1 | 0.74 |
+| side-by-side favourite | +5.2 | −2.8 to +12.8 | 0.21 |
+| **format effect, likes (pair − scroll)** | −1.2 | −12.0 to +9.8 | 0.83 |
+| format effect, dislikes | +6.3 | −1.2 to +14.7 | 0.11 |
+
+One set only — sets have swung from −3 to +11 on likes before (LF-18/19), so +10.5 is not evidence yet.
+The favourite number (+5.2) is close to night 1's +5.6. **No format effect so far.**
+Other: side by side makes llama far harsher (its people dislike 21 % of posts vs 5 % scrolling; gemma 6 vs 8 %),
+and people pick the post shown first 72 % of the time (order shuffled, so noise not bias). Gemma-played
+people pick gemma's post 57 %, llama-played pick llama's 48 %.
+Page v12 shows the A/B section. Export `data/llm_bias/export_ab/`.

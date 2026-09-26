@@ -1096,3 +1096,5 @@ dropped from all 4 worlds. All worlds PASS.
 length did NOT remove the lean. Caution: the old design also read +4 after its first 2 sets and settled near +2
 over 7 (LF-18/19); two sets are two draws. Favourite shares: gemma-played pick gemma 55 %, llama-played pick
 llama 50 %. Position 1 picked 73 %. Page v13.
+*LF-25 check:* old design (sets 10-16) restricted to the first 50 people: like +2.6 [−1.1, +6.3], dislike −1.1 —
+same as all 99 (+2.4 / −1.2). The A/B's higher like numbers are not from using 50 people.

@@ -76,12 +76,56 @@ def load():
     return R, P, U1
 
 
+def fast_bootstrap(df, col, B=2000, seed=0, chunk=200):
+    """analyze.cluster_bootstrap, vectorised: SAME random draws (same generator, same order), same pooled
+    double difference, ~50x faster. Checked equal to the original in test_llm_bias.py."""
+    rng = np.random.default_rng(seed)
+    personas, slots = df["persona"].unique(), df["slot"].unique()
+    p_idx = pd.Categorical(df["persona"], categories=personas).codes
+    s_idx = pd.Categorical(df["slot"], categories=slots).codes
+    judges, authors_ = sorted(df["judge"].unique()), sorted(df["author"].unique())
+    cell = (pd.Categorical(df["judge"], categories=judges).codes * len(authors_)
+            + pd.Categorical(df["author"], categories=authors_).codes)
+    M1 = np.zeros((len(df), len(judges) * len(authors_)))
+    M1[np.arange(len(df)), cell] = 1.0
+    Mx = M1 * df[col].values[:, None]
+    draws = []
+    for start in range(0, B, chunk):
+        W = []
+        for _ in range(min(chunk, B - start)):
+            wp = rng.multinomial(len(personas), np.ones(len(personas)) / len(personas))
+            ws = rng.multinomial(len(slots), np.ones(len(slots)) / len(slots))
+            W.append(wp[p_idx] * ws[s_idx])
+        W = np.asarray(W, dtype=float)
+        with np.errstate(invalid="ignore", divide="ignore"):
+            R = (W @ Mx) / (W @ M1)
+        R = R.reshape(len(W), len(judges), len(authors_))
+        for r in R:
+            rel = np.array([[r[k, a] - np.mean([r[k, b] for b in range(len(authors_)) if b != a])
+                             for a in range(len(authors_))] for k in range(len(judges))])
+            vals = []
+            for J, jn in enumerate(judges):
+                if jn not in authors_:
+                    continue
+                a = authors_.index(jn)
+                others = [rel[K, a] for K in range(len(judges)) if K != J]
+                vals.append(rel[J, a] - np.mean(others))
+            v = float(np.mean(vals))
+            if np.isfinite(v):
+                draws.append(v)
+    d = np.array(draws)
+    ci = (float(np.percentile(d, 2.5)), float(np.percentile(d, 97.5)))
+    p = float(min(1.0, 2 * min((d <= 0).mean(), (d >= 0).mean())))
+    return ci, p
+
+
 def sp(df, B):
     """Self-preference double difference (points) with the persona x slot cluster bootstrap."""
     out = {}
     for col in ("up", "down"):
         est = analyze.did(df, col)["_pooled"]
-        ci, p = analyze.cluster_bootstrap(df, col, B=B)
+        ci, p = fast_bootstrap(df, col, B=B)
+        ci = {"_pooled": ci}
         out[col] = {"est": round(100 * est, 1), "ci95": [round(100 * x, 1) for x in ci["_pooled"]], "p": p}
     out["n"] = len(df)
     return out

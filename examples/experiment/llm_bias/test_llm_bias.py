@@ -272,3 +272,25 @@ def test_core99_refuses_changed_personas(monkeypatch):
     monkeypatch.setattr(personas, "load_bank", lambda path=None: bank)
     with pytest.raises(personas.PersonaDrift):
         personas.core99()
+
+
+def test_fast_bootstrap_matches_cluster_bootstrap():
+    """explore_world.fast_bootstrap must give the SAME interval and p as analyze.cluster_bootstrap."""
+    import pandas as pd
+    import explore_world
+    rng = np.random.default_rng(3)
+    rows = []
+    for persona in range(30):
+        for slot in range(8):
+            for judge_ in ("A", "B"):
+                if (persona + slot) % 2 != ("A", "B").index(judge_):
+                    continue
+                for author in ("A", "B"):
+                    p = 0.5 + 0.1 * (author == "A") + 0.05 * (author == judge_)
+                    rows.append({"persona": persona, "slot": slot, "judge": judge_, "author": author,
+                                 "up": int(rng.random() < p), "down": int(rng.random() < 0.1)})
+    df = pd.DataFrame(rows)
+    for col in ("up", "down"):
+        ci, p = analyze.cluster_bootstrap(df, col, B=150)
+        fci, fp = explore_world.fast_bootstrap(df, col, B=150, chunk=40)
+        assert np.allclose(ci["_pooled"], fci) and p == fp

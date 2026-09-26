@@ -52,7 +52,7 @@ def finished(label):
     return os.path.exists(m) and "finished_at" in json.load(open(m))
 
 
-def load():
+def load(sets=None):
     R = pd.read_csv(os.path.join(EXPORT, "reactions.csv"))
     P = pd.read_csv(os.path.join(EXPORT, "posts.csv"))
     U = pd.read_csv(os.path.join(EXPORT, "users.csv"))
@@ -61,6 +61,8 @@ def load():
     ok = R.groupby("post_set_seed")["world_label"].agg(lambda s: all(finished(l) for l in s.unique())
                                                         and s.nunique() == 2)
     R = R[R["post_set_seed"].isin(ok[ok].index)].copy()
+    if sets:
+        R = R[R["post_set_seed"].isin(sets)].copy()
     R["judge"] = R["controlling_model"]
     R["author"] = R["post_author_model"]
     R["persona"] = R["user_id"]
@@ -249,8 +251,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--B", type=int, default=1000)
     ap.add_argument("--out")
+    ap.add_argument("--sets", help="only these post sets, e.g. 14,15 (the held-out test, LD-12)")
     a = ap.parse_args()
-    R, P, U = load()
+    R, P, U = load([int(x) for x in a.sets.split(",")] if a.sets else None)
     res = {"post_sets": sorted(int(x) for x in R["post_set_seed"].unique()), "reactions": len(R),
            "people": int(R["persona"].nunique()), "posts": int(R["post"].nunique())}
     res["headline"] = sp(R, a.B)

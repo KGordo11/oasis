@@ -16,16 +16,17 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-26 22:35 — EVENING REPORT (Gordon away all day). A/B seeds 27-30 running, ETA ~06:30.*
+*Last updated 2026-09-27 06:20 — MORNING REPORT. A/B seeds 31-34 running (started 06:13, ETA ~14:00; stop with
+`pkill -f ab_campaign.sh`).*
 
-**Today (LD-13, your decisions):** built the side-by-side format, length-matched post writing and the A/B
-analysis (26 tests pass; scroll unchanged on regression), and ran 7 A/B post sets (20-26, 65,600 reactions,
-first 50 of the pinned 99 people, every world PASS). **Answer: showing the two posts side by side makes no
-difference** — format effect on likes −1.0 [−5.4, +3.3] (LF-30). Both formats show a small own-post like lean
-(scroll +4.2 [+0.2, +8.2]; side by side +3.2; favourite +2.6), which length matching did not remove, and which
-has drifted down as sets accumulated (+10.5 after 1 set → +4.2 after 7). Llama gets much harsher side by side
-(dislikes ~20 % vs ~5 %). Old design closed at 7 sets (LF-23: like +2.4, dislike −1.2, both unclear).
-Page (v18) shows all of it in plain words.
+**A/B so far (LF-34, 11 post sets 20-30, 102,000 reactions, first 50 of the pinned 99, every world PASS):**
+**showing the two posts side by side makes no difference** — format effect on likes −2.7 [−6.3, +0.7], on
+dislikes +0.2 [−2.5, +2.8]. With length-matched posts there is a small, steady one-at-a-time own-post like lean,
+**+4.3 [+1.1, +7.5]** (p 0.006); side by side it is smaller (+1.7, not clear of zero; favourite +1.6).
+So matching post length did NOT remove the lean, and the side-by-side format does not create one.
+Old design (60-120 words, 99 people, 7 sets): like +2.4 [−1.3, +6.2] — consistent with a small lean of a few
+points that needs many post sets to see. Llama gets much harsher side by side (~20 % dislikes vs ~5 %).
+Page v22 shows all of it in plain words.
 
 **For you to decide next:** (a) stop the A/B after seed 30, or keep adding sets? (b) the length rule drops
 llama's short posts (11 of 175 briefs) — lower the floor to 55? (c) third model / GPU machine when ready.
@@ -1193,3 +1194,11 @@ Set 29: 3 slots dropped. All PASS. Scroll likes **+4.2 [+1.0, +7.4]** (p 0.011);
 [−3.8, +0.8]; side-by-side likes +1.9 [−2.3, +6.1]; favourite +1.4 [−1.3, +4.0]; **format effect likes −2.2
 [−6.1, +1.5], dislikes −0.2 [−3.0, +2.6]**. Stable picture: no format effect; a small one-at-a-time like lean
 (~+4) with length-matched posts; side by side smaller and not clear of zero. Page v21. Seed 30 running (last queued).
+
+### LF-34 — A/B after 11 post sets (20-30; 102,000 reactions)
+
+Set 30: 2 slots dropped. All PASS. Scroll likes **+4.3 [+1.1, +7.5]** (p 0.006); scroll dislikes −1.9
+[−4.3, +0.5]; side-by-side likes +1.7 [−2.3, +5.5]; favourite +1.6 [−1.0, +4.1]; **format effect likes −2.7
+[−6.3, +0.7] (p 0.12), dislikes +0.2 [−2.5, +2.8]**. If anything, side by side shows slightly LESS own-post
+liking than one at a time — the opposite of the night-1 idea — but not clearly. Page v22.
+Seeds 31-34 queued and started 06:13 (same A/B; ETA ~14:00). Stop with `pkill -f ab_campaign.sh`.

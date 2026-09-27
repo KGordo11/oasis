@@ -1142,3 +1142,12 @@ Scroll likes **+5.4 [+0.9, +10.0]** (p 0.02); scroll dislikes −1.5 [−5.2, +2
 [−4.0, +3.9]**. The format makes no difference; the like lean holds at ~+5 with length-matched posts.
 Favourite shares: gemma-played pick gemma 52.8 %, llama-played pick llama 50.7 %. Position 1 picked 74 %.
 Dropped slots so far: 1 + 2 + 0 + 0 + 2 = 5 of 125 (all llama posts that stayed short). Page v16.
+
+### LF-29 — A/B after 6 post sets (20-25; 58,000 reactions)
+
+Scroll likes **+4.6 [+0.3, +9.0]** (p 0.03); scroll dislikes −0.9 [−4.1, +2.2]; side-by-side likes +4.2
+[−0.7, +9.2]; favourite +2.8 [−0.5, +6.2]; **format effect likes −0.4 [−4.8, +4.4], dislikes −0.7 [−4.6, +2.8]**.
+The format still makes no difference, and the range keeps narrowing around zero. The like lean with
+length-matched posts is drifting down as sets accumulate (+10.5 → +7.6 → +6.9 → +5.4 → +5.4 → +4.6), the same
+pattern as the old design (early sets high, settling lower). Favourite shares now 51.7 / 51.1 %. Page v17.
+Queued: seeds 27-30 of the same A/B after seed 26 (more sets narrow the answer; within LD-13).

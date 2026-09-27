@@ -1186,3 +1186,10 @@ Set 28: 1 slot dropped. All PASS. Scroll likes **+4.6 [+1.2, +8.0]** (p 0.008); 
 [−6.1, +1.8], dislikes −0.1 [−3.0, +2.7]**. Still no format effect. With length-matched posts, the one-at-a-time
 like lean (~+4.6) is now steadier than in the old design — the side-by-side one is smaller and not clear of zero.
 Page v20.
+
+### LF-33 — A/B after 10 post sets (20-29; 92,800 reactions)
+
+Set 29: 3 slots dropped. All PASS. Scroll likes **+4.2 [+1.0, +7.4]** (p 0.011); scroll dislikes −1.5
+[−3.8, +0.8]; side-by-side likes +1.9 [−2.3, +6.1]; favourite +1.4 [−1.3, +4.0]; **format effect likes −2.2
+[−6.1, +1.5], dislikes −0.2 [−3.0, +2.6]**. Stable picture: no format effect; a small one-at-a-time like lean
+(~+4) with length-matched posts; side by side smaller and not clear of zero. Page v21. Seed 30 running (last queued).

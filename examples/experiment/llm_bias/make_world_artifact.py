@@ -33,8 +33,8 @@ DATA = os.path.join(REPO, "data", "llm_bias")
 EXP = os.path.join(DATA, "export")
 E = html.escape
 MODELS = ["llama3.1:8b", "gemma4:e2b"]          # fixed order -> fixed colour: slot 1 blue, slot 2 orange
-CLS = {"llama3.1:8b": "s1", "gemma4:e2b": "s2"}
-NICE = {"llama3.1:8b": "llama", "gemma4:e2b": "gemma"}
+CLS = {"llama3.1:8b": "s1", "gemma4:e2b": "s2", "mistral:7b": "s3"}
+NICE = {"llama3.1:8b": "llama", "gemma4:e2b": "gemma", "mistral:7b": "mistral"}
 PRIMARY = ["personal_finance", "cars", "farming", "cooking", "tech"]
 SHORT_TOPIC = {"personal_finance": "Money", "cars": "Cars", "farming": "Farming", "cooking": "Cooking", "tech": "Tech"}
 
@@ -739,40 +739,58 @@ moves about four times faster than that column suggests.</p>"""
 
 # ---------------------------------------------------------------- look-up tool data
 
-def lookup_data():
-    """Everything the look-up tool needs: posts, people, reasons (deduplicated) and one row per reaction."""
-    R = pd.read_csv(os.path.join(EXP, "reactions.csv"))
-    P = pd.read_csv(os.path.join(EXP, "posts.csv"))
-    U = pd.read_csv(os.path.join(EXP, "users.csv")).drop_duplicates("user_id").sort_values("user_id")
+def lookup_data(exp=EXP, fmt=None):
+    """Everything the look-up tool needs for one dataset: posts, people, reasons (deduplicated), one row per reaction."""
+    R = pd.read_csv(os.path.join(exp, "reactions.csv"))
+    if fmt and "format" in R:
+        R = R[R["format"] == fmt]
+    P = pd.read_csv(os.path.join(exp, "posts.csv"))
+    P = P[P["post_uid"].isin(set(R["post_uid"]))]
+    U = pd.read_csv(os.path.join(exp, "users.csv")).drop_duplicates("user_id").sort_values("user_id")
+    U = U[U["user_id"].isin(set(R["user_id"]))]
+    models = [m for m in ("llama3.1:8b", "gemma4:e2b", "mistral:7b") if m in set(R["controlling_model"])]
     P = P.sort_values(["post_set_seed", "topic", "slot", "author_model"]).reset_index(drop=True)
     pidx = {u: i for i, u in enumerate(P["post_uid"])}
     reasons = pd.Index(R["reason"].fillna("").unique())
     ridx = {r: i for i, r in enumerate(reasons)}
     act = {"like": 0, "dislike": 1, "nothing": 2}
-    posts = [{"s": int(r.post_set_seed), "t": r.topic, "a": MODELS.index(r.author_model), "ti": r.title, "b": r.body,
+    posts = [{"s": int(r.post_set_seed), "t": r.topic, "a": models.index(r.author_model), "ti": r.title, "b": r.body,
               "w": int(r.words), "k": r.post_type} for r in P.itertuples()]
     users = [{"i": int(u.user_id), "n": u["name"], "age": int(u.age), "g": u.gender, "pl": u.place, "job": u.profession,
               "st": u.voting_style, "in": {t: int(u[f"interest_{t}"]) for t in PRIMARY}, "d": u.persona_text}
              for _, u in U.iterrows()]
-    rows = [[pidx[r.post_uid], int(r.user_id), MODELS.index(r.controlling_model), act.get(r.action, 2),
+    rows = [[pidx[r.post_uid], int(r.user_id), models.index(r.controlling_model), act.get(r.action, 2),
              ridx[r.reason if isinstance(r.reason, str) else ""], round(float(r.seconds), 1)]
             for r in R.itertuples() if r.post_uid in pidx]
-    return {"topics": {t: TOPICS[t]["name"] for t in PRIMARY}, "models": [NICE[m] for m in MODELS],
-            "posts": posts, "users": users, "reasons": list(reasons), "R": rows}
+    return {"topics": {t: TOPICS[t]["name"] for t in PRIMARY}, "models": [NICE[m] for m in models],
+            "cls": [CLS[m] for m in models], "posts": posts, "users": users, "reasons": list(reasons), "R": rows}
+
+
+# every dataset the look-up tool can show: (id, label, export folder, format filter)
+DATASETS = [
+    ("v2", "Test 2: scrolling, 99 people, 2 AIs (post sets 10-16)", EXP, None),
+    ("ab_scroll", "A/B test, one post at a time (length-matched posts, sets 20-34)", os.path.join(DATA, "export_ab"), "scroll"),
+    ("ab_pair", "A/B test, two posts side by side (sets 20-34)", os.path.join(DATA, "export_ab"), "pair"),
+    ("v3", "Newest: three AIs, natural posts (sets 40+)", os.path.join(DATA, "export_v3"), None),
+]
+
+
+def available_datasets():
+    return [d for d in DATASETS if os.path.exists(os.path.join(d[2], "reactions.csv"))]
 
 
 # ---------------------------------------------------------------- page
 
 CSS = """
 :root { --ground:#F2F4F6; --paper:#FFFFFF; --ink:#18202B; --muted:#5A6573; --rule:#D5DBE2; --accent:#1F6F8B;
-  --diag:#B7791F; --s1:#2a78d6; --s2:#eb6834; --luck:#AEB7C2; --like:#1E7A4F; --dislike:#B4322A; --skip:#66707C;
+  --diag:#B7791F; --s1:#2a78d6; --s2:#eb6834; --s3:#c2378f; --luck:#AEB7C2; --like:#1E7A4F; --dislike:#B4322A; --skip:#66707C;
   --chipbg:#EEF1F4;
   --sans:"Archivo","Helvetica Neue",Arial,sans-serif; --serif:"Source Serif 4",Georgia,serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ground:#11161C; --paper:#18202A; --ink:#E4E9EF;
-  --muted:#9AA6B4; --rule:#2C3643; --accent:#63B4D1; --diag:#E2A948; --s1:#3987e5; --s2:#d95926; --luck:#4A5563;
+  --muted:#9AA6B4; --rule:#2C3643; --accent:#63B4D1; --diag:#E2A948; --s1:#3987e5; --s2:#d95926; --s3:#d65aa4; --luck:#4A5563;
   --like:#5CC48E; --dislike:#F07A70; --skip:#9AA6B4; --chipbg:#222C38; color-scheme:dark; } }
 :root[data-theme="dark"] { --ground:#11161C; --paper:#18202A; --ink:#E4E9EF; --muted:#9AA6B4; --rule:#2C3643;
-  --accent:#63B4D1; --diag:#E2A948; --s1:#3987e5; --s2:#d95926; --luck:#4A5563; --like:#5CC48E; --dislike:#F07A70;
+  --accent:#63B4D1; --diag:#E2A948; --s1:#3987e5; --s2:#d95926; --s3:#d65aa4; --luck:#4A5563; --like:#5CC48E; --dislike:#F07A70;
   --skip:#9AA6B4; --chipbg:#222C38; color-scheme:dark; }
 body { background:var(--ground); color:var(--ink); font:17px/1.6 var(--serif); padding-inline:16px; }
 .wrap { max-width:760px; margin:0 auto; padding-block:40px 80px; display:grid; gap:8px; }
@@ -801,7 +819,7 @@ details { background:var(--paper); border:1px solid var(--rule); border-radius:6
 summary { font-family:var(--sans); font-weight:600; cursor:pointer; }
 .legend { display:flex; gap:18px; flex-wrap:wrap; font:13px var(--sans); color:var(--muted); margin-top:10px; }
 .key { display:inline-flex; align-items:center; gap:6px; }
-.sw { width:12px; height:12px; border-radius:50%; display:inline-block; } .sw.s1 { background:var(--s1); } .sw.s2 { background:var(--s2); }
+.sw { width:12px; height:12px; border-radius:50%; display:inline-block; } .sw.s1 { background:var(--s1); } .sw.s2 { background:var(--s2); } .sw.s3 { background:var(--s3); }
 .chart svg { width:100%; height:auto; max-width:700px; display:block; } .chart.sq svg { max-width:480px; }
 svg .grid { stroke:var(--rule); stroke-width:1; } svg .axis { stroke:var(--muted); stroke-width:1; }
 svg .zero { stroke:var(--ink); stroke-width:1.5; } svg .diag { stroke:var(--muted); stroke-width:1.5; stroke-dasharray:5 4; }
@@ -809,7 +827,7 @@ svg .tick { fill:var(--muted); font:12px var(--mono); } svg .tick.lab { font:13p
 svg .axlab { fill:var(--muted); font:12.5px var(--sans); } svg .note { fill:var(--muted); font:italic 12px var(--sans); }
 svg .endlab { fill:var(--ink); font:600 12.5px var(--sans); } svg .val { fill:var(--ink); font:600 12.5px var(--sans); }
 svg .ln { fill:none; stroke-width:2; } svg .ln.s1 { stroke:var(--s1); } svg .ln.s2 { stroke:var(--s2); }
-svg .bar.s1 { fill:var(--s1); } svg .bar.s2 { fill:var(--s2); }
+svg .bar.s1 { fill:var(--s1); } svg .bar.s2 { fill:var(--s2); } svg .bar.s3 { fill:var(--s3); }
 svg .dot { stroke:var(--paper); stroke-width:2; } svg .dot.s1 { fill:var(--s1); } svg .dot.s2 { fill:var(--s2); } svg .dot.acc { fill:var(--accent); }
 svg .whisk { stroke:var(--accent); stroke-width:2; stroke-linecap:round; }
 svg .hit, svg .hitr { fill:transparent; } svg .pt:hover .dot { r:7; } svg .pt:hover .bar { opacity:.85; }
@@ -836,7 +854,7 @@ svg .hit, svg .hitr { fill:transparent; } svg .pt:hover .dot { r:7; } svg .pt:ho
 .pick .chk { flex-direction:row; display:flex; gap:6px; align-items:center; font-size:13.5px; color:var(--ink); }
 button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
 .postcard { border-left:4px solid var(--rule); padding:4px 0 4px 14px; font-family:var(--serif); }
-.postcard.s1 { border-color:var(--s1); } .postcard.s2 { border-color:var(--s2); }
+.postcard.s1 { border-color:var(--s1); } .postcard.s2 { border-color:var(--s2); } .postcard.s3 { border-color:var(--s3); }
 .postcard h4 { font:700 17px/1.3 var(--sans); margin:0 0 4px; } .postcard p { margin:4px 0; font-size:16px; }
 .meta { font-size:13px; color:var(--muted); }
 .tally { display:flex; gap:16px; flex-wrap:wrap; font-size:14px; }
@@ -851,101 +869,112 @@ button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-v
 
 JS = r"""
 (function () {
-  var D = window.WORLD_DATA; if (!D) { return; }
+  var SETS = window.LOOKUP_SETS || [], CACHE = {};
   var ACT = ["like", "dislike", "skip"], ACTW = ["Like", "Dislike", "Skip"];
   var CARE = {"-2": "really dislikes", "-1": "dislikes", "0": "doesn't mind", "1": "likes", "2": "loves"};
   var STYLE = {generous: "easy to please", typical: "normal", harsh: "hard to please"};
-  var byPost = {}, byUser = {};
-  D.R.forEach(function (r) { (byPost[r[0]] = byPost[r[0]] || []).push(r); (byUser[r[1]] = byUser[r[1]] || []).push(r); });
-  var users = {}; D.users.forEach(function (u) { users[u.i] = u; });
   var $ = function (id) { return document.getElementById(id); };
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]; }); }
-  function chip(r) { return r ? '<span class="chip ' + ACT[r[3]] + '">' + ACTW[r[3]] + '</span><span class="why">' + esc(D.reasons[r[4]]) + '</span>' : '<span class="muted">not seen yet</span>'; }
   function opt(v, t, sel) { return '<option value="' + esc(v) + '"' + (sel ? " selected" : "") + ">" + esc(t) + "</option>"; }
-  var sets = Array.from(new Set(D.posts.map(function (p) { return p.s; }))).sort(function (a, b) { return a - b; });
   function save(k, v) { try { localStorage.setItem("lk_" + k, v); } catch (e) {} }
   function load(k) { try { return localStorage.getItem("lk_" + k); } catch (e) { return null; } }
+  var D, M, byPost, byUser, users;
+  function chip(r) { return r ? '<span class="chip ' + ACT[r[3]] + '">' + ACTW[r[3]] + '</span><span class="why">' + esc(D.reasons[r[4]]) + '</span>' : '<span class="muted">—</span>'; }
+  function differs(pr) { var a = pr.filter(Boolean).map(function (r) { return r[3]; }); return a.length > 1 && a.some(function (x) { return x !== a[0]; }); }
+  function heads() { return D.models.map(function (m) { return "<th>When " + esc(m) + " played them</th>"; }).join(""); }
 
-  // ---- post view
   function fillPosts() {
-    var s = +$("lkSet").value, t = $("lkTopic").value, cur = $("lkPost").value;
-    var html = "";
+    var s = +$("lkSet").value, t = $("lkTopic").value, cur = $("lkPost").value, html = "";
     D.posts.forEach(function (p, i) { if (p.s === s && p.t === t) html += opt(i, p.ti + "  (by " + D.models[p.a] + ")", String(i) === cur); });
     $("lkPost").innerHTML = html; showPost();
   }
   function showPost() {
-    var i = +$("lkPost").value, p = D.posts[i]; if (!p) { return; }
+    var i = +$("lkPost").value, p = D.posts[i]; if (!p) { $("lkOut").innerHTML = "<p class='muted'>No posts here.</p>"; return; }
     var rs = byPost[i] || [], pair = {};
-    rs.forEach(function (r) { (pair[r[1]] = pair[r[1]] || [null, null])[r[2]] = r; });
-    var tally = [0, 1].map(function (m) {
+    rs.forEach(function (r) { (pair[r[1]] = pair[r[1]] || new Array(M).fill(null))[r[2]] = r; });
+    var tally = D.models.map(function (name, m) {
       var c = [0, 0, 0]; rs.forEach(function (r) { if (r[2] === m) c[r[3]]++; });
-      return "<span><b>Played by " + D.models[m] + ":</b> " + c[0] + " like · " + c[1] + " dislike · " + c[2] + " skip</span>";
+      return "<span><b>Played by " + esc(name) + ":</b> " + c[0] + " like · " + c[1] + " dislike · " + c[2] + " skip</span>";
     }).join("");
     var only = $("lkDiff").checked, rows = "", shown = 0;
     Object.keys(pair).map(Number).sort(function (a, b) { return users[b].in[p.t] - users[a].in[p.t] || a - b; }).forEach(function (uid) {
-      var pr = pair[uid], u = users[uid], diff = pr[0] && pr[1] && pr[0][3] !== pr[1][3];
+      var pr = pair[uid], u = users[uid], diff = differs(pr);
       if (only && !diff) { return; }
       shown++;
       rows += '<tr class="' + (diff ? "diff" : "") + '"><td><b>' + esc(u.n) + "</b><br><span class='meta'>" + u.age + ", " + esc(u.job) + "</span></td><td><span class='tag'>" +
-        CARE[u.in[p.t]] + "</span></td><td>" + chip(pr[0]) + "</td><td>" + chip(pr[1]) + "</td></tr>";
+        CARE[u.in[p.t]] + "</span></td>" + pr.map(function (r) { return "<td>" + chip(r) + "</td>"; }).join("") + "</tr>";
     });
-    $("lkOut").innerHTML = '<div class="postcard ' + (p.a === 0 ? "s1" : "s2") + '"><h4>' + esc(p.ti) + "</h4>" +
+    $("lkOut").innerHTML = '<div class="postcard ' + D.cls[p.a] + '"><h4>' + esc(p.ti) + "</h4>" +
       esc(p.b).split(/\n+/).map(function (x) { return "<p>" + x + "</p>"; }).join("") +
-      '<p class="meta">Written by ' + D.models[p.a] + " · " + p.w + " words · " + esc(D.topics[p.t]) + " · post set " + p.s + " · asked to write: " + esc(p.k) + "</p></div>" +
+      '<p class="meta">Written by ' + esc(D.models[p.a]) + " · " + p.w + " words · " + esc(D.topics[p.t]) + " · post set " + p.s + " · asked to write: " + esc(p.k) + "</p></div>" +
       '<div class="tally">' + tally + "</div>" +
-      '<div class="scroll"><table class="plain rt"><thead><tr><th>Person</th><th>Topic</th><th>When llama played them</th><th>When gemma played them</th></tr></thead><tbody>' +
-      (rows || '<tr><td colspan="4" class="muted">No one here — untick the box to see everyone.</td></tr>') + "</tbody></table></div>" +
-      '<p class="meta">' + shown + " people shown. Shaded rows: the two AIs made different choices for the same person.</p>";
+      '<div class="scroll"><table class="plain rt"><thead><tr><th>Person</th><th>Topic</th>' + heads() + '</tr></thead><tbody>' +
+      (rows || '<tr><td colspan="' + (2 + M) + '" class="muted">No one here — untick the box to see everyone.</td></tr>') + "</tbody></table></div>" +
+      '<p class="meta">' + shown + " people shown. Shaded rows: the AIs made different choices for the same person.</p>";
     save("post", i);
   }
-  // ---- person view
   function showPerson() {
     var u = users[+$("lkUser").value]; if (!u) { return; }
     var t = $("lkUTopic").value, rs = byUser[u.i] || [], pair = {};
-    rs.forEach(function (r) { (pair[r[0]] = pair[r[0]] || [null, null])[r[2]] = r; });
+    rs.forEach(function (r) { (pair[r[0]] = pair[r[0]] || new Array(M).fill(null))[r[2]] = r; });
     var ints = Object.keys(D.topics).map(function (k) { return '<span class="tag">' + esc(D.topics[k]) + ": " + CARE[u.in[k]] + "</span>"; }).join("");
-    var agree = 0, both = 0, rows = "";
+    var agree = 0, all = 0, rows = "";
     Object.keys(pair).map(Number).sort(function (a, b) { var A = D.posts[a], B = D.posts[b]; return A.s - B.s || u.in[B.t] - u.in[A.t] || (A.t < B.t ? -1 : A.t > B.t ? 1 : a - b); }).forEach(function (pi) {
-      var p = D.posts[pi], pr = pair[pi], diff = pr[0] && pr[1] && pr[0][3] !== pr[1][3];
-      if (pr[0] && pr[1]) { both++; if (!diff) agree++; }
+      var p = D.posts[pi], pr = pair[pi], diff = differs(pr);
+      if (pr.every(Boolean)) { all++; if (!diff) agree++; }
       if (t && p.t !== t) { return; }
-      rows += '<tr class="' + (diff ? "diff" : "") + '"><td>' + p.s + "</td><td>" + esc(p.ti) + "<br><span class='meta'>" + esc(D.topics[p.t]) + " · by " + D.models[p.a] +
-        "</span></td><td>" + chip(pr[0]) + "</td><td>" + chip(pr[1]) + "</td></tr>";
+      rows += '<tr class="' + (diff ? "diff" : "") + '"><td>' + p.s + "</td><td>" + esc(p.ti) + "<br><span class='meta'>" + esc(D.topics[p.t]) + " · by " + esc(D.models[p.a]) +
+        "</span></td>" + pr.map(function (r) { return "<td>" + chip(r) + "</td>"; }).join("") + "</tr>";
     });
     $("lkOut").innerHTML = '<div class="person"><h4>' + esc(u.n) + "</h4><div>" + u.age + "-year-old " + esc(u.g) + " " + esc(u.job) + " in " + esc(u.pl) +
       " · " + (STYLE[u.st] || u.st) + '</div><div class="ints">' + ints + "</div>" +
       "<details><summary>Exactly what the AI was told about " + esc(u.n.split(" ")[0]) + "</summary><p class='meta' style='white-space:pre-wrap'>" + esc(u.d) + "</p></details>" +
-      (both ? "<p>Llama and gemma made the same choice for " + esc(u.n.split(" ")[0]) + " on " + agree + " of " + both + " posts (" + Math.round(100 * agree / both) + " in 100).</p>" : "") +
-      '</div><div class="scroll"><table class="plain rt"><thead><tr><th>Set</th><th>Post</th><th>When llama played them</th><th>When gemma played them</th></tr></thead><tbody>' +
-      rows + "</tbody></table></div>";
+      (all ? "<p>" + (M === 2 ? "Both AIs" : "All " + M + " AIs") + " made the same choice for " + esc(u.n.split(" ")[0]) + " on " + agree + " of " + all + " posts (" + Math.round(100 * agree / all) + " in 100).</p>" : "") +
+      '</div><div class="scroll"><table class="plain rt"><thead><tr><th>Set</th><th>Post</th>' + heads() + '</tr></thead><tbody>' + rows + "</tbody></table></div>";
     save("user", u.i);
   }
   function mode(m) {
-    ["post", "person"].forEach(function (k) {
-      $("lkTab_" + k).setAttribute("aria-selected", String(k === m)); $("lkPick_" + k).hidden = k !== m;
-    });
+    ["post", "person"].forEach(function (k) { $("lkTab_" + k).setAttribute("aria-selected", String(k === m)); $("lkPick_" + k).hidden = k !== m; });
     save("mode", m); if (m === "post") { fillPosts(); } else { showPerson(); }
   }
-  // ---- build controls
-  var topicOpts = Object.keys(D.topics).map(function (k) { return opt(k, D.topics[k]); }).join("");
-  $("lkSet").innerHTML = sets.map(function (s) { return opt(s, "Post set " + s, s === sets[sets.length - 1]); }).join("");
-  $("lkTopic").innerHTML = topicOpts;
-  $("lkUTopic").innerHTML = opt("", "All topics") + topicOpts;
-  $("lkUser").innerHTML = D.users.slice().sort(function (a, b) { return a.n < b.n ? -1 : 1; }).map(function (u) { return opt(u.i, u.n + " (" + u.age + ", " + u.job + ")"); }).join("");
-  var lp = load("post"); if (lp !== null && D.posts[+lp]) { $("lkSet").value = D.posts[+lp].s; $("lkTopic").value = D.posts[+lp].t; }
-  fillPosts(); if (lp !== null && D.posts[+lp]) { $("lkPost").value = lp; showPost(); }
-  var lu = load("user"); if (lu !== null && users[+lu]) { $("lkUser").value = lu; }
+  function init(data, id) {
+    D = data; M = D.models.length; byPost = {}; byUser = {}; users = {};
+    D.R.forEach(function (r) { (byPost[r[0]] = byPost[r[0]] || []).push(r); (byUser[r[1]] = byUser[r[1]] || []).push(r); });
+    D.users.forEach(function (u) { users[u.i] = u; });
+    var sets = Array.from(new Set(D.posts.map(function (p) { return p.s; }))).sort(function (a, b) { return a - b; });
+    var topicOpts = Object.keys(D.topics).map(function (k) { return opt(k, D.topics[k]); }).join("");
+    $("lkSet").innerHTML = sets.map(function (s) { return opt(s, "Post set " + s, s === sets[sets.length - 1]); }).join("");
+    $("lkTopic").innerHTML = topicOpts; $("lkUTopic").innerHTML = opt("", "All topics") + topicOpts;
+    $("lkUser").innerHTML = D.users.slice().sort(function (a, b) { return a.n < b.n ? -1 : 1; }).map(function (u) { return opt(u.i, u.n + " (" + u.age + ", " + u.job + ")"); }).join("");
+    var lp = load("post_" + id); if (lp !== null && D.posts[+lp]) { $("lkSet").value = D.posts[+lp].s; $("lkTopic").value = D.posts[+lp].t; }
+    fillPosts(); if (lp !== null && D.posts[+lp]) { $("lkPost").value = lp; showPost(); }
+    var lu = load("user"); if (lu !== null && users[+lu]) { $("lkUser").value = lu; }
+    mode(load("mode") === "person" ? "person" : "post");
+  }
+  function pick(id) {
+    var d = SETS.filter(function (x) { return x.id === id; })[0] || SETS[0]; if (!d) { return; }
+    save("ds", d.id);
+    if (CACHE[d.id]) { return init(CACHE[d.id], d.id); }
+    if (!d.file) { CACHE[d.id] = window.WORLD_DATA; return init(CACHE[d.id], d.id); }
+    $("lkOut").innerHTML = "<p class='muted'>Loading " + esc(d.label) + "…</p>";
+    fetch(d.file).then(function (r) { return r.json(); }).then(function (j) { CACHE[d.id] = j; init(j, d.id); })
+      .catch(function () { $("lkOut").innerHTML = "<p class='muted'>Could not load this dataset. Reload the page to try again.</p>"; });
+  }
+  $("lkData").innerHTML = SETS.map(function (d) { return opt(d.id, d.label); }).join("");
+  var ds = load("ds"); if (ds && SETS.some(function (x) { return x.id === ds; })) { $("lkData").value = ds; }
+  $("lkData").onchange = function () { pick($("lkData").value); };
   $("lkSet").onchange = fillPosts; $("lkTopic").onchange = fillPosts; $("lkPost").onchange = showPost; $("lkDiff").onchange = showPost;
   $("lkUser").onchange = showPerson; $("lkUTopic").onchange = showPerson;
   $("lkTab_post").onclick = function () { mode("post"); }; $("lkTab_person").onclick = function () { mode("person"); };
-  mode(load("mode") === "person" ? "person" : "post");
+  pick($("lkData").value);
 })();
 """
 
 TOOL = """<h2>Look it up yourself</h2>
-<p>Pick any post to see how all 99 people reacted to it, both when llama played them and when gemma did. Or pick a person
-to see every choice they made. Shaded rows are where the two AIs made different choices for the same person.</p>
+<p>Pick a test, then any post to see how every person reacted to it, once for each AI that played them. Or pick a person
+to see every choice they made. Shaded rows are where the AIs made different choices for the same person.</p>
 <div class="tool">
+<div class="pick"><label class="wide">Which test<select id="lkData"></select></label></div>
 <div class="tabs" role="tablist"><button id="lkTab_post" role="tab" aria-selected="true">Look up a post</button>
 <button id="lkTab_person" role="tab" aria-selected="false">Look up a person</button></div>
 <div class="pick" id="lkPick_post"><label>Post set<select id="lkSet"></select></label><label>Topic<select id="lkTopic"></select></label>
@@ -963,6 +992,8 @@ def build(ap=None, xp=None):
     sets = sorted({int(w.split("_s")[1].split("_")[0]) for w in res["worlds"]}) if res else []
     now = datetime.now().strftime("%Y-%m-%d %H:%M")
     topics = ", ".join(TOPICS[t]["name"].lower() for t in PRIMARY)
+    lookup_sets = json.dumps([{"id": d[0], "label": d[1], "file": None if d[0] == "v2" else f"data_{d[0]}.json"}
+                              for d in available_datasets()])
     head = f"""<title>Scroll Test</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -1003,6 +1034,7 @@ pick like, dislike or skip, and say why in a few words.</li>
 {timing_section()}
 {data_section()}
 </div>
+<script>window.LOOKUP_SETS = {lookup_sets};</script>
 <script src="world_data.js"></script>
 <script>{JS}</script>
 """
@@ -1017,10 +1049,20 @@ def main():
     args = a.parse_args()
     with open(args.out, "w") as f:
         f.write(build(args.analysis, args.explore))
-    dp = os.path.join(os.path.dirname(os.path.abspath(args.out)), "world_data.js")
+    out_dir = os.path.dirname(os.path.abspath(args.out))
+    dp = os.path.join(out_dir, "world_data.js")
     with open(dp, "w") as f:
         f.write("window.WORLD_DATA=" + json.dumps(lookup_data(), ensure_ascii=False, separators=(",", ":")) + ";")
-    print("wrote", args.out, "and", dp, f"({os.path.getsize(dp) / 1e6:.1f} MB)")
+    files = {"world_data.js": dp}
+    for did, _, exp, fmt in available_datasets():
+        if did == "v2":
+            continue
+        fp = os.path.join(out_dir, f"data_{did}.json")
+        with open(fp, "w") as f:
+            json.dump(lookup_data(exp, fmt), f, ensure_ascii=False, separators=(",", ":"))
+        files[f"data_{did}.json"] = fp
+    print("wrote", args.out, "and", ", ".join(f"{k} ({os.path.getsize(v) / 1e6:.1f} MB)" for k, v in files.items()))
+    json.dump(files, open(os.path.join(out_dir, "publish_files.json"), "w"), indent=1)
 
 
 if __name__ == "__main__":

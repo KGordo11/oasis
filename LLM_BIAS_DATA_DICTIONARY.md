@@ -161,3 +161,42 @@ model), `shown_keys` / `shown_authors` (the 7 posts in the order shown),
 post), `reason`, `latency_s`. Per-round timings are in each run's `manifest.json`
 under `rounds` (`wall_s`, `s_per_decision`). Summaries in
 `data/llm_bias/analysis_s<seed>.txt`.
+
+---
+
+## A/B test (LD-13, post sets 20-34) — `data/llm_bias/export_ab/`
+
+Same tables as `export/`, made by `export_world.py --prefix ab_ --out data/llm_bias/export_ab`, for the 60
+A/B worlds (`ab_s<set>_<scroll|pair>_w<world>`). Posts were written under the length rule "ask 75-85 words,
+reject outside 65-95, up to 9 tries" (`length_rule` in each post-bank record); a brief with a missing post was
+dropped from all four worlds of its set (`--complete-slots`). 50 people (first 50 of the pinned 99).
+
+Extra columns in `reactions.csv` (also present, mostly empty, in `export/`):
+
+| column | meaning |
+|---|---|
+| `format` | `scroll` = one post per decision; `pair` = the two posts of one brief shown side by side |
+| `side_by_side_position` | pair only: 1 or 2, where this post appeared on screen (order shuffled per person and brief) |
+| `picked_as_favourite` | pair only: 1 if the person picked this post as the one they'd most want to open, else 0 |
+
+In `pair` rows, `seconds`, `prompt_tokens` and `output_tokens` belong to the whole call (both posts), so they
+repeat on the two rows of that call. `world_timing.csv` has `format` and `calls` (a pair call covers 2 posts).
+`posts.csv` counts are split by format: `like_by_<model>_users_<format>` etc.
+
+Analysis: `data/llm_bias/analysis_ab.json` (`analyze_ab.py`: per-format double differences, the favourite
+double difference, and the format effect = pair − scroll, all from one shared people x brief bootstrap).
+Checks: `data/llm_bias/ab_checks.txt`.
+
+## Three AIs, natural posts (LD-14, post sets 40+) — `data/llm_bias/export_v3/`
+
+Worlds `v3_s<set>_w<0|1|2>`: llama3.1:8b, gemma4:e2b and mistral:7b each write posts and play people; person i is
+played by `judges[(i + world) % 3]`, so three worlds per set give every person every AI. Posts are "natural":
+no length or format rules, only the topic brief and "don't mention AI / don't sign" (`length_rule: "natural"`).
+Same table layout as `export/`, three models instead of two. Analysis: `data/llm_bias/analysis_v3.json`
+(`analyze_world.py --prefix v3_`); checks `data/llm_bias/v3_checks.txt`.
+
+## Page data files (published next to the Scroll Test page)
+
+`world_data.js` (test 2), `data_ab_scroll.json`, `data_ab_pair.json`, `data_v3.json`: the same packed layout as
+`world_data.js` (see above), one per dataset, plus `models` (names in column order) and `cls` (colour classes).
+Chart colours: llama blue, gemma orange, mistral magenta (validated for colour-blind separation, both themes).

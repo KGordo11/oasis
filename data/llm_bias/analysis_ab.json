@@ -11,134 +11,135 @@
   28,
   29,
   30,
-  31
+  31,
+  32
  ],
- "reactions": 111200,
+ "reactions": 120800,
  "people": 50,
- "slots": 278,
+ "slots": 302,
  "pair": {
   "rates_%": {
    "gemma4:e2b people": {
     "gemma4:e2b posts": {
-     "up": 79.0,
-     "down": 3.6,
-     "nothing": 17.4
+     "up": 79.1,
+     "down": 3.8,
+     "nothing": 17.1
     },
     "llama3.1:8b posts": {
      "up": 77.6,
-     "down": 5.8,
-     "nothing": 16.6
+     "down": 5.7,
+     "nothing": 16.7
     }
    },
    "llama3.1:8b people": {
     "gemma4:e2b posts": {
-     "up": 69.6,
-     "down": 15.7,
+     "up": 69.8,
+     "down": 15.5,
      "nothing": 14.7
     },
     "llama3.1:8b posts": {
-     "up": 70.7,
-     "down": 16.0,
-     "nothing": 13.3
+     "up": 71.2,
+     "down": 15.6,
+     "nothing": 13.2
     }
    }
   },
   "favourite_share_%": {
    "gemma4:e2b people": {
-    "gemma4:e2b posts": 51.1,
-    "llama3.1:8b posts": 48.9
+    "gemma4:e2b posts": 50.9,
+    "llama3.1:8b posts": 49.1
    },
    "llama3.1:8b people": {
-    "gemma4:e2b posts": 49.0,
-    "llama3.1:8b posts": 51.0
+    "gemma4:e2b posts": 48.6,
+    "llama3.1:8b posts": 51.4
    }
   },
-  "position_1_picked_%": 74.0
+  "position_1_picked_%": 74.3
  },
  "scroll": {
   "rates_%": {
    "gemma4:e2b people": {
     "gemma4:e2b posts": {
-     "up": 78.9,
-     "down": 7.0,
-     "nothing": 14.1
+     "up": 78.8,
+     "down": 7.2,
+     "nothing": 14.0
     },
     "llama3.1:8b posts": {
-     "up": 74.6,
-     "down": 10.2,
+     "up": 74.7,
+     "down": 10.0,
      "nothing": 15.2
     }
    },
    "llama3.1:8b people": {
     "gemma4:e2b posts": {
      "up": 62.8,
-     "down": 4.0,
+     "down": 3.9,
      "nothing": 33.3
     },
     "llama3.1:8b posts": {
-     "up": 63.7,
-     "down": 4.8,
-     "nothing": 31.5
+     "up": 63.8,
+     "down": 4.7,
+     "nothing": 31.4
     }
    }
   }
  },
  "effects_points": {
   "scroll_up": {
-   "est": 5.16,
+   "est": 5.08,
    "ci95": [
-    2.02,
-    8.34
+    2.12,
+    8.13
    ],
    "p": 0.0
   },
   "scroll_down": {
-   "est": -2.35,
+   "est": -2.08,
    "ci95": [
-    -4.71,
-    -0.07
+    -4.46,
+    0.11
    ],
-   "p": 0.046
+   "p": 0.062
   },
   "pair_up": {
-   "est": 2.54,
+   "est": 2.91,
    "ci95": [
-    -1.4,
-    6.46
+    -0.64,
+    6.9
    ],
-   "p": 0.21
+   "p": 0.119
   },
   "pair_down": {
-   "est": -1.93,
+   "est": -1.78,
    "ci95": [
-    -4.25,
-    0.26
+    -3.91,
+    0.29
    ],
-   "p": 0.092
+   "p": 0.091
   },
   "pair_chosen": {
-   "est": 2.09,
+   "est": 2.27,
    "ci95": [
-    -0.42,
-    4.55
+    -0.05,
+    4.74
    ],
-   "p": 0.102
+   "p": 0.054
   },
   "format_effect_up": {
-   "est": -2.62,
+   "est": -2.17,
    "ci95": [
-    -6.23,
-    0.65
+    -5.46,
+    1.23
    ],
-   "p": 0.117
+   "p": 0.204
   },
   "format_effect_down": {
-   "est": 0.42,
+   "est": 0.3,
    "ci95": [
-    -2.37,
-    3.17
+    -2.18,
+    2.78
    ],
-   "p": 0.8
+   "p": 0.845
   }
  }
 }

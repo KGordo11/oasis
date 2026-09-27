@@ -1274,3 +1274,15 @@ will be imprecise; as an author and as a comparison judge for llama/gemma it is 
 hidden; Gordon chose mistral (LD-14).
 **Launched 17:58**: `v3_campaign.sh` seeds 40-45, 3 worlds each, ~3.7 h per post set → ~4 sets by 09:00.
 Post set 40's bank is the smoke test's (same rule, reused).
+
+### LD-15 — Analysis plan for v3, stated before any v3 result (2026-09-27 18:05)
+
+* **Primary:** for each AI J, the like and dislike self-preference double difference (J's people on J's posts
+  vs J's people on the other AIs' posts, minus the same gap for the other AIs' people), plus the pooled mean;
+  95 % intervals from the persona x slot cluster bootstrap (`analyze_world.py --prefix v3_`). Only post sets
+  with all 3 worlds finished. Reported per AI because, with three AIs, each gets its own number.
+* **Stopping:** report whatever sets are complete at 09:00 2026-09-28; no conclusions from fewer than 3 sets
+  (single sets swing far more than the effect, LF-18/19).
+* **Secondary (labelled exploratory):** post length as a covariate (natural lengths differ a lot); by topic;
+  by whether the person cares; mistral's like ceiling noted when reading its own number.
+* Health check on every world; page and log refreshed after every post set.

@@ -1247,3 +1247,16 @@ under 65 words after 9 tries; same slots dropped from both formats).
 Side notes: llama is far harsher side by side (~20 % dislikes vs ~5 %); people pick the post shown first 75 %
 of the time (shuffled, so noise not bias); favourite shares are near 50/50 for both models (51 %).
 Page v26.
+
+### LD-14 — Gordon's decisions, 2026-09-27 ~14:45: three AIs, natural posts
+
+* **Third AI: mistral:7b** (Mistral AI; strongest self-preference on night 1, +14 [+6, +23]; independent of
+  Meta/Google). llama3.1:8b, gemma4:e2b and mistral:7b each write posts AND play people.
+* **Posts have no rules except being on the requested topic**: no word limits, no sentence/format limits
+  ("pure whatever that LLM is thinking"). A length rule may come later, set to the measured natural average,
+  only when Gordon says so. Kept: "don't mention AI / model names, don't sign" (otherwise the author is visible,
+  which breaks blinding). Dropped: title/body word limits, plain-text/no-emoji/no-bullets rule, markdown stripping.
+* **Format: scroll** (one post at a time; the A/B showed format makes no difference, LF-38).
+* **Rotation over 3 worlds** per post set: person i is played by judges[(i + world) % 3], so every person is
+  played by every AI on the same posts.
+* First 50 of the pinned 99 people; run until 09:00 2026-09-28, then report.

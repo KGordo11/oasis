@@ -1215,3 +1215,9 @@ likes and dislikes; still no clear format effect. Page v23.
 Set 32: 1 slot dropped. All PASS. Scroll likes **+5.1 [+2.1, +8.1]**; scroll dislikes −2.1 [−4.5, +0.1];
 side-by-side likes +2.9 [−0.6, +6.9]; favourite +2.3 [−0.1, +4.7] (p 0.054); format effect likes −2.2
 [−5.5, +1.2], dislikes +0.3 [−2.2, +2.8]. Stable: no format effect; one-at-a-time like lean ~+5. Page v24.
+
+### LF-37 — A/B after 14 post sets (20-33; 130,400 reactions)
+
+Set 33: 1 slot dropped. All PASS. Scroll likes **+5.4 [+2.5, +8.7]**; scroll dislikes −2.0 [−4.2, +0.1];
+side-by-side likes +2.9 [−0.5, +6.7]; favourite **+2.3 [+0.0, +4.5]** (p 0.046); format effect likes −2.5
+[−5.9, +0.7], dislikes +0.2 [−2.1, +2.8]. Unchanged picture. Page v25. Seed 34 (last queued) running, ETA ~14:15.

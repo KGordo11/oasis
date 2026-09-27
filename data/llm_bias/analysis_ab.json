@@ -12,35 +12,36 @@
   29,
   30,
   31,
-  32
+  32,
+  33
  ],
- "reactions": 120800,
+ "reactions": 130400,
  "people": 50,
- "slots": 302,
+ "slots": 326,
  "pair": {
   "rates_%": {
    "gemma4:e2b people": {
     "gemma4:e2b posts": {
      "up": 79.1,
-     "down": 3.8,
-     "nothing": 17.1
+     "down": 3.7,
+     "nothing": 17.2
     },
     "llama3.1:8b posts": {
-     "up": 77.6,
-     "down": 5.7,
-     "nothing": 16.7
+     "up": 77.4,
+     "down": 5.8,
+     "nothing": 16.8
     }
    },
    "llama3.1:8b people": {
     "gemma4:e2b posts": {
      "up": 69.8,
-     "down": 15.5,
-     "nothing": 14.7
+     "down": 15.4,
+     "nothing": 14.8
     },
     "llama3.1:8b posts": {
-     "up": 71.2,
+     "up": 71.1,
      "down": 15.6,
-     "nothing": 13.2
+     "nothing": 13.3
     }
    }
   },
@@ -54,7 +55,7 @@
     "llama3.1:8b posts": 51.4
    }
   },
-  "position_1_picked_%": 74.3
+  "position_1_picked_%": 74.4
  },
  "scroll": {
   "rates_%": {
@@ -65,81 +66,81 @@
      "nothing": 14.0
     },
     "llama3.1:8b posts": {
-     "up": 74.7,
-     "down": 10.0,
-     "nothing": 15.2
+     "up": 74.4,
+     "down": 10.1,
+     "nothing": 15.5
     }
    },
    "llama3.1:8b people": {
     "gemma4:e2b posts": {
-     "up": 62.8,
-     "down": 3.9,
-     "nothing": 33.3
+     "up": 62.7,
+     "down": 3.8,
+     "nothing": 33.5
     },
     "llama3.1:8b posts": {
-     "up": 63.8,
+     "up": 63.7,
      "down": 4.7,
-     "nothing": 31.4
+     "nothing": 31.6
     }
    }
   }
  },
  "effects_points": {
   "scroll_up": {
-   "est": 5.08,
+   "est": 5.41,
    "ci95": [
-    2.12,
-    8.13
+    2.45,
+    8.66
    ],
    "p": 0.0
   },
   "scroll_down": {
-   "est": -2.08,
+   "est": -2.03,
    "ci95": [
-    -4.46,
-    0.11
+    -4.21,
+    0.06
    ],
-   "p": 0.062
+   "p": 0.059
   },
   "pair_up": {
-   "est": 2.91,
+   "est": 2.94,
    "ci95": [
-    -0.64,
-    6.9
+    -0.53,
+    6.65
    ],
-   "p": 0.119
+   "p": 0.1
   },
   "pair_down": {
-   "est": -1.78,
+   "est": -1.8,
    "ci95": [
-    -3.91,
-    0.29
+    -3.85,
+    0.2
    ],
-   "p": 0.091
+   "p": 0.083
   },
   "pair_chosen": {
-   "est": 2.27,
+   "est": 2.31,
    "ci95": [
-    -0.05,
-    4.74
+    0.04,
+    4.54
    ],
-   "p": 0.054
+   "p": 0.046
   },
   "format_effect_up": {
-   "est": -2.17,
+   "est": -2.47,
    "ci95": [
-    -5.46,
-    1.23
+    -5.88,
+    0.71
    ],
-   "p": 0.204
+   "p": 0.116
   },
   "format_effect_down": {
-   "est": 0.3,
+   "est": 0.23,
    "ci95": [
-    -2.18,
-    2.78
+    -2.09,
+    2.79
    ],
-   "p": 0.845
+   "p": 0.813
   }
  }
 }

@@ -1202,3 +1202,10 @@ Set 30: 2 slots dropped. All PASS. Scroll likes **+4.3 [+1.1, +7.5]** (p 0.006);
 [−6.3, +0.7] (p 0.12), dislikes +0.2 [−2.5, +2.8]**. If anything, side by side shows slightly LESS own-post
 liking than one at a time — the opposite of the night-1 idea — but not clearly. Page v22.
 Seeds 31-34 queued and started 06:13 (same A/B; ETA ~14:00). Stop with `pkill -f ab_campaign.sh`.
+
+### LF-35 — A/B after 12 post sets (20-31; 111,200 reactions)
+
+Set 31: 2 slots dropped. All PASS. Scroll likes **+5.2 [+2.0, +8.3]** (p < 0.001); scroll dislikes **−2.4
+[−4.7, −0.1]** (p 0.046); side-by-side likes +2.5 [−1.4, +6.5]; favourite +2.1 [−0.4, +4.5]; format effect likes
+−2.6 [−6.2, +0.7], dislikes +0.4 [−2.4, +3.2]. With length-matched posts the one-at-a-time lean now shows on both
+likes and dislikes; still no clear format effect. Page v23.

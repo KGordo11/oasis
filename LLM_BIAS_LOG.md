@@ -16,8 +16,11 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-27 14:30 — A/B COMPLETE (LF-38). Nothing running; Ollama up. Waiting for Gordon's next decisions.*
+*Last updated 2026-09-27 18:30 — RUNNING: three-AI campaign (LD-14/15; llama, gemma, mistral; natural posts;
+scroll; 50 people; 3 worlds per set), started 17:58, ~3.7 h per post set, ~4 sets by 09:00. Refresh after each set:
+`examples/experiment/llm_bias/v3_refresh.sh <page dir>` then publish the files in `<page dir>/publish_files.json`.*
 
+**Previous test (A/B, complete):**
 **Answer (15 post sets, 140,000 reactions, first 50 of the pinned 99, length-matched posts, every world PASS):**
 * **Showing posts side by side does not change self-preference** — format effect on likes −1.8 [−5.0, +1.3].
 * **A small own-post preference is real in both formats**: scrolling +5.2 likes [+2.4, +8.1] and −2.3 dislikes
@@ -1286,3 +1289,10 @@ Post set 40's bank is the smoke test's (same rule, reused).
 * **Secondary (labelled exploratory):** post length as a covariate (natural lengths differ a lot); by topic;
   by whether the person cares; mistral's like ceiling noted when reading its own number.
 * Health check on every world; page and log refreshed after every post set.
+
+**Artifacts brought up to date (2026-09-27 ~18:30):** Scroll Test page v28 — look-up tool now covers every test
+(pick "Which test": test 2, A/B one-at-a-time, A/B side-by-side; the three-AI data joins after its first set),
+handles 3 AIs; new "Newest test: three AIs" section (running); mistral colour magenta #c2378f / dark #d65aa4
+(validated: CVD ΔE ≥ 10.4 vs blue and orange, all pairs, both themes; purple failed vs blue). Test-1 page v5 —
+"later tests" box now summarises the scroll, A/B and three-AI tests. Data dictionary covers export_ab, pair
+columns, export_v3 and the page data files.

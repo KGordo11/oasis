@@ -391,7 +391,7 @@ summary:focus-visible {{ outline:2px solid var(--accent); }}
 .persona h4 span {{ font:400 13px var(--mono); color:var(--muted); }}
 .persona pre {{ white-space:pre-wrap; margin:6px 0 0; font-size:13px; line-height:1.5; }}
 .grown {{ color:var(--muted); font:14px/1.5 var(--sans); margin-top:6px; }}
-.newer {{ background:var(--accent-soft); padding:10px 14px; border-radius:6px; }}
+.newer {{ background:var(--accent-soft); padding:10px 14px; border-radius:6px; }} .newer ul {{ margin:6px 0 0; padding-left:20px; }} .newer p {{ margin:0; }}
 a {{ color:var(--accent); }}
 .formula {{ font:15px/1.5 var(--mono); background:var(--paper); border:1px solid var(--rule); border-radius:6px; padding:12px 14px; overflow-x:auto; }}
 .brief {{ background:var(--accent-soft); padding:10px 14px; border-radius:6px; }}
@@ -409,8 +409,13 @@ keep picking the post the AI wrote?</p>
 <p>Why it matters: researchers are starting to use AIs as pretend crowds. If an AI quietly favours its own writing, a
 test that uses one AI to write posts <em>and</em> play the audience is unfair. Scientists call this <em>self-preference
 bias</em>.</p>
-<p class="newer">This page is about our <b>first</b> test. The newer test uses two AIs and has people scroll a whole feed
-instead of picking a favourite. It has its own page: <a href="https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx">Scroll Test</a>.</p>
+<div class="newer"><p><b>This page is about our first test (night 1).</b> Since then we ran more tests, all on the
+<a href="https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx">Scroll Test</a> page:</p>
+<ul><li><b>Scrolling one post at a time</b> (2 AIs, 7 post sets): a small lean toward the AI's own posts, too small to be sure of.</li>
+<li><b>Side by side vs one at a time</b> (15 post sets): the way posts are shown makes <b>no difference</b>. With posts of similar
+length, a small lean toward the AI's own posts is real in both ways, about 3 to 5 more likes per 100.</li>
+<li><b>Now running:</b> three AIs (llama, gemma and mistral) writing posts however they like, so we can tell <em>which</em> AI
+favours itself.</li></ul></div>
 
 {sections}
 

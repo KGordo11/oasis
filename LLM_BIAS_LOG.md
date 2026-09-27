@@ -1178,3 +1178,11 @@ Set 27: 3 slots dropped (llama short). All worlds PASS. Scroll likes **+3.9 [+0.
 likes +2.1 [−2.4, +6.5]; favourite +1.8 [−1.1, +4.8]; **format effect likes −1.8 [−5.8, +2.1], dislikes −0.9
 [−4.1, +2.0]**. No format effect; the like lean keeps drifting down (+4.2 → +3.9 scroll; favourite +2.6 → +1.8).
 Favourite shares 50.5 / 51.3 % — essentially even. Page v19.
+
+### LF-32 — A/B after 9 post sets (20-28; 84,000 reactions)
+
+Set 28: 1 slot dropped. All PASS. Scroll likes **+4.6 [+1.2, +8.0]** (p 0.008); scroll dislikes −1.5
+[−4.0, +1.1]; side-by-side likes +2.5 [−2.0, +7.1]; favourite +1.6 [−1.0, +4.4]; **format effect likes −2.1
+[−6.1, +1.8], dislikes −0.1 [−3.0, +2.7]**. Still no format effect. With length-matched posts, the one-at-a-time
+like lean (~+4.6) is now steadier than in the old design — the side-by-side one is smaller and not clear of zero.
+Page v20.

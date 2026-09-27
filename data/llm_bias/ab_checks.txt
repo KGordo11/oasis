@@ -34,3 +34,7 @@ PASS  ab_s27_pair_w0  llama3.1:8b: like 72%  2.18 s/decision | gemma4:e2b: like 
 PASS  ab_s27_pair_w1  llama3.1:8b: like 67%  2.13 s/decision | gemma4:e2b: like 72%  0.56 s/decision
 PASS  ab_s27_scroll_w0  llama3.1:8b: like 61%  1.20 s/decision | gemma4:e2b: like 66%  0.33 s/decision
 PASS  ab_s27_scroll_w1  llama3.1:8b: like 62%  1.19 s/decision | gemma4:e2b: like 73%  0.33 s/decision
+PASS  ab_s28_pair_w0  llama3.1:8b: like 73%  2.11 s/decision | gemma4:e2b: like 77%  0.56 s/decision
+PASS  ab_s28_pair_w1  llama3.1:8b: like 69%  2.14 s/decision | gemma4:e2b: like 78%  0.56 s/decision
+PASS  ab_s28_scroll_w0  llama3.1:8b: like 65%  1.19 s/decision | gemma4:e2b: like 76%  0.32 s/decision
+PASS  ab_s28_scroll_w1  llama3.1:8b: like 64%  1.20 s/decision | gemma4:e2b: like 80%  0.33 s/decision

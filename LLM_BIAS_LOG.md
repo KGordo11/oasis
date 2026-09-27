@@ -1171,3 +1171,10 @@ post in that set vs 1.5-3.3 elsewhere). Checked: same failure mode as before (ll
 briefs), not a bug; both formats drop the same slots, so the format comparison is unaffected. Dropped so far:
 11 of 175 slots, all llama-short. If this rule is reused, lower the floor to 55 or raise llama's retries.
 Seeds 27-30 started automatically 22:29 (~2 h each, ETA ~06:30). Page v18.
+
+### LF-31 — A/B after 8 post sets (20-27; 74,400 reactions)
+
+Set 27: 3 slots dropped (llama short). All worlds PASS. Scroll likes **+3.9 [+0.1, +7.5]** (p 0.047); side-by-side
+likes +2.1 [−2.4, +6.5]; favourite +1.8 [−1.1, +4.8]; **format effect likes −1.8 [−5.8, +2.1], dislikes −0.9
+[−4.1, +2.0]**. No format effect; the like lean keeps drifting down (+4.2 → +3.9 scroll; favourite +2.6 → +1.8).
+Favourite shares 50.5 / 51.3 % — essentially even. Page v19.

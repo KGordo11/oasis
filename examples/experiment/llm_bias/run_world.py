@@ -138,7 +138,7 @@ async def run(a):
     band = tuple(map(int, a.length_band.split(","))) if a.length_band else None
     enforce = tuple(map(int, a.length_enforce.split(","))) if a.length_enforce else None
     pbank = authors.generate(a.seed, a.posts_per_topic, topics, author_list, log=log,
-                             band=band, enforce=enforce, retries=a.post_retries)
+                             band=band, enforce=enforce, retries=a.post_retries, natural=a.natural_posts)
     gen_s = time.time() - t0
     posts = [pbank[authors.key(k, t, au)] for t in topics for k in range(a.posts_per_topic)
              for au in author_list]
@@ -199,7 +199,7 @@ async def run(a):
                    "think": False, "show_author": False, "show_scores": False,
                    "assignment": "persona i -> judges[(i + world) % len(judges)]",
                    "scheduler": a.scheduler, "draw": a.draw, "format": a.format,
-                   "length_rule": authors.length_rule(band, enforce), "complete_slots": a.complete_slots},
+                   "length_rule": authors.length_rule(band, enforce, a.natural_posts), "complete_slots": a.complete_slots},
         "persona_bank_hash": persona_mod.PINNED_BANK_HASH,
         "core99_hash": persona_mod.PINNED_CORE99_HASH,
         "persona_ids": [p["id"] for p in bank],
@@ -347,6 +347,8 @@ def main():
     ap.add_argument("--length-band", help="lo,hi words asked for in the post prompt (default: 60 to 120)")
     ap.add_argument("--length-enforce", help="lo,hi: reject and retry posts outside this range")
     ap.add_argument("--post-retries", type=int, default=4)
+    ap.add_argument("--natural-posts", action="store_true",
+                    help="LD-14: no length/format rules in the post prompt; only the topic brief and 'don't reveal you are an AI'")
     ap.add_argument("--complete-slots", action="store_true", help="drop a slot if any author's post is missing")
     ap.add_argument("--draw", type=int, default=0,
                     help="0 = the standard random draw; any other number = a fresh, reproducible draw (retest)")

@@ -69,8 +69,10 @@ def load(labels=None, prefix=None, include_unfinished=False):
     df = pd.DataFrame(rows)
     if len(df) and not include_unfinished:
         # a post set counts only when BOTH rotation worlds are done (each person played by both models)
+        # every rotation world must be done: as many worlds as there are judge models (2 in v2, 3 in v3)
+        need = df.groupby("seed")["judge"].nunique().clip(lower=2)
         full = df.groupby("seed")["world"].nunique()
-        drop = sorted(full[full < 2].index)
+        drop = sorted(full[full < need].index)
         if drop:
             print(f"skipping post sets with only one finished world: {drop}", file=sys.stderr)
             df = df[~df["seed"].isin(drop)]

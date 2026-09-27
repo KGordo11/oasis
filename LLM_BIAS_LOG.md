@@ -1260,3 +1260,17 @@ Page v26.
 * **Rotation over 3 worlds** per post set: person i is played by judges[(i + world) % 3], so every person is
   played by every AI on the same posts.
 * First 50 of the pinned 99 people; run until 09:00 2026-09-28, then report.
+
+### LR — v3 (three AIs, natural posts) smoke test and launch, 2026-09-27
+
+**Smoke test** (post set 40, world 0, 6 people, 3 judges; `run_world.py --natural-posts`): 75/75 natural posts
+on the first or second try (no retries needed), 450/450 valid decisions, 0 cut off, 0 hidden thinking, PASS.
+Natural post length (words): **llama 113** (74-164), **mistral 155** (62-306), **gemma 170** (92-311) — far
+longer than under the old 60-120 rule; 10-13 of 25 posts per model use paragraphs/formatting.
+Judging speed with the longer posts: llama 1.49 s, mistral 1.60 s, gemma 0.40 s per decision (4 parallel).
+**Mistral as a judge likes almost everything: 94 % like, 2 % dislike, 4 % nothing; 91 % likes even on topics
+the person dislikes** (llama 3 %, gemma 67-80 %). So mistral's own self-preference in likes has little room and
+will be imprecise; as an author and as a comparison judge for llama/gemma it is fully usable. Reported, not
+hidden; Gordon chose mistral (LD-14).
+**Launched 17:58**: `v3_campaign.sh` seeds 40-45, 3 worlds each, ~3.7 h per post set → ~4 sets by 09:00.
+Post set 40's bank is the smoke test's (same rule, reused).

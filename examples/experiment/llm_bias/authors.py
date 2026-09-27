@@ -59,6 +59,20 @@ Rules:
 
 Reply with JSON only: {{"title": "...", "body": "..."}}"""
 
+# LD-14 (Gordon, 2026-09-27): no length or format rules -- only the topic brief and the anonymity rule
+# (a post that says "as an AI" or signs itself would show the judge who wrote it).
+NATURAL_SYSTEM = "You write posts for an online discussion forum."
+
+NATURAL_USER = """Write one new post for {sub} ({topic_name}).
+
+You are posting as {voice}.
+Post type: {ptype}.
+Subject: {angle}.
+
+Write it however you naturally would. Do not mention AI or language models, and do not sign the post.
+
+Reply with JSON only: {{"title": "...", "body": "..."}}"""
+
 LEAK = re.compile(r"\b(as an ai|language model|llama|gemma|qwen|mistral|granite|phi-?\d|chatgpt|openai|"
                   r"anthropic|claude|gemini|assistant)\b", re.I)
 EMOJI = re.compile("[\U0001F000-\U0001FAFF☀-➿️‍]")
@@ -102,6 +116,18 @@ def validate_post(obj):
     return {"title": title, "body": body}
 
 
+def validate_natural(obj):
+    """Natural posts: no cleaning and no length limits; only non-empty text and no AI / model-name leak."""
+    if not isinstance(obj, dict):
+        raise ValueError("not an object")
+    title, body = str(obj.get("title") or "").strip(), str(obj.get("body") or "").strip()
+    if not title or not body:
+        raise ValueError("empty title or body")
+    if LEAK.search(title + " " + body):
+        raise ValueError("mentions AI or a model name")
+    return {"title": title, "body": body}
+
+
 def bank_path(seed):
     return os.path.join(DATA, f"postbank_s{seed}.jsonl")
 
@@ -121,21 +147,24 @@ def key(rnd, topic, author):
     return f"r{rnd}|{topic}|{author}"
 
 
-def length_rule(band=None, enforce=None):
+def length_rule(band=None, enforce=None, natural=False):
     """The length instruction and the accepted range, as one comparable label ('' = the original 60-120 rule)."""
+    if natural:
+        return "natural"
     if not band and not enforce:
         return ""
     return f"ask {band[0]}-{band[1]}" + (f", enforce {enforce[0]}-{enforce[1]}" if enforce else "")
 
 
-def generate(seed, rounds, topics, authors, temperature=0.8, log=print, band=None, enforce=None, retries=4):
+def generate(seed, rounds, topics, authors, temperature=0.8, log=print, band=None, enforce=None, retries=4,
+             natural=False):
     """band=(lo, hi): the word range written in the prompt (default "60 to 120").
     enforce=(lo, hi): also reject and retry posts whose body falls outside it (LD-13 length matching).
     A bank remembers its rule; mixing rules in one bank is refused."""
     os.makedirs(DATA, exist_ok=True)
     bank = load_bank(seed)
     path = bank_path(seed)
-    rule = length_rule(band, enforce)
+    rule = length_rule(band, enforce, natural)
     have = {r.get("length_rule", "") for r in bank.values()}
     if bank and have != {rule}:
         raise SystemExit(f"post bank for seed {seed} was written with length rule {have}, not {rule!r}; "
@@ -143,6 +172,9 @@ def generate(seed, rounds, topics, authors, temperature=0.8, log=print, band=Non
     user_tmpl = AUTHOR_USER if not band else AUTHOR_USER.replace("- Body: 60 to 120 words.",
                                                                  f"- Body: {band[0]} to {band[1]} words.")
     check = validate_post
+    system = AUTHOR_SYSTEM
+    if natural:
+        user_tmpl, check, system = NATURAL_USER, validate_natural, NATURAL_SYSTEM
     if enforce:
         def check(obj):
             v = validate_post(obj)
@@ -160,8 +192,8 @@ def generate(seed, rounds, topics, authors, temperature=0.8, log=print, band=Non
         for r, t in todo:
             b = slot_brief(seed, r, t)
             user = user_tmpl.format(sub=TOPICS[t]["sub"], topic_name=TOPICS[t]["name"], **b)
-            obj, meta = llm.chat_json(author, AUTHOR_SYSTEM, user, seed=hash_seed(seed, r, t),
-                                      temperature=temperature, num_predict=500,
+            obj, meta = llm.chat_json(author, system, user, seed=hash_seed(seed, r, t),
+                                      temperature=temperature, num_predict=2000 if natural else 500,
                                       validate=check, retries=retries)
             rec = {"key": key(r, t, author), "seed": seed, "round": r, "topic": t, "author": author,
                    "brief": b, "ok": obj is not None, "length_rule": rule,

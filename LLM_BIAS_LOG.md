@@ -16,11 +16,21 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-26 05:45 — MORNING REPORT for Gordon (overnight 21:37-08:00). Post set 16 running.*
+*Last updated 2026-09-26 22:35 — EVENING REPORT (Gordon away all day). A/B seeds 27-30 running, ETA ~06:30.*
 
-**Running:** post set 16 (same design), started 05:36, ETA ~07:50. Nothing else.
+**Today (LD-13, your decisions):** built the side-by-side format, length-matched post writing and the A/B
+analysis (26 tests pass; scroll unchanged on regression), and ran 7 A/B post sets (20-26, 65,600 reactions,
+first 50 of the pinned 99 people, every world PASS). **Answer: showing the two posts side by side makes no
+difference** — format effect on likes −1.0 [−5.4, +3.3] (LF-30). Both formats show a small own-post like lean
+(scroll +4.2 [+0.2, +8.2]; side by side +3.2; favourite +2.6), which length matching did not remove, and which
+has drifted down as sets accumulated (+10.5 after 1 set → +4.2 after 7). Llama gets much harsher side by side
+(dislikes ~20 % vs ~5 %). Old design closed at 7 sets (LF-23: like +2.4, dislike −1.2, both unclear).
+Page (v18) shows all of it in plain words.
 
-**What got done overnight** (every world PASSes `check_world.py`; everything pushed; page v9):
+**For you to decide next:** (a) stop the A/B after seed 30, or keep adding sets? (b) the length rule drops
+llama's short posts (11 of 175 briefs) — lower the floor to 55? (c) third model / GPU machine when ready.
+
+**What got done the night before** (every world PASSes `check_world.py`; everything pushed; page v9):
 * Campaign finished: post sets 13-15 → **6 sets, 59,400 reactions** (LF-17..19). Agent sweep 10/25/50/75 done (LF-21).
 * **Answer (LF-19): in the scroll design there is no reliable self-preference.** Like +2.7 [−1.2, +6.6];
   dislike −1.5 [−4.6, +1.3]. The mid-campaign "significant" dislike result did not survive sets 14-15.
@@ -1151,3 +1161,13 @@ The format still makes no difference, and the range keeps narrowing around zero.
 length-matched posts is drifting down as sets accumulate (+10.5 → +7.6 → +6.9 → +5.4 → +5.4 → +4.6), the same
 pattern as the old design (early sets high, settling lower). Favourite shares now 51.7 / 51.1 %. Page v17.
 Queued: seeds 27-30 of the same A/B after seed 26 (more sets narrow the answer; within LD-13).
+
+### LF-30 — A/B after 7 post sets (20-26; 65,600 reactions): the format makes no difference
+
+Scroll likes **+4.2 [+0.2, +8.2]** (p 0.04); scroll dislikes −1.0 [−4.0, +1.9]; side-by-side likes +3.2
+[−1.5, +8.1]; favourite +2.6 [−0.3, +5.7]; **format effect likes −1.0 [−5.4, +3.3], dislikes −0.7 [−4.1, +2.8]**.
+**Set 26 dropped 6 of 25 slots** (llama posts stuck at 47-64 words after 9 tries; llama averaged 4.6 tries per
+post in that set vs 1.5-3.3 elsewhere). Checked: same failure mode as before (llama writes short for some
+briefs), not a bug; both formats drop the same slots, so the format comparison is unaffected. Dropped so far:
+11 of 175 slots, all llama-short. If this rule is reused, lower the floor to 55 or raise llama's retries.
+Seeds 27-30 started automatically 22:29 (~2 h each, ETA ~06:30). Page v18.

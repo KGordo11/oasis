@@ -324,6 +324,62 @@ def heldout_note():
             f"explain at all ({up['est']:+.1f}, range {up['ci95'][0]:+.1f} to {up['ci95'][1]:+.1f}).</p>")
 
 
+def v3_section():
+    """LD-14: three AIs write natural posts and play people (analyze_world.py --prefix v3_ -> analysis_v3.json)."""
+    M3 = ["llama3.1:8b", "gemma4:e2b", "mistral:7b"]
+    head = """<h2>Newest test: three AIs, posts written freely</h2>
+<p>With only two AIs, our fair-comparison trick gives the same number to both, so it can't tell <em>which</em> AI is
+favouring itself. So we added a third AI, <b>mistral</b>. Now llama, gemma and mistral all write posts and all play the
+same 50 people. Every person is played by each of the three AIs, on the same posts, in three separate worlds. This time
+the AIs write posts however they like: no word limits and no style rules, just the topic, and they may not say they are
+an AI. Each AI now gets its own “likes its own posts” number, measured against how the other two AIs react to the same
+posts.</p>"""
+    p = os.path.join(DATA, "analysis_v3.json")
+    log = os.path.join(DATA, "v3_campaign.log")
+    if not os.path.exists(p):
+        done = sum(1 for l in open(log) if " end v3_" in l) if os.path.exists(log) else 0
+        return head + (f"<p class='muted'>Running now: {done} of the first post set's 3 worlds are finished. Results appear here "
+                       "when a whole post set (all three worlds) is done.</p>")
+    r = json.load(open(p))
+    sets = sorted({int(w.split("_s")[1].split("_")[0]) for w in r["worlds"]})
+    words = {}
+    for sd in sets:
+        for line in open(os.path.join(DATA, f"postbank_s{sd}.jsonl")):
+            x = json.loads(line)
+            if x.get("ok"):
+                words.setdefault(x["author"], []).append(x["words"])
+    ms = [m for m in M3 if m in r["judges"]]
+    items, rows = [], []
+    for m in ms:
+        u, d = r["sp_up"].get(m, {}), r["sp_down"].get(m, {})
+        if not u.get("ci95"):
+            continue
+        e, lo, hi = 100 * u["est"], 100 * u["ci95"][0], 100 * u["ci95"][1]
+        verdict = ("clearly likes its own posts more" if lo > 0 else "clearly likes its own posts less" if hi < 0
+                   else "no clear difference yet")
+        items.append(f"<li><b>{NICE[m]}</b>: {e:+.1f} extra likes per 100 for its own posts, {verdict} "
+                     f"(95 % range {lo:+.1f} to {hi:+.1f}); dislikes {100 * d['est']:+.1f}.</li>")
+        rows.append((f"{NICE[m]}: likes", e, lo, hi))
+        rows.append((f"{NICE[m]}: dislikes", 100 * d["est"], 100 * d["ci95"][0], 100 * d["ci95"][1]))
+    up = pd.DataFrame(r["rate_up"]).reindex(index=ms, columns=ms) * 100
+    head_row = "".join(f"<th class='num'>{E(NICE[a])}'s posts</th>" for a in ms)
+    body = "".join(f"<tr><th>people played by {E(NICE[j])}</th>" + "".join(
+        f"<td class='num{' diag' if a == j else ''}'>{up.loc[j, a]:.1f}</td>" for a in ms) + "</tr>" for j in ms)
+    pooled = r["sp_up"].get("_pooled", {})
+    return head + f"""
+<div class="verdict"><p class="q">After {len(sets)} post set{'s' if len(sets) != 1 else ''} ({r['n_valid']:,} reactions)</p>
+<ul>{''.join(items)}</ul>
+<p class="grown">For grown-ups: each AI's double difference = its people's gap between its own and the other AIs' posts,
+minus the other AIs' people's gap on the same posts; persona x brief cluster bootstrap. Pooled over the three:
+{100 * pooled.get('est', 0):+.1f} (95 % range {100 * pooled['ci95'][0]:+.1f} to {100 * pooled['ci95'][1]:+.1f}). {'Early: single post sets swing a lot, so wait for several.' if len(sets) < 3 else ''}</p></div>
+{whisker_chart(rows, "Own-post boost per AI", "change per 100 for the AI's own posts")}
+<div class='scroll'><table class='plain'><caption>Likes (out of every 100 posts seen)</caption><thead><tr><th></th>{head_row}</tr></thead>
+<tbody>{body}</tbody></table></div>
+<p class="cap">Outlined boxes = people reacting to their own AI's posts. Mistral likes almost everything (over 9 in 10 posts,
+even on topics the person dislikes), which leaves little room to see it favour itself, so its own number is the least
+precise. Natural post lengths: {', '.join(f"{NICE[m]} about {sum(words[m]) / len(words[m]):.0f} words" for m in ms if m in words)}.</p>"""
+
+
 def tough_line(r):
     """How much harsher each AI's people get when the two posts are side by side."""
     def dis(fmt, m):
@@ -1023,6 +1079,8 @@ In the second round the two AIs swap, so every person gets played by both AIs on
 <li><b>Scrolling.</b> Each person sees every post, one at a time, starting with their favourite topic. For each post they
 pick like, dislike or skip, and say why in a few words.</li>
 </ol>
+
+{v3_section()}
 
 {ab_section()}
 

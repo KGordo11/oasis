@@ -16,20 +16,18 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-27 06:20 — MORNING REPORT. A/B seeds 31-34 running (started 06:13, ETA ~14:00; stop with
-`pkill -f ab_campaign.sh`).*
+*Last updated 2026-09-27 14:30 — A/B COMPLETE (LF-38). Nothing running; Ollama up. Waiting for Gordon's next decisions.*
 
-**A/B so far (LF-34, 11 post sets 20-30, 102,000 reactions, first 50 of the pinned 99, every world PASS):**
-**showing the two posts side by side makes no difference** — format effect on likes −2.7 [−6.3, +0.7], on
-dislikes +0.2 [−2.5, +2.8]. With length-matched posts there is a small, steady one-at-a-time own-post like lean,
-**+4.3 [+1.1, +7.5]** (p 0.006); side by side it is smaller (+1.7, not clear of zero; favourite +1.6).
-So matching post length did NOT remove the lean, and the side-by-side format does not create one.
-Old design (60-120 words, 99 people, 7 sets): like +2.4 [−1.3, +6.2] — consistent with a small lean of a few
-points that needs many post sets to see. Llama gets much harsher side by side (~20 % dislikes vs ~5 %).
-Page v22 shows all of it in plain words.
+**Answer (15 post sets, 140,000 reactions, first 50 of the pinned 99, length-matched posts, every world PASS):**
+* **Showing posts side by side does not change self-preference** — format effect on likes −1.8 [−5.0, +1.3].
+* **A small own-post preference is real in both formats**: scrolling +5.2 likes [+2.4, +8.1] and −2.3 dislikes
+  [−4.3, −0.1] per 100; side by side +3.4 likes [+0.0, +6.8], favourite +2.4 [+0.3, +4.6].
+* It is small and needs many post sets to see; matching post length did not remove it.
+Page v26 (PEMNidbCam72v6qKC3GNBx) has it all in plain words.
 
-**For you to decide next:** (a) stop the A/B after seed 30, or keep adding sets? (b) the length rule drops
-llama's short posts (11 of 175 briefs) — lower the floor to 55? (c) third model / GPU machine when ready.
+**For you to decide next:** (a) more post sets of this design, or move on? (b) the length rule drops llama's
+short posts (17 of 375 briefs) — lower the floor to 55? (c) third model (to tell WHICH model self-prefers) /
+GPU machine when ready.
 
 **What got done the night before** (every world PASSes `check_world.py`; everything pushed; page v9):
 * Campaign finished: post sets 13-15 → **6 sets, 59,400 reactions** (LF-17..19). Agent sweep 10/25/50/75 done (LF-21).
@@ -1221,3 +1219,31 @@ side-by-side likes +2.9 [−0.6, +6.9]; favourite +2.3 [−0.1, +4.7] (p 0.054);
 Set 33: 1 slot dropped. All PASS. Scroll likes **+5.4 [+2.5, +8.7]**; scroll dislikes −2.0 [−4.2, +0.1];
 side-by-side likes +2.9 [−0.5, +6.7]; favourite **+2.3 [+0.0, +4.5]** (p 0.046); format effect likes −2.5
 [−5.9, +0.7], dislikes +0.2 [−2.1, +2.8]. Unchanged picture. Page v25. Seed 34 (last queued) running, ETA ~14:15.
+
+### LF-38 — A/B COMPLETE: 15 post sets (20-34; 140,000 reactions). Format doesn't matter; a small own-post lean is real
+
+Set 34: 1 slot dropped. All 60 A/B worlds PASS. Dropped slots in total: 17 of 375 (all llama posts that stayed
+under 65 words after 9 tries; same slots dropped from both formats).
+
+| measure (double difference, points per 100) | estimate | 95 % range | p |
+|---|---|---|---|
+| scroll likes | **+5.2** | +2.4 to +8.1 | 0.001 |
+| scroll dislikes | **−2.3** | −4.3 to −0.1 | 0.038 |
+| side-by-side likes | **+3.4** | +0.0 to +6.8 | 0.049 |
+| side-by-side dislikes | −1.9 | −3.8 to +0.1 | 0.06 |
+| side-by-side favourite | **+2.4** | +0.3 to +4.6 | 0.025 |
+| **format effect, likes (pair − scroll)** | **−1.8** | −5.0 to +1.3 | 0.24 |
+| format effect, dislikes | +0.4 | −1.9 to +2.7 | 0.71 |
+
+**Conclusions (LD-13 question answered):**
+1. **Display format does not create self-preference.** Showing the two sibling posts side by side changes the
+   own-post lean by −1.8 [−5.0, +1.3] — no effect, and any effect larger than ~5 points is ruled out.
+2. **With length-matched posts, a small own-post preference is real in both formats**: about +5 likes and −2
+   dislikes per 100 when scrolling, about +3 likes and +2.4 favourite picks side by side. Length matching did
+   NOT remove it (so LF-15..20's "length explains it" was at most partial).
+3. It is **small** — a few reactions per 100 — and **needed ~10+ post sets to see**, because which posts get
+   written dominates the uncertainty (LF-19). Single post sets swing far more than the effect itself.
+4. The old design's +2.4 [−1.3, +6.2] (7 sets, 99 people) is consistent with the same small effect.
+Side notes: llama is far harsher side by side (~20 % dislikes vs ~5 %); people pick the post shown first 75 %
+of the time (shuffled, so noise not bias); favourite shares are near 50/50 for both models (51 %).
+Page v26.

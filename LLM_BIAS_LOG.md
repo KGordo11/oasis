@@ -1296,3 +1296,19 @@ handles 3 AIs; new "Newest test: three AIs" section (running); mistral colour ma
 (validated: CVD ΔE ≥ 10.4 vs blue and orange, all pairs, both themes; purple failed vs blue). Test-1 page v5 —
 "later tests" box now summarises the scroll, A/B and three-AI tests. Data dictionary covers export_ab, pair
 columns, export_v3 and the page data files.
+
+### LF-39 — Three AIs, post set 40 (first set; 11,250 reactions) — NOT a conclusion (LD-15: wait for ≥3 sets)
+
+3 worlds done 21:41 (~3.7 h). 11,248/11,250 valid (1 answer cut off; check WARN on w2 only for that).
+Speed: llama 1.43, gemma 0.40, mistral 1.70 s/decision. Mistral liked 96 % in w2.
+
+| AI | like self-preference | dislike |
+|---|---|---|
+| gemma | +7.9 [+1.0, +15.5] | −6.4 [−12.7, −1.0] |
+| llama | +5.7 [−0.2, +12.3] | −5.4 [−11.2, −0.7] |
+| mistral | +6.8 [+1.5, +12.3] | −0.9 [−4.0, +2.5] |
+| pooled | **+6.8 [+2.5, +11.6]**, p 0.001 | −4.2 [−8.0, −0.9] |
+
+One set only — single sets have overshot before (LF-18/19). Page v29 shows it with that warning; the three-AI
+data is in the look-up tool. Power note: the Mac's 65 W charger can't keep up with sustained inference
+(battery −4 to −6 W while plugged in, 78 % at 21:23); Gordon told how to reduce draw.

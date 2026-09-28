@@ -1,0 +1,7 @@
+WARN  v3_s40_w0  llama3.1:8b: like 65%  1.42 s/decision | gemma4:e2b: like 73%  0.39 s/decision | mistral:7b: like 95%  1.72 s/decision
+   warn: 2 decisions without a valid choice {'chose': 3748, 'cut_off': 2}
+   warn: 4 answers cut off at the token limit
+WARN  v3_s40_w1  llama3.1:8b: like 61%  1.43 s/decision | gemma4:e2b: like 78%  0.40 s/decision | mistral:7b: like 94%  1.74 s/decision
+   warn: 3 answers cut off at the token limit
+WARN  v3_s40_w2  llama3.1:8b: like 65%  1.43 s/decision | gemma4:e2b: like 78%  0.40 s/decision | mistral:7b: like 96%  1.70 s/decision
+   warn: 1 answers cut off at the token limit

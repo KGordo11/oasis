@@ -1,0 +1,311 @@
+{
+ "post_sets": [
+  40,
+  41,
+  42
+ ],
+ "posts": 225,
+ "fingerprint": {
+  "gemma4:e2b": {
+   "words": 162.88,
+   "paragraphs": 2.07,
+   "questions": 1.51,
+   "title_is_question": 0.21,
+   "exclamations": 0.57,
+   "first_person_per_100": 5.26,
+   "numbers": 0.47,
+   "formatting": 0.0,
+   "words_per_sentence": 16.66,
+   "happy_words_per_100": 0.99,
+   "sad_words_per_100": 0.32
+  },
+  "llama3.1:8b": {
+   "words": 117.2,
+   "paragraphs": 1.0,
+   "questions": 1.37,
+   "title_is_question": 0.07,
+   "exclamations": 0.67,
+   "first_person_per_100": 5.97,
+   "numbers": 1.29,
+   "formatting": 0.0,
+   "words_per_sentence": 16.15,
+   "happy_words_per_100": 0.82,
+   "sad_words_per_100": 0.52
+  },
+  "mistral:7b": {
+   "words": 161.29,
+   "paragraphs": 2.05,
+   "questions": 0.67,
+   "title_is_question": 0.0,
+   "exclamations": 2.08,
+   "first_person_per_100": 5.62,
+   "numbers": 1.77,
+   "formatting": 0.13,
+   "words_per_sentence": 16.07,
+   "happy_words_per_100": 1.11,
+   "sad_words_per_100": 0.25
+  }
+ },
+ "taste": {
+  "gemma4:e2b": {
+   "words": {
+    "pts_per_sd": 3.49,
+    "ci95": [
+     -0.69,
+     7.66
+    ]
+   },
+   "paragraphs": {
+    "pts_per_sd": 1.89,
+    "ci95": [
+     -2.18,
+     5.97
+    ]
+   },
+   "questions": {
+    "pts_per_sd": -2.27,
+    "ci95": [
+     -4.96,
+     0.41
+    ]
+   },
+   "title_is_question": {
+    "pts_per_sd": 1.68,
+    "ci95": [
+     -0.74,
+     4.09
+    ]
+   },
+   "exclamations": {
+    "pts_per_sd": -4.44,
+    "ci95": [
+     -7.05,
+     -1.82
+    ]
+   },
+   "first_person_per_100": {
+    "pts_per_sd": -4.2,
+    "ci95": [
+     -7.08,
+     -1.32
+    ]
+   },
+   "numbers": {
+    "pts_per_sd": 4.21,
+    "ci95": [
+     0.73,
+     7.69
+    ]
+   },
+   "formatting": {
+    "pts_per_sd": -2.99,
+    "ci95": [
+     -7.34,
+     1.36
+    ]
+   },
+   "words_per_sentence": {
+    "pts_per_sd": 1.67,
+    "ci95": [
+     -1.53,
+     4.87
+    ]
+   },
+   "happy_words_per_100": {
+    "pts_per_sd": 2.27,
+    "ci95": [
+     -0.54,
+     5.08
+    ]
+   },
+   "sad_words_per_100": {
+    "pts_per_sd": -2.07,
+    "ci95": [
+     -4.62,
+     0.48
+    ]
+   }
+  },
+  "llama3.1:8b": {
+   "words": {
+    "pts_per_sd": 0.66,
+    "ci95": [
+     -1.02,
+     2.35
+    ]
+   },
+   "paragraphs": {
+    "pts_per_sd": 0.11,
+    "ci95": [
+     -1.23,
+     1.45
+    ]
+   },
+   "questions": {
+    "pts_per_sd": -0.35,
+    "ci95": [
+     -1.61,
+     0.9
+    ]
+   },
+   "title_is_question": {
+    "pts_per_sd": 0.47,
+    "ci95": [
+     -0.3,
+     1.23
+    ]
+   },
+   "exclamations": {
+    "pts_per_sd": -0.88,
+    "ci95": [
+     -1.92,
+     0.16
+    ]
+   },
+   "first_person_per_100": {
+    "pts_per_sd": -0.55,
+    "ci95": [
+     -1.6,
+     0.49
+    ]
+   },
+   "numbers": {
+    "pts_per_sd": 0.69,
+    "ci95": [
+     -0.37,
+     1.74
+    ]
+   },
+   "formatting": {
+    "pts_per_sd": -0.55,
+    "ci95": [
+     -1.63,
+     0.53
+    ]
+   },
+   "words_per_sentence": {
+    "pts_per_sd": 0.73,
+    "ci95": [
+     -0.33,
+     1.8
+    ]
+   },
+   "happy_words_per_100": {
+    "pts_per_sd": 1.24,
+    "ci95": [
+     0.08,
+     2.4
+    ]
+   },
+   "sad_words_per_100": {
+    "pts_per_sd": 0.18,
+    "ci95": [
+     -0.81,
+     1.17
+    ]
+   }
+  },
+  "mistral:7b": {
+   "words": {
+    "pts_per_sd": 1.83,
+    "ci95": [
+     0.12,
+     3.55
+    ]
+   },
+   "paragraphs": {
+    "pts_per_sd": 0.91,
+    "ci95": [
+     -0.51,
+     2.34
+    ]
+   },
+   "questions": {
+    "pts_per_sd": -0.48,
+    "ci95": [
+     -1.72,
+     0.76
+    ]
+   },
+   "title_is_question": {
+    "pts_per_sd": -0.28,
+    "ci95": [
+     -2.24,
+     1.69
+    ]
+   },
+   "exclamations": {
+    "pts_per_sd": 1.23,
+    "ci95": [
+     0.05,
+     2.4
+    ]
+   },
+   "first_person_per_100": {
+    "pts_per_sd": -0.55,
+    "ci95": [
+     -1.74,
+     0.63
+    ]
+   },
+   "numbers": {
+    "pts_per_sd": -0.33,
+    "ci95": [
+     -1.74,
+     1.09
+    ]
+   },
+   "formatting": {
+    "pts_per_sd": 0.21,
+    "ci95": [
+     -0.92,
+     1.34
+    ]
+   },
+   "words_per_sentence": {
+    "pts_per_sd": 2.27,
+    "ci95": [
+     0.36,
+     4.18
+    ]
+   },
+   "happy_words_per_100": {
+    "pts_per_sd": 1.58,
+    "ci95": [
+     0.29,
+     2.86
+    ]
+   },
+   "sad_words_per_100": {
+    "pts_per_sd": 0.25,
+    "ci95": [
+     -1.02,
+     1.52
+    ]
+   }
+  }
+ },
+ "taste_matches_own_style_r": {
+  "gemma4:e2b": 0.38,
+  "llama3.1:8b": -0.03,
+  "mistral:7b": 0.35
+ },
+ "own_post_term": {
+  "before": [
+   4.67,
+   [
+    3.12,
+    6.22
+   ]
+  ],
+  "after_all_feature_tastes": [
+   3.68,
+   [
+    1.68,
+    5.68
+   ]
+  ],
+  "reference_judge": "gemma4:e2b",
+  "share_explained_%": 21.1
+ }
+}

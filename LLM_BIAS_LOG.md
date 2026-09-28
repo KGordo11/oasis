@@ -1417,3 +1417,19 @@ format doesn't matter (LF-38). Which AI plays a person matters far more than the
 8. **Write-up:** plain-language report of the whole project (as a document).
 Standing: rebuild the Scroll Test page around the current answer (three-AI result first, then every test in
 order, every number with its source, data linked and viewable), 5th-grade language (Gordon, 2026-09-28).
+
+### LF-43 — What is the "taste"? (LD-16 item 2; three-AI sets 40-42, 225 posts; exploratory) → `taste_v3.json`
+
+`taste.py`: 11 simple post features (words, paragraphs, questions, title-is-question, exclamations, first-person
+words per 100, numbers, formatting, words per sentence, happy/sad words per 100).
+* **Fingerprints (means by author):** llama 117 words, 1.0 paragraph, 1.3 numbers; gemma 163 words, 2.1
+  paragraphs, 1.5 questions; mistral 161 words, 2.0 paragraphs, **2.1 exclamations** (others 0.6-0.7), 1.8 numbers.
+* **Tastes (like points per SD of the feature, person + topic held fixed, clustered by brief):** gemma's people
+  dislike exclamations (−4.4 [−7.0, −1.8]) and first-person-heavy posts (−4.2 [−7.1, −1.3]), like numbers
+  (+4.2 [+0.7, +7.7]); mistral's people like exclamations (+1.2 [+0.1, +2.4]), longer sentences (+2.3), happy
+  words (+1.6); llama's people barely respond to any feature (all |effect| ≤ 1.2).
+* **Taste vs own style** (correlation of each AI's feature tastes with how its own posts differ from the
+  others'): gemma 0.38, mistral 0.35, llama −0.03.
+* **How much do these features explain?** Own-post term 4.67 [3.12, 6.22] → 3.68 [1.68, 5.68] after giving
+  each AI its own taste for all 11 features (post + person-x-AI fixed effects): **~21 % explained; ~79 % is
+  something subtler** (word choice, voice) than these surface features.

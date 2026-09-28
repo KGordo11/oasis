@@ -1456,3 +1456,10 @@ not mostly length/simple style; display format doesn't matter; who plays a perso
 are), then every test in order (test 1-4, each with its full details folded underneath), the look-up tool (table now
 scrolls in its own box), timing charts (folded), links to every data file on GitHub, and what's next. Every number has a
 "Where this comes from" line linking the exact file on the public repo.
+
+**2026-09-28 ~10:55 — STOPPED at Gordon's request (needs the laptop for classes).** Killed the set-43 run (world 1
+partial, resumable), Ollama and all background jobs. Nothing running.
+Item 3 early result (existing night-1 data, `family_night1.json`): sibling preference llama3.2 -> llama3.1 favourite
+picks +5.6 [+0.2, +10.8]; llama3.1 -> llama3.2 +1.8 [-1.8, +5.9]; on upvotes llama3.1 gives llama3.2's posts FEWER
+(-11.8 [-23.1, -0.4]). Mixed; no clear "family loyalty". Remaining LD-16 items: 3 (new design), 4, 6, 7, 8.
+Resume set 43: start Ollama (LF-14 settings), then `SEEDS="43" examples/experiment/llm_bias/v3_campaign.sh`.

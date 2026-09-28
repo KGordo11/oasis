@@ -1,6 +1,6 @@
 {
- "n_decisions": 11250,
- "n_valid": 11248,
+ "n_decisions": 22500,
+ "n_valid": 22498,
  "judges": [
   "gemma4:e2b",
   "llama3.1:8b",
@@ -14,187 +14,190 @@
  "worlds": [
   "v3_s40_w0",
   "v3_s40_w1",
-  "v3_s40_w2"
+  "v3_s40_w2",
+  "v3_s41_w0",
+  "v3_s41_w1",
+  "v3_s41_w2"
  ],
  "personas": 50,
- "posts": 75,
+ "posts": 150,
  "rate_up": {
   "gemma4:e2b": {
-   "gemma4:e2b": 0.8336,
-   "llama3.1:8b": 0.6512,
-   "mistral:7b": 0.9752
+   "gemma4:e2b": 0.8148,
+   "llama3.1:8b": 0.6464,
+   "mistral:7b": 0.9668
   },
   "llama3.1:8b": {
-   "gemma4:e2b": 0.7376,
-   "llama3.1:8b": 0.6464,
-   "mistral:7b": 0.9175
+   "gemma4:e2b": 0.7384,
+   "llama3.1:8b": 0.6344,
+   "mistral:7b": 0.9063
   },
   "mistral:7b": {
-   "gemma4:e2b": 0.7184,
+   "gemma4:e2b": 0.7028,
    "llama3.1:8b": 0.6184,
-   "mistral:7b": 0.9656
+   "mistral:7b": 0.972
   }
  },
  "rate_down": {
   "gemma4:e2b": {
-   "gemma4:e2b": 0.0448,
-   "llama3.1:8b": 0.0552,
-   "mistral:7b": 0.0096
+   "gemma4:e2b": 0.0648,
+   "llama3.1:8b": 0.0656,
+   "mistral:7b": 0.012
   },
   "llama3.1:8b": {
-   "gemma4:e2b": 0.1512,
-   "llama3.1:8b": 0.06,
-   "mistral:7b": 0.0224
+   "gemma4:e2b": 0.1544,
+   "llama3.1:8b": 0.0648,
+   "mistral:7b": 0.028
   },
   "mistral:7b": {
-   "gemma4:e2b": 0.0768,
-   "llama3.1:8b": 0.0656,
-   "mistral:7b": 0.0008
+   "gemma4:e2b": 0.0736,
+   "llama3.1:8b": 0.0736,
+   "mistral:7b": 0.002
   }
  },
  "rate_nothing": {
   "gemma4:e2b": {
-   "gemma4:e2b": 0.1216,
-   "llama3.1:8b": 0.2936,
-   "mistral:7b": 0.0152
+   "gemma4:e2b": 0.1204,
+   "llama3.1:8b": 0.288,
+   "mistral:7b": 0.0212
   },
   "llama3.1:8b": {
-   "gemma4:e2b": 0.1112,
-   "llama3.1:8b": 0.2936,
-   "mistral:7b": 0.0601
+   "gemma4:e2b": 0.1072,
+   "llama3.1:8b": 0.3008,
+   "mistral:7b": 0.0657
   },
   "mistral:7b": {
-   "gemma4:e2b": 0.2048,
-   "llama3.1:8b": 0.316,
-   "mistral:7b": 0.0336
+   "gemma4:e2b": 0.2236,
+   "llama3.1:8b": 0.308,
+   "mistral:7b": 0.026
   }
  },
  "sp_up": {
   "gemma4:e2b": {
-   "est": 0.0793669871794872,
+   "est": 0.07038126501200964,
    "ci95": [
-    0.009574658360128607,
-    0.1548234362469927
+    0.021569850940376233,
+    0.12295705370390943
    ]
   },
   "llama3.1:8b": {
-   "est": 0.057266025641025564,
+   "est": 0.04373746997598077,
    "ci95": [
-    -0.002204999999999979,
-    0.12275507070816113
+    0.0037207031394346822,
+    0.08887366476740804
    ]
   },
   "mistral:7b": {
-   "est": 0.06806602564102582,
+   "est": 0.08333746997598074,
    "ci95": [
-    0.01543562500000002,
-    0.12277814836767657
+    0.04258281249999995,
+    0.12770810211280484
    ]
   },
   "_pooled": {
-   "est": 0.06823301282051286,
+   "est": 0.06581873498799039,
    "ci95": [
-    0.02480967974379508,
-    0.11622303681598044
+    0.035206125450180134,
+    0.09774759748396146
    ]
   }
  },
- "sp_up_p": 0.001,
+ "sp_up_p": 0.0,
  "sp_down": {
   "gemma4:e2b": {
-   "est": -0.06439102564102563,
+   "est": -0.04589439551641314,
    "ci95": [
-    -0.1271707844568306,
-    -0.010184899836535958
+    -0.0875956692677071,
+    -0.007894412587006266
    ]
   },
   "llama3.1:8b": {
-   "est": -0.05421794871794872,
+   "est": -0.05791120896717374,
    "ci95": [
-    -0.11160652522017614,
-    -0.006795624499599706
+    -0.09630534027221777,
+    -0.02439037936571663
    ]
   },
   "mistral:7b": {
-   "est": -0.008617948717948716,
+   "est": -0.004211208967173731,
    "ci95": [
-    -0.039605,
-    0.025399283426741363
+    -0.03311982948798846,
+    0.02350249999999999
    ]
   },
   "_pooled": {
-   "est": -0.04240897435897436,
+   "est": -0.03600560448358687,
    "ci95": [
-    -0.08000569935691318,
-    -0.00879129707612249
+    -0.06182069073761212,
+    -0.01220426941553244
    ]
   }
  },
- "sp_down_p": 0.01,
+ "sp_down_p": 0.004,
  "personas_played_by_both": 50,
  "like_by_interest": {
   "-2": {
-   "gemma4:e2b": 54.4,
+   "gemma4:e2b": 52.4,
    "llama3.1:8b": 8.4,
-   "mistral:7b": 88.6
+   "mistral:7b": 87.1
   },
   "-1": {
-   "gemma4:e2b": 68.8,
-   "llama3.1:8b": 4.0,
-   "mistral:7b": 91.2
+   "gemma4:e2b": 68.4,
+   "llama3.1:8b": 4.2,
+   "mistral:7b": 90.8
   },
   "0": {
-   "gemma4:e2b": 77.7,
-   "llama3.1:8b": 84.0,
-   "mistral:7b": 97.3
+   "gemma4:e2b": 77.0,
+   "llama3.1:8b": 82.9,
+   "mistral:7b": 97.0
   },
   "1": {
-   "gemma4:e2b": 85.0,
-   "llama3.1:8b": 89.2,
+   "gemma4:e2b": 83.3,
+   "llama3.1:8b": 88.4,
    "mistral:7b": 97.2
   },
   "2": {
-   "gemma4:e2b": 88.1,
-   "llama3.1:8b": 91.1,
-   "mistral:7b": 97.6
+   "gemma4:e2b": 86.7,
+   "llama3.1:8b": 90.8,
+   "mistral:7b": 97.2
   }
  },
  "like_by_topic_rank": {
   "0": {
-   "gemma4:e2b": 84.0,
-   "llama3.1:8b": 88.9,
-   "mistral:7b": 97.7
+   "gemma4:e2b": 82.6,
+   "llama3.1:8b": 89.0,
+   "mistral:7b": 97.3
   },
   "1": {
-   "gemma4:e2b": 81.6,
-   "llama3.1:8b": 84.4,
-   "mistral:7b": 96.5
+   "gemma4:e2b": 81.2,
+   "llama3.1:8b": 83.5,
+   "mistral:7b": 96.4
   },
   "2": {
-   "gemma4:e2b": 80.9,
-   "llama3.1:8b": 78.3,
-   "mistral:7b": 97.2
+   "gemma4:e2b": 80.1,
+   "llama3.1:8b": 76.7,
+   "mistral:7b": 97.1
   },
   "3": {
-   "gemma4:e2b": 74.8,
-   "llama3.1:8b": 50.3,
+   "gemma4:e2b": 73.8,
+   "llama3.1:8b": 50.1,
    "mistral:7b": 95.1
   },
   "4": {
-   "gemma4:e2b": 60.3,
-   "llama3.1:8b": 17.5,
-   "mistral:7b": 89.9
+   "gemma4:e2b": 58.3,
+   "llama3.1:8b": 17.2,
+   "mistral:7b": 88.3
   }
  },
  "nothing": {
   "gemma4:e2b": {
-   "decisions": 3750,
-   "like_%": 76.3,
-   "dislike_%": 9.1,
-   "nothing_%": 14.6,
+   "decisions": 7500,
+   "like_%": 75.2,
+   "dislike_%": 9.8,
+   "nothing_%": 15.0,
    "failed_%": 0.0,
    "outcomes": {
-    "chose": 3750
+    "chose": 7500
    },
    "needed_retry_%": 0.0,
    "cut_off_at_token_limit": 0,
@@ -202,29 +205,29 @@
    "mean_output_tokens": 15.4,
    "nothing_with_a_reason_%": 100.0,
    "nothing_%_by_interest": {
-    "-2": 28.8,
-    "-1": 20.2,
-    "0": 14.6,
-    "1": 7.7,
-    "2": 5.5
+    "-2": 29.6,
+    "-1": 19.8,
+    "0": 15.3,
+    "1": 8.1,
+    "2": 6.0
    },
    "sample_nothing_reasons": [
-    "Too generic",
-    "Too much fluff",
-    "Too much fluff",
     "Too vague",
-    "Too much hype",
-    "Too much fluff"
+    "Too vague",
+    "Too much whining",
+    "Too much fluff",
+    "Too long",
+    "Not my area"
    ]
   },
   "llama3.1:8b": {
-   "decisions": 3750,
-   "like_%": 63.9,
-   "dislike_%": 6.0,
-   "nothing_%": 30.1,
+   "decisions": 7500,
+   "like_%": 63.3,
+   "dislike_%": 6.8,
+   "nothing_%": 29.9,
    "failed_%": 0.0,
    "outcomes": {
-    "chose": 3750
+    "chose": 7500
    },
    "needed_retry_%": 0.0,
    "cut_off_at_token_limit": 0,
@@ -232,50 +235,50 @@
    "mean_output_tokens": 23.2,
    "nothing_with_a_reason_%": 100.0,
    "nothing_%_by_interest": {
-    "-2": 65.6,
-    "-1": 82.8,
-    "0": 15.0,
-    "1": 9.8,
-    "2": 8.1
+    "-2": 64.1,
+    "-1": 80.7,
+    "0": 15.4,
+    "1": 10.6,
+    "2": 8.0
    },
    "sample_nothing_reasons": [
-    "not my cup of tea, car talk is a snooze",
-    "not my thing",
+    "Not my cup of tea",
+    "boring topic for me",
+    "Not my cup of tea",
     "Not my thing",
-    "Not my interest",
-    "Post's a bit too long-winded for my taste",
-    "Too obvious a search query"
+    "Not my thing, but decent discussion.",
+    "Too bland, needs more personal experience"
    ]
   },
   "mistral:7b": {
-   "decisions": 3750,
-   "like_%": 95.2,
-   "dislike_%": 1.1,
-   "nothing_%": 3.6,
-   "failed_%": 0.1,
+   "decisions": 7500,
+   "like_%": 94.8,
+   "dislike_%": 1.4,
+   "nothing_%": 3.8,
+   "failed_%": 0.0,
    "outcomes": {
-    "chose": 3748,
+    "chose": 7498,
     "cut_off": 2
    },
-   "needed_retry_%": 1.3,
-   "cut_off_at_token_limit": 8,
+   "needed_retry_%": 1.5,
+   "cut_off_at_token_limit": 14,
    "hidden_thinking_chars": 0,
-   "mean_output_tokens": 46.4,
+   "mean_output_tokens": 46.7,
    "nothing_with_a_reason_%": 100.0,
    "nothing_%_by_interest": {
-    "-2": 9.0,
-    "-1": 6.8,
-    "0": 2.1,
-    "1": 2.0,
-    "2": 1.6
+    "-2": 9.9,
+    "-1": 6.5,
+    "0": 2.4,
+    "1": 1.8,
+    "2": 1.7
    },
    "sample_nothing_reasons": [
-    "Not relevant to my interests or experiences, and the post seems more like a vent rather than offering useful insights.",
-    "I'll pass on this post for now as it doesn't seem to offer any practical tips or solutions I can contribute to. However, if I find myself with some extra time and useful insights later, I might come back to it.",
-    "While I empathize with the frustration, this post feels too personal and potentially inflammatory. It's best to avoid getting involved in such situations on a public forum like this.",
-    "While I understand the parent's concern about their child's diet, this post doesn't provide practical advice or useful information that I'm interested in as a long-haul truck driver. I prefer posts with more concrete advice or tips.",
-    "As u/nikolai93, while I appreciate the effort and passion behind the post, I'm not knowledgeable enough about farming or mechanics to offer meaningful advice. However, it's great to see someone taking an interest in restoring old equipment instead of immediately buying new.",
-    "While I can empathize with the frustration of joint account management, this post doesn't provide enough practical advice or humor for my taste. It seems more like a venting post which I prefer to avoid."
+    "While I appreciate the initiative to involve youth in agriculture, my interests lie more in urban areas and small businesses. Therefore, this post does not particularly appeal to me.",
+    "While I sympathize with the farmer's situation, this post doesn't provide enough detail to offer a helpful response. It's also not within my area of expertise.",
+    "While I appreciate the effort to reuse and the predicament you're in, this post doesn't seem to provide enough detail or practical advice for me to upvote. It's more of a personal question than something informative or entertaining. However, I wish you luck in finding a solution!",
+    "While empathetic to their situation, I find posts about cars not interesting enough for me. I'd rather focus on topics that align more with my interests.",
+    "Not relevant to my interests or expertise. I prefer posts focused on parenting, cooking, or small business.",
+    "While I share the sentiment about dishonest mechanics, this post seems more like a complaint thread than seeking specific recommendations. I'd rather see posts with actual suggestions for good mechanics."
    ]
   }
  }

@@ -1,52 +1,52 @@
-worlds ['v3_s40_w0', 'v3_s40_w1', 'v3_s40_w2']
-50 personas, 75 posts, 11248/11250 valid decisions
+worlds ['v3_s40_w0', 'v3_s40_w1', 'v3_s40_w2', 'v3_s41_w0', 'v3_s41_w1', 'v3_s41_w2']
+50 personas, 150 posts, 22498/22500 valid decisions
 personas played by both models: 50
 
 LIKE RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b  mistral:7b
-gemma4:e2b         83.4         73.8        71.8
-llama3.1:8b        65.1         64.6        61.8
-mistral:7b         97.5         91.8        96.6
+gemma4:e2b         81.5         73.8        70.3
+llama3.1:8b        64.6         63.4        61.8
+mistral:7b         96.7         90.6        97.2
 
 DISLIKE RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b  mistral:7b
-gemma4:e2b          4.5         15.1         7.7
-llama3.1:8b         5.5          6.0         6.6
-mistral:7b          1.0          2.2         0.1
+gemma4:e2b          6.5         15.4         7.4
+llama3.1:8b         6.6          6.5         7.4
+mistral:7b          1.2          2.8         0.2
 
 NOTHING RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b  mistral:7b
-gemma4:e2b         12.2         11.1        20.5
-llama3.1:8b        29.4         29.4        31.6
-mistral:7b          1.5          6.0         3.4
+gemma4:e2b         12.0         10.7        22.4
+llama3.1:8b        28.8         30.1        30.8
+mistral:7b          2.1          6.6         2.6
 
 SELF-PREFERENCE on like rate (double difference, percentage points):
-  gemma4:e2b     +7.9  95% CI [+1.0, +15.5]
-  llama3.1:8b    +5.7  95% CI [-0.2, +12.3]
-  mistral:7b     +6.8  95% CI [+1.5, +12.3]
-  _pooled        +6.8  95% CI [+2.5, +11.6]
-  pooled bootstrap p = 0.0010
+  gemma4:e2b     +7.0  95% CI [+2.2, +12.3]
+  llama3.1:8b    +4.4  95% CI [+0.4, +8.9]
+  mistral:7b     +8.3  95% CI [+4.3, +12.8]
+  _pooled        +6.6  95% CI [+3.5, +9.8]
+  pooled bootstrap p = 0.0000
 
 SELF-PREFERENCE on dislike rate (double difference, percentage points):
-  gemma4:e2b     -6.4  95% CI [-12.7, -1.0]
-  llama3.1:8b    -5.4  95% CI [-11.2, -0.7]
-  mistral:7b     -0.9  95% CI [-4.0, +2.5]
-  _pooled        -4.2  95% CI [-8.0, -0.9]
-  pooled bootstrap p = 0.0100
+  gemma4:e2b     -4.6  95% CI [-8.8, -0.8]
+  llama3.1:8b    -5.8  95% CI [-9.6, -2.4]
+  mistral:7b     -0.4  95% CI [-3.3, +2.4]
+  _pooled        -3.6  95% CI [-6.2, -1.2]
+  pooled bootstrap p = 0.0040
 
 WHY 'NOTHING'? per model:
-  gemma4:e2b: like 76.3%  dislike 9.1%  nothing 14.6%  failed 0.0% | outcomes {'chose': 3750} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 28.8, -1: 20.2, 0: 14.6, 1: 7.7, 2: 5.5}
-     sample reasons for nothing: ['Too generic', 'Too much fluff', 'Too much fluff', 'Too vague', 'Too much hype', 'Too much fluff']
-  llama3.1:8b: like 63.9%  dislike 6.0%  nothing 30.1%  failed 0.0% | outcomes {'chose': 3750} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 65.6, -1: 82.8, 0: 15.0, 1: 9.8, 2: 8.1}
-     sample reasons for nothing: ['not my cup of tea, car talk is a snooze', 'not my thing', 'Not my thing', 'Not my interest', "Post's a bit too long-winded for my taste", 'Too obvious a search query']
-  mistral:7b: like 95.2%  dislike 1.1%  nothing 3.6%  failed 0.1% | outcomes {'chose': 3748, 'cut_off': 2} | retried 1.3% | cut off 8 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 9.0, -1: 6.8, 0: 2.1, 1: 2.0, 2: 1.6}
-     sample reasons for nothing: ['Not relevant to my interests or experiences, and the post seems more like a vent rather than offering useful insights.', "I'll pass on this post for now as it doesn't seem to offer any practical tips or solutions I can contribute to. However, if I find myself with some extra time and useful insights later, I might come back to it.", "While I empathize with the frustration, this post feels too personal and potentially inflammatory. It's best to avoid getting involved in such situations on a public forum like this.", "While I understand the parent's concern about their child's diet, this post doesn't provide practical advice or useful information that I'm interested in as a long-haul truck driver. I prefer posts with more concrete advice or tips.", "As u/nikolai93, while I appreciate the effort and passion behind the post, I'm not knowledgeable enough about farming or mechanics to offer meaningful advice. However, it's great to see someone taking an interest in restoring old equipment instead of immediately buying new.", "While I can empathize with the frustration of joint account management, this post doesn't provide enough practical advice or humor for my taste. It seems more like a venting post which I prefer to avoid."]
+  gemma4:e2b: like 75.2%  dislike 9.8%  nothing 15.0%  failed 0.0% | outcomes {'chose': 7500} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 29.6, -1: 19.8, 0: 15.3, 1: 8.1, 2: 6.0}
+     sample reasons for nothing: ['Too vague', 'Too vague', 'Too much whining', 'Too much fluff', 'Too long', 'Not my area']
+  llama3.1:8b: like 63.3%  dislike 6.8%  nothing 29.9%  failed 0.0% | outcomes {'chose': 7500} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 64.1, -1: 80.7, 0: 15.4, 1: 10.6, 2: 8.0}
+     sample reasons for nothing: ['Not my cup of tea', 'boring topic for me', 'Not my cup of tea', 'Not my thing', 'Not my thing, but decent discussion.', 'Too bland, needs more personal experience']
+  mistral:7b: like 94.8%  dislike 1.4%  nothing 3.8%  failed 0.0% | outcomes {'chose': 7498, 'cut_off': 2} | retried 1.5% | cut off 14 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 9.9, -1: 6.5, 0: 2.4, 1: 1.8, 2: 1.7}
+     sample reasons for nothing: ['While I appreciate the initiative to involve youth in agriculture, my interests lie more in urban areas and small businesses. Therefore, this post does not particularly appeal to me.', "While I sympathize with the farmer's situation, this post doesn't provide enough detail to offer a helpful response. It's also not within my area of expertise.", "While I appreciate the effort to reuse and the predicament you're in, this post doesn't seem to provide enough detail or practical advice for me to upvote. It's more of a personal question than something informative or entertaining. However, I wish you luck in finding a solution!", "While empathetic to their situation, I find posts about cars not interesting enough for me. I'd rather focus on topics that align more with my interests.", 'Not relevant to my interests or expertise. I prefer posts focused on parenting, cooking, or small business.', "While I share the sentiment about dishonest mechanics, this post seems more like a complaint thread than seeking specific recommendations. I'd rather see posts with actual suggestions for good mechanics."]
 
 LIKE % by persona interest in the topic:
                -2    -1     0     1     2
-gemma4:e2b   54.4  68.8  77.7  85.0  88.1
-llama3.1:8b   8.4   4.0  84.0  89.2  91.1
-mistral:7b   88.6  91.2  97.3  97.2  97.6
+gemma4:e2b   52.4  68.4  77.0  83.3  86.7
+llama3.1:8b   8.4   4.2  82.9  88.4  90.8
+mistral:7b   87.1  90.8  97.0  97.2  97.2

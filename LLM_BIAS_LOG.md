@@ -1312,3 +1312,18 @@ Speed: llama 1.43, gemma 0.40, mistral 1.70 s/decision. Mistral liked 96 % in w2
 One set only — single sets have overshot before (LF-18/19). Page v29 shows it with that warning; the three-AI
 data is in the look-up tool. Power note: the Mac's 65 W charger can't keep up with sustained inference
 (battery −4 to −6 W while plugged in, 78 % at 21:23); Gordon told how to reduce draw.
+
+### LF-40 — Three AIs after 2 post sets (40-41; 22,500 reactions) — still under the 3-set minimum
+
+Set 41 done 01:36 (3.9 h). 22,498/22,500 valid; set 41 worlds PASS.
+
+| AI | like self-preference | dislike |
+|---|---|---|
+| gemma | +7.0 [+2.2, +12.3] | −4.6 [−8.8, −0.8] |
+| llama | +4.4 [+0.4, +8.9] | −5.8 [−9.6, −2.4] |
+| mistral | **+8.3 [+4.3, +12.8]** | −0.4 [−3.3, +2.4] |
+| pooled | **+6.6 [+3.5, +9.8]** (p < 0.001) | −3.6 [−6.2, −1.2] |
+
+All three lean toward their own posts in likes, including mistral despite liking ~95 % of everything (its
+boost comes from liking OTHER AIs' posts a bit less). Llama and gemma also show it in dislikes. Page v30.
+Timing: sets take ~3.9 h, so set 43 cannot finish by 09:00 (would end ~09:25).

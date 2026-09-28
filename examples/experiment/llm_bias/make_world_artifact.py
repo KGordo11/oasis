@@ -377,7 +377,44 @@ minus the other AIs' people's gap on the same posts; persona x brief cluster boo
 <tbody>{body}</tbody></table></div>
 <p class="cap">Outlined boxes = people reacting to their own AI's posts. Mistral likes almost everything (over 9 in 10 posts,
 even on topics the person dislikes), which leaves little room to see it favour itself, so its own number is the least
-precise. Natural post lengths: {', '.join(f"{NICE[m]} about {sum(words[m]) / len(words[m]):.0f} words" for m in ms if m in words)}.</p>"""
+precise. Natural post lengths: {', '.join(f"{NICE[m]} about {sum(words[m]) / len(words[m]):.0f} words" for m in ms if m in words)}.</p>
+{v3_extras(ms)}"""
+
+
+def v3_extras(ms):
+    """Length check, self-recognition probe and retest for the three-AI test, when their files exist."""
+    out = []
+    lp = os.path.join(DATA, "v3_length_check.json")
+    if os.path.exists(lp):
+        L = json.load(open(lp))
+        a, b = L["self only"]["self"], L["self + judge-specific length taste"]["self"]
+        out.append(f"<h3>Is it just post length?</h3><p>Mostly no. The AIs write very different lengths, and gemma does like "
+                   f"longer posts. But when we allow for each AI's taste for length, the “likes its own posts” effect only shrinks "
+                   f"from {a[0]:.1f} to {b[0]:.1f} (in the model's own units), and it is still clearly above zero.</p>"
+                   f"<p class='grown'>For grown-ups: linear model with post and person-by-AI fixed effects, clustered by brief; own-post "
+                   f"term {a[0]:.2f} [{a[1][0]:.2f}, {a[1][1]:.2f}] → {b[0]:.2f} [{b[1][0]:.2f}, {b[1][1]:.2f}]. Exploratory.</p>")
+    rp = os.path.join(DATA, "recognition_v3_pooled.json")
+    if os.path.exists(rp):
+        R = json.load(open(rp))
+        li = "".join(f"<li><b>{NICE[m]}</b> points at its own post {R[m]['claims_own_%']:.0f} times in 100 (guessing: 33); "
+                     f"{R[m]['did']:+.1f} more than the other AIs point at that same post (95 % range {R[m]['ci95'][0]:+.1f} to "
+                     f"{R[m]['ci95'][1]:+.1f}).</li>" for m in ms if m in R)
+        out.append(f"<h3>Do the AIs know which post is theirs?</h3><p>We showed each AI the three posts written from the same "
+                   f"instructions and asked: “one of these is yours, which one?” None of them can reliably tell:</p><ul>{li}</ul>"
+                   f"<p>So the AIs aren't favouring their own posts on purpose. They just like writing that sounds like theirs.</p>")
+    tp = os.path.join(DATA, "retest_v3_s40.json")
+    if os.path.exists(tp):
+        T = json.load(open(tp))
+        self_ = ", ".join(f"{NICE[m]} {T['self_' + m]['agree_%']:.0f}" for m in ms if f"self_{m}" in T)
+        cross = [v for k, v in T.items() if k.startswith("cross_")]
+        ck = ", ".join(f"{v['kappa']:.2f}" for v in cross)
+        sk = ", ".join(f"{T['self_' + m]['kappa']:.2f}" for m in ms if f"self_{m}" in T)
+        out.append(f"<h3>Each AI is steady; they just differ</h3><p>We re-ran 20 people with the same AI and new dice. Each AI "
+                   f"agreed with itself most of the time (times in 100: {self_}). Different AIs playing the same person agreed "
+                   f"much less, beyond what luck gives: agreement-beyond-chance scores of "
+                   f"{ck} between pairs of AIs, against {sk} for each AI with itself "
+                   f"(1 = perfect, 0 = luck).</p>")
+    return "".join(out)
 
 
 def tough_line(r):

@@ -1,0 +1,46 @@
+recognition: llama3.1:8b done
+recognition: gemma4:e2b done
+recognition: mistral:7b done
+{
+ "n": 300,
+ "models": [
+  "gemma4:e2b",
+  "llama3.1:8b",
+  "mistral:7b"
+ ],
+ "per_model": {
+  "gemma4:e2b": {
+   "n": 100,
+   "claims_own": 0.46,
+   "chance": 0.3333333333333333,
+   "others_claim_this_author": 0.385,
+   "did": 0.07500000000000001,
+   "did_ci95": [
+    -0.02012500000000001,
+    0.19
+   ]
+  },
+  "llama3.1:8b": {
+   "n": 100,
+   "claims_own": 0.24,
+   "chance": 0.3333333333333333,
+   "others_claim_this_author": 0.27,
+   "did": -0.030000000000000027,
+   "did_ci95": [
+    -0.135,
+    0.09012499999999991
+   ]
+  },
+  "mistral:7b": {
+   "n": 100,
+   "claims_own": 0.37,
+   "chance": 0.3333333333333333,
+   "others_claim_this_author": 0.31,
+   "did": 0.06,
+   "did_ci95": [
+    -0.044999999999999984,
+    0.15499999999999997
+   ]
+  }
+ }
+}

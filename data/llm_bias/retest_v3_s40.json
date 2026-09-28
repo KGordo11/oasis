@@ -1,0 +1,38 @@
+{
+ "self_gemma4:e2b": {
+  "kappa": 0.883,
+  "agree_%": 95.2,
+  "chance_%": 59.0,
+  "pairs": 1500
+ },
+ "self_llama3.1:8b": {
+  "kappa": 0.722,
+  "agree_%": 85.2,
+  "chance_%": 46.8,
+  "pairs": 1500
+ },
+ "self_mistral:7b": {
+  "kappa": 0.728,
+  "agree_%": 96.9,
+  "chance_%": 88.7,
+  "pairs": 1499
+ },
+ "cross_llama3.1:8b_vs_gemma4:e2b": {
+  "kappa": 0.257,
+  "agree_%": 62.9,
+  "chance_%": 50.1,
+  "pairs": 1500
+ },
+ "cross_llama3.1:8b_vs_mistral:7b": {
+  "kappa": 0.098,
+  "agree_%": 61.2,
+  "chance_%": 57.0,
+  "pairs": 1500
+ },
+ "cross_gemma4:e2b_vs_mistral:7b": {
+  "kappa": 0.211,
+  "agree_%": 77.0,
+  "chance_%": 70.8,
+  "pairs": 1500
+ }
+}

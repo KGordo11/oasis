@@ -16,9 +16,24 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-27 18:30 — RUNNING: three-AI campaign (LD-14/15; llama, gemma, mistral; natural posts;
-scroll; 50 people; 3 worlds per set), started 17:58, ~3.7 h per post set, ~4 sets by 09:00. Refresh after each set:
-`examples/experiment/llm_bias/v3_refresh.sh <page dir>` then publish the files in `<page dir>/publish_files.json`.*
+*Last updated 2026-09-28 07:30 — MORNING REPORT. Nothing running (campaign stopped 05:23 after set 42; morning
+checks done 07:14). Ollama up.*
+
+**Three AIs, natural posts (LD-14/15; post sets 40-42, 33,750 reactions, 50 pinned people, every world done):**
+**every AI favours its own posts when playing a person.** Likes: gemma +8.2 [+3.8, +12.6], llama +5.7
+[+2.1, +9.3], mistral +7.2 [+3.9, +10.4], pooled **+7.0 [+4.3, +9.7]**; dislikes pooled −3.6 [−5.8, −1.7]
+(llama −6.4, gemma −4.3; mistral ~0 because it almost never dislikes). Positive for every AI in every set.
+Not a length artefact (length explains ~16 %). The AIs **cannot reliably recognise** their own posts → shared
+taste, not deliberate favouritism (LF-42). Each AI is self-consistent; different AIs play the same person
+differently (kappa 0.10-0.26 across vs 0.72-0.88 within).
+**Why earlier tests looked weaker:** with two AIs one number covers both directions and single post sets swung
+a lot; three AIs give three independent checks per set and a far steadier answer.
+Page v32 (PEMNidbCam72v6qKC3GNBx): plain-words results, charts, look-up tool for every test incl. three AIs.
+
+**For Gordon:** (a) continue three-AI sets (post set 43's first world is partial and resumable:
+`SEEDS="43 44 45" examples/experiment/llm_bias/v3_campaign.sh`), ~3.9 h each; (b) the natural-length average
+across all three AIs is ~147 words (llama 117, mistral 161, gemma 163) if you want the later length rule;
+(c) charger: 65 W can't keep up with the sims (needs 96 W+).
 
 **Previous test (A/B, complete):**
 **Answer (15 post sets, 140,000 reactions, first 50 of the pinned 99, length-matched posts, every world PASS):**
@@ -1360,3 +1375,17 @@ retest are running now (morning chain). Page v31.
 posts were still being written, so git held partial snapshots (+533 lines missing, 0 changed). The files on
 disk were always complete and every analysis read the files on disk, so no result changes; the complete banks
 are committed now. Rule from now on: commit a set's post bank only after that set's worlds finish.
+
+### LF-42 — Three AIs: they can't reliably spot their own posts; each is self-consistent (morning checks)
+
+**Self-recognition probe** (`recognize.py`, post sets 40-42, 3 posts per brief so guessing = 33 %, k = 4
+shuffles per brief, 300 tries per AI; pooled with a brief bootstrap → `recognition_v3_pooled.json`):
+gemma claims its own post 44 % (+5.0 vs how often the others claim that post [−1.3, +11.7]); mistral 39 %
+(+4.3 [−1.5, +10.2]); llama 24 % (+2.2 [−4.2, +8.2]). **None clearly recognises its own writing** (all ranges
+include 0), while all three clearly prefer it (LF-41) → **shared taste, not knowing favouritism** (same as LF-8).
+
+**Retest** (`rt3_s40_w0-2`, people 0-19, `--draw 1`, all 3 worlds; `retest_v3_s40.json`): self-agreement
+gemma 95 % (kappa 0.88), llama 85 % (0.72), mistral 97 % (0.73; its chance agreement is 89 % because it likes
+nearly everything). Across AIs on the same person and post: llama-gemma 0.26, llama-mistral 0.10, gemma-mistral
+0.21. Same pattern as LF-22: each AI is steady, different AIs play the same person differently.
+Page v32 shows the length check, recognition and retest under the three-AI section.

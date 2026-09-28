@@ -1,0 +1,119 @@
+{
+ "label": "rt3_s40_w2",
+ "design": "v2-scroll-shared-world",
+ "started_at": "2026-09-28T06:43:42.159570",
+ "config": {
+  "seed": 40,
+  "world": 2,
+  "judges": [
+   "llama3.1:8b",
+   "gemma4:e2b",
+   "mistral:7b"
+  ],
+  "authors": [
+   "llama3.1:8b",
+   "gemma4:e2b",
+   "mistral:7b"
+  ],
+  "topics": [
+   "personal_finance",
+   "cars",
+   "farming",
+   "cooking",
+   "tech"
+  ],
+  "posts_per_topic": 5,
+  "agents": 20,
+  "parallel": 4,
+  "temperature": 0.7,
+  "num_ctx": 8192,
+  "think": false,
+  "show_author": false,
+  "show_scores": false,
+  "assignment": "persona i -> judges[(i + world) % len(judges)]",
+  "scheduler": "interleaved",
+  "draw": 1,
+  "format": "scroll",
+  "length_rule": "natural",
+  "complete_slots": true
+ },
+ "persona_bank_hash": "8c9cf5b67383",
+ "core99_hash": "964462b96652",
+ "persona_ids": [
+  0,
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15,
+  16,
+  17,
+  18,
+  19
+ ],
+ "post_generation_s": 0.0,
+ "ollama_server": {
+  "OLLAMA_FLASH_ATTENTION": "true",
+  "OLLAMA_NUM_PARALLEL": "4",
+  "OLLAMA_CONTEXT_LENGTH": "8192",
+  "OLLAMA_KV_CACHE_TYPE": "",
+  "OLLAMA_KEEP_ALIVE": "24h0m0s",
+  "OLLAMA_MAX_LOADED_MODELS": "0"
+ },
+ "ollama_models": {
+  "gemma4:e2b": "7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e",
+  "llama3.1:8b": "46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e",
+  "mistral:7b": "6577803aa9a036369e481d648a2baebb381ebc6e897f2bb9a766a2aa7bfbc1cf"
+ },
+ "machine": {
+  "platform": "macOS-15.8.1-arm64-arm-64bit",
+  "ollama_env": {}
+ },
+ "judges": {
+  "llama3.1:8b": {
+   "decisions": 525,
+   "wall_s": 721.5,
+   "counts": {
+    "like": 370,
+    "dislike": 29,
+    "nothing": 126
+   },
+   "rows": 525,
+   "s_per_decision": 1.374
+  },
+  "gemma4:e2b": {
+   "decisions": 450,
+   "wall_s": 174.3,
+   "counts": {
+    "nothing": 102,
+    "like": 295,
+    "dislike": 53
+   },
+   "rows": 450,
+   "s_per_decision": 0.387
+  },
+  "mistral:7b": {
+   "decisions": 525,
+   "wall_s": 913.1,
+   "counts": {
+    "like": 500,
+    "dislike": 6,
+    "nothing": 19
+   },
+   "rows": 525,
+   "s_per_decision": 1.739
+  }
+ },
+ "n_posts": 75,
+ "finished_at": "2026-09-28T07:14:00.657855"
+}

@@ -1,0 +1,42 @@
+{
+ "post_sets": [
+  40,
+  41,
+  42
+ ],
+ "reactions": 33744,
+ "people": 50,
+ "posts": 225,
+ "AIs": [
+  "gemma4:e2b",
+  "llama3.1:8b",
+  "mistral:7b"
+ ],
+ "like_share_%": {
+  "AI": 9.9,
+  "person": 11.8,
+  "post": 8.3,
+  "AI x person": 6.1,
+  "AI x post": 5.6,
+  "person x post": 26.7,
+  "leftover": 31.6
+ },
+ "dislike_share_%": {
+  "AI": 2.4,
+  "person": 4.3,
+  "post": 11.1,
+  "AI x person": 3.5,
+  "AI x post": 10.1,
+  "person x post": 27.6,
+  "leftover": 41.0
+ },
+ "dice_share_of_like_variance_%": 13.1,
+ "retest_pairs": 4499,
+ "summary_like_%": {
+  "from the person's description (person + person x post)": 38.5,
+  "from which AI plays them (AI + AI x person + AI x post)": 21.6,
+  "from the post itself": 8.3,
+  "dice (from the retest)": 13.1,
+  "other leftover": 18.5
+ }
+}

@@ -1433,3 +1433,19 @@ words per 100, numbers, formatting, words per sentence, happy/sad words per 100)
 * **How much do these features explain?** Own-post term 4.67 [3.12, 6.22] → 3.68 [1.68, 5.68] after giving
   each AI its own taste for all 11 features (post + person-x-AI fixed effects): **~21 % explained; ~79 % is
   something subtler** (word choice, voice) than these surface features.
+
+### LF-44 — Person vs AI: where the variation comes from (LD-16 item 5; sets 40-42; exploratory) → `variance_v3.json`
+
+`variance.py`: exact three-way split (AI x person x post, one reaction per cell; 33,744 reactions, 50 people,
+225 posts). Share of the variance in "liked it":
+AI 9.9 % · person 11.8 % · post 8.3 % · AI x person 6.1 % · AI x post 5.6 % · **person x post 26.7 %** ·
+leftover 31.6 %. The retest (same AI, person and post, new draw; 4,499 pairs) puts pure randomness at **13.1 %**,
+so ~18.5 % of the leftover is AI-specific quirks for particular person-post pairs.
+Dislikes: AI 2.4 · person 4.3 · post 11.1 · AI x person 3.5 · AI x post 10.1 · person x post 27.6 · leftover 41.0.
+**Summary (likes):** the person's description (person + person x post) **38.5 %**; which AI plays them directly
+(AI + AI x person + AI x post) **21.6 %**, up to ~40 % if the AI-specific leftover is counted; post 8.3 %;
+randomness 13.1 %.
+**CORRECTION to LF-15/22/42 wording:** "the model matters more than the persona" was too strong — it came from
+low cross-AI agreement (kappa). The decomposition shows the description matters most on its own, and which AI
+plays the person matters about as much once its person-post quirks are counted. Pages updated to say
+"about as much as".

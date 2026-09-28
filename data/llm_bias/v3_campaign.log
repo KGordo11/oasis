@@ -59,3 +59,23 @@
 2026-09-28 08:43:25 end v3_s43_w0 rc=0
 2026-09-28 08:43:25 start v3_s43_w1 
 2026-09-28 08:43:44 stopped before 09:00 (v3_s43_w0 3750 decisions)
+2026-09-28 10:04:13 v3 campaign start seeds=[43] agents=50
+skip v3_s43_w0 (finished)
+2026-09-28 10:04:13 start v3_s43_w1 --resume
+2026-09-28 14:02:59 v3 campaign start seeds=[43] agents=50
+skip v3_s43_w0 (finished)
+2026-09-28 14:02:59 start v3_s43_w1 --resume
+14:07:43 llama3.1:8b: done 169 in 4.3 min (1.52 s/decision) {'like': 99, 'nothing': 56, 'dislike': 14}
+14:16:21 gemma4:e2b: done 1275 in 8.5 min (0.40 s/decision) {'like': 980, 'dislike': 96, 'nothing': 199}
+14:55:39 mistral:7b: done 1275 in 39.3 min (1.85 s/decision) {'like': 1205, 'nothing': 57, 'dislike': 11, 'cut_off': 2}
+2026-09-28 14:55:40 end v3_s43_w1 rc=0
+2026-09-28 14:55:40 start v3_s43_w2 
+15:25:48 llama3.1:8b: done 1275 in 29.9 min (1.41 s/decision) {'like': 788, 'nothing': 375, 'dislike': 112}
+15:33:44 gemma4:e2b: done 1200 in 7.8 min (0.39 s/decision) {'like': 921, 'nothing': 186, 'dislike': 93}
+16:11:37 mistral:7b: done 1275 in 37.9 min (1.78 s/decision) {'like': 1207, 'dislike': 17, 'nothing': 50, 'cut_off': 1}
+2026-09-28 16:11:38 end v3_s43_w2 rc=0
+2026-09-28 16:11:38 post set 43 done
+2026-09-28 16:11:38 v3 campaign end
+2026-09-28 16:16:27 feed smoke done
+2026-09-28 16:16:27 v3 campaign start seeds=[44 45] agents=50
+2026-09-28 16:16:27 start v3_s44_w0 

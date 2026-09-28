@@ -1502,3 +1502,13 @@ https://claude.ai/code/artifact/7f61723e-b24b-4c68-871f-3510205cdbd4 — the que
 chart with ranges), five findings with source links, the four tests (table), how to read the numbers + where the data
 lives, limits and corrections, what's next. Open question left for Gordon in a doc comment: run the feed test before
 or after finishing the three-AI post sets? Items 3, 4, 7 are designed (LD-17) but not run; item 6 numbers in LD-17.
+
+### LF-45 — Three AIs after 4 post sets (40-43; 45,000 reactions): still clear
+
+44,993/45,000 valid. Like self-preference: gemma +6.5 [+2.4, +10.9], llama +4.9 [+1.6, +8.3], mistral +6.7
+[+3.9, +9.8], **pooled +6.0 [+3.6, +8.7]**. Dislikes: llama −5.3 [−8.3, −2.7], gemma −3.3 [−6.6, −0.0], mistral
+−0.5, pooled −3.0 [−4.9, −1.2]. Page v34. Sets 44-45 running (started 16:16, ETA ~00:15).
+**Feed test (LD-17 item 4):** `run_feed.py` smoke on set 40, llama crowd, 6 people: 90/90 valid both modes, counts
+shown up to 5 likes, ~2.4 min → 50 people ≈ 20 min (llama), ~6 (gemma), ~24 (mistral). Full run queued after
+sets 44-45: sets 40-43 x crowds llama/gemma/mistral x visible/hidden = 24 runs (~7 h, ETA ~07:00),
+`data/llm_bias/feeds/`, progress in `data/llm_bias/feed_campaign.log`.

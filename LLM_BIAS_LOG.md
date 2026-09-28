@@ -1389,3 +1389,8 @@ gemma 95 % (kappa 0.88), llama 85 % (0.72), mistral 97 % (0.73; its chance agree
 nearly everything). Across AIs on the same person and post: llama-gemma 0.26, llama-mistral 0.10, gemma-mistral
 0.21. Same pattern as LF-22: each AI is steady, different AIs play the same person differently.
 Page v32 shows the length check, recognition and retest under the three-AI section.
+
+**2026-09-28 08:43:** post set 43, world 0 finished (3,750 decisions, resumed from the 05:23 stop; check: 3,748 valid,
+8 answers cut off at the 80-token cap, 2 of them still invalid after retries — mostly mistral's long reasons).
+Campaign stopped at 08:43 before world 1 got going (world 1's 19 seconds are on disk, resumable). Set 43 needs
+worlds 1-2 to count.

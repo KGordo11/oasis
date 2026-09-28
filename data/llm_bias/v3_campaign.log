@@ -51,3 +51,11 @@
 2026-09-28 05:23:20 campaign stopped after set 42 (set 43 would end after 09:00)
 2026-09-28 05:45:00 recognition done
 2026-09-28 07:14:01 morning chain done
+2026-09-28 07:20:38 v3 campaign start seeds=[43] agents=50
+2026-09-28 07:20:38 start v3_s43_w0 --resume
+07:57:35 llama3.1:8b: done 1275 in 29.5 min (1.39 s/decision) {'like': 812, 'nothing': 350, 'dislike': 113}
+08:05:57 gemma4:e2b: done 1275 in 8.3 min (0.39 s/decision) {'like': 938, 'nothing': 226, 'dislike': 111}
+08:43:24 mistral:7b: done 1200 in 37.4 min (1.87 s/decision) {'like': 1133, 'nothing': 54, 'dislike': 11, 'cut_off': 2}
+2026-09-28 08:43:25 end v3_s43_w0 rc=0
+2026-09-28 08:43:25 start v3_s43_w1 
+2026-09-28 08:43:44 stopped before 09:00 (v3_s43_w0 3750 decisions)

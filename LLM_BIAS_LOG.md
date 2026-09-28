@@ -1449,3 +1449,10 @@ randomness 13.1 %.
 low cross-AI agreement (kappa). The decomposition shows the description matters most on its own, and which AI
 plays the person matters about as much once its person-post quirks are counted. Pages updated to say
 "about as much as".
+
+**Page rebuilt around the answer (2026-09-28 ~10:45), Scroll Test v33:** opens with the three-AI result (one tile per
+AI with its range), a "how to read the numbers" box, five key findings (every AI favours its own posts; not on purpose;
+not mostly length/simple style; display format doesn't matter; who plays a person matters about as much as who they
+are), then every test in order (test 1-4, each with its full details folded underneath), the look-up tool (table now
+scrolls in its own box), timing charts (folded), links to every data file on GitHub, and what's next. Every number has a
+"Where this comes from" line linking the exact file on the public repo.

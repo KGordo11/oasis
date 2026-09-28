@@ -557,7 +557,7 @@ which AI is the one playing favourites. These two bars show it is mostly gemma.<
 <p>Every person was played by both AIs on the same posts. If the person's description decided everything, the two
 versions would always agree. They match only {sp['all']['agree_%']:.0f} times in 100. Two players who simply like, dislike
 and skip as often as these two do would match {sp['all']['chance_%']:.0f} times in 100 by luck alone. On topics the person
-doesn't like, they match no more often than luck. So which AI is playing matters more than who the person is supposed to be.</p>
+doesn't like, they match no more often than luck. So which AI is playing changes a lot about how a person reacts (the newest test measures exactly how much).</p>
 {example}
 {match_bars([("All posts", sp['all']['agree_%'], sp['all']['chance_%']),
              ("Topics the person likes", sp['cares']['agree_%'], sp['cares']['chance_%']),
@@ -953,10 +953,33 @@ button:focus-visible, select:focus-visible, input:focus-visible, summary:focus-v
 .tally { display:flex; gap:16px; flex-wrap:wrap; font-size:14px; }
 .chip { display:inline-block; font:600 12px/1 var(--sans); padding:4px 7px; border-radius:4px; background:var(--chipbg); margin-right:6px; }
 .chip.like { color:var(--like); } .chip.dislike { color:var(--dislike); } .chip.skip { color:var(--skip); }
+#lkOut .scroll { max-height:70vh; overflow:auto; border:1px solid var(--rule); border-radius:6px; }
+#lkOut thead th { position:sticky; top:0; background:var(--paper); }
 .rt td { font-size:13.5px; } .rt .why { color:var(--muted); } .rt tr.diff td { background:var(--chipbg); }
 .tag { display:inline-block; font-size:11.5px; padding:1px 6px; border-radius:10px; border:1px solid var(--rule); color:var(--muted); white-space:nowrap; }
 .person { display:grid; gap:4px; font-size:14.5px; } .person h4 { font:700 18px var(--sans); margin:0; }
 .ints { display:flex; gap:6px; flex-wrap:wrap; }
+/* answer-first layout */
+h4 { font:700 16px/1.3 var(--sans); margin:18px 0 0; }
+.answer { background:var(--paper); border:1px solid var(--rule); border-radius:10px; padding:18px 20px; display:grid; gap:10px; margin-top:14px; }
+.answer .q { font:600 13px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--accent); margin:0; }
+.answer .a { font-size:19px; margin:0; }
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:10px; }
+.tile { border:1px solid var(--rule); border-top:5px solid var(--rule); border-radius:8px; padding:12px 14px; background:var(--ground); font-family:var(--sans); display:grid; gap:2px; }
+.tile.s1 { border-top-color:var(--s1); } .tile.s2 { border-top-color:var(--s2); } .tile.s3 { border-top-color:var(--s3); }
+.tile .who { font-weight:700; font-size:15px; } .tile .big { font:800 38px/1.1 var(--sans); font-variant-numeric:tabular-nums; }
+.tile .unit { font-size:13px; color:var(--muted); line-height:1.3; } .tile .rng { font-size:12.5px; color:var(--muted); margin-top:4px; font-variant-numeric:tabular-nums; }
+.src { font:12.5px/1.5 var(--mono); color:var(--muted); margin:6px 0 0; overflow-wrap:anywhere; }
+.src a { color:var(--accent); }
+a { color:var(--accent); }
+.card { background:var(--paper); border:1px solid var(--rule); border-radius:10px; padding:16px 18px; margin-top:12px; }
+.card h3 { margin-top:0; }
+details.read, details.how { margin-top:16px; } details.read ul { margin:8px 0 0; padding-left:20px; font-size:16px; }
+.timeline { display:grid; gap:14px; margin-top:12px; }
+.test { background:var(--paper); border:1px solid var(--rule); border-left:5px solid var(--accent); border-radius:10px; padding:14px 18px; }
+.test .tag { font:600 12px/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; color:var(--muted); margin:0; }
+.test h3 { margin-top:6px; } .test details { background:var(--ground); }
+ol.next { max-width:68ch; display:grid; gap:6px; }
 @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
 """
 
@@ -1077,6 +1100,228 @@ to see every choice they made. Shaded rows are where the AIs made different choi
 </div>"""
 
 
+GH = "https://github.com/KGordo11/oasis/blob/llm-bias/"
+
+
+def src(*paths):
+    """'Where this came from' line: every file linked on GitHub (public repo, branch llm-bias)."""
+    links = " · ".join(f'<a href="{GH}{p}">{E(p.split("/")[-1])}</a>' for p in paths)
+    return f'<p class="src">Where this comes from: {links}</p>'
+
+
+def jload(name):
+    p = os.path.join(DATA, name)
+    return json.load(open(p)) if os.path.exists(p) else None
+
+
+def demote(html_):
+    """Nest an older section inside a test card: h3 -> h4, h2 -> h3."""
+    return html_.replace("<h3>", "<h4>").replace("</h3>", "</h4>").replace("<h2>", "<h3>").replace("</h2>", "</h3>")
+
+
+def v3_per_set():
+    """Own-post like boost per AI in each three-AI post set (same double difference as the headline)."""
+    try:
+        import analyze
+        import analyze_world
+        L = analyze_world.to_long(analyze_world.load(prefix="v3_"))
+    except Exception:
+        return ""
+    if not len(L):
+        return ""
+    ms = [m for m in ("llama3.1:8b", "gemma4:e2b", "mistral:7b") if m in set(L["judge"])]
+    rows = ""
+    for sd, g in L.groupby("seed"):
+        d = analyze.did(g, "up")
+        rows += f"<tr><td>Post set {sd}</td>" + "".join(f"<td class='num'>{100 * d[m]:+.1f}</td>" for m in ms) + \
+                f"<td class='num'><b>{100 * d['_pooled']:+.1f}</b></td></tr>"
+    head = "".join(f"<th class='num'>{NICE[m]}</th>" for m in ms)
+    return (f"<div class='scroll'><table class='plain'><caption>Extra likes per 100 for the AI's own posts, one post set at a "
+            f"time</caption><thead><tr><th></th>{head}<th class='num'>all three</th></tr></thead><tbody>{rows}</tbody></table></div>")
+
+
+def hero():
+    r = jload("analysis_v3.json")
+    if not r:
+        return "<p class='muted'>The newest test is still running.</p>"
+    sets = sorted({int(w.split("_s")[1].split("_")[0]) for w in r["worlds"]})
+    ms = [m for m in ("gemma4:e2b", "mistral:7b", "llama3.1:8b") if m in r["judges"]]
+    tiles = ""
+    for m in ms:
+        u = r["sp_up"][m]
+        e, lo, hi = 100 * u["est"], 100 * u["ci95"][0], 100 * u["ci95"][1]
+        tiles += (f"<div class='tile {CLS[m]}'><div class='who'>{NICE[m]}</div><div class='big'>{e:+.1f}</div>"
+                  f"<div class='unit'>extra likes per 100<br>for its own posts</div><div class='rng'>fairly sure: {lo:+.1f} to {hi:+.1f}</div></div>")
+    pu = r["sp_up"]["_pooled"]
+    return f"""
+<p class="lede">We made a pretend Reddit where AI programs write the posts <em>and</em> pretend to be the people reading them.
+The question: <b>when an AI pretends to be a person, does that person like the AI's own posts more?</b> If so, any
+simulation that uses AIs as a pretend crowd is quietly tilted toward that AI's writing.</p>
+<div class="answer"><p class="q">The answer so far</p>
+<p class="a"><b>Yes.</b> Three AIs (llama, gemma and mistral) each wrote posts and each played the same 50 people.
+Every one of them liked its own posts more than the other AIs liked those same posts: about
+<b>{100 * pu['est']:.0f} extra likes for every 100 posts</b> (we are fairly sure it is between {100 * pu['ci95'][0]:.0f} and
+{100 * pu['ci95'][1]:.0f}). It showed up in every post set, and the AIs can't even tell which posts are theirs.</p>
+<div class="tiles">{tiles}</div>
+{src("data/llm_bias/analysis_v3.json", "data/llm_bias/analysis_v3.txt")}
+<p class="cap">Based on {len(sets)} post sets ({', '.join(map(str, sets))}): {r['n_valid']:,} reactions from {r['personas']} people to {r['posts']} posts.</p></div>"""
+
+
+def how_to_read():
+    return """<details class="read" open><summary>How to read the numbers on this page</summary>
+<ul>
+<li><b>“per 100”</b>: out of every 100 posts a person sees. “+7 extra likes per 100” means 7 more likes than expected for
+every 100 posts.</li>
+<li><b>“Extra likes for its own posts”</b>: we compare two gaps. How much more an AI's people like that AI's posts than the
+other AIs' posts, minus the same gap for people played by the other AIs, on the very same posts. If one AI simply writes
+better posts, everyone likes them more and the gaps cancel. What is left is favouritism. (Grown-ups call this a
+<em>double difference</em>.)</li>
+<li><b>“Fairly sure: A to B”</b>: we re-did the maths thousands of times on reshuffled people and posts. The true number
+lands in this range 95 times out of 100. If the range includes 0, “no favouritism at all” is still possible. (A 95 %
+<em>cluster bootstrap</em>.)</li>
+<li><b>A post set</b> is one batch of posts: every AI writes one post for each of 25 instructions (5 topics × 5).</li>
+<li><b>Where this comes from</b> lines link to the exact data file on GitHub, so anyone can check the numbers.</li>
+</ul></details>"""
+
+
+def key_findings():
+    out = ['<h2>What we found</h2>']
+    r3 = jload("analysis_v3.json")
+    if r3:
+        out.append(f"""<div class="find card"><h3>1. Every AI favours its own posts, every time</h3>
+<p>In the newest test, all three AIs gave their own posts more likes, and llama and gemma also gave them fewer dislikes.
+It wasn't a fluke of one batch: it showed up in every post set.</p>{v3_per_set()}
+{src("data/llm_bias/analysis_v3.json", "LLM_BIAS_LOG.md")}</div>""")
+    rec = jload("recognition_v3_pooled.json")
+    if rec:
+        li = ", ".join(f"{NICE[m]} {v['claims_own_%']:.0f}" for m, v in rec.items())
+        out.append(f"""<div class="find card"><h3>2. They don't do it on purpose</h3>
+<p>We showed each AI three posts written from the same instructions and asked “which one is yours?”. Guessing would be right
+33 times in 100. They picked their own {li} times in 100, which is not clearly better than the other AIs pointing at those
+same posts. So the AIs can't tell which posts are theirs. They just like writing that sounds like theirs.</p>
+{src("data/llm_bias/recognition_v3_pooled.json", "examples/experiment/llm_bias/recognize.py")}</div>""")
+    lc, ta = jload("v3_length_check.json"), jload("taste_v3.json")
+    if lc and ta:
+        a = lc["self only"]["self"][0]
+        b = lc["self + judge-specific length taste"]["self"][0]
+        fp = ta["fingerprint"]
+        out.append(f"""<div class="find card"><h3>3. It isn't mostly about length or simple style</h3>
+<p>Each AI has a writing fingerprint. Llama writes about {fp['llama3.1:8b']['words']:.0f} words, gemma about
+{fp['gemma4:e2b']['words']:.0f} and mistral about {fp['mistral:7b']['words']:.0f}; mistral uses three times as many
+exclamation marks. Some of the favouritism follows these habits (gemma's people like longer posts). But length alone explains
+only a small part ({a:.1f} → {b:.1f} in the model's units), and all 11 simple features we measured together explain about
+{ta['own_post_term']['share_explained_%']:.0f} in 100 parts. The rest is subtler: word choice, tone, “sounds like me”.</p>
+{src("data/llm_bias/v3_length_check.json", "data/llm_bias/taste_v3.json", "examples/experiment/llm_bias/taste.py")}</div>""")
+    ab = jload("analysis_ab.json")
+    if ab:
+        fe = ab["effects_points"]["format_effect_up"]
+        out.append(f"""<div class="find card"><h3>4. How the posts are shown doesn't matter</h3>
+<p>We showed the same posts to the same people two ways: one at a time, like scrolling a feed, and two side by side. The
+favouritism was about the same both ways (difference {fe['est']:+.1f} per 100, fairly sure between {fe['ci95'][0]:+.1f} and
+{fe['ci95'][1]:+.1f}), across {len(ab['post_sets'])} post sets and {ab['reactions']:,} reactions.</p>
+{src("data/llm_bias/analysis_ab.json", "examples/experiment/llm_bias/analyze_ab.py")}</div>""")
+    va = jload("variance_v3.json")
+    if va:
+        sm = va["summary_like_%"]
+        labels = [("from the person's description", "the person's description (who they are and which topics they like)"),
+                  ("from which AI plays them", "which AI plays them"),
+                  ("from the post itself", "the post itself"),
+                  ("dice", "pure chance (measured by re-running)"),
+                  ("other leftover", "other quirks (mostly one AI on one person and post)")]
+        bars = ""
+        for key, lab in labels:
+            v = next(x for k, x in sm.items() if k.startswith(key))
+            bars += (f"<div class='mrow'><div class='mlab'>{E(lab)}</div><div class='mbars'><div class='mb'>"
+                     f"<span class='fill acc' style='width:{v:.1f}%'></span><b>{v:.0f} in 100</b></div></div></div>")
+        out.append(f"""<div class="find card"><h3>5. Who plays a person matters about as much as who they are</h3>
+<p>Why did a person like a post or not? We split the reasons, like slicing a pie. The person's own description is the
+biggest single slice. But which AI plays them is a big slice too, and different AIs playing the very same person on the very
+same post often disagree. Anyone using AIs as pretend people should know the choice of AI changes the crowd.</p>
+<div class="match">{bars}</div>
+{src("data/llm_bias/variance_v3.json", "data/llm_bias/retest_v3_s40.json", "examples/experiment/llm_bias/variance.py")}</div>""")
+    return "".join(out)
+
+
+def story(res, ex):
+    """Every test in order: what we did, what we found, where it came from, and the full details."""
+    c1 = jload("analysis_combined_s1_s2.json")
+    t1 = ""
+    if c1:
+        sp = c1["sp_chosen"]["_pooled"]
+        t1 = (f"Seven AIs each wrote a post; each AI then played 99 people who picked their favourite of the seven. The AIs picked "
+              f"their own post {100 * sp['est']:.1f} more times per 100 (fairly sure {100 * sp['ci95'][0]:.1f} to {100 * sp['ci95'][1]:.1f}).")
+    r2 = res
+    t2 = ""
+    if r2:
+        u = r2["sp_up"]["_pooled"]
+        t2 = (f"Two AIs (llama and gemma) wrote posts; 99 people scrolled every post one at a time. Over 7 post sets the lean was "
+              f"small and unclear: {100 * u['est']:+.1f} likes per 100 (fairly sure {100 * u['ci95'][0]:+.1f} to {100 * u['ci95'][1]:+.1f}). "
+              f"With only two AIs, one number has to cover both, and single post sets swung a lot.")
+    ab = jload("analysis_ab.json")
+    t3 = ""
+    if ab:
+        e = ab["effects_points"]
+        t3 = (f"Same two AIs, posts kept to similar lengths, 50 people, and every post set shown two ways. Showing posts side by side "
+              f"made no difference ({e['format_effect_up']['est']:+.1f}), and a small lean appeared both ways "
+              f"(one at a time {e['scroll_up']['est']:+.1f}, side by side {e['pair_up']['est']:+.1f} likes per 100).")
+    r3 = jload("analysis_v3.json")
+    t4 = ""
+    if r3:
+        pu = r3["sp_up"]["_pooled"]
+        t4 = (f"A third AI (mistral) joined. All three wrote posts however they liked (no length rules) and played the same 50 people, "
+              f"each person played by all three AIs. Clear answer: {100 * pu['est']:+.1f} likes per 100 for the AI's own posts.")
+    step = f"""<ol class="steps">
+<li><b>Writing.</b> Every AI gets the exact same instructions for each post, like “a 24-year-old asks for advice about paying off
+a credit card”, on five topics ({", ".join(TOPICS[t]["name"].lower() for t in PRIMARY)}). So posts written from the same
+instructions differ only in which AI wrote them.</li>
+<li><b>No names, no scores.</b> Posts go up on one pretend Reddit (the OASIS simulator). Nobody sees who wrote a post or how many likes it has.</li>
+<li><b>The same people every time.</b> 99 made-up people with ages, jobs, hometowns and favourite topics, written by a computer
+program, not an AI. They never change; the computer checks this before every run.</li>
+<li><b>Everyone plays everyone.</b> The runs are repeated with the AIs swapped, so every person is played by every AI on the same posts.</li>
+<li><b>Scrolling.</b> Each person sees each post and picks like, dislike or skip, and says why in a few words.</li></ol>"""
+    cards = [
+        ("Test 1 · night 1", "Seven AIs pick a favourite", t1,
+         '<p>Full details are on the <a href="https://claude.ai/artifact/JRWXc8bgCYU6bXaV3okZC9">Test 1 page</a>.</p>',
+         ["data/llm_bias/analysis_combined_s1_s2.json"]),
+        ("Test 2 · 7 post sets", "Two AIs, scrolling one post at a time", t2,
+         demote(results(res)) + "<h4>More from test 2</h4>" + demote(findings(ex, res)) + demote(nothing_section(res)),
+         ["data/llm_bias/analysis_v2.json", "data/llm_bias/explore_v2.json", "data/llm_bias/export"]),
+        ("Test 3 · 15 post sets", "Side by side vs one at a time", t3, demote(ab_section()),
+         ["data/llm_bias/analysis_ab.json", "data/llm_bias/export_ab"]),
+        ("Test 4 · now", "Three AIs, posts written freely", t4, demote(v3_section()),
+         ["data/llm_bias/analysis_v3.json", "data/llm_bias/export_v3", "data/llm_bias/recognition_v3_pooled.json"]),
+    ]
+    out = ['<h2>How we got here: every test, in order</h2><p>We ran four tests. Each one fixed a weakness of the one before.</p>',
+           "<details class='how'><summary>How every test works</summary>" + step + "</details>", '<div class="timeline">']
+    for tag, title, text, detail, files in cards:
+        out.append(f"""<section class="test"><p class="tag">{E(tag)}</p><h3>{E(title)}</h3><p>{text}</p>{src(*files)}
+<details><summary>See everything from this test</summary>{detail}</details></section>""")
+    out.append("</div>")
+    return "".join(out)
+
+
+def data_files():
+    rows = [("LLM_BIAS_LOG.md", "The full lab notebook: every decision, run, result and correction, in order."),
+            ("LLM_BIAS_DATA_DICTIONARY.md", "What every column in every data file means."),
+            ("data/llm_bias/export", "Test 2 tables: every reaction, post and person (open in Excel or Google Sheets)."),
+            ("data/llm_bias/export_ab", "Test 3 tables (both display formats)."),
+            ("data/llm_bias/export_v3", "Test 4 tables (three AIs)."),
+            ("data/llm_bias/worlds", "The raw records of every run: each decision as it happened, plus the settings used."),
+            ("examples/experiment/llm_bias", "The code that runs the simulations and does the maths.")]
+    body = "".join(f"<tr><td><a href='{GH.replace('/blob/', '/tree/')}{p}'>{E(p)}</a></td><td>{E(d)}</td></tr>" for p, d in rows)
+    return f"""<h2>All the data</h2><p>Everything is public on GitHub, so anyone can check the numbers or redo the maths.</p>
+<div class='scroll'><table class='plain'><thead><tr><th>Where</th><th>What's in it</th></tr></thead><tbody>{body}</tbody></table></div>"""
+
+
+def next_steps():
+    return """<h2>What's next</h2><ol class="next">
+<li><b>Finish the three-AI test</b> at 6 post sets (40-45), a number fixed before seeing more results.</li>
+<li><b>Same-company AIs:</b> does llama favour posts by its smaller sibling (llama3.2) too?</li>
+<li><b>A real feed:</b> with visible like counts and ranking, does one AI's writing rise to the top?</li>
+<li><b>Bigger runs</b> on a faster computer with more AIs (qwen, phi).</li>
+<li><b>A plain-language write-up</b> of the whole project.</li></ol>"""
+
+
 def build(ap=None, xp=None):
     ap = ap or os.path.join(DATA, "analysis_v2.json")
     xp = xp or os.path.join(DATA, "explore_v2.json")
@@ -1092,42 +1337,18 @@ def build(ap=None, xp=None):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>{CSS}</style>
 <div class="wrap">
-<p class="kicker">LLM Bias · test 2 · local AIs only · updated {now} · {len(sets)} post sets done{f" ({res['n_valid']:,} reactions)" if res else ""}</p>
+<p class="kicker">LLM Bias · local AIs only · updated {now}</p>
 <h1>Do AIs like their own posts?</h1>
-<p class="lede">We asked two AI programs, <b>llama</b> and <b>gemma</b>, to write posts for a pretend Reddit. Then the same
-two AIs pretended to be 99 different people, like Marcus, a 68-year-old retired mail carrier in Dublin. Each pretend person
-scrolls through every post and picks <b>like</b>, <b>dislike</b> or <b>skip</b>. The big question: when llama is pretending
-to be Marcus, does Marcus like llama's posts more? If so, the AI is secretly cheering for itself.</p>
-<p>Why it matters: researchers are starting to use AIs as pretend crowds to test ideas before trying them on real people.
-If an AI quietly favours its own writing, those tests are unfair.</p>
-
-<h2>The answer so far</h2>
-{results(res)}
-
-<h2>How the test works</h2>
-<ol class="steps">
-<li><b>Writing.</b> Both AIs write 25 posts each on the same five topics ({topics}). For every post, both AIs get the exact
-same instructions, like “a 24-year-old asks for advice about paying off a credit card”. So each pair of posts differs only in
-which AI wrote it. That makes 50 posts per <b>post set</b>.</li>
-<li><b>No names, no scores.</b> All 50 posts go up on one pretend Reddit. Nobody can see who wrote a post or how many likes it has.</li>
-<li><b>The same 99 people every time.</b> We made 99 people with ages, jobs, hometowns and favourite topics. They never
-change; the computer checks this before every run. In the first round llama plays half of them and gemma plays the other half.
-In the second round the two AIs swap, so every person gets played by both AIs on the same posts.</li>
-<li><b>Scrolling.</b> Each person sees every post, one at a time, starting with their favourite topic. For each post they
-pick like, dislike or skip, and say why in a few words.</li>
-</ol>
-
-{v3_section()}
-
-{ab_section()}
-
-<h2>What else we found</h2>
-{findings(ex, res)}
+{hero()}
+{how_to_read()}
+{key_findings()}
+{story(res, ex)}
 
 {TOOL}
-{nothing_section(res)}
-{timing_section()}
-{data_section()}
+<details class="how"><summary>How long the simulations take (timing charts)</summary>{demote(timing_section())}</details>
+{data_files()}
+{demote(data_section())}
+{next_steps()}
 </div>
 <script>window.LOOKUP_SETS = {lookup_sets};</script>
 <script src="world_data.js"></script>

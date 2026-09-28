@@ -1,0 +1,309 @@
+2026-09-26 08:52:00 A/B campaign start seeds=[20 21 22 23 24 25 26] agents=50
+2026-09-26 08:52:00 start ab_s20_scroll_w0 
+08:52:03 WARNING 1 slots dropped (a post is missing): [('cars', 1)]
+09:15:55 llama3.1:8b: done 1200 in 23.7 min (1.19 s/decision) {'like': 753, 'dislike': 50, 'nothing': 397}
+09:22:26 gemma4:e2b: done 1200 in 6.5 min (0.33 s/decision) {'dislike': 109, 'like': 830, 'nothing': 261}
+2026-09-26 09:22:26 end ab_s20_scroll_w0 rc=0
+2026-09-26 09:22:26 start ab_s20_scroll_w1 
+09:22:30 WARNING 1 slots dropped (a post is missing): [('cars', 1)]
+09:46:30 llama3.1:8b: done 1200 in 23.9 min (1.19 s/decision) {'like': 729, 'nothing': 398, 'dislike': 73}
+09:53:02 gemma4:e2b: done 1200 in 6.5 min (0.33 s/decision) {'like': 872, 'nothing': 233, 'dislike': 95}
+2026-09-26 09:53:02 end ab_s20_scroll_w1 rc=0
+2026-09-26 09:53:02 start ab_s20_pair_w0 
+09:53:06 WARNING 1 slots dropped (a post is missing): [('cars', 1)]
+10:14:57 llama3.1:8b: done 600 in 21.7 min (2.17 s/decision) {'like': 810, 'dislike': 220, 'nothing': 170}
+10:20:34 gemma4:e2b: done 600 in 5.6 min (0.56 s/decision) {'like': 859, 'dislike': 73, 'nothing': 268}
+2026-09-26 10:20:35 end ab_s20_pair_w0 rc=0
+2026-09-26 10:20:35 start ab_s20_pair_w1 
+10:20:39 WARNING 1 slots dropped (a post is missing): [('cars', 1)]
+10:41:54 llama3.1:8b: done 600 in 21.1 min (2.11 s/decision) {'like': 764, 'dislike': 273, 'nothing': 163}
+10:47:31 gemma4:e2b: done 600 in 5.6 min (0.56 s/decision) {'nothing': 229, 'like': 905, 'dislike': 66}
+2026-09-26 10:47:32 end ab_s20_pair_w1 rc=0
+2026-09-26 10:47:32 post set 20 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-26 10:47:32 start ab_s21_pair_w0 
+10:52:47 WARNING 2 slots dropped (a post is missing): [('personal_finance', 1), ('personal_finance', 2)]
+11:13:33 llama3.1:8b: done 575 in 20.6 min (2.15 s/decision) {'like': 843, 'nothing': 143, 'dislike': 164}
+11:18:55 gemma4:e2b: done 575 in 5.4 min (0.56 s/decision) {'like': 881, 'dislike': 88, 'nothing': 181}
+2026-09-26 11:18:55 end ab_s21_pair_w0 rc=0
+2026-09-26 11:18:55 start ab_s21_pair_w1 
+11:18:59 WARNING 2 slots dropped (a post is missing): [('personal_finance', 1), ('personal_finance', 2)]
+11:39:50 llama3.1:8b: done 575 in 20.7 min (2.16 s/decision) {'like': 788, 'dislike': 212, 'nothing': 150}
+11:45:14 gemma4:e2b: done 575 in 5.4 min (0.56 s/decision) {'like': 902, 'nothing': 153, 'dislike': 95}
+2026-09-26 11:45:14 end ab_s21_pair_w1 rc=0
+2026-09-26 11:45:14 start ab_s21_scroll_w0 
+11:45:18 WARNING 2 slots dropped (a post is missing): [('personal_finance', 1), ('personal_finance', 2)]
+12:08:08 llama3.1:8b: done 1150 in 22.7 min (1.19 s/decision) {'like': 768, 'nothing': 345, 'dislike': 37}
+12:14:25 gemma4:e2b: done 1150 in 6.3 min (0.33 s/decision) {'like': 809, 'dislike': 156, 'nothing': 185}
+2026-09-26 12:14:25 end ab_s21_scroll_w0 rc=0
+2026-09-26 12:14:25 start ab_s21_scroll_w1 
+12:14:29 WARNING 2 slots dropped (a post is missing): [('personal_finance', 1), ('personal_finance', 2)]
+12:37:28 llama3.1:8b: done 1150 in 22.9 min (1.19 s/decision) {'like': 726, 'nothing': 356, 'dislike': 68}
+12:43:43 gemma4:e2b: done 1150 in 6.2 min (0.33 s/decision) {'nothing': 146, 'like': 872, 'dislike': 132}
+2026-09-26 12:43:43 end ab_s21_scroll_w1 rc=0
+2026-09-26 12:43:43 post set 21 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-26 12:43:43 start ab_s22_scroll_w0 
+13:13:14 llama3.1:8b: done 1250 in 24.5 min (1.17 s/decision) {'like': 826, 'dislike': 38, 'nothing': 386}
+13:19:56 gemma4:e2b: done 1250 in 6.7 min (0.32 s/decision) {'like': 994, 'dislike': 142, 'nothing': 114}
+2026-09-26 13:19:57 end ab_s22_scroll_w0 rc=0
+2026-09-26 13:19:57 start ab_s22_scroll_w1 
+13:44:32 llama3.1:8b: done 1250 in 24.4 min (1.17 s/decision) {'like': 800, 'nothing': 394, 'dislike': 56}
+13:51:16 gemma4:e2b: done 1250 in 6.7 min (0.32 s/decision) {'like': 1032, 'dislike': 131, 'nothing': 87}
+2026-09-26 13:51:17 end ab_s22_scroll_w1 rc=0
+2026-09-26 13:51:17 start ab_s22_pair_w0 
+14:13:37 llama3.1:8b: done 625 in 22.1 min (2.13 s/decision) {'like': 939, 'dislike': 157, 'nothing': 154}
+14:19:22 gemma4:e2b: done 625 in 5.8 min (0.55 s/decision) {'like': 990, 'nothing': 175, 'dislike': 85}
+2026-09-26 14:19:23 end ab_s22_pair_w0 rc=0
+2026-09-26 14:19:23 start ab_s22_pair_w1 
+14:41:19 llama3.1:8b: done 625 in 21.7 min (2.09 s/decision) {'like': 876, 'dislike': 192, 'nothing': 182}
+14:47:06 gemma4:e2b: done 625 in 5.8 min (0.55 s/decision) {'like': 1017, 'nothing': 163, 'dislike': 70}
+2026-09-26 14:47:06 end ab_s22_pair_w1 rc=0
+2026-09-26 14:47:06 post set 22 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-26 14:47:06 start ab_s23_pair_w0 
+15:13:52 llama3.1:8b: done 625 in 21.8 min (2.09 s/decision) {'like': 904, 'dislike': 167, 'nothing': 179}
+15:19:40 gemma4:e2b: done 625 in 5.8 min (0.56 s/decision) {'like': 932, 'dislike': 44, 'nothing': 274}
+2026-09-26 15:19:41 end ab_s23_pair_w0 rc=0
+2026-09-26 15:19:41 start ab_s23_pair_w1 
+15:41:48 llama3.1:8b: done 625 in 21.9 min (2.10 s/decision) {'like': 833, 'nothing': 190, 'dislike': 227}
+15:47:36 gemma4:e2b: done 625 in 5.8 min (0.56 s/decision) {'nothing': 273, 'like': 929, 'dislike': 48}
+2026-09-26 15:47:36 end ab_s23_pair_w1 rc=0
+2026-09-26 15:47:36 start ab_s23_scroll_w0 
+16:12:31 llama3.1:8b: done 1250 in 24.7 min (1.19 s/decision) {'like': 773, 'nothing': 429, 'dislike': 48}
+16:19:14 gemma4:e2b: done 1250 in 6.7 min (0.32 s/decision) {'like': 936, 'dislike': 84, 'nothing': 230}
+2026-09-26 16:19:15 end ab_s23_scroll_w0 rc=0
+2026-09-26 16:19:15 start ab_s23_scroll_w1 
+16:44:07 llama3.1:8b: done 1250 in 24.7 min (1.18 s/decision) {'like': 765, 'nothing': 406, 'dislike': 79}
+16:50:52 gemma4:e2b: done 1250 in 6.7 min (0.32 s/decision) {'like': 996, 'dislike': 73, 'nothing': 181}
+2026-09-26 16:50:52 end ab_s23_scroll_w1 rc=0
+2026-09-26 16:50:53 post set 23 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-26 16:50:53 start ab_s24_scroll_w0 
+16:55:54 WARNING 2 slots dropped (a post is missing): [('cooking', 2), ('cooking', 3)]
+17:19:01 llama3.1:8b: done 1150 in 23.0 min (1.20 s/decision) {'like': 735, 'nothing': 372, 'dislike': 43}
+17:25:13 gemma4:e2b: done 1150 in 6.2 min (0.32 s/decision) {'like': 834, 'dislike': 78, 'nothing': 238}
+2026-09-26 17:25:13 end ab_s24_scroll_w0 rc=0
+2026-09-26 17:25:13 start ab_s24_scroll_w1 
+17:25:17 WARNING 2 slots dropped (a post is missing): [('cooking', 2), ('cooking', 3)]
+17:48:17 llama3.1:8b: done 1150 in 22.9 min (1.19 s/decision) {'nothing': 369, 'like': 716, 'dislike': 65}
+17:54:31 gemma4:e2b: done 1150 in 6.2 min (0.32 s/decision) {'like': 895, 'nothing': 191, 'dislike': 64}
+2026-09-26 17:54:31 end ab_s24_scroll_w1 rc=0
+2026-09-26 17:54:31 start ab_s24_pair_w0 
+17:54:35 WARNING 2 slots dropped (a post is missing): [('cooking', 2), ('cooking', 3)]
+18:15:05 llama3.1:8b: done 575 in 20.4 min (2.13 s/decision) {'like': 829, 'nothing': 169, 'dislike': 152}
+18:20:25 gemma4:e2b: done 575 in 5.3 min (0.56 s/decision) {'like': 867, 'nothing': 243, 'dislike': 40}
+2026-09-26 18:20:26 end ab_s24_pair_w0 rc=0
+2026-09-26 18:20:26 start ab_s24_pair_w1 
+18:20:30 WARNING 2 slots dropped (a post is missing): [('cooking', 2), ('cooking', 3)]
+18:40:54 llama3.1:8b: done 575 in 20.3 min (2.12 s/decision) {'like': 762, 'nothing': 167, 'dislike': 221}
+18:46:16 gemma4:e2b: done 575 in 5.4 min (0.56 s/decision) {'nothing': 218, 'like': 888, 'dislike': 44}
+2026-09-26 18:46:17 end ab_s24_pair_w1 rc=0
+2026-09-26 18:46:17 post set 24 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-26 18:46:17 start ab_s25_pair_w0 
+19:11:42 llama3.1:8b: done 625 in 22.0 min (2.11 s/decision) {'like': 964, 'dislike': 127, 'nothing': 159}
+19:17:31 gemma4:e2b: done 625 in 5.8 min (0.56 s/decision) {'like': 1096, 'nothing': 126, 'dislike': 28}
+2026-09-26 19:17:31 end ab_s25_pair_w0 rc=0
+2026-09-26 19:17:31 start ab_s25_pair_w1 
+19:39:35 llama3.1:8b: done 625 in 21.9 min (2.10 s/decision) {'like': 902, 'nothing': 169, 'dislike': 179}
+19:45:24 gemma4:e2b: done 625 in 5.8 min (0.56 s/decision) {'like': 1126, 'nothing': 101, 'dislike': 23}
+2026-09-26 19:45:25 end ab_s25_pair_w1 rc=0
+2026-09-26 19:45:25 start ab_s25_scroll_w0 
+20:10:19 llama3.1:8b: done 1250 in 24.7 min (1.19 s/decision) {'like': 795, 'nothing': 419, 'dislike': 36}
+20:17:05 gemma4:e2b: done 1250 in 6.8 min (0.32 s/decision) {'like': 1065, 'nothing': 99, 'dislike': 86}
+2026-09-26 20:17:06 end ab_s25_scroll_w0 rc=0
+2026-09-26 20:17:06 start ab_s25_scroll_w1 
+20:41:58 llama3.1:8b: done 1250 in 24.7 min (1.18 s/decision) {'like': 797, 'nothing': 394, 'dislike': 59}
+20:48:46 gemma4:e2b: done 1250 in 6.8 min (0.33 s/decision) {'like': 1096, 'dislike': 66, 'nothing': 88}
+2026-09-26 20:48:46 end ab_s25_scroll_w1 rc=0
+2026-09-26 20:48:46 post set 25 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-26 20:48:46 start ab_s26_scroll_w0 
+20:56:11 WARNING 6 slots dropped (a post is missing): [('cars', 4), ('cooking', 2), ('farming', 2), ('personal_finance', 3), ('personal_finance', 4), ('tech', 1)]
+21:15:31 llama3.1:8b: done 950 in 19.2 min (1.22 s/decision) {'like': 598, 'nothing': 325, 'dislike': 27}
+21:20:43 gemma4:e2b: done 950 in 5.2 min (0.33 s/decision) {'like': 738, 'nothing': 135, 'dislike': 77}
+2026-09-26 21:20:44 end ab_s26_scroll_w0 rc=0
+2026-09-26 21:20:44 start ab_s26_scroll_w1 
+21:20:48 WARNING 6 slots dropped (a post is missing): [('cars', 4), ('cooking', 2), ('farming', 2), ('personal_finance', 3), ('personal_finance', 4), ('tech', 1)]
+21:40:08 llama3.1:8b: done 950 in 19.2 min (1.21 s/decision) {'like': 595, 'nothing': 312, 'dislike': 43}
+21:45:22 gemma4:e2b: done 950 in 5.2 min (0.33 s/decision) {'like': 799, 'dislike': 60, 'nothing': 91}
+2026-09-26 21:45:22 end ab_s26_scroll_w1 rc=0
+2026-09-26 21:45:22 start ab_s26_pair_w0 
+21:45:26 WARNING 6 slots dropped (a post is missing): [('cars', 4), ('cooking', 2), ('farming', 2), ('personal_finance', 3), ('personal_finance', 4), ('tech', 1)]
+22:02:28 llama3.1:8b: done 475 in 16.9 min (2.14 s/decision) {'like': 668, 'dislike': 116, 'nothing': 166}
+22:06:58 gemma4:e2b: done 475 in 4.5 min (0.57 s/decision) {'like': 744, 'nothing': 169, 'dislike': 37}
+2026-09-26 22:06:59 end ab_s26_pair_w0 rc=0
+2026-09-26 22:06:59 start ab_s26_pair_w1 
+22:07:03 WARNING 6 slots dropped (a post is missing): [('cars', 4), ('cooking', 2), ('farming', 2), ('personal_finance', 3), ('personal_finance', 4), ('tech', 1)]
+22:24:12 llama3.1:8b: done 475 in 17.0 min (2.15 s/decision) {'like': 633, 'nothing': 157, 'dislike': 160}
+22:28:41 gemma4:e2b: done 475 in 4.5 min (0.57 s/decision) {'like': 756, 'nothing': 165, 'dislike': 29}
+2026-09-26 22:28:41 end ab_s26_pair_w1 rc=0
+2026-09-26 22:28:42 post set 26 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-26 22:28:42 A/B campaign end
+2026-09-26 22:29:16 A/B campaign start seeds=[27 28 29 30] agents=50
+2026-09-26 22:29:16 start ab_s27_pair_w0 
+22:34:56 WARNING 3 slots dropped (a post is missing): [('cars', 2), ('cooking', 0), ('cooking', 2)]
+22:54:59 llama3.1:8b: done 550 in 19.9 min (2.18 s/decision) {'like': 790, 'dislike': 156, 'nothing': 154}
+23:00:10 gemma4:e2b: done 550 in 5.2 min (0.57 s/decision) {'like': 788, 'dislike': 64, 'nothing': 248}
+2026-09-26 23:00:11 end ab_s27_pair_w0 rc=0
+2026-09-26 23:00:11 start ab_s27_pair_w1 
+23:00:15 WARNING 3 slots dropped (a post is missing): [('cars', 2), ('cooking', 0), ('cooking', 2)]
+23:19:51 llama3.1:8b: done 550 in 19.5 min (2.13 s/decision) {'like': 739, 'dislike': 221, 'nothing': 140}
+23:25:02 gemma4:e2b: done 550 in 5.2 min (0.56 s/decision) {'like': 793, 'nothing': 231, 'dislike': 76}
+2026-09-26 23:25:02 end ab_s27_pair_w1 rc=0
+2026-09-26 23:25:02 start ab_s27_scroll_w0 
+23:25:06 WARNING 3 slots dropped (a post is missing): [('cars', 2), ('cooking', 0), ('cooking', 2)]
+23:47:17 llama3.1:8b: done 1100 in 22.1 min (1.20 s/decision) {'like': 673, 'nothing': 385, 'dislike': 42}
+23:53:16 gemma4:e2b: done 1100 in 6.0 min (0.33 s/decision) {'like': 730, 'dislike': 117, 'nothing': 253}
+2026-09-26 23:53:16 end ab_s27_scroll_w0 rc=0
+2026-09-26 23:53:16 start ab_s27_scroll_w1 
+23:53:20 WARNING 3 slots dropped (a post is missing): [('cars', 2), ('cooking', 0), ('cooking', 2)]
+00:15:14 llama3.1:8b: done 1100 in 21.8 min (1.19 s/decision) {'like': 682, 'nothing': 345, 'dislike': 73}
+00:21:15 gemma4:e2b: done 1100 in 6.0 min (0.33 s/decision) {'like': 798, 'nothing': 210, 'dislike': 92}
+2026-09-27 00:21:16 end ab_s27_scroll_w1 rc=0
+2026-09-27 00:21:16 post set 27 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-27 00:21:16 start ab_s28_scroll_w0 
+00:27:50 WARNING 1 slots dropped (a post is missing): [('cars', 4)]
+00:51:40 llama3.1:8b: done 1200 in 23.7 min (1.19 s/decision) {'nothing': 384, 'like': 779, 'dislike': 37}
+00:58:09 gemma4:e2b: done 1200 in 6.5 min (0.32 s/decision) {'like': 911, 'dislike': 124, 'nothing': 165}
+2026-09-27 00:58:10 end ab_s28_scroll_w0 rc=0
+2026-09-27 00:58:10 start ab_s28_scroll_w1 
+00:58:14 WARNING 1 slots dropped (a post is missing): [('cars', 4)]
+01:22:14 llama3.1:8b: done 1200 in 23.9 min (1.19 s/decision) {'like': 766, 'nothing': 390, 'dislike': 44}
+01:28:45 gemma4:e2b: done 1200 in 6.5 min (0.33 s/decision) {'like': 957, 'dislike': 104, 'nothing': 139}
+2026-09-27 01:28:45 end ab_s28_scroll_w1 rc=0
+2026-09-27 01:28:45 start ab_s28_pair_w0 
+01:28:49 WARNING 1 slots dropped (a post is missing): [('cars', 4)]
+01:50:05 llama3.1:8b: done 600 in 21.1 min (2.11 s/decision) {'like': 874, 'dislike': 183, 'nothing': 143}
+01:55:41 gemma4:e2b: done 600 in 5.6 min (0.56 s/decision) {'like': 919, 'dislike': 45, 'nothing': 236}
+2026-09-27 01:55:42 end ab_s28_pair_w0 rc=0
+2026-09-27 01:55:42 start ab_s28_pair_w1 
+01:55:46 WARNING 1 slots dropped (a post is missing): [('cars', 4)]
+02:17:15 llama3.1:8b: done 600 in 21.4 min (2.14 s/decision) {'like': 833, 'nothing': 171, 'dislike': 196}
+02:22:52 gemma4:e2b: done 600 in 5.6 min (0.56 s/decision) {'like': 931, 'nothing': 226, 'dislike': 43}
+2026-09-27 02:22:52 end ab_s28_pair_w1 rc=0
+2026-09-27 02:22:53 post set 28 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-27 02:22:53 start ab_s29_pair_w0 
+02:29:19 WARNING 3 slots dropped (a post is missing): [('cars', 1), ('cooking', 1), ('tech', 1)]
+02:48:44 llama3.1:8b: done 550 in 19.3 min (2.11 s/decision) {'like': 784, 'dislike': 162, 'nothing': 154}
+02:53:56 gemma4:e2b: done 550 in 5.2 min (0.57 s/decision) {'like': 883, 'nothing': 183, 'dislike': 34}
+2026-09-27 02:53:57 end ab_s29_pair_w0 rc=0
+2026-09-27 02:53:57 start ab_s29_pair_w1 
+02:54:01 WARNING 3 slots dropped (a post is missing): [('cars', 1), ('cooking', 1), ('tech', 1)]
+03:14:20 llama3.1:8b: done 550 in 20.2 min (2.20 s/decision) {'like': 748, 'nothing': 157, 'dislike': 195}
+03:19:32 gemma4:e2b: done 550 in 5.2 min (0.57 s/decision) {'like': 904, 'nothing': 173, 'dislike': 23}
+2026-09-27 03:19:33 end ab_s29_pair_w1 rc=0
+2026-09-27 03:19:33 start ab_s29_scroll_w0 
+03:19:37 WARNING 3 slots dropped (a post is missing): [('cars', 1), ('cooking', 1), ('tech', 1)]
+03:42:07 llama3.1:8b: done 1100 in 22.4 min (1.22 s/decision) {'like': 704, 'nothing': 364, 'dislike': 32}
+03:48:06 gemma4:e2b: done 1100 in 6.0 min (0.33 s/decision) {'like': 840, 'nothing': 198, 'dislike': 62}
+2026-09-27 03:48:07 end ab_s29_scroll_w0 rc=0
+2026-09-27 03:48:07 start ab_s29_scroll_w1 
+03:48:11 WARNING 3 slots dropped (a post is missing): [('cars', 1), ('cooking', 1), ('tech', 1)]
+04:10:21 llama3.1:8b: done 1100 in 22.1 min (1.20 s/decision) {'like': 698, 'nothing': 352, 'dislike': 50}
+04:16:22 gemma4:e2b: done 1100 in 6.0 min (0.33 s/decision) {'like': 887, 'nothing': 166, 'dislike': 47}
+2026-09-27 04:16:23 end ab_s29_scroll_w1 rc=0
+2026-09-27 04:16:23 post set 29 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-27 04:16:23 start ab_s30_scroll_w0 
+04:21:51 WARNING 2 slots dropped (a post is missing): [('cars', 1), ('personal_finance', 4)]
+04:44:43 llama3.1:8b: done 1150 in 22.7 min (1.19 s/decision) {'like': 743, 'nothing': 375, 'dislike': 32}
+04:50:59 gemma4:e2b: done 1150 in 6.3 min (0.33 s/decision) {'dislike': 162, 'like': 788, 'nothing': 200}
+2026-09-27 04:51:00 end ab_s30_scroll_w0 rc=0
+2026-09-27 04:51:00 start ab_s30_scroll_w1 
+04:51:04 WARNING 2 slots dropped (a post is missing): [('cars', 1), ('personal_finance', 4)]
+05:13:59 llama3.1:8b: done 1150 in 22.8 min (1.19 s/decision) {'like': 728, 'nothing': 357, 'dislike': 65}
+05:20:17 gemma4:e2b: done 1150 in 6.3 min (0.33 s/decision) {'like': 847, 'dislike': 125, 'nothing': 178}
+2026-09-27 05:20:17 end ab_s30_scroll_w1 rc=0
+2026-09-27 05:20:17 start ab_s30_pair_w0 
+05:20:21 WARNING 2 slots dropped (a post is missing): [('cars', 1), ('personal_finance', 4)]
+05:41:31 llama3.1:8b: done 575 in 21.0 min (2.20 s/decision) {'like': 829, 'dislike': 150, 'nothing': 171}
+05:46:55 gemma4:e2b: done 575 in 5.4 min (0.56 s/decision) {'dislike': 77, 'nothing': 187, 'like': 886}
+2026-09-27 05:46:56 end ab_s30_pair_w0 rc=0
+2026-09-27 05:46:56 start ab_s30_pair_w1 
+05:47:00 WARNING 2 slots dropped (a post is missing): [('cars', 1), ('personal_finance', 4)]
+06:07:27 llama3.1:8b: done 575 in 20.3 min (2.12 s/decision) {'dislike': 218, 'like': 772, 'nothing': 160}
+06:12:52 gemma4:e2b: done 575 in 5.4 min (0.56 s/decision) {'like': 896, 'dislike': 76, 'nothing': 178}
+2026-09-27 06:12:53 end ab_s30_pair_w1 rc=0
+2026-09-27 06:12:53 post set 30 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-27 06:12:53 A/B campaign end
+2026-09-27 06:13:04 A/B campaign start seeds=[31 32 33 34] agents=50
+2026-09-27 06:13:04 start ab_s31_pair_w0 
+06:18:42 WARNING 2 slots dropped (a post is missing): [('cooking', 0), ('cooking', 4)]
+06:38:56 llama3.1:8b: done 575 in 20.1 min (2.10 s/decision) {'like': 851, 'dislike': 146, 'nothing': 153}
+06:44:23 gemma4:e2b: done 575 in 5.4 min (0.57 s/decision) {'like': 936, 'nothing': 158, 'dislike': 56}
+2026-09-27 06:44:23 end ab_s31_pair_w0 rc=0
+2026-09-27 06:44:23 start ab_s31_pair_w1 
+06:44:27 WARNING 2 slots dropped (a post is missing): [('cooking', 0), ('cooking', 4)]
+07:05:34 llama3.1:8b: done 575 in 21.0 min (2.19 s/decision) {'like': 761, 'dislike': 214, 'nothing': 175}
+07:11:01 gemma4:e2b: done 575 in 5.4 min (0.57 s/decision) {'like': 937, 'nothing': 161, 'dislike': 52}
+2026-09-27 07:11:02 end ab_s31_pair_w1 rc=0
+2026-09-27 07:11:02 start ab_s31_scroll_w0 
+07:11:06 WARNING 2 slots dropped (a post is missing): [('cooking', 0), ('cooking', 4)]
+07:34:22 llama3.1:8b: done 1150 in 23.1 min (1.21 s/decision) {'like': 715, 'dislike': 44, 'nothing': 391}
+07:40:39 gemma4:e2b: done 1150 in 6.3 min (0.33 s/decision) {'like': 869, 'dislike': 112, 'nothing': 169}
+2026-09-27 07:40:40 end ab_s31_scroll_w0 rc=0
+2026-09-27 07:40:40 start ab_s31_scroll_w1 
+07:40:44 WARNING 2 slots dropped (a post is missing): [('cooking', 0), ('cooking', 4)]
+08:04:11 llama3.1:8b: done 1150 in 23.3 min (1.22 s/decision) {'like': 711, 'dislike': 76, 'nothing': 363}
+08:10:52 gemma4:e2b: done 1150 in 6.7 min (0.35 s/decision) {'like': 937, 'nothing': 123, 'dislike': 90}
+2026-09-27 08:10:53 end ab_s31_scroll_w1 rc=0
+2026-09-27 08:10:53 post set 31 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-27 08:10:53 start ab_s32_scroll_w0 
+08:17:06 WARNING 1 slots dropped (a post is missing): [('cars', 0)]
+08:42:13 llama3.1:8b: done 1200 in 25.0 min (1.25 s/decision) {'like': 781, 'nothing': 377, 'dislike': 42}
+08:49:08 gemma4:e2b: done 1200 in 6.9 min (0.35 s/decision) {'like': 897, 'nothing': 182, 'dislike': 121}
+2026-09-27 08:49:08 end ab_s32_scroll_w0 rc=0
+2026-09-27 08:49:08 start ab_s32_scroll_w1 
+08:49:12 WARNING 1 slots dropped (a post is missing): [('cars', 0)]
+09:14:34 llama3.1:8b: done 1200 in 25.3 min (1.26 s/decision) {'like': 763, 'nothing': 384, 'dislike': 53}
+09:21:29 gemma4:e2b: done 1200 in 6.9 min (0.35 s/decision) {'like': 953, 'dislike': 89, 'nothing': 158}
+2026-09-27 09:21:30 end ab_s32_scroll_w1 rc=0
+2026-09-27 09:21:30 start ab_s32_pair_w0 
+09:21:34 WARNING 1 slots dropped (a post is missing): [('cars', 0)]
+09:44:24 llama3.1:8b: done 600 in 22.7 min (2.27 s/decision) {'like': 919, 'dislike': 131, 'nothing': 150}
+09:50:25 gemma4:e2b: done 600 in 6.0 min (0.60 s/decision) {'like': 927, 'dislike': 70, 'nothing': 203}
+2026-09-27 09:50:25 end ab_s32_pair_w0 rc=0
+2026-09-27 09:50:25 start ab_s32_pair_w1 
+09:50:30 WARNING 1 slots dropped (a post is missing): [('cars', 0)]
+10:13:04 llama3.1:8b: done 600 in 22.5 min (2.25 s/decision) {'like': 887, 'nothing': 157, 'dislike': 156}
+10:18:44 gemma4:e2b: done 600 in 5.7 min (0.57 s/decision) {'like': 961, 'dislike': 52, 'nothing': 187}
+2026-09-27 10:18:45 end ab_s32_pair_w1 rc=0
+2026-09-27 10:18:45 post set 32 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-27 10:18:45 start ab_s33_pair_w0 
+10:23:55 WARNING 1 slots dropped (a post is missing): [('personal_finance', 3)]
+10:45:46 llama3.1:8b: done 600 in 21.7 min (2.17 s/decision) {'like': 871, 'nothing': 185, 'dislike': 144}
+10:51:24 gemma4:e2b: done 600 in 5.6 min (0.56 s/decision) {'nothing': 222, 'like': 921, 'dislike': 57}
+2026-09-27 10:51:25 end ab_s33_pair_w0 rc=0
+2026-09-27 10:51:25 start ab_s33_pair_w1 
+10:51:29 WARNING 1 slots dropped (a post is missing): [('personal_finance', 3)]
+11:13:48 llama3.1:8b: done 600 in 22.2 min (2.22 s/decision) {'like': 792, 'dislike': 213, 'nothing': 195}
+11:19:29 gemma4:e2b: done 600 in 5.7 min (0.57 s/decision) {'like': 933, 'nothing': 212, 'dislike': 55}
+2026-09-27 11:19:29 end ab_s33_pair_w1 rc=0
+2026-09-27 11:19:29 start ab_s33_scroll_w0 
+11:19:33 WARNING 1 slots dropped (a post is missing): [('personal_finance', 3)]
+11:43:42 llama3.1:8b: done 1200 in 24.0 min (1.20 s/decision) {'like': 748, 'nothing': 419, 'dislike': 33}
+11:50:16 gemma4:e2b: done 1200 in 6.6 min (0.33 s/decision) {'like': 853, 'nothing': 226, 'dislike': 121}
+2026-09-27 11:50:17 end ab_s33_scroll_w0 rc=0
+2026-09-27 11:50:17 start ab_s33_scroll_w1 
+11:50:21 WARNING 1 slots dropped (a post is missing): [('personal_finance', 3)]
+12:14:26 llama3.1:8b: done 1200 in 24.0 min (1.20 s/decision) {'like': 743, 'nothing': 408, 'dislike': 49}
+12:21:01 gemma4:e2b: done 1200 in 6.6 min (0.33 s/decision) {'like': 939, 'nothing': 159, 'dislike': 102}
+2026-09-27 12:21:02 end ab_s33_scroll_w1 rc=0
+2026-09-27 12:21:02 post set 33 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-27 12:21:02 start ab_s34_scroll_w0 
+12:26:26 WARNING 1 slots dropped (a post is missing): [('cooking', 2)]
+12:50:38 llama3.1:8b: done 1200 in 24.1 min (1.20 s/decision) {'like': 802, 'nothing': 357, 'dislike': 41}
+12:57:16 gemma4:e2b: done 1200 in 6.6 min (0.33 s/decision) {'like': 924, 'dislike': 102, 'nothing': 174}
+2026-09-27 12:57:17 end ab_s34_scroll_w0 rc=0
+2026-09-27 12:57:17 start ab_s34_scroll_w1 
+12:57:21 WARNING 1 slots dropped (a post is missing): [('cooking', 2)]
+13:21:55 llama3.1:8b: done 1200 in 24.4 min (1.22 s/decision) {'nothing': 347, 'like': 783, 'dislike': 70}
+13:28:32 gemma4:e2b: done 1200 in 6.6 min (0.33 s/decision) {'like': 984, 'nothing': 135, 'dislike': 81}
+2026-09-27 13:28:33 end ab_s34_scroll_w1 rc=0
+2026-09-27 13:28:33 start ab_s34_pair_w0 
+13:28:37 WARNING 1 slots dropped (a post is missing): [('cooking', 2)]
+13:50:19 llama3.1:8b: done 600 in 21.6 min (2.16 s/decision) {'like': 896, 'dislike': 163, 'nothing': 141}
+13:56:01 gemma4:e2b: done 600 in 5.7 min (0.57 s/decision) {'dislike': 42, 'nothing': 185, 'like': 973}
+2026-09-27 13:56:02 end ab_s34_pair_w0 rc=0
+2026-09-27 13:56:02 start ab_s34_pair_w1 
+13:56:06 WARNING 1 slots dropped (a post is missing): [('cooking', 2)]
+14:17:24 llama3.1:8b: done 600 in 21.2 min (2.12 s/decision) {'dislike': 199, 'nothing': 154, 'like': 847}
+14:23:00 gemma4:e2b: done 600 in 5.6 min (0.56 s/decision) {'like': 982, 'nothing': 180, 'dislike': 38}
+2026-09-27 14:23:00 end ab_s34_pair_w1 rc=0
+2026-09-27 14:23:00 post set 34 done (checks in data/llm_bias/ab_checks.txt)
+2026-09-27 14:23:00 A/B campaign end

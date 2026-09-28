@@ -11,3 +11,8 @@ WARN  v3_s41_w1  llama3.1:8b: like 61%  1.46 s/decision | gemma4:e2b: like 75%  
    warn: 2 answers cut off at the token limit
 WARN  v3_s41_w2  llama3.1:8b: like 62%  1.44 s/decision | gemma4:e2b: like 75%  0.40 s/decision | mistral:7b: like 94%  1.74 s/decision
    warn: 2 answers cut off at the token limit
+PASS  v3_s42_w0  llama3.1:8b: like 66%  1.39 s/decision | gemma4:e2b: like 69%  0.39 s/decision | mistral:7b: like 95%  1.74 s/decision
+WARN  v3_s42_w1  llama3.1:8b: like 62%  1.41 s/decision | gemma4:e2b: like 74%  0.38 s/decision | mistral:7b: like 95%  1.71 s/decision
+   warn: 3 answers cut off at the token limit
+WARN  v3_s42_w2  llama3.1:8b: like 64%  1.41 s/decision | gemma4:e2b: like 74%  0.39 s/decision | mistral:7b: like 96%  1.71 s/decision
+   warn: 2 answers cut off at the token limit

@@ -1,0 +1,51 @@
+2026-09-27 17:58:34 v3 campaign start seeds=[40 41 42 43 44 45] agents=50
+2026-09-27 17:58:34 start v3_s40_w0 
+18:29:09 llama3.1:8b: done 1275 in 30.3 min (1.42 s/decision) {'like': 834, 'dislike': 97, 'nothing': 344}
+18:37:30 gemma4:e2b: done 1275 in 8.3 min (0.39 s/decision) {'like': 934, 'nothing': 206, 'dislike': 135}
+19:11:58 mistral:7b: done 1200 in 34.5 min (1.72 s/decision) {'like': 1142, 'nothing': 42, 'dislike': 14, 'cut_off': 2}
+2026-09-27 19:11:58 end v3_s40_w0 rc=0
+2026-09-27 19:11:58 start v3_s40_w1 
+19:40:59 llama3.1:8b: done 1200 in 28.7 min (1.43 s/decision) {'like': 735, 'nothing': 415, 'dislike': 50}
+19:49:28 gemma4:e2b: done 1275 in 8.4 min (0.39 s/decision) {'like': 993, 'dislike': 98, 'nothing': 184}
+20:26:26 mistral:7b: done 1275 in 37.0 min (1.74 s/decision) {'like': 1203, 'dislike': 15, 'nothing': 57}
+2026-09-27 20:26:27 end v3_s40_w1 rc=0
+2026-09-27 20:26:27 start v3_s40_w2 
+20:57:14 llama3.1:8b: done 1275 in 30.4 min (1.43 s/decision) {'like': 826, 'nothing': 370, 'dislike': 79}
+21:05:16 gemma4:e2b: done 1200 in 7.9 min (0.40 s/decision) {'nothing': 157, 'like': 935, 'dislike': 108}
+21:41:26 mistral:7b: done 1275 in 36.2 min (1.70 s/decision) {'like': 1226, 'dislike': 12, 'nothing': 37}
+2026-09-27 21:41:27 end v3_s40_w2 rc=0
+2026-09-27 21:41:27 post set 40 done
+2026-09-27 21:41:27 start v3_s41_w0 
+22:19:21 llama3.1:8b: done 1275 in 30.2 min (1.42 s/decision) {'like': 821, 'dislike': 120, 'nothing': 334}
+22:27:48 gemma4:e2b: done 1275 in 8.4 min (0.39 s/decision) {'like': 919, 'nothing': 210, 'dislike': 146}
+23:03:35 mistral:7b: done 1200 in 35.8 min (1.79 s/decision) {'like': 1138, 'nothing': 42, 'dislike': 20}
+2026-09-27 23:03:35 end v3_s41_w0 rc=0
+2026-09-27 23:03:35 start v3_s41_w1 
+23:33:00 llama3.1:8b: done 1200 in 29.1 min (1.46 s/decision) {'like': 736, 'nothing': 404, 'dislike': 60}
+23:41:28 gemma4:e2b: done 1275 in 8.4 min (0.39 s/decision) {'like': 959, 'nothing': 196, 'dislike': 120}
+00:20:02 mistral:7b: done 1275 in 38.6 min (1.81 s/decision) {'like': 1198, 'nothing': 58, 'dislike': 19}
+2026-09-28 00:20:02 end v3_s41_w1 rc=0
+2026-09-28 00:20:02 start v3_s41_w2 
+00:50:59 llama3.1:8b: done 1275 in 30.6 min (1.44 s/decision) {'like': 796, 'nothing': 375, 'dislike': 104}
+00:59:00 gemma4:e2b: done 1200 in 7.9 min (0.40 s/decision) {'like': 900, 'nothing': 175, 'dislike': 125}
+01:36:01 mistral:7b: done 1275 in 37.0 min (1.74 s/decision) {'like': 1204, 'nothing': 46, 'dislike': 25}
+2026-09-28 01:36:02 end v3_s41_w2 rc=0
+2026-09-28 01:36:02 post set 41 done
+2026-09-28 01:36:02 start v3_s42_w0 
+02:12:35 llama3.1:8b: done 1275 in 29.5 min (1.39 s/decision) {'like': 837, 'dislike': 107, 'nothing': 331}
+02:20:50 gemma4:e2b: done 1275 in 8.2 min (0.38 s/decision) {'like': 886, 'dislike': 165, 'nothing': 224}
+02:55:41 mistral:7b: done 1200 in 34.8 min (1.74 s/decision) {'like': 1143, 'nothing': 47, 'dislike': 10}
+2026-09-28 02:55:41 end v3_s42_w0 rc=0
+2026-09-28 02:55:41 start v3_s42_w1 
+03:24:11 llama3.1:8b: done 1200 in 28.2 min (1.41 s/decision) {'like': 743, 'nothing': 391, 'dislike': 66}
+03:32:24 gemma4:e2b: done 1275 in 8.1 min (0.38 s/decision) {'like': 947, 'nothing': 209, 'dislike': 119}
+04:08:43 mistral:7b: done 1275 in 36.3 min (1.71 s/decision) {'like': 1214, 'nothing': 51, 'dislike': 10}
+2026-09-28 04:08:44 end v3_s42_w1 rc=0
+2026-09-28 04:08:44 start v3_s42_w2 
+04:38:54 llama3.1:8b: done 1275 in 29.9 min (1.40 s/decision) {'like': 820, 'nothing': 357, 'dislike': 98}
+04:46:42 gemma4:e2b: done 1200 in 7.7 min (0.39 s/decision) {'like': 894, 'nothing': 170, 'dislike': 136}
+05:23:07 mistral:7b: done 1275 in 36.4 min (1.71 s/decision) {'like': 1229, 'dislike': 9, 'nothing': 37}
+2026-09-28 05:23:08 end v3_s42_w2 rc=0
+2026-09-28 05:23:08 post set 42 done
+2026-09-28 05:23:08 start v3_s43_w0 
+2026-09-28 05:23:20 campaign stopped after set 42 (set 43 would end after 09:00)

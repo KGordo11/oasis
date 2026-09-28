@@ -1327,3 +1327,36 @@ Set 41 done 01:36 (3.9 h). 22,498/22,500 valid; set 41 worlds PASS.
 All three lean toward their own posts in likes, including mistral despite liking ~95 % of everything (its
 boost comes from liking OTHER AIs' posts a bit less). Llama and gemma also show it in dislikes. Page v30.
 Timing: sets take ~3.9 h, so set 43 cannot finish by 09:00 (would end ~09:25).
+
+### LF-41 — Three AIs, natural posts, 3 post sets (40-42; 33,750 reactions): every AI favours its own posts
+
+Minimum of 3 sets met (LD-15). 33,748/33,750 valid; all 9 worlds done (WARNs are only 1-2 answers cut off at
+the token limit per world). Campaign stopped 05:23 after set 42 (set 43 could not finish by 09:00; its first
+world is partial on disk and resumable).
+
+**Primary (LD-15): per-AI double difference, persona x brief cluster bootstrap**
+
+| AI | like self-preference | dislike self-preference |
+|---|---|---|
+| gemma4:e2b | **+8.2 [+3.8, +12.6]** | **−4.3 [−7.8, −1.1]** |
+| llama3.1:8b | **+5.7 [+2.1, +9.3]** | **−6.4 [−9.5, −3.4]** |
+| mistral:7b | **+7.2 [+3.9, +10.4]** | −0.1 [−2.1, +2.0] (mistral almost never dislikes) |
+| pooled | **+7.0 [+4.3, +9.7]**, p < 0.001 | **−3.6 [−5.8, −1.7]**, p < 0.001 |
+
+**Consistent across sets** (pooled like: set 40 +6.8, set 41 +6.3, set 42 +7.8; every AI positive in every set)
+— unlike the two-AI designs, where single sets swung from −3 to +11.
+**Secondary (exploratory): post length.** Natural lengths: llama 117, mistral 161, gemma 163 words. Linear
+model with post and person-x-AI fixed effects, clustered by brief: own-post term 4.67 [3.12, 6.22] → 3.92
+[2.23, 5.62] after adding each AI's taste for length (gemma +4.2 per SD [+1.6, +6.9], mistral +1.5 [+0.2,
++2.8]). Length explains ~16 % of the like effect; the dislike effect is unchanged (−2.40 → −2.15). Saved in
+`data/llm_bias/v3_length_check.json`.
+**Reading:** with three AIs writing freely, each AI, when playing a person, likes its own AI's posts about 6-8
+more times per 100 than the other AIs do, and dislikes them less (llama, gemma). It is not a length artefact.
+Why the two-AI tests looked weaker: with two AIs the double difference pools both directions and set-to-set
+noise was large; three AIs give three independent checks per set. Mechanism test (self-recognition) and a
+retest are running now (morning chain). Page v31.
+
+**LB-note (2026-09-28 05:40):** post banks for sets 21-34, 41 and 42 had been committed while the next set's
+posts were still being written, so git held partial snapshots (+533 lines missing, 0 changed). The files on
+disk were always complete and every analysis read the files on disk, so no result changes; the complete banks
+are committed now. Rule from now on: commit a set's post bank only after that set's worlds finish.

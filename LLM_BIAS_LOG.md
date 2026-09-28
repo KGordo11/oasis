@@ -1496,3 +1496,9 @@ settings (LF-14). Before mixing machines: re-run one finished post set (e.g. 40)
 match (like the flash-attention check, LF-14). Then add qwen2.5:7b and phi4-mini:3.8b as writers + judges
 (5 AIs → 5 worlds per set, 125 posts): ~10 h per set on this Mac, expected ~1-2 h on a 24 GB GPU.
 Gordon to provide: host, username, and add the Mac's SSH key.
+
+**LD-16 item 8 done (2026-09-28):** plain-language report "Do AIs Favour Their Own Writing?" as a Claude Doc:
+https://claude.ai/code/artifact/7f61723e-b24b-4c68-871f-3510205cdbd4 — the question, how it works, the answer (per-AI
+chart with ranges), five findings with source links, the four tests (table), how to read the numbers + where the data
+lives, limits and corrections, what's next. Open question left for Gordon in a doc comment: run the feed test before
+or after finishing the three-AI post sets? Items 3, 4, 7 are designed (LD-17) but not run; item 6 numbers in LD-17.

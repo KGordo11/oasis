@@ -1463,3 +1463,36 @@ Item 3 early result (existing night-1 data, `family_night1.json`): sibling prefe
 picks +5.6 [+0.2, +10.8]; llama3.1 -> llama3.2 +1.8 [-1.8, +5.9]; on upvotes llama3.1 gives llama3.2's posts FEWER
 (-11.8 [-23.1, -0.4]). Mixed; no clear "family loyalty". Remaining LD-16 items: 3 (new design), 4, 6, 7, 8.
 Resume set 43: start Ollama (LF-14 settings), then `SEEDS="43" examples/experiment/llm_bias/v3_campaign.sh`.
+
+### LD-17 — Designs for LD-16 items 3, 4, 6, 7 (2026-09-28; nothing run — laptop needed for classes)
+
+Speeds used (measured, this Mac, 4 parallel, natural posts): llama3.1 1.43 s, gemma 0.40 s, mistral 1.70 s per
+decision; llama3.2 ~0.75 s, qwen2.5 ~1.3 s, phi4-mini ~1.05 s (scaled from night-1 speeds).
+
+**Item 6 — natural post length (sets 40-43, 300 posts):** all three AIs: mean 147, median 132, middle half
+103-180 words. llama 117 (94-142), gemma 162 (126-196), mistral 162 (100-214). A later rule, if Gordon wants one,
+would target ~130-150 words. No change to post writing until he says so.
+
+**Item 3 — same-company AIs (does llama favour its sibling?).** Existing night-1 data (7 AIs, pick-a-favourite):
+llama3.2 → llama3.1 favourite +5.6 [+0.2, +10.8]; llama3.1 → llama3.2 +1.8 [−1.8, +5.9]; upvotes llama3.1 →
+llama3.2 −11.8 [−23.1, −0.4]. Mixed, no clear family loyalty (`family_night1.json`).
+Proposed new test: add llama3.2:3b as a 4th AI to the three-AI design (writes + plays people), 4 rotation worlds,
+natural posts, 100 posts per set. Family preference = llama3.1's people on llama3.2's posts vs how gemma/mistral
+people treat those posts (and the reverse). Cost: 50 people ≈ 6 h per set; **25 people ≈ 3 h per set**
+(people add little precision, LF-19) → recommend 25 people x 4 sets ≈ 12 h. Smoke test first (4 people, ~15 min).
+
+**Item 4 — what the bias does in a real feed.** The usual real case: ONE AI plays the whole crowd. Design
+(`run_feed.py`, to write): reuse the natural posts of sets 40-45 (no new writing). 50 people arrive one at a time
+in a random order; each sees the current top 15 of the 75 posts ranked by score (likes − dislikes, visible "▲ 12
+▼ 3" counts) and reacts to each; counts update before the next person. Crowds: all-llama, all-gemma, all-mistral;
+control: counts hidden and random order. Outcome: share of the final top-10 written by each AI under each crowd —
+"when llama runs the crowd, llama's posts take X of the top 10 vs Y under the other crowds", and whether visible
+counts make it snowball. Cost: ~750 decisions per run, ~5-10 min; 3 crowds x 2 conditions x 6 post sets x 2
+arrival orders = 72 runs ≈ 6-10 h. Smoke test: 1 run (~10 min).
+
+**Item 7 — bigger runs.** Needs an NVIDIA GPU with 24 GB+ (e.g. RTX 4090, A5000, L4/A10G) reachable by SSH with
+key login. Use Ollama with the same model digests recorded in every manifest (so it's the same weights), same
+settings (LF-14). Before mixing machines: re-run one finished post set (e.g. 40) there and confirm ~99 % of answers
+match (like the flash-attention check, LF-14). Then add qwen2.5:7b and phi4-mini:3.8b as writers + judges
+(5 AIs → 5 worlds per set, 125 posts): ~10 h per set on this Mac, expected ~1-2 h on a 24 GB GPU.
+Gordon to provide: host, username, and add the Mac's SSH key.

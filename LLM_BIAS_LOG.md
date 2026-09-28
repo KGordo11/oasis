@@ -1394,3 +1394,26 @@ Page v32 shows the length check, recognition and retest under the three-AI secti
 8 answers cut off at the 80-token cap, 2 of them still invalid after retries — mostly mistral's long reasons).
 Campaign stopped at 08:43 before world 1 got going (world 1's 19 seconds are on disk, resumable). Set 43 needs
 worlds 1-2 to count.
+
+### LD-16 — Plan from here (brainstorm logged 2026-09-28 10:05; Gordon: "do these in order")
+
+**Where we stand (LF-41/42):** with three AIs writing freely, every AI favours its own posts when playing a
+person (≈ +6-8 likes per 100); steady across sets; not mainly length; not recognition (shared taste). Display
+format doesn't matter (LF-38). Which AI plays a person matters far more than the persona text (LF-22/42).
+
+**The plan, in order (each item reports back to Gordon):**
+1. **Finish post set 43** (worlds 1-2 resumed 10:04). **Total fixed now, before more results: the three-AI
+   campaign is 6 post sets (40-45)**; sets 44-45 follow after items 2-5. Result reported at 6 sets, whatever it is.
+2. **What is the "taste"?** Existing data only: post features (length, paragraphs, questions vs statements,
+   first person, numbers, exclamation, sentiment words, formatting) per author, and which features each AI's
+   people reward. Exploratory.
+3. **Same-company AIs:** add llama3.2:3b (llama3.1's sibling). Design + smoke test only until approved.
+4. **What the bias does in a real feed:** OASIS feed with visible vote counts and ranking; does one AI's
+   writing rise to the top? Design + smoke test only until approved.
+5. **Persona vs AI:** variance decomposition of reactions (how much comes from the person's description,
+   the AI playing them, the post, the topic) on existing data.
+6. **Length rule (later, Gordon's call):** natural averages to report; no change to post writing.
+7. **Bigger runs:** GPU machine + qwen/phi as writers and judges — plan and cost estimate only (no machine yet).
+8. **Write-up:** plain-language report of the whole project (as a document).
+Standing: rebuild the Scroll Test page around the current answer (three-AI result first, then every test in
+order, every number with its source, data linked and viewable), 5th-grade language (Gordon, 2026-09-28).

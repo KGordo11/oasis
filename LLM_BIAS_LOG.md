@@ -16,7 +16,18 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-28 07:30 — MORNING REPORT. Nothing running (campaign stopped 05:23 after set 42; morning
+*Last updated 2026-09-29 06:40 — ALL TASKS DONE, everything stopped (Ollama off, nothing running).*
+
+**Final answers:** three AIs writing freely, 6 post sets (LF-46): every AI favours its own posts, pooled +6.8
+likes per 100 [+4.6, +9.4]; each AI above zero in every set. Feed test (LF-47): when one AI plays the whole crowd,
+its own posts get +7.2 likes per 100 (counts hidden) / +4.8 (counts visible) and more of the top spots; visible
+counts let the first few people fix the ranking. Taste (LF-43), person vs AI (LF-44), recognition (LF-42).
+Report: https://claude.ai/code/artifact/7f61723e-b24b-4c68-871f-3510205cdbd4 · Page v36:
+https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx
+**Open (Gordon's call):** sibling test (LD-17 item 3, designed), more feed sets, GPU machine, length rule.
+
+---
+*Previous status, 2026-09-28 07:30 — MORNING REPORT. Nothing running (campaign stopped 05:23 after set 42; morning
 checks done 07:14). Ollama up.*
 
 **Three AIs, natural posts (LD-14/15; post sets 40-42, 33,750 reactions, 50 pinned people, every world done):**

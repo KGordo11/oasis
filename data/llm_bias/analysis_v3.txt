@@ -1,52 +1,52 @@
-worlds ['v3_s40_w0', 'v3_s40_w1', 'v3_s40_w2', 'v3_s41_w0', 'v3_s41_w1', 'v3_s41_w2', 'v3_s42_w0', 'v3_s42_w1', 'v3_s42_w2', 'v3_s43_w0', 'v3_s43_w1', 'v3_s43_w2']
-50 personas, 300 posts, 44993/45000 valid decisions
+worlds ['v3_s40_w0', 'v3_s40_w1', 'v3_s40_w2', 'v3_s41_w0', 'v3_s41_w1', 'v3_s41_w2', 'v3_s42_w0', 'v3_s42_w1', 'v3_s42_w2', 'v3_s43_w0', 'v3_s43_w1', 'v3_s43_w2', 'v3_s44_w0', 'v3_s44_w1', 'v3_s44_w2', 'v3_s45_w0', 'v3_s45_w1', 'v3_s45_w2']
+50 personas, 450 posts, 67489/67500 valid decisions
 personas played by both models: 50
 
 LIKE RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b  mistral:7b
-gemma4:e2b         80.6         71.9        71.6
-llama3.1:8b        64.6         62.9        61.9
-mistral:7b         96.8         90.9        97.3
+gemma4:e2b         79.6         71.5        70.0
+llama3.1:8b        64.3         63.2        61.2
+mistral:7b         96.3         89.7        97.4
 
 DISLIKE RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b  mistral:7b
-gemma4:e2b          7.3         14.3         7.5
-llama3.1:8b         7.0          6.6         8.0
-mistral:7b          0.9          2.4         0.1
+gemma4:e2b          8.0         14.8         8.3
+llama3.1:8b         6.8          6.5         8.0
+mistral:7b          1.0          2.6         0.1
 
 NOTHING RATE (rows = model playing the persona, cols = model that wrote the post):
              gemma4:e2b  llama3.1:8b  mistral:7b
-gemma4:e2b         12.1         13.8        20.9
-llama3.1:8b        28.4         30.4        30.1
-mistral:7b          2.2          6.7         2.6
+gemma4:e2b         12.4         13.7        21.7
+llama3.1:8b        29.0         30.3        30.8
+mistral:7b          2.7          7.7         2.5
 
 SELF-PREFERENCE on like rate (double difference, percentage points):
-  gemma4:e2b     +6.5  95% CI [+2.4, +10.9]
-  llama3.1:8b    +4.9  95% CI [+1.6, +8.3]
-  mistral:7b     +6.7  95% CI [+3.9, +9.8]
-  _pooled        +6.0  95% CI [+3.6, +8.7]
+  gemma4:e2b     +6.4  95% CI [+3.1, +10.0]
+  llama3.1:8b    +5.7  95% CI [+2.9, +9.0]
+  mistral:7b     +8.4  95% CI [+5.8, +11.6]
+  _pooled        +6.8  95% CI [+4.6, +9.4]
   pooled bootstrap p = 0.0000
 
 SELF-PREFERENCE on dislike rate (double difference, percentage points):
-  gemma4:e2b     -3.3  95% CI [-6.6, -0.0]
-  llama3.1:8b    -5.3  95% CI [-8.3, -2.7]
-  mistral:7b     -0.5  95% CI [-2.5, +1.4]
-  _pooled        -3.0  95% CI [-4.9, -1.2]
+  gemma4:e2b     -3.1  95% CI [-5.9, -0.5]
+  llama3.1:8b    -5.2  95% CI [-7.8, -3.1]
+  mistral:7b     -0.8  95% CI [-2.5, +0.6]
+  _pooled        -3.1  95% CI [-4.8, -1.6]
   pooled bootstrap p = 0.0000
 
 WHY 'NOTHING'? per model:
-  gemma4:e2b: like 74.7%  dislike 9.7%  nothing 15.6%  failed 0.0% | outcomes {'chose': 15000} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 28.6, -1: 21.5, 0: 15.1, 1: 8.9, 2: 8.6}
-     sample reasons for nothing: ['Not relevant', 'Too vague', 'Too generic', 'Too vague', 'Irrelevant topic', 'Too much fluff']
-  llama3.1:8b: like 63.1%  dislike 7.2%  nothing 29.6%  failed 0.0% | outcomes {'chose': 15000} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 62.9, -1: 79.0, 0: 15.9, 1: 10.7, 2: 7.7}
-     sample reasons for nothing: ['not really my cup of tea', 'Too general and not really my thing', 'Not my cup of tea', 'Too vague and generic', 'not my thing', 'Too sappy and unrelated to my interests']
-  mistral:7b: like 94.9%  dislike 1.2%  nothing 3.9%  failed 0.0% | outcomes {'chose': 14993, 'cut_off': 7} | retried 1.6% | cut off 35 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
-     nothing % by interest (-2..+2): {-2: 9.9, -1: 6.7, 0: 2.4, 1: 1.9, 2: 1.9}
-     sample reasons for nothing: ["While I appreciate the question, as a non-car enthusiast, it doesn't particularly interest me. Let others share their opinions on this matter.", 'As u/rustyfox65, I have no interest in farming or rural life. This post does not seem relevant to my interests and may contain information that is not useful or valuable to me.', 'While I appreciate the concern for safety, this post seems more like an opinion piece than a constructive discussion about DIY brake jobs. As someone who values practicality and clear opinions, I prefer posts that provide useful information or insights.', 'As u/kkowalski209, a city dweller at heart, I find the topic of rural property prices not particularly interesting or relevant to my personal or professional life. However, I do empathize with the frustration of high land prices and wish the original poster good luck in their search.', "While I understand the stress of financial decisions, this post lacks specific details and seems more suitable for a personal advice subreddit rather than r/personalfinance. It's also more focused on individual opinions which might lead to biased responses.", "While I appreciate the sentiment and understand the dilemma, this post doesn't align with my interests or provide the concise, humorous, and opinionated content I prefer. I will let others enjoy the discussion about cars."]
+  gemma4:e2b: like 73.7%  dislike 10.4%  nothing 15.9%  failed 0.0% | outcomes {'chose': 22500} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 27.4, -1: 21.8, 0: 15.6, 1: 9.6, 2: 9.3}
+     sample reasons for nothing: ['Too much fluff', 'Too much fluff', 'Too vague', 'Too vague', 'Too vague', 'Too basic']
+  llama3.1:8b: like 62.9%  dislike 7.1%  nothing 30.0%  failed 0.0% | outcomes {'chose': 22500} | retried 0.0% | cut off 0 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 63.7, -1: 79.4, 0: 16.1, 1: 10.9, 2: 8.6}
+     sample reasons for nothing: ['Boring finance post', 'not a tech expert but the post is straightforward', 'Not my area of interest', 'Not really my thing, not relevant to me', 'Not really my thing', 'not my area of interest']
+  mistral:7b: like 94.5%  dislike 1.2%  nothing 4.3%  failed 0.0% | outcomes {'chose': 22489, 'cut_off': 11} | retried 1.8% | cut off 59 | hidden thinking chars 0 | 'nothing' with a reason 100.0%
+     nothing % by interest (-2..+2): {-2: 10.2, -1: 7.7, 0: 2.5, 1: 2.7, 2: 2.1}
+     sample reasons for nothing: ["While I appreciate the farmer's determination and resilience, the post lacks specific details about the crops, yield, or techniques used. As a result, it doesn't provide enough useful information for me to upvote.", 'While I understand the financial burden of winter tires, safety is a priority for me during snowy seasons. I prefer not to take chances and would rather invest in safer options.', "While I understand the cost and hassle of winter tires, it's a personal decision based on safety concerns and driving habits. The post seems well-researched and thoughtful, but I don't feel strongly enough to upvote or downvote.", "While I can empathize with the frustration, this post doesn't provide useful or detailed information that I value. The focus on personal problems and lack of constructive discussion don't align with my interests.", "I appreciate the question but I don't use coupons myself. Moving forward, perhaps looking into bulk shopping or comparing prices at different stores could help.", 'While I understand the cost concern and agree that winter tires might not be necessary for everyone, I also believe in prioritizing safety on the road. Given my personal preference for practicality over cost, I would like to see more discussion about the long-term benefits and potential risks of usi']
 
 LIKE % by persona interest in the topic:
                -2    -1     0     1     2
-gemma4:e2b   53.9  66.2  77.0  83.5  84.0
-llama3.1:8b   6.9   4.5  82.6  88.6  91.4
-mistral:7b   87.6  91.3  97.0  97.1  97.3
+gemma4:e2b   53.1  64.4  76.1  82.6  83.0
+llama3.1:8b   6.8   4.2  82.6  88.2  90.5
+mistral:7b   87.2  90.1  96.9  96.3  97.0

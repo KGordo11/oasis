@@ -1512,3 +1512,18 @@ or after finishing the three-AI post sets? Items 3, 4, 7 are designed (LD-17) bu
 shown up to 5 likes, ~2.4 min → 50 people ≈ 20 min (llama), ~6 (gemma), ~24 (mistral). Full run queued after
 sets 44-45: sets 40-43 x crowds llama/gemma/mistral x visible/hidden = 24 runs (~7 h, ETA ~07:00),
 `data/llm_bias/feeds/`, progress in `data/llm_bias/feed_campaign.log`.
+
+### LF-46 — Three AIs, FINAL (6 post sets 40-45, the pre-fixed total; 67,500 reactions)
+
+67,489/67,500 valid; no world FAILs (WARNs = 1-4 answers per world cut off at the 80-token cap).
+
+| AI | like self-preference | dislike self-preference |
+|---|---|---|
+| gemma4:e2b | **+6.4 [+3.1, +10.0]** | −3.1 [−5.9, −0.5] |
+| llama3.1:8b | **+5.7 [+2.9, +9.0]** | −5.2 [−7.8, −3.1] |
+| mistral:7b | **+8.4 [+5.8, +11.6]** | −0.8 [−2.5, +0.6] |
+| pooled | **+6.8 [+4.6, +9.4]**, p < 0.001 | **−3.1 [−4.8, −1.6]**, p < 0.001 |
+
+The answer stated in LD-15 terms: **every AI, when it plays a person, likes its own AI's posts ~6-8 more times per
+100 than the other AIs do, and (llama, gemma) dislikes them less.** The 3-set result (LF-41, +7.0) held at 6 sets.
+Page v35. Feed test running (started 23:52).

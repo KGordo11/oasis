@@ -25,3 +25,18 @@ WARN  v3_s43_w1  llama3.1:8b: like 60%  1.52 s/decision (resumed: timing covers 
 WARN  v3_s43_w2  llama3.1:8b: like 62%  1.41 s/decision | gemma4:e2b: like 77%  0.39 s/decision | mistral:7b: like 95%  1.78 s/decision
    warn: 1 decisions without a valid choice {'chose': 3749, 'cut_off': 1}
    warn: 3 answers cut off at the token limit
+WARN  v3_s44_w0  llama3.1:8b: like 64%  1.38 s/decision | gemma4:e2b: like 73%  0.38 s/decision | mistral:7b: like 94%  1.80 s/decision
+   warn: 1 decisions without a valid choice {'chose': 3749, 'cut_off': 1}
+   warn: 7 answers cut off at the token limit
+WARN  v3_s44_w1  llama3.1:8b: like 61%  1.36 s/decision | gemma4:e2b: like 77%  0.39 s/decision | mistral:7b: like 92%  1.77 s/decision
+   warn: 2 decisions without a valid choice {'chose': 3748, 'cut_off': 2}
+   warn: 5 answers cut off at the token limit
+WARN  v3_s44_w2  llama3.1:8b: like 64%  1.38 s/decision | gemma4:e2b: like 76%  0.39 s/decision | mistral:7b: like 94%  1.73 s/decision
+   warn: 1 decisions without a valid choice {'chose': 3749, 'cut_off': 1}
+   warn: 4 answers cut off at the token limit
+WARN  v3_s45_w0  llama3.1:8b: like 63%  1.37 s/decision | gemma4:e2b: like 66%  0.38 s/decision | mistral:7b: like 94%  1.76 s/decision
+   warn: 2 answers cut off at the token limit
+WARN  v3_s45_w1  llama3.1:8b: like 59%  1.42 s/decision | gemma4:e2b: like 69%  0.38 s/decision | mistral:7b: like 93%  1.68 s/decision
+   warn: 4 answers cut off at the token limit
+WARN  v3_s45_w2  llama3.1:8b: like 63%  1.39 s/decision | gemma4:e2b: like 70%  0.38 s/decision | mistral:7b: like 94%  1.67 s/decision
+   warn: 2 answers cut off at the token limit

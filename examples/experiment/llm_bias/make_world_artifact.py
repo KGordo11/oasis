@@ -1239,6 +1239,19 @@ biggest single slice. But which AI plays them is a big slice too, and different 
 same post often disagree. Anyone using AIs as pretend people should know the choice of AI changes the crowd.</p>
 <div class="match">{bars}</div>
 {src("data/llm_bias/variance_v3.json", "data/llm_bias/retest_v3_s40.json", "examples/experiment/llm_bias/variance.py")}</div>""")
+    fd = jload("analysis_feed.json")
+    if fd:
+        h, v = fd["hidden"], fd["visible"]
+        out.append(f"""<div class="find card"><h3>6. In a real feed, the crowd's AI pushes its own posts up</h3>
+<p>Most AI simulations use ONE AI to play the whole crowd. So we let one AI play all 50 people and ranked 75 posts
+(25 from each AI) by likes. When the counts were hidden, the crowd's AI gave its own posts {100 * h['pooled_own_like_boost']:+.1f}
+extra likes per 100 (fairly sure {100 * h['pooled_own_like_boost_ci95'][0]:+.1f} to {100 * h['pooled_own_like_boost_ci95'][1]:+.1f}),
+and its own posts took about {10 * h['pooled_own_top10_boost']:.1f} more of the 10 top spots than when another AI ran the crowd.
+With like counts showing, people followed the crowd: the top 10 posts collected {100 * v['top10_like_concentration']:.0f} in 100 of
+all likes (against {100 * h['top10_like_concentration']:.0f} with counts hidden), the first few people largely decided the ranking,
+and the favouritism shrank to {100 * v['pooled_own_like_boost']:+.1f} likes per 100 and about {10 * v['pooled_own_top10_boost']:.1f}
+more top spots.</p>
+{src("data/llm_bias/analysis_feed.json", "data/llm_bias/feeds", "examples/experiment/llm_bias/run_feed.py")}</div>""")
     return "".join(out)
 
 
@@ -1288,10 +1301,19 @@ program, not an AI. They never change; the computer checks this before every run
          ["data/llm_bias/analysis_v2.json", "data/llm_bias/explore_v2.json", "data/llm_bias/export"]),
         ("Test 3 · 15 post sets", "Side by side vs one at a time", t3, demote(ab_section()),
          ["data/llm_bias/analysis_ab.json", "data/llm_bias/export_ab"]),
-        ("Test 4 · now", "Three AIs, posts written freely", t4, demote(v3_section()),
+        ("Test 4 · 6 post sets", "Three AIs, posts written freely", t4, demote(v3_section()),
          ["data/llm_bias/analysis_v3.json", "data/llm_bias/export_v3", "data/llm_bias/recognition_v3_pooled.json"]),
     ]
-    out = ['<h2>How we got here: every test, in order</h2><p>We ran four tests. Each one fixed a weakness of the one before.</p>',
+    fd = jload("analysis_feed.json")
+    if fd:
+        h = fd["hidden"]
+        t5 = (f"One AI played the whole crowd of 50 on a ranked feed, with like counts shown or hidden, across {len(fd['post_sets'])} post "
+              f"sets and {fd['runs']} runs. The crowd's AI favoured its own posts ({100 * h['pooled_own_like_boost']:+.1f} likes per 100 with "
+              f"counts hidden) and moved them up the leaderboard.")
+        cards.append(("Test 5 · the feed", "One AI plays the whole crowd", t5,
+                      "<p>Full numbers are in the analysis file linked above.</p>",
+                      ["data/llm_bias/analysis_feed.json", "data/llm_bias/feeds"]))
+    out = ['<h2>How we got here: every test, in order</h2><p>We ran five tests. Each one fixed a weakness of, or built on, the one before.</p>',
            "<details class='how'><summary>How every test works</summary>" + step + "</details>", '<div class="timeline">']
     for tag, title, text, detail, files in cards:
         out.append(f"""<section class="test"><p class="tag">{E(tag)}</p><h3>{E(title)}</h3><p>{text}</p>{src(*files)}
@@ -1315,9 +1337,8 @@ def data_files():
 
 def next_steps():
     return """<h2>What's next</h2><ol class="next">
-<li><b>Finish the three-AI test</b> at 6 post sets (40-45), a number fixed before seeing more results.</li>
 <li><b>Same-company AIs:</b> does llama favour posts by its smaller sibling (llama3.2) too?</li>
-<li><b>A real feed:</b> with visible like counts and ranking, does one AI's writing rise to the top?</li>
+<li><b>More feed runs:</b> more post sets would narrow how many top spots the crowd's AI gains.</li>
 <li><b>Bigger runs</b> on a faster computer with more AIs (qwen, phi).</li>
 <li><b>A plain-language write-up</b> of the whole project.</li></ol>"""
 

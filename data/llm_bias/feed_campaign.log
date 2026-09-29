@@ -1,0 +1,25 @@
+2026-09-29 00:10:23 feed_s40_llama3.1_visible: 20.4 min, top 10 by author {'llama3.1:8b': 2, 'gemma4:e2b': 6, 'mistral:7b': 2}
+2026-09-29 00:16:25 feed_s40_gemma4_visible: 5.9 min, top 10 by author {'llama3.1:8b': 3, 'gemma4:e2b': 6, 'mistral:7b': 1}
+2026-09-29 00:40:13 feed_s40_mistral_visible: 23.8 min, top 10 by author {'llama3.1:8b': 2, 'gemma4:e2b': 5, 'mistral:7b': 3}
+2026-09-29 00:59:30 feed_s40_llama3.1_hidden: 19.2 min, top 10 by author {'llama3.1:8b': 4, 'gemma4:e2b': 2, 'mistral:7b': 4}
+2026-09-29 01:05:05 feed_s40_gemma4_hidden: 5.5 min, top 10 by author {'llama3.1:8b': 2, 'gemma4:e2b': 6, 'mistral:7b': 2}
+2026-09-29 01:27:55 feed_s40_mistral_hidden: 22.8 min, top 10 by author {'llama3.1:8b': 2, 'gemma4:e2b': 4, 'mistral:7b': 4}
+2026-09-29 01:48:45 feed_s41_llama3.1_visible: 20.7 min, top 10 by author {'llama3.1:8b': 3, 'gemma4:e2b': 4, 'mistral:7b': 3}
+2026-09-29 01:54:41 feed_s41_gemma4_visible: 5.8 min, top 10 by author {'llama3.1:8b': 3, 'gemma4:e2b': 4, 'mistral:7b': 3}
+2026-09-29 02:18:58 feed_s41_mistral_visible: 24.3 min, top 10 by author {'llama3.1:8b': 3, 'gemma4:e2b': 4, 'mistral:7b': 3}
+2026-09-29 02:38:42 feed_s41_llama3.1_hidden: 19.6 min, top 10 by author {'llama3.1:8b': 5, 'gemma4:e2b': 3, 'mistral:7b': 2}
+2026-09-29 02:44:21 feed_s41_gemma4_hidden: 5.6 min, top 10 by author {'llama3.1:8b': 4, 'gemma4:e2b': 4, 'mistral:7b': 2}
+2026-09-29 03:07:37 feed_s41_mistral_hidden: 23.2 min, top 10 by author {'llama3.1:8b': 4, 'gemma4:e2b': 3, 'mistral:7b': 3}
+2026-09-29 03:27:39 feed_s42_llama3.1_visible: 20.0 min, top 10 by author {'llama3.1:8b': 1, 'gemma4:e2b': 3, 'mistral:7b': 6}
+2026-09-29 03:33:21 feed_s42_gemma4_visible: 5.6 min, top 10 by author {'llama3.1:8b': 0, 'gemma4:e2b': 5, 'mistral:7b': 5}
+2026-09-29 03:57:01 feed_s42_mistral_visible: 23.7 min, top 10 by author {'llama3.1:8b': 0, 'gemma4:e2b': 4, 'mistral:7b': 6}
+2026-09-29 04:16:36 feed_s42_llama3.1_hidden: 19.5 min, top 10 by author {'llama3.1:8b': 2, 'gemma4:e2b': 4, 'mistral:7b': 4}
+2026-09-29 04:22:10 feed_s42_gemma4_hidden: 5.5 min, top 10 by author {'llama3.1:8b': 2, 'gemma4:e2b': 6, 'mistral:7b': 2}
+2026-09-29 04:44:56 feed_s42_mistral_hidden: 22.8 min, top 10 by author {'llama3.1:8b': 2, 'gemma4:e2b': 4, 'mistral:7b': 4}
+2026-09-29 05:04:28 feed_s43_llama3.1_visible: 19.4 min, top 10 by author {'llama3.1:8b': 4, 'gemma4:e2b': 4, 'mistral:7b': 2}
+2026-09-29 05:10:12 feed_s43_gemma4_visible: 5.6 min, top 10 by author {'llama3.1:8b': 5, 'gemma4:e2b': 3, 'mistral:7b': 2}
+2026-09-29 05:34:19 feed_s43_mistral_visible: 24.1 min, top 10 by author {'llama3.1:8b': 3, 'gemma4:e2b': 3, 'mistral:7b': 4}
+2026-09-29 05:53:47 feed_s43_llama3.1_hidden: 19.4 min, top 10 by author {'llama3.1:8b': 4, 'gemma4:e2b': 5, 'mistral:7b': 1}
+2026-09-29 05:59:24 feed_s43_gemma4_hidden: 5.5 min, top 10 by author {'llama3.1:8b': 5, 'gemma4:e2b': 2, 'mistral:7b': 3}
+2026-09-29 06:23:10 feed_s43_mistral_hidden: 23.8 min, top 10 by author {'llama3.1:8b': 4, 'gemma4:e2b': 3, 'mistral:7b': 3}
+2026-09-29 06:23:10 feed campaign end

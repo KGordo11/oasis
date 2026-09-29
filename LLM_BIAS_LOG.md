@@ -1527,3 +1527,25 @@ sets 44-45: sets 40-43 x crowds llama/gemma/mistral x visible/hidden = 24 runs (
 The answer stated in LD-15 terms: **every AI, when it plays a person, likes its own AI's posts ~6-8 more times per
 100 than the other AIs do, and (llama, gemma) dislikes them less.** The 3-set result (LF-41, +7.0) held at 6 sets.
 Page v35. Feed test running (started 23:52).
+
+### LF-47 — Feed test (LD-17 item 4): one AI plays the whole crowd; its own posts move up
+
+`run_feed.py`, post sets 40-43 (natural three-AI posts, 75 per set), 50 people, feed of 15, crowds llama / gemma /
+mistral, like counts visible (feed = current top 15 by likes − dislikes) or hidden (random 15, no counts); 24 runs,
+18,000 decisions, **0 invalid**. `analyze_feed.py` → `analysis_feed.json` (intervals resample post sets; only 4).
+
+| | counts hidden | counts visible |
+|---|---|---|
+| fair like boost for the crowd's own AI (double difference) | **+7.2 [+4.9, +9.6]** per 100 | **+4.8 [+1.9, +8.3]** |
+| per crowd (llama / gemma / mistral) | +6.7 / +6.8 / +7.9 | −0.2 / +3.5 / +11.2 |
+| extra top-10 places for the crowd's own AI | ~0.9 of 10 [−0.1, +1.8] | ~0.5 of 10 [+0.1, +0.9] |
+| share of all likes going to the final top 10 | 22 % | **72 %** |
+
+Reading: when one AI runs the crowd, its own AI's posts get more likes (hidden counts reproduce the main test's
++6.8) and more of the top spots. Visible counts make people follow the crowd — the top 10 soak up 72 % of likes
+and the first few arrivals largely fix the ranking — which dilutes each AI's own taste (the boost shrinks to +4.8).
+Fix during analysis: the first version compared raw like rates across crowds, which mostly measured how generous
+each AI is (mistral likes ~98 %); corrected to the double difference before reporting.
+Pages: Scroll Test v36 (finding 6, test 5); report doc updated (6 sets, finding 6, test 5, next steps).
+**All LD-16 items done except 3 (sibling test: designed, not run) and 7 (needs a GPU machine). Everything stopped
+06:26 2026-09-29: Ollama and all jobs shut down, per Gordon ("stop when you finish all tasks").**

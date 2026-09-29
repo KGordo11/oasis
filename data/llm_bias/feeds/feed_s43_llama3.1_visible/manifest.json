@@ -1,0 +1,28 @@
+{
+ "label": "feed_s43_llama3.1_visible",
+ "seed": 43,
+ "crowd": "llama3.1:8b",
+ "mode": "visible",
+ "agents": 50,
+ "k": 15,
+ "order": 0,
+ "posts": 75,
+ "wall_s": 1165.8,
+ "top10_by_author": {
+  "llama3.1:8b": 4,
+  "gemma4:e2b": 4,
+  "mistral:7b": 2
+ },
+ "ollama_models": {
+  "llama3.1:8b": "46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e"
+ },
+ "ollama_server": {
+  "OLLAMA_FLASH_ATTENTION": "true",
+  "OLLAMA_NUM_PARALLEL": "4",
+  "OLLAMA_CONTEXT_LENGTH": "8192",
+  "OLLAMA_KV_CACHE_TYPE": "",
+  "OLLAMA_KEEP_ALIVE": "24h0m0s",
+  "OLLAMA_MAX_LOADED_MODELS": "0"
+ },
+ "finished_at": "2026-09-29T05:04:28.093640"
+}

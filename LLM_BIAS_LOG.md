@@ -1638,3 +1638,9 @@ answers. gemma3:1b's overall generosity simply swings with the post batch (like 
 90 %), while gemma4 went 81 % → 71 %. The double difference compares within a round, so this cancels; it is also why
 per-round values vary. After 5 rounds: like +6.4 (5/5 rounds positive; wider 95 % interval [−1.0, +13.9]), dislike −5.5,
 at equal length +17.7; length taste per +100 words: gemma4-users +12.5, gemma3-users −16.2.
+| 6 | 07:16 | 67 | 10,000/10,000 | — | 4283/406/311 | gemma4 PASS; gemma3 WARN (like 86 %) |
+**Drift check (07:25, `drift_check.py two_r01_gemma3 200`):** 200 random round-1 gemma3 votes replayed with the same
+seeds and settings at 07:20 → 97.0 % identical answers and identical totals (127 like / 44 dislike / 29 nothing). The
+AI has not drifted overnight; the high gemma3 like rates in rounds 5-6 come from those rounds' posts.
+**After 6 rounds:** like +6.6, 6/6 rounds positive, wider 95 % interval (user × slot) [+0.7, +13.1] → clears zero
+(LD-19 rule); dislike −5.5; at equal length +15.6; κ 0.19.

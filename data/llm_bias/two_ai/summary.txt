@@ -1,12 +1,12 @@
-rounds [1, 2, 3, 4], 40000/40000 valid votes, 200 posts (0 duplicate bodies), 0 slots dropped
-OWN-AI LIKE boost +4.5 pts [+2.5, +7.4] rounds-bootstrap, 4/4 rounds positive
-   user x slot bootstrap: {'est': 0.04459999999999997, 'ci95': (-0.035634999999999965, 0.1217249999999999)}
-OWN-AI DISLIKE -5.1 pts [-6.0, -4.2]
-at equal length: like +17.0, slope per 100 words +33.4
-same user same post, two AIs: same choice 65.9%, kappa 0.21
+rounds [1, 2, 3, 4, 5], 49600/49600 valid votes, 249 posts (0 duplicate bodies), 1 slots dropped
+OWN-AI LIKE boost +6.4 pts [+2.8, +10.8] rounds-bootstrap, 5/5 rounds positive
+   user x slot bootstrap: {'est': 0.06395161290322582, 'ci95': (-0.010084677419354775, 0.1387983870967742)}
+OWN-AI DISLIKE -5.5 pts [-6.4, -4.5]
+at equal length: like +17.7, slope per 100 words +31.5
+same user same post, two AIs: same choice 67.0%, kappa 0.21
 like rate (rows played by, cols written by):
             gemma3:1b  gemma4:e2b
-gemma3:1b        65.7        69.6
-gemma4:e2b       74.4        82.8
-length taste (upvote change per +100 words): {'gemma3:1b': -18.2, 'gemma4:e2b': 9.4}
-top-10 own share: {'gemma4:e2b': 7.25, 'gemma3:1b': 5.0} round minutes: {1: 67.9, 2: 68.2, 3: 65.7, 4: 69.2}
+gemma3:1b        70.7        72.6
+gemma4:e2b       73.0        81.2
+length taste (upvote change per +100 words): {'gemma3:1b': -16.2, 'gemma4:e2b': 12.5}
+top-10 own share: {'gemma4:e2b': 7.4, 'gemma3:1b': 5.0} round minutes: {1: 67.9, 2: 68.2, 3: 65.7, 4: 69.2, 5: 62.5}

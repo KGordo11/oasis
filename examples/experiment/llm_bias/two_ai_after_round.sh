@@ -13,6 +13,7 @@ s = int((max(t) - min(t)).total_seconds())
 open("data/llm_bias/two_ai_round_s.txt", "w").write(str(s))
 print(f"round {sys.argv[1]}: {s / 60:.0f} min")
 PY
+(  # heavy part in the background so the next round starts at once
 $P $S/check_world.py --prefix two_r >> data/llm_bias/two_ai_checks.txt 2>&1 || true
 taskpolicy -b $P $S/analyze_two_ai.py 1000 > data/llm_bias/two_ai/summary.txt 2>&1 || true  # background QoS: don't slow the run
 $P $S/make_two_ai_page.py /private/tmp/claude-501/-Users-gordon-research/19a036d6-ce9e-41eb-bda1-be700f315042/scratchpad/two_ai_page || true
@@ -22,3 +23,4 @@ git commit -qm "Two-AI round $R data (100 users x 50 posts x 2 AIs)
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>" && git push -q origin llm-bias
 echo "$(date '+%F %T') round $R committed"
+) >> data/llm_bias/two_ai_after.log 2>&1 &

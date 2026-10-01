@@ -1609,3 +1609,12 @@ Smoke (5 users, seed 299, both AIs, deleted after): 480 votes, 0 broken; 49/50 p
 5 tries → that slot dropped for both AIs); 49 unique bodies; gemma3 posts read as normal Reddit posts.
 Campaign launched 23:53: `A=gemma4:e2b B=gemma3:1b STOP_AT="2026-10-01 14:30" two_ai_campaign.sh`, rounds 1-15,
 seeds 201-215, no new round started unless its measured duration fits before 14:30.
+
+### LR progress, LD-18 rounds (appended as they finish)
+| round | finished | minutes | votes valid | gemma4 like/dislike/nothing | gemma3 like/dislike/nothing | checks |
+|---|---|---|---|---|---|---|
+| 1 | 01:08 | 68 | 10,000/10,000 | 3945/512/543 | 3140/1103/757 | PASS both |
+| 2 | 02:22 | 68 | 10,000/10,000 | see analysis | 3787/718/495 | PASS both (4 gemma3 replies cut off at the token limit, all retried OK) |
+After 2 rounds: like boost +3.4 pts (both rounds positive), dislike −4.2; same user + post, two AIs agree 66 % (κ 0.21).
+Fix 02:30: `two_ai_after_round.sh` now runs check/analysis/page/commit in the background (it held the next round ~4 min).
+Results page (rebuilt every round): https://claude.ai/artifact/HPmkfevmeC3LTYWhN4citW. Report doc: new tab "Test 6".

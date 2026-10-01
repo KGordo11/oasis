@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-01T06:05:48",
+ "generated_at": "2026-10-01T07:17:00",
  "ai_a": "gemma4:e2b",
  "ai_b": "gemma3:1b",
  "rounds": [
@@ -7,174 +7,175 @@
   2,
   3,
   4,
-  5
+  5,
+  6
  ],
  "users": 100,
- "posts_shown": 248,
- "decisions": 49600,
- "valid": 49600,
+ "posts_shown": 298,
+ "decisions": 59600,
+ "valid": 59600,
  "failed": 0,
  "rate_up": {
   "gemma3:1b": {
-   "gemma3:1b": 0.7073,
-   "gemma4:e2b": 0.7298
+   "gemma3:1b": 0.7384,
+   "gemma4:e2b": 0.7348
   },
   "gemma4:e2b": {
-   "gemma3:1b": 0.7256,
-   "gemma4:e2b": 0.812
+   "gemma3:1b": 0.7415,
+   "gemma4:e2b": 0.8036
   }
  },
  "rate_down": {
   "gemma3:1b": {
-   "gemma3:1b": 0.1447,
-   "gemma4:e2b": 0.1102
+   "gemma3:1b": 0.1315,
+   "gemma4:e2b": 0.1048
   },
   "gemma4:e2b": {
-   "gemma3:1b": 0.1511,
-   "gemma4:e2b": 0.0621
+   "gemma3:1b": 0.1419,
+   "gemma4:e2b": 0.0605
   }
  },
  "rate_nothing": {
   "gemma3:1b": {
-   "gemma3:1b": 0.1481,
-   "gemma4:e2b": 0.16
+   "gemma3:1b": 0.1301,
+   "gemma4:e2b": 0.1604
   },
   "gemma4:e2b": {
-   "gemma3:1b": 0.1233,
-   "gemma4:e2b": 0.1259
+   "gemma3:1b": 0.1166,
+   "gemma4:e2b": 0.1358
   }
  },
  "sp_up": {
   "gemma3:1b": {
-   "est": 0.06395161290322582,
+   "est": 0.06570469798657719,
    "ci95": [
-    -0.010084677419354775,
-    0.1387983870967742
+    0.007026845637583932,
+    0.13088590604026853
    ]
   },
   "gemma4:e2b": {
-   "est": 0.06395161290322582,
+   "est": 0.06570469798657719,
    "ci95": [
-    -0.010084677419354775,
-    0.1387983870967742
+    0.007026845637583932,
+    0.13088590604026853
    ]
   },
   "_pooled": {
-   "est": 0.06395161290322582,
+   "est": 0.06570469798657719,
    "ci95": [
-    -0.010084677419354775,
-    0.1387983870967742
+    0.007026845637583932,
+    0.13088590604026853
    ]
   }
  },
  "sp_down": {
   "gemma3:1b": {
-   "est": -0.05459677419354838,
+   "est": -0.05469798657718122,
    "ci95": [
-    -0.095258064516129,
-    -0.015239919354838727
+    -0.09154865771812082,
+    -0.01857382550335573
    ]
   },
   "gemma4:e2b": {
-   "est": -0.05459677419354838,
+   "est": -0.05469798657718122,
    "ci95": [
-    -0.095258064516129,
-    -0.015239919354838727
+    -0.09154865771812082,
+    -0.01857382550335573
    ]
   },
   "_pooled": {
-   "est": -0.05459677419354838,
+   "est": -0.05469798657718122,
    "ci95": [
-    -0.095258064516129,
-    -0.015239919354838727
+    -0.09154865771812082,
+    -0.01857382550335573
    ]
   }
  },
- "sp_up_p": 0.098,
- "sp_down_p": 0.012,
+ "sp_up_p": 0.028,
+ "sp_down_p": 0.0,
  "like_by_interest": {
   "-2": {
-   "gemma3:1b": 65.9,
-   "gemma4:e2b": 55.7
+   "gemma3:1b": 68.2,
+   "gemma4:e2b": 54.6
   },
   "-1": {
-   "gemma3:1b": 67.0,
-   "gemma4:e2b": 66.8
+   "gemma3:1b": 69.7,
+   "gemma4:e2b": 66.2
   },
   "0": {
-   "gemma3:1b": 71.5,
-   "gemma4:e2b": 79.8
+   "gemma3:1b": 73.8,
+   "gemma4:e2b": 79.4
   },
   "1": {
-   "gemma3:1b": 74.9,
-   "gemma4:e2b": 84.8
+   "gemma3:1b": 76.9,
+   "gemma4:e2b": 85.3
   },
   "2": {
-   "gemma3:1b": 76.4,
-   "gemma4:e2b": 84.5
+   "gemma3:1b": 78.8,
+   "gemma4:e2b": 84.8
   }
  },
  "like_by_topic_rank": {
   "0": {
-   "gemma3:1b": 75.0,
-   "gemma4:e2b": 83.5
+   "gemma3:1b": 77.4,
+   "gemma4:e2b": 84.1
   },
   "1": {
-   "gemma3:1b": 73.1,
+   "gemma3:1b": 75.3,
    "gemma4:e2b": 83.0
   },
   "2": {
-   "gemma3:1b": 72.3,
-   "gemma4:e2b": 79.5
+   "gemma3:1b": 74.5,
+   "gemma4:e2b": 79.4
   },
   "3": {
-   "gemma3:1b": 71.3,
-   "gemma4:e2b": 75.2
+   "gemma3:1b": 73.7,
+   "gemma4:e2b": 74.7
   },
   "4": {
-   "gemma3:1b": 66.6,
-   "gemma4:e2b": 64.2
+   "gemma3:1b": 69.1,
+   "gemma4:e2b": 63.4
   }
  },
  "nothing": {
   "gemma3:1b": {
-   "decisions": 24800,
-   "like_%": 71.6,
-   "dislike_%": 14.8,
-   "nothing_%": 13.6,
+   "decisions": 29800,
+   "like_%": 74.0,
+   "dislike_%": 13.7,
+   "nothing_%": 12.3,
    "failed_%": 0.0,
    "outcomes": {
-    "chose": 24800
+    "chose": 29800
    },
    "needed_retry_%": 0.4,
-   "cut_off_at_token_limit": 9,
+   "cut_off_at_token_limit": 12,
    "hidden_thinking_chars": 0,
-   "mean_output_tokens": 37.7,
+   "mean_output_tokens": 37.8,
    "nothing_with_a_reason_%": 100.0,
    "nothing_%_by_interest": {
-    "-2": 14.6,
-    "-1": 15.5,
-    "0": 13.4,
-    "1": 12.6,
-    "2": 12.6
+    "-2": 13.4,
+    "-1": 14.2,
+    "0": 12.1,
+    "1": 11.5,
+    "2": 11.2
    },
    "sample_nothing_reasons": [
-    "Interesting setup. Seems like a nice, low-pressure project.  Could definitely use some help with carving \u2013 that\u2019s a good idea!",
-    "Interesting perspective. A bit melancholy, but the sentiment resonates with a few people, especially those who value the tactile experience of driving.",
-    "It\u2019s a pretty standard question. Seems like a decent enough topic, but honestly, the arguments aren\u2019t compelling enough to warrant a vote.",
-    "Interesting... sounds a bit like a very organized, slightly anxious old woman. I\u2019m more of a \u2018keep it tidy\u2019 kind of person, but that\u2019s\u2026 calming, actually.",
-    "Seems a little\u2026heavy. Lots of feelings, but a little overwhelming. Let\u2019s move on.",
-    "Interesting perspective. A bit repetitive, but the sentiment is valid. Seems like a genuine appreciation for balance and controlled heat."
+    "Interesting perspective. It\u2019s a valid point, but the \u2018absorption\u2019 method seems to be working well for me. Seems a little complicated, but I appreciate the explanation.",
+    "Interesting perspective. Seems like a thoughtful observation, but it\u2019s a bit\u2026 meandering. I\u2019m focusing on the practical aspects of the transition, not the emotional one.",
+    "Sounds like a perfectly reasonable question.  Lots of people are feeling that way, especially with the constant barrage of shiny new stuff.  It\u2019s a good point to consider, though.",
+    "Sounds like a decent point, but honestly, I\u2019m not convinced. It\u2019s a bit of a generic advice piece.  My experience with old machines is usually just\u2026comfortable.  Let\u2019s see if it sparks a genuine debate, shall we?",
+    "Seems like a reasonable approach to me.  A little bit consistently is a good start.",
+    "It\u2019s a bit tedious, honestly.  A little bit of paperwork is never fun, but it\u2019s a waste of time."
    ]
   },
   "gemma4:e2b": {
-   "decisions": 24800,
-   "like_%": 77.1,
-   "dislike_%": 8.6,
-   "nothing_%": 14.3,
+   "decisions": 29800,
+   "like_%": 76.9,
+   "dislike_%": 8.3,
+   "nothing_%": 14.8,
    "failed_%": 0.0,
    "outcomes": {
-    "chose": 24800
+    "chose": 29800
    },
    "needed_retry_%": 0.0,
    "cut_off_at_token_limit": 0,
@@ -182,18 +183,18 @@
    "mean_output_tokens": 15.6,
    "nothing_with_a_reason_%": 100.0,
    "nothing_%_by_interest": {
-    "-2": 28.2,
-    "-1": 21.9,
-    "0": 13.0,
-    "1": 8.5,
-    "2": 8.5
+    "-2": 29.2,
+    "-1": 22.7,
+    "0": 13.7,
+    "1": 8.6,
+    "2": 8.7
    },
    "sample_nothing_reasons": [
     "Too much fluff",
     "Too vague",
     "Too vague",
-    "Too basic",
     "Too much fluff",
+    "Too much worry",
     "Too much fluff"
    ]
   }
@@ -289,71 +290,89 @@
    "nothing_gemma4_on_gemma3": 0.22083333333333333,
    "nothing_gemma3_on_gemma4": 0.10083333333333333,
    "nothing_gemma3_on_gemma3": 0.04833333333333333
+  },
+  {
+   "round": 6,
+   "like_dd": 0.07440000000000002,
+   "dislike_dd": -0.0552,
+   "posts": 50,
+   "up_gemma4_on_gemma4": 0.762,
+   "up_gemma4_on_gemma3": 0.76,
+   "up_gemma3_on_gemma4": 0.8204,
+   "up_gemma3_on_gemma3": 0.8928,
+   "down_gemma4_on_gemma4": 0.0528,
+   "down_gemma4_on_gemma3": 0.0776,
+   "down_gemma3_on_gemma4": 0.0964,
+   "down_gemma3_on_gemma3": 0.066,
+   "nothing_gemma4_on_gemma4": 0.1852,
+   "nothing_gemma4_on_gemma3": 0.1624,
+   "nothing_gemma3_on_gemma4": 0.0832,
+   "nothing_gemma3_on_gemma3": 0.0412
   }
  ],
  "round_boot_up": {
-  "est": 0.06395161290322582,
+  "est": 0.06570469798657719,
   "ci95": [
-   0.027599999999999958,
-   0.10778688524590174
+   0.03611499999999991,
+   0.1021088435374149
   ],
   "p": 0.0,
-  "rounds_positive": 5
+  "rounds_positive": 6
  },
  "round_boot_down": {
-  "est": -0.05459677419354838,
+  "est": -0.05469798657718122,
   "ci95": [
-   -0.06373983739837398,
-   -0.045340919354838735
+   -0.06202702702702703,
+   -0.04526666666666666
   ],
   "p": 0.0,
   "rounds_positive": 0
  },
  "length": {
   "like_dd": {
-   "raw_mean": 0.0639516129032258,
-   "at_equal_length": 0.17700755990000355,
+   "raw_mean": 0.06570469798657717,
+   "at_equal_length": 0.15630326728417357,
    "at_equal_length_ci95": [
-    0.09768211805813073,
-    0.25633300174187634
+    0.08645861155616325,
+    0.2261479230121839
    ],
-   "per_100_words_gap": 0.31517395295864264,
+   "per_100_words_gap": 0.2820557213819861,
    "per_100_words_gap_ci95": [
-    0.2164158916903567,
-    0.4139320142269286
+    0.17804914946838274,
+    0.38606229329558944
    ],
-   "r2": 0.23044422852196145,
-   "slots": 124
+   "r2": 0.18693468949158087,
+   "slots": 149
   },
   "dislike_dd": {
-   "raw_mean": -0.054596774193548386,
-   "at_equal_length": -0.06379035221460211,
+   "raw_mean": -0.05469798657718121,
+   "at_equal_length": -0.060923182654724135,
    "at_equal_length_ci95": [
-    -0.07242741842197054,
-    -0.05515328600723368
+    -0.06890034506486187,
+    -0.0529460202445864
    ],
-   "per_100_words_gap": -0.0256295790155274,
+   "per_100_words_gap": -0.01938057282812146,
    "per_100_words_gap_ci95": [
-    -0.0678008555455572,
-    0.016541697514502414
+    -0.057831077862843326,
+    0.019069932206600408
    ],
-   "r2": 0.004800394213310244,
-   "slots": 124
+   "r2": 0.0026532613929627358,
+   "slots": 149
   }
  },
  "length_taste": {
   "gemma3:1b": {
-   "per_100_words": -0.16232050696551914,
+   "per_100_words": -0.14624615674010943,
    "ci95": [
-    -0.2349693793576881,
-    -0.08967163457335017
+    -0.22144859069240866,
+    -0.07104372278781021
    ]
   },
   "gemma4:e2b": {
-   "per_100_words": 0.12474258849425096,
+   "per_100_words": 0.12785274264892232,
    "ci95": [
-    0.060784387440096746,
-    0.1887007895484052
+    0.07694596988250624,
+    0.1787595154153384
    ]
   }
  },
@@ -1349,71 +1368,271 @@
    "dislike_dd": 0.0,
    "words_a": 149.0,
    "words_b": 269.0
+  },
+  {
+   "round": 6,
+   "topic": "cars",
+   "like_dd": -0.08,
+   "dislike_dd": -0.05,
+   "words_a": 146.0,
+   "words_b": 137.0
+  },
+  {
+   "round": 6,
+   "topic": "cooking",
+   "like_dd": 0.69,
+   "dislike_dd": -0.4,
+   "words_a": 122.0,
+   "words_b": 120.0
+  },
+  {
+   "round": 6,
+   "topic": "farming",
+   "like_dd": -0.04,
+   "dislike_dd": -0.09,
+   "words_a": 176.0,
+   "words_b": 302.0
+  },
+  {
+   "round": 6,
+   "topic": "personal_finance",
+   "like_dd": 0.36,
+   "dislike_dd": 0.01,
+   "words_a": 135.0,
+   "words_b": 90.0
+  },
+  {
+   "round": 6,
+   "topic": "tech",
+   "like_dd": 0.3,
+   "dislike_dd": 0.0,
+   "words_a": 273.0,
+   "words_b": 284.0
+  },
+  {
+   "round": 6,
+   "topic": "cars",
+   "like_dd": -0.02,
+   "dislike_dd": 0.01,
+   "words_a": 187.0,
+   "words_b": 207.0
+  },
+  {
+   "round": 6,
+   "topic": "cooking",
+   "like_dd": -0.23,
+   "dislike_dd": 0.02,
+   "words_a": 136.0,
+   "words_b": 138.0
+  },
+  {
+   "round": 6,
+   "topic": "farming",
+   "like_dd": 0.07,
+   "dislike_dd": -0.06,
+   "words_a": 129.0,
+   "words_b": 166.0
+  },
+  {
+   "round": 6,
+   "topic": "personal_finance",
+   "like_dd": 0.19,
+   "dislike_dd": 0.0,
+   "words_a": 155.0,
+   "words_b": 155.0
+  },
+  {
+   "round": 6,
+   "topic": "tech",
+   "like_dd": 0.03,
+   "dislike_dd": -0.02,
+   "words_a": 128.0,
+   "words_b": 168.0
+  },
+  {
+   "round": 6,
+   "topic": "cars",
+   "like_dd": -0.27,
+   "dislike_dd": 0.11,
+   "words_a": 182.0,
+   "words_b": 183.0
+  },
+  {
+   "round": 6,
+   "topic": "cooking",
+   "like_dd": 0.17,
+   "dislike_dd": 0.0,
+   "words_a": 156.0,
+   "words_b": 135.0
+  },
+  {
+   "round": 6,
+   "topic": "farming",
+   "like_dd": 0.04,
+   "dislike_dd": -0.02,
+   "words_a": 183.0,
+   "words_b": 304.0
+  },
+  {
+   "round": 6,
+   "topic": "personal_finance",
+   "like_dd": 0.3,
+   "dislike_dd": -0.2,
+   "words_a": 137.0,
+   "words_b": 161.0
+  },
+  {
+   "round": 6,
+   "topic": "tech",
+   "like_dd": 0.88,
+   "dislike_dd": -0.05,
+   "words_a": 189.0,
+   "words_b": 169.0
+  },
+  {
+   "round": 6,
+   "topic": "cars",
+   "like_dd": -0.46,
+   "dislike_dd": 0.42,
+   "words_a": 158.0,
+   "words_b": 162.0
+  },
+  {
+   "round": 6,
+   "topic": "cooking",
+   "like_dd": 0.0,
+   "dislike_dd": 0.0,
+   "words_a": 146.0,
+   "words_b": 171.0
+  },
+  {
+   "round": 6,
+   "topic": "farming",
+   "like_dd": 0.34,
+   "dislike_dd": -0.48,
+   "words_a": 96.0,
+   "words_b": 194.0
+  },
+  {
+   "round": 6,
+   "topic": "personal_finance",
+   "like_dd": -0.14,
+   "dislike_dd": 0.06,
+   "words_a": 306.0,
+   "words_b": 232.0
+  },
+  {
+   "round": 6,
+   "topic": "tech",
+   "like_dd": -0.31,
+   "dislike_dd": -0.01,
+   "words_a": 146.0,
+   "words_b": 183.0
+  },
+  {
+   "round": 6,
+   "topic": "cars",
+   "like_dd": -0.3,
+   "dislike_dd": 0.26,
+   "words_a": 104.0,
+   "words_b": 140.0
+  },
+  {
+   "round": 6,
+   "topic": "cooking",
+   "like_dd": -0.07,
+   "dislike_dd": 0.0,
+   "words_a": 179.0,
+   "words_b": 186.0
+  },
+  {
+   "round": 6,
+   "topic": "farming",
+   "like_dd": -0.2,
+   "dislike_dd": 0.05,
+   "words_a": 307.0,
+   "words_b": 303.0
+  },
+  {
+   "round": 6,
+   "topic": "personal_finance",
+   "like_dd": 0.01,
+   "dislike_dd": -0.3,
+   "words_a": 210.0,
+   "words_b": 148.0
+  },
+  {
+   "round": 6,
+   "topic": "tech",
+   "like_dd": 0.6,
+   "dislike_dd": -0.64,
+   "words_a": 169.0,
+   "words_b": 155.0
   }
  ],
  "by_topic": {
   "cars": {
-   "like_dd": 0.1152,
-   "dislike_dd": -0.005599999999999997,
-   "slots": 25
+   "like_dd": 0.058333333333333334,
+   "dislike_dd": 0.020333333333333335,
+   "slots": 30
   },
   "cooking": {
-   "like_dd": 0.16799999999999998,
+   "like_dd": 0.15866666666666665,
    "dislike_dd": -0.07600000000000001,
-   "slots": 25
+   "slots": 30
   },
   "farming": {
-   "like_dd": 0.0516,
-   "dislike_dd": -0.096,
-   "slots": 25
+   "like_dd": 0.049999999999999996,
+   "dislike_dd": -0.1,
+   "slots": 30
   },
   "personal_finance": {
-   "like_dd": 0.0008000000000000096,
-   "dislike_dd": -0.0032000000000000028,
-   "slots": 25
+   "like_dd": 0.024666666666666674,
+   "dislike_dd": -0.017,
+   "slots": 30
   },
   "tech": {
-   "like_dd": -0.019166666666666665,
-   "dislike_dd": -0.09375,
-   "slots": 24
+   "like_dd": 0.03586206896551724,
+   "dislike_dd": -0.10241379310344827,
+   "slots": 29
   }
  },
  "agreement": {
-  "pairs": 24800,
-  "same_choice_%": 67.01209677419355,
-  "kappa": 0.20623483319661315,
+  "pairs": 29800,
+  "same_choice_%": 67.32885906040268,
+  "kappa": 0.18576978310000913,
   "crosstab": {
    "dislike": {
-    "dislike": 1121,
-    "like": 2117,
-    "nothing": 430
+    "dislike": 1184,
+    "like": 2399,
+    "nothing": 491
    },
    "like": {
-    "dislike": 898,
-    "like": 14626,
-    "nothing": 2243
+    "dislike": 1127,
+    "like": 17940,
+    "nothing": 2983
    },
    "nothing": {
-    "dislike": 118,
-    "like": 2375,
-    "nothing": 872
+    "dislike": 152,
+    "like": 2584,
+    "nothing": 940
    }
   }
  },
  "like_by_interest_pct": {
   "gemma3:1b": {
-   "-2": 65.9,
-   "-1": 67.0,
-   "0": 71.5,
-   "1": 74.9,
-   "2": 76.4
+   "-2": 68.2,
+   "-1": 69.7,
+   "0": 73.8,
+   "1": 76.9,
+   "2": 78.8
   },
   "gemma4:e2b": {
-   "-2": 55.7,
-   "-1": 66.8,
-   "0": 79.8,
-   "1": 84.8,
-   "2": 84.5
+   "-2": 54.6,
+   "-1": 66.2,
+   "0": 79.4,
+   "1": 85.3,
+   "2": 84.8
   }
  },
  "top10": {
@@ -1477,15 +1696,27 @@
     "crowd": "gemma4:e2b",
     "gemma4:e2b": 8,
     "gemma3:1b": 2
+   },
+   {
+    "round": 6,
+    "crowd": "gemma3:1b",
+    "gemma4:e2b": 4,
+    "gemma3:1b": 6
+   },
+   {
+    "round": 6,
+    "crowd": "gemma4:e2b",
+    "gemma4:e2b": 4,
+    "gemma3:1b": 6
    }
   ],
   "mean_own_share": {
-   "gemma4:e2b": 7.4,
-   "gemma3:1b": 5.0
+   "gemma4:e2b": 6.833333333333333,
+   "gemma3:1b": 5.166666666666667
   },
   "mean_other_share": {
-   "gemma4:e2b": 2.6,
-   "gemma3:1b": 5.0
+   "gemma4:e2b": 3.1666666666666665,
+   "gemma3:1b": 4.833333333333333
   }
  },
  "timing": {
@@ -1609,6 +1840,30 @@
     "started": "2026-10-01T05:03:16.468691",
     "finished": "2026-10-01T05:37:09.481111",
     "world_wall_min": 33.88
+   },
+   {
+    "world": "two_r06_gemma3",
+    "round": 6,
+    "judge": "gemma3:1b",
+    "decisions": 5000,
+    "vote_wall_min": 30.46,
+    "s_per_vote": 0.365,
+    "post_writing_min": 0.0,
+    "started": "2026-10-01T06:46:29.344392",
+    "finished": "2026-10-01T07:16:56.958064",
+    "world_wall_min": 30.46
+   },
+   {
+    "world": "two_r06_gemma4",
+    "round": 6,
+    "judge": "gemma4:e2b",
+    "decisions": 5000,
+    "vote_wall_min": 35.93,
+    "s_per_vote": 0.431,
+    "post_writing_min": 4.44,
+    "started": "2026-10-01T06:10:21.802717",
+    "finished": "2026-10-01T06:46:18.057642",
+    "world_wall_min": 35.94
    }
   ],
   "round_min": {
@@ -1616,33 +1871,34 @@
    "2": 68.2,
    "3": 65.7,
    "4": 69.2,
-   "5": 62.5
+   "5": 62.5,
+   "6": 66.6
   },
   "s_per_vote": {
-   "gemma3:1b": 0.368,
-   "gemma4:e2b": 0.445
+   "gemma3:1b": 0.3665,
+   "gemma4:e2b": 0.438
   },
   "post_s": {
-   "gemma3:1b": 3.5949999999999998,
-   "gemma4:e2b": 2.86
+   "gemma3:1b": 3.39,
+   "gemma4:e2b": 2.91
   }
  },
  "posts": {
-  "written": 249,
+  "written": 299,
   "failed": 1,
-  "unique_bodies": 249,
+  "unique_bodies": 299,
   "duplicate_bodies": 0,
-  "unique_titles": 248,
+  "unique_titles": 298,
   "words_mean": {
-   "gemma3:1b": 197.8,
-   "gemma4:e2b": 161.7
+   "gemma3:1b": 195.4,
+   "gemma4:e2b": 163.1
   },
   "words_median": {
-   "gemma3:1b": 198.5,
-   "gemma4:e2b": 142.0
+   "gemma3:1b": 192.0,
+   "gemma4:e2b": 146.5
   },
   "needed_retry_%": {
-   "gemma3:1b": 36.3,
+   "gemma3:1b": 33.6,
    "gemma4:e2b": 0.0
   },
   "slots_dropped": 1

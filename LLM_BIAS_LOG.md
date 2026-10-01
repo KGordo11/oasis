@@ -1630,3 +1630,11 @@ Results page (rebuilt every round): https://claude.ai/artifact/HPmkfevmeC3LTYWhN
    reported whatever it is at the end; not used to pick the headline.
 3. Also reported: per-round values, rounds positive, by subreddit (descriptive only, 5 tests, no correction → not
    claimed), agreement (κ), top-10 share, interest gradient, timing, failures.
+| 3 | 03:38 | 66 | 10,000/10,000 | — | 3568/759/673 | PASS both |
+| 4 | 04:54 | 69 | 10,000/10,000 | — | 3034/884/1082 | PASS both |
+| 5 | 06:05 | 63 | 9,600/9,600 (1 slot dropped: gemma3 tech post failed 5 tries) | — | 4238/204/358 | gemma4 PASS; gemma3 WARN (like 88 % vs ~67 % before) |
+**Round-5 WARN checked (06:10):** not a harness fault — same context (8192), same prompt sizes (~660 tokens), 0 failed
+answers. gemma3:1b's overall generosity simply swings with the post batch (like 61 % in r4 → 88 % in r5; r/cars 40 % →
+90 %), while gemma4 went 81 % → 71 %. The double difference compares within a round, so this cancels; it is also why
+per-round values vary. After 5 rounds: like +6.4 (5/5 rounds positive; wider 95 % interval [−1.0, +13.9]), dislike −5.5,
+at equal length +17.7; length taste per +100 words: gemma4-users +12.5, gemma3-users −16.2.

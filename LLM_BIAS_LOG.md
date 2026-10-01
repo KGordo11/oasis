@@ -1704,3 +1704,9 @@ Checks: 14 PASS, 8 WARN (gemma3 like-rate swings by batch), 0 FAIL. Replay: gemm
 Pages: results page v11 https://claude.ai/artifact/HPmkfevmeC3LTYWhN4citW (final); report doc tab "Test 6" filled
 (answer, design, method, results + 3 charts, quality/cost, limitations + 5 improvements, data); main tab table has a
 Test 6 row and says "six tests".
+**Guide for Gordon's professor (2026-10-01 afternoon):** Claude Doc "How the Two-AI Reddit Test Works"
+https://claude.ai/code/artifact/b35c46ac-9e48-4096-a798-0bd00138a4f5 — tab "Guide" (5th-grade explanation: question,
+who is who + diagram, one round step by step with the real prompts, fairness table, worked double-difference example,
+findings + chart, how sure, limits, every file, every command in order with times and a redo-it-yourself block) and
+tab "All the code" (14 files in full with plain-words notes; exported and diffed: 13/13 files identical to source,
+analyze.py excerpt verbatim).

@@ -1662,3 +1662,10 @@ seeds and settings at 07:20 → 97.0 % identical answers and identical totals (1
 AI has not drifted overnight; the high gemma3 like rates in rounds 5-6 come from those rounds' posts.
 **After 6 rounds:** like +6.6, 6/6 rounds positive, wider 95 % interval (user × slot) [+0.7, +13.1] → clears zero
 (LD-19 rule); dislike −5.5; at equal length +15.6; κ 0.19.
+| 7 | 08:32 | 69 | 10,000/10,000 | — | 3637/816/547 | gemma4 PASS; gemma3 WARN (73 %) |
+| 8 | 09:46 | 65 | 9,600/9,600 (1 slot dropped) | — | 3801/695/304 | gemma4 PASS; gemma3 WARN (79 %) — first round with like boost ≤ 0 |
+| 9 | 10:57 | 64 | 9,600/9,600 (1 slot dropped) | — | 3687/378/735 | gemma4 PASS; gemma3 WARN (77 %) |
+| 10 | 12:06 | 66 | 10,000/10,000 | — | 3989/601/410 | gemma4 PASS; gemma3 WARN (80 %) |
+(gemma3 WARNs = its like rate is above the baseline formed by rounds 1-4; drift ruled out at 07:25.)
+**After 10 rounds (98,800 votes, 0 invalid, 497 posts, 0 duplicates, 3 slots dropped):** like +6.3, 9/10 rounds positive,
+wider 95 % [+1.7, +11.2]; dislike −4.2; at equal length +11.8; κ 0.19; top-10 own posts: gemma4 crowd 6.9, gemma3 crowd 5.4.

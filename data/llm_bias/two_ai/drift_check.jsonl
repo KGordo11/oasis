@@ -1,1 +1,2 @@
 {"world": "two_r01_gemma3", "n": 200, "same_answer_%": 97.0, "recorded": {"like": 127, "dislike": 44, "nothing": 29}, "replayed": {"like": 127, "dislike": 44, "nothing": 29}}
+{"world": "two_r01_gemma4", "n": 200, "same_answer_%": 99.5, "recorded": {"like": 156, "dislike": 21, "nothing": 23}, "replayed": {"like": 156, "dislike": 20, "nothing": 24}}

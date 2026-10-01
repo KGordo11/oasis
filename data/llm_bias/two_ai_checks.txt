@@ -117,3 +117,31 @@ PASS  two_r08_gemma4  gemma4:e2b: like 72%  0.45 s/decision
 WARN  two_r09_gemma3  gemma3:1b: like 77%  0.36 s/decision
    warn: 2 answers cut off at the token limit
 PASS  two_r09_gemma4  gemma4:e2b: like 78%  0.44 s/decision
+PASS  two_r01_gemma3  gemma3:1b: like 63%  0.37 s/decision
+PASS  two_r01_gemma4  gemma4:e2b: like 79%  0.45 s/decision
+WARN  two_r02_gemma3  gemma3:1b: like 76%  0.37 s/decision
+   warn: 4 answers cut off at the token limit
+PASS  two_r02_gemma4  gemma4:e2b: like 78%  0.45 s/decision
+PASS  two_r03_gemma3  gemma3:1b: like 71%  0.36 s/decision
+PASS  two_r03_gemma4  gemma4:e2b: like 77%  0.43 s/decision
+WARN  two_r04_gemma3  gemma3:1b: like 61%  0.37 s/decision
+   warn: 1 answers cut off at the token limit
+PASS  two_r04_gemma4  gemma4:e2b: like 81%  0.45 s/decision
+WARN  two_r05_gemma3  gemma3:1b: like 88%  0.35 s/decision
+   warn: 4 answers cut off at the token limit
+PASS  two_r05_gemma4  gemma4:e2b: like 71%  0.42 s/decision
+WARN  two_r06_gemma3  gemma3:1b: like 86%  0.36 s/decision
+   warn: 3 answers cut off at the token limit
+PASS  two_r06_gemma4  gemma4:e2b: like 76%  0.43 s/decision
+WARN  two_r07_gemma3  gemma3:1b: like 73%  0.36 s/decision
+   warn: 1 answers cut off at the token limit
+PASS  two_r07_gemma4  gemma4:e2b: like 84%  0.46 s/decision
+WARN  two_r08_gemma3  gemma3:1b: like 79%  0.37 s/decision
+   warn: 3 answers cut off at the token limit
+PASS  two_r08_gemma4  gemma4:e2b: like 72%  0.45 s/decision
+WARN  two_r09_gemma3  gemma3:1b: like 77%  0.36 s/decision
+   warn: 2 answers cut off at the token limit
+PASS  two_r09_gemma4  gemma4:e2b: like 78%  0.44 s/decision
+WARN  two_r10_gemma3  gemma3:1b: like 80%  0.36 s/decision
+   warn: 2 answers cut off at the token limit
+PASS  two_r10_gemma4  gemma4:e2b: like 80%  0.42 s/decision

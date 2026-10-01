@@ -81,6 +81,16 @@ EMOJI = re.compile("[\U0001F000-\U0001FAFF☀-➿️‍]")
 def slot_brief(seed, rnd, topic):
     """Deterministic brief for (seed, round, topic). Angles do not repeat until the list is used up."""
     t = TOPICS[topic]
+    if seed > 200:
+        # LD-18 rounds (seed 200+r): briefs are numbered across the whole campaign, so every angle is used before
+        # any repeats and no (angle, post type, voice) brief is ever reused (12 angles x 84 type/voice pairs).
+        i = 5 * (seed - 201) + rnd
+        order = list(range(len(t["angles"])))
+        random.Random(f"ld18|{topic}|angles").shuffle(order)
+        combos = [(p, v) for p in POST_TYPES for v in POSTER_VOICES]
+        random.Random(f"ld18|{topic}|combos").shuffle(combos)
+        p, v = combos[i % len(combos)]
+        return {"angle": t["angles"][order[i % len(order)]], "ptype": p, "voice": v}
     order = list(range(len(t["angles"])))
     random.Random(f"{seed}|{topic}|angles").shuffle(order)
     rng = random.Random(f"{seed}|{rnd}|{topic}|brief")

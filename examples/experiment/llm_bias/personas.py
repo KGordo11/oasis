@@ -228,6 +228,9 @@ def render_persona(p):
 CORE_N = 99
 PINNED_BANK_HASH = "8c9cf5b67383"
 PINNED_CORE99_HASH = "964462b96652"
+# Gordon, 2026-09-30: 100 users, never changed. #0-98 above plus #99 of the same bank.
+CORE100_N = 100
+PINNED_CORE100_HASH = "f51d2b0a1f7d"
 
 
 class PersonaDrift(RuntimeError):
@@ -242,6 +245,14 @@ def core99():
     core = bank[:CORE_N]
     if bank_hash(core) != PINNED_CORE99_HASH or [p["id"] for p in core] != list(range(CORE_N)):
         raise PersonaDrift("the 99 standard personas changed")
+    return core
+
+
+def core100():
+    """The 100 standard users: the pinned 99 plus #99, verified against their own fingerprint."""
+    core = core99() + load_bank()[CORE_N:CORE100_N]
+    if bank_hash(core) != PINNED_CORE100_HASH:
+        raise PersonaDrift("the 100 standard users changed")
     return core
 
 

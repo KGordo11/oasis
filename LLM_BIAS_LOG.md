@@ -1560,3 +1560,52 @@ each AI is (mistral likes ~98 %); corrected to the double difference before repo
 Pages: Scroll Test v36 (finding 6, test 5); report doc updated (6 sets, finding 6, test 5, next steps).
 **All LD-16 items done except 3 (sibling test: designed, not run) and 7 (needs a GPU machine). Everything stopped
 06:26 2026-09-29: Ollama and all jobs shut down, per Gordon ("stop when you finish all tasks").**
+
+---
+
+### LD-18 — Two AIs, 100 users, new posts every round (Gordon, 2026-09-30 23:00-23:30)
+
+Gordon's spec, in his words where it matters: "100 hard coded users ... never changed or altered"; "5 topics";
+"each model will write 5 posts each for each topic"; "the users will then go through ALL posts like a reddit feed,
+one by one scroll"; "the AI models will generate new posts every round, nothing about the post should be reused";
+"the users will be played by each AI model ... they don't know or care where the post came from, they just judge
+the post based off their personality and the AI model controlling them"; "upvote, downvote, nothing"; "add a second
+AI, whatever is second fastest, because we need comparisons"; "use the fastest 2 AIs available, free and open
+source"; 10-15 rounds; "keep all data and document it thoroughly". Full control until 15:00 2026-10-01.
+
+Answers he picked (23:20): speed-test the small models first; each round's feed is only that round's 50 new posts;
+keep the shared per-slot angle (both AIs get the same angle/post-type/voice in a slot, new angles every round).
+
+Design as built:
+* **Users:** the 100 pinned users = the pinned 99 + bank #99 (`personas.core100()`, hash f51d2b0a1f7d; refuses to
+  run if any of the 100 changed). Same 100 in every round, for both AIs.
+* **Round r** uses post seed 200+r: each AI writes 5 natural posts (no length/format rule; only on topic) for each
+  of the 5 topics → 50 brand-new posts. A slot is dropped only if an AI fails to write its post after 4 tries.
+* **Then AI A plays all 100 users** through all 50 posts (best-loved topic first, posts shuffled per user, one post
+  per call, upvote/downvote/nothing + reason; author and vote counts never shown), **then AI B plays the same 100
+  users** on the same 50 posts. 10,000 decisions per round. World labels `two_rNN_<model>`.
+* Rounds are independent (no memory carried over; users never change).
+* Code: `two_ai_campaign.sh` (rounds, stops before starting a round that can't finish by 15:00),
+  `two_ai_after_round.sh` (round time, check_world, analyze_world, commit + push each round), `speed_pick.py`.
+* Not done: an aborted earlier start (one AI only, old post set 40, 23:00) was killed after ~50 s on Gordon's
+  word and deleted; no data from it is kept.
+* **Briefs never reused (Gordon 23:35: "each round the AI models should make new posts").** Only 12 angles per
+  topic exist (16 finance) and 15 rounds need 75 slots, so `slot_brief` numbers briefs across the campaign for
+  seeds > 200: all 12 angles are used before any repeats, and each slot gets its own (post type, voice) pair from the
+  84 available, so no full brief is ever reused (checked: 75 unique per topic). Old banks (seed ≤ 200) are byte-for-byte
+  unchanged (checked). Posts are always newly written; users have no memory (each vote is one stateless call with
+  only the fixed personality + that one post).
+
+### LR-? Speed pick + launch (2026-09-30 23:40-23:54)
+
+`speed_pick.py` (40 votes + 2 natural posts per model, real prompts, 4 in parallel; `data/llm_bias/speed_pick.json`).
+Every model gave 100 % readable answers and 2/2 posts. Seconds per vote: gemma3:1b 0.36, gemma4:e2b 0.53,
+llama3.2:1b 0.92, granite4.1:3b 1.13, llama3.2:3b 1.19, qwen2.5:1.5b 1.23, qwen2.5:3b 1.47, phi4-mini 1.80,
+llama3.1:8b 1.97 (absolute numbers include warm-up at this small size; the ranking is what was used).
+**Chosen: gemma4:e2b + gemma3:1b** (the two fastest, per Gordon "use the fastest 2 AIs available"). Caveat to report:
+both are Google Gemma models (siblings), so "own AI" here partly means "own family"; llama3.2:1b (next fastest, other
+family) would have fitted only ~8 rounds before 15:00.
+Smoke (5 users, seed 299, both AIs, deleted after): 480 votes, 0 broken; 49/50 posts (one gemma3 finance post failed
+5 tries → that slot dropped for both AIs); 49 unique bodies; gemma3 posts read as normal Reddit posts.
+Campaign launched 23:53: `A=gemma4:e2b B=gemma3:1b STOP_AT="2026-10-01 14:30" two_ai_campaign.sh`, rounds 1-15,
+seeds 201-215, no new round started unless its measured duration fits before 14:30.

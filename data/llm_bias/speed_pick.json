@@ -1,0 +1,126 @@
+{
+ "gemma4:e2b": {
+  "s_per_vote": 0.525,
+  "votes": {
+   "dislike": 5,
+   "like": 34,
+   "nothing": 1
+  },
+  "s_per_post": 3.6,
+  "posts_ok": "2/2",
+  "post_words": [
+   229,
+   144
+  ]
+ },
+ "llama3.2:1b": {
+  "s_per_vote": 0.915,
+  "votes": {
+   "dislike": 12,
+   "like": 28
+  },
+  "s_per_post": 4.1,
+  "posts_ok": "2/2",
+  "post_words": [
+   62,
+   132
+  ]
+ },
+ "gemma3:1b": {
+  "s_per_vote": 0.355,
+  "votes": {
+   "dislike": 6,
+   "like": 34
+  },
+  "s_per_post": 30.1,
+  "posts_ok": "2/2",
+  "post_words": [
+   168,
+   168
+  ]
+ },
+ "qwen2.5:1.5b": {
+  "s_per_vote": 1.23,
+  "votes": {
+   "nothing": 7,
+   "like": 27,
+   "dislike": 6
+  },
+  "s_per_post": 8.3,
+  "posts_ok": "2/2",
+  "post_words": [
+   333,
+   79
+  ]
+ },
+ "qwen2.5:3b": {
+  "s_per_vote": 1.465,
+  "votes": {
+   "nothing": 28,
+   "dislike": 1,
+   "like": 11
+  },
+  "s_per_post": 4.2,
+  "posts_ok": "2/2",
+  "post_words": [
+   109,
+   83
+  ]
+ },
+ "llama3.2:3b": {
+  "s_per_vote": 1.186,
+  "votes": {
+   "nothing": 3,
+   "like": 33,
+   "dislike": 4
+  },
+  "s_per_post": 6.1,
+  "posts_ok": "2/2",
+  "post_words": [
+   145,
+   154
+  ]
+ },
+ "granite4.1:3b": {
+  "s_per_vote": 1.133,
+  "votes": {
+   "dislike": 6,
+   "like": 33,
+   "nothing": 1
+  },
+  "s_per_post": 7.6,
+  "posts_ok": "2/2",
+  "post_words": [
+   134,
+   261
+  ]
+ },
+ "phi4-mini:3.8b": {
+  "s_per_vote": 1.797,
+  "votes": {
+   "like": 28,
+   "nothing": 11,
+   "dislike": 1
+  },
+  "s_per_post": 8.0,
+  "posts_ok": "2/2",
+  "post_words": [
+   145,
+   122
+  ]
+ },
+ "llama3.1:8b": {
+  "s_per_vote": 1.967,
+  "votes": {
+   "dislike": 5,
+   "nothing": 14,
+   "like": 21
+  },
+  "s_per_post": 5.0,
+  "posts_ok": "2/2",
+  "post_words": [
+   77,
+   92
+  ]
+ }
+}

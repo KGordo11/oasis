@@ -159,9 +159,9 @@ async def run(a):
     # 2. world
     # The SAME 99 hard-coded personas every run (pinned fingerprint; refuses to run if changed).
     # A smaller --agents takes the first N of those same 99, never different people.
-    if a.agents > persona_mod.CORE_N:
-        raise SystemExit(f"--agents {a.agents}: the standard population is the {persona_mod.CORE_N} pinned personas")
-    bank = persona_mod.core99()[:a.agents]
+    if a.agents > persona_mod.CORE100_N:
+        raise SystemExit(f"--agents {a.agents}: the standard population is the {persona_mod.CORE100_N} pinned users")
+    bank = persona_mod.core100()[:a.agents]
     db_path = os.path.join(out, "oasis.db")
     if os.path.exists(db_path):
         os.remove(db_path)  # rebuilt from scratch on resume; votes are replayed below
@@ -202,6 +202,7 @@ async def run(a):
                    "length_rule": authors.length_rule(band, enforce, a.natural_posts), "complete_slots": a.complete_slots},
         "persona_bank_hash": persona_mod.PINNED_BANK_HASH,
         "core99_hash": persona_mod.PINNED_CORE99_HASH,
+        "core100_hash": persona_mod.PINNED_CORE100_HASH,
         "persona_ids": [p["id"] for p in bank],
         "post_generation_s": round(gen_s, 1),
         "ollama_server": llm.server_config(),

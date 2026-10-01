@@ -12,3 +12,13 @@ WARN  two_r02_gemma3  gemma3:1b: like 76%  0.37 s/decision
 PASS  two_r02_gemma4  gemma4:e2b: like 78%  0.45 s/decision
 PASS  two_r03_gemma3  gemma3:1b: like 71%  0.36 s/decision
 PASS  two_r03_gemma4  gemma4:e2b: like 77%  0.43 s/decision
+PASS  two_r01_gemma3  gemma3:1b: like 63%  0.37 s/decision
+PASS  two_r01_gemma4  gemma4:e2b: like 79%  0.45 s/decision
+WARN  two_r02_gemma3  gemma3:1b: like 76%  0.37 s/decision
+   warn: 4 answers cut off at the token limit
+PASS  two_r02_gemma4  gemma4:e2b: like 78%  0.45 s/decision
+PASS  two_r03_gemma3  gemma3:1b: like 71%  0.36 s/decision
+PASS  two_r03_gemma4  gemma4:e2b: like 77%  0.43 s/decision
+WARN  two_r04_gemma3  gemma3:1b: like 61%  0.37 s/decision
+   warn: 1 answers cut off at the token limit
+PASS  two_r04_gemma4  gemma4:e2b: like 81%  0.45 s/decision

@@ -16,7 +16,25 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-09-29 06:40 — ALL TASKS DONE, everything stopped (Ollama off, nothing running).*
+*Last updated 2026-10-01 08:50 — LD-18 RUNNING (two AIs, 100 users, new posts every round), round 8 of ~12.*
+
+**Design (Gordon 2026-09-30, LD-18):** gemma4:e2b + gemma3:1b (fastest two of 9 speed-tested) each write 5 new natural
+posts per subreddit every round (50/round, briefs never reused); then gemma4 plays all 100 pinned users through every
+post (upvote/downvote/nothing, author hidden, no memory), then gemma3 plays the same 100 on the same posts.
+`two_ai_campaign.sh` runs rounds until 14:30; `two_ai_after_round.sh` checks, analyses, rebuilds the page, commits.
+**After 7 rounds (69,600 votes, 0 invalid):** own-AI upvote boost +7.1 points, 7/7 rounds positive, wider 95 % interval
+[+1.5, +13.6]; downvotes −5.0 [−8.5, −1.2]. Mostly gemma4 favouring its own posts (+6.6 vs gemma3 +0.5). Length hides
+part of it (gemma3 writes longer; gemma3-users dislike length, gemma4-users like it): at equal length +14.0.
+Same user + post, two AIs agree 67.5 % (κ 0.18). Drift check: replay of round-1 votes 97 % identical.
+**Pages:** results page (every round) https://claude.ai/artifact/HPmkfevmeC3LTYWhN4citW · report doc tab "Test 6"
+(results through round 7; final redraw at the end via make_doc_charts.py).
+**If it stops:** `A=gemma4:e2b B=gemma3:1b STOP_AT="2026-10-01 14:30" examples/experiment/llm_bias/two_ai_campaign.sh`
+resumes (finished worlds skipped, half-done ones resumed). Start Ollama first (LF-14 settings).
+
+---
+*Previous status (2026-09-29 06:40):*
+
+*(was) Last updated 2026-09-29 06:40 — ALL TASKS DONE, everything stopped (Ollama off, nothing running).*
 
 **Final answers:** three AIs writing freely, 6 post sets (LF-46): every AI favours its own posts, pooled +6.8
 likes per 100 [+4.6, +9.4]; each AI above zero in every set. Feed test (LF-47): when one AI plays the whole crowd,

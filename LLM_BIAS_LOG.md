@@ -1710,3 +1710,8 @@ who is who + diagram, one round step by step with the real prompts, fairness tab
 findings + chart, how sure, limits, every file, every command in order with times and a redo-it-yourself block) and
 tab "All the code" (14 files in full with plain-words notes; exported and diffed: 13/13 files identical to source,
 analyze.py excerpt verbatim).
+
+### LR — LD-18 extension, rounds 12-15 (Gordon 2026-10-01 17:30: "start running another sim now for more data")
+Same design, same AIs, same 100 users, seeds 212-215 (new briefs continue the campaign numbering, so still no brief
+reused). Launched 17:33: `A=gemma4:e2b B=gemma3:1b ROUNDS="12 13 14 15" STOP_AT="2026-10-02 06:00" two_ai_campaign.sh`.
+Expected ~66 min/round → done ~22:00. Pages and analysis refresh after each round.

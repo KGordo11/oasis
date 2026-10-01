@@ -197,6 +197,8 @@ def main(B=2000):
                     "needed_retry_%": ok.assign(r=ok["attempts"] > 1).groupby("author")["r"].mean().mul(100).round(1).to_dict(),
                     "slots_dropped": int(len(posts.groupby(["seed", "round", "topic"])) - len(S))}
 
+    dpath = os.path.join(OUT, "drift_check.jsonl")
+    res["drift"] = [json.loads(l) for l in open(dpath)] if os.path.exists(dpath) else []
     # exports: every vote, every post, the 100 users, timing, slot table
     users = pd.DataFrame(personas.core100())
     uname = users.set_index("id")["username"].to_dict()

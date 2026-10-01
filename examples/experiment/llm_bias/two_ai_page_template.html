@@ -276,7 +276,8 @@ table("ttopic",["Subreddit","Slots","Upvote boost","Downvote boost"],Object.entr
   ["Posts written (mean words)",`${p.words_mean[A]} words`,`${p.words_mean[B]} words`],
   ["Posts that needed a retry",p["needed_retry_%"][A]+"%",p["needed_retry_%"][B]+"%"],
   ["Posts never written / slots dropped",`${p.failed} posts / ${p.slots_dropped} slots`,""],
-  ["Duplicate post bodies (all rounds)",p.duplicate_bodies,""]])})();
+  ["Duplicate post bodies (all rounds)",p.duplicate_bodies,""],
+  ...RES.drift.map(d=>[`Replay check: ${d.n} ${d.world.replace("two_r0","round ").replace("_"," ")} votes re-run hours later with the same seeds`,`${d["same_answer_%"]}% identical answers`,""])]])})();
 
 // timing
 (function(){const rm=RES.timing.round_min,ks=Object.keys(rm).map(Number).sort((a,b)=>a-b),W=760,H=220,s=svg(W,H,"fig5");

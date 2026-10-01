@@ -16,7 +16,14 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-10-01 08:50 — LD-18 RUNNING (two AIs, 100 users, new posts every round), round 8 of ~12.*
+*Last updated 2026-10-01 14:10 — LD-18 DONE (11 rounds). Nothing running (Ollama idle).*
+
+**Answer (LF-48):** users played by an AI upvote that AI's posts **+7.1 points** more [+2.9, +11.5] and downvote them
+**−4.7** less [−7.6, −1.9]; 10/11 rounds positive; mostly gemma4; +12.5 at equal length. 108,800 votes, 0 failed.
+**Next (Gordon's call):** cross-family pair (gemma4 vs llama3.2:1b, ~8 rounds/night), neutral referee crowd,
+length-matched posts (~179 words), visible counts, GPU machine.
+
+*(was, 08:50)* LD-18 RUNNING, round 8 of ~12.
 
 **Design (Gordon 2026-09-30, LD-18):** gemma4:e2b + gemma3:1b (fastest two of 9 speed-tested) each write 5 new natural
 posts per subreddit every round (50/round, briefs never reused); then gemma4 plays all 100 pinned users through every
@@ -1669,3 +1676,31 @@ AI has not drifted overnight; the high gemma3 like rates in rounds 5-6 come from
 (gemma3 WARNs = its like rate is above the baseline formed by rounds 1-4; drift ruled out at 07:25.)
 **After 10 rounds (98,800 votes, 0 invalid, 497 posts, 0 duplicates, 3 slots dropped):** like +6.3, 9/10 rounds positive,
 wider 95 % [+1.7, +11.2]; dislike −4.2; at equal length +11.8; κ 0.19; top-10 own posts: gemma4 crowd 6.9, gemma3 crowd 5.4.
+
+| 11 | 13:22 | 70 | 10,000/10,000 | — | 3682/894/424 | PASS both |
+Campaign stopped itself 13:22 ("round 12 needs 4167 s, 4089 s left"). gemma4 replay check 13:30: 99.5 % identical.
+
+### LF-48 — LD-18 final: two AIs, 100 users, new posts every round → own-AI boost is real (2026-10-01 13:45)
+
+11 rounds (seeds 201-211), 108,800 votes (0 failed), 547 posts (0 duplicate bodies; 3 gemma3 posts failed → 3 slots
+dropped for both AIs), 100 pinned users, gemma4:e2b + gemma3:1b. `analyze_two_ai.py 2000` → data/llm_bias/two_ai/.
+Checks: 14 PASS, 8 WARN (gemma3 like-rate swings by batch), 0 FAIL. Replay: gemma3 97.0 %, gemma4 99.5 % identical.
+
+| | estimate | wider 95 % (LD-19 rule) | round bootstrap | rounds |
+|---|---|---|---|---|
+| own-AI upvote boost | **+7.1** | [+2.9, +11.5] (user×slot), p = 0.002 | [+4.5, +9.9] | 10/11 positive |
+| own-AI downvote change | **−4.7** | [−7.6, −1.9], p = 0.001 | [−6.2, −3.4] | 11/11 negative |
+| upvote boost at equal length | +12.5 | [+8.0, +17.1] (round-clustered) | | |
+
+* Who: gemma4-users upvote gemma4 posts 81.2 % vs 74.9 % (+6.3) and downvote them 6.2 % vs 14.1 %; gemma3-users
+  75.5 % vs 74.7 % (+0.8) and downvote their own AI's posts MORE (13.3 % vs 10.1 %).
+* Length (pre-stated LD-19 secondary): gemma3 writes 194 words vs 164; per +100 words, author fixed: gemma4-users
+  +10.7 [+6.6, +14.7], gemma3-users −15.1 [−19.8, −10.4] → length hides part of the boost.
+* Same user + same post, two AIs: 68.2 % same choice, κ 0.18. Interest gradient: gemma4 56 → 85 %, gemma3 69 → 80 %.
+* Top 10 by score: gemma4 crowd 6.8 own posts, gemma3 crowd 5.3 (fair = 5).
+* By subreddit (descriptive): farming +9.9, cooking +9.7, cars +8.8, tech +3.9, finance +3.1 — all positive.
+* Cost: 66.6 min/round (62.5-69.5); 0.45 s/vote gemma4, 0.37 gemma3; 13.5 h total.
+* Matches the earlier three-family test (LF-46 +6.8) in size. Caveat: both AIs are Gemma (siblings).
+Pages: results page v11 https://claude.ai/artifact/HPmkfevmeC3LTYWhN4citW (final); report doc tab "Test 6" filled
+(answer, design, method, results + 3 charts, quality/cost, limitations + 5 improvements, data); main tab table has a
+Test 6 row and says "six tests".

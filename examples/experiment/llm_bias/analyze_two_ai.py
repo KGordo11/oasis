@@ -133,6 +133,17 @@ def main(B=2000):
                               "per_100_words_gap": float(m.params["gap100"]),
                               "per_100_words_gap_ci95": [float(ci.loc["gap100", 0]), float(ci.loc["gap100", 1])],
                               "r2": float(m.rsquared), "slots": len(S)}
+    # length taste per AI: post-level upvote rate vs words (per 100), author held fixed, clustered by round
+    pl = L.groupby(["round", "post", "judge", "author"])["up"].mean().reset_index()
+    pk = posts[posts.ok].assign(post=lambda d: d["seed"].astype(str) + "|" + d["key"])[["post", "words"]]
+    pl = pl.merge(pk, on="post")
+    pl["w100"] = pl["words"] / 100
+    res["length_taste"] = {}
+    for j, g in pl.groupby("judge"):
+        m = smf.ols("up ~ w100 + C(author)", g).fit(cov_type="cluster", cov_kwds={"groups": g["round"]}) if g["round"].nunique() > 1 \
+            else smf.ols("up ~ w100 + C(author)", g).fit()
+        res["length_taste"][j] = {"per_100_words": float(m.params["w100"]),
+                                  "ci95": [float(m.conf_int().loc["w100", 0]), float(m.conf_int().loc["w100", 1])]}
     res["slots"] = S[["round", "topic", "like_dd", "dislike_dd", "words_a", "words_b"]].round(4).to_dict(orient="records")
     res["by_topic"] = {t: {"like_dd": float(g["like_dd"].mean()), "dislike_dd": float(g["dislike_dd"].mean()),
                            "slots": len(g)} for t, g in S.groupby("topic")}
@@ -216,6 +227,7 @@ def main(B=2000):
     print(f"same user same post, two AIs: same choice {res['agreement']['same_choice_%']:.1f}%, "
           f"kappa {res['agreement']['kappa']:.2f}")
     print("like rate (rows played by, cols written by):\n" + (pd.DataFrame(res["rate_up"]) * 100).round(1).to_string())
+    print("length taste (upvote change per +100 words):", {k: round(v["per_100_words"] * 100, 1) for k, v in res["length_taste"].items()})
     print("top-10 own share:", res["top10"]["mean_own_share"], "round minutes:", res["timing"]["round_min"])
 
 

@@ -1618,3 +1618,15 @@ seeds 201-215, no new round started unless its measured duration fits before 14:
 After 2 rounds: like boost +3.4 pts (both rounds positive), dislike −4.2; same user + post, two AIs agree 66 % (κ 0.21).
 Fix 02:30: `two_ai_after_round.sh` now runs check/analysis/page/commit in the background (it held the next round ~4 min).
 Results page (rebuilt every round): https://claude.ai/artifact/HPmkfevmeC3LTYWhN4citW. Report doc: new tab "Test 6".
+
+### LD-19 — Final-analysis plan for LD-18, stated 2026-10-01 03:55 (after 3 of ~12 rounds, before the rest)
+1. **Primary:** own-AI double difference on upvotes and downvotes, pooled over all finished rounds. 95 % interval =
+   the WIDER of (a) whole-round bootstrap and (b) two-way user × slot bootstrap (correction: the page/doc first called
+   the round bootstrap "main and strictest"; with 3 rounds it is the narrower one — fixed on page v3 and in the doc).
+   "Real" = the wider interval excludes zero.
+2. **Secondary:** the length-adjusted boost = intercept of slot double difference ~ word gap (round-clustered).
+   Seen after 3 rounds: raw +3.0, at equal length +13.8 — explained by opposite length tastes (author held fixed,
+   per +100 words: gemma4-played users +8.3, gemma3-played users −15.8; gemma3 writes ~45 words longer). Will be
+   reported whatever it is at the end; not used to pick the headline.
+3. Also reported: per-round values, rounds positive, by subreddit (descriptive only, 5 tests, no correction → not
+   claimed), agreement (κ), top-10 share, interest gradient, timing, failures.

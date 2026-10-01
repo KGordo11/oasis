@@ -98,14 +98,14 @@ select{font:14px var(--sans);padding:6px 8px;background:var(--bg);color:var(--in
 <p>Comparing raw upvote rates would mix up three things: one AI writing better posts, one AI upvoting everything, and real favouritism. The double difference cancels the first two:</p>
 <div class="formula">boost = (A-users' upvote % on A's posts − on B's posts) − (B-users' upvote % on A's posts − on B's posts)</div>
 <p class="plain">In plain words: how much more do A-played users prefer A's posts than B-played users do, on the exact same posts? Zero means no favouritism. For downvotes, favouritism shows up as a negative number.</p>
-<p>Uncertainty is shown as 95% intervals, the range the true number very likely sits in. We report two: (1) resampling whole rounds, the strictest, because which posts got written is the biggest source of noise; and (2) resampling users and post slots together, the method used in all our earlier tests.</p>
+<p>Uncertainty is shown as 95% intervals, the range the true number very likely sits in. We compute two and lead with whichever is wider: (1) resampling whole rounds, because which posts got written is the biggest source of noise (with few rounds this one is too narrow, as there are only a handful of ways to resample); (2) resampling users and post slots together, the method used in all our earlier tests.</p>
 
 <h2>3. Results</h2>
 <h3>3.1 Raw rates</h3>
 <figure><div id="fig1"></div><figcaption><b>Figure 1.</b> Share of votes that were upvotes, downvotes and "nothing", split by which AI played the users (rows) and which AI wrote the post (columns). Each cell covers every round so far.</figcaption></figure>
 
 <h3>3.2 The own-AI boost</h3>
-<figure><div id="fig2"></div><figcaption><b>Figure 2.</b> Own-AI boost on upvotes (top) and downvotes (bottom), in percentage points: one dot per round, plus the pooled estimate with its 95% interval (whole-round resampling). Right of the dashed zero line means more upvotes (or more downvotes) for the users' own AI's posts.</figcaption></figure>
+<figure><div id="fig2"></div><figcaption><b>Figure 2.</b> Own-AI boost on upvotes (top) and downvotes (bottom), in percentage points: one dot per round, plus the pooled estimate (black tick) with the wider of its two 95% intervals (shaded). Right of the dashed zero line means more upvotes (or more downvotes) for the users' own AI's posts.</figcaption></figure>
 <div class="tbl"><table id="tboost"></table></div>
 
 <h3>3.3 Is it just post length?</h3>
@@ -164,9 +164,11 @@ function table(id,head,rows){const t=document.getElementById(id);t.innerHTML="<t
 // status + abstract
 const lb=RES.round_boot_up, db=RES.round_boot_down, len=RES.length.like_dd;
 document.getElementById("status").textContent=`${nR} round${nR>1?"s":""} finished · ${RES.valid.toLocaleString()} votes · updated ${RES.generated_at.replace("T"," ")}`;
-const sig=lb.ci95&&(lb.ci95[0]>0||lb.ci95[1]<0);
+const wide=(a,b)=>!a?b:!b?a:(a[1]-a[0]>=b[1]-b[0]?a:b); // lead with the WIDER (more cautious) interval
+const lci=wide(lb.ci95,RES.sp_up._pooled.ci95), dci=wide(db.ci95,RES.sp_down._pooled.ci95);
+const sig=lci&&(lci[0]>0||lci[1]<0);
 document.getElementById("abstract").innerHTML=`<b class="k">Abstract</b>
-<p>Two free local AIs, <span class="ai-a">${A}</span> and <span class="ai-b">${B}</span>, each wrote 25 new Reddit-style posts per round across 5 subreddits. Each AI then played the same 100 fixed users, who scrolled every post and voted <span class="up">up</span>, <span class="down">down</span> or nothing, without being told who wrote it. Over <b>${nR} round${nR>1?"s":""}</b> (${RES.valid.toLocaleString()} votes on ${RES.posts.written} posts), users played by an AI upvoted that AI's posts by <b class="num">${sgn(lb.est)} points</b> more than users played by the other AI did ${lb.ci95?`(95% interval ${ci(lb.ci95)}; ${lb.rounds_positive} of ${nR} rounds positive)`:""}. ${sig?"The interval excludes zero.":"The interval includes zero, so we cannot rule out no effect yet."} Downvotes moved by <span class="num">${sgn(db.est)}</span> points ${db.ci95?ci(db.ci95):""}. With both posts the same length, the upvote boost is <span class="num">${sgn(len.at_equal_length)}</span> points. The same user played by the two AIs made the same choice ${RES.agreement["same_choice_%"].toFixed(0)}% of the time (κ = ${RES.agreement.kappa.toFixed(2)}).</p>`;
+<p>Two free local AIs, <span class="ai-a">${A}</span> and <span class="ai-b">${B}</span>, each wrote 25 new Reddit-style posts per round across 5 subreddits. Each AI then played the same 100 fixed users, who scrolled every post and voted <span class="up">up</span>, <span class="down">down</span> or nothing, without being told who wrote it. Over <b>${nR} round${nR>1?"s":""}</b> (${RES.valid.toLocaleString()} votes on ${RES.posts.written} posts), users played by an AI upvoted that AI's posts by <b class="num">${sgn(lb.est)} points</b> more than users played by the other AI did (95% interval ${ci(lci)}, the wider of our two intervals; ${lb.rounds_positive} of ${nR} rounds positive). ${sig?"The interval excludes zero.":"The interval includes zero, so we cannot rule out no effect yet."} Downvotes moved by <span class="num">${sgn(db.est)}</span> points ${ci(dci)}. With both posts the same length, the upvote boost is <span class="num">${sgn(len.at_equal_length)}</span> points. The same user played by the two AIs made the same choice ${RES.agreement["same_choice_%"].toFixed(0)}% of the time (κ = ${RES.agreement.kappa.toFixed(2)}).</p>`;
 
 // design table
 table("design",["Part","What we used"],[
@@ -192,7 +194,7 @@ table("design",["Part","What we used"],[
 // fig2: per-round dots + pooled CI
 (function(){
  const W=760,rowH=24,rows=RES.per_round.length; const H=2*(rows*rowH+60)+10; const s=svg(W,H,"fig2");
- const all=RES.per_round.flatMap(r=>[r.like_dd,r.dislike_dd]).concat([lb.ci95||[0,0],db.ci95||[0,0]].flat(),[0]);
+ const all=RES.per_round.flatMap(r=>[r.like_dd,r.dislike_dd]).concat([lci||[0,0],dci||[0,0]].flat(),[0]);
  let lo=Math.min(...all),hi=Math.max(...all); const pad=(hi-lo)*.1||.02; lo-=pad;hi+=pad;
  const x=v=>110+(v-lo)/(hi-lo)*(W-130);
  [["like_dd",lb,"Upvotes","--up"],["dislike_dd",db,"Downvotes","--down"]].forEach(([k,b,name,c],gi)=>{
@@ -202,7 +204,7 @@ table("design",["Part","What we used"],[
   el("line",{x1:x(0),x2:x(0),y1:y0+20,y2:yb+14,class:"zero"},s);
   RES.per_round.forEach((r,i)=>{const y=y0+34+i*rowH;el("text",{x:100,y:y+4,"text-anchor":"end"},s,"round "+r.round);
    el("circle",{cx:x(r[k]),cy:y,r:5,fill:`var(${c})`},s)});
-  if(b.ci95){el("rect",{x:x(b.ci95[0]),y:yb-8,width:x(b.ci95[1])-x(b.ci95[0]),height:16,fill:"var(--band)",stroke:"var(--a)"},s)}
+  const bc=k==="like_dd"?lci:dci;if(bc){el("rect",{x:x(bc[0]),y:yb-8,width:x(bc[1])-x(bc[0]),height:16,fill:"var(--band)",stroke:"var(--a)"},s)}
   el("rect",{x:x(b.est)-2,y:yb-11,width:4,height:22,fill:"var(--ink)"},s);
   el("text",{x:100,y:yb+4,"text-anchor":"end",class:"lab",style:"font-weight:600"},s,"pooled");
  });
@@ -231,7 +233,7 @@ table("tboost",["","Upvote boost","Downvote boost"],[
  el("text",{x:(W+40)/2,y:H-4,"text-anchor":"middle",class:"lab"},s,`word gap: ${short(A)} post − ${short(B)} post`);
  el("text",{x:14,y:H/2,transform:`rotate(-90 14 ${H/2})`,"text-anchor":"middle",class:"lab"},s,"slot's upvote boost (points)");
 })();
-document.getElementById("lengthtext").innerHTML=`Average boost per slot: <span class="num">${sgn(len.raw_mean)}</span>. At equal length: <span class="num">${sgn(len.at_equal_length)}</span> ${ci(len.at_equal_length_ci95)}. Each extra 100 words on ${short(A)}'s side changes it by <span class="num">${sgn(len.per_100_words_gap)}</span> ${ci(len.per_100_words_gap_ci95)}. Length explains ${(len.r2*100).toFixed(0)}% of the slot-to-slot variation. ${A} wrote <span class="num">${RES.posts.words_mean[A]}</span> words on average and ${B} <span class="num">${RES.posts.words_mean[B]}</span>.`;
+document.getElementById("lengthtext").innerHTML=`Average boost per slot: <span class="num">${sgn(len.raw_mean)}</span>. At equal length: <span class="num">${sgn(len.at_equal_length)}</span> ${ci(len.at_equal_length_ci95)}. Each extra 100 words on ${short(A)}'s side changes it by <span class="num">${sgn(len.per_100_words_gap)}</span> ${ci(len.per_100_words_gap_ci95)}. Length explains ${(len.r2*100).toFixed(0)}% of the slot-to-slot variation. ${A} wrote <span class="num">${RES.posts.words_mean[A]}</span> words on average and ${B} <span class="num">${RES.posts.words_mean[B]}</span>.<br><br><b>Why length matters here:</b> the two AIs play the same users with opposite tastes for length. With the post's author held fixed, each extra 100 words changes the upvote rate by <span class="num">${sgn(RES.length_taste[A].per_100_words)}</span> points ${ci(RES.length_taste[A].ci95)} when ${short(A)} plays the users, and by <span class="num">${sgn(RES.length_taste[B].per_100_words)}</span> ${ci(RES.length_taste[B].ci95)} when ${short(B)} does. <span class="plain">In plain words: ${RES.length_taste[B].per_100_words<0?short(B)+"-played users mark down long posts, and "+short(B)+" is the AI that writes long posts, so its own users partly punish its posts for their length. That hides part of the own-AI boost in the raw number.":"the two AIs reward length differently, which mixes into the raw number."}</span>`;
 
 // fig4: like by interest
 (function(){

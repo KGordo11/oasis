@@ -195,6 +195,68 @@ no length or format rules, only the topic brief and "don't mention AI / don't si
 Same table layout as `export/`, three models instead of two. Analysis: `data/llm_bias/analysis_v3.json`
 (`analyze_world.py --prefix v3_`); checks `data/llm_bias/v3_checks.txt`.
 
+## Two AIs, 100 users, new posts every round (LD-18, from 2026-09-30) — `data/llm_bias/two_ai/`
+
+**Rebuild:** `./oasis-env/bin/python examples/experiment/llm_bias/analyze_two_ai.py` (re-run after every round;
+`two_ai_after_round.sh` does it automatically, with 1,000 bootstrap draws instead of 2,000).
+
+Words specific to this test:
+- **AI A / AI B** — gemma4:e2b and gemma3:1b. Each one writes posts AND plays users.
+- **Round** — here, one fresh batch of 50 posts (post seed 200 + round) plus two worlds on it:
+  `two_rNN_gemma4` (gemma4 plays ALL 100 users) and `two_rNN_gemma3` (gemma3 plays the same 100 users on the
+  same posts, same order). A round = 100 users × ~50 posts × 2 AIs ≈ 10,000 votes. Rounds are independent.
+- **The 100 users** — the pinned 99 (ids 0-98) plus id 99 of the same bank; fingerprint `f51d2b0a1f7d`
+  (`personas.core100()`), checked before every run.
+- **Brief** — the angle + post type + poster voice both AIs get for one slot. Numbered across the whole campaign
+  so no brief is ever reused (all 12 angles used before one repeats; each slot has its own post type × voice pair).
+- **Own-AI post** (`own_ai_post`) — 1 when the post was written by the AI playing the user.
+
+### `reactions.csv` — one row per vote (user × post × AI playing the user)
+| column | meaning |
+|---|---|
+| round, seed | round number (1-15) and its post seed (201-215) |
+| label | the world the vote happened in (`two_rNN_<ai>`) |
+| played_by | the AI controlling the user for this vote |
+| user_id, username, voting_style | which of the 100 users (0-99), their handle, their fixed voting habit |
+| affinity | the user's fixed interest in this subreddit, −2 … +2 |
+| topic, topic_rank, pos_in_topic | subreddit; where it came in the user's scroll (0 = favourite subreddit first); position of the post inside that subreddit's feed |
+| post_key, written_by | the post (`<slot>|<topic>|<author>`, unique within a round) and the AI that wrote it |
+| own_ai_post | 1 = written_by == played_by |
+| action | `like` (upvote), `dislike` (downvote), `nothing` (no vote); empty if the answer failed |
+| reason | the user's few words of reason, as the AI wrote them |
+| outcome | `chose` (readable answer), `unreadable`, `cut_off`, `timeout` |
+| attempts | calls needed (1 = first answer was readable) |
+| latency_s | seconds the vote took (one call; 4 calls run at a time) |
+| prompt_tokens, eval_tokens | tokens read / written for this vote |
+
+### `posts.csv` — one row per post (also failed ones, `ok` = False)
+round, seed, slot_in_topic (0-4), topic, author, key, ok, brief (angle / ptype / voice), title, body (full text,
+exactly as written), words (body word count), attempts, latency_s (seconds to write, incl. retries), eval_tokens.
+
+### `users.csv` — the 100 users, every trait
+id, username, realname, age, gender, country, place, profession, education, income, mbti, big_five,
+topic_affinity (interest −2…+2 for every topic), taste (length / tone / evidence they value), pet_peeve, voting
+habit, persona (the exact text the AI is given).
+
+### `timing.csv` — one row per world
+world, round, judge (the AI playing users), decisions, vote_wall_min, s_per_vote, post_writing_min (only the
+first world of a round writes posts; the second reuses them, so its value is ~0), started, finished, world_wall_min.
+
+### `slots.csv` — one row per slot (a pair of posts from the same brief)
+slot, round, topic, like_dd / dislike_dd (that slot's own-AI double difference: see analysis), words_a /
+words_b (word counts of the gemma4 and gemma3 posts), gap100 ((words_a − words_b) / 100).
+
+### `analysis.json` — every number on the results page
+rate_up/down/nothing (rate[author][player]), sp_up/sp_down (double difference + user × slot bootstrap 95 %),
+round_boot_up/down (same estimate, whole rounds resampled: est, ci95, p, rounds_positive), per_round,
+length (slot double difference regressed on word gap, round-clustered: at_equal_length, per_100_words_gap, r2),
+by_topic, agreement (same user + same post, both AIs: same_choice_%, kappa, crosstab), like_by_interest_pct,
+top10 (own-AI posts in each crowd's top 10 per round), timing, posts (counts, duplicates, words, retries),
+nothing (per-AI failure / "nothing" report), slots.
+
+Also: `data/llm_bias/speed_pick.json` (the speed test that chose the two AIs), `two_ai_campaign.log`,
+`two_ai_after.log`, `two_ai_checks.txt` (check_world.py per round), raw records in `worlds/two_r*/`.
+
 ## Page data files (published next to the Scroll Test page)
 
 `world_data.js` (test 2), `data_ab_scroll.json`, `data_ab_pair.json`, `data_v3.json`: the same packed layout as

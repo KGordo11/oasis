@@ -71,7 +71,7 @@ def load(labels=None, prefix=None, include_unfinished=False):
         # a post set counts only when BOTH rotation worlds are done (each person played by both models)
         # every rotation world must be done: as many worlds as there are judge models (2 in v2, 3 in v3)
         need = df.groupby("seed")["judge"].nunique().clip(lower=2)
-        full = df.groupby("seed")["world"].nunique()
+        full = df.groupby("seed")["label"].nunique()  # labels, not rotation index: LD-18 runs both AIs as world 0
         drop = sorted(full[full < need].index)
         if drop:
             print(f"skipping post sets with only one finished world: {drop}", file=sys.stderr)

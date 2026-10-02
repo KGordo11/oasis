@@ -22,6 +22,7 @@ written.
 | **Part 11** | Simulation 4 design spec (2026-08-24) | `docs/superpowers/specs/2026-08-24-social-timeline-design.md` |
 | **Part 12** | Research agenda (2026-09-11) | `docs/superpowers/specs/2026-09-11-research-agenda.md` |
 | **Part 13** | Sim 4 run folders: what the run names mean | `data/runs/README.md` |
+| **Part 14** | **LLM Bias v2: design proposal (draft, 2026-10-02)** | written 2026-10-02 |
 
 **How this file grew.** It was seven documents until 2026-09-13 and three until 2026-10-02. They were merged
 because every search had to be run several times and the cross-references kept breaking. Nothing was dropped.
@@ -70,6 +71,10 @@ research**:
   (gemma4 vs llama3.2:1b, because Test 6's two AIs are siblings from the same maker); a neutral "referee" crowd
   played by a third AI; posts all made the same length (about 182 words); showing vote counts; moving to a GPU
   machine over SSH (planned, not set up).
+- **Next: LLM Bias v2, designed but NOT approved** (Part 14). The professor wants 100 hard-coded users, 2-3
+  models from different families, every action available, baselines, and one change at a time. Part 14 has the
+  recommended "hybrid feed" design, a review of two outside AI answers, a self-critique of Tests 1-6, and the open
+  questions. **Nothing runs until Gordon says go.**
 - **Sim 4 has been paused since 2026-09-17.** Its last results are in. The next run on its list is **Q-24**
   (§0.4), which has not been run.
 - **All web pages (claude.ai artifacts) were deleted on 2026-10-02** at Gordon's request. Every
@@ -13640,3 +13645,215 @@ more. The second effect is larger, and it is the one worth having.
 descriptions and prompt ordering. That is what makes the 9 control runs an
 independent replication of the published findings rather than more of the same —
 see F-92.
+
+---
+
+# Part 14 — LLM Bias v2: design proposal (DRAFT for the professor meeting, 2026-10-02)
+
+*Written 2026-10-02 morning. **Nothing here is approved or built. No simulation runs until Gordon says go.** This
+Part records the professor's requirements, a review of two outside AI answers Gordon pasted in, a self-critique of
+Tests 1-6, the recommended design, and the questions to settle. Decisions made in the meeting go below as `LD-19`
+and onward.*
+
+## 14.1 What the professor asked for (as relayed by Gordon)
+
+1. **100 hard-coded users**, realistic and never changed.
+2. **2-3 models from different families**, not two Gemmas ("like gemma and qwen").
+3. **Every OASIS action available** to the users, to collect as much data as possible. Useless actions get
+   dropped later.
+4. **Baselines.** "You can't show bias if you don't know how one model reacts to just itself."
+5. **Real research practice:** change only one thing between runs.
+6. Gordon's open problem: **how should the posts be made?** Written in advance like Tests 1-6, or written by the
+   users during the simulation like Sim 4?
+
+## 14.2 Facts checked on 2026-10-02 (from the code, Ollama's model pages, Pew and BLS)
+
+- **OASIS's default Reddit action set has 13 actions:** like/dislike post, create post, create comment,
+  like/dislike comment, search posts, search users, trend, refresh, do nothing, follow, mute
+  (`oasis/social_platform/typing.py:63`). The full list also has repost, quote, report, unfollow, unmute, undo,
+  and group chat (create/join/leave/send/listen).
+  - **Group chat broke Sim 4.** It pushes the feed out of the prompt (Part 1, upstream bug 4), and
+    `follow(group_id=)` errors left only 45 % of attempted follows succeeding (Q-24). So "all actions" should
+    mean all *except group chat*, until that is fixed and tested on its own.
+- **Tool calling (how OASIS agents normally act) per model on Ollama:**
+  - gemma3: **no tools**
+  - gemma4 (e2b/e4b/12b/26b/31b): tools + thinking
+  - qwen3 (0.6b-235b): tools + thinking
+  - llama3.2 (1b/3b): tools
+  - ministral-3 (3b/8b/14b): tools, no thinking
+  - granite4.1: tools
+- **The current persona bank (`personas.py`, `personas_bank.json`)** was built for variety, not to represent a
+  real population:
+  - places include Toronto, rural Saskatchewan and Manchester (`personas.py:64-69`)
+  - MBTI types
+  - ages drawn uniformly from 18 to 78
+  - hand-written rules that change interests: rural → likes farming more, 60+ → likes gaming less, job → interest
+    pulls (`personas.py:166-175`)
+  - 15 topics, of which the tests used 5
+- **Pew 2025** ("Americans' Social Media Use 2025", survey of 5,022 US adults, Feb-Jun 2025): YouTube 84 %,
+  Facebook 71 %, Instagram 50 %, TikTok 37 %, WhatsApp 32 %, Reddit 26 % of US adults.
+- **BLS OEWS May 2024**, shares of all jobs: healthcare practitioners 6.2 % + healthcare support 4.8 % = about
+  11 %; computer and mathematical 3.4 %.
+
+## 14.3 Review of the two outside AI answers Gordon pasted
+
+**Answer 1 (fixed posts + demographic table + controversial topics).** The core idea is right: posts must not
+change between model runs, and a "puppet" account can inject them, as in OASIS's own
+`reddit_simulation_align_with_human.py`. Problems:
+- **The demographic numbers are unsourced, and several are wrong.** It gives healthcare 20 jobs in 100 and
+  tech/IT 15; BLS says about 11 % and 3.4 %. Students (10) and retirees (10) are mixed into the job counts
+  without a rule.
+- **A fully static feed contradicts "all actions".** If users can post, the feed changes.
+- **One puppet posting everything** gives users one account to follow or mute. Use a pool of seed accounts.
+- **Controversial topics (UBI, EVs, diets, remote work, AI at work) bring in a second bias.** The models' own
+  political and safety leanings would mix with own-writing favouritism, a different research question.
+- **Stances written as opinion sentences** ("believes return-to-office builds culture") add wording that differs
+  per user. A fixed template ("Remote work: DISLIKE") keeps the language identical.
+- Its orthogonal-stance idea is good, but it gives no construction. §14.5 gives one, tested.
+
+**Answer 2 (long plan: ACS-based personas, controlling-model experiment first, author bias second).** Mostly sound
+and consistent with this log: blocking by seed, clustered statistics, manifests with hashes, worlds diverging
+after the start being a treatment effect rather than a confound, and keeping Tests 1-6 untouched. Problems:
+- **It never says who writes its "identical initial content bank".** If one model writes it, that model's users
+  get an own-writing advantage in every world. The bank must be **balanced across every model plus humans**.
+- **It recommends gemma3:4b together with "all OASIS actions",** but gemma3 has no tool calling on Ollama. More
+  generally, **native tool calling measures each model's skill at tool calling, not its social behaviour.** A
+  family that is worse at tools would look "less engaged". Sim 1 already showed an 8B model failing at this.
+- **qwen3 (and gemma4) think before answering by default.** Thinking must be switched off for every model
+  (`llm.py` already sends `think: false`), or one family gets hidden reasoning and the others do not.
+- **A random draw of 100 people from census microdata (ACS PUMS) is noisy at n = 100.** A group that is 4 % of
+  the population lands anywhere from 0 to 8. Use **quota (controlled) selection** that hits the target margins
+  exactly, and use the microdata only to keep combinations realistic (age with job with education).
+- **It ignores how much data each design produces.** In Sim 4 a user acted on only about 0.34-0.40 posts per turn
+  (F-109). Test 6 got an explicit decision on *every* post shown. An open one-action-per-turn simulation gives far
+  *fewer* usable bias measurements per hour, which is the opposite of "a ton of data" (§14.6).
+- **Signs it did not read closely:** it invents a name ("Kaleb"), uses a "fitness" topic that is not in the five,
+  and its persona JSON mixes in fields the project doesn't use.
+
+## 14.4 Self-critique of Tests 1-6 (what a reviewer would say)
+
+1. **Each test was internally fair, but the sequence was not one-change-at-a-time.** Between tests the models, the
+   number of people, the format, the length rules and the post sources all changed together. So "the effect grew
+   from Test 2 to Test 4" cannot be pinned on any single change.
+2. **Test 6's two AIs are siblings of different sizes** (gemma4:e2b vs gemma3:1b). Family and size are mixed up
+   together.
+3. **No neutral author.** Every post was AI-written, so "favours its own" has no human reference point.
+4. **No persona-free baseline.** We never measured how much of the behaviour comes from the persona at all.
+5. **The population isn't a real population** (§14.2): non-US places, MBTI, interest rules.
+6. **Up/down/nothing only.** No comments, follows or posts, so nothing about how bias shapes a network.
+7. **One laptop, one Ollama server.** No bit-for-bit determinism under parallel requests. Only Test 6 measured
+   the run-to-run floor (a 97 % identical replay).
+
+## 14.5 Recommended design: "hybrid feed"
+
+**The answer to "how do we do the posts": both, kept apart.** Every feed mixes two kinds of post, and every post is
+tagged with which kind it is.
+
+- **Seed posts: the controlled measurement.** Written *before* any run, frozen and hashed, and **identical in every
+  world**.
+  - Balanced authors: equal numbers from each model in the study **plus real human posts**.
+  - Authorship is hidden. Posts are spread across a pool of about 20 neutral seed accounts that are not agents,
+    with authors balanced across accounts so an account name gives nothing away.
+  - Written from identical briefs (topic × angle × post type × poster voice), as in Tests 1-6. Per Gordon's rule
+    the only constraint is staying on topic: no length limits.
+  - Human posts come from real subreddits on the same five topics, dated **before November 2022** (before
+    ChatGPT) so they are certainly human. **The source dataset is still to be chosen.**
+  - Seed posts appear in **pre-drawn slots** of each user's feed (for example 4 of 12 slots). The same post goes
+    in the same slot for the same user in the same round in every world. So even when everything else diverges,
+    every model faces exactly the same seed stimuli. **That is what keeps "one variable" true.**
+- **Organic posts: the social realism.** Users may create posts, comment, vote, follow, mute and search, like a real
+  app. Their posts are written by whichever model plays them. These fill the remaining feed slots through the
+  normal recommender (Sim 4's `timeline_platform.py`).
+
+**One action format for every model.** Instead of each model's native tool calling, every user turn returns the
+same JSON (constrained with Ollama `format`, as Test 6 did with 147,598 of 147,600 valid):
+
+    {"reactions": {"<post_id>": "upvote|downvote|nothing", ...one entry for EVERY post shown...},
+     "comments":  [{"post_id": ..., "text": ...}],
+     "follow": [...], "mute": [...], "search": "...",
+     "new_post": {"subreddit": ..., "title": ..., "body": ...} or null,
+     "reason": "one sentence, in character"}
+
+Our code carries these out on the real OASIS platform (`like_post`, `create_comment`, `follow`...), so the database
+is standard OASIS. "Nothing" becomes an explicit, recorded choice for every exposure (LF-11 showed it is a real,
+reasoned choice). **This is how to get "data, data, data":** 12 labelled decisions per user per round plus every
+free action, instead of about 0.4.
+
+**100 users, v2 bank (replaces the Tests 1-6 bank; Tests 1-6 stay reproducible with theirs):**
+- **Population claimed:** US adults who use social media.
+- **Demographics** (age band, gender, region/state, urban/suburban/rural, education, occupation group, income
+  band): quota-selected to hit targets from ACS 2024, BLS OEWS and Pew 2025, with the target and actual table
+  published.
+- **Personality:** Big Five, 1-10 each (no MBTI).
+- **Topic stances (5 topics × love/like/neutral/dislike/hate):** an **orthogonal array** built from mutually
+  orthogonal Latin squares of order 5. Tested 2026-10-02:
+  - every topic has exactly 20 users at each of the 5 stances
+  - every pair of topics has each of the 25 stance combinations exactly 4 times, so **zero correlation between any
+    two topics**
+  - with label shifts (0,0,2,1,2) **no user has the same stance on all five**, and each user's stance total stays
+    between 5 and 15 out of 20 (10 = neutral on average)
+  - construction: base row (a, b) → stances (a, b, a+b, a+2b, a+3b) mod 5, plus the shift; 25 rows × 4 copies
+- **Stances are assigned independently of demographics.** This is deliberate, so stance effects cannot be
+  confused with age or place effects. Write it in the methods.
+- **Every persona renders through one fixed template.** Only the values differ, never the wording.
+- Pinned with a SHA-256 hash, as now.
+
+**Models (pending Gordon and the professor; size class matched as closely as available):**
+
+| Family | Candidate | Tools in Ollama | Thinking |
+|---|---|---|---|
+| Google | `gemma4:e4b` (or e2b) | yes | yes, switch off |
+| Alibaba | `qwen3:4b` | yes | yes, switch off |
+| Meta or Mistral | `llama3.2:3b` or `ministral-3:3b` | yes | no |
+
+Pull each model, record its digest, and never update it mid-study. `gemma3` is out if native tools are ever
+needed.
+
+**Fixed for every run** (everything in the manifest): persona hash, seed-bank hash, seed-slot schedule hash, prompt
+hash, action-schema hash, topic set, model digest, Ollama version, temperature 0.7, top_p, context 8192, parallel 4,
+flash attention, memory on/off, vote counts shown/hidden, rounds, world seed, git commit.
+
+## 14.6 The experiment ladder (each step changes ONE thing from the step it's compared with)
+
+| Step | What runs | Compared with | The one thing that changes | What it answers |
+|---|---|---|---|---|
+| 0 | Model gate: each model, 10 users × 2 rounds | (none) | (none) | Valid-JSON rate, persona adherence, seconds per turn. **Freeze digests** |
+| 1 | **Noise floor:** model G world run twice | itself | the sampling seed only | How much two runs differ by pure chance. Every later difference must beat this |
+| 2 | **Single-model worlds** G, Q, X (all 100 users played by one model) on world seeds 1-3 | each other, paired by seed | the controlling model | **The professor's baseline:** how each model behaves and how it treats its own seed posts vs the other models' vs humans |
+| 3 | Persona-free: one model, users replaced by a generic "a social media user" | Step 2 same model | the persona text | How much behaviour comes from the persona at all |
+| 4 | **Mixed worlds:** the 100 users split into thirds across G/Q/X; rotate 3 times (Latin square) so every user is played by every model once | Step 2 | who plays whom | Own-writing favouritism in *organic* posts; do G-played users follow G-played users? (network homophily) |
+| 5+ | From the mixed baseline, one at a time: show vote counts; memory on; controversial topic set | Step 4 | that single setting | Herding, memory and political-topic effects |
+
+**Main measurements:**
+- For seed posts: the full actor × author table (diagonal = a model reacting to itself; human column = the neutral
+  reference), as plain counts and % first, then the own-AI boost with clustered intervals.
+- For everything: P(action | exposure) per action type; how steeply engagement follows stance (love → hate, which
+  measures persona adherence); posting and comment rates; follow-network homophily by controlling model.
+
+**Statistics:** decisions are not independent (same user, same post, same round), so use mixed models with user,
+post and round effects, plus the cluster bootstrap Tests 1-6 used. Pre-register the main outcome (the seed-post
+own-AI boost) before running.
+
+**Cost: measure in Step 0 before promising anything.** Reference points:
+- Test 6: tiny models, about 0.4 s per single-post decision, 68 min per round for 2 AIs × 100 users × 50 posts.
+- Sim 4: llama3.1:8b with memory and tool calling, 21.4 s per user-turn, so 100 users × 15 rounds ≈ 7.9 h.
+
+A 3-model ladder with 3 world seeds is about 9 worlds in Step 2 alone. Whether that takes days or a week depends
+on the GPU machine, which isn't set up yet.
+
+## 14.7 Questions to settle with the professor (answers become LD-19+)
+
+1. **Which bias is the paper about?** (a) favouring one's own model's writing; (b) different models playing the
+   same people differently; (c) political or stance bias on opinion topics. The ladder answers (a) and (b);
+   (c) is Step 5.
+2. **Personas:** build the new US-grounded 100 (recommended), or keep Test 6's pinned 100 for continuity?
+3. **Topics:** keep the five everyday ones (finance, cars, farming, cooking, tech: comparable with Tests 1-6,
+   politically neutral), or switch to opinion topics?
+4. **Human-written posts** as a fourth "author" baseline: acceptable? Which dataset?
+5. **The "react to every post in your feed" turn format:** acceptable as "all actions available"?
+6. **Exact models and sizes** (§14.5 table), and thinking off for all?
+7. **Vote counts hidden** (Tests 1-4, 6) **or shown** (OASIS default)? **Memory** on or off? **Starting follow
+   graph** empty (Sim 4) or seeded?
+8. **Rounds and replicates** (proposed: 15 rounds × 3 paired world seeds), and **compute**: when is the GPU
+   machine available?
+9. **Deliverable and deadline:** paper, poster, report?

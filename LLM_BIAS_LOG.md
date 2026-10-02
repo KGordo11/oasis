@@ -1784,3 +1784,10 @@ Updated: results page v12, report doc tab Test 6 (text, 3 charts, design table) 
 * "Every command, in order" replaced by a **run-it-yourself recipe** (Inside page + guide doc), backed by
   `reproduce_test6.sh` (analyze ~10 min / check ~5 min / run ~17 h; no git push; moves originals to
   `_original_test6/`). Syntax-checked only — not run end to end (laptop kept idle).
+
+### 2026-10-02 — per-round "every person's scroll" workbooks (Gordon: "all 100 users go through each of their 50 posts and their reactions")
+* `make_round_workbooks.py` → `data/llm_bias/two_ai/by_round/round_NN.xlsx` (15 files, ~2.7 MB each; shortcut
+  `00_LLM_BIAS_START_HERE/test6_two_ai/each_round_every_person/`). Sheets Scrolls / People / Posts / README.
+* Checked: per-round reaction counts for each AI equal reactions.csv exactly; 73,800 rows = 147,600 votes / 2; the script
+  asserts both AIs got the same scroll order; all 100 people's orders differ (round 3, r/cars: 100 distinct orders).
+  Rounds with 46–48 posts are rounds where some posts failed to write (same as everywhere else).

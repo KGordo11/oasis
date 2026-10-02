@@ -38,6 +38,7 @@ the posts and upvote, downvote or do nothing. 15 rounds.
 | [`test6_two_ai/code/authors.py`](test6_two_ai/code/authors.py), [`scroll.py`](test6_two_ai/code/scroll.py), [`llm.py`](test6_two_ai/code/llm.py), [`personas.py`](test6_two_ai/code/personas.py), [`topics.py`](test6_two_ai/code/topics.py) | Post writing, the voting question, talking to the AIs, the 100 users, the subreddits |
 | [`test6_two_ai/code/analyze_two_ai.py`](test6_two_ai/code/analyze_two_ai.py), [`analyze_deep.py`](test6_two_ai/code/analyze_deep.py) | All the math |
 | [`test6_two_ai/results/`](test6_two_ai/results/) | `reactions.csv` (every vote), `posts.csv` (every post), `users.csv`, `analysis.json`, `deep.json`, `summary.txt` |
+| [`test6_two_ai/each_round_every_person/`](test6_two_ai/each_round_every_person/) | **One Excel file per round**: every person's whole scroll, post by post in the order they saw it, with the full post and both AIs' reactions and reasons side by side |
 | [`test6_two_ai/post_banks/`](test6_two_ai/post_banks/) | Every post of each round, word for word (one file per round) |
 | [`test6_two_ai/runs/`](test6_two_ai/runs/) | 30 runs (15 rounds × 2 AIs): `decisions.jsonl` = every vote with its reason, `manifest.json` = every setting |
 | [`test6_two_ai/logs_and_checks/`](test6_two_ai/logs_and_checks/) | The speed test that picked the AIs, the campaign log, the health checks |

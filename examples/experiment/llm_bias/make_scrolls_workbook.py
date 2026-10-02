@@ -106,6 +106,111 @@ def bias_tab(wb, at, name, title, note, key_headers, cats):
     wd.auto_filter.ref = f"A4:{last}{i - 1}"
 
 
+def time_tab(wb, at, R, P):
+    """How long Test 6 took on the laptop, round by round, plus a fill-in Spark time/cost estimate."""
+    t = pd.read_csv(os.path.join(D, "timing.csv"), parse_dates=["started", "finished"])
+    g4, g3 = (t[t.judge == ai].set_index("round") for ai in (A, B))
+    ws = wb.create_sheet("Time & cost", at)
+    INPUT = PatternFill("solid", start_color="FFFF00")
+    BLUE = Font(name="Arial", size=10, color="0000FF")
+
+    def put(cell, v, font=F, fmt=None, fill=None):
+        ws[cell] = v
+        ws[cell].font = font
+        if fmt:
+            ws[cell].number_format = fmt
+        if fill:
+            ws[cell].fill = fill
+
+    put("A1", "How long Test 6 took on Gordon's laptop, and what it might take on the Spark",
+        Font(name="Arial", size=13, bold=True))
+    put("A2", "Each round: first gemma4's run writes all the round's posts (both AIs' posts), then gemma4 plays the 100 "
+              "people, then gemma3 plays the same 100 people. Blue numbers are measured times copied from "
+              "data/llm_bias/two_ai/timing.csv; black numbers are formulas.")
+    ws["A2"].alignment = Alignment(wrap_text=True, vertical="top")
+    ws.merge_cells("A2:K2")
+    ws.row_dimensions[2].height = 42
+    hdr = ["Round", "Started", "Finished", "Writing posts (min)", "gemma4 playing the people (min)",
+           "gemma3 playing the people (min)", "Whole round (min)", "Votes (both AIs)", "Seconds per vote",
+           "Break before next round (min)", "Note"]
+    for j, h in enumerate(hdr):
+        c = ws.cell(row=4, column=j + 1, value=h)
+        c.font, c.fill, c.alignment = FB, HEAD, Alignment(wrap_text=True, vertical="top")
+    first, rounds = 5, sorted(g4.index)
+    for n, r in enumerate(rounds):
+        i = first + n
+        put(f"A{i}", int(r))
+        put(f"B{i}", g4.started[r].to_pydatetime().replace(microsecond=0), BLUE, "yyyy-mm-dd hh:mm")
+        put(f"C{i}", g3.finished[r].to_pydatetime().replace(microsecond=0), BLUE, "yyyy-mm-dd hh:mm")
+        write = float(g4.post_writing_min[r])
+        put(f"D{i}", round(write, 2), BLUE, "0.0")
+        # gemma4's run includes the post writing; its voting time is the rest
+        put(f"E{i}", round(float(g4.world_wall_min[r]) - write, 2), BLUE, "0.0")
+        put(f"F{i}", round(float(g3.world_wall_min[r]), 2), BLUE, "0.0")
+        put(f"G{i}", f"=SUM(D{i}:F{i})", fmt="0.0")
+        put(f"H{i}", int(g4.decisions[r] + g3.decisions[r]), BLUE, "#,##0")
+        put(f"I{i}", f"=(E{i}+F{i})*60/H{i}", fmt="0.000")
+        if n + 1 < len(rounds):
+            put(f"J{i}", f"=(B{i + 1}-C{i})*1440", fmt="0.0")
+    last = first + len(rounds) - 1
+    gaps = [g4.started[rounds[n + 1]] - g3.finished[rounds[n]] for n in range(len(rounds) - 1)]
+    pause = first + gaps.index(max(gaps))
+    put(f"K{pause}", "Pause: the first 11 rounds were done; 4 more were started later. Not part of the run.")
+    tot = last + 1
+    put(f"A{tot}", "Total", FB)
+    for c in "DEFG":
+        put(f"{c}{tot}", f"=SUM({c}{first}:{c}{last})", FB, "0.0")
+    put(f"H{tot}", f"=SUM(H{first}:H{last})", FB, "#,##0")
+    put(f"I{tot}", f"=(E{tot}+F{tot})*60/H{tot}", FB, "0.000")
+    put(f"J{tot}", f"=SUM(J{first}:J{last})-J{pause}", FB, "0.0")
+    put(f"K{tot}", "Breaks = checks between rounds, not counting the pause")
+
+    r0 = tot + 2
+    put(f"A{r0}", "Totals in hours", FB)
+    rows = [("Work (all 15 rounds)", f"=G{tot}/60"),
+            ("Breaks between rounds", f"=J{tot}/60"),
+            ("Analysis at the end (reproduce script)", 10 / 60),
+            ("One full run, start to finish", f"=SUM(B{r0 + 1}:B{r0 + 3})")]
+    for k, (lab, v) in enumerate(rows, 1):
+        put(f"A{r0 + k}", lab, FB if k == 4 else F)
+        put(f"B{r0 + k}", v, FB if k == 4 else (BLUE if k == 3 else F), "0.00")
+    put(f"C{r0 + 3}", "About 10 minutes (estimate)")
+    put(f"C{r0 + 2}", "The reproduce script skips most of these; kept here to be safe")
+
+    r1 = r0 + 6
+    put(f"A{r1}", "How much work the AIs did (from reactions.csv and posts.csv)", FB)
+    work = [("Votes", len(R)),
+            ("Posts written OK (6 lost their partner post, so 738 were shown)", int(P.ok.sum())),
+            ("Post tries (including retries)", int(P.attempts.sum())),
+            ("Tokens the AIs read (about ¾ of a word each)", int(R.prompt_tokens.sum())),
+            ("Tokens the AIs wrote: votes + reasons", int(R.eval_tokens.sum())),
+            ("Tokens the AIs wrote: posts", int(P.eval_tokens.sum()))]
+    for k, (lab, v) in enumerate(work, 1):
+        put(f"A{r1 + k}", lab)
+        put(f"B{r1 + k}", v, BLUE, "#,##0")
+
+    r2 = r1 + len(work) + 2
+    put(f"A{r2}", "Spark estimate: fill in the yellow cells", FB)
+    put(f"A{r2 + 1}", "Laptop: seconds per vote")
+    put(f"B{r2 + 1}", f"=I{tot}", fmt="0.000")
+    put(f"A{r2 + 2}", "Spark: seconds per vote (from the 5-minute check run)")
+    put(f"B{r2 + 2}", 0.367, BLUE, "0.000", INPUT)
+    put(f"C{r2 + 2}", "← put the Spark's number here (0.367 = same speed as the laptop)")
+    put(f"A{r2 + 3}", "Spark is this many times faster")
+    put(f"B{r2 + 3}", f"=B{r2 + 1}/B{r2 + 2}", fmt="0.0")
+    put(f"A{r2 + 4}", "Spark hours for one full run")
+    put(f"B{r2 + 4}", f"=B{r0 + 1}/B{r2 + 3}+B{r0 + 2}+B{r0 + 3}", FB, "0.00")
+    put(f"C{r2 + 4}", "Work ÷ speed-up, plus breaks and analysis (those don't speed up). Assumes post writing speeds up like voting")
+    put(f"A{r2 + 5}", "Cost per hour on the Spark ($)")
+    put(f"B{r2 + 5}", 0, BLUE, "$#,##0.00", INPUT)
+    put(f"C{r2 + 5}", "← put the hourly price here")
+    put(f"A{r2 + 6}", "Estimated cost of one full run ($)")
+    put(f"B{r2 + 6}", f"=B{r2 + 4}*B{r2 + 5}", FB, "$#,##0.00")
+    for col, w in zip("ABCDEFGHIJK", [44, 17, 17, 11, 13, 13, 11, 10, 10, 12, 40]):
+        ws.column_dimensions[col].width = w
+    ws.freeze_panes = "A5"
+
+
 def main():
     R = pd.read_csv(os.path.join(D, "reactions.csv"))
     P = pd.read_csv(os.path.join(D, "posts.csv"))
@@ -206,6 +311,7 @@ def main():
              ["Voting habit"], [([HABIT[k]], f'{S}$F:$F,"{HABIT[k]}"') for k in ["generous", "typical", "harsh"]])
     bias_tab(wb, 5, "Each person", "Own vs other AI's posts, for each of the 100 people (all 15 rounds)", note,
              ["Person #", "Name"], [([int(u), p.realname], f"{S}$B:$B,{int(u)}") for u, p in users.sort_index().iterrows()])
+    time_tab(wb, 6, R, P)
     # README
     lines = [
         ("Test 6: every person's scroll in every round, post by post", FB),
@@ -225,6 +331,8 @@ def main():
         ("Sheets", FB),
         ("Bias data: for each round (and all rounds together), how many of each AI's posts each AI's people upvoted, "
          "downvoted or ignored, as counts and percentages. Own posts vs the other AI's posts.", F),
+        ("Time & cost: how long every round took on the laptop, total hours, how much work the AIs did, and a "
+         "fill-in estimate of hours and dollars on the Spark.", F),
         ("By subreddit / By interest / By voting habit / Each person: the same counts and percentages over all 15 rounds, "
          "split by the post's subreddit, by how much the person cares about that subreddit, by the person's voting habit, "
          "and for each of the 100 people.", F),

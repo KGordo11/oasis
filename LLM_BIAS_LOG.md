@@ -1803,3 +1803,8 @@ Updated: results page v12, report doc tab Test 6 (text, 3 charts, design table) 
 * Added tabs **By subreddit**, **By interest**, **By voting habit**, **Each person** (same layout as Bias data, via one
   `bias_tab()` builder), plus an "Upvoted %: own minus other's" column on every bias tab. Checked by evaluating every
   COUNTIFS in Python against reactions.csv: 516 rows over 5 tabs, 0 mismatches; gap formulas point at the right rows.
+* Added **Time & cost** tab (Gordon, planning runs on the UK NVIDIA Spark, honda.csr.uky.edu, which will cost money):
+  per-round laptop minutes (post writing / gemma4 voting / gemma3 voting, from timing.csv), breaks, totals (work 16.62 h,
+  breaks 1.47 h excluding the 258-min pause after round 11, +10 min analysis = ~18.25 h per full run), work done (147,600
+  votes, 744 posts OK of 975 tries, 100.7 M tokens read, 3.9 M + 0.59 M written), and a fill-in Spark estimate
+  (yellow cells: Spark seconds per vote from `reproduce_test6.sh check`, $/hour). Laptop: 0.367 s per vote at 4 at once.

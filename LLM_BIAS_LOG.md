@@ -1795,3 +1795,8 @@ Updated: results page v12, report doc tab Test 6 (text, 3 charts, design table) 
   `data/llm_bias/two_ai/test6_every_scroll.xlsx` (Round column added; Post IDs carry the round; People counts now over
   all rounds). Script renamed `make_scrolls_workbook.py`. Re-checked: per-round per-AI counts equal reactions.csv; 738
   unique posts, same set on Posts and Scrolls.
+* Gordon: "give me a data tab … each round how many of its posts were upvoted/downvoted/nothing … percentages" → added
+  **Bias data** sheet to `test6_every_scroll.xlsx`: per round + all rounds, 4 rows each (gemma4 people on gemma4 / on
+  gemma3 posts, gemma3 people on gemma3 / on gemma4 posts): upvoted, downvoted, nothing, total, and the three %s
+  (COUNTIFS over Scrolls; % over answered reactions). Checked by evaluating every formula in Python against
+  reactions.csv: 64 rows, 0 mismatches; all-rounds upvote % 81.2 / 75.0 / 75.1 / 74.4 = published numbers.

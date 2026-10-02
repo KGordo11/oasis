@@ -2,7 +2,7 @@
 
     python make_scrolls_workbook.py           # writes data/llm_bias/two_ai/test6_every_scroll.xlsx
 
-Sheets: README (what every column means), Scrolls (one row per round per person per post, in the order they saw them),
+Sheets: README (what every column means), Bias data (own vs other AI's posts per round), Scrolls (one row per round per person per post, in the order they saw them),
 People (the 100 people, the exact text the AI read, live counts of their reactions over all rounds), Posts (every post
 in full, with live vote counts). Counts are Excel formulas (COUNTIFS on the Scrolls sheet), so they stay right if you
 filter or edit; Excel, Numbers and Google Sheets calculate them when the file opens.
@@ -144,6 +144,43 @@ def main():
         "N": f'=COUNTIFS({S}$K:$K,$A{i},{S}$O:$O,"nothing")', "O": f'=COUNTIFS({S}$K:$K,$A{i},{S}$Q:$Q,"upvote")',
         "P": f'=COUNTIFS({S}$K:$K,$A{i},{S}$Q:$Q,"downvote")', "Q": f'=COUNTIFS({S}$K:$K,$A{i},{S}$Q:$Q,"nothing")',
         "R": f"=L{i}-M{i}", "S": f"=O{i}-P{i}"})
+    # Bias data: per round, how each AI's people reacted to its own posts and to the other AI's posts
+    wd = wb.create_sheet("Bias data", 1)
+    wd["A1"] = "How each AI reacted to its OWN posts vs the OTHER AI's posts, round by round"
+    wd["A1"].font = Font(name="Arial", size=13, bold=True)
+    wd["A2"] = (f"'AI playing the people' = which AI pretended to be the 100 people. Each row counts that AI's reactions "
+                f"to one AI's posts. The people never knew who wrote a post. Percentages are out of all its reactions to "
+                f"those posts (the 2 unreadable answers are left out). All numbers are formulas counting the Scrolls sheet.")
+    wd["A2"].font = F
+    wd["A2"].alignment = Alignment(wrap_text=True, vertical="top")
+    wd.merge_cells("A2:K2")
+    wd.row_dimensions[2].height = 42
+    dh = ["Round", "AI playing the people", "Whose posts", "Own or other's?", "Upvoted", "Downvoted", "Nothing",
+          "Total reactions", "Upvoted %", "Downvoted %", "Nothing %"]
+    wd.append([])
+    wd.append(dh)
+    for c in wd[4]:
+        c.font, c.fill = FB, HEAD
+        c.alignment = Alignment(wrap_text=True, vertical="top")
+    react = {A: f"{S}$O:$O", B: f"{S}$Q:$Q"}
+    groups = [(A, A), (A, B), (B, B), (B, A)]
+    i = 5
+    for rnd in ["All 15 rounds"] + list(range(1, 16)):
+        crit = '">=1"' if isinstance(rnd, str) else rnd
+        for player, author in groups:
+            base = f'{S}$A:$A,{crit},{S}$L:$L,"{short(author)}",{react[player]}'
+            wd.append([rnd, short(player), f"{short(author)}'s posts", "own" if player == author else "other AI's",
+                       f'=COUNTIFS({base},"upvote")', f'=COUNTIFS({base},"downvote")', f'=COUNTIFS({base},"nothing")',
+                       f"=SUM(E{i}:G{i})", f"=E{i}/H{i}", f"=F{i}/H{i}", f"=G{i}/H{i}"])
+            for c in wd[i]:
+                c.font = FB if isinstance(rnd, str) else F
+                if c.column >= 9:
+                    c.number_format = "0.0%"
+            i += 1
+    for col, w in zip("ABCDEFGHIJK", [14, 14, 16, 13, 10, 10, 10, 11, 11, 12, 11]):
+        wd.column_dimensions[col].width = w
+    wd.freeze_panes = "A5"
+    wd.auto_filter.ref = f"A4:K{i - 1}"
     # README
     lines = [
         ("Test 6: every person's scroll in every round, post by post", FB),
@@ -161,6 +198,8 @@ def main():
          "fresh question.", F),
         ("", F),
         ("Sheets", FB),
+        ("Bias data: for each round (and all rounds together), how many of each AI's posts each AI's people upvoted, "
+         "downvoted or ignored, as counts and percentages. Own posts vs the other AI's posts.", F),
         ("Scrolls: one row per round per person per post, in the exact order that person saw them. Filter 'Round' and "
          "'Person #' to follow one person through one round; filter only 'Person #' to see them across all 15 rounds; "
          "filter 'Did both AIs do the same?' to see where the two AIs disagree about the same person.", F),

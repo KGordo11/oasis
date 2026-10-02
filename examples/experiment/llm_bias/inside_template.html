@@ -108,7 +108,7 @@ details{margin:10px 0 18px}summary{cursor:pointer;font:600 14px var(--sans);colo
   <a href="#after">After each round</a>
   <a href="#math">How the numbers are made</a>
   <a href="#files">Every file</a>
-  <a href="#commands">Every command, in order</a>
+  <a href="#commands">Run it yourself</a>
   <a href="#history">Every saved change (git)</a>
   <a href="#wrong">What went wrong and was fixed</a>
   <a href="#code">All the code</a>
@@ -279,8 +279,10 @@ kind + voice = all 7 × 12 = 84 (kind, voice) pairs in a fixed shuffled order, i
 
 <h2 id="math">How the numbers are made</h2>
 <h3>The own-AI boost (double difference)</h3>
+<p class="plain">How many more upvotes, out of every 100 times a post is seen, people give to posts by the AI that is pretending to be them. Worked example: gemma4's people upvote gemma4's posts 81.2 times out of 100 and gemma3's posts 75.0 times (6.2 more for their own). gemma3's people upvote gemma3's posts 75.1 times and gemma4's 74.4 times (0.7 more for their own). 6.2 + 0.7 = 6.9 more upvotes out of 100 for the AI's own posts.</p>
 <p>[[ref:analyze.py:did]] computes, for each AI J: (J's crowd's rate on J's posts − J's crowd's rate on the other AI's posts) − (the other crowd's rate on J's posts − the other crowd's rate on its own posts). With two AIs both get the same number, which is the headline. Rates are averaged over every vote in the group.</p>
 <h3>The 95% interval (bootstrap)</h3>
+<p class="plain">Imagine the 100 people and the post pairs are marbles in a bag. Pull out a new bag of the same size, putting each marble back after picking it, so some come out twice and some not at all, and work out the answer again. Do that 2,000 times. The middle 95% of those 2,000 answers is the range we are "95% sure" about. If the whole range is above 0, the favouritism isn't luck.</p>
 <p>[[ref:analyze.py:cluster_bootstrap]] repeats the calculation 2,000 times. Each time, every user and every post slot gets a random weight (how many times it is "drawn" in a resample of the same size), the two weights are multiplied for each vote, and the double difference is recomputed with those weights. The middle 95% of the 2,000 answers is the interval. Resampling users and slots keeps all of one user's votes together and all of one slot's votes together, because votes from the same person or on the same posts are not independent. A second version resamples whole rounds (in [[ref:analyze_two_ai.py:84:110]]). We report the wider of the two. The p-value is twice the share of resampled answers on the other side of zero.</p>
 <h3>The length check</h3>
 <p>For each slot (pair of posts), [[ref:analyze_two_ai.py:112:135]] computes that slot's double difference and the word gap between the two posts, then fits a straight line: <code>slot boost = a + b × (word gap / 100)</code>, with uncertainty clustered by round. <code>a</code> is the boost when both posts have the same length. Each crowd's taste for length ([[ref:analyze_two_ai.py:136:146]]) is a regression of each post's upvote rate on its word count with the author held fixed.</p>
@@ -295,9 +297,27 @@ kind + voice = all 7 × 12 = 84 (kind, voice) pairs in a fixed shuffled order, i
 <h3>What the files look like inside</h3>
 <div id="samples"></div>
 
-<h2 id="commands">Every command, in order</h2>
-<p>Run in the project folder <code>~/research/oasis</code> with the project's Python environment (<code>./oasis-env/bin/python</code>). Times are US Eastern; "about" marks times taken from the conversation rather than a log.</p>
-<div class="tbl"><table id="tcmd"></table></div>
+<h2 id="commands">Run it yourself: every command, in order</h2>
+<p>These are the exact commands to get the same results on your own computer. Copy them one at a time into a Terminal window.</p>
+<div class="callout"><b class="t">What you need</b>A Mac with Apple silicon (M1 or newer) and at least 16 GB of memory, or a Linux PC with a graphics card. About 15 GB of free disk space. <a href="https://www.python.org/downloads/">Python 3.11</a>, <a href="https://git-scm.com/">git</a> and <a href="https://ollama.com/download">Ollama</a> (we used version 0.24.0) installed.</div>
+<div class="step"><div class="no">1</div><div><h3>Download the project</h3><pre class="block">git clone -b llm-bias https://github.com/KGordo11/oasis.git
+cd oasis</pre><p>This gets all the code and all the saved data, including every post and every vote from our run.</p></div></div>
+<div class="step"><div class="no">2</div><div><h3>Install the Python parts (once)</h3><pre class="block">python3.11 -m venv oasis-env
+./oasis-env/bin/pip install -e . pandas statsmodels</pre><p>This makes a private Python folder (<code>oasis-env</code>) and installs OASIS and the math libraries into it. It takes a few minutes.</p></div></div>
+<div class="step"><div class="no">3</div><div><h3>Get the same numbers from our saved votes (about 10 minutes)</h3><pre class="block">examples/experiment/llm_bias/reproduce_test6.sh analyze</pre><p>This redoes all the math from the 147,600 saved votes: the main answer (6.9 more upvotes for the AI's own posts), every breakdown, an independent recount, and the health checks. No AI needed. If you only want to check our results, you can stop here.</p></div></div>
+<div class="step"><div class="no">4</div><div><h3>Start the AI server (to rerun the experiment itself)</h3><pre class="block">OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h \
+  ollama serve &gt; /tmp/ollama_serve.log 2&gt;&amp;1 &amp;</pre><p>Leave this running. The settings matter: 4 questions at a time and an 8,192-token window are what we used.</p></div></div>
+<div class="step"><div class="no">5</div><div><h3>Check your setup with a mini-round (about 5 minutes)</h3><pre class="block">examples/experiment/llm_bias/reproduce_test6.sh check</pre><p>This downloads the two AIs if needed (about 8 GB) and prints their fingerprints. Ours were <code>gemma4:e2b 7fbdbf8f5e45</code> and <code>gemma3:1b 8648f39daa8f</code>; if yours differ, Google has updated the model and your results may differ a little. It also confirms the 100 users are exactly ours and runs 5 people through round 1's posts with both AIs.</p></div></div>
+<div class="step"><div class="no">6</div><div><h3>Rerun the whole experiment (about 17 hours)</h3><pre class="block">examples/experiment/llm_bias/reproduce_test6.sh run</pre><p>This moves our saved Test 6 data into <code>data/llm_bias/_original_test6/</code> so nothing is mixed up. Then, for each of the 15 rounds, both AIs write their 50 posts, gemma4 plays the 100 users, then gemma3 does, and finally all the math runs. If it stops (sleep, power), run the same command again and it carries on where it stopped.</p></div></div>
+<div class="step"><div class="no">7</div><div><h3>Compare with ours</h3><pre class="block">cat data/llm_bias/two_ai/summary.txt
+cat data/llm_bias/_original_test6/two_ai/summary.txt</pre><p>With the same model fingerprints and settings, the posts come out word for word the same (we checked one). About 97–99 votes out of 100 also come out the same; the rest can flip because the AI server answers 4 questions at once in one batch, which changes the math inside the chip very slightly. So expect the final numbers to land very close to ours (around 7 more upvotes for the AI's own posts), not always to the last decimal.</p></div></div>
+<div class="step"><div class="no">8</div><div><h3>Stop the AI server when done</h3><pre class="block">pkill -f "ollama serve"</pre></div></div>
+<p>What the script runs for each round (you don't need to type this; it's inside <a class="cref" href="#code" data-file="reproduce_test6.sh" data-from="1" data-to="78">reproduce_test6.sh</a>):</p>
+<pre class="block">./oasis-env/bin/python examples/experiment/llm_bias/run_world.py --label two_rNN_gemma4 --seed 2NN --judges gemma4:e2b \
+   --authors gemma4:e2b,gemma3:1b --agents 100 --natural-posts --complete-slots --post-retries 4
+./oasis-env/bin/python examples/experiment/llm_bias/run_world.py --label two_rNN_gemma3 --seed 2NN --judges gemma3:1b \
+   --authors gemma4:e2b,gemma3:1b --agents 100 --natural-posts --complete-slots --post-retries 4</pre>
+<details><summary>For the record: what was actually run during our test, with times</summary><div class="tbl"><table id="tcmd"></table></div></details>
 
 <h2 id="history">Every saved change (git)</h2>
 <p>Every change to code, data, logs and pages was committed and pushed to GitHub as it happened:</p>
@@ -470,9 +490,9 @@ table("tcmd",["When","Command","What it did","Result"],[
  cmd("07:20","./oasis-env/bin/python examples/experiment/llm_bias/drift_check.py two_r01_gemma3 200","replay check, gemma3","97.0% identical"),
  cmd("13:22","(automatic) stop: round 12 needs 4167s, 4089s left","deadline rule","11 rounds done"),
  cmd("13:25","./oasis-env/bin/python examples/experiment/llm_bias/drift_check.py two_r01_gemma4 200","replay check, gemma4","99.5% identical"),
- cmd("13:34","./oasis-env/bin/python examples/experiment/llm_bias/analyze_two_ai.py 2000 > data/llm_bias/two_ai/summary.txt\n./oasis-env/bin/python examples/experiment/llm_bias/check_world.py --prefix two_r","final math after 11 rounds","+7.1 [+2.9, +11.5]"),
+ cmd("13:34","./oasis-env/bin/python examples/experiment/llm_bias/analyze_two_ai.py 2000 > data/llm_bias/two_ai/summary.txt\n./oasis-env/bin/python examples/experiment/llm_bias/check_world.py --prefix two_r","final math after 11 rounds","7.1 more upvotes for own posts (range 2.9 to 11.5 more)"),
  cmd("17:33","A=gemma4:e2b B=gemma3:1b ROUNDS=\"12 13 14 15\" STOP_AT=\"2026-10-02 06:00\" nohup examples/experiment/llm_bias/two_ai_campaign.sh >> data/llm_bias/two_ai_campaign.log 2>&1 &","4 more rounds (Gordon: more data)","ended 22:27"),
- cmd("2 Oct, about 00:10","./oasis-env/bin/python examples/experiment/llm_bias/analyze_two_ai.py 2000 > data/llm_bias/two_ai/summary.txt\n./oasis-env/bin/python examples/experiment/llm_bias/check_world.py --prefix two_r > data/llm_bias/two_ai_checks_final.txt","final math, 15 rounds","+6.9 [+2.9, +10.6]; 19 PASS, 11 WARN, 0 FAIL"),
+ cmd("2 Oct, about 00:10","./oasis-env/bin/python examples/experiment/llm_bias/analyze_two_ai.py 2000 > data/llm_bias/two_ai/summary.txt\n./oasis-env/bin/python examples/experiment/llm_bias/check_world.py --prefix two_r > data/llm_bias/two_ai_checks_final.txt","final math, 15 rounds","6.9 more upvotes for own posts (range 2.9 to 10.6 more); 19 PASS, 11 WARN, 0 FAIL"),
  cmd("about 00:40","./oasis-env/bin/python examples/experiment/llm_bias/analyze_deep.py","every breakdown","deep.json, deep_posts.json, deep_users.json"),
  cmd("about 00:37","(a short Python script) replay the traced post and vote with the exact requests and seeds","the live examples on this page","same post word for word; same vote"),
  cmd("about 01:00","./oasis-env/bin/python examples/experiment/llm_bias/make_two_ai_page.py <dir>\n./oasis-env/bin/python examples/experiment/llm_bias/make_inside_page.py <dir> <results url> <trace file>","build both pages","published")]);

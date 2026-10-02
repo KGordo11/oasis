@@ -32,7 +32,8 @@ GH = "https://github.com/KGordo11/oasis/blob/llm-bias/"
 SCRATCH_TRACE = sys.argv[3] if len(sys.argv) > 3 else None
 
 CODE_FILES = [  # (file, role)
-    ("two_ai_campaign.sh", "runs every round"), ("run_world.py", "one AI's turn in one round"),
+    ("reproduce_test6.sh", "rerun or re-analyse the whole test yourself"),
+    ("two_ai_campaign.sh", "runs every round (what we used)"), ("run_world.py", "one AI's turn in one round"),
     ("authors.py", "job cards and post writing"), ("scroll.py", "the voting question and the scroll order"),
     ("llm.py", "talks to the AIs"), ("personas.py", "the 100 users"), ("topics.py", "subreddits and job-card lists"),
     ("pair.py", "imported by run_world.py; used only by an earlier test"),

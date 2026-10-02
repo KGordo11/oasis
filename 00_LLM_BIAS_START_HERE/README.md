@@ -42,13 +42,18 @@ the posts and upvote, downvote or do nothing. 15 rounds.
 | [`test6_two_ai/runs/`](test6_two_ai/runs/) | 30 runs (15 rounds × 2 AIs): `decisions.jsonl` = every vote with its reason, `manifest.json` = every setting |
 | [`test6_two_ai/logs_and_checks/`](test6_two_ai/logs_and_checks/) | The speed test that picked the AIs, the campaign log, the health checks |
 
-**To rebuild the numbers:** from the `oasis` folder run
-`./oasis-env/bin/python examples/experiment/llm_bias/analyze_two_ai.py 2000` then
-`./oasis-env/bin/python examples/experiment/llm_bias/analyze_deep.py`.
-**To run more rounds:** start Ollama
-(`OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve`), then
-`A=gemma4:e2b B=gemma3:1b ROUNDS="16 17" STOP_AT="2026-12-31 23:59" examples/experiment/llm_bias/two_ai_campaign.sh`.
-Stop Ollama when done (`pkill -f "ollama serve"`).
+**To get the same results yourself** (from the `oasis` folder; full steps are on the "Inside" page under "Run it yourself"):
+
+| Command | What it does | Time |
+|---|---|---|
+| `examples/experiment/llm_bias/reproduce_test6.sh analyze` | Recomputes every result from the saved votes (no AI needed) | ~10 min |
+| `examples/experiment/llm_bias/reproduce_test6.sh check` | Tests your setup with a 5-person mini-round (start Ollama first) | ~5 min |
+| `examples/experiment/llm_bias/reproduce_test6.sh run` | Reruns the whole experiment from scratch | ~17 h |
+| `./oasis-env/bin/python examples/experiment/llm_bias/verify_numbers.py` | Independent recount of the main numbers straight from the votes | ~1 min |
+
+Start Ollama first for `check` and `run`:
+`OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve &`, and stop it when
+done (`pkill -f "ollama serve"`).
 
 ## All six tests and their files
 

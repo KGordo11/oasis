@@ -1768,3 +1768,19 @@ Updated: results page v12, report doc tab Test 6 (text, 3 charts, design table) 
   vote traced through every layer with a live replay that reproduced the post word for word and the vote, OASIS rows,
   user 0's full scroll recomputed and matched to the log 50/50, every file with sizes, every command, git history,
   what went wrong, all code with exact line links). Generators: make_two_ai_page.py, make_inside_page.py.
+
+### 2026-10-02 morning — number check, two text corrections, plain-words pages, reproduction recipe
+* `verify_numbers.py` recomputes every page number from reactions.csv/posts.csv with plain pandas (not the analysis
+  code): 0 mismatches. (Two first-pass "mismatches" were the checker's own float noise — exact fractions confirm 85/10/5
+  users and round 14 = 14.25.)
+* **Correction (results page, LF-50 text):** the "Seriously" titles are hated by **gemma4's** crowd (8 of its 8
+  most-hated posts; 19 % of all posts), not gemma3's. **Correction:** "gemma3's crowd dislikes long posts" is not
+  significant in the 14-feature model (it is in the separate length-taste regression); significant for gemma3's crowd:
+  exclamation marks +, list lines +, casual openers +, long words −.
+* Results page rewritten in plain words (Gordon: 5th-grade, no bare +/−): every number reads "X more upvotes / fewer
+  downvotes out of every 100", "95% sure: between…", 100-square grids, a how-to-read box, downvotes shown as "fewer
+  downvotes" so right = nicer to own AI everywhere; added "Mostly gemma4 …" summary. Guide doc + report doc reworded the
+  same way (worked example now 6.2 + 0.7 = 6.9; chart titles/labels in words).
+* "Every command, in order" replaced by a **run-it-yourself recipe** (Inside page + guide doc), backed by
+  `reproduce_test6.sh` (analyze ~10 min / check ~5 min / run ~17 h; no git push; moves originals to
+  `_original_test6/`). Syntax-checked only — not run end to end (laptop kept idle).

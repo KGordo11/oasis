@@ -21,7 +21,7 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 **Answer (LF-49):** users played by an AI upvote that AI's posts **+6.9 points** more [+2.9, +10.6] and downvote them
 **−4.2** less [−6.7, −1.7]; 13/15 rounds positive; mostly gemma4; +10.9 at equal length. 147,600 votes.
 LF-48's downvote breakdown was wrong (cells swapped) — corrected in LF-49 and in the docs.
-Professor guide: https://claude.ai/code/artifact/b35c46ac-9e48-4096-a798-0bd00138a4f5
+Professor guide: https://claude.ai/artifact/P9bXKUyGjtaJWJyiVqh2Sg
 **Next (Gordon's call):** cross-family pair (gemma4 vs llama3.2:1b), neutral referee crowd, length-matched posts
 (~182 words), visible counts, GPU machine.
 
@@ -49,7 +49,7 @@ resumes (finished worlds skipped, half-done ones resumed). Start Ollama first (L
 likes per 100 [+4.6, +9.4]; each AI above zero in every set. Feed test (LF-47): when one AI plays the whole crowd,
 its own posts get +7.2 likes per 100 (counts hidden) / +4.8 (counts visible) and more of the top spots; visible
 counts let the first few people fix the ranking. Taste (LF-43), person vs AI (LF-44), recognition (LF-42).
-Report: https://claude.ai/code/artifact/7f61723e-b24b-4c68-871f-3510205cdbd4 · Page v36:
+Report: https://claude.ai/artifact/GjK4JnpmeZkEREoWoDkco5 · Page v36:
 https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx
 **Open (Gordon's call):** sibling test (LD-17 item 3, designed), more feed sets, GPU machine, length rule.
 
@@ -1536,7 +1536,7 @@ match (like the flash-attention check, LF-14). Then add qwen2.5:7b and phi4-mini
 Gordon to provide: host, username, and add the Mac's SSH key.
 
 **LD-16 item 8 done (2026-09-28):** plain-language report "Do AIs Favour Their Own Writing?" as a Claude Doc:
-https://claude.ai/code/artifact/7f61723e-b24b-4c68-871f-3510205cdbd4 — the question, how it works, the answer (per-AI
+https://claude.ai/artifact/GjK4JnpmeZkEREoWoDkco5 — the question, how it works, the answer (per-AI
 chart with ranges), five findings with source links, the four tests (table), how to read the numbers + where the data
 lives, limits and corrections, what's next. Open question left for Gordon in a doc comment: run the feed test before
 or after finishing the three-AI post sets? Items 3, 4, 7 are designed (LD-17) but not run; item 6 numbers in LD-17.
@@ -1707,7 +1707,7 @@ Pages: results page v11 https://claude.ai/artifact/HPmkfevmeC3LTYWhN4citW (final
 (answer, design, method, results + 3 charts, quality/cost, limitations + 5 improvements, data); main tab table has a
 Test 6 row and says "six tests".
 **Guide for Gordon's professor (2026-10-01 afternoon):** Claude Doc "How the Two-AI Reddit Test Works"
-https://claude.ai/code/artifact/b35c46ac-9e48-4096-a798-0bd00138a4f5 — tab "Guide" (5th-grade explanation: question,
+https://claude.ai/artifact/P9bXKUyGjtaJWJyiVqh2Sg — tab "Guide" (5th-grade explanation: question,
 who is who + diagram, one round step by step with the real prompts, fairness table, worked double-difference example,
 findings + chart, how sure, limits, every file, every command in order with times and a redo-it-yourself block) and
 tab "All the code" (14 files in full with plain-words notes; exported and diffed: 13/13 files identical to source,

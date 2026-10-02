@@ -21,8 +21,8 @@ Everything for this project is reachable from this folder. The real files stay w
 |---|---|
 | [Inside the Two-AI Feed](https://claude.ai/artifact/G9ofxKT7gC2M2fdezFcKFU) | How Test 6 works end to end: the machine, users, posts, one vote traced through every layer, every file, every command, all code |
 | [The Two-AI Feed](https://claude.ai/artifact/HPmkfevmeC3LTYWhN4citW) | All Test 6 results: every breakdown, why it happens, browsers for every post and every user |
-| [How the Two-AI Reddit Test Works](https://claude.ai/code/artifact/b35c46ac-9e48-4096-a798-0bd00138a4f5) | The 5th-grade guide for a professor, with all the code (Claude Doc) |
-| [Do AIs Favour Their Own Writing?](https://claude.ai/code/artifact/7f61723e-b24b-4c68-871f-3510205cdbd4) | The report on all six tests (Claude Doc; Test 6 has its own tab) |
+| [How the Two-AI Reddit Test Works](https://claude.ai/artifact/P9bXKUyGjtaJWJyiVqh2Sg) | The 5th-grade guide for a professor, with all the code (Claude Doc) |
+| [Do AIs Favour Their Own Writing?](https://claude.ai/artifact/GjK4JnpmeZkEREoWoDkco5) | The report on all six tests (Claude Doc; Test 6 has its own tab) |
 | [Scroll Test](https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx) | The older page for Tests 2–5 |
 | [GitHub, branch llm-bias](https://github.com/KGordo11/oasis/tree/llm-bias) | Everything above, saved |
 

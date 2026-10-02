@@ -1,45 +1,297 @@
-# OASIS research log — every simulation and the LLM Bias project, one file
+# OASIS research log — everything, in one file
 
-**Where to resume (2026-10-02 on): Part 9 §0 STATUS** — the LLM Bias project, the current work.
-Sim 4's resume point is Part 5 §0 STATUS. Everything else is append-only history.
-
-**One file, deliberately.** This was seven documents until 2026-09-13:
-`PROJECT_LOG.md`, the three simulation write-ups, `SIM4_LOG.md`,
-`SIM4_RUN_PLAN.md` and `OVERNIGHT_2026-09-08.md`. They were split because each
-was written at a different time for a different reason, but every search had to
-be run seven times and the cross-references between them had already started to
-rot. Nothing was dropped in the merge: each part below is its source document
-verbatim, under a banner naming the file it used to be.
-
-**Status sections: Part 5 §0 (Sim 4) and Part 9 §0 (LLM Bias).** Those are the only
-sections that go stale.
-
-**Ids.** Findings are `F-n`, bugs `B-n`, decisions `D-n`, runs `R-n`, open
-questions `Q-n`. They are unique across the whole file and each appears in
-exactly one place. **Retractions are kept, not deleted** — a claim that was
-believed and then killed is the most useful entry in a research log, and this one
-has a lot of them.
+**If you are new: read Part 0 (below) and nothing else to start.** It says what this project is, what was done
+from July to October 2026, what was found, where things stand today, and how every piece works. Parts 1-13 are
+the full record behind it: every run, bug, decision and correction, written at the time and kept word for word.
+If Part 0 and an older Part disagree, **Part 0 is current**. The older Part recorded what was true when it was
+written.
 
 | Part | What it holds | Was |
 |---|---|---|
-| **Part 1** | Project log: start here, conventions, open threads | `PROJECT_LOG.md` |
+| **Part 0** | **Handoff: the whole project on one page. Start here** | written 2026-10-02 |
+| **Part 1** | Project log for Sims 1-3: setup, conventions, open threads (as of Aug 2026) | `PROJECT_LOG.md` |
 | **Part 2** | Simulation 1: basic Reddit sim and reasoning capture | `SESSION_REPORT (basic sim1).md` |
 | **Part 3** | Simulation 2: the up/control/down misinformation experiment | `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md` |
 | **Part 4** | Simulation 3: the iAgent Shield experiment | `SHIELD_EXPERIMENT_REPORT.md` |
-| **Part 5** | Simulation 4: the complete log | `SIM4_LOG.md` |
+| **Part 5** | Simulation 4: the complete log (status, build, scaling, every bug) | `SIM4_LOG.md` |
 | **Part 6** | Simulation 4: run plan and its review | `SIM4_RUN_PLAN.md` |
-| **Part 7** | Overnight plan, 2026-09-08 (historical, kept for the record) | `OVERNIGHT_2026-09-08.md` |
+| **Part 7** | Overnight plan, 2026-09-08 (historical) | `OVERNIGHT_2026-09-08.md` |
 | **Part 8** | Primer: what upstream OASIS is and how the framework works | `LEARN_OASIS.md` |
-| **Part 9** | LLM Bias project: do AIs favour their own writing? (started 2026-09-23) | `LLM_BIAS_LOG.md` |
+| **Part 9** | LLM Bias project: do AIs favour their own writing? (the latest work) | `LLM_BIAS_LOG.md` |
 | **Part 10** | LLM Bias data dictionary: every file and column | `LLM_BIAS_DATA_DICTIONARY.md` |
-| **Part 11** | Simulation 4 design spec (2026-08-24) | `2026-08-24-social-timeline-design.md` |
-| **Part 12** | Research agenda (2026-09-11) | `2026-09-11-research-agenda.md` |
+| **Part 11** | Simulation 4 design spec (2026-08-24) | `docs/superpowers/specs/2026-08-24-social-timeline-design.md` |
+| **Part 12** | Research agenda (2026-09-11) | `docs/superpowers/specs/2026-09-11-research-agenda.md` |
+| **Part 13** | Sim 4 run folders: what the run names mean | `data/runs/README.md` |
 
-**Part 8 is a different kind of document from the rest.** It is a primer on
-upstream OASIS — what the paper claims and how the framework works — rather than
-a record of our own research. It was kept separate until 2026-09-13 for that
-reason, and merged anyway because one file beats a rule about tidiness. Read it
-first if you are new to the project; ignore it entirely if you are not.
+**How this file grew.** It was seven documents until 2026-09-13 and three until 2026-10-02. They were merged
+because every search had to be run several times and the cross-references kept breaking. Nothing was dropped.
+Each Part is its source document, under a banner naming the file it used to be.
+
+**Ids.** Sims 1-4 use `F-n` findings, `B-n` bugs, `D-n` decisions, `R-n` runs and `Q-n` open questions. The LLM
+Bias project uses the same with an `L` in front (`LF-n`, `LB-n`, `LD-n`, `LR-n`, `LQ-n`), so the two never clash.
+Every id appears in exactly one place, so searching for `F-105` or `LF-49` finds its full write-up. **Retractions
+are kept, not deleted.** A claim that was believed and then disproved is one of the most useful things a research
+log can hold, and this one has many of them.
+
+---
+
+# Part 0 — Handoff: the whole project on one page
+
+*Written 2026-10-02 from the full log and the code. Update §0.2 "Where things stand" whenever the state changes.*
+
+## 0.1 What this project is
+
+**OASIS** (`camel-ai/oasis`, paper arXiv 2411.11581) is an open-source social-media simulator. Every "user" is an
+AI language model (an *LLM*, the same kind of system as ChatGPT) given a made-up person to play: a name, age, job
+and interests. The users post, comment, like and follow each other on a pretend Twitter or Reddit, and every
+action is saved to a database. The original authors ran up to a million users on 24 data-centre GPUs. **This
+project runs the same kind of experiment on one laptop with free AI models running locally**, so nothing is
+paid for and no data leaves the machine.
+
+Gordon runs the work, with a professor who sets the tasks (for example, in the week of 2026-08-31: "make runs
+faster, and store the data so it would survive 1,000 users × 1,000 rounds"). There have been **two lines of
+research**:
+
+1. **Simulations 1-4 (July - mid-September 2026).** How do AI users behave on a social network? Do they follow
+   the crowd? What decides which posts they react to? How much does a bigger simulation cost in time?
+2. **The LLM Bias project (23 September - 2 October 2026).** If one AI both *writes* the posts and *plays* the
+   people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
+   for both jobs is quietly tilted in that AI's favour.
+
+## 0.2 Where things stand (2026-10-02)
+
+- **Nothing is running.** Ollama (the program that runs the AI models) is stopped. A forgotten scheduled job that
+  re-ran old Sim 4 runs overnight on 1 October has been disabled (see the 2026-10-02 entry at the end of Part 8).
+- **LLM Bias is finished up to Test 6.** The answer: **yes, a small own-AI favouritism is real.** In Test 6
+  (15 rounds, 147,598 votes), people played by an AI gave that AI's posts **6.9 more upvotes out of every 100**
+  (95 % sure the true figure is between 2.9 and 10.6) and **4.2 fewer downvotes out of every 100** (95 % sure:
+  between 1.7 and 6.7 fewer). That is §0.4 and Part 9, LF-49.
+- **Waiting on Gordon to choose the next LLM Bias test.** Options on the table: two AIs from *different* families
+  (gemma4 vs llama3.2:1b, because Test 6's two AIs are siblings from the same maker); a neutral "referee" crowd
+  played by a third AI; posts all made the same length (about 182 words); showing vote counts; moving to a GPU
+  machine over SSH (planned, not set up).
+- **Sim 4 has been paused since 2026-09-17.** Its last results are in. The next run on its list is **Q-24**
+  (§0.4), which has not been run.
+- **All web pages (claude.ai artifacts) were deleted on 2026-10-02** at Gordon's request. Every
+  `claude.ai/artifact/...` link in Parts 1-13 is dead. Everything the pages showed is in this file and in the
+  data folders, and the scripts that built them still exist (`make_world_artifact.py`, `make_inside_page.py`,
+  `make_two_ai_page.py`, `make_graph.py`).
+- **Code is on GitHub** at `github.com/KGordo11/oasis` (Gordon's copy of OASIS). The current branch is `llm-bias`,
+  which contains all earlier work (see §0.5). Everything is committed and pushed.
+
+## 0.3 Timeline
+
+| When | What happened | Where in this file |
+|---|---|---|
+| Jul 21 | Setup on the laptop; **Sim 1** (36 users, can the AI explain itself?) and **Sim 2** (do users pile on downvoted posts?) | Parts 2, 3, 8 |
+| Aug 10-20 | **Sim 3**, the "Shield": hide vote counts from the users and see what changes. 4 rounds of bug fixes, then the full 3×2 experiment and significance tests | Part 4 |
+| Aug 24 | **Sim 4** designed: a real social timeline with a recommender, follows and full tracking of what everyone saw | Parts 11, 5 |
+| late Aug - Sep 3 | Sim 4 built and run at 36 users. Four silent upstream OASIS bugs found. Professor's task: speed and storage | Part 5 (Part I and II) |
+| Sep 8-12 | Prompt shortened (engagement tripled; runs got slower). **B-28**: a whole night of runs secretly cut off the feed (fixed and now guarded in code) | Parts 5, 6, 7 |
+| Sep 11 | Research agenda written | Part 12 |
+| Sep 14-17 | Standing order "just keep simming". Size sweep 12 → 99 users; the cost law; 15-round runs; **F-116**: main results replicate at 18-99 users | Part 5 §0 |
+| Sep 23-24 | **LLM Bias starts.** Test 1: 7 AIs, people pick a favourite post | Part 9 |
+| Sep 24-26 | Test 2: 2 AIs, people scroll and vote on each post | Part 9 |
+| Sep 26-27 | Test 3: one post at a time vs side by side, posts made the same length | Part 9 |
+| Sep 27-29 | Test 4: 3 AIs writing freely. Test 5: one AI plays the whole crowd on a ranked feed | Part 9 |
+| Sep 30 - Oct 1 | **Test 6**: 2 AIs, 100 users, brand-new posts every round, 15 rounds | Part 9 §0, LF-48..50 |
+| Oct 2 | Deep breakdown of Test 6, Excel workbook of every scroll, forgotten scheduled job stopped, all pages deleted, all logs merged into this file | Part 9 LF-50, Part 0 |
+
+## 0.4 What we found, in plain words
+
+### Simulations 1-3 (36 users, llama3.1:8b, Reddit setting)
+
+- **Sim 1.** The made-up personalities really drive behaviour: a gardening-loving persona posted about gardening
+  unprompted. But **an 8-billion-parameter local AI cannot both explain its reasoning in words and use the
+  posting tools in the same turn.** Three attempts. The first broke posting completely and was undone. The full
+  account is in Part 2.
+- **Sim 2.** 220 false claims were posted, each given a fake starting score of +1 ("up"), 0 ("control") or −1
+  ("down"). **When a post looked downvoted, about 62-68 % of comments disagreed with or corrected it, against
+  under 15 % for the others.** This held in both independent runs. A comment-count claim from the first run did
+  not hold and was retracted. The full account is in Part 3.
+- **Sim 3, the Shield.** A second AI call stripped the vote counts out before each user saw their feed. **Pushback
+  on downvoted posts fell from 68 % to 28 %** (very unlikely to be chance: p = 0.0009, where *p* is the chance of
+  a result this big if hiding the votes truly made no difference). So most of Sim 2's "scepticism" was copying
+  the crowd, not fact-checking. With the votes hidden, the control posts drew the most pushback (48 %). The
+  Shield itself failed about 1 time in 8 and fell back to the normal feed. The full account is in Part 4.
+
+### Simulation 4 (social timeline: 12-99 users, up to 15 rounds, llama3.1:8b)
+
+Each round, every user gets a personal feed of 12 posts. Some come from people they follow (the "network"), some
+from friends of friends ("fof") and the rest from strangers ("discovery"). Each user then acts on the feed. Every
+post shown is logged, so we know what everyone saw and ignored as well as what they did.
+
+**What makes a user react to a post they were shown.** The numbers below are *odds ratios*: 2.0 means the odds of
+reacting double, and 1.0 means no effect. All are against a post from a stranger.
+
+| Factor | Effect | Status |
+|---|---|---|
+| Post is from someone the user follows | **3.5×** (3.3× on new data) | Strongest. Holds in every run (F-92, F-108, F-116) |
+| User has seen this post before | **2.6×** (2.05× on new data) | Holds (F-110, F-116) |
+| Post sits near the top of the feed | **2.15×** | Holds in 9 of 9 runs (F-94) |
+| Post is about things the user likes | **1.33×** | Small but real. An earlier claim that it was harmful was retracted (F-38 → F-112) |
+| Post is from a friend of a friend | **2.3×** | Replicated, but not yet established (F-116) |
+
+**Cost.** Time grows in a straight line with the number of users: **about 21.4 seconds per user per round**
+(fitted on 8 sizes from 12 to 99 users, R² 0.9993, where 1.0 would be a perfect fit). The wall-clock formula is
+**21.44 s × users × (rounds − 1.7)**, because the first rounds are cheaper (F-115). For example, 99 users × 15
+rounds took 7.8 hours. **1,000 users × 1,000 rounds is out of reach on this laptop by a factor of over 100**, so it
+needs GPU servers, not tuning. 99 users is also a hard ceiling: the persona file only has 99 usable people.
+
+**Engagement drops in bigger worlds even though the users behave the same.** Each user takes about the same
+number of actions per turn, but a bigger world shows them more distinct posts, so the percentage falls (F-105,
+F-106). **When comparing different sizes, quote actions per user-turn, never engagement rate.**
+
+**Upstream OASIS bugs we found** (all silent, all worked around in our code; see Part 1, Sim 4):
+1. The "twitter" recommender quietly returns random feeds.
+2. The text-matching model gives different answers in every process.
+3. Feed history is deleted every round.
+4. Group chats push the feed out of the prompt.
+
+**Q-24, the next Sim 4 run (not done).** 76 errors come from a `follow(group_id=)` parameter that never existed.
+Only 45 % of attempted follows succeeded at 90 users. One run with groups switched off (`q24_nogroups.sh`, about
+3 h) would show whether the follow network is being undercounted. It must not be added to the cost data.
+
+**The data package** is `data/sim4_package/`: 49 runs as Parquet tables (a compact format that Excel-adjacent
+tools, DuckDB and pandas can open), plus `runs_index.csv` and a generated `DATA_DICTIONARY.md`. Part 13 explains
+the run names.
+
+### LLM Bias, Tests 1-6 (Ollama models only)
+
+The basic set-up: AIs write Reddit-style posts on everyday topics (finance, cars, farming, cooking, tech). Then
+each AI *plays* a fixed list of made-up people (always the same pinned people, never changed), who read the posts
+and react. The people never see who wrote a post. **The fair comparison:** how much more AI X's people like X's
+posts than the *other* AI's people like X's posts. That subtraction cancels out "X simply writes better posts".
+
+| # | Dates | Design | Own-AI boost: extra upvotes per 100 (95 % range) |
+|---|---|---|---|
+| 1 | Sep 23-24 | 7 AIs each write a post; 99 people pick a favourite | +5.6 (+3.4 to +7.8) |
+| 2 | Sep 24-26 | 2 AIs (llama3.1, gemma4); 99 people scroll and vote on each post | +2.4 (−1.3 to +6.2), not clear |
+| 3 | Sep 26-27 | One post at a time vs side by side; posts length-matched | +5.2 (+2.4 to +8.1); the format made no difference |
+| 4 | Sep 27-29 | 3 AIs (llama3.1, gemma4, mistral) writing freely; 50 people | +6.8 (+4.6 to +9.4); every AI, every post set |
+| 5 | Sep 29 | One AI plays the whole crowd on a ranked feed | +7.2 (+4.9 to +9.6) |
+| 6 | Sep 30 - Oct 1 | 2 AIs (gemma4:e2b, gemma3:1b); 100 users; new posts every round; 15 rounds | **+6.9 (+2.9 to +10.6)** |
+
+**Test 6 as plain counts** (`data/llm_bias/two_ai/reactions.csv`, 147,598 valid votes):
+
+| People played by | Posts written by | Upvote | Downvote | Nothing |
+|---|---|---|---|---|
+| gemma3:1b | gemma3:1b (own) | 27,711 (75.1 %) | 4,917 (13.3 %) | 4,272 (11.6 %) |
+| gemma3:1b | gemma4:e2b | 27,456 (74.4 %) | 5,124 (13.9 %) | 4,318 (11.7 %) |
+| gemma4:e2b | gemma3:1b | 27,669 (75.0 %) | 3,586 (9.7 %) | 5,645 (15.3 %) |
+| gemma4:e2b | gemma4:e2b (own) | 29,973 (81.2 %) | 2,256 (6.1 %) | 4,671 (12.7 %) |
+
+Reading it: gemma4's people upvote gemma4's posts 81.2 % of the time but gemma3's posts only 75.0 %, a gap of
+6.2. gemma3's people show a gap of only 0.7 (75.1 vs 74.4). 6.2 + 0.7 = **6.9**. Most of the effect comes from
+gemma4. 13 of the 15 rounds came out positive. With the posts' length taken into account it is +10.9, because
+gemma3 writes longer posts and gemma3's own people dislike long posts.
+
+**Other things we learned.** The AIs **cannot reliably pick out their own posts** when asked, so this is shared
+taste, not deliberate favouritism (LF-8, LF-42). Each AI agrees with itself when re-asked (kappa 0.72-0.88, a
+0-to-1 agreement score where 1 means always identical) but **different AIs play the same person differently**
+(kappa 0.10-0.26). Who the person is and which AI plays them matter about equally (LF-44). When one AI plays
+everyone and vote counts are visible, the first few voters fix the ranking: the top 10 posts get 72 % of likes
+(LF-47).
+
+## 0.5 How everything works
+
+**Machine.** MacBook Pro, Apple M2 Max, 32 GB memory, one shared Ollama server. A 65 W charger cannot keep up
+during runs, so use 96 W or more. Folder: `/Users/gordon/research/oasis`. Also in `/Users/gordon/research`:
+`reference/` (two related OASIS research repos, read in Part 5 §6) and `.vscode/settings.json` (hides the
+270 MB of auto-generated OASIS logs in `oasis/log/` and the Python environment).
+
+**Git.** `origin` = `github.com/KGordo11/oasis` (Gordon's fork; push here). `upstream` = `camel-ai/oasis` (the
+real project; **never push there**). The branches stack, each containing the one before it:
+`main` (Sims 1-3) → `social-timeline-sim` (Sim 4, last commit 2026-09-17) → **`llm-bias`** (current, contains
+everything). `main` has 6 local commits that were never pushed, but they are all inside `llm-bias`, which is
+pushed. **Our code never edits OASIS's own `oasis/` folder.** Every experiment swaps in its own subclass. The
+single upstream file we changed is the Ollama hook-up in `examples/experiment/reddit_simulation_counterfactual/`.
+
+**Python.** `source oasis-env/bin/activate` (Python 3.11; OASIS needs 3.10 or 3.11), or call
+`./oasis-env/bin/python` directly.
+
+**Starting Ollama: always this exact command.** Each setting exists because leaving it out once broke results:
+
+    OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h \
+      ollama serve > /tmp/ollama_serve.log 2>&1 &
+
+- `CONTEXT_LENGTH=8192` is how much text the model can read at once. The default of 4096 silently cuts off the
+  end of the prompt, which is where the feed is (B-28). Runs then *get faster* while the experiment quietly
+  breaks. Sim 4 code refuses to run below 8192.
+- `NUM_PARALLEL=4` is four requests at a time. 8 gives no speed-up and much more noise.
+- `KEEP_ALIVE=24h` keeps the model loaded between calls. Reloading made runs 3-4× slower.
+- Logging to `/tmp/ollama_serve.log` lets the LLM Bias manifests record the server settings.
+- Stop it when done: `pkill -f "ollama serve"`.
+
+Models used: `llama3.1:8b` (all of Sims 1-4); `gemma4:e2b`, `gemma3:1b`, `mistral:7b`, `llama3.2:3b`,
+`qwen2.5:7b`, `granite4.1:3b` and `phi4-mini:3.8b` (LLM Bias). The LLM Bias manifests record each model's exact
+download fingerprint ("digest").
+
+**Sim 4 code**, in `examples/experiment/social_timeline/`. Every file opens with an `IN PLAIN WORDS` explanation.
+- `run_simulation.py` runs one simulation. `timeline_agent.py` and `timeline_platform.py` hold our user and our
+  platform, with the 12-slot feed and the logging.
+- Campaigns: `sweep18.sh` (a sweep over sizes; skips finished runs), `night_queue.sh` (repeats sweeps forever)
+  and `switch_campaign.sh` (changes a campaign safely).
+- Fold-in after a run: `export_parquet.py`, then `build_package.py`, then `make_timing_charts.py` and
+  `make_engagement_charts.py`.
+- Analysis: `analyze.py`, `exposure_model.py` (the odds-ratio table above), `recency_check.py`, `load_verdict.py`.
+- Guards: `check_deps.py` (8 pre-run checks) and `server_state.py` (refuses a wrong context length). The
+  `test_*.py` files are the test suites.
+- Runbook: Part 5 §0, "STANDING ORDER" (how to start, fold in and record a run).
+
+**LLM Bias code**, in `examples/experiment/llm_bias/`. The data is in `data/llm_bias/`, and the shortcut folder
+`00_LLM_BIAS_START_HERE/` lists which files each test used.
+- Shared pieces: `llm.py` (talks to Ollama), `personas.py` + `personas_bank.json` (the pinned people: 99 core,
+  100 for Test 6; never change them), `topics.py`, `authors.py` (post writing), `scroll.py` (the voting
+  question), `check_world.py` (health check for every run).
+- **Test 6:** `two_ai_campaign.sh` runs every round. `run_world.py` is one AI's turn in one round.
+  `two_ai_after_round.sh` checks, analyses and commits after each round. The maths is in `analyze_two_ai.py` and
+  `analyze_deep.py`. `verify_numbers.py` independently recounts the headline numbers. `make_scrolls_workbook.py`
+  builds `data/llm_bias/two_ai/test6_every_scroll.xlsx` (every person's scroll, every vote and its reason, all
+  15 rounds).
+- **Reproduce Test 6:** `examples/experiment/llm_bias/reproduce_test6.sh analyze` recomputes every result from
+  the saved votes (about 10 min, no AI needed). `... check` runs a 5-person test round (about 5 min).
+  `... run` reruns everything (about 17 h).
+- Earlier tests: `run_bias.py`/`judge.py` (Test 1), `world_campaign.sh` (Test 2), `ab_campaign.sh` (Test 3),
+  `v3_campaign.sh` (Test 4), `run_feed.py` (Test 5). Every file and column is described in Part 10.
+
+## 0.6 Rules learned the hard way
+
+Each rule below cost real time when it was broken. The id says where to read the story.
+
+1. **Smoke-test small before every big run** (2 rounds or 5 people). This caught 2 of 3 bugs in Sim 3.
+2. **Replicate before believing.** Run anything that claims a finding at least twice. Several "findings" did not
+   survive a second run (Sim 2 comment counts, LF-16 → LF-19).
+3. **Record every setting in the run's own manifest.** A setting that isn't recorded will eventually be wrong,
+   and the error will get blamed on something else (B-28, F-65, F-77, F-85).
+4. **Never change the simulation in the middle of a campaign**, not even a "small improvement" to the prompt,
+   model, personas or flags. Every prompt change is a change to the experiment: the shorter prompt *tripled*
+   engagement (F-93). B-26, B-28 and B-31-B-33 each made runs silently incomparable.
+5. **Don't run anything else on the machine during a run.** One run took 2.16× longer because the laptop was in
+   use (B-32).
+6. **Check a new analysis against a published number first.** Reproduce a known figure before computing anything
+   new. This caught B-34, a data package that could not reproduce its own engagement figures.
+7. **When benchmarking speed, vary the prompt on every call.** Repeating the same prompt measures Ollama's cache,
+   not the model (F-51 and F-54, both retracted).
+8. **Only local Ollama models** play people or write posts. No Claude, Gemini or other paid AIs (Gordon,
+   2026-09-23).
+9. **Restate a new design and wait for Gordon's "go"** before running it (2026-09-30).
+10. **Posts have no rules except staying on topic.** No word limits. A length rule may come later, set to the
+    measured natural average, and only when Gordon says so.
+11. **Lead results with plain counts and percentages** (who played the people × whose posts → up / down /
+    nothing), then the derived numbers. Explain every term and symbol where it appears.
+12. **Before saying "nothing is running", check the whole machine:** `ps -Ao pcpu,etime,command -r | head`,
+    `ollama ps`, `lsof -iTCP:11434`, `launchctl list | grep -i gordon`, `crontab -l`. **Remove any scheduled
+    job made for a one-off run in the same session** (a forgotten launchd job re-ran Sim 4 on 2026-10-01).
+13. **Commit and push to `origin` after every substantive change, and update this log.** A finding that exists only
+    in a chat or a commit message is lost.
+
+## 0.7 Keeping this file useful
+
+- Add new work to the **end of the relevant Part** (LLM Bias → Part 9; give it the next `LF-`/`LD-` id) and update
+  **§0.2 above** and Part 9 §0 STATUS.
+- Never delete a wrong claim. Mark it retracted and say what replaced it.
+- A new project gets a new Part at the end, plus a row in the table at the top and a line in §0.2.
 
 ---
 
@@ -58,6 +310,8 @@ first if you are new to the project; ignore it entirely if you are not.
 > of a log.
 
 *Was `PROJECT_LOG.md`. Merged into this file 2026-09-13; original title: “Project Log”.*
+
+> **Written in August 2026 for Sims 1-3. Where it disagrees with Part 0 (branches, pushing, Sim 4 status), Part 0 is current.**
 
 **Purpose of this file: if you are an assistant picking this project up
 with zero prior context, this is the one file to read first.** It's
@@ -13315,3 +13569,74 @@ That is maybe a day's work and it can be done while runs are going.
 - **The cost-of-realism frontier.** We have the only instrumented OASIS and could
   write the paper nobody else can. It is a methods contribution and reads as one.
   Better as a section of whatever else we publish than as the thing itself.
+
+---
+
+# Part 13 — Sim 4 run folders: what the run names mean
+
+*Was `data/runs/README.md` (the folder those runs live in). Merged into this file 2026-10-02, verbatim; original title: “Runs, and what their names mean”.*
+
+Names were assigned in the order things were investigated, not by what the runs
+are. This file is the translation.
+
+## control/ — 9 runs, one identical configuration
+
+    np4_val_r1, np4_val_r2      "NumParallel=4 validation, replicate 1-2"
+    bank_r1 ... bank_r7         "the replicate bank"
+
+**All nine are the same configuration.** The two names are historical: the first
+two confirmed that 4 concurrent agents was the right setting, the other seven
+were added to measure how much two identical runs differ. Treat them as
+`control_r1` through `control_r9`.
+
+    36 agents, 15 rounds, llama3.1:8b, temperature 0.7,
+    4 concurrent requests, terse tool descriptions, shared prompt prefix
+
+## fresh_context/ — 3 runs
+`fc_full_r1-r3`. Identical to control except agent memory is cleared between
+rounds. 3.07x faster, engagement falls to a third. F-88.
+
+## scale99/ — 2 runs
+`scale99` (3 rounds) and `scale99_full` (5 rounds). 99 agents from the Twitter
+persona file. A different persona construction, so not poolable with the 36.
+
+## published/ — 10 runs
+The original baseline: `v10_*`, `baseline`, `full_*`. Prompt v10 at temperature
+**0.9**, full tool docstrings, persona-first prompt ordering.
+
+---
+
+## Why the new runs take LONGER than the published ones
+
+    published mean   113 min     engagement 2.71%
+    control mean     169 min     engagement 7.68%
+
+A fair question, since the newer ones include every efficiency improvement. The
+answer is that they are not doing more work per action — they are getting more
+out of each one:
+
+| | published | control |
+|---|---|---|
+| actions per agent-turn | 0.82 | 0.82 |
+| text generated | 12,022 tokens | 9,959 tokens |
+| **engagement with shown posts** | **2.71 %** | **7.68 %** |
+
+Same action rate, *less* text generated, nearly **3x the engagement**.
+
+**The cause is temperature 0.9 -> 0.7.** A lower temperature makes the model less
+random, so it acts on posts that were really in its feed instead of inventing
+post IDs that the honesty gate then discards. Each genuine `like_post` means the
+model actually read and reasoned about a feed it had previously half-ignored.
+
+**The published runs were faster because the agents were sloppier.** At 2.71 %
+engagement they barely interacted with their feeds, which makes a run cheap and
+scientifically thin.
+
+So both things are true: the efficiency work made each model call faster (terse
+tools 1.44x, shared prefix 1.66x), and the temperature change made each call do
+more. The second effect is larger, and it is the one worth having.
+
+**Consequence: the two sets cannot be pooled.** They differ in temperature, tool
+descriptions and prompt ordering. That is what makes the 9 control runs an
+independent replication of the published findings rather than more of the same —
+see F-92.

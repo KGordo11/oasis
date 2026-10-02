@@ -274,7 +274,8 @@ nothing (per-AI failure / "nothing" report), slots.
   rounds. **Posts**: all 738 posts in full (Post ID starts with the round, e.g. `R03 r/cars #2 by gemma4`), job card,
   COUNTIFS vote counts. **README**: what each column means. Counts are formulas (computed on open; LibreOffice was not
   available to pre-compute them). **Bias data**: per round + all rounds, each AI's people on its own vs the other AI's
-  posts: up/down/nothing counts and %. 73,800 rows (× 2 AIs = all 147,600 votes); 2 "(no answer)". 40 MB.
+  posts: up/down/nothing counts, %, and own-minus-other upvote %; **By subreddit / By interest / By voting habit /
+  Each person**: the same, split those ways over all rounds. 73,800 rows (× 2 AIs = all 147,600 votes); 2 "(no answer)". 40 MB.
 
 Also: `data/llm_bias/speed_pick.json` (the speed test that chose the two AIs), `two_ai_campaign.log`,
 `two_ai_after.log`, `two_ai_checks.txt` (check_world.py per round), raw records in `worlds/two_r*/`.

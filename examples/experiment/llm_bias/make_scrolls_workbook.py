@@ -2,7 +2,8 @@
 
     python make_scrolls_workbook.py           # writes data/llm_bias/two_ai/test6_every_scroll.xlsx
 
-Sheets: README (what every column means), Bias data (own vs other AI's posts per round), Scrolls (one row per round per person per post, in the order they saw them),
+Sheets: README (what every column means), Bias data, By subreddit, By interest, By voting habit,
+Each person (own vs other AI's posts, split those ways), Scrolls (one row per round per person per post, in the order they saw them),
 People (the 100 people, the exact text the AI read, live counts of their reactions over all rounds), Posts (every post
 in full, with live vote counts). Counts are Excel formulas (COUNTIFS on the Scrolls sheet), so they stay right if you
 filter or edit; Excel, Numbers and Google Sheets calculate them when the file opens.
@@ -60,6 +61,49 @@ def formulas(ws, n_rows, cols):
         for col, fm in cols(i).items():
             ws[f"{col}{i}"] = fm
             ws[f"{col}{i}"].font = F
+
+
+def bias_tab(wb, at, name, title, note, key_headers, cats):
+    """One row per category per (AI playing the people, whose posts): counts, %s, and own-minus-other upvote %."""
+    S = "Scrolls!"
+    k = len(key_headers)
+    wd = wb.create_sheet(name, at)
+    last = get_column_letter(k + 11)
+    wd["A1"], wd["A2"] = title, note
+    wd["A1"].font = Font(name="Arial", size=13, bold=True)
+    wd["A2"].font = F
+    wd["A2"].alignment = Alignment(wrap_text=True, vertical="top")
+    wd.merge_cells(f"A2:{last}2")
+    wd.row_dimensions[2].height = 70
+    wd.append([])
+    wd.append(key_headers + ["AI playing the people", "Whose posts", "Own or other's?", "Upvoted", "Downvoted", "Nothing",
+                             "Total reactions", "Upvoted %", "Downvoted %", "Nothing %", "Upvoted %: own minus other's"])
+    for c in wd[4]:
+        c.font, c.fill = FB, HEAD
+        c.alignment = Alignment(wrap_text=True, vertical="top")
+    col = lambda n: get_column_letter(k + n)  # n = 1.. for the columns after the key columns
+    up, dn, no, tot, upp = col(4), col(5), col(6), col(7), col(8)
+    react = {A: f"{S}$O:$O", B: f"{S}$Q:$Q"}
+    i = 5
+    for labels, crit in cats:
+        for player, author in [(A, A), (A, B), (B, B), (B, A)]:
+            base = f'{crit},{S}$L:$L,"{short(author)}",{react[player]}'
+            own = player == author
+            wd.append(labels + [short(player), f"{short(author)}'s posts", "own" if own else "other AI's",
+                                f'=COUNTIFS({base},"upvote")', f'=COUNTIFS({base},"downvote")',
+                                f'=COUNTIFS({base},"nothing")', f"=SUM({up}{i}:{no}{i})", f"={up}{i}/{tot}{i}",
+                                f"={dn}{i}/{tot}{i}", f"={no}{i}/{tot}{i}", f"={upp}{i}-{upp}{i + 1}" if own else None])
+            for c in wd[i]:
+                c.font = FB if labels[0] == "All 15 rounds" else F
+                if c.column >= k + 8:
+                    c.number_format = "0.0%"
+            i += 1
+    for n, w in enumerate([14] * k + [14, 16, 13, 10, 10, 10, 11, 11, 12, 11, 14], 1):
+        wd.column_dimensions[get_column_letter(n)].width = w
+    if k == 2:
+        wd.column_dimensions["B"].width = 20
+    wd.freeze_panes = "A5"
+    wd.auto_filter.ref = f"A4:{last}{i - 1}"
 
 
 def main():
@@ -144,43 +188,24 @@ def main():
         "N": f'=COUNTIFS({S}$K:$K,$A{i},{S}$O:$O,"nothing")', "O": f'=COUNTIFS({S}$K:$K,$A{i},{S}$Q:$Q,"upvote")',
         "P": f'=COUNTIFS({S}$K:$K,$A{i},{S}$Q:$Q,"downvote")', "Q": f'=COUNTIFS({S}$K:$K,$A{i},{S}$Q:$Q,"nothing")',
         "R": f"=L{i}-M{i}", "S": f"=O{i}-P{i}"})
-    # Bias data: per round, how each AI's people reacted to its own posts and to the other AI's posts
-    wd = wb.create_sheet("Bias data", 1)
-    wd["A1"] = "How each AI reacted to its OWN posts vs the OTHER AI's posts, round by round"
-    wd["A1"].font = Font(name="Arial", size=13, bold=True)
-    wd["A2"] = (f"'AI playing the people' = which AI pretended to be the 100 people. Each row counts that AI's reactions "
-                f"to one AI's posts. The people never knew who wrote a post. Percentages are out of all its reactions to "
-                f"those posts (the 2 unreadable answers are left out). All numbers are formulas counting the Scrolls sheet.")
-    wd["A2"].font = F
-    wd["A2"].alignment = Alignment(wrap_text=True, vertical="top")
-    wd.merge_cells("A2:K2")
-    wd.row_dimensions[2].height = 42
-    dh = ["Round", "AI playing the people", "Whose posts", "Own or other's?", "Upvoted", "Downvoted", "Nothing",
-          "Total reactions", "Upvoted %", "Downvoted %", "Nothing %"]
-    wd.append([])
-    wd.append(dh)
-    for c in wd[4]:
-        c.font, c.fill = FB, HEAD
-        c.alignment = Alignment(wrap_text=True, vertical="top")
-    react = {A: f"{S}$O:$O", B: f"{S}$Q:$Q"}
-    groups = [(A, A), (A, B), (B, B), (B, A)]
-    i = 5
-    for rnd in ["All 15 rounds"] + list(range(1, 16)):
-        crit = '">=1"' if isinstance(rnd, str) else rnd
-        for player, author in groups:
-            base = f'{S}$A:$A,{crit},{S}$L:$L,"{short(author)}",{react[player]}'
-            wd.append([rnd, short(player), f"{short(author)}'s posts", "own" if player == author else "other AI's",
-                       f'=COUNTIFS({base},"upvote")', f'=COUNTIFS({base},"downvote")', f'=COUNTIFS({base},"nothing")',
-                       f"=SUM(E{i}:G{i})", f"=E{i}/H{i}", f"=F{i}/H{i}", f"=G{i}/H{i}"])
-            for c in wd[i]:
-                c.font = FB if isinstance(rnd, str) else F
-                if c.column >= 9:
-                    c.number_format = "0.0%"
-            i += 1
-    for col, w in zip("ABCDEFGHIJK", [14, 14, 16, 13, 10, 10, 10, 11, 11, 12, 11]):
-        wd.column_dimensions[col].width = w
-    wd.freeze_panes = "A5"
-    wd.auto_filter.ref = f"A4:K{i - 1}"
+    # Bias tabs: how each AI's people reacted to its own posts vs the other AI's posts, split different ways
+    note = ("'AI playing the people' = which AI pretended to be the 100 people. Each row counts that AI's reactions to one "
+            "AI's posts. The people never knew who wrote a post. Percentages are out of all its reactions to those posts "
+            "(the 2 unreadable answers are left out). 'Own minus other's' = how many more percent of its own posts that AI "
+            "upvoted than of the other AI's posts (below zero = it upvoted the other AI's posts more). All numbers are "
+            "formulas counting the Scrolls sheet.")
+    rounds = [(["All 15 rounds"], f'{S}$A:$A,">=1"')] + [([r], f"{S}$A:$A,{r}") for r in range(1, 16)]
+    bias_tab(wb, 1, "Bias data", "How each AI reacted to its OWN posts vs the OTHER AI's posts, round by round", note,
+             ["Round"], rounds)
+    bias_tab(wb, 2, "By subreddit", "Own vs other AI's posts, in each subreddit (all 15 rounds)", note, ["Subreddit"],
+             [([TOPICS[t]["sub"]], f'{S}$H:$H,"{TOPICS[t]["sub"]}"') for t in TOPIC_ORDER])
+    bias_tab(wb, 3, "By interest", "Own vs other AI's posts, by how much the person cares about the post's subreddit "
+             "(all 15 rounds)", note, ["How much the person cares about the subreddit"],
+             [([CARE[k]], f'{S}$J:$J,"{CARE[k]}"') for k in sorted(CARE)])
+    bias_tab(wb, 4, "By voting habit", "Own vs other AI's posts, by the person's voting habit (all 15 rounds)", note,
+             ["Voting habit"], [([HABIT[k]], f'{S}$F:$F,"{HABIT[k]}"') for k in ["generous", "typical", "harsh"]])
+    bias_tab(wb, 5, "Each person", "Own vs other AI's posts, for each of the 100 people (all 15 rounds)", note,
+             ["Person #", "Name"], [([int(u), p.realname], f"{S}$B:$B,{int(u)}") for u, p in users.sort_index().iterrows()])
     # README
     lines = [
         ("Test 6: every person's scroll in every round, post by post", FB),
@@ -200,6 +225,9 @@ def main():
         ("Sheets", FB),
         ("Bias data: for each round (and all rounds together), how many of each AI's posts each AI's people upvoted, "
          "downvoted or ignored, as counts and percentages. Own posts vs the other AI's posts.", F),
+        ("By subreddit / By interest / By voting habit / Each person: the same counts and percentages over all 15 rounds, "
+         "split by the post's subreddit, by how much the person cares about that subreddit, by the person's voting habit, "
+         "and for each of the 100 people.", F),
         ("Scrolls: one row per round per person per post, in the exact order that person saw them. Filter 'Round' and "
          "'Person #' to follow one person through one round; filter only 'Person #' to see them across all 15 rounds; "
          "filter 'Did both AIs do the same?' to see where the two AIs disagree about the same person.", F),

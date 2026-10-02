@@ -1800,3 +1800,6 @@ Updated: results page v12, report doc tab Test 6 (text, 3 charts, design table) 
   gemma3 posts, gemma3 people on gemma3 / on gemma4 posts): upvoted, downvoted, nothing, total, and the three %s
   (COUNTIFS over Scrolls; % over answered reactions). Checked by evaluating every formula in Python against
   reactions.csv: 64 rows, 0 mismatches; all-rounds upvote % 81.2 / 75.0 / 75.1 / 74.4 = published numbers.
+* Added tabs **By subreddit**, **By interest**, **By voting habit**, **Each person** (same layout as Bias data, via one
+  `bias_tab()` builder), plus an "Upvoted %: own minus other's" column on every bias tab. Checked by evaluating every
+  COUNTIFS in Python against reactions.csv: 516 rows over 5 tabs, 0 mismatches; gap formulas point at the right rows.

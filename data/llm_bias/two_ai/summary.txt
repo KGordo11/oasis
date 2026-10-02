@@ -1,7 +1,7 @@
 rounds [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15], 147598/147600 valid votes, 744 posts (0 duplicate bodies), 6 slots dropped
-OWN-AI LIKE boost +6.9 pts [+4.6, +9.4] rounds-bootstrap, 13/15 rounds positive
-   user x slot bootstrap: {'est': 0.06930926258148695, 'ci95': (0.02980347680389402, 0.1051849593495936)}
-OWN-AI DISLIKE -4.2 pts [-5.8, -2.2]
+OWN-AI LIKE boost +6.9 pts [+4.5, +9.4] rounds-bootstrap, 13/15 rounds positive
+   user x slot bootstrap: {'est': 0.06930926258148695, 'ci95': (0.029462796360327573, 0.10626355013550129)}
+OWN-AI DISLIKE -4.2 pts [-5.8, -2.1]
 at equal length: like +10.9, slope per 100 words +13.0
 same user same post, two AIs: same choice 67.9%, kappa 0.17
 like rate (rows played by, cols written by):

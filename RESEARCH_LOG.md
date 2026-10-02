@@ -10422,3 +10422,12 @@ tail -f log/social.agent-*.log                 # watch agents think
 
 git fetch upstream && git log --oneline HEAD..upstream/main   # what's new upstream
 ```
+
+---
+### 2026-10-02 — Unintended Sim 4 replicate run (launchd agent never unloaded) — stopped
+The launchd agent `com.gordon.oasis.replicates` set up on 2026-09-01 "to fire once" was never unloaded. Its schedule is
+23:59 on day 1 of every month, so it re-ran `overnight_replicates.sh` on 2026-10-01 23:59 (llama3.1:8b, heating the
+laptop overnight). v10_rep3 and v10_rep4 completed, v10_rep5 was killed at 07:20 (partial). Outputs moved to
+`data/_archive/oct01_unintended_replicates/` (README there); the September originals in `data/runs/published/` are
+untouched (verified identical to git). On Gordon's instruction: job killed, agent booted out, plist renamed to
+`.disabled`, Ollama stopped. **Rule: any launchd/cron job created for a one-off run must be removed in the same session.**

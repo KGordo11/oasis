@@ -16,12 +16,14 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 
 ## 0. STATUS — read this first when resuming
 
-*Last updated 2026-10-01 14:10 — LD-18 DONE (11 rounds). Nothing running (Ollama idle).*
+*Last updated 2026-10-02 00:30 — LD-18 DONE (15 rounds). Nothing running (Ollama idle).*
 
-**Answer (LF-48):** users played by an AI upvote that AI's posts **+7.1 points** more [+2.9, +11.5] and downvote them
-**−4.7** less [−7.6, −1.9]; 10/11 rounds positive; mostly gemma4; +12.5 at equal length. 108,800 votes, 0 failed.
-**Next (Gordon's call):** cross-family pair (gemma4 vs llama3.2:1b, ~8 rounds/night), neutral referee crowd,
-length-matched posts (~179 words), visible counts, GPU machine.
+**Answer (LF-49):** users played by an AI upvote that AI's posts **+6.9 points** more [+2.9, +10.6] and downvote them
+**−4.2** less [−6.7, −1.7]; 13/15 rounds positive; mostly gemma4; +10.9 at equal length. 147,600 votes.
+LF-48's downvote breakdown was wrong (cells swapped) — corrected in LF-49 and in the docs.
+Professor guide: https://claude.ai/code/artifact/b35c46ac-9e48-4096-a798-0bd00138a4f5
+**Next (Gordon's call):** cross-family pair (gemma4 vs llama3.2:1b), neutral referee crowd, length-matched posts
+(~182 words), visible counts, GPU machine.
 
 *(was, 08:50)* LD-18 RUNNING, round 8 of ~12.
 
@@ -1715,3 +1717,31 @@ analyze.py excerpt verbatim).
 Same design, same AIs, same 100 users, seeds 212-215 (new briefs continue the campaign numbering, so still no brief
 reused). Launched 17:33: `A=gemma4:e2b B=gemma3:1b ROUNDS="12 13 14 15" STOP_AT="2026-10-02 06:00" two_ai_campaign.sh`.
 Expected ~66 min/round → done ~22:00. Pages and analysis refresh after each round.
+
+### LF-49 — LD-18 final over 15 rounds (2026-10-02 00:30) + two corrections to LF-48
+
+Rounds 12-15 ran 17:33-22:27 on 1 Oct (61/70/67/68 min). Totals: 15 rounds, 147,600 votes (2 failed: gemma3,
+round 13, cut off at the token limit after retries), 744 posts (0 duplicate bodies; 6 gemma3 posts failed → 6 slots
+dropped for both AIs). Checks: 19 PASS, 11 WARN, 0 FAIL. `analyze_two_ai.py 2000`.
+
+| | estimate | wider 95 % (user×slot) | round bootstrap | rounds |
+|---|---|---|---|---|
+| own-AI upvote boost | **+6.9** | [+2.9, +10.6], p = 0.001 | [+4.5, +9.4] | 13/15 positive |
+| own-AI downvote change | **−4.2** | [−6.7, −1.7], p = 0.001 | [−5.8, −2.1] | 14/15 negative |
+| upvote boost at equal length | +10.9 | [+6.9, +15.0] | | |
+
+Upvote % (rows = AI playing users, cols = AI that wrote): gemma4-users 81.2 on gemma4 / 75.0 on gemma3;
+gemma3-users 74.4 on gemma4 / 75.1 on gemma3. Downvote %: gemma4-users 6.1 / 9.7; gemma3-users 13.9 / 13.3.
+Length taste per +100 words: gemma4-users +11.1 [+8.0, +14.2], gemma3-users −14.0 [−17.4, −10.6]; words 166 vs 197.
+κ 0.17 (67.9 % same choice). Top 10: gemma4 crowd 6.8 own, gemma3 crowd 5.3. By subreddit (descriptive): farming
++12.1, cooking +9.0, cars +7.5, tech +3.3, finance +2.6. 66.7 min/round.
+
+**Correction 1 (LF-48 and the report doc):** LF-48 said "gemma4-users downvote gemma4 posts 6.2 % vs 14.1 %;
+gemma3-users downvote their own AI's posts MORE (13.3 % vs 10.1 %)". Wrong: I read the rate_down dict
+(rate[author][judge]) with rows and columns swapped. Recomputed straight from reactions.csv: both AIs downvote their
+own posts less (gemma4-users 6.1 vs 9.7; gemma3-users 13.3 vs 13.9). Headline numbers were not affected (they come
+from the double difference, computed correctly). Fixed in the report doc with a visible correction note.
+**Correction 2:** "every WARN was gemma3's like rate swinging" was incomplete — some WARNs are gemma3 answers cut off
+at the token limit (then retried). Fixed in both docs.
+Updated: results page v12, report doc tab Test 6 (text, 3 charts, design table) + main-tab table row, professor guide
+(all numbers, chart, files, step 9 commands for rounds 12-15).

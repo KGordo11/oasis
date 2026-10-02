@@ -1191,7 +1191,7 @@ def key_findings():
         out.append(f"""<div class="find card"><h3>1. Every AI favours its own posts, every time</h3>
 <p>In the newest test, all three AIs gave their own posts more likes, and llama and gemma also gave them fewer dislikes.
 It wasn't a fluke of one batch: it showed up in every post set.</p>{v3_per_set()}
-{src("data/llm_bias/analysis_v3.json", "LLM_BIAS_LOG.md")}</div>""")
+{src("data/llm_bias/analysis_v3.json", "RESEARCH_LOG.md")}</div>""")
     rec = jload("recognition_v3_pooled.json")
     if rec:
         li = ", ".join(f"{NICE[m]} {v['claims_own_%']:.0f}" for m, v in rec.items())
@@ -1323,7 +1323,7 @@ program, not an AI. They never change; the computer checks this before every run
 
 
 def data_files():
-    rows = [("LLM_BIAS_LOG.md", "The full lab notebook: every decision, run, result and correction, in order."),
+    rows = [("RESEARCH_LOG.md", "The full lab notebook: every decision, run, result and correction, in order."),
             ("LLM_BIAS_DATA_DICTIONARY.md", "What every column in every data file means."),
             ("data/llm_bias/export", "Test 2 tables: every reaction, post and person (open in Excel or Google Sheets)."),
             ("data/llm_bias/export_ab", "Test 3 tables (both display formats)."),

@@ -10,7 +10,7 @@ Everything for this project is reachable from this folder. The real files stay w
 | In this folder | What it is |
 |---|---|
 | [`test6_two_ai/`](test6_two_ai/) | **The latest test, only the files it used**: code, results, post banks, every run, logs |
-| [`LOG.md`](LOG.md) | The lab notebook: every decision (LD-), finding (LF-) and run, with times. Section 0 = current status |
+| [`LOG.md`](LOG.md) | The one log for everything (Sims 1-4 + LLM Bias). LLM Bias is Part 9 (every decision LD-, finding LF-, run); Part 9 §0 = current status |
 | [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md) | What every file and column means |
 | [`all_code/`](all_code/) | Every program from all six tests (`examples/experiment/llm_bias/`) |
 | [`all_data/`](all_data/) | Every data file from all six tests (`data/llm_bias/`) |
@@ -79,7 +79,7 @@ Not part of any result: `postbank_s900.jsonl` (a smoke test), `bench_*` worlds a
 ```
 oasis/
 ├── 00_LLM_BIAS_START_HERE/        ← this folder (shortcuts only)
-├── LLM_BIAS_LOG.md                 the lab notebook
+├── RESEARCH_LOG.md                 the one log (LLM Bias = Part 9)
 ├── LLM_BIAS_DATA_DICTIONARY.md     every file and column
 ├── examples/experiment/llm_bias/   all LLM Bias code
 ├── data/llm_bias/                  all LLM Bias data
@@ -88,5 +88,5 @@ oasis/
 │   ├── feeds/                      Test 5 runs
 │   ├── runs/                       Test 1 runs
 │   └── postbank_s*.jsonl           every post, one file per post set / round
-└── (everything else)               OASIS itself and the older Sim 1–4 projects (RESEARCH_LOG.md)
+└── (everything else)               OASIS itself and the older Sim 1–4 projects (log Parts 1-8)
 ```

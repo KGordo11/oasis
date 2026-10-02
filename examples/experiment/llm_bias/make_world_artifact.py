@@ -814,7 +814,7 @@ def data_section():
     n = sum(1 for _ in open(p)) - 1
     return f"""<h2>The data files</h2>
 <p>Everything on this page comes from these tables. They are in <code>data/llm_bias/export/</code> on the <code>llm-bias</code>
-branch, open in Excel or Google Sheets, and every column is explained in <code>LLM_BIAS_DATA_DICTIONARY.md</code>.</p>
+branch, open in Excel or Google Sheets, and every column is explained in <code>RESEARCH_LOG.md (Part 10)</code>.</p>
 <ul>
 <li><b>reactions.csv</b>: one row for every time a person saw a post ({n:,} rows). It says what they did (like, dislike or
 nothing, meaning skip), their reason, how many seconds the AI took, which AI <b>wrote</b> the post, and which AI was
@@ -1324,7 +1324,7 @@ program, not an AI. They never change; the computer checks this before every run
 
 def data_files():
     rows = [("RESEARCH_LOG.md", "The full lab notebook: every decision, run, result and correction, in order."),
-            ("LLM_BIAS_DATA_DICTIONARY.md", "What every column in every data file means."),
+            ("RESEARCH_LOG.md (Part 10)", "What every column in every data file means."),
             ("data/llm_bias/export", "Test 2 tables: every reaction, post and person (open in Excel or Google Sheets)."),
             ("data/llm_bias/export_ab", "Test 3 tables (both display formats)."),
             ("data/llm_bias/export_v3", "Test 4 tables (three AIs)."),

@@ -187,7 +187,7 @@ def main(out_dir, results_url):
         "drift": open(os.path.join(T, "drift_check.jsonl")).read(),
     }
     # --- inventory
-    tracked = set(sh("git ls-files data/llm_bias examples/experiment/llm_bias RESEARCH_LOG.md LLM_BIAS_DATA_DICTIONARY.md").split())
+    tracked = set(sh("git ls-files data/llm_bias examples/experiment/llm_bias RESEARCH_LOG.md").split())
     inv = []
     def add(rel, what):
         p = os.path.join(REPO, rel)
@@ -222,7 +222,6 @@ def main(out_dir, results_url):
                     ("two_ai_campaign.log", "the campaign's own log"), ("two_ai_after.log", "after-round log")):
         add("data/llm_bias/" + f, what)
     add("RESEARCH_LOG.md", "the lab notebook")
-    add("LLM_BIAS_DATA_DICTIONARY.md", "every column explained")
     D["inventory"] = inv
     D["n_world_dirs"] = len(glob.glob(os.path.join(DATA, "worlds", "two_r*")))
     # --- git history of the test

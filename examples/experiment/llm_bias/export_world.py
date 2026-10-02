@@ -20,7 +20,7 @@ Writes data/llm_bias/export/:
 A "round" is one pass of all 99 users over one fresh set of 50 posts (one world).
 Rounds are numbered in the order they ran.
 
-Every column is described in LLM_BIAS_DATA_DICTIONARY.md. Re-run any time; it
+Every column is described in RESEARCH_LOG.md (Part 10). Re-run any time; it
 rebuilds everything from the run records (decisions.jsonl, manifest.json,
 run.log, oasis.db, the post bank and the persona bank).
 

@@ -31,6 +31,9 @@ has a lot of them.
 | **Part 7** | Overnight plan, 2026-09-08 (historical, kept for the record) | `OVERNIGHT_2026-09-08.md` |
 | **Part 8** | Primer: what upstream OASIS is and how the framework works | `LEARN_OASIS.md` |
 | **Part 9** | LLM Bias project: do AIs favour their own writing? (started 2026-09-23) | `LLM_BIAS_LOG.md` |
+| **Part 10** | LLM Bias data dictionary: every file and column | `LLM_BIAS_DATA_DICTIONARY.md` |
+| **Part 11** | Simulation 4 design spec (2026-08-24) | `2026-08-24-social-timeline-design.md` |
+| **Part 12** | Research agenda (2026-09-11) | `2026-09-11-research-agenda.md` |
 
 **Part 8 is a different kind of document from the rest.** It is a primer on
 upstream OASIS — what the paper claims and how the framework works — rather than
@@ -2195,7 +2198,7 @@ for it.
 
 ---
 
-# ⟦ STANDING ORDER — KEEP THE MACHINE SIMMING ⟧
+## ⟦ STANDING ORDER — KEEP THE MACHINE SIMMING ⟧
 
 **Set by Gordon, 2026-09-14.** *"We haven't changed anything so we just need
 data — just keep simming."* This is the default task whenever no other
@@ -3162,11 +3165,11 @@ An edit that reports success is not evidence; the changed bytes are.
 
 ---
 
-# Part I — building it
+## Part I — building it
 
 *Originally `SIM4_LOG.md` Part I. Its own STATUS block described a study that was already finished when this merge happened, so it is superseded by section 0 above and has been dropped; nothing else was removed.*
 
-# Simulation 4 — Social Timeline: Build Log
+## Simulation 4 — Social Timeline: Build Log
 
 **Purpose of this document.** A complete, running record of everything done to build
 Simulation 4: every file created or modified, every source consulted, every decision
@@ -5819,7 +5822,7 @@ positional indexing
 
 ---
 
-# Part II — making it run
+## Part II — making it run
 
 *Originally `SIM4_LOG.md` Part II.*
 
@@ -9660,7 +9663,7 @@ in this project, and the only cure is more runs at one configuration.
 
 ---
 
-# Review of this plan
+## Review of this plan
 
 ## R1 — Phase 1 cannot resolve the effect it is about, and the plan must not pretend otherwise
 
@@ -9903,7 +9906,7 @@ are listed in Part 5 §4.
 
 ---
 
-# OASIS — Your Complete Starter Guide
+## OASIS — Your Complete Starter Guide
 
 Written for you, Gordon, ahead of Wednesday's meeting.
 Everything here was checked against the actual paper (arXiv 2411.11581, 37 pages) and the
@@ -10456,6 +10459,8 @@ Code: `examples/experiment/llm_bias/`. Data: `data/llm_bias/`. Branch: `llm-bias
 ---
 
 ## 0. STATUS — read this first when resuming
+
+**2026-10-02 11:10 — all web pages deleted (Gordon), and every log/doc merged into this one file.** Every `claude.ai/artifact/...` link below is dead; the page generators (`make_world_artifact.py`, `make_inside_page.py`) still work if pages are wanted again.
 
 *Last updated 2026-10-02 00:30 — LD-18 DONE (15 rounds). Nothing running (Ollama idle).*
 
@@ -12249,3 +12254,1064 @@ Updated: results page v12, report doc tab Test 6 (text, 3 charts, design table) 
   breaks 1.47 h excluding the 258-min pause after round 11, +10 min analysis = ~18.25 h per full run), work done (147,600
   votes, 744 posts OK of 975 tries, 100.7 M tokens read, 3.9 M + 0.59 M written), and a fill-in Spark estimate
   (yellow cells: Spark seconds per vote from `reproduce_test6.sh check`, $/hour). Laptop: 0.367 s per vote at 4 at once.
+
+---
+
+# Part 10 — LLM Bias data dictionary: every file and column
+
+*Was `LLM_BIAS_DATA_DICTIONARY.md`. Merged into this file 2026-10-02, verbatim; original title: “LLM Bias — data dictionary”.*
+
+Every file the LLM Bias project produces, and every column in it, in plain
+words. Design v2 (the scrolling shared world, from 2026-09-24) is first; design v1
+(night 1, pick-a-favourite with 7 models) is at the end.
+
+**To rebuild every table from the raw records:**
+
+    ./oasis-env/bin/python examples/experiment/llm_bias/export_world.py
+
+---
+
+## Words used below
+
+- **User / persona** — one of the 99 pinned people (ids 0–98). The same 99 in
+  every run, verified by fingerprint `964462b96652` before any run starts.
+- **Controlling model** — the AI model that plays a user in a given world: it
+  reads the user's personality and decides what that user does.
+- **Author model** — the AI model that wrote a post.
+- **Same model** — 1 when the post was written by the model controlling the
+  user. The whole hypothesis is about these rows: are they liked more?
+- **Post set (seed)** — one fresh batch of 50 posts: 2 models × 5 topics × 5
+  posts. Every seed is a new batch; the same seed always means the same posts.
+- **World** — one OASIS platform where all 99 users scroll one post set. World 0:
+  even-numbered users are controlled by llama3.1, odd-numbered by gemma4.
+  World 1: swapped. After both, every user has been played by both models on the
+  same posts.
+- **Round** — one world, numbered in the order it ran (round 1 = the first world
+  of the campaign). One round = 99 users × 50 posts = 4,950 decisions.
+- **Slot** — the 5 posts per topic are 5 slots. In each slot, both models wrote a
+  post from the identical brief (same subject, post type and poster), so the
+  pair differs only by which model wrote it.
+- **Interest** — how much a user cares about a topic: −2 dislikes, −1 bored,
+  0 indifferent, +1 enjoys, +2 loves. Fixed per user.
+
+---
+
+## Design v2 tables — `data/llm_bias/export/`
+
+### `reactions.csv` — one row per user per post
+
+The main table: what every user did with every post.
+
+| column | meaning |
+|---|---|
+| `round` | which round (world), in the order they ran |
+| `world_label` | the run's folder name under `data/llm_bias/worlds/` |
+| `post_set_seed` | which batch of 50 posts |
+| `world` | 0 or 1 — which way round the users were split between models |
+| `user_id` | the user's number, 0–98 (same person in every run) |
+| `username`, `user_name` | the user's handle and name |
+| `controlling_model` | **the model controlling this user** for this reaction |
+| `post_uid` | **the post's unique id across all post sets**: `s<seed>\|r<slot-1>\|<topic>\|<author model>` |
+| `post_key` | the post's id within its post set (repeats across sets — use `post_uid` to join or count) |
+| `oasis_post_id` | the post's id inside that world's OASIS database |
+| `post_author_model` | **the model that wrote the post** |
+| `same_model` | 1 if the author model is the controlling model, else 0 |
+| `topic` | the post's topic |
+| `user_interest_in_topic` | −2 … +2, see above |
+| `topic_order` | 1 = the first topic this user scrolled (their best-loved), 5 = the last |
+| `position_in_topic` | 1–10: where the post came in that topic's scroll |
+| `scroll_position` | 1–50: where the post came in the user's whole scroll |
+| `action` | **`like`, `dislike`, `nothing`** (no vote, kept scrolling), or `FAILED` (no readable answer after 3 tries) |
+| `reason` | the user's few words of reasoning, in their own voice |
+| `seconds` | **how long this one decision took**, from sending the post to the model to getting its answer. Four decisions run at once on the chip, so these overlap: the run as a whole moves about 4× faster than this number suggests (see `world_timing.csv`) |
+| `prompt_tokens` | length of what the model read (personality + post), in tokens (~¾ of a word) |
+| `output_tokens` | length of the model's answer, in tokens |
+| `attempts` | 1 normally; 2–3 if the first answer was unreadable and was asked again |
+| `outcome` | `chose` (a readable answer), `unreadable`, `cut_off` (hit the length limit), or `timeout` |
+| `stop_reason` | why the model stopped writing: `stop` = finished normally, `length` = hit the limit |
+
+### `posts.csv` — one row per post
+
+| column | meaning |
+|---|---|
+| `post_uid` | unique id across all post sets (join key to reactions.csv) |
+| `post_key` | id within its post set |
+| `post_set_seed`, `topic`, `subreddit`, `slot` | where the post belongs |
+| `author_model` | **who wrote it** |
+| `oasis_post_id` | id inside the OASIS database |
+| `post_type`, `subject`, `poster_voice` | the brief both models were given for this slot |
+| `title`, `body` | the post as users saw it (plain text) |
+| `words` | length of the body |
+| `generation_seconds`, `generation_attempts` | how long writing it took, and how many tries |
+| `like_by_<model>_users`, `dislike_by_<model>_users`, `nothing_by_<model>_users` | how many users controlled by each model liked / disliked / ignored it, summed over every round that used this post |
+
+### `users.csv` — one row per user (the 99 pinned personas)
+
+| column | meaning |
+|---|---|
+| `user_id`, `username`, `name`, `age`, `gender`, `place`, `profession` | who they are |
+| `voting_style` | `generous`, `typical` or `harsh` — part of the personality text |
+| `interest_<topic>` | −2 … +2 for all 15 topics |
+| `controlled_by_round_<n>` | **which model controlled this user in round n** |
+| `persona_text` | the exact personality text the model was given |
+
+### `world_timing.csv` — one row per round per model
+
+| column | meaning |
+|---|---|
+| `round`, `world_label`, `post_set_seed`, `world` | which round |
+| `model` | the controlling model |
+| `users` | how many users that model controlled in that round |
+| `decisions` | users × posts |
+| `minutes` | wall-clock time that model took to get all its users through all posts |
+| `seconds_per_decision` | `minutes × 60 ÷ decisions` — the throughput number |
+| `posts` | posts in the world (50) |
+| `started_at`, `finished_at` | when the round began and ended |
+
+### `progress_timing.csv` — the time-vs-agents data
+
+One row every 250 decisions (= every 5 users), read from each run's log.
+
+| column | meaning |
+|---|---|
+| `round`, `world_label`, `model` | which run and model |
+| `decisions_done` | decisions finished so far |
+| `elapsed_s` | seconds since that model started |
+| `users_done_equiv` | `decisions_done ÷ 50` — how many users' worth of scrolling is done |
+| `personas_in_run` | users this model controls in the run |
+
+---
+
+## Raw records — `data/llm_bias/worlds/<world_label>/`
+
+| file | what it is |
+|---|---|
+| `decisions.jsonl` | one line per decision, written the moment it happens: everything in `reactions.csv` plus the model's raw reply text and any errors. Source of truth |
+| `manifest.json` | the run's settings (models, seed, world, persona fingerprint and ids, parallelism, temperature), per-model timing and action counts, start/finish times, machine |
+| `run.log` | human-readable progress (ignored by git; its timings are copied into `progress_timing.csv`) |
+| `oasis.db` | the OASIS reddit database: `user`, `post`, `like`, `dislike` and `trace` tables. Likes and dislikes are real OASIS actions. Not committed (rebuilt by re-running); "nothing" is not stored here, only in `decisions.jsonl` |
+
+Post banks: `data/llm_bias/postbank_s<seed>.jsonl` — every post ever generated
+for that seed, with the raw model output, the brief, attempts and timing.
+Analysis: `data/llm_bias/analysis_v2.txt` / `.json` (refreshed after every post set).
+Only **finished** worlds are exported, and the analysis counts a post set only when **both** of its rotation
+worlds are finished (a half-done set has one model's people only). A world that was paused and resumed keeps
+all its reactions, but its `world_timing.csv` minutes cover only the part after the restart (compare
+`decisions` with users x 50); the page's timing charts leave such rounds out.
+
+Exploration: `data/llm_bias/explore_v2.json` (numbers behind the page's "What else we found": self-preference by
+topic and by whether the person cares, same-person agreement, per-post agreement, post length, scroll position,
+persona traits, reasons) and `explore_v2_posts.csv` (one row per post: like rate among people who care about the
+topic, separately for llama-played and gemma-played people, plus author, topic, words). Made by `explore_world.py`;
+exploratory, complete post sets only.
+
+Page data: `world_data.js`, written next to the page by `make_world_artifact.py` and published with it. It is
+reactions.csv/posts.csv/users.csv packed for the look-up tool: `posts` (s = post set, t = topic, a = author 0 llama /
+1 gemma, ti = title, b = body, w = words, k = kind of post), `users` (i = id, n = name, age, g = gender, pl = place,
+job, st = voting style, in = interest -2..+2 per primary topic, d = the exact persona text), `reasons` (every
+distinct reason once) and `R` = one row per reaction `[post index, user id, playing model 0/1, action 0 like /
+1 dislike / 2 nothing, reason index, seconds]`.
+
+---
+
+## Design v1 (night 1) — `data/llm_bias/runs/<label>/decisions.jsonl`
+
+7 models, pick-a-favourite. One line per user per round: `judge` (controlling
+model), `shown_keys` / `shown_authors` (the 7 posts in the order shown),
+`favorite_key` / `favorite_author` (the one picked), `votes` (up/down/none per
+post), `reason`, `latency_s`. Per-round timings are in each run's `manifest.json`
+under `rounds` (`wall_s`, `s_per_decision`). Summaries in
+`data/llm_bias/analysis_s<seed>.txt`.
+
+---
+
+## A/B test (LD-13, post sets 20-34) — `data/llm_bias/export_ab/`
+
+Same tables as `export/`, made by `export_world.py --prefix ab_ --out data/llm_bias/export_ab`, for the 60
+A/B worlds (`ab_s<set>_<scroll|pair>_w<world>`). Posts were written under the length rule "ask 75-85 words,
+reject outside 65-95, up to 9 tries" (`length_rule` in each post-bank record); a brief with a missing post was
+dropped from all four worlds of its set (`--complete-slots`). 50 people (first 50 of the pinned 99).
+
+Extra columns in `reactions.csv` (also present, mostly empty, in `export/`):
+
+| column | meaning |
+|---|---|
+| `format` | `scroll` = one post per decision; `pair` = the two posts of one brief shown side by side |
+| `side_by_side_position` | pair only: 1 or 2, where this post appeared on screen (order shuffled per person and brief) |
+| `picked_as_favourite` | pair only: 1 if the person picked this post as the one they'd most want to open, else 0 |
+
+In `pair` rows, `seconds`, `prompt_tokens` and `output_tokens` belong to the whole call (both posts), so they
+repeat on the two rows of that call. `world_timing.csv` has `format` and `calls` (a pair call covers 2 posts).
+`posts.csv` counts are split by format: `like_by_<model>_users_<format>` etc.
+
+Analysis: `data/llm_bias/analysis_ab.json` (`analyze_ab.py`: per-format double differences, the favourite
+double difference, and the format effect = pair − scroll, all from one shared people x brief bootstrap).
+Checks: `data/llm_bias/ab_checks.txt`.
+
+## Three AIs, natural posts (LD-14, post sets 40+) — `data/llm_bias/export_v3/`
+
+Worlds `v3_s<set>_w<0|1|2>`: llama3.1:8b, gemma4:e2b and mistral:7b each write posts and play people; person i is
+played by `judges[(i + world) % 3]`, so three worlds per set give every person every AI. Posts are "natural":
+no length or format rules, only the topic brief and "don't mention AI / don't sign" (`length_rule: "natural"`).
+Same table layout as `export/`, three models instead of two. Analysis: `data/llm_bias/analysis_v3.json`
+(`analyze_world.py --prefix v3_`); checks `data/llm_bias/v3_checks.txt`.
+
+## Two AIs, 100 users, new posts every round (LD-18, from 2026-09-30) — `data/llm_bias/two_ai/`
+
+**Rebuild:** `./oasis-env/bin/python examples/experiment/llm_bias/analyze_two_ai.py` (re-run after every round;
+`two_ai_after_round.sh` does it automatically, with 1,000 bootstrap draws instead of 2,000).
+
+Words specific to this test:
+- **AI A / AI B** — gemma4:e2b and gemma3:1b. Each one writes posts AND plays users.
+- **Round** — here, one fresh batch of 50 posts (post seed 200 + round) plus two worlds on it:
+  `two_rNN_gemma4` (gemma4 plays ALL 100 users) and `two_rNN_gemma3` (gemma3 plays the same 100 users on the
+  same posts, same order). A round = 100 users × ~50 posts × 2 AIs ≈ 10,000 votes. Rounds are independent.
+- **The 100 users** — the pinned 99 (ids 0-98) plus id 99 of the same bank; fingerprint `f51d2b0a1f7d`
+  (`personas.core100()`), checked before every run.
+- **Brief** — the angle + post type + poster voice both AIs get for one slot. Numbered across the whole campaign
+  so no brief is ever reused (all 12 angles used before one repeats; each slot has its own post type × voice pair).
+- **Own-AI post** (`own_ai_post`) — 1 when the post was written by the AI playing the user.
+
+### `reactions.csv` — one row per vote (user × post × AI playing the user)
+| column | meaning |
+|---|---|
+| round, seed | round number (1-15) and its post seed (201-215) |
+| label | the world the vote happened in (`two_rNN_<ai>`) |
+| played_by | the AI controlling the user for this vote |
+| user_id, username, voting_style | which of the 100 users (0-99), their handle, their fixed voting habit |
+| affinity | the user's fixed interest in this subreddit, −2 … +2 |
+| topic, topic_rank, pos_in_topic | subreddit; where it came in the user's scroll (0 = favourite subreddit first); position of the post inside that subreddit's feed |
+| post_key, written_by | the post (`<slot>|<topic>|<author>`, unique within a round) and the AI that wrote it |
+| own_ai_post | 1 = written_by == played_by |
+| action | `like` (upvote), `dislike` (downvote), `nothing` (no vote); empty if the answer failed |
+| reason | the user's few words of reason, as the AI wrote them |
+| outcome | `chose` (readable answer), `unreadable`, `cut_off`, `timeout` |
+| attempts | calls needed (1 = first answer was readable) |
+| latency_s | seconds the vote took (one call; 4 calls run at a time) |
+| prompt_tokens, eval_tokens | tokens read / written for this vote |
+
+### `posts.csv` — one row per post (also failed ones, `ok` = False)
+round, seed, slot_in_topic (0-4), topic, author, key, ok, brief (angle / ptype / voice), title, body (full text,
+exactly as written), words (body word count), attempts, latency_s (seconds to write, incl. retries), eval_tokens.
+
+### `users.csv` — the 100 users, every trait
+id, username, realname, age, gender, country, place, profession, education, income, mbti, big_five,
+topic_affinity (interest −2…+2 for every topic), taste (length / tone / evidence they value), pet_peeve, voting
+habit, persona (the exact text the AI is given).
+
+### `timing.csv` — one row per world
+world, round, judge (the AI playing users), decisions, vote_wall_min, s_per_vote, post_writing_min (only the
+first world of a round writes posts; the second reuses them, so its value is ~0), started, finished, world_wall_min.
+
+### `slots.csv` — one row per slot (a pair of posts from the same brief)
+slot, round, topic, like_dd / dislike_dd (that slot's own-AI double difference: see analysis), words_a /
+words_b (word counts of the gemma4 and gemma3 posts), gap100 ((words_a − words_b) / 100).
+
+### `analysis.json` — every number on the results page
+rate_up/down/nothing (rate[author][player]), sp_up/sp_down (double difference + user × slot bootstrap 95 %),
+round_boot_up/down (same estimate, whole rounds resampled: est, ci95, p, rounds_positive), per_round,
+length (slot double difference regressed on word gap, round-clustered: at_equal_length, per_100_words_gap, r2),
+by_topic, agreement (same user + same post, both AIs: same_choice_%, kappa, crosstab), like_by_interest_pct,
+top10 (own-AI posts in each crowd's top 10 per round), timing, posts (counts, duplicates, words, retries),
+nothing (per-AI failure / "nothing" report), slots.
+
+### Deep breakdown files (from `analyze_deep.py`, LF-50)
+- `deep.json` — every breakdown on the results page: `overall`, `by_topic`, `by_interest`, `by_voting`, `by_scroll_rank`,
+  `by_half` (each: up/down double difference in points with 95 % users×slots bootstrap, 1,000 draws, and the four cell
+  rates), `leave_one_round_out`, `leave_one_topic_out`, `per_user` (each user's double difference; histogram; sign test),
+  `by_position`, `up/down/nothing_by_interest`, `agreement` (crosstab, by topic, per-user), `features_by_author` +
+  `what_each_crowd_rewards` (post-level OLS of upvote rate on 14 standardized features + round, clustered by round) +
+  `style_explains` (double difference of predicted vs residual rates), `reasons` (top words; own-vs-other log ratios),
+  `posts_loved/hated/disputed` (score = upvotes − downvotes per crowd), `latency`, `post_seconds`, `post_attempts`, `users`.
+- `deep_posts.json` — one record per shown post: id, round r, topic t, slot s, author a, title ti, body b, words w, job
+  card br, votes v[crowd] = [up, down, nothing], sample reasons rs[crowd] = [[action, user, reason], …].
+- `deep_users.json` — one record per user: profile, persona text, own-AI boost, agreement, and `acts[crowd]` = one
+  character per post in `deep_posts.json` order (u = upvote, d = downvote, n = nothing, . = not shown).
+
+- `test6_every_scroll.xlsx` (make_scrolls_workbook.py) — one Excel file, all 15 rounds. **Scrolls**: one row per round
+  per person per post in the exact order that person saw them (scroll position from `scroll.feed`: favourite subreddit
+  first, per-person-per-round shuffle inside it), full post text, both AIs' reaction + reason side by side, same/different
+  column. **People**: the 100 people, interest per subreddit, the exact persona text the AI read, COUNTIFS counts over all
+  rounds. **Posts**: all 738 posts in full (Post ID starts with the round, e.g. `R03 r/cars #2 by gemma4`), job card,
+  COUNTIFS vote counts. **README**: what each column means. Counts are formulas (computed on open; LibreOffice was not
+  available to pre-compute them). **Bias data**: per round + all rounds, each AI's people on its own vs the other AI's
+  posts: up/down/nothing counts, %, and own-minus-other upvote %; **By subreddit / By interest / By voting habit /
+  Each person**: the same, split those ways over all rounds. 73,800 rows (× 2 AIs = all 147,600 votes); 2 "(no answer)". 40 MB.
+
+Also: `data/llm_bias/speed_pick.json` (the speed test that chose the two AIs), `two_ai_campaign.log`,
+`two_ai_after.log`, `two_ai_checks.txt` (check_world.py per round), raw records in `worlds/two_r*/`.
+
+## Page data files (published next to the Scroll Test page)
+
+`world_data.js` (test 2), `data_ab_scroll.json`, `data_ab_pair.json`, `data_v3.json`: the same packed layout as
+`world_data.js` (see above), one per dataset, plus `models` (names in column order) and `cls` (colour classes).
+Chart colours: llama blue, gemma orange, mistral magenta (validated for colour-blind separation, both themes).
+
+---
+
+# Part 11 — Simulation 4 design spec (2026-08-24)
+
+*Was `docs/superpowers/specs/2026-08-24-social-timeline-design.md`. Merged into this file 2026-10-02, verbatim; original title: “Social Timeline Simulation — Design”.*
+
+**Date:** 2026-08-24
+**Status:** Approved design, pending implementation
+**Context:** Simulation 4 in the OASIS project. Follows Sim 1 (reasoning capture),
+Sim 2 (herd behavior), Sim 3 (iAgent shield). See `RESEARCH_LOG.md` (Part 1).
+
+---
+
+## 1. Goal
+
+Turn the OASIS simulation from a narrow up/downvote experiment into something that
+behaves like a real social media app: agents with full personalities acting freely
+over many turns, each with their own personalized timeline, discovering each other
+through an algorithm and through their social graph — and instrumented finely enough
+to reconstruct, per agent, exactly what they saw, what they ignored, what they did,
+to whom, how often, and why.
+
+Success is measured by the questions we can answer afterwards, not by any single
+headline finding:
+
+- Who was connected before, who is connected after, and what rewired in between?
+- Whose posts reached whom, and by which mechanism?
+- Who interacted with whom, how many times, and through which action types?
+- Which posts did an agent see and act on, see and ignore, or never see at all?
+
+The motivating scenario, in the user's words: *user 1 is friends with user 2, user 2
+is friends with user 4, user 2 posts something about user 4, user 1 sees it, and user
+1 may or may not interact with user 4 later — depending on how often user 1 sees user
+4 and whether the content matches what user 1 likes.*
+
+**This is an illustration, not a fixture.** It describes the *kind* of emergent
+multi-hop propagation the simulation must be capable of producing — friend-of-friend
+discovery driven by exposure frequency and content affinity. It may surface one round
+into a run or a hundred, between any agents, at any depth. The design must make such
+chains *possible and observable*; it must not stage them.
+
+---
+
+## 2. Key findings from reading the OASIS source
+
+These drove every decision below. All verified against the code, not the README.
+
+### 2.1 The two recommendation algorithms create fundamentally different worlds
+
+| | Hot-score (`REDDIT`) | Interest-based (`TWHIN`) |
+|---|---|---|
+| Per-user feed | No — `[top_post_ids] * len(rec_matrix)` (`recsys.py:257`) gives every user a byte-identical feed | Yes, genuinely personalized |
+| Interest matching | None | TwHIN-BERT embedding cosine, profile vs. post |
+| Interests evolve | No | Yes — appends the user's latest post to their profile (`recsys.py:509-520`) |
+| Recency decay | Yes | Yes — log decay on post age |
+| Follow graph reaches feed | **No — explicitly skipped** (`platform.py:280`) | Yes — injects followees' posts |
+| Supports the motivating scenario | **Impossible** | Yes |
+
+Hot-score produces one shared global timeline — a broadcast world with no
+personalization and no social graph. It cannot satisfy the multiple-timelines
+requirement.
+
+**Decision: TWHIN (interest-based) is the algorithm.** Hot-score is retained only as
+an optional contrast condition for a later comparison run, not part of the primary
+build.
+
+### 2.2 The feed is a union of two sources
+
+Under any non-REDDIT recsys, `refresh()` builds the feed from:
+
+1. **Algorithmic** — up to `refresh_rec_post_count` posts sampled from that user's
+   `rec` table rows, which the recsys populated.
+2. **Social** — the top `following_post_count` posts authored by people the user
+   follows, ordered by `num_likes` (`platform.py:285-303`, a
+   `JOIN follow ON post.user_id = follow.followee_id`).
+
+This union is what makes the follow graph causally matter, and it is why the
+before/after graph diagram is meaningful rather than decorative. Under REDDIT recsys
+this second source is skipped entirely.
+
+### 2.3 `RecsysType.TWITTER` is silently broken — avoid it
+
+`RecsysType.TWITTER` dispatches to `rec_sys_personalized_with_trace`, which scores
+posts using a module-global `model` that is **never initialized on that code path**
+(`recsys.py:39`; only assigned at line 282, inside a different function). When
+`model is None` the function falls through to `random.random()` (`recsys.py:749`)
+and returns a **uniformly random feed with no error raised**.
+
+Using it would have produced a dataset labelled "interest-based recommendation" that
+was in fact a random number generator. This is the same fail-open failure class as
+Sim 3's shield. It is the direct justification for requirement §4.3 below: the run
+must *assert* that the intended algorithm actually executed.
+
+`DefaultPlatformType.TWITTER` maps to `recsys_type="twhin-bert"` (`env.py:81`), not
+`"twitter"`, so the default Twitter platform uses the correct, well-implemented TWHIN
+path. Only the explicit `RecsysType.TWITTER` value is affected.
+
+### 2.4 Exposure history is destroyed every round
+
+`update_rec_table()` runs `DELETE FROM rec` on every refresh (`platform.py:383`).
+The `rec` table is therefore a snapshot of the current round only. There is no record
+anywhere of what any agent saw in any prior round.
+
+This makes "what did they see / not see / see and ignore" — the single most important
+analysis requirement — **currently unrecoverable**. Fixing it is the core
+instrumentation task (§4.2).
+
+### 2.5 The default feed is far too small
+
+`env.py:82-84` sets `refresh_rec_post_count=2`, `max_rec_post_len=2`,
+`following_post_count=3` — roughly 5 posts per refresh, and a recsys that only ever
+ranks a top-2 candidate pool per user. That is not a social media feed and leaves
+almost no surface for personalization to express itself. Must be raised (§4.1).
+
+### 2.6 Group chat is not direct messaging
+
+`create_group(agent_id, group_name)` takes only a name and creates the group with the
+creator as its sole member (`platform.py:1497-1527`). There is no invite, no
+recipient, no addressee anywhere in the schema. The only way in is `join_group`,
+where an agent adds *itself*, and `get_group_env` shows every agent *all* groups.
+
+Group chat is therefore an open-join public chat room — closer to a Discord server or
+subreddit than a DM. True 1:1 DMs cannot be expressed through the existing action set.
+See §7 for how this is handled.
+
+### 2.7 Assorted hazards found
+
+- **Module-global state.** `rec_sys_personalized_twh` keeps state in module globals
+  (`date_score`, `t_items`, `u_items`, `user_previous_post`, `user_profiles`) that
+  persist across calls and are cleared only by `reset_globals()` (`recsys.py:124`).
+  Two runs in one process would silently carry stale state from the first into the
+  second. **Every run must call `reset_globals()` at start.**
+- **`enable_like_score=True` is a trap.** That code path contains
+  `pdb.set_trace()` inside exception handlers (`recsys.py:564, 579`), which would
+  hang a headless run forever waiting on debugger input. Leave it `False`.
+- **Timestep ceiling.** TWHIN's recency score computes
+  `log((271.8 - age) / 100)`, which goes non-finite once a post ages past ~171
+  timesteps; the source comments a practical ceiling of ~90 (`recsys.py:469-472`).
+  Round counts must stay well under this.
+- **Off-by-one risk.** `rec_sys_personalized_with_trace` iterates
+  `range(1, len(rec_matrix))` and returns `len-1` rows, which can leave the final
+  agent with no recommendations. TWHIN does not appear to share this shape, but the
+  smoke test must explicitly verify that *every* agent receives a non-empty feed.
+- **TwHIN-BERT is not cached locally.** `Twitter/twhin-bert-base` (~560MB) will be
+  downloaded on first use, and `load_model` only checks for CUDA — on this Mac it
+  runs on **CPU**, not MPS.
+- **`generate_twitter_agent_graph` ignores the social network.** It reads the profile
+  CSV but uses only `user_char`, `username`, and `description`, never the
+  `following_agentid_list` column (`agents_generator.py:614-649`). Using it yields an
+  empty initial follow graph. `generate_agents` (line 34) does build the network.
+
+---
+
+## 3. Design principles
+
+1. **Zero diff to `oasis/`.** Everything lives in a new experiment folder, using
+   subclassing — the pattern established by `ShieldAgent` in Sim 3. Sim 1 Attempt 1
+   proved that editing shared engine files breaks things.
+2. **Never touch the tool-call response schema.** Sim 1 Attempt 1 broke tool-calling
+   completely (0/36 actions performed) by altering agent-facing structure. Prompt
+   content and platform internals are fair game; the action/tool schema is not.
+3. **No manual actions.** Every agent acts only through `LLMAction()`, every round,
+   driven entirely by its own persona. No scripted posts, no puppeted behavior.
+4. **Fail loud, not open.** Sim 3's shield silently failed open ~12.5% of the time and
+   polluted its own results. Any degradation of the recommendation algorithm must
+   raise, not silently substitute randomness.
+5. **State the algorithm precisely.** The run must record exactly which algorithm ran
+   with exactly which parameters, and assert it.
+6. **Smoke test before every full run.** Established project practice; caught 2 of 3
+   real bugs in Sim 3.
+
+---
+
+## 4. What gets built
+
+New folder: `examples/experiment/social_timeline/`
+
+### 4.1 `TimelinePlatform(Platform)`
+
+A subclass overriding `update_rec_table()`. `env.py:103` already accepts a `Platform`
+instance directly, so this requires no upstream change.
+
+Responsibilities:
+
+- Call `reset_globals()` at construction to clear TWHIN's module state.
+- Delegate recommendation to upstream `rec_sys_personalized_twh` **unchanged**, with
+  `enable_like_score=False`, so the algorithm remains exactly upstream TWHIN and
+  stays faithfully citable.
+- **Assert the algorithm actually ran** — verify the TwHIN model and tokenizer are
+  loaded and that recommendations are not degenerate. Raise on failure. This is the
+  §2.3 guard.
+- **Snapshot exposure into `rec_history` before `rec` is wiped** (§4.2).
+- Reject outsiders joining a 2-member group, so emergent DMs stay private (§7).
+
+Feed sizing, raised from the §2.5 defaults:
+
+| Parameter | Default | New | Rationale |
+|---|---|---|---|
+| `max_rec_post_len` | 2 | 30 | Candidate pool the recsys ranks per user |
+| `refresh_rec_post_count` | 2 | 8 | Algorithmic posts shown per refresh |
+| `following_post_count` | 3 | 4 | Posts from followees per refresh |
+
+Roughly 12 posts per feed. Deliberately moderate rather than maximal: Sim 1
+established that an 8B local model's tool-calling reliability degrades as prompts grow,
+and the feed is the bulk of the prompt. Final values confirmed in the smoke test.
+
+### 4.2 Exposure instrumentation — the `rec_history` table
+
+The fix for §2.4. Two additive tables created by our code, never by editing `oasis/`:
+
+```sql
+CREATE TABLE rec_history (
+    round      INTEGER,
+    user_id    INTEGER,
+    post_id    INTEGER,
+    rank       INTEGER,   -- position in the ranked feed
+    source     TEXT,      -- 'recsys' | 'following' | 'both'
+    score      REAL,      -- cosine similarity, diagnostic
+    PRIMARY KEY (round, user_id, post_id)
+);
+
+CREATE TABLE round_boundary (
+    round      INTEGER PRIMARY KEY,
+    started_at DATETIME
+);
+```
+
+`rec_history` accumulates rather than being wiped, giving a complete per-round record
+of who was shown what.
+
+`round_boundary` makes time-travel queries trivial without a separate graph-snapshot
+table: since `follow` already stores `created_at` per edge, *"the social graph as of
+round K"* is simply `SELECT * FROM follow WHERE created_at <= (SELECT started_at FROM
+round_boundary WHERE round = K)`. Before, after, and every round between come from one
+query.
+
+**On `score` and the "why".** Sim 1 established that an 8B model cannot reliably
+narrate genuine reasoning alongside structured tool calls, so we do not ask it to and
+do not treat any self-report as motive. Instead we log the mechanism: the cosine
+similarity that ranked the post, and which of the two feed sources surfaced it. This
+is a real, defensible answer to *why did this post reach this user* — the same answer
+a real platform's "why am I seeing this?" gives. The similarity is computed by our
+subclass over the same TwHIN embeddings for the (user, recommended-post) pairs already
+returned; it is **diagnostic metadata only and does not alter the algorithm**.
+
+Writes happen every round regardless of partial agent failures, so snapshots stay
+complete — a direct lesson from Sim 3, where one agent's timeout crashed a whole run.
+
+### 4.3 The driver script
+
+- All agents act every round via `LLMAction()`. No `ManualAction` anywhere.
+- Full 27-action set (§6).
+- Round count configurable, held well under the ~90-timestep TWHIN ceiling (§2.7).
+- Bootstraps naturally: round 1 has empty feeds, so agents mostly post; round 2
+  onward has content to react to. No seeding required.
+- One agent's LLM failure must not abort the round's `asyncio.gather`.
+- Records the exact algorithm name and every parameter into the run log, and asserts
+  the algorithm ran (§2.3, §3.5).
+
+### 4.4 Initial social graph — empty by design
+
+**The follow graph starts at zero edges.** No seeding, no pre-wired friendships.
+
+An earlier draft proposed seeding a homophily-weighted initial network, on the
+reasoning that the §1 scenario presumed existing friendships. That was an
+over-literal reading of an illustrative example, and it is rejected. Seeding the
+graph would be exactly the kind of world-staging that §3.3 forbids, and it would
+contaminate the most interesting available result: watching a social network
+assemble itself from nothing, purely out of agent choices.
+
+Consequences, accepted deliberately:
+
+- The "before" graph is empty. That is a legitimate and informative baseline — the
+  before/after comparison becomes *network formation*, not *network rewiring*.
+- The follow-injection feed source (§2.2) contributes nothing in early rounds and
+  grows in influence as agents choose to follow each other. The relative weight of
+  algorithmic versus social discovery therefore **shifts over the run**, which is
+  itself a measurable finding rather than a defect — and `rec_history.source` (§4.2)
+  records exactly that shift round by round.
+- Multi-hop propagation chains of the §1 kind can only appear once agents have built
+  enough graph to support them. Whether, when, and how deep they appear is an
+  empirical result.
+
+Agents are generated from the richer Reddit personas (`bio`, `persona`,
+`interested_topics` — already well-formed for embedding, see §5) rather than the
+Twitter CSV's thinner `user_char`. Only the personas are initialized; the network is
+not.
+
+### 4.5 Analytics
+
+Reads the database and produces per-agent and pairwise detail:
+
+- **Per agent:** every action taken, with type, target, round, and counts by type.
+- **Exposure ledger:** for each agent — posts seen and acted on, posts seen and
+  ignored, and posts never seen. This is the §4.2 payoff.
+- **Pairwise interaction matrix:** who acted on whose content, how many times, by
+  action type, and how many times A was exposed to B's content (the exposure-frequency
+  term the motivating scenario turns on).
+- **Graph deltas:** follower/following counts per round, edges added and removed.
+- **Propagation traces:** paths matching the motivating scenario — A exposed to B's
+  content, then later interacting with C, with the exposure count and similarity that
+  preceded it.
+
+### 4.6 Graph visualization
+
+A self-contained Artifact: force-directed web diagram, nodes as agents, follow edges,
+edge weight by interaction volume, scrubable by round with before/after as the
+endpoints. No external assets.
+
+---
+
+## 5. Personas — MatrAIx assessment
+
+The existing 36 personas (`data/reddit/user_data_36.json`) carry `realname`,
+`username`, `bio`, `persona`, `age`, `gender`, `mbti`, `country`, `profession`, and
+`interested_topics`, with genuinely topical bios (e.g. *"Passionate about hospitality
+& tourism. Exploring the world one destination at a time."*).
+
+Since the interest-based recsys embeds **bio text**, these are already in exactly the
+form the algorithm consumes. MatrAIx-Persona-8B's 1,290 categorical dimensions would
+have to be collapsed back into a bio sentence to be usable at all.
+
+MatrAIx's real value is **scale and demographic diversity beyond 36 agents** (1M
+personas, MIT licensed, `MatrAIx2026/MatrAIx_Persona_1M_Public_Release`). That makes
+it a clean fast-follow with its own spec once this engine works — not a blocker, and
+not on this build's critical path.
+
+---
+
+## 6. Action set — 27 actions
+
+**Social (22):** `CREATE_POST`, `CREATE_COMMENT`, `LIKE_POST`, `UNLIKE_POST`,
+`DISLIKE_POST`, `UNDO_DISLIKE_POST`, `LIKE_COMMENT`, `UNLIKE_COMMENT`,
+`DISLIKE_COMMENT`, `UNDO_DISLIKE_COMMENT`, `REPOST`, `QUOTE_POST`, `REPORT_POST`,
+`FOLLOW`, `UNFOLLOW`, `MUTE`, `UNMUTE`, `SEARCH_USER`, `SEARCH_POSTS`, `TREND`,
+`REFRESH`, `DO_NOTHING`
+
+**Group (5):** `CREATE_GROUP`, `JOIN_GROUP`, `LEAVE_GROUP`, `SEND_TO_GROUP`,
+`LISTEN_FROM_GROUP`
+
+**Excluded, with reasons:**
+
+- `EXIT`, `SIGNUP`, `UPDATE_REC_TABLE` — system-internal plumbing, not user behavior.
+- `PURCHASE_PRODUCT` — requires the e-commerce product table; a different experiment.
+- `INTERVIEW` — a researcher probe injected from outside, not an agent's own social
+  behavior. Including it would contaminate the free-behavior requirement (§3.3).
+
+---
+
+## 7. Direct messaging — resolution
+
+Per §2.6, OASIS cannot express a targeted DM: there is no recipient field, and
+`create_group` cannot invite anyone.
+
+A pre-seeded 2-person group was considered and **rejected**, because seeding who talks
+to whom is exactly the manual intervention §3.3 forbids. Building a custom `send_dm`
+action was also rejected: it would require a new `ActionType` and a change to the
+tool-call schema, which is what broke Sim 1 Attempt 1 (§3.2).
+
+**Resolution:** the five group actions are available and agents are free to create and
+join groups on their own. Analytics classifies a 2-member group as a de-facto DM and
+larger ones as group chat, and both appear in the interaction graph as distinct edge
+types. Whether private 1:1 conversation emerges is then a genuine empirical finding
+rather than something we engineered.
+
+**Stated limitation:** because `create_group` has no targeting, emergent true 1:1 DMs
+may be rare or absent. This will be reported honestly either way, not quietly dropped.
+
+---
+
+## 8. Risks
+
+| Risk | Mitigation |
+|---|---|
+| Silent algorithm degradation (§2.3) | Hard assertion that TWHIN loaded and ran; fail loud |
+| Stale module globals across runs (§2.7) | `reset_globals()` at every run start |
+| An agent receives an empty feed (§2.7) | Smoke test asserts every agent's feed is non-empty |
+| 27 actions destabilize 8B tool-calling | Validate action names as in Sim 1; measure the performed-action rate in the smoke test against Sim 1's ~32/36 baseline |
+| Prompt growth degrades tool-calling | Moderate feed sizing (§4.1), tuned in smoke test |
+| TwHIN-BERT download / CPU-only inference | Verified in smoke test before any full run |
+| One agent's failure aborts a round | Per-agent exception isolation in the gather |
+| Long runtimes | `OLLAMA_KEEP_ALIVE=60m` (established project habit) |
+| Exceeding TWHIN's ~90-timestep ceiling | Round count capped well below |
+
+---
+
+## 9. Rollout — staged, smallest first
+
+**Standing rule for this build: no full-scale runs until the small ones are clean.**
+Every stage below is a gate. Bugs get found at the cheapest scale that can expose
+them, never in a multi-hour run. Sim 3 burned roughly four full runs (~4 hours) on
+three bugs that a 20-minute smoke test would have caught; that is not repeated here.
+
+| Stage | Scale | Gate — must all pass before advancing |
+|---|---|---|
+| 0. Dependency check | No simulation at all | TwHIN-BERT downloads, loads, and embeds on CPU |
+| 1. Plumbing | Tiny (~4 agents, 2 rounds) | `rec_history` and `round_boundary` populate correctly; every agent gets a non-empty feed; algorithm assertion fires on a deliberately broken config |
+| 2. Behavior | Small (~8 agents, 3-4 rounds) | 27-action set does not degrade tool-calling vs. Sim 1's ~32/36 baseline; agents use a genuine spread of actions, not just one; follows actually get created |
+| 3. Dynamics | Moderate | Feed composition shifts as the graph grows (§4.4); per-round wall-clock measured; round count and feed sizing tuned from real timings |
+| 4. Analysis pipeline | Reuses stage 3 data | Every §4.5 output is produced and manually spot-checked against the raw database |
+| 5. Full run | Decided from stage 3 timings | Only after 0-4 are clean |
+| 6. Contrast run | Optional | Hot-score, same config. Requires `reset_globals()` between runs (§2.7) |
+
+Agent counts and round counts above are starting points, not commitments — each stage
+uses the smallest configuration that can still exercise the behavior under test.
+Sim 3's `"rank": null` bug is the cautionary case: it needed *enough* LLM calls to
+surface a rare model output, so "smallest" means smallest-that-still-exposes-the-bug,
+not trivially small.
+
+---
+
+## 10. Out of scope
+
+- **The shield / Bengals-style personalization feedback.** Explicitly deferred by the
+  user. The `rec_history` table built here is the substrate a future shield would need,
+  since it records what each user was exposed to and engaged with.
+- **MatrAIx persona integration** (§5) — separate fast-follow spec.
+- **E-commerce and interview actions** (§6).
+- **Scaling past the tuned agent count** — the 100/1000/10000 upstream configs remain
+  a later thread.
+
+
+---
+
+## 11. Implementation deltas
+
+Recorded after building. The design above is left as originally written; this
+section states where reality diverged and why. Full evidence in
+`RESEARCH_LOG.md` (Part I).
+
+### 11.1 The embedding path had to be replaced (D-13)
+
+§4.1 planned to delegate to upstream `rec_sys_personalized_twh` unchanged, for
+fidelity. That proved impossible. `process_recsys_posts.py:33` returns
+`outputs.pooler_output`, but TwHIN-BERT's checkpoint carries **no trained
+pooler**, so those weights are randomly re-initialised on every process launch.
+
+Measured consequences: two processes produced different embedding spaces
+(weight fingerprints `-6.18` vs `+6.46`), making replication structurally
+meaningless; and discrimination collapsed to a within-vs-across-topic margin of
+`+0.0008` in one process — noise. Mean-pooling `last_hidden_state` gives
+`+0.0475` and is bit-identical across processes.
+
+The ranking therefore lives in `TimelinePlatform`, following TWHIN's formula
+with two stated deviations: mean pooling, and per-pair score capture (which
+upstream does not expose but `rec_history` requires).
+
+### 11.2 The action set is 22, not 27 (D-14)
+
+§6 enabled all 27 actions. All 27 are implemented and verified working
+(`test_actions.py`, 16/16 mechanical checks). But running with them produces a
+*worse* social simulation on an 8B model, measured in a controlled A/B:
+
+| | 27 actions | 22 actions |
+|---|---|---|
+| action_rate | 0.469 | **0.812** |
+| comments | 0 | 9 |
+| exposure events | 77 | 148 |
+
+The cause is not tool count but a prompt hijack (F-14): `to_text_prompt()`
+renders `$groups_env` **before** `$posts_env` on every turn *regardless of
+`available_actions`*, so one agent creating a group put a wall of group
+imperatives above the feed in every other agent's prompt, compounding with each
+new group message. Group actions remain switchable via `--no-groups`; they are
+simply off by default.
+
+This also settles §7 empirically: 2-member groups **do** emerge unprompted (2
+groups, 6 messages in R-5), so DMs are observable — but only at the cost of
+suppressing the feed behaviour that is the point of the simulation. Reported as
+a limitation, as §7 committed to doing.
+
+### 11.3 A prompt-content layer was required (new)
+
+§4.3 assumed the stock environment prompt was usable. It was not: three
+properties of it actively suppressed the behaviour being studied.
+
+`TimelineEnvironment` changes prompt **content** only — never the tool-call
+schema (§3.2) — and does four things: puts the feed first; names who you follow
+instead of reporting a bare count (upstream ships both as `# TODO` stubs);
+exposes `author_id` per post, without which `follow()` is uncallable from a
+feed showing only usernames; and replaces the double-negative *"Do not limit
+your action in just `like` to like posts"* with positive guidance.
+
+Measured effect at identical scale: follow edges 1 → 5, likes 0 → 6, and
+duplicate posts eliminated (8/8 distinct, from 10/14).
+
+### 11.4 The initial graph is empty (D-10)
+
+§4.4 originally proposed seeding a homophily-weighted network. Reversed: the
+motivating scenario was an illustration, not a fixture. The graph starts at
+zero edges and self-assembles. Confirmed working — R-7 produced a genuine hub
+(agent 3, followed by four others after three exposures each) with nothing
+staged, and `rec_history.source` shows the algorithmic/social feed balance
+shifting as the graph grows, exactly as §4.4 predicted.
+
+---
+
+# Part 12 — Research agenda (2026-09-11)
+
+*Was `docs/superpowers/specs/2026-09-11-research-agenda.md`. Merged into this file 2026-10-02, verbatim; original title: “Research agenda — what to study next, and why”.*
+
+*Written 2026-09-11, overnight. Status: candidate directions, nothing approved.
+Supersedes nothing; the Sim 4 results stand as published.*
+
+**The constraint this document is written against.** A run at the current design
+point costs about 2.8 hours and the machine is one M2 Max. Everything below is
+priced in runs. Anything needing more than about forty runs is not a project,
+it is a wish.
+
+---
+
+## 0. What changed tonight, and why it reorders everything
+
+F-94. Slot position is worth an odds ratio of **2.15** after conditioning on the
+ranker's own relevance score, replicating in 9 of 9 runs. Tightening the score
+control from 5 bins to 80 does not weaken it.
+
+Put that beside the three results already published, all measured on the same
+runs:
+
+| what was measured | odds ratio | what kind of thing it is |
+|---|---|---|
+| network vs discovery | 3.07 | **structural** — who you follow |
+| repeat exposure | 2.62 | **structural** — how often you are shown it |
+| slot position | 2.15 | **structural** — where it sits on the screen |
+| content similarity | 1.14, CI spans 1 | **semantic** — what the post is about |
+
+**Everything structural works. The one semantic thing does not.** That is not
+four findings. That is one finding stated four times, and it has a name.
+
+---
+
+## 1. FLAGSHIP — Is the recommender doing anything, or is it only allocating attention?
+
+### The claim to test
+
+A recommender system is built to match content to people. This one does not
+detectably do that: cosine similarity predicts nothing, and its composite score
+does not explain the position effect. What it does do is decide *where things
+go*, and where things go turns out to matter enormously.
+
+**Hypothesis: the ranker's contribution to engagement is almost entirely the
+allocation of attention, not the matching of content. Its ordering could be
+replaced by an arbitrary one with little loss.**
+
+If true, this is a strong and slightly uncomfortable claim about
+recommender systems in LLM-agent societies, and it is testable in one run.
+
+### The experiment
+
+Three arms, identical in every other respect:
+
+| arm | feed construction | what it isolates |
+|---|---|---|
+| **control** | rank as now | the status quo |
+| **shuffled** | rank as now, then randomise the order before display | ordering, holding *selection* fixed |
+| **random-select** | fill slots by uniform sample from the candidate pool | selection, holding nothing fixed |
+
+The shuffled arm is the sharp one. The same twelve posts reach the same agent;
+only their order changes. Predictions, stated in advance:
+
+- If the ranker's ordering carries real information the score does not capture,
+  shuffling should **reduce total engagement** and flatten the slot gradient.
+- If position is pure attention, shuffling should leave total engagement
+  **roughly unchanged** while flattening the per-slot gradient — the same
+  engagement, redistributed.
+
+Those two outcomes are distinguishable and both are interesting. There is no
+null result here, which is the property a good experiment has.
+
+### Cost
+
+At the measured run-level noise floor of 0.52pp, a configuration comparison
+needs 2 to 5 runs per arm. Three arms, four runs each, twelve runs, about
+**34 hours of machine time** — three overnights. Feasible this month.
+
+### Why nobody has done it
+
+Both OASIS-derived projects surveyed (arXiv 2507.14660, arXiv 2511.06448)
+disable the follow-graph feed entirely and run recommender-only worlds, and
+neither records feed position at all. The exposure ledger that makes this
+measurable is not standard equipment. It is ours.
+
+### What it needs built
+
+One flag, `--shuffle-feed`, applied after ranking and before display, plus a
+manifest field recording it. The exposure ledger already stores the displayed
+position, so the analysis is F-94's, unchanged.
+
+---
+
+## 2. SECOND STRAND — How much memory does it take to stop broadcasting?
+
+### The claim to test
+
+An agent with no memory between rounds engages at 2.30 % and its actions are
+almost entirely `create_post`. An agent with full memory engages at 6.94 % and
+likes and replies. Same model, same personas, same feed (F-88).
+
+**Memory is what converts a speaker into a participant.** Nobody has asked where
+the threshold is, or whether there is one.
+
+### The experiment
+
+Memory window as a dose: 0, 1, 2, 3, 5 rounds, and unbounded. Six arms, three
+replicates each, 18 runs — but the short-memory arms are *cheap*, because short
+context is fast. The zero arm runs in 55 minutes against 170. Estimated
+**28 hours** for the whole sweep, less than the flagship.
+
+Outcomes: engagement rate, the create_post / react ratio, and whether the curve
+is gradual or has a knee.
+
+### Why it is interesting beyond the simulation
+
+It is a claim about what memory *does socially* rather than computationally, and
+it is the kind of thing that generalises past this system.
+
+### What it needs built
+
+`--fresh-context` already exists and is the zero arm. A windowed version is a
+small generalisation of it.
+
+---
+
+## 3. THIRD — Does personalisation destroy the persona?
+
+Sharpest form: a strongly personalised feed shows each agent what it already
+likes, so every decision collapses to "react to what I was fed" and the persona
+stops doing work. Turn personalisation down and the persona has to carry it.
+
+**If that is right, the recommender does not amplify identity. It replaces it.**
+
+Blocked on measurement: it needs a way to score whether prose is plausibly a
+40-year-old ESTJ, which is S-2 in the deferred queue and is unsolved. Park it
+until the flagship is done; the shuffled arm produces exactly the data it needs.
+
+---
+
+## 4. What each of these is NOT
+
+- Not a correction of anyone else's paper. All three start from this system.
+- Not a methods paper. Each has a phenomenon at its centre.
+- Not dependent on scale. Every one is answerable at 36 agents, which is the
+  only scale this hardware can replicate at.
+
+---
+
+## 5. Sequencing, if all three run
+
+    weeks 1-2   flagship, three arms x 4 runs          12 runs, ~34 h
+    weeks 3-4   memory dose-response, six arms x 3     18 runs, ~28 h
+    week 5      re-analysis; persona scoring if the flagship supports it
+    week 6+     whichever of the two produced the sharper result, extended
+
+The flagship goes first because it is cheaper to interpret, because F-94 already
+half-supports it, and because it produces the data the third study needs.
+
+---
+
+## 5b. How to price an arm
+
+*Rewritten three times on the night of 2026-09-11. The first version asserted a
+cost-versus-engagement law, refuted by its own data. The second was built on a
+sweep that turned out to be truncated (B-28). This is the version that survived.*
+
+### The one rule that matters before any of the numbers
+
+**Start the inference server with the context length set explicitly, and verify
+it.** B-28: an entire six-point sweep was run at Ollama's 4,096-token default,
+every prompt was truncated, the feed was the part cut, and engagement fell from
+6.8 % to 2.5 % **while the wall clock improved**. It read as a clean scaling
+result for four hours.
+
+    OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve
+
+This is now enforced: `check_deps.py` fails below 8,192 and `run_simulation.py`
+refuses to start and records the server's real window in every manifest. But the
+habit matters more than the guard, because **a truncated run does not fail. It
+gets faster and quietly stops being the experiment.**
+
+### What is measured, at the correct context
+
+| agents | plateau | per agent-turn |
+|---|---|---|
+| 12 | 276.0 s | 23.0 s |
+| 24 | ~537 s | 22.4 s |
+| 36 (the 9-run bank) | 793 s | 22.0 s |
+
+**Per-agent-turn cost is flat at ~22.5 s and cost is linear in agent count.**
+The exponent measured across 12-99 agents is **1.081** (R² 0.998) -- that sweep
+was truncated, so read its *shape* and take the *level* from the table above.
+
+**Round count:** a three-round ramp, then flat (F-81), and the ramp is the
+context window filling (F-86). Both confirmed by B-28 from the other side: at a
+4,096 window the ramp vanishes because the window fills in one round.
+
+    wall clock  ~=  agents x rounds x ~22.5 s     after the ramp
+
+At 36 x 15 that is the bank's observed **170 minutes**, which is the number to
+budget with.
+
+### What is NOT measured, and must not be assumed
+
+**There is no usable cost-versus-engagement relationship.** Within a sweep,
+engagement varies threefold while per-agent cost does not move. A line fitted
+across families gives R² 0.595 with one point running backwards.
+
+### The rule that survives
+
+Price arms in **engagement events per hour**, not wall clock. F-88 is the
+standing example: `--fresh-context` is three times faster, returns a third of the
+engagement, and yields 1.02x the evidence per hour. **An arm that looks cheap is
+usually producing less of the thing being measured** -- which is exactly what
+B-28 was, accidentally.
+
+### What that does to the two proposals above
+
+**The flagship is unaffected and its costing stands.** Shuffling changes where
+posts land, not what is shown. Budget all three arms at ~2.8 hours per run at 36
+agents; twelve runs is about 34 hours.
+
+**The memory sweep's costing in section 2 remains wrong and optimistic.** It
+priced the short-memory arms as cheap because fresh-context runs in a third of
+the time. It does, but F-88 shows it engages a third as much and F-95 shows it
+also weakens the connection effect from 3.07 to 2.05. Those arms need more
+replicates for the same precision. **Re-plan in events per hour before
+committing a night to it.**
+
+## 6. The Spark machine, when it arrives## 6. The Spark machine, when it arrives## 6. The Spark machine, when it arrives
+
+128 GB of RAM changes which constraint binds. Today the ceiling is GPU memory:
+four inference slots at 11 GB, and eight slots costs five times the variance
+because the machine starts swapping. Questions to answer on day one there, in
+this order:
+
+1. **Is there a GPU, and what is it?** If Spark is CPU-only, none of the local
+   optimisation work transfers — the bottleneck moves from memory bandwidth to
+   cores, and the right serving stack changes.
+2. **Does more RAM buy more slots?** The memory formula is `4.9 GB + 1.55 GB per
+   slot`. At 128 GB that is ~79 slots by arithmetic. It will not hold — compute
+   binds first — but the crossover is worth measuring, because it sets the
+   maximum useful concurrency.
+3. **Does vLLM run there?** Both surveyed projects use vLLM with continuous
+   batching and treat 32 to 40 concurrent requests as routine. That is the single
+   biggest available speedup and Ollama does not offer it.
+
+**What to prepare now, so no time is wasted there.** The run driver already takes
+concurrency as a flag and records the server's actual state in the manifest.
+What is missing is an inference backend abstraction: today the Ollama URL is
+threaded through directly. One interface with two implementations, Ollama and an
+OpenAI-compatible endpoint, makes the move a config change rather than a port.
+That is maybe a day's work and it can be done while runs are going.
+
+---
+
+## 7. Ideas considered and set aside
+
+- **Ranking interventions against harmful spread.** Strong, but it requires
+  building a harm model this project does not have, and it lands squarely in the
+  surveyed lab's territory.
+- **Activation rate as a variable.** Genuinely unexamined — one surveyed project
+  activates 2 % of agents per step, the other 100 %, and neither asks whether it
+  changes the conclusion. Cheap to test. Held back only because it is a
+  methodological question rather than a phenomenon, and it would strengthen the
+  flagship rather than stand alone.
+- **The cost-of-realism frontier.** We have the only instrumented OASIS and could
+  write the paper nobody else can. It is a methods contribution and reads as one.
+  Better as a section of whatever else we publish than as the thing itself.

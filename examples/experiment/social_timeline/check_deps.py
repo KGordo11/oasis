@@ -26,7 +26,7 @@ Checks:
 Run:  oasis-env/bin/python examples/experiment/social_timeline/check_deps.py
 Exits non-zero on any failure.
 
-See RESEARCH_LOG.md (Part I) section 9 (Q-1) and the design spec section 9, stage 0.
+See RESEARCH_LOG.md (Part I) section 9 (Q-1) and the design spec (RESEARCH_LOG.md Part 11) section 9, stage 0.
 """
 
 import os

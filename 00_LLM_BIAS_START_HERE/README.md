@@ -10,21 +10,13 @@ Everything for this project is reachable from this folder. The real files stay w
 | In this folder | What it is |
 |---|---|
 | [`test6_two_ai/`](test6_two_ai/) | **The latest test, only the files it used**: code, results, post banks, every run, logs |
-| [`LOG.md`](LOG.md) | The one log for everything (Sims 1-4 + LLM Bias). LLM Bias is Part 9 (every decision LD-, finding LF-, run); Part 9 §0 = current status |
-| [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md) | What every file and column means |
+| [`../RESEARCH_LOG.md`](../RESEARCH_LOG.md) | **The one log for everything.** LLM Bias = Part 9 (§0 = current status), every file and column = Part 10 |
 | [`all_code/`](all_code/) | Every program from all six tests (`examples/experiment/llm_bias/`) |
 | [`all_data/`](all_data/) | Every data file from all six tests (`data/llm_bias/`) |
 
-## The pages (open in a browser)
+## The pages
 
-| Page | What's on it |
-|---|---|
-| [Inside the Two-AI Feed](https://claude.ai/artifact/G9ofxKT7gC2M2fdezFcKFU) | How Test 6 works end to end: the machine, users, posts, one vote traced through every layer, every file, every command, all code |
-| [The Two-AI Feed](https://claude.ai/artifact/HPmkfevmeC3LTYWhN4citW) | All Test 6 results: every breakdown, why it happens, browsers for every post and every user |
-| [How the Two-AI Reddit Test Works](https://claude.ai/artifact/P9bXKUyGjtaJWJyiVqh2Sg) | The 5th-grade guide for a professor, with all the code (Claude Doc) |
-| [Do AIs Favour Their Own Writing?](https://claude.ai/artifact/GjK4JnpmeZkEREoWoDkco5) | The report on all six tests (Claude Doc; Test 6 has its own tab) |
-| [Scroll Test](https://claude.ai/artifact/PEMNidbCam72v6qKC3GNBx) | The older page for Tests 2–5 |
-| [GitHub, branch llm-bias](https://github.com/KGordo11/oasis/tree/llm-bias) | Everything above, saved |
+All web pages were deleted on 2026-10-02 (Gordon). Everything they showed is in `RESEARCH_LOG.md`.
 
 ## Test 6 in one table (30 Sep – 1 Oct 2026)
 
@@ -79,8 +71,7 @@ Not part of any result: `postbank_s900.jsonl` (a smoke test), `bench_*` worlds a
 ```
 oasis/
 ├── 00_LLM_BIAS_START_HERE/        ← this folder (shortcuts only)
-├── RESEARCH_LOG.md                 the one log (LLM Bias = Part 9)
-├── LLM_BIAS_DATA_DICTIONARY.md     every file and column
+├── RESEARCH_LOG.md                 the one log (LLM Bias = Part 9, data dictionary = Part 10)
 ├── examples/experiment/llm_bias/   all LLM Bias code
 ├── data/llm_bias/                  all LLM Bias data
 │   ├── two_ai/                     Test 6 results (CSVs, analysis)

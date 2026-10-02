@@ -1745,3 +1745,26 @@ from the double difference, computed correctly). Fixed in the report doc with a 
 at the token limit (then retried). Fixed in both docs.
 Updated: results page v12, report doc tab Test 6 (text, 3 charts, design table) + main-tab table row, professor guide
 (all numbers, chart, files, step 9 commands for rounds 12-15).
+
+### LF-50 — LD-18 deep breakdown (analyze_deep.py, 2026-10-02 00:40) + the two new pages
+
+* **Broad, not a few users:** 85 of 100 users show an own-AI upvote boost, 10 the opposite, 5 zero (mean +6.9, median
+  +6.8; sign test p ≈ 6 × 10^-16). 84 of 100 get fewer downvotes on their own AI's posts.
+* **Voting habit:** generous voters +0.6 [−2.6, +3.9] (ceiling: they upvote 90–98 % of everything), typical +9.2
+  [+4.5, +13.7], harsh +10.6 [+3.9, +16.5].
+* **Interest:** larger where the user doesn't care: −2 +10.9 [+4.9, +17.6], −1 +10.0, 0 +5.6, +1 +5.3, +2 +6.4. The
+  last subreddit of the scroll (always the least liked) +9.4. Reading: when the persona gives no strong reason, the
+  AI's own taste decides more.
+* **Subreddits:** farming +12.1, cooking +9.0, cars +7.5 [−0.1, +15.7], tech +3.3 and finance +2.6 (intervals include 0).
+* **Robustness:** leave-one-round-out +6.4 to +7.5; rounds 1-7 +7.1, rounds 8-15 +6.7.
+* **Style explains none of it:** 14 post features (length, sentences, words/sentence, paragraphs, !, ?, I/me, you,
+  markdown, list lines, title words, question title, casual opener, long words) predict upvotes (R² ~ what each crowd
+  rewards differs: gemma3 crowd punishes length/long words, rewards ! and casual openers; gemma4 crowd rewards long
+  sentences, punishes question titles) but account for −0.5 of the +6.9 boost; +7.5 remains after them.
+* **Different tastes:** crowds' post scores correlate 0.23; agreement 67.9 % (κ 0.17), by subreddit 62.5-77.4 %.
+* **Reasons:** gemma4 reasons 2.9 words on average, gemma3 18.2; own-vs-other words are subject words echoed from posts.
+* Pages: results page rebuilt deep (v13, same URL HPmkfevmeC3LTYWhN4citW, post + user browsers);
+  new "Inside the Two-AI Feed" https://claude.ai/artifact/G9ofxKT7gC2M2fdezFcKFU (pipeline diagram, one post and one
+  vote traced through every layer with a live replay that reproduced the post word for word and the vote, OASIS rows,
+  user 0's full scroll recomputed and matched to the log 50/50, every file with sizes, every command, git history,
+  what went wrong, all code with exact line links). Generators: make_two_ai_page.py, make_inside_page.py.

@@ -254,6 +254,19 @@ by_topic, agreement (same user + same post, both AIs: same_choice_%, kappa, cros
 top10 (own-AI posts in each crowd's top 10 per round), timing, posts (counts, duplicates, words, retries),
 nothing (per-AI failure / "nothing" report), slots.
 
+### Deep breakdown files (from `analyze_deep.py`, LF-50)
+- `deep.json` — every breakdown on the results page: `overall`, `by_topic`, `by_interest`, `by_voting`, `by_scroll_rank`,
+  `by_half` (each: up/down double difference in points with 95 % users×slots bootstrap, 1,000 draws, and the four cell
+  rates), `leave_one_round_out`, `leave_one_topic_out`, `per_user` (each user's double difference; histogram; sign test),
+  `by_position`, `up/down/nothing_by_interest`, `agreement` (crosstab, by topic, per-user), `features_by_author` +
+  `what_each_crowd_rewards` (post-level OLS of upvote rate on 14 standardized features + round, clustered by round) +
+  `style_explains` (double difference of predicted vs residual rates), `reasons` (top words; own-vs-other log ratios),
+  `posts_loved/hated/disputed` (score = upvotes − downvotes per crowd), `latency`, `post_seconds`, `post_attempts`, `users`.
+- `deep_posts.json` — one record per shown post: id, round r, topic t, slot s, author a, title ti, body b, words w, job
+  card br, votes v[crowd] = [up, down, nothing], sample reasons rs[crowd] = [[action, user, reason], …].
+- `deep_users.json` — one record per user: profile, persona text, own-AI boost, agreement, and `acts[crowd]` = one
+  character per post in `deep_posts.json` order (u = upvote, d = downvote, n = nothing, . = not shown).
+
 Also: `data/llm_bias/speed_pick.json` (the speed test that chose the two AIs), `two_ai_campaign.log`,
 `two_ai_after.log`, `two_ai_checks.txt` (check_world.py per round), raw records in `worlds/two_r*/`.
 

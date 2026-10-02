@@ -1,0 +1,542 @@
+<meta charset="utf-8">
+<title>The Two-AI Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+:root{
+  --bg:#F4F5F6;--paper:#FFFFFF;--ink:#1A1A1B;--ink2:#474D55;--mute:#757D87;--rule:#DADFE4;--soft:#EBEEF1;
+  --a:#0E7C66;--b:#8E3B8E;--a-soft:#D6EEE8;--b-soft:#F0DEF0;--up:#D9480F;--down:#3B5BDB;--none:#98A1AB;
+  --band:rgba(14,124,102,.14);--zero:#8C949E;--hl:#FFF3BF;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#111315;--paper:#1A1D21;--ink:#E7E9EC;--ink2:#B4BBC3;--mute:#8A929B;--rule:#2D3238;--soft:#22262B;
+  --a:#3CC4A3;--b:#D68AD6;--a-soft:#16362F;--b-soft:#38213D;--up:#FF7A45;--down:#7D98FF;--none:#6A727C;
+  --band:rgba(60,196,163,.18);--zero:#6A727C;--hl:#4A4220;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#111315;--paper:#1A1D21;--ink:#E7E9EC;--ink2:#B4BBC3;--mute:#8A929B;--rule:#2D3238;--soft:#22262B;
+  --a:#3CC4A3;--b:#D68AD6;--a-soft:#16362F;--b-soft:#38213D;--up:#FF7A45;--down:#7D98FF;--none:#6A727C;
+  --band:rgba(60,196,163,.18);--zero:#6A727C;--hl:#4A4220;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--serif);margin:0}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;max-width:1180px;margin:0 auto;padding-inline:20px}
+.toc{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;max-height:100vh;overflow:auto;padding-block:36px;font:13.5px/1.35 var(--sans)}
+.toc b{display:block;font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:11.5px;color:var(--mute);margin-bottom:10px}
+.toc a{display:block;color:var(--ink2);text-decoration:none;padding:4px 0 4px 10px;border-left:2px solid var(--rule)}
+.toc a:hover{color:var(--ink);border-left-color:var(--a)}
+main{min-width:0;padding-block:36px 90px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}.toc{position:static;max-height:none;padding-block:20px 0;columns:2}.toc a{break-inside:avoid}}
+header .eyebrow{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+h1{font:700 42px/1.08 var(--sans);margin:10px 0 12px;text-wrap:balance;max-width:24ch}
+h2{font:700 27px/1.2 var(--sans);margin:64px 0 12px;border-top:2px solid var(--ink);padding-top:14px;text-wrap:balance;scroll-margin-top:12px}
+h3{font:600 19px/1.3 var(--sans);margin:34px 0 8px;text-wrap:balance;scroll-margin-top:12px}
+p{margin:0 0 14px;max-width:70ch}
+ul,ol{max-width:70ch;padding-left:22px}li{margin:5px 0}
+a{color:var(--a)}a:focus-visible,button:focus-visible,select:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+.lede{font-size:19px;line-height:1.55;max-width:66ch}
+.answer{background:var(--paper);border:1px solid var(--rule);border-left:5px solid var(--a);padding:18px 22px;margin:22px 0}
+.answer p:last-child{margin:0}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0 6px}
+.stat{background:var(--paper);border:1px solid var(--rule);padding:12px 14px}
+.stat .k{font:600 11.5px/1.2 var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.stat .v{font:500 26px/1.15 var(--mono);margin-top:6px;font-variant-numeric:tabular-nums}
+.stat .s{font:13px/1.35 var(--sans);color:var(--ink2);margin-top:4px}
+.num,.mono{font-family:var(--mono);font-size:.9em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ai-a{color:var(--a);font-weight:600}.ai-b{color:var(--b);font-weight:600}.up{color:var(--up)}.down{color:var(--down)}
+.plain{background:var(--soft);padding:10px 14px;font-size:16px;max-width:70ch;margin:0 0 16px}
+.plain::before{content:"In plain words: ";font:600 13px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.why{border-left:3px solid var(--b);padding:2px 0 2px 14px;margin:0 0 16px;max-width:70ch}
+.why::before{content:"Why this happens";display:block;font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--b);margin-bottom:4px}
+figure{margin:20px 0 28px;background:var(--paper);border:1px solid var(--rule);padding:16px 16px 12px}
+figcaption{font:14px/1.5 var(--sans);color:var(--ink2);margin-top:10px;max-width:none}
+figcaption b{color:var(--ink)}
+svg{display:block;width:100%;height:auto;overflow:visible}
+svg text{font-family:var(--mono);font-size:11px;fill:var(--ink2)}
+svg .lab{font-family:var(--sans);font-size:12.5px;fill:var(--ink)}
+svg .labb{font-family:var(--sans);font-size:12.5px;fill:var(--ink);font-weight:600}
+svg .grid{stroke:var(--rule);stroke-width:1}
+svg .zero{stroke:var(--zero);stroke-width:1.2;stroke-dasharray:3 3}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font:13px/1.3 var(--sans);color:var(--ink2);margin-bottom:8px}
+.sw{display:inline-block;width:11px;height:11px;margin-right:6px;vertical-align:-1px}
+.tbl{overflow-x:auto;margin:12px 0 22px}
+table{border-collapse:collapse;font:14px/1.4 var(--sans);font-variant-numeric:tabular-nums;width:100%}
+th,td{padding:7px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font-weight:600;color:var(--ink2);font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+tr.hl td{background:var(--hl)}
+details{margin:10px 0 18px}summary{cursor:pointer;font:600 14px var(--sans);color:var(--a)}
+.formula{font:14.5px/1.6 var(--mono);background:var(--soft);padding:12px 14px;overflow-x:auto;margin:10px 0 16px;white-space:pre}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:700px){.twocol{grid-template-columns:1fr}h1{font-size:33px}}
+.box{background:var(--paper);border:1px solid var(--rule);padding:14px 16px}
+.box h4{font:600 13px var(--sans);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:13px var(--mono);background:var(--soft);padding:3px 8px}
+.browser{background:var(--paper);border:1px solid var(--rule);padding:16px}
+.controls{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px;font:14px var(--sans);align-items:center}
+select{font:14px var(--sans);padding:6px 8px;background:var(--bg);color:var(--ink);border:1px solid var(--rule);max-width:100%}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px}
+@media (max-width:760px){.pair{grid-template-columns:1fr}}
+.post{border:1px solid var(--rule);padding:12px 14px;background:var(--bg);min-width:0}
+.post .who{font:600 12px/1 var(--sans);letter-spacing:.08em;text-transform:uppercase;margin-bottom:8px}
+.post h4{font:600 16px/1.3 var(--sans);margin:0 0 6px}
+.post .body{font-size:14.5px;line-height:1.55;max-height:230px;overflow:auto;white-space:pre-wrap;color:var(--ink2)}
+.votes{display:grid;grid-template-columns:auto 1fr;gap:5px 10px;font:12.5px var(--sans);margin-top:10px;align-items:center}
+.vbar{display:flex;height:12px;background:var(--soft)}.vbar span{display:block;height:100%}
+.said{font:13px/1.45 var(--sans);color:var(--ink2);margin-top:8px}
+.said div{margin:3px 0}
+.brief{font:13px/1.4 var(--sans);color:var(--mute);margin:-2px 0 10px}
+.strip{display:flex;flex-wrap:wrap;gap:1px;margin:6px 0 4px}
+.strip i{width:7px;height:12px;display:block}
+.pill{display:inline-block;font:600 11.5px/1 var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:4px 7px;border:1px solid var(--rule)}
+.persona{font:14px/1.55 var(--mono);background:var(--soft);padding:12px;white-space:pre-wrap;max-height:220px;overflow:auto}
+.note{font:14px/1.5 var(--sans);color:var(--ink2)}
+</style>
+
+<div class="layout">
+<nav class="toc" aria-label="Sections">
+  <b>The Two-AI Feed</b>
+  <a href="#answer">The answer</a>
+  <a href="#setup">What was tested</a>
+  <a href="#raw">The raw vote table</a>
+  <a href="#boost">The own-AI boost</a>
+  <a href="#rounds">Round by round</a>
+  <a href="#who">Which AI drives it</a>
+  <a href="#users">Most users or a few?</a>
+  <a href="#where">Where it is stronger</a>
+  <a href="#robust">Does it hold up?</a>
+  <a href="#why">Why it happens</a>
+  <a href="#length">· Post length</a>
+  <a href="#style">· Writing style</a>
+  <a href="#taste">· Two different tastes</a>
+  <a href="#reasons">· What the AIs say</a>
+  <a href="#interest">· Interest and "nothing"</a>
+  <a href="#feed">What tops the feed</a>
+  <a href="#posts">Most loved, hated, disputed</a>
+  <a href="#people">The 100 users</a>
+  <a href="#quality">Data quality and cost</a>
+  <a href="#earlier">Earlier tests</a>
+  <a href="#limits">Limits</a>
+  <a href="#browse-posts">Browse every post</a>
+  <a href="#browse-users">Browse every user</a>
+  <a href="#files">Data files</a>
+</nav>
+<main>
+<header>
+  <div class="eyebrow">LLM Bias project · test LD-18 · results</div>
+  <h1>Do AI-played Reddit users favour their own AI's posts?</h1>
+  <p class="lede" id="lede"></p>
+  <div class="stats" id="stats"></div>
+</header>
+
+<h2 id="answer">The answer</h2>
+<div class="answer" id="answerbox"></div>
+<p class="plain" id="answerplain"></p>
+<p>How the test works, every prompt, every file and all the code are on the companion page, <a href="{INSIDE}">Inside the Two-AI Feed</a>.</p>
+
+<h2 id="setup">What was tested</h2>
+<div class="tbl"><table id="tsetup"></table></div>
+
+<h2 id="raw">The raw vote table</h2>
+<p>Every vote fits in one of four boxes: which AI was playing the user, and which AI wrote the post. Here is how often each box ended in an upvote, a downvote or nothing, over all rounds.</p>
+<figure><div id="fraw"></div><figcaption><b>Figure 1.</b> Share of votes that were upvotes, downvotes and "nothing", by the AI playing the users (rows) and the AI that wrote the post (columns). Darker = higher. The diagonal boxes (bold) are "own AI" votes.</figcaption></figure>
+<p id="rawtext"></p>
+
+<h2 id="boost">The own-AI boost</h2>
+<p>Raw upvote rates can't answer the question on their own. If gemma4 simply wrote better posts, both crowds would upvote them more. If gemma4 simply upvoted everything, its crowd would upvote both AIs' posts more. The <b>double difference</b> removes both:</p>
+<div class="formula" id="ddformula"></div>
+<p class="plain">How much more do gemma4-played users prefer gemma4's posts than gemma3-played users do, on the exact same posts? Zero means no favouritism. For downvotes, favouritism shows up as a negative number: fewer downvotes for your own AI.</p>
+<div class="tbl"><table id="tboost"></table></div>
+<p class="note"><b>95% interval</b> = the range the true value very likely sits in, from a bootstrap: we resampled the data 2,000 times and kept the middle 95% of the answers. We resampled two ways and show both. "Users × slots" resamples the 100 users and the post slots together and is the wider, more cautious one, so it is the headline. "Whole rounds" resamples the 15 rounds. <b>p</b> = how often the resampled answer crosses zero, so p = 0.001 means about 1 time in 1,000.</p>
+
+<h3 id="rounds">Round by round</h3>
+<figure><div id="fround"></div><figcaption><b>Figure 2.</b> The own-AI boost in each of the 15 rounds (dots), with the pooled value (black bar) and its 95% interval (shaded). Upvotes on the left, downvotes on the right. Each round used 50 brand-new posts.</figcaption></figure>
+<p id="roundtext"></p>
+<details><summary>Every round's 12 rates (upvote, downvote, nothing for each of the 4 boxes)</summary><div class="tbl"><table id="tround"></table></div></details>
+
+<h2 id="who">Which AI drives it</h2>
+<p>The double difference adds two pieces: how much more gemma4's crowd likes gemma4's posts than gemma3's posts, plus how much more gemma3's crowd likes gemma3's posts than gemma4's posts.</p>
+<figure><div id="fwho"></div><figcaption><b>Figure 3.</b> Each crowd's preference for its own AI's posts over the other AI's posts, in points. Upvotes (own minus other) and downvotes (other minus own, so positive = kinder to own posts). Added together, the two crowds' bars give the double difference.</figcaption></figure>
+<p id="whotext"></p>
+
+<h2 id="users">Most users or a few?</h2>
+<p>Each of the 100 users voted on every post twice, once played by each AI, so we can compute the double difference for each user separately (about 1,476 votes per user).</p>
+<figure><div id="fusers"></div><figcaption><b>Figure 4.</b> The own-AI upvote boost for each of the 100 users, in points. Right of the dashed line = that user, played by an AI, favoured that AI's posts.</figcaption></figure>
+<p id="userstext"></p>
+
+<h2 id="where">Where it is stronger</h2>
+<p>The same double difference, inside different slices of the data. Each row has its own 95% interval (1,000 resamples of users and slots).</p>
+<figure><div id="fwhere"></div><figcaption><b>Figure 5.</b> Own-AI upvote boost by subreddit, by how much the user cares about the subreddit (−2 dislikes it, +2 loves it), by the user's voting habit, by where the subreddit came in the user's scroll (1 = favourite first), and by first vs second half of the rounds. The dashed line is zero; the shaded column marks the overall value.</figcaption></figure>
+<div id="wheretext"></div>
+
+<h2 id="robust">Does it hold up?</h2>
+<div class="tbl"><table id="trobust"></table></div>
+<p id="robusttext"></p>
+
+<h2 id="why">Why it happens</h2>
+<p>The AIs never see who wrote a post, so the boost is not deliberate. Something about each AI's own writing matches that AI's taste when it plays a user. Below are the five things we can measure, with what each one explains and what it doesn't.</p>
+
+<h3 id="length">1. Post length: it hides part of the boost</h3>
+<figure><div id="fwords"></div><figcaption><b>Figure 6.</b> How long each AI's posts were (words in the body), all 744 posts.</figcaption></figure>
+<figure><div id="ftaste"></div><figcaption><b>Figure 7.</b> Change in upvote rate for every extra 100 words, with the post's author held fixed, for each crowd (95% interval, clustered by round).</figcaption></figure>
+<figure><div id="fscatter"></div><figcaption><b>Figure 8.</b> Each dot is one slot, a pair of posts written from the same job card. Across: how many more words gemma4's post had than gemma3's. Up: that slot's own-AI upvote boost. The line is a straight-line fit; where it crosses zero words is the boost when both posts are the same length.</figcaption></figure>
+<div class="why" id="lengthwhy"></div>
+
+<h3 id="style">2. Writing style: it explains none of the boost</h3>
+<p>We measured 14 visible features of every post and asked what each crowd rewards, holding the other features and the round fixed.</p>
+<div class="tbl"><table id="tfeat"></table></div>
+<p id="styletext"></p>
+<div class="why" id="stylewhy"></div>
+
+<h3 id="taste">3. Two different tastes</h3>
+<div class="twocol">
+  <div class="box"><h4>Same user, same post, two AIs</h4><div class="tbl" style="margin:0"><table id="tagree"></table></div></div>
+  <div class="box"><h4>Agreement by subreddit</h4><div class="tbl" style="margin:0"><table id="tagreetopic"></table></div></div>
+</div>
+<p id="tastetext"></p>
+<div class="why" id="tastewhy"></div>
+
+<h3 id="reasons">4. What the AIs say when they vote</h3>
+<p id="reasonslead"></p>
+<div class="twocol" id="reasonsboxes"></div>
+<p id="reasonsown"></p>
+<div class="twocol" id="ownwords"></div>
+<div class="why" id="reasonswhy"></div>
+
+<h3 id="interest">5. Interest, "nothing" and the scroll</h3>
+<figure><div id="finterest"></div><figcaption><b>Figure 9.</b> Upvote (solid) and "nothing" (dashed) rates by how much the user cares about the subreddit, for each AI.</figcaption></figure>
+<figure><div id="frank"></div><figcaption><b>Figure 10.</b> Upvote rate by where the subreddit came in the user's scroll (1 = the user's favourite subreddit, shown first; 5 = their least favourite, shown last).</figcaption></figure>
+<p id="interesttext"></p>
+
+<h2 id="feed">What tops the feed</h2>
+<figure><div id="ftop10"></div><figcaption><b>Figure 11.</b> For each round, the 10 highest-scoring posts (upvotes minus downvotes across 100 users) within each crowd: how many were written by the crowd's own AI. Five of ten would be a fair split.</figcaption></figure>
+<p id="feedtext"></p>
+
+<h2 id="posts">Most loved, most hated, most disputed</h2>
+<p>Score = upvotes − downvotes from the 100 users (−100 to +100). Click a title to open it in the post browser.</p>
+<div id="postlists"></div>
+
+<h2 id="people">The 100 users</h2>
+<div class="twocol">
+  <figure style="margin:0"><div id="fage"></div><figcaption>Ages.</figcaption></figure>
+  <div class="box"><h4>Who they are</h4><div id="whoare" class="note"></div></div>
+</div>
+<figure><div id="finterestmap"></div><figcaption><b>Figure 12.</b> How the 100 users feel about each subreddit: number of users at each interest level.</figcaption></figure>
+
+<h2 id="quality">Data quality and cost</h2>
+<div class="tbl"><table id="tquality"></table></div>
+<figure><div id="fmins"></div><figcaption><b>Figure 13.</b> Minutes per round on one laptop, from the first post written to the last vote of gemma3.</figcaption></figure>
+<p id="qualitytext"></p>
+
+<h2 id="earlier">How this compares with earlier tests</h2>
+<div class="tbl"><table id="tearlier"></table></div>
+<p>Different designs, AIs and numbers of people, so the numbers aren't strictly comparable, but every test that gave people played by an AI posts from that same AI found the same direction, of about the same size.</p>
+
+<h2 id="limits">Limits</h2>
+<ul id="limits-list"></ul>
+
+<h2 id="browse-posts">Browse every post</h2>
+<div class="browser">
+  <div class="controls">
+    <label for="pRound">Round <select id="pRound"></select></label>
+    <label for="pTopic">Subreddit <select id="pTopic"></select></label>
+  </div>
+  <div id="postlist"></div>
+</div>
+
+<h2 id="browse-users">Browse every user</h2>
+<div class="browser">
+  <div class="controls">
+    <label for="uSel">User <select id="uSel"></select></label>
+    <label for="uSort">Sort by <select id="uSort"><option value="id">user number</option><option value="up">own-AI boost, highest first</option><option value="agree">agreement between the AIs, lowest first</option></select></label>
+  </div>
+  <div id="userview"></div>
+</div>
+
+<h2 id="files">Data files</h2>
+<div class="tbl"><table id="tfiles"></table></div>
+</main>
+</div>
+
+<script>
+const RES=/*RES*/null, DEEP=/*DEEP*/null, TOPICS=/*TOPICS*/null, GH="{GH}";
+</script>
+<script src="posts_data.js"></script>
+<script src="users_data.js"></script>
+<script>
+(function(){
+const A=RES.ai_a,B=RES.ai_b,sa=A.split(":")[0],sb=B.split(":")[0];
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const sg=(x,d=1)=>(x>=0?"+":"−")+Math.abs(x).toFixed(d);
+const P=x=>sg(x*100);
+const iv=c=>c?`[${sg(c[0])}, ${sg(c[1])}]`:"";
+const ivp=c=>c?`[${P(c[0])}, ${P(c[1])}]`:"";
+const nR=RES.rounds.length, O=DEEP.overall;
+const pv=p=>p<0.001?"< 0.001":p.toFixed(3);
+const TN=t=>TOPICS[t]||t;
+function table(id,head,rows,cls){const t=$(id);t.innerHTML="<thead><tr>"+head.map(h=>`<th>${h}</th>`).join("")+"</tr></thead><tbody>"+rows.map((r,i)=>`<tr${cls&&cls(i)?' class="hl"':""}>`+r.map(c=>{const s=String(c);const n=/^[−+\-]?[\d.,]+%?$|^\[.*\]$|^[−+\-]?[\d.,]+ (pts|points|min|s)$/.test(s);return `<td${n?' class="n"':""}>${s}</td>`}).join("")+"</tr>").join("")+"</tbody>"}
+// svg helpers
+function S(w,h,inner){return `<svg viewBox="0 0 ${w} ${h}" role="img">${inner}</svg>`}
+const T=(x,y,s,a={})=>`<text x="${x}" y="${y}"${a.anchor?` text-anchor="${a.anchor}"`:""}${a.cls?` class="${a.cls}"`:""}${a.fill?` style="fill:${a.fill}"`:""}${a.rot?` transform="rotate(${a.rot} ${x} ${y})"`:""}>${esc(s)}</text>`;
+const L=(x1,y1,x2,y2,cls,st="")=>`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}"${cls?` class="${cls}"`:""}${st?` style="${st}"`:""}/>`;
+const R=(x,y,w,h,fill,extra="",title="")=>`<rect x="${x}" y="${y}" width="${Math.max(0,w)}" height="${Math.max(0,h)}" style="fill:${fill}" ${extra}>${title?`<title>${esc(title)}</title>`:""}</rect>`;
+const C=(x,y,r,fill,title)=>`<circle cx="${x}" cy="${y}" r="${r}" style="fill:${fill}">${title?`<title>${esc(title)}</title>`:""}</circle>`;
+function ticks(lo,hi,n=6){const span=hi-lo,raw=span/n,mag=Math.pow(10,Math.floor(Math.log10(raw))),st=[1,2,2.5,5,10].map(m=>m*mag).find(s=>s>=raw);const out=[];for(let t=Math.ceil(lo/st)*st;t<=hi+1e-9;t+=st)out.push(+t.toFixed(6));return out}
+// forest: rows [{label, est, lo, hi, head?}] -> svg string
+function forest(rows,{w=760,left=200,right=165,ref=null,unit=""}={}){
+  const vals=rows.filter(r=>!r.head).flatMap(r=>[r.lo,r.hi,r.est]).concat([0]);let lo=Math.min(...vals),hi=Math.max(...vals);const pad=(hi-lo)*.06;lo-=pad;hi+=pad;
+  const x=v=>left+(v-lo)/(hi-lo)*(w-left-right),rowH=22;let y=10,body="";
+  const H=rows.length*rowH+44;
+  ticks(lo,hi).forEach(t=>{body+=L(x(t),6,x(t),H-30,"grid")+T(x(t),H-14,(t>0?"+":"")+t+unit,{anchor:"middle"})});
+  if(ref!=null)body+=R(x(ref)-1.5,6,3,H-36,"var(--band)");
+  body+=L(x(0),6,x(0),H-30,"zero");
+  rows.forEach(r=>{y+=rowH;if(r.head){body+=T(0,y+4,r.label,{cls:"labb"});return}
+    body+=T(left-10,y+4,r.label,{anchor:"end",cls:"lab"});
+    body+=L(x(r.lo),y,x(r.hi),y,"","stroke:var(--ink2);stroke-width:2");
+    body+=C(x(r.est),y,5,r.color||"var(--a)",`${r.label}: ${sg(r.est)} [${sg(r.lo)}, ${sg(r.hi)}]`);
+    body+=T(w-right+10,y+4,r.lo===r.hi?sg(r.est):`${sg(r.est)} [${sg(r.lo)}, ${sg(r.hi)}]`)});
+  return S(w,H,body)}
+function hist(series,edges,{w=760,h=230,left=50,xlab="",colors}={}){
+  const nb=edges.length-1,mx=Math.max(...series.flatMap(s=>s.v)),bw=(w-left-20)/nb,inner=bw*.84/series.length;let body="";
+  const y=v=>h-40-v/mx*(h-70);
+  ticks(0,mx,4).forEach(t=>{body+=L(left,y(t),w-10,y(t),"grid")+T(left-6,y(t)+4,t,{anchor:"end"})});
+  series.forEach((s,k)=>s.v.forEach((v,i)=>{body+=R(left+i*bw+bw*.08+k*inner,y(v),inner,h-40-y(v),s.c,"",`${s.name} ${edges[i]} to ${edges[i+1]}: ${v}`)}));
+  const step=Math.ceil(nb/10);for(let i=0;i<=nb;i+=step)body+=T(left+i*bw,h-24,edges[i],{anchor:"middle"});
+  body+=T((w+left)/2,h-4,xlab,{anchor:"middle",cls:"lab"});
+  return S(w,h,body)}
+function legend(items){return `<div class="legend">${items.map(([c,t])=>`<span><i class="sw" style="background:${c}"></i>${t}</span>`).join("")}</div>`}
+function lines(series,xs,{w=760,h=260,left=56,ylo=0,yhi=100,xlab="",ylab="",xfmt=v=>v}={}){
+  let body="";const x=i=>left+i*(w-left-30)/(xs.length-1),y=v=>h-44-(v-ylo)/(yhi-ylo)*(h-70);
+  ticks(ylo,yhi,5).forEach(t=>{body+=L(left,y(t),w-20,y(t),"grid")+T(left-6,y(t)+4,t+"%",{anchor:"end"})});
+  xs.forEach((v,i)=>body+=T(x(i),h-26,xfmt(v),{anchor:"middle"}));
+  series.forEach(s=>{const pts=s.v.map((v,i)=>v==null?null:`${x(i)},${y(v)}`).filter(Boolean).join(" ");
+    body+=`<polyline points="${pts}" style="fill:none;stroke:${s.c};stroke-width:2.5${s.dash?";stroke-dasharray:6 4":""}"/>`;
+    s.v.forEach((v,i)=>{if(v!=null)body+=C(x(i),y(v),3.5,s.c,`${s.name}, ${xfmt(xs[i])}: ${v}%`)});
+  });
+  body+=T((w+left)/2,h-6,xlab,{anchor:"middle",cls:"lab"});
+  return S(w,h,body)}
+const ttl=s=>s.split(":")[0];
+
+// header
+const ou={est:RES.sp_up._pooled.est*100,ci:RES.sp_up._pooled.ci95.map(v=>v*100),p:RES.sp_up_p},od={est:RES.sp_down._pooled.est*100,ci:RES.sp_down._pooled.ci95.map(v=>v*100),p:RES.sp_down_p};
+$("lede").innerHTML=`Two free AIs, <span class="ai-a">${A}</span> and <span class="ai-b">${B}</span>, each wrote Reddit posts and then each pretended to be the same 100 made-up people scrolling those posts. Over ${nR} rounds and ${RES.valid.toLocaleString()} votes, the people an AI played gave that AI's own posts more upvotes and fewer downvotes, without ever being told who wrote what.`;
+const st=[["Own-AI upvote boost",sg(ou.est)+" pts",`95% interval ${iv(ou.ci)}`],["Own-AI downvote change",sg(od.est)+" pts",`95% interval ${iv(od.ci)}`],["Rounds with an upvote boost",`${RES.round_boot_up.rounds_positive} / ${nR}`,"each round = 50 new posts"],["Users showing it",`${DEEP.per_user.up_positive} / 100`,`${DEEP.per_user.up_negative} the other way, ${DEEP.per_user.up_zero} exactly zero`],["Votes",RES.valid.toLocaleString(),`${(RES.decisions-RES.valid)} unreadable of ${RES.decisions.toLocaleString()}`]];
+$("stats").innerHTML=st.map(([k,v,s])=>`<div class="stat"><div class="k">${k}</div><div class="v">${v}</div><div class="s">${s}</div></div>`).join("");
+const g4own=O.rates[`${sa}|${sa}`],g4oth=O.rates[`${sa}|${sb}`],g3own=O.rates[`${sb}|${sb}`],g3oth=O.rates[`${sb}|${sa}`];
+$("answerbox").innerHTML=`<p><b>Yes.</b> Users played by an AI upvote that AI's posts <b class="num">${sg(ou.est)}</b> points more and downvote them <b class="num">${sg(-od.est)}</b> points less than the same users played by the other AI, reading the same posts (95% intervals ${iv(ou.ci)} and ${iv(od.ci)}; bootstrap p = ${pv(ou.p)} and ${pv(od.p)}). It shows in ${RES.round_boot_up.rounds_positive} of ${nR} rounds and in ${DEEP.per_user.up_positive} of the 100 users. Most of it comes from <span class="ai-a">${sa}</span>, which upvotes its own posts ${(g4own.up-g4oth.up).toFixed(1)} points more than ${sb}'s. Post length hides part of it: with equal-length posts the boost is <span class="num">${P(RES.length.like_dd.at_equal_length)}</span>. Visible writing style explains none of it.</p>`;
+$("answerplain").textContent=`If you let one of these AIs pretend to be a crowd of Reddit users, that crowd will quietly push the same AI's posts up, about 7 extra upvotes for every 100 times someone sees one, even though nobody tells it who wrote anything.`;
+
+table("tsetup",["Part","What we used"],[
+ ["The two AIs (each writes posts and plays users)",`<span class="ai-a">${A}</span> (Google Gemma 4, about 2 billion effective parameters) and <span class="ai-b">${B}</span> (Google Gemma 3, 1 billion), run free on one laptop with Ollama; the two fastest of 9 tested`],
+ ["Users","100 made-up people built from fixed lists with no AI involved, locked by a fingerprint, the same in every round and for both AIs"],
+ ["Subreddits",Object.values(TOPICS).join(", ")],
+ ["Posts",`${nR} rounds × 5 subreddits × 5 slots × 2 AIs = ${nR*50} planned; ${DEEP.n_posts} shown (6 slots dropped because gemma3 failed a post 5 times)`],
+ ["Each vote","one separate question: the user's description plus one post (subreddit, title, body). Answer: upvote, downvote or nothing, plus a few words of reason. No author, no vote counts, no memory"],
+ ["Votes",`100 users × ~49 posts × 2 AIs × ${nR} rounds = ${RES.decisions.toLocaleString()}`],
+ ["When","30 Sep 2026 23:53 to 1 Oct 22:27 (rounds 1–11 overnight, 12–15 the next evening)"]]);
+
+// figure 1: three 2x2 heat tables
+(function(){const W=830,H=200;let b="";[["up","Upvote %","var(--up)"],["down","Downvote %","var(--down)"],["none","Nothing %","var(--none)"]].forEach(([k,name,c],i)=>{const x0=70+i*254;b+=T(x0+70,16,name,{cls:"labb"});
+ [sa,sb].forEach((au,ci)=>b+=T(x0+98+ci*82,38,"by "+au,{anchor:"middle"}));
+ [sa,sb].forEach((j,ri)=>{b+=T(x0+52,82+ri*64,j+" users",{anchor:"end",cls:"lab"});
+  [sa,sb].forEach((au,ci)=>{const v=O.rates[`${j}|${au}`][k];const mx=k==="up"?100:30;b+=R(x0+58+ci*82,48+ri*64,78,58,c,`fill-opacity="${(0.1+0.8*Math.min(1,v/mx)).toFixed(2)}"`)+`<text x="${x0+97+ci*82}" y="${83+ri*64}" text-anchor="middle" style="font-size:15px;font-weight:${au===j?700:400};fill:var(--ink)">${v.toFixed(1)}</text>`})})});
+ $("fraw").innerHTML=S(W,H,b)})();
+$("rawtext").innerHTML=`Read across a row to see how one crowd treats the two AIs' posts. <span class="ai-a">${sa}</span>-played users upvote ${sa}'s posts ${g4own.up.toFixed(1)}% of the time and ${sb}'s ${g4oth.up.toFixed(1)}%: a clear preference. <span class="ai-b">${sb}</span>-played users upvote ${sb}'s posts ${g3own.up.toFixed(1)}% and ${sa}'s ${g3oth.up.toFixed(1)}%: almost no difference. The crowds also differ overall: ${sb} downvotes far more (${(g3own.down+g3oth.down)/2>0?((g3own.down+g3oth.down)/2).toFixed(1):0}% on average against ${((g4own.down+g4oth.down)/2).toFixed(1)}%), which is why we compare inside each crowd first.`;
+$("ddformula").textContent=`boost = (${sa} users on ${sa} posts − ${sa} users on ${sb} posts) − (${sb} users on ${sa} posts − ${sb} users on ${sb} posts)\n      = (${g4own.up.toFixed(2)} − ${g4oth.up.toFixed(2)}) − (${g3oth.up.toFixed(2)} − ${g3own.up.toFixed(2)})\n      = ${(g4own.up-g4oth.up).toFixed(2)} − (${(g3oth.up-g3own.up).toFixed(2)}) = ${sg(ou.est,2)} points`;
+const rb=RES.round_boot_up,rd=RES.round_boot_down;
+table("tboost",["","Upvote boost","Downvote change"],[
+ ["Estimate (points per 100 votes)",sg(ou.est),sg(od.est)],
+ ["95% interval, users × slots resampled (headline)",iv(ou.ci),iv(od.ci)],
+ ["p, users × slots (2,000 resamples)",pv(ou.p),pv(od.p)],
+ ["95% interval, whole rounds resampled",ivp(rb.ci95),ivp(rd.ci95)],
+ ["Rounds in the favouring direction",`${rb.rounds_positive} of ${nR}`,`${nR-rd.rounds_positive} of ${nR}`]]);
+
+// figure 2: rounds forest, two panels
+(function(){const pr=RES.per_round;const mk=(k,lab,pool)=>[{head:true,label:lab}].concat(pr.map(r=>({label:"Round "+r.round,est:r[k]*100,lo:r[k]*100,hi:r[k]*100,color:k==="like_dd"?"var(--up)":"var(--down)"}))).concat([{label:"All rounds",est:pool.est,lo:pool.ci[0],hi:pool.ci[1],color:"var(--ink)"}]);
+ $("fround").innerHTML=`<div class="twocol">${forest(mk("like_dd","Upvotes",ou),{w:440,left:86,right:132,ref:ou.est})}${forest(mk("dislike_dd","Downvotes",od),{w:440,left:86,right:132,ref:od.est})}</div>`})();
+const neg=RES.per_round.filter(r=>r.like_dd<=0).map(r=>r.round);
+$("roundtext").innerHTML=`Round-to-round values swing a lot (upvotes from ${sg(Math.min(...RES.per_round.map(r=>r.like_dd*100)))} to ${sg(Math.max(...RES.per_round.map(r=>r.like_dd*100)))}) because each round has only 25 pairs of new posts, and some pairs happen to suit one AI's taste. That is why 15 rounds are pooled. The upvote boost was at or below zero in round${neg.length>1?"s":""} ${neg.join(" and ")}; round 12 is also the only round where downvotes went the other way.`;
+table("tround",["Round","Up boost","Down change",...[[sa,sa],[sa,sb],[sb,sa],[sb,sb]].flatMap(([j,a])=>[`${j} users on ${a}: up`,"down","none"])],RES.per_round.map(r=>[r.round,P(r.like_dd),P(r.dislike_dd),...[[sa,sa],[sa,sb],[sb,sa],[sb,sb]].flatMap(([j,a])=>["up","down","nothing"].map(c=>(r[`${c}_${j}_on_${a}`]*100).toFixed(1)))]));
+
+// figure 3: who drives it
+(function(){const rows=[[sa,"var(--a)",g4own.up-g4oth.up,g4oth.down-g4own.down],[sb,"var(--b)",g3own.up-g3oth.up,g3oth.down-g3own.down]];
+ const W=760,H=190,x0=380,sc=26;let b=L(x0,10,x0,H-30,"zero");[-4,-2,0,2,4,6,8].forEach(t=>b+=T(x0+t*sc,H-12,(t>0?"+":"")+t,{anchor:"middle"}));
+ rows.forEach(([n,c,u,d],i)=>{const y=20+i*72;b+=T(x0-170,y+18,`${n} users`,{anchor:"end",cls:"labb"});
+  b+=T(x0-165,y+18,"upvotes",{cls:"lab"})+R(Math.min(x0,x0+u*sc),y+6,Math.abs(u*sc),18,c)+T(x0+u*sc+(u>=0?6:-6),y+20,sg(u),{anchor:u>=0?"start":"end"});
+  b+=T(x0-165,y+46,"downvotes",{cls:"lab"})+R(Math.min(x0,x0+d*sc),y+34,Math.abs(d*sc),18,c,'fill-opacity="0.5"')+T(x0+d*sc+(d>=0?6:-6),y+48,sg(d),{anchor:d>=0?"start":"end"})});
+ $("fwho").innerHTML=S(W,H,b)})();
+$("whotext").innerHTML=`<span class="ai-a">${sa}</span>'s crowd does most of the favouring: ${sg(g4own.up-g4oth.up)} points more upvotes and ${(g4oth.down-g4own.down).toFixed(1)} points fewer downvotes for ${sa}'s posts. <span class="ai-b">${sb}</span>'s crowd favours its own posts by only ${sg(g3own.up-g3oth.up)} on upvotes and ${sg(g3oth.down-g3own.down)} on downvotes. Both lean the same way, but with these two AIs the effect is mostly one-sided. The length section below shows part of the reason: ${sb}'s users mark down long posts, and ${sb} writes the longer posts.`;
+
+// figure 4: per user histogram
+(function(){const pu=DEEP.per_user;$("fusers").innerHTML=hist([{name:"users",v:pu.hist_up,c:"var(--a)"}],pu.hist_edges,{xlab:"one user's own-AI upvote boost (points)"})})();
+const pu=DEEP.per_user;
+$("userstext").innerHTML=`<b>${pu.up_positive} of 100 users</b> show an own-AI upvote boost, ${pu.up_negative} show the opposite and ${pu.up_zero} exactly zero (average ${sg(pu.up_mean)}, median ${sg(pu.up_median)}). If there were no favouritism, a user would be as likely to land below zero as above; ${pu.up_positive} against ${pu.up_negative} would happen by chance with probability about ${pu.sign_test_p.toExponential(0).replace("e-"," × 10^-")} (sign test). On downvotes, ${pu.down_negative} of 100 users get fewer downvotes on their own AI's posts. So this is not a handful of odd users: almost every made-up person, when played by an AI, leans toward that AI's writing.`;
+
+// figure 5: where
+(function(){const rows=[];const add=(head,arr,lab)=>{rows.push({head:true,label:head});arr.forEach(r=>rows.push({label:lab(r.label),est:r.up.est,lo:r.up.ci[0],hi:r.up.ci[1]}))};
+ add("Subreddit",DEEP.by_topic,l=>TN(l));
+ add("User's interest in the subreddit",DEEP.by_interest,l=>({"-2":"−2 dislikes it","-1":"−1 bored by it","0":"0 indifferent","1":"+1 enjoys it","2":"+2 loves it"})[String(l)]);
+ add("User's voting habit",DEEP.by_voting,l=>l+" voter");
+ add("Where the subreddit came in the scroll",DEEP.by_scroll_rank,l=>`${+l+1}${["st","nd","rd","th","th"][+l]} subreddit`);
+ add("Half of the run",DEEP.by_half,l=>l);
+ $("fwhere").innerHTML=forest(rows,{left:230,right:120,ref:ou.est})})();
+(function(){const v=k=>DEEP.by_voting.find(r=>r.label===k);const gen=v("generous"),har=v("harsh"),ty=v("typical");const ia=k=>DEEP.by_interest.find(r=>String(r.label)===k);
+ $("wheretext").innerHTML=`<p><b>Voting habit matters most.</b> Users described as generous voters ("you upvote freely whenever a post is decent") show almost no boost (${sg(gen.up.est)}): they upvote ${gen.rates[`${sa}|${sa}`].up.toFixed(0)}–${gen.rates[`${sb}|${sb}`].up.toFixed(0)}% of everything, so there is no room left to favour anything. Typical (${sg(ty.up.est)}) and harsh voters (${sg(har.up.est)}) leave room, and the AI's own taste shows.</p>
+ <p><b>It is larger where the user doesn't care.</b> In subreddits the user dislikes, the boost is ${sg(ia("-2").up.est)}; in ones they love, ${sg(ia("2").up.est)}. When the description gives the AI a strong reason to like a post (the user loves the subject), that drives the vote; when it doesn't, the AI falls back on its own taste in writing. The same pattern explains the slightly larger boost in the last subreddit of the scroll, which is always the user's least favourite.</p>
+ <p><b>By subreddit</b> it is clearest in farming, cooking and cars and weakest in personal finance and technology, where the intervals include zero. With five slices, one weak slice is expected by chance, so treat the subreddit differences as a rough look.</p>
+ <p><b>It replicates.</b> The first 7 rounds give ${sg(DEEP.by_half[0].up.est)} and the last 8 give ${sg(DEEP.by_half[1].up.est)}, on completely different posts.</p>`})();
+
+// robustness
+(function(){const lr=DEEP.leave_one_round_out,lt=DEEP.leave_one_topic_out;const mn=k=>Math.min(...lr.map(r=>r[k])),mx=k=>Math.max(...lr.map(r=>r[k]));
+ table("trobust",["Check","Upvote boost","Downvote change","What it tests"],[
+  ["All data",sg(ou.est),sg(od.est),"the headline"],
+  ["Leave out one round at a time (15 versions)",`${sg(mn("up"))} to ${sg(mx("up"))}`,`${sg(mn("down"))} to ${sg(mx("down"))}`,"no single round drives it"],
+  ["Leave out one subreddit at a time (5 versions)",`${sg(Math.min(...lt.map(r=>r.up)))} to ${sg(Math.max(...lt.map(r=>r.up)))}`,`${sg(Math.min(...lt.map(r=>r.down)))} to ${sg(Math.max(...lt.map(r=>r.down)))}`,"no single subreddit drives it"],
+  ["Rounds 1–7 only",sg(DEEP.by_half[0].up.est),sg(DEEP.by_half[0].down.est),"replication on new posts"],
+  ["Rounds 8–15 only",sg(DEEP.by_half[1].up.est),sg(DEEP.by_half[1].down.est),"replication on new posts"],
+  ["Posts of equal length (statistical)",P(RES.length.like_dd.at_equal_length),P(RES.length.dislike_dd.at_equal_length),"is it just length? (it grows)"],
+  ["After 14 style features (post level)",sg(DEEP.style_explains.left_after_features),"","is it visible style? (no)"],
+  ...RES.drift.map(d=>[`Replay of 200 round-1 ${d.world.split("_").pop()} votes hours later`,`${d["same_answer_%"]}% identical`,"","did the AI change overnight? (no)"])]);
+ $("robusttext").textContent="Every version keeps the same direction and roughly the same size. The answer doesn't hang on one round, one subreddit, post length or the AI drifting during the night.";})();
+
+// length
+(function(){const e=DEEP.words_hist_edges;$("fwords").innerHTML=legend([["var(--a)",`${sa} (mean ${RES.posts.words_mean[A]} words)`],["var(--b)",`${sb} (mean ${RES.posts.words_mean[B]} words)`]])+hist([{name:sa,v:DEEP.words_hist[sa],c:"var(--a)"},{name:sb,v:DEEP.words_hist[sb],c:"var(--b)"}],e,{xlab:"words in the post body"});
+ const lt=RES.length_taste;$("ftaste").innerHTML=forest([{label:`${sa} users`,est:lt[A].per_100_words*100,lo:lt[A].ci95[0]*100,hi:lt[A].ci95[1]*100,color:"var(--a)"},{label:`${sb} users`,est:lt[B].per_100_words*100,lo:lt[B].ci95[0]*100,hi:lt[B].ci95[1]*100,color:"var(--b)"}],{left:140,right:130});
+ const W=760,H=320,pts=RES.slots.filter(d=>d.words_a!=null&&d.words_b!=null),gx=pts.map(d=>d.words_a-d.words_b),gy=pts.map(d=>d.like_dd*100);
+ const xl=Math.min(...gx),xh=Math.max(...gx),yl=Math.min(...gy),yh=Math.max(...gy),x=v=>60+(v-xl)/(xh-xl)*(W-90),y=v=>H-40-(v-yl)/(yh-yl)*(H-60);let b="";
+ ticks(yl,yh,6).forEach(t=>b+=L(60,y(t),W-30,y(t),"grid")+T(54,y(t)+4,(t>0?"+":"")+t,{anchor:"end"}));ticks(xl,xh,8).forEach(t=>b+=T(x(t),H-22,(t>0?"+":"")+t,{anchor:"middle"}));
+ b+=L(60,y(0),W-30,y(0),"zero")+L(x(0),10,x(0),H-40,"zero");pts.forEach((d,i)=>b+=C(x(gx[i]),y(gy[i]),3,"var(--a)").replace("/>",' fill-opacity="0.45"/>').replace('style="fill:var(--a)"','style="fill:var(--a);fill-opacity:.45"'));
+ const L0=RES.length.like_dd,b0=L0.at_equal_length*100,b1=L0.per_100_words_gap;b+=L(x(xl),y(b0+b1*xl),x(xh),y(b0+b1*xh),"","stroke:var(--ink);stroke-width:2")+C(x(0),y(b0),5,"var(--ink)");
+ b+=T((W+60)/2,H-4,`word gap: ${sa} post − ${sb} post`,{anchor:"middle",cls:"lab"})+T(14,H/2,"slot's upvote boost (points)",{anchor:"middle",cls:"lab",rot:-90});$("fscatter").innerHTML=S(W,H,b);
+ $("lengthwhy").innerHTML=`<p>The two AIs play the same users with opposite tastes for length. With the author held fixed, every extra 100 words changes the upvote rate by <span class="num">${P(lt[A].per_100_words)}</span> points for ${sa}-played users and <span class="num">${P(lt[B].per_100_words)}</span> for ${sb}-played users. ${sb} writes the longer posts (${RES.posts.words_mean[B]} words against ${RES.posts.words_mean[A]}; it also uses more, shorter sentences), so ${sb}'s own crowd marks its posts down for their length while ${sa}'s crowd rewards them for it. That works against the own-AI boost. When both posts in a slot are the same length, the boost is <span class="num">${P(L0.at_equal_length)}</span> ${ivp(L0.at_equal_length_ci95)} instead of ${sg(ou.est)}.</p><p>So length is not the reason for the boost. If anything, it hides some of it. This test was written down in advance (log LD-19) after round 3.</p>`})();
+
+// style
+(function(){const F=DEEP.features_by_author,W=DEEP.what_each_crowd_rewards,lab=DEEP.feature_labels;
+ const cell=o=>{const s=o.lo>0||o.hi<0;return `<span class="num" style="${s?"font-weight:600":"color:var(--mute)"}">${sg(o.coef)}</span>`};
+ table("tfeat",["Feature",`${sa} posts (mean)`,`${sb} posts (mean)`,`${sa} users reward (pts per 1 SD)`,`${sb} users reward (pts per 1 SD)`],Object.keys(lab).map(k=>[lab[k],F[k][sa],F[k][sb],cell(W[sa][k]),cell(W[sb][k])]));
+ const se=DEEP.style_explains;
+ $("styletext").innerHTML=`Bold = the 95% interval excludes zero; grey = could be zero. "Per 1 SD" means per one typical step up in that feature (one standard deviation). These 14 features together explain ${(W[sa]._r2*100).toFixed(0)}% of how ${sa}'s crowd scores posts and ${(W[sb]._r2*100).toFixed(0)}% for ${sb}'s crowd.`;
+ $("stylewhy").innerHTML=`<p>The two AIs write differently. ${sb} writes more sentences, uses bold or bullet formatting in ${(F.uses_markdown[sb]*100).toFixed(0)}% of posts against ${(F.uses_markdown[sa]*100).toFixed(0)}%, and gives shorter titles. ${sa} writes longer sentences and longer titles and uses more exclamation marks. The crowds reward different things too: ${sb}'s users dislike long posts and long words and like exclamation marks and casual openings ("Okay, so..."); ${sa}'s users like longer sentences and dislike titles that are questions.</p><p>But when we predict every post's upvote rate from these 14 features alone and redo the double difference, the features account for <b>${sg(se.explained_by_features)}</b> of the ${sg(se.post_level_dd)}-point boost. After removing their effect, <b>${sg(se.left_after_features)}</b> is left. The favouritism is not in anything this simple. It sits in what the posts say and how they say it, at a level these counts can't see. That matches our earlier test, where AIs could not tell their own posts apart from others' yet still preferred them: <b>shared taste, not recognition</b>.</p>`})();
+
+// taste / agreement
+(function(){const ag=DEEP.agreement,acts=["like","dislike","nothing"],ct=ag.crosstab;
+ table("tagree",[`${sa} chose ↓ / ${sb} chose →`,...acts],acts.map(a=>[a,...acts.map(b=>ct[a][b].toLocaleString())]));
+ table("tagreetopic",["Subreddit","Same choice"],Object.entries(ag.by_topic).map(([t,v])=>[TN(t),v.toFixed(1)+"%"]));
+ $("tastetext").innerHTML=`Each user saw each post twice, once played by each AI. Out of ${ag.pairs.toLocaleString()} user-post pairs, the two AIs made the same choice <b>${ag.same_pct.toFixed(1)}%</b> of the time. Cohen's κ (kappa: agreement beyond what chance would give; 0 = chance, 1 = always agree) is <span class="num">${ag.kappa.toFixed(2)}</span>, which counts as "slight". Ranking posts by score, the two crowds' rankings correlate at only <span class="num">${DEEP.net_score_corr_between_crowds}</span>: they disagree about which posts are good.`;
+ $("tastewhy").innerHTML=`<p>The personality text is identical, word for word, under both AIs. Yet the AI playing it changes about a third of the votes. Each AI brings its own idea of a good post, and the personality only partly overrides it. A crowd made of one AI therefore reflects that AI's taste. When that taste happens to match the AI's own writing, which is likely since the same model produced both, you get the own-AI boost.</p>`})();
+
+// reasons
+(function(){const RS=DEEP.reasons;
+ $("reasonslead").innerHTML=`Every vote came with a short reason in the user's voice. ${sa}'s reasons average <b>${RS[sa].mean_words} words</b> ("Good physics insight"); ${sb}'s average <b>${RS[sb].mean_words}</b>. The most common words (filler words removed):`;
+ $("reasonsboxes").innerHTML=[[sa,"var(--a)"],[sb,"var(--b)"]].map(([j,c])=>`<div class="box"><h4 style="color:${c}">${j} users</h4>${["like","dislike","nothing"].map(a=>`<div class="note" style="margin:6px 0 4px"><b>${({like:"Upvote reasons",dislike:"Downvote reasons",nothing:"Nothing reasons"})[a]}</b></div><div class="chips">${RS[j][a].map(w=>`<span class="chip">${esc(w)}</span>`).join("")}</div>`).join("")}</div>`).join("");
+ $("reasonsown").innerHTML=`Which words does each crowd use more when upvoting its <b>own</b> AI's posts than when upvoting the other AI's? (Counts are own / other.)`;
+ $("ownwords").innerHTML=[[sa,"var(--a)"],[sb,"var(--b)"]].map(([j,c])=>`<div class="box"><h4 style="color:${c}">${j} users, own posts</h4><div class="chips">${RS[j].own_vs_other_like_words.map(([w,lr,o,t])=>`<span class="chip">${esc(w)} ${o}/${t}</span>`).join("")}</div></div>`).join("");
+ $("reasonswhy").innerHTML=`<p>The general vocabulary is the same for both posts' authors: ${sa}'s users praise posts that are "practical", "relatable" or "make sense" and punish "whining", "vague", "fluff" and "rambling"; ${sb}'s users write longer, chattier reasons ("relatable", "interesting", "a bit..."). The words used more for own-AI posts are almost all <b>subject words echoed from specific posts</b> (physics, whisk, pie, gravel). The reasons repeat what a post was about rather than naming a hidden style signal. That fits the style finding: whatever makes an AI favour its own posts isn't something it says out loud when explaining a vote.</p>`})();
+
+// interest
+(function(){const xs=["-2","-1","0","1","2"],ui=DEEP.up_by_interest,ni=DEEP.nothing_by_interest;
+ $("finterest").innerHTML=legend([["var(--a)",`${sa} users`],["var(--b)",`${sb} users`]])+`<div class="legend"><span>solid line = upvote %</span><span>dashed line = "nothing" %</span></div>`+lines([{name:sa+" up",v:xs.map(k=>ui[A][k]),c:"var(--a)"},{name:sb+" up",v:xs.map(k=>ui[B][k]),c:"var(--b)"},{name:sa+" nothing",v:xs.map(k=>ni[A][k]),c:"var(--a)",dash:1},{name:sb+" nothing",v:xs.map(k=>ni[B][k]),c:"var(--b)",dash:1}],xs,{xlab:"user's interest in the subreddit (−2 dislikes … +2 loves)",xfmt:v=>(+v>0?"+":"")+v});
+ const rk=DEEP.by_position.rank,ks=["0","1","2","3","4"];
+ $("frank").innerHTML=legend([["var(--a)",`${sa} users`],["var(--b)",`${sb} users`]])+lines([{name:sa,v:ks.map(k=>rk[A][k]),c:"var(--a)"},{name:sb,v:ks.map(k=>rk[B][k]),c:"var(--b)"}],ks,{ylo:50,yhi:100,xlab:"position of the subreddit in the scroll",xfmt:v=>+v+1});
+ $("interesttext").innerHTML=`Both AIs act out the personalities: upvotes climb with the user's interest (${sa}: ${ui[A]["-2"]}% → ${ui[A]["2"]}%; ${sb}: ${ui[B]["-2"]}% → ${ui[B]["2"]}%), and "nothing" is chosen most where the user doesn't care. ${sa} follows the personality much more strongly than ${sb}. Upvotes also fall the further down the scroll a subreddit comes, because the scroll is ordered from favourite to least favourite subreddit, so this is the interest effect again, not tiredness (each vote is a fresh question with no memory).`})();
+
+// top10
+(function(){const T10=RES.top10.per_round,W=760,H=230,rs=RES.rounds,bw=Math.min(18,(W-90)/rs.length/2.6),x=i=>70+i*(W-90)/rs.length,y=v=>H-40-v/10*(H-60);let b="";
+ [0,5,10].forEach(t=>b+=L(60,y(t),W-10,y(t),t===5?"zero":"grid")+T(54,y(t)+4,t,{anchor:"end"}));
+ rs.forEach((r,i)=>{[[A,"var(--a)",0],[B,"var(--b)",1]].forEach(([j,c,o])=>{const row=T10.find(d=>d.round===r&&d.crowd===j);if(!row)return;const v=row[j];b+=R(x(i)+o*(bw+2),y(v),bw,y(0)-y(v),c,"",`round ${r}, ${ttl(j)} crowd: ${v} of 10`)});b+=T(x(i)+bw,H-22,"r"+r,{anchor:"middle"})});
+ $("ftop10").innerHTML=legend([["var(--a)",`${sa} crowd, own posts in top 10 (mean ${RES.top10.mean_own_share[A].toFixed(1)})`],["var(--b)",`${sb} crowd (mean ${RES.top10.mean_own_share[B].toFixed(1)})`]])+S(W,H,b);
+ $("feedtext").innerHTML=`In a real feed, ranking decides what people see. In ${sa}'s crowd, ${sa}'s posts took <b>${RES.top10.mean_own_share[A].toFixed(1)} of the top 10</b> on average; in ${sb}'s crowd, ${sb}'s posts took ${RES.top10.mean_own_share[B].toFixed(1)}. A simulation that used ${sa} to play its users would systematically push ${sa}-written content up the rankings.`})();
+
+// post lists
+(function(){const PD=DEEP;const li=(arr,key,c)=>`<ol>${arr.map(p=>`<li><a href="#browse-posts" data-post="${esc(p.id)}">${esc(p.ti)}</a> <span class="note">· ${TN(p.t)} · round ${p.r} · by <span class="${p.a===sa?"ai-a":"ai-b"}">${p.a}</span> · ${sa} crowd <span class="num">${sg(p.g4,0)}</span> · ${sb} crowd <span class="num">${sg(p.g3,0)}</span></span></li>`).join("")}</ol>`;
+ $("postlists").innerHTML=`<div class="twocol"><div class="box"><h4 class="ai-a">Most loved by ${sa}'s crowd</h4>${li(PD.posts_loved.gemma4)}</div><div class="box"><h4 class="ai-b">Most loved by ${sb}'s crowd</h4>${li(PD.posts_loved.gemma3)}</div><div class="box"><h4 class="ai-a">Most hated by ${sa}'s crowd</h4>${li(PD.posts_hated.gemma4)}</div><div class="box"><h4 class="ai-b">Most hated by ${sb}'s crowd</h4>${li(PD.posts_hated.gemma3)}</div><div class="box"><h4>Biggest disagreements: ${sa}'s crowd loved, ${sb}'s hated</h4>${li(PD.posts_disputed.gemma4_more)}</div><div class="box"><h4>Biggest disagreements: ${sb}'s crowd loved, ${sa}'s hated</h4>${li(PD.posts_disputed.gemma3_more)}</div></div><p class="note">Notice how many of ${sb}'s most-hated posts are frustrated rants with "Seriously" in the title, which ${sa}'s crowd often liked, and how often the same post scores +90 in one crowd and −90 in the other.</p>`})();
+
+// people
+(function(){const Us=DEEP.users;$("fage").innerHTML=hist([{name:"users",v:Us.age_hist,c:"var(--ink2)"}],Us.age_edges,{h:200,xlab:"age"});
+ $("whoare").innerHTML=`<p><b>Gender:</b> ${Object.entries(Us.gender).map(([k,v])=>`${k} ${v}`).join(", ")}.</p><p><b>Voting habit:</b> ${Object.entries(Us.voting).map(([k,v])=>`${k} ${v}`).join(", ")}.</p><p><b>Countries:</b> ${Object.entries(Us.countries).map(([k,v])=>`${k} ${v}`).join(", ")}.</p><p><b>Most common jobs:</b> ${Object.entries(Us.professions).slice(0,8).map(([k,v])=>`${k} (${v})`).join(", ")}.</p>`;
+ const tops=Object.keys(Us.interest),lv=["-2","-1","0","1","2"],W=760,H=48+tops.length*34;let b="";const cw=(W-220)/5;
+ lv.forEach((l,i)=>b+=T(220+i*cw+cw/2,24,({"-2":"−2 dislike","-1":"−1 bored","0":"0 indifferent","1":"+1 enjoy","2":"+2 love"})[l],{anchor:"middle"}));
+ tops.forEach((t,r)=>{b+=T(210,56+r*34,TN(t),{anchor:"end",cls:"lab"});lv.forEach((l,i)=>{const v=Us.interest[t][l]||0;b+=R(220+i*cw+2,36+r*34,cw-4,28,"var(--a)",`fill-opacity="${(0.08+v/60).toFixed(2)}"`)+T(220+i*cw+cw/2,55+r*34,v,{anchor:"middle",fill:"var(--ink)"})})});
+ $("finterestmap").innerHTML=S(W,H,b)})();
+
+// quality
+(function(){const n=RES.nothing,lat=DEEP.latency,pa=DEEP.post_attempts;
+ table("tquality",["Check",sa,sb],[
+  ["Votes recorded",n[A].decisions.toLocaleString(),n[B].decisions.toLocaleString()],
+  ["Unreadable answers (after retries)","0",String(RES.decisions-RES.valid)],
+  ["Answers that needed a retry",n[A]["needed_retry_%"]+"%",n[B]["needed_retry_%"]+"%"],
+  ["Answers cut off at the 80-token limit",String(n[A].cut_off_at_token_limit),String(n[B].cut_off_at_token_limit)],
+  ["Upvote / downvote / nothing",`${n[A]["like_%"]} / ${n[A]["dislike_%"]} / ${n[A]["nothing_%"]}%`,`${n[B]["like_%"]} / ${n[B]["dislike_%"]} / ${n[B]["nothing_%"]}%`],
+  ["Seconds per answer (median; 5th–95th percentile)",`${lat[sa]["50"]} (${lat[sa]["5"]}–${lat[sa]["95"]})`,`${lat[sb]["50"]} (${lat[sb]["5"]}–${lat[sb]["95"]})`],
+  ["Votes per second overall (4 at a time)",(1/RES.timing.s_per_vote[A]).toFixed(2),(1/RES.timing.s_per_vote[B]).toFixed(2)],
+  ["Posts written (mean words)",`${RES.posts.words_mean[A]} words`,`${RES.posts.words_mean[B]} words`],
+  ["Posts by number of tries (1 / 2 / 3 / 4 / 5)",[1,2,3,4,5].map(k=>pa[sa][k]||0).join(" / "),[1,2,3,4,5].map(k=>pa[sb][k]||0).join(" / ")],
+  ["Posts never written","0",String(RES.posts.failed)],
+  ["Duplicate post bodies across all rounds",String(RES.posts.duplicate_bodies),""]]);
+ const rm=RES.timing.round_min,ks=Object.keys(rm).map(Number).sort((a,b)=>a-b),W=760,H=210,mx=80,x=i=>60+i*(W-80)/ks.length,bw=(W-80)/ks.length*.7,y=v=>H-40-v/mx*(H-60);let b="";
+ [0,20,40,60,80].forEach(t=>b+=L(52,y(t),W-10,y(t),"grid")+T(46,y(t)+4,t,{anchor:"end"}));
+ ks.forEach((k,i)=>b+=R(x(i),y(rm[k]),bw,y(0)-y(rm[k]),"var(--ink2)")+T(x(i)+bw/2,H-24,"r"+k,{anchor:"middle"})+T(x(i)+bw/2,y(rm[k])-5,Math.round(rm[k]),{anchor:"middle"}));
+ $("fmins").innerHTML=S(W,H,b);
+ const tot=Object.values(rm).reduce((a,b)=>a+b,0);
+ $("qualitytext").innerHTML=`${nR} rounds took ${(tot/60).toFixed(1)} hours of computing (${(tot/nR).toFixed(1)} minutes per round on average). One answer takes about ${lat[sa]["50"]} s (${sa}) or ${lat[sb]["50"]} s (${sb}), but 4 are processed at once, so the throughput is about ${(1/RES.timing.s_per_vote[A]).toFixed(1)} and ${(1/RES.timing.s_per_vote[B]).toFixed(1)} votes per second. Only ${RES.decisions-RES.valid} of ${RES.decisions.toLocaleString()} votes failed. ${sb} needed retries on a third of its posts (the JSON it returned was malformed, or it mentioned being an AI) and failed 6 posts entirely, so their slots were dropped for both AIs.`})();
+
+// earlier tests
+table("tearlier",["Test","Design","Own-AI favour (points per 100)","95% interval"],[
+ ["1. Seven AIs pick a favourite (23–24 Sep)","7 AIs; 99 people pick their favourite of 7 posts","+5.6","[+3.4, +7.8]"],
+ ["2. Two AIs, scrolling (24–26 Sep)","llama3.1 + gemma4; 99 people; 7 post sets","+2.4","[−1.3, +6.2]"],
+ ["3. One at a time vs side by side (26–27 Sep)","llama3.1 + gemma4; length-matched; 15 sets","+5.2","[+2.4, +8.1]"],
+ ["4. Three AIs, free writing (27–29 Sep)","llama3.1 + gemma4 + mistral; 50 people; 6 sets","+6.8","[+4.6, +9.4]"],
+ ["5. One AI plays the whole crowd (29 Sep)","ranked feed, counts hidden","+7.2","[+4.9, +9.6]"],
+ ["6. This test (30 Sep – 1 Oct)",`${sa} + ${sb}; 100 users; ${nR} rounds of new posts`,sg(ou.est),iv(ou.ci)]],i=>i===5);
+
+// limits
+$("limits-list").innerHTML=[
+ `<b>Both AIs are Google Gemma models</b> (${A} and ${B}). They were the two fastest, but they are siblings, so "own AI" here partly means "own family". Test 4 found the same effect across three different families; a gemma4-vs-llama run would settle it for this design.`,
+ `<b>The users are AI role-play, not people.</b> The result is about AI crowds, which is what simulation studies use. It says nothing about how humans would vote.`,
+ `<b>Small, fast models on one laptop.</b> Larger models might behave differently.`,
+ `<b>One setting:</b> temperature 0.7 and one fixed random seed per user and post. Replays show the votes are stable (97–99.5% identical), but other settings could shift the size.`,
+ `<b>Subgroup results are exploratory</b> (no correction for looking at many slices). The headline, the length check and the decision to report the wider interval were written down in advance (log LD-19).`,
+ `<b>The style features are simple counts.</b> They explain none of the boost, which shows it isn't simple style, but doesn't tell us what it is.`].map(x=>`<li>${x}</li>`).join("");
+
+// post browser
+const POS=window.POSTS||[];const pR=$("pRound"),pT=$("pTopic"),pl=$("postlist");
+RES.rounds.forEach(r=>pR.add(new Option("Round "+r,r)));Object.entries(TOPICS).forEach(([t,s])=>pT.add(new Option(s,t)));
+const bar=v=>{const n=v[0]+v[1]+v[2]||1;return `<div class="vbar" title="${v[0]} up, ${v[1]} down, ${v[2]} nothing"><span style="width:${v[0]/n*100}%;background:var(--up)"></span><span style="width:${v[1]/n*100}%;background:var(--down)"></span><span style="width:${v[2]/n*100}%;background:var(--none)"></span></div>`};
+function drawPosts(focus){const r=+pR.value,t=pT.value,ps=POS.filter(p=>p.r===r&&p.t===t),slots=[...new Set(ps.map(p=>p.s))].sort();
+ pl.innerHTML=slots.map(sl=>{const two=[sa,sb].map(a=>ps.find(p=>p.s===sl&&p.a===a));const br=(two[0]||two[1]).br;
+  return `<div class="brief">Slot ${sl+1} · job card: subject "${esc(br.angle)}" · ${esc(br.ptype)} · posted as ${esc(br.voice)}</div><div class="pair">`+two.map((p,i)=>!p?"":`<div class="post" id="post-${esc(p.id).replace(/[^a-z0-9]/gi,"_")}"${focus===p.id?' style="outline:2px solid var(--a)"':""}><div class="who ${i?"ai-b":"ai-a"}">written by ${p.a} · ${p.w} words</div><h4>${esc(p.ti)}</h4><div class="body">${esc(p.b)}</div><div class="votes">${[sa,sb].map(j=>p.v[j]?`<span>${j} users<br><span class="num up">${p.v[j][0]}↑</span> <span class="num down">${p.v[j][1]}↓</span> <span class="num">${p.v[j][2]}·</span></span>${bar(p.v[j])}`:"").join("")}</div><div class="said">${[sa,sb].map(j=>(p.rs[j]||[]).map(([a,u,s])=>`<div><span class="${j===sa?"ai-a":"ai-b"}">${j}</span> as user ${u} <b class="${a==="l"?"up":a==="d"?"down":""}">${({l:"upvoted",d:"downvoted",n:"did nothing"})[a]}</b>: "${esc(s)}"</div>`).join("")).join("")}</div></div>`).join("")+"</div>"}).join("")||"<p class='note'>No posts.</p>"}
+pR.onchange=pT.onchange=()=>drawPosts();drawPosts();
+document.addEventListener("click",e=>{const a=e.target.closest("a[data-post]");if(!a)return;const p=POS.find(x=>x.id===a.dataset.post);if(!p)return;pR.value=p.r;pT.value=p.t;drawPosts(p.id)});
+
+// user browser
+const USR=window.USERS||[],uS=$("uSel"),uSo=$("uSort"),uv=$("userview");
+function fillUsers(){const k=uSo.value,cur=uS.value;const arr=[...USR].sort((a,b)=>k==="up"?b.boost_up-a.boost_up:k==="agree"?a.agree-b.agree:a.id-b.id);uS.innerHTML="";arr.forEach(u=>uS.add(new Option(`#${u.id} ${u.name}, ${u.age}, ${u.job} (boost ${sg(u.boost_up)})`,u.id)));if(cur)uS.value=cur}
+function drawUser(){const u=USR.find(x=>x.id===+uS.value);if(!u)return;
+ const cnt=s=>({u:(s.match(/u/g)||[]).length,d:(s.match(/d/g)||[]).length,n:(s.match(/n/g)||[]).length});
+ const col={u:"var(--up)",d:"var(--down)",n:"var(--none)",".":"var(--soft)"};
+ const strip=s=>`<div class="strip">${[...s].map((c,i)=>`<i style="background:${col[c]}" title="${POS[i]?esc(POS[i].ti)+" ("+POS[i].a+")":""}"></i>`).join("")}</div>`;
+ const ownRate=(j)=>{let n=0,up=0,no=0,upo=0;[...u.acts[j]].forEach((c,i)=>{if(c==="."||!POS[i])return;if(POS[i].a===j){n++;up+=c==="u"}else{no++;upo+=c==="u"}});return [up/n*100,upo/no*100]};
+ const [a1,a2]=ownRate(sa),[b1,b2]=ownRate(sb);
+ uv.innerHTML=`<div class="twocol"><div><p><b>${esc(u.name)}</b> (u/${esc(u.user)}), ${u.age}, ${u.gender}, ${esc(u.job)} in ${esc(u.place)}. Voting habit: <span class="pill">${u.voting}</span></p><p class="note">Interest: ${Object.entries(u.aff).map(([t,v])=>`${TN(t)} ${v>0?"+":""}${v}`).join(" · ")}</p><p>Own-AI upvote boost for this user: <b class="num">${sg(u.boost_up)}</b> · downvote change <span class="num">${sg(u.boost_down)}</span> · the two AIs made the same choice on <span class="num">${u.agree.toFixed(1)}%</span> of posts.</p><p class="note">Played by <span class="ai-a">${sa}</span>: upvoted ${a1.toFixed(1)}% of ${sa}'s posts and ${a2.toFixed(1)}% of ${sb}'s. Played by <span class="ai-b">${sb}</span>: upvoted ${b2.toFixed(1)}% of ${sa}'s posts and ${b1.toFixed(1)}% of ${sb}'s.</p></div><div><div class="note" style="margin-bottom:4px">The exact text the AI is given for this user:</div><div class="persona">${esc(u.persona)}</div></div></div>
+ <p class="note" style="margin-top:14px">Every vote this user made, in post order (round 1 to ${nR}). Each mark is one post: <span class="up">■ upvote</span> <span class="down">■ downvote</span> <span style="color:var(--none)">■ nothing</span>. Hover a mark for the post.</p>
+ <div class="note"><span class="ai-a">Played by ${sa}</span> (${cnt(u.acts[sa]).u} up, ${cnt(u.acts[sa]).d} down, ${cnt(u.acts[sa]).n} nothing)</div>${strip(u.acts[sa])}
+ <div class="note"><span class="ai-b">Played by ${sb}</span> (${cnt(u.acts[sb]).u} up, ${cnt(u.acts[sb]).d} down, ${cnt(u.acts[sb]).n} nothing)</div>${strip(u.acts[sb])}`}
+uSo.onchange=()=>{fillUsers();drawUser()};uS.onchange=drawUser;fillUsers();uS.value=0;drawUser();
+
+// files
+table("tfiles",["File","What it holds"],[
+ [`<a href="${GH}data/llm_bias/two_ai/reactions.csv">reactions.csv</a>`,"All 147,600 votes: round, user, AI playing, AI that wrote the post, subreddit, scroll position, action, reason, seconds, tokens"],
+ [`<a href="${GH}data/llm_bias/two_ai/posts.csv">posts.csv</a>`,"All 750 planned posts: full text, job card, words, tries, seconds"],
+ [`<a href="${GH}data/llm_bias/two_ai/users.csv">users.csv</a>`,"The 100 users and every trait, including the exact text the AI reads"],
+ [`<a href="${GH}data/llm_bias/two_ai/analysis.json">analysis.json</a>`,"Headline numbers (from analyze_two_ai.py)"],
+ [`<a href="${GH}data/llm_bias/two_ai/deep.json">deep.json</a>`,"Every breakdown on this page (from analyze_deep.py)"],
+ [`<a href="${GH}data/llm_bias/two_ai/timing.csv">timing.csv</a>, <a href="${GH}data/llm_bias/two_ai/slots.csv">slots.csv</a>`,"Minutes per run; one row per post pair"],
+ [`<a href="${GH}data/llm_bias/worlds/">worlds/two_r01_gemma4 … two_r15_gemma3</a>`,"Raw records: every call (decisions.jsonl) and every setting and model fingerprint (manifest.json)"],
+ [`<a href="${GH}LLM_BIAS_DATA_DICTIONARY.md">Data dictionary</a> · <a href="${GH}LLM_BIAS_LOG.md">Project log</a>`,"Every column explained; every decision with its time (LD-18, LD-19, LF-48, LF-49)"]]);
+})();
+</script>

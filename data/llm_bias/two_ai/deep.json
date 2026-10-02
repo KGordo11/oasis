@@ -1,0 +1,3169 @@
+{
+ "n_votes": 147600,
+ "n_valid": 147598,
+ "n_posts": 738,
+ "n_slots": 369,
+ "n_users": 100,
+ "rounds": [
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+  8,
+  9,
+  10,
+  11,
+  12,
+  13,
+  14,
+  15
+ ],
+ "overall": {
+  "label": "all",
+  "n": 147598,
+  "up": {
+   "est": 6.9309,
+   "ci": [
+    2.9799,
+    10.6559
+   ],
+   "p": 0.0
+  },
+  "down": {
+   "est": -4.1661,
+   "ci": [
+    -6.6429,
+    -1.7857
+   ],
+   "p": 0.0
+  },
+  "rates": {
+   "gemma4|gemma4": {
+    "up": 81.2276,
+    "down": 6.1138,
+    "none": 12.6585
+   },
+   "gemma4|gemma3": {
+    "up": 74.9837,
+    "down": 9.7182,
+    "none": 15.2981
+   },
+   "gemma3|gemma4": {
+    "up": 74.4105,
+    "down": 13.8869,
+    "none": 11.7025
+   },
+   "gemma3|gemma3": {
+    "up": 75.0976,
+    "down": 13.3252,
+    "none": 11.5772
+   }
+  }
+ },
+ "by_topic": [
+  {
+   "label": "cars",
+   "n": 29600,
+   "up": {
+    "est": 7.5135,
+    "ci": [
+     -0.1041,
+     15.6473
+    ],
+    "p": 0.058
+   },
+   "down": {
+    "est": -3.973,
+    "ci": [
+     -10.1124,
+     3.0715
+    ],
+    "p": 0.23
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 75.9324,
+     "down": 9.7432,
+     "none": 14.3243
+    },
+    "gemma4|gemma3": {
+     "up": 69.8919,
+     "down": 14.8514,
+     "none": 15.2568
+    },
+    "gemma3|gemma4": {
+     "up": 67.1892,
+     "down": 23.2027,
+     "none": 9.6081
+    },
+    "gemma3|gemma3": {
+     "up": 68.6622,
+     "down": 24.3378,
+     "none": 7.0
+    }
+   }
+  },
+  {
+   "label": "cooking",
+   "n": 29600,
+   "up": {
+    "est": 9.0135,
+    "ci": [
+     2.6553,
+     15.1267
+    ],
+    "p": 0.006
+   },
+   "down": {
+    "est": -4.5541,
+    "ci": [
+     -8.0916,
+     -0.984
+    ],
+    "p": 0.012
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 82.9054,
+     "down": 6.2162,
+     "none": 10.8784
+    },
+    "gemma4|gemma3": {
+     "up": 78.7568,
+     "down": 9.0405,
+     "none": 12.2027
+    },
+    "gemma3|gemma4": {
+     "up": 85.2838,
+     "down": 7.7568,
+     "none": 6.9595
+    },
+    "gemma3|gemma3": {
+     "up": 90.1486,
+     "down": 6.027,
+     "none": 3.8243
+    }
+   }
+  },
+  {
+   "label": "farming",
+   "n": 29600,
+   "up": {
+    "est": 12.0946,
+    "ci": [
+     3.3661,
+     20.06
+    ],
+    "p": 0.004
+   },
+   "down": {
+    "est": -6.9865,
+    "ci": [
+     -12.136,
+     -2.2332
+    ],
+    "p": 0.004
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 80.4054,
+     "down": 3.7297,
+     "none": 15.8649
+    },
+    "gemma4|gemma3": {
+     "up": 74.0541,
+     "down": 6.9324,
+     "none": 19.0135
+    },
+    "gemma3|gemma4": {
+     "up": 68.8784,
+     "down": 13.3919,
+     "none": 17.7297
+    },
+    "gemma3|gemma3": {
+     "up": 74.6216,
+     "down": 9.6081,
+     "none": 15.7703
+    }
+   }
+  },
+  {
+   "label": "personal_finance",
+   "n": 29198,
+   "up": {
+    "est": 2.6492,
+    "ci": [
+     -5.6022,
+     10.4976
+    ],
+    "p": 0.504
+   },
+   "down": {
+    "est": -0.1125,
+    "ci": [
+     -6.1283,
+     5.6866
+    ],
+    "p": 0.98
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 85.3288,
+     "down": 2.8904,
+     "none": 11.7808
+    },
+    "gemma4|gemma3": {
+     "up": 79.3014,
+     "down": 3.6301,
+     "none": 17.0685
+    },
+    "gemma3|gemma4": {
+     "up": 80.5289,
+     "down": 10.6193,
+     "none": 8.8517
+    },
+    "gemma3|gemma3": {
+     "up": 77.1507,
+     "down": 11.2466,
+     "none": 11.6027
+    }
+   }
+  },
+  {
+   "label": "tech",
+   "n": 29600,
+   "up": {
+    "est": 3.3243,
+    "ci": [
+     -7.6099,
+     14.367
+    ],
+    "p": 0.588
+   },
+   "down": {
+    "est": -5.1486,
+    "ci": [
+     -11.8849,
+     1.3196
+    ],
+    "p": 0.122
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 81.6216,
+     "down": 7.9459,
+     "none": 10.4324
+    },
+    "gemma4|gemma3": {
+     "up": 72.973,
+     "down": 14.0541,
+     "none": 12.973
+    },
+    "gemma3|gemma4": {
+     "up": 70.2568,
+     "down": 14.4189,
+     "none": 15.3243
+    },
+    "gemma3|gemma3": {
+     "up": 64.9324,
+     "down": 15.3784,
+     "none": 19.6892
+    }
+   }
+  }
+ ],
+ "by_interest": [
+  {
+   "label": -2,
+   "n": 13868,
+   "up": {
+    "est": 10.874,
+    "ci": [
+     4.8879,
+     17.6021
+    ],
+    "p": 0.0
+   },
+   "down": {
+    "est": -7.1243,
+    "ci": [
+     -12.1227,
+     -2.4318
+    ],
+    "p": 0.006
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 61.148,
+     "down": 13.1237,
+     "none": 25.7283
+    },
+    "gemma4|gemma3": {
+     "up": 50.7067,
+     "down": 20.5942,
+     "none": 28.6992
+    },
+    "gemma3|gemma4": {
+     "up": 68.3588,
+     "down": 17.9406,
+     "none": 13.7006
+    },
+    "gemma3|gemma3": {
+     "up": 68.7915,
+     "down": 18.2867,
+     "none": 12.9218
+    }
+   }
+  },
+  {
+   "label": -1,
+   "n": 26571,
+   "up": {
+    "est": 9.985,
+    "ci": [
+     4.7972,
+     15.1166
+    ],
+    "p": 0.0
+   },
+   "down": {
+    "est": -5.798,
+    "ci": [
+     -9.1424,
+     -2.3894
+    ],
+    "p": 0.0
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 72.3017,
+     "down": 8.2342,
+     "none": 19.4641
+    },
+    "gemma4|gemma3": {
+     "up": 63.9169,
+     "down": 13.0664,
+     "none": 23.0167
+    },
+    "gemma3|gemma4": {
+     "up": 69.3315,
+     "down": 16.2451,
+     "none": 14.4234
+    },
+    "gemma3|gemma3": {
+     "up": 70.9318,
+     "down": 15.2792,
+     "none": 13.789
+    }
+   }
+  },
+  {
+   "label": 0,
+   "n": 50440,
+   "up": {
+    "est": 5.6146,
+    "ci": [
+     1.3671,
+     9.7657
+    ],
+    "p": 0.014
+   },
+   "down": {
+    "est": -3.5369,
+    "ci": [
+     -6.232,
+     -0.8331
+    ],
+    "p": 0.012
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 83.7113,
+     "down": 4.8454,
+     "none": 11.4433
+    },
+    "gemma4|gemma3": {
+     "up": 77.954,
+     "down": 7.8985,
+     "none": 14.1475
+    },
+    "gemma3|gemma4": {
+     "up": 75.0991,
+     "down": 13.9572,
+     "none": 10.9437
+    },
+    "gemma3|gemma3": {
+     "up": 74.9564,
+     "down": 13.4734,
+     "none": 11.5702
+    }
+   }
+  },
+  {
+   "label": 1,
+   "n": 36904,
+   "up": {
+    "est": 5.3544,
+    "ci": [
+     1.2806,
+     9.3766
+    ],
+    "p": 0.01
+   },
+   "down": {
+    "est": -2.3304,
+    "ci": [
+     -4.8456,
+     0.081
+    ],
+    "p": 0.058
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 88.3048,
+     "down": 4.6282,
+     "none": 7.067
+    },
+    "gemma4|gemma3": {
+     "up": 83.6549,
+     "down": 6.7635,
+     "none": 9.5816
+    },
+    "gemma3|gemma4": {
+     "up": 77.3141,
+     "down": 11.9879,
+     "none": 10.698
+    },
+    "gemma3|gemma3": {
+     "up": 78.0186,
+     "down": 11.7928,
+     "none": 10.1886
+    }
+   }
+  },
+  {
+   "label": 2,
+   "n": 19815,
+   "up": {
+    "est": 6.3629,
+    "ci": [
+     1.7517,
+     10.8486
+    ],
+    "p": 0.01
+   },
+   "down": {
+    "est": -4.9276,
+    "ci": [
+     -7.8475,
+     -2.0883
+    ],
+    "p": 0.002
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 87.7473,
+     "down": 4.3601,
+     "none": 7.8926
+    },
+    "gemma4|gemma3": {
+     "up": 83.1046,
+     "down": 7.7513,
+     "none": 9.1441
+    },
+    "gemma3|gemma4": {
+     "up": 78.296,
+     "down": 11.2457,
+     "none": 10.4583
+    },
+    "gemma3|gemma3": {
+     "up": 80.0161,
+     "down": 9.7093,
+     "none": 10.2745
+    }
+   }
+  }
+ ],
+ "by_voting": [
+  {
+   "label": "generous",
+   "n": 42803,
+   "up": {
+    "est": 0.627,
+    "ci": [
+     -2.5694,
+     3.9052
+    ],
+    "p": 0.708
+   },
+   "down": {
+    "est": -0.1593,
+    "ci": [
+     -1.9685,
+     1.6572
+    ],
+    "p": 0.894
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 98.3179,
+     "down": 0.0,
+     "none": 1.6821
+    },
+    "gemma4|gemma3": {
+     "up": 97.1591,
+     "down": 0.243,
+     "none": 2.5979
+    },
+    "gemma3|gemma4": {
+     "up": 90.3084,
+     "down": 4.4112,
+     "none": 5.2804
+    },
+    "gemma3|gemma3": {
+     "up": 89.7767,
+     "down": 4.4949,
+     "none": 5.7284
+    }
+   }
+  },
+  {
+   "label": "typical",
+   "n": 84131,
+   "up": {
+    "est": 9.2439,
+    "ci": [
+     4.4928,
+     13.6469
+    ],
+    "p": 0.0
+   },
+   "down": {
+    "est": -6.0912,
+    "ci": [
+     -9.291,
+     -3.1304
+    ],
+    "p": 0.0
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 80.5686,
+     "down": 6.3995,
+     "none": 13.0319
+    },
+    "gemma4|gemma3": {
+     "up": 73.0233,
+     "down": 10.688,
+     "none": 16.2887
+    },
+    "gemma3|gemma4": {
+     "up": 72.3564,
+     "down": 15.8283,
+     "none": 11.8153
+    },
+    "gemma3|gemma3": {
+     "up": 74.0551,
+     "down": 14.0256,
+     "none": 11.9194
+    }
+   }
+  },
+  {
+   "label": "harsh",
+   "n": 20664,
+   "up": {
+    "est": 10.5691,
+    "ci": [
+     3.938,
+     16.5099
+    ],
+    "p": 0.0
+   },
+   "down": {
+    "est": -4.6264,
+    "ci": [
+     -9.1095,
+     0.2729
+    ],
+    "p": 0.056
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 48.5095,
+     "down": 17.6152,
+     "none": 33.8753
+    },
+    "gemma4|gemma3": {
+     "up": 37.0306,
+     "down": 25.3968,
+     "none": 37.5726
+    },
+    "gemma3|gemma4": {
+     "up": 49.8451,
+     "down": 25.6098,
+     "none": 24.5451
+    },
+    "gemma3|gemma3": {
+     "up": 48.9353,
+     "down": 28.765,
+     "none": 22.2997
+    }
+   }
+  }
+ ],
+ "by_scroll_rank": [
+  {
+   "label": 0,
+   "n": 29564,
+   "up": {
+    "est": 6.2508,
+    "ci": [
+     1.929,
+     10.1839
+    ],
+    "p": 0.004
+   },
+   "down": {
+    "est": -3.856,
+    "ci": [
+     -6.4172,
+     -1.2373
+    ],
+    "p": 0.002
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 87.2142,
+     "down": 4.4243,
+     "none": 8.3615
+    },
+    "gemma4|gemma3": {
+     "up": 83.1417,
+     "down": 7.1709,
+     "none": 9.6875
+    },
+    "gemma3|gemma4": {
+     "up": 77.0667,
+     "down": 12.2717,
+     "none": 10.6616
+    },
+    "gemma3|gemma3": {
+     "up": 79.245,
+     "down": 11.1622,
+     "none": 9.5927
+    }
+   }
+  },
+  {
+   "label": 1,
+   "n": 29507,
+   "up": {
+    "est": 6.3473,
+    "ci": [
+     1.9329,
+     10.4596
+    ],
+    "p": 0.002
+   },
+   "down": {
+    "est": -3.4584,
+    "ci": [
+     -6.6755,
+     -0.6222
+    ],
+    "p": 0.022
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 86.4579,
+     "down": 5.3545,
+     "none": 8.1876
+    },
+    "gemma4|gemma3": {
+     "up": 80.0732,
+     "down": 8.7434,
+     "none": 11.1834
+    },
+    "gemma3|gemma4": {
+     "up": 76.3151,
+     "down": 12.8661,
+     "none": 10.8189
+    },
+    "gemma3|gemma3": {
+     "up": 76.2776,
+     "down": 12.7965,
+     "none": 10.9259
+    }
+   }
+  },
+  {
+   "label": 2,
+   "n": 29512,
+   "up": {
+    "est": 5.9501,
+    "ci": [
+     1.0713,
+     10.4816
+    ],
+    "p": 0.012
+   },
+   "down": {
+    "est": -3.5511,
+    "ci": [
+     -6.5277,
+     -0.7391
+    ],
+    "p": 0.016
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 83.6406,
+     "down": 4.6354,
+     "none": 11.724
+    },
+    "gemma4|gemma3": {
+     "up": 78.219,
+     "down": 7.3191,
+     "none": 14.4619
+    },
+    "gemma3|gemma4": {
+     "up": 74.7899,
+     "down": 13.215,
+     "none": 11.9951
+    },
+    "gemma3|gemma3": {
+     "up": 75.3185,
+     "down": 12.3475,
+     "none": 12.334
+    }
+   }
+  },
+  {
+   "label": 3,
+   "n": 29487,
+   "up": {
+    "est": 6.7045,
+    "ci": [
+     1.8618,
+     11.1897
+    ],
+    "p": 0.006
+   },
+   "down": {
+    "est": -4.0578,
+    "ci": [
+     -7.2727,
+     -1.0933
+    ],
+    "p": 0.008
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 79.8291,
+     "down": 5.7651,
+     "none": 14.4059
+    },
+    "gemma4|gemma3": {
+     "up": 73.6706,
+     "down": 9.1834,
+     "none": 17.146
+    },
+    "gemma3|gemma4": {
+     "up": 74.7117,
+     "down": 13.7566,
+     "none": 11.5317
+    },
+    "gemma3|gemma3": {
+     "up": 75.2577,
+     "down": 13.1172,
+     "none": 11.6251
+    }
+   }
+  },
+  {
+   "label": 4,
+   "n": 29528,
+   "up": {
+    "est": 9.4012,
+    "ci": [
+     4.3363,
+     14.254
+    ],
+    "p": 0.0
+   },
+   "down": {
+    "est": -5.9063,
+    "ci": [
+     -9.6156,
+     -2.269
+    ],
+    "p": 0.0
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 68.9921,
+     "down": 10.3901,
+     "none": 20.6177
+    },
+    "gemma4|gemma3": {
+     "up": 59.8076,
+     "down": 16.1745,
+     "none": 24.0179
+    },
+    "gemma3|gemma4": {
+     "up": 69.1682,
+     "down": 17.3259,
+     "none": 13.5058
+    },
+    "gemma3|gemma3": {
+     "up": 69.385,
+     "down": 17.204,
+     "none": 13.411
+    }
+   }
+  }
+ ],
+ "by_half": [
+  {
+   "label": "rounds 1-7",
+   "n": 69600,
+   "up": {
+    "est": 7.1437,
+    "ci": [
+     1.1721,
+     12.9435
+    ],
+    "p": 0.014
+   },
+   "down": {
+    "est": -4.9655,
+    "ci": [
+     -8.3166,
+     -1.6057
+    ],
+    "p": 0.004
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 81.2299,
+     "down": 5.9828,
+     "none": 12.7874
+    },
+    "gemma4|gemma3": {
+     "up": 74.6092,
+     "down": 10.1207,
+     "none": 15.2701
+    },
+    "gemma3|gemma4": {
+     "up": 73.5517,
+     "down": 14.4655,
+     "none": 11.9828
+    },
+    "gemma3|gemma3": {
+     "up": 74.0747,
+     "down": 13.6379,
+     "none": 12.2874
+    }
+   }
+  },
+  {
+   "label": "rounds 8-15",
+   "n": 77998,
+   "up": {
+    "est": 6.741,
+    "ci": [
+     1.7171,
+     11.9514
+    ],
+    "p": 0.002
+   },
+   "down": {
+    "est": -3.4527,
+    "ci": [
+     -6.9814,
+     0.1089
+    ],
+    "p": 0.062
+   },
+   "rates": {
+    "gemma4|gemma4": {
+     "up": 81.2256,
+     "down": 6.2308,
+     "none": 12.5436
+    },
+    "gemma4|gemma3": {
+     "up": 75.3179,
+     "down": 9.359,
+     "none": 15.3231
+    },
+    "gemma3|gemma4": {
+     "up": 75.1769,
+     "down": 13.3706,
+     "none": 11.4525
+    },
+    "gemma3|gemma3": {
+     "up": 76.0103,
+     "down": 13.0462,
+     "none": 10.9436
+    }
+   }
+  }
+ ],
+ "leave_one_round_out": [
+  {
+   "left_out": 1,
+   "up": 7.2224,
+   "down": -4.2101
+  },
+  {
+   "left_out": 2,
+   "up": 7.1468,
+   "down": -4.1142
+  },
+  {
+   "left_out": 3,
+   "up": 7.2893,
+   "down": -4.0328
+  },
+  {
+   "left_out": 4,
+   "up": 6.7834,
+   "down": -4.027
+  },
+  {
+   "left_out": 5,
+   "up": 6.4073,
+   "down": -3.9806
+  },
+  {
+   "left_out": 6,
+   "up": 6.894,
+   "down": -4.0677
+  },
+  {
+   "left_out": 7,
+   "up": 6.6672,
+   "down": -4.3264
+  },
+  {
+   "left_out": 8,
+   "up": 7.4392,
+   "down": -4.3544
+  },
+  {
+   "left_out": 9,
+   "up": 6.9406,
+   "down": -4.3371
+  },
+  {
+   "left_out": 10,
+   "up": 6.9492,
+   "down": -4.1898
+  },
+  {
+   "left_out": 11,
+   "up": 6.3648,
+   "down": -3.7362
+  },
+  {
+   "left_out": 12,
+   "up": 7.4726,
+   "down": -4.9199
+  },
+  {
+   "left_out": 13,
+   "up": 7.0901,
+   "down": -4.0
+  },
+  {
+   "left_out": 14,
+   "up": 6.4218,
+   "down": -4.111
+  },
+  {
+   "left_out": 15,
+   "up": 6.8736,
+   "down": -4.0793
+  }
+ ],
+ "leave_one_topic_out": [
+  {
+   "left_out": "cars",
+   "up": 6.7847,
+   "down": -4.2143
+  },
+  {
+   "left_out": "cooking",
+   "up": 6.4087,
+   "down": -4.0688
+  },
+  {
+   "left_out": "farming",
+   "up": 5.6355,
+   "down": -3.4586
+  },
+  {
+   "left_out": "personal_finance",
+   "up": 7.9865,
+   "down": -5.1655
+  },
+  {
+   "left_out": "tech",
+   "up": 7.8356,
+   "down": -3.9196
+  }
+ ],
+ "per_user": {
+  "up_positive": 85,
+  "up_negative": 10,
+  "up_zero": 5,
+  "up_mean": 6.93,
+  "up_median": 6.78,
+  "up_sd": 5.79,
+  "down_negative": 84,
+  "down_positive": 15,
+  "hist_up": [
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   2,
+   8,
+   19,
+   13,
+   10,
+   18,
+   13,
+   5,
+   8,
+   3,
+   1,
+   0,
+   0,
+   0
+  ],
+  "hist_edges": [
+   -30.0,
+   -27.5,
+   -25.0,
+   -22.5,
+   -20.0,
+   -17.5,
+   -15.0,
+   -12.5,
+   -10.0,
+   -7.5,
+   -5.0,
+   -2.5,
+   0.0,
+   2.5,
+   5.0,
+   7.5,
+   10.0,
+   12.5,
+   15.0,
+   17.5,
+   20.0,
+   22.5,
+   25.0,
+   27.5,
+   30.0
+  ],
+  "values": [
+   {
+    "user_id": 0,
+    "up": 19.2412,
+    "down": -8.1301,
+    "agree": 66.2602
+   },
+   {
+    "user_id": 1,
+    "up": 3.523,
+    "down": -4.878,
+    "agree": 53.6585
+   },
+   {
+    "user_id": 2,
+    "up": 5.1491,
+    "down": -1.897,
+    "agree": 79.8103
+   },
+   {
+    "user_id": 3,
+    "up": 2.439,
+    "down": 0.813,
+    "agree": 84.9593
+   },
+   {
+    "user_id": 4,
+    "up": 1.355,
+    "down": -0.813,
+    "agree": 84.9593
+   },
+   {
+    "user_id": 5,
+    "up": 15.1762,
+    "down": -7.0461,
+    "agree": 58.1301
+   },
+   {
+    "user_id": 6,
+    "up": 12.7371,
+    "down": -4.607,
+    "agree": 63.6856
+   },
+   {
+    "user_id": 7,
+    "up": 7.8591,
+    "down": -3.252,
+    "agree": 68.4282
+   },
+   {
+    "user_id": 8,
+    "up": 5.1491,
+    "down": -1.897,
+    "agree": 45.2575
+   },
+   {
+    "user_id": 9,
+    "up": 11.3821,
+    "down": -7.0461,
+    "agree": 68.2927
+   },
+   {
+    "user_id": 10,
+    "up": 0.0,
+    "down": 0.813,
+    "agree": 91.5989
+   },
+   {
+    "user_id": 11,
+    "up": 8.9431,
+    "down": -3.252,
+    "agree": 42.4119
+   },
+   {
+    "user_id": 12,
+    "up": 9.7561,
+    "down": -9.4851,
+    "agree": 56.6396
+   },
+   {
+    "user_id": 13,
+    "up": 17.3442,
+    "down": -8.9431,
+    "agree": 63.6856
+   },
+   {
+    "user_id": 14,
+    "up": 4.878,
+    "down": -4.878,
+    "agree": 50.813
+   },
+   {
+    "user_id": 15,
+    "up": 9.7561,
+    "down": -5.6911,
+    "agree": 54.065
+   },
+   {
+    "user_id": 16,
+    "up": 7.5881,
+    "down": -8.1301,
+    "agree": 50.1355
+   },
+   {
+    "user_id": 17,
+    "up": -1.084,
+    "down": 0.813,
+    "agree": 83.8753
+   },
+   {
+    "user_id": 18,
+    "up": 14.3631,
+    "down": -7.0461,
+    "agree": 60.8401
+   },
+   {
+    "user_id": 19,
+    "up": -0.542,
+    "down": 0.542,
+    "agree": 91.0569
+   },
+   {
+    "user_id": 20,
+    "up": -2.71,
+    "down": 0.813,
+    "agree": 87.5339
+   },
+   {
+    "user_id": 21,
+    "up": 11.9241,
+    "down": -10.8401,
+    "agree": 44.3089
+   },
+   {
+    "user_id": 22,
+    "up": 3.523,
+    "down": -4.065,
+    "agree": 53.6585
+   },
+   {
+    "user_id": 23,
+    "up": 6.7751,
+    "down": -8.1301,
+    "agree": 69.5122
+   },
+   {
+    "user_id": 24,
+    "up": 11.3821,
+    "down": -0.542,
+    "agree": 73.7127
+   },
+   {
+    "user_id": 25,
+    "up": 7.8591,
+    "down": -2.439,
+    "agree": 41.7344
+   },
+   {
+    "user_id": 26,
+    "up": 10.2981,
+    "down": -6.5041,
+    "agree": 59.6206
+   },
+   {
+    "user_id": 27,
+    "up": 16.2602,
+    "down": -3.523,
+    "agree": 45.5285
+   },
+   {
+    "user_id": 28,
+    "up": 13.2791,
+    "down": -8.6721,
+    "agree": 58.5366
+   },
+   {
+    "user_id": 29,
+    "up": 15.9892,
+    "down": -6.7751,
+    "agree": 63.8211
+   },
+   {
+    "user_id": 30,
+    "up": 1.355,
+    "down": 1.897,
+    "agree": 87.1274
+   },
+   {
+    "user_id": 31,
+    "up": 9.2141,
+    "down": -10.2981,
+    "agree": 60.2981
+   },
+   {
+    "user_id": 32,
+    "up": 0.271,
+    "down": -1.355,
+    "agree": 89.7019
+   },
+   {
+    "user_id": 33,
+    "up": 11.1111,
+    "down": -5.9621,
+    "agree": 54.065
+   },
+   {
+    "user_id": 34,
+    "up": 11.1111,
+    "down": -5.4201,
+    "agree": 67.8862
+   },
+   {
+    "user_id": 35,
+    "up": 1.084,
+    "down": -1.084,
+    "agree": 91.0569
+   },
+   {
+    "user_id": 36,
+    "up": 1.084,
+    "down": 0.271,
+    "agree": 88.8889
+   },
+   {
+    "user_id": 37,
+    "up": -0.271,
+    "down": -0.542,
+    "agree": 92.2764
+   },
+   {
+    "user_id": 38,
+    "up": 1.9302,
+    "down": 0.2555,
+    "agree": 88.1954
+   },
+   {
+    "user_id": 39,
+    "up": -3.794,
+    "down": 2.168,
+    "agree": 88.3469
+   },
+   {
+    "user_id": 40,
+    "up": -2.168,
+    "down": 0.542,
+    "agree": 88.3469
+   },
+   {
+    "user_id": 41,
+    "up": 1.355,
+    "down": -0.813,
+    "agree": 84.9593
+   },
+   {
+    "user_id": 42,
+    "up": 12.7371,
+    "down": -7.8591,
+    "agree": 72.7642
+   },
+   {
+    "user_id": 43,
+    "up": 16.8022,
+    "down": -5.4201,
+    "agree": 48.5095
+   },
+   {
+    "user_id": 44,
+    "up": 15.4472,
+    "down": -7.8591,
+    "agree": 43.3604
+   },
+   {
+    "user_id": 45,
+    "up": 2.439,
+    "down": 0.813,
+    "agree": 86.5854
+   },
+   {
+    "user_id": 46,
+    "up": 6.0409,
+    "down": -3.5724,
+    "agree": 62.1438
+   },
+   {
+    "user_id": 47,
+    "up": 4.336,
+    "down": -5.4201,
+    "agree": 63.4146
+   },
+   {
+    "user_id": 48,
+    "up": 9.4851,
+    "down": -4.878,
+    "agree": 61.5176
+   },
+   {
+    "user_id": 49,
+    "up": 5.4201,
+    "down": -7.0461,
+    "agree": 50.1355
+   },
+   {
+    "user_id": 50,
+    "up": 11.3821,
+    "down": -7.5881,
+    "agree": 60.7046
+   },
+   {
+    "user_id": 51,
+    "up": 18.9702,
+    "down": -8.9431,
+    "agree": 59.4851
+   },
+   {
+    "user_id": 52,
+    "up": 4.878,
+    "down": -2.168,
+    "agree": 62.4661
+   },
+   {
+    "user_id": 53,
+    "up": 2.439,
+    "down": -0.271,
+    "agree": 92.5474
+   },
+   {
+    "user_id": 54,
+    "up": 8.1301,
+    "down": -4.336,
+    "agree": 59.6206
+   },
+   {
+    "user_id": 55,
+    "up": 3.523,
+    "down": -4.336,
+    "agree": 72.8997
+   },
+   {
+    "user_id": 56,
+    "up": 2.439,
+    "down": -3.523,
+    "agree": 76.4228
+   },
+   {
+    "user_id": 57,
+    "up": 16.5312,
+    "down": -10.0271,
+    "agree": 49.0515
+   },
+   {
+    "user_id": 58,
+    "up": -1.626,
+    "down": -2.168,
+    "agree": 83.8753
+   },
+   {
+    "user_id": 59,
+    "up": 10.0271,
+    "down": -5.6911,
+    "agree": 67.2087
+   },
+   {
+    "user_id": 60,
+    "up": 11.1111,
+    "down": -3.794,
+    "agree": 39.7019
+   },
+   {
+    "user_id": 61,
+    "up": -1.897,
+    "down": -0.0,
+    "agree": 85.7724
+   },
+   {
+    "user_id": 62,
+    "up": 5.6911,
+    "down": -2.71,
+    "agree": 68.9702
+   },
+   {
+    "user_id": 63,
+    "up": -1.084,
+    "down": 1.355,
+    "agree": 88.4824
+   },
+   {
+    "user_id": 64,
+    "up": 7.8591,
+    "down": -6.5041,
+    "agree": 62.8726
+   },
+   {
+    "user_id": 65,
+    "up": 5.9621,
+    "down": -6.2331,
+    "agree": 62.6016
+   },
+   {
+    "user_id": 66,
+    "up": 1.355,
+    "down": -1.084,
+    "agree": 81.3008
+   },
+   {
+    "user_id": 67,
+    "up": 6.2331,
+    "down": -3.794,
+    "agree": 61.7886
+   },
+   {
+    "user_id": 68,
+    "up": 6.7751,
+    "down": -8.1301,
+    "agree": 70.3252
+   },
+   {
+    "user_id": 69,
+    "up": 15.4472,
+    "down": -4.878,
+    "agree": 48.2385
+   },
+   {
+    "user_id": 70,
+    "up": 8.6721,
+    "down": -8.1301,
+    "agree": 45.935
+   },
+   {
+    "user_id": 71,
+    "up": 2.981,
+    "down": -1.355,
+    "agree": 95.2575
+   },
+   {
+    "user_id": 72,
+    "up": 4.336,
+    "down": -2.71,
+    "agree": 88.0759
+   },
+   {
+    "user_id": 73,
+    "up": 7.0461,
+    "down": -3.794,
+    "agree": 63.1436
+   },
+   {
+    "user_id": 74,
+    "up": 12.1951,
+    "down": -5.6911,
+    "agree": 68.6992
+   },
+   {
+    "user_id": 75,
+    "up": 0.0,
+    "down": -0.271,
+    "agree": 91.4634
+   },
+   {
+    "user_id": 76,
+    "up": 3.523,
+    "down": -2.168,
+    "agree": 72.6287
+   },
+   {
+    "user_id": 77,
+    "up": 0.0,
+    "down": 1.084,
+    "agree": 59.0786
+   },
+   {
+    "user_id": 78,
+    "up": 1.355,
+    "down": 0.271,
+    "agree": 76.2873
+   },
+   {
+    "user_id": 79,
+    "up": 0.0,
+    "down": -0.542,
+    "agree": 84.2818
+   },
+   {
+    "user_id": 80,
+    "up": 10.5691,
+    "down": -5.1491,
+    "agree": 62.7371
+   },
+   {
+    "user_id": 81,
+    "up": 1.084,
+    "down": -3.523,
+    "agree": 67.3442
+   },
+   {
+    "user_id": 82,
+    "up": 4.065,
+    "down": -4.336,
+    "agree": 80.7588
+   },
+   {
+    "user_id": 83,
+    "up": 9.4851,
+    "down": -7.3171,
+    "agree": 63.2791
+   },
+   {
+    "user_id": 84,
+    "up": -0.542,
+    "down": -0.271,
+    "agree": 91.4634
+   },
+   {
+    "user_id": 85,
+    "up": 9.7561,
+    "down": -8.9431,
+    "agree": 61.1111
+   },
+   {
+    "user_id": 86,
+    "up": 13.8211,
+    "down": -9.7561,
+    "agree": 46.477
+   },
+   {
+    "user_id": 87,
+    "up": 8.4011,
+    "down": -5.1491,
+    "agree": 71.5447
+   },
+   {
+    "user_id": 88,
+    "up": 17.6152,
+    "down": -11.6531,
+    "agree": 52.5745
+   },
+   {
+    "user_id": 89,
+    "up": 10.0271,
+    "down": -6.5041,
+    "agree": 63.2791
+   },
+   {
+    "user_id": 90,
+    "up": 8.4011,
+    "down": -6.7751,
+    "agree": 54.7425
+   },
+   {
+    "user_id": 91,
+    "up": 3.523,
+    "down": -5.4201,
+    "agree": 60.9756
+   },
+   {
+    "user_id": 92,
+    "up": 4.607,
+    "down": -5.1491,
+    "agree": 73.1707
+   },
+   {
+    "user_id": 93,
+    "up": 12.4661,
+    "down": -1.355,
+    "agree": 42.2764
+   },
+   {
+    "user_id": 94,
+    "up": 21.1382,
+    "down": -12.4661,
+    "agree": 65.7182
+   },
+   {
+    "user_id": 95,
+    "up": 0.0,
+    "down": 0.813,
+    "agree": 94.3089
+   },
+   {
+    "user_id": 96,
+    "up": 8.6721,
+    "down": -3.523,
+    "agree": 37.1274
+   },
+   {
+    "user_id": 97,
+    "up": 8.9431,
+    "down": -8.6721,
+    "agree": 63.5501
+   },
+   {
+    "user_id": 98,
+    "up": 4.336,
+    "down": -1.355,
+    "agree": 89.4309
+   },
+   {
+    "user_id": 99,
+    "up": 7.8591,
+    "down": -5.6911,
+    "agree": 62.7371
+   }
+  ],
+  "sign_test_p": 5.762323641301719e-16
+ },
+ "by_position": {
+  "rank": {
+   "gemma4:e2b": {
+    "0": 85.2,
+    "1": 83.3,
+    "2": 80.9,
+    "3": 76.7,
+    "4": 64.4
+   },
+   "gemma3:1b": {
+    "0": 78.2,
+    "1": 76.3,
+    "2": 75.1,
+    "3": 75.0,
+    "4": 69.3
+   }
+  },
+  "pos": {
+   "gemma4:e2b": {
+    "0": 78.0,
+    "1": 78.1,
+    "2": 77.9,
+    "3": 77.7,
+    "4": 77.6,
+    "5": 78.3,
+    "6": 78.1,
+    "7": 78.6,
+    "8": 78.1,
+    "9": 78.7
+   },
+   "gemma3:1b": {
+    "0": 75.0,
+    "1": 75.2,
+    "2": 74.7,
+    "3": 74.5,
+    "4": 74.9,
+    "5": 75.0,
+    "6": 74.1,
+    "7": 75.1,
+    "8": 74.6,
+    "9": 74.3
+   }
+  }
+ },
+ "nothing_by_interest": {
+  "gemma4:e2b": {
+   "-2": 27.2,
+   "-1": 21.2,
+   "0": 12.8,
+   "1": 8.3,
+   "2": 8.5
+  },
+  "gemma3:1b": {
+   "-2": 13.3,
+   "-1": 14.1,
+   "0": 11.3,
+   "1": 10.4,
+   "2": 10.4
+  }
+ },
+ "down_by_interest": {
+  "gemma4:e2b": {
+   "-2": 16.9,
+   "-1": 10.7,
+   "0": 6.4,
+   "1": 5.7,
+   "2": 6.1
+  },
+  "gemma3:1b": {
+   "-2": 18.1,
+   "-1": 15.8,
+   "0": 13.7,
+   "1": 11.9,
+   "2": 10.5
+  }
+ },
+ "up_by_interest": {
+  "gemma4:e2b": {
+   "-2": 55.9,
+   "-1": 68.1,
+   "0": 80.8,
+   "1": 86.0,
+   "2": 85.4
+  },
+  "gemma3:1b": {
+   "-2": 68.6,
+   "-1": 70.1,
+   "0": 75.0,
+   "1": 77.7,
+   "2": 79.2
+  }
+ },
+ "agreement": {
+  "pairs": 73798,
+  "same_pct": 67.8989,
+  "kappa": 0.1749704931461478,
+  "crosstab": {
+   "like": {
+    "like": 45353,
+    "dislike": 6139,
+    "nothing": 6148
+   },
+   "dislike": {
+    "like": 2503,
+    "dislike": 2826,
+    "nothing": 513
+   },
+   "nothing": {
+    "like": 7311,
+    "dislike": 1076,
+    "nothing": 1929
+   }
+  },
+  "by_topic": {
+   "cars": 62.5135,
+   "cooking": 77.3649,
+   "farming": 65.8311,
+   "personal_finance": 70.6056,
+   "tech": 63.2162
+  },
+  "per_user_hist": [
+   5,
+   7,
+   9,
+   7,
+   21,
+   10,
+   7,
+   3,
+   8,
+   12,
+   8,
+   1
+  ]
+ },
+ "features_by_author": {
+  "words": {
+   "gemma4": 169.05,
+   "gemma3": 210.76
+  },
+  "sentences": {
+   "gemma4": 10.28,
+   "gemma3": 16.12
+  },
+  "words_per_sentence": {
+   "gemma4": 16.69,
+   "gemma3": 13.37
+  },
+  "paragraphs": {
+   "gemma4": 2.41,
+   "gemma3": 2.42
+  },
+  "exclamations_per_100w": {
+   "gemma4": 0.54,
+   "gemma3": 0.19
+  },
+  "questions_per_100w": {
+   "gemma4": 1.04,
+   "gemma3": 1.14
+  },
+  "first_person_per_100w": {
+   "gemma4": 5.89,
+   "gemma3": 5.18
+  },
+  "you_per_100w": {
+   "gemma4": 1.12,
+   "gemma3": 1.13
+  },
+  "uses_markdown": {
+   "gemma4": 0.24,
+   "gemma3": 0.76
+  },
+  "list_lines": {
+   "gemma4": 0.07,
+   "gemma3": 0.09
+  },
+  "title_words": {
+   "gemma4": 11.17,
+   "gemma3": 8.11
+  },
+  "title_is_question": {
+   "gemma4": 0.22,
+   "gemma3": 0.19
+  },
+  "opens_casually": {
+   "gemma4": 0.8,
+   "gemma3": 0.83
+  },
+  "long_words_share": {
+   "gemma4": 0.12,
+   "gemma3": 0.12
+  }
+ },
+ "feature_labels": {
+  "words": "words in the post",
+  "sentences": "sentences",
+  "words_per_sentence": "words per sentence",
+  "paragraphs": "paragraphs",
+  "exclamations_per_100w": "exclamation marks per 100 words",
+  "questions_per_100w": "question marks per 100 words",
+  "first_person_per_100w": "I / me / my per 100 words",
+  "you_per_100w": "you / your per 100 words",
+  "uses_markdown": "uses bold, headings or bullet formatting",
+  "list_lines": "list lines",
+  "title_words": "words in the title",
+  "title_is_question": "title is a question",
+  "opens_casually": "opens with okay / so / hey / honestly",
+  "long_words_share": "share of long words (8+ letters)"
+ },
+ "words_hist": {
+  "gemma4": [
+   0,
+   0,
+   0,
+   15,
+   67,
+   89,
+   56,
+   45,
+   34,
+   28,
+   17,
+   9,
+   7,
+   1,
+   0,
+   0,
+   0,
+   1,
+   0,
+   0
+  ],
+  "gemma3": [
+   1,
+   1,
+   4,
+   4,
+   10,
+   41,
+   48,
+   60,
+   58,
+   50,
+   35,
+   23,
+   16,
+   10,
+   4,
+   1,
+   2,
+   1,
+   0,
+   0
+  ]
+ },
+ "words_hist_edges": [
+  0,
+  25,
+  50,
+  75,
+  100,
+  125,
+  150,
+  175,
+  200,
+  225,
+  250,
+  275,
+  300,
+  325,
+  350,
+  375,
+  400,
+  425,
+  450,
+  475,
+  500
+ ],
+ "what_each_crowd_rewards": {
+  "gemma4": {
+   "words": {
+    "coef": 2.128,
+    "lo": -3.3192,
+    "hi": 7.5752
+   },
+   "sentences": {
+    "coef": -0.3038,
+    "lo": -6.4669,
+    "hi": 5.8594
+   },
+   "words_per_sentence": {
+    "coef": 3.9179,
+    "lo": 0.3325,
+    "hi": 7.5034
+   },
+   "paragraphs": {
+    "coef": 2.2391,
+    "lo": 0.5295,
+    "hi": 3.9488
+   },
+   "exclamations_per_100w": {
+    "coef": 1.6853,
+    "lo": -0.4495,
+    "hi": 3.8202
+   },
+   "questions_per_100w": {
+    "coef": -1.5708,
+    "lo": -3.0403,
+    "hi": -0.1014
+   },
+   "first_person_per_100w": {
+    "coef": -2.5737,
+    "lo": -4.0399,
+    "hi": -1.1075
+   },
+   "you_per_100w": {
+    "coef": 2.0979,
+    "lo": 0.2455,
+    "hi": 3.9502
+   },
+   "uses_markdown": {
+    "coef": 0.3745,
+    "lo": -0.7511,
+    "hi": 1.5001
+   },
+   "list_lines": {
+    "coef": 1.0695,
+    "lo": 0.3474,
+    "hi": 1.7917
+   },
+   "title_words": {
+    "coef": 1.5728,
+    "lo": 0.5779,
+    "hi": 2.5676
+   },
+   "title_is_question": {
+    "coef": -2.8484,
+    "lo": -4.6378,
+    "hi": -1.0591
+   },
+   "opens_casually": {
+    "coef": 0.5636,
+    "lo": -1.3686,
+    "hi": 2.4959
+   },
+   "long_words_share": {
+    "coef": -0.1441,
+    "lo": -1.677,
+    "hi": 1.3888
+   },
+   "_r2": 0.214
+  },
+  "gemma3": {
+   "words": {
+    "coef": -4.1273,
+    "lo": -11.4936,
+    "hi": 3.2389
+   },
+   "sentences": {
+    "coef": -1.8293,
+    "lo": -10.5093,
+    "hi": 6.8507
+   },
+   "words_per_sentence": {
+    "coef": -2.645,
+    "lo": -6.6915,
+    "hi": 1.4015
+   },
+   "paragraphs": {
+    "coef": -0.0272,
+    "lo": -3.2209,
+    "hi": 3.1664
+   },
+   "exclamations_per_100w": {
+    "coef": 5.9499,
+    "lo": 3.4063,
+    "hi": 8.4935
+   },
+   "questions_per_100w": {
+    "coef": 1.2572,
+    "lo": -0.3289,
+    "hi": 2.8432
+   },
+   "first_person_per_100w": {
+    "coef": -1.6174,
+    "lo": -3.5565,
+    "hi": 0.3218
+   },
+   "you_per_100w": {
+    "coef": -0.7819,
+    "lo": -3.1841,
+    "hi": 1.6203
+   },
+   "uses_markdown": {
+    "coef": 1.1608,
+    "lo": -0.3949,
+    "hi": 2.7165
+   },
+   "list_lines": {
+    "coef": 2.5176,
+    "lo": 1.0429,
+    "hi": 3.9924
+   },
+   "title_words": {
+    "coef": -0.2522,
+    "lo": -1.5444,
+    "hi": 1.0401
+   },
+   "title_is_question": {
+    "coef": -1.018,
+    "lo": -3.241,
+    "hi": 1.205
+   },
+   "opens_casually": {
+    "coef": 3.6924,
+    "lo": 1.6499,
+    "hi": 5.7349
+   },
+   "long_words_share": {
+    "coef": -3.8768,
+    "lo": -6.2449,
+    "hi": -1.5087
+   },
+   "_r2": 0.208
+  }
+ },
+ "style_explains": {
+  "post_level_dd": 6.9296,
+  "explained_by_features": -0.5257,
+  "left_after_features": 7.4553,
+  "share_explained": -0.076
+ },
+ "reasons": {
+  "gemma4": {
+   "mean_words": 2.9,
+   "like": [
+    "good",
+    "sense",
+    "practical",
+    "relatable",
+    "sounds",
+    "advice",
+    "real",
+    "need",
+    "matters",
+    "simple",
+    "needed",
+    "struggle",
+    "key",
+    "frustration",
+    "frustrating"
+   ],
+   "dislike": [
+    "whining",
+    "vague",
+    "fluff",
+    "drama",
+    "time",
+    "fixing",
+    "rambling",
+    "without",
+    "text",
+    "clickbait",
+    "fake",
+    "waste",
+    "walls",
+    "hype",
+    "fuss"
+   ],
+   "nothing": [
+    "vague",
+    "fluff",
+    "rambling",
+    "whining",
+    "text",
+    "noise",
+    "drama",
+    "relevant",
+    "venting",
+    "generic",
+    "sounds",
+    "irrelevant",
+    "topic",
+    "hype",
+    "boring"
+   ],
+   "own_vs_other_like_words": [
+    [
+     "physics",
+     4.91,
+     147,
+     0
+    ],
+    [
+     "stewardship",
+     4.53,
+     100,
+     0
+    ],
+    [
+     "forces",
+     4.4,
+     88,
+     0
+    ],
+    [
+     "hack",
+     4.27,
+     77,
+     0
+    ],
+    [
+     "foundational",
+     4.2,
+     72,
+     0
+    ],
+    [
+     "ownership",
+     4.19,
+     71,
+     0
+    ],
+    [
+     "cleaner",
+     4.19,
+     71,
+     0
+    ],
+    [
+     "psychological",
+     4.17,
+     70,
+     0
+    ],
+    [
+     "simplicity",
+     4.16,
+     69,
+     0
+    ],
+    [
+     "store",
+     4.15,
+     68,
+     0
+    ],
+    [
+     "brands",
+     4.15,
+     68,
+     0
+    ],
+    [
+     "curated",
+     4.13,
+     67,
+     0
+    ]
+   ],
+   "other_vs_own_like_words": [
+    [
+     "grounded",
+     5.19,
+     0,
+     163
+    ],
+    [
+     "audit",
+     4.82,
+     0,
+     112
+    ],
+    [
+     "dry",
+     4.63,
+     0,
+     93
+    ],
+    [
+     "streamlined",
+     4.6,
+     0,
+     90
+    ],
+    [
+     "localized",
+     4.48,
+     0,
+     80
+    ],
+    [
+     "mixing",
+     4.47,
+     0,
+     79
+    ],
+    [
+     "upkeep",
+     4.47,
+     0,
+     79
+    ],
+    [
+     "impact",
+     4.41,
+     0,
+     74
+    ],
+    [
+     "software",
+     4.35,
+     0,
+     70
+    ],
+    [
+     "payments",
+     4.29,
+     0,
+     66
+    ],
+    [
+     "inspiring",
+     4.28,
+     0,
+     65
+    ],
+    [
+     "unsettling",
+     4.22,
+     0,
+     61
+    ]
+   ]
+  },
+  "gemma3": {
+   "mean_words": 18.2,
+   "like": [
+    "good",
+    "relatable",
+    "bit",
+    "little",
+    "sounds",
+    "interesting",
+    "always",
+    "even",
+    "seriously",
+    "struggle",
+    "point",
+    "someone",
+    "perspective",
+    "problem",
+    "especially"
+   ],
+   "dislike": [
+    "seriously",
+    "bit",
+    "feels",
+    "little",
+    "frustrating",
+    "sounds",
+    "time",
+    "waste",
+    "lot",
+    "problem",
+    "trying",
+    "don",
+    "dramatic",
+    "think",
+    "incredibly"
+   ],
+   "nothing": [
+    "bit",
+    "interesting",
+    "little",
+    "good",
+    "perspective",
+    "sounds",
+    "let",
+    "though",
+    "feels",
+    "see",
+    "point",
+    "focused",
+    "pretty",
+    "honestly",
+    "practical"
+   ],
+   "own_vs_other_like_words": [
+    [
+     "heartfelt",
+     4.55,
+     88,
+     0
+    ],
+    [
+     "gravel",
+     4.2,
+     62,
+     0
+    ],
+    [
+     "pie",
+     4.16,
+     120,
+     1
+    ],
+    [
+     "pollock",
+     4.14,
+     58,
+     0
+    ],
+    [
+     "cinnamon",
+     4.14,
+     58,
+     0
+    ],
+    [
+     "jackson",
+     4.14,
+     58,
+     0
+    ],
+    [
+     "apples",
+     4.12,
+     57,
+     0
+    ],
+    [
+     "cherry",
+     4.07,
+     54,
+     0
+    ],
+    [
+     "whisk",
+     3.98,
+     200,
+     3
+    ],
+    [
+     "cancellation",
+     3.89,
+     45,
+     0
+    ],
+    [
+     "drying",
+     3.82,
+     42,
+     0
+    ],
+    [
+     "subaru",
+     3.82,
+     42,
+     0
+    ]
+   ],
+   "other_vs_own_like_words": [
+    [
+     "peeler",
+     5.02,
+     0,
+     160
+    ],
+    [
+     "lasagna",
+     4.57,
+     0,
+     101
+    ],
+    [
+     "congrats",
+     4.31,
+     0,
+     78
+    ],
+    [
+     "nesting",
+     4.23,
+     0,
+     72
+    ],
+    [
+     "psychological",
+     4.18,
+     1,
+     137
+    ],
+    [
+     "chamel",
+     4.16,
+     0,
+     67
+    ],
+    [
+     "rolling",
+     3.87,
+     0,
+     50
+    ],
+    [
+     "bookkeeping",
+     3.87,
+     0,
+     50
+    ],
+    [
+     "knife",
+     3.86,
+     4,
+     250
+    ],
+    [
+     "pin",
+     3.81,
+     0,
+     47
+    ],
+    [
+     "peanut",
+     3.7,
+     0,
+     42
+    ],
+    [
+     "hungry",
+     3.7,
+     0,
+     42
+    ]
+   ]
+  }
+ },
+ "posts_loved": {
+  "gemma4": [
+   {
+    "id": "201|r0|personal_finance|gemma3:1b",
+    "a": "gemma3",
+    "t": "personal_finance",
+    "r": 1,
+    "ti": "The Quiet Savings \u2013 It Wasn't a Big Sum, But It Felt Like a Mountain",
+    "g4": 100,
+    "g3": 0,
+    "gap": 100
+   },
+   {
+    "id": "201|r0|personal_finance|gemma4:e2b",
+    "a": "gemma4",
+    "t": "personal_finance",
+    "r": 1,
+    "ti": "Finally cutting the cord on subscriptions - some real savings!",
+    "g4": 100,
+    "g3": 83,
+    "gap": 17
+   },
+   {
+    "id": "201|r1|personal_finance|gemma4:e2b",
+    "a": "gemma4",
+    "t": "personal_finance",
+    "r": 1,
+    "ti": "Night shift life and splitting bills with my partner - a little strategy that helped",
+    "g4": 100,
+    "g3": 86,
+    "gap": 14
+   },
+   {
+    "id": "201|r3|personal_finance|gemma4:e2b",
+    "a": "gemma4",
+    "t": "personal_finance",
+    "r": 1,
+    "ti": "How I Got a Raise and Managed Not to Immediately Upgrade My Lifestyle",
+    "g4": 100,
+    "g3": 53,
+    "gap": 47
+   },
+   {
+    "id": "201|r2|tech|gemma4:e2b",
+    "a": "gemma4",
+    "t": "tech",
+    "r": 1,
+    "ti": "The endless cycle of 'repair or replace' with these new gadgets is driving me nuts.",
+    "g4": 100,
+    "g3": -30,
+    "gap": 130
+   },
+   {
+    "id": "202|r0|farming|gemma4:e2b",
+    "a": "gemma4",
+    "t": "farming",
+    "r": 2,
+    "ti": "Just managed to resurrect the old John Deere without emptying the savings account (almost).",
+    "g4": 100,
+    "g3": 100,
+    "gap": 0
+   },
+   {
+    "id": "202|r0|personal_finance|gemma3:1b",
+    "a": "gemma3",
+    "t": "personal_finance",
+    "r": 2,
+    "ti": "The Unexpected Debt Trap",
+    "g4": 100,
+    "g3": 64,
+    "gap": 36
+   },
+   {
+    "id": "202|r0|personal_finance|gemma4:e2b",
+    "a": "gemma4",
+    "t": "personal_finance",
+    "r": 2,
+    "ti": "Just got out of a car loan that turned out to be a mistake - lesson learned!",
+    "g4": 100,
+    "g3": 100,
+    "gap": 0
+   }
+  ],
+  "gemma3": [
+   {
+    "id": "201|r1|cooking|gemma3:1b",
+    "a": "gemma3",
+    "t": "cooking",
+    "r": 1,
+    "ti": "Rice: Seriously, Don\u2019t Overcook It",
+    "g4": 63,
+    "g3": 100,
+    "gap": -37
+   },
+   {
+    "id": "201|r2|cooking|gemma3:1b",
+    "a": "gemma3",
+    "t": "cooking",
+    "r": 1,
+    "ti": "Okay, seriously, the humble whisk is a game-changer.",
+    "g4": 16,
+    "g3": 100,
+    "gap": -84
+   },
+   {
+    "id": "201|r2|farming|gemma3:1b",
+    "a": "gemma3",
+    "t": "farming",
+    "r": 1,
+    "ti": "Sunshine and Squash",
+    "g4": 88,
+    "g3": 100,
+    "gap": -12
+   },
+   {
+    "id": "201|r3|farming|gemma3:1b",
+    "a": "gemma3",
+    "t": "farming",
+    "r": 1,
+    "ti": "Dusty Roads and a Little Bit of Sunshine",
+    "g4": 64,
+    "g3": 100,
+    "gap": -36
+   },
+   {
+    "id": "201|r4|personal_finance|gemma4:e2b",
+    "a": "gemma4",
+    "t": "personal_finance",
+    "r": 1,
+    "ti": "Finally nailed a monthly budget! \ud83c\udf89",
+    "g4": 79,
+    "g3": 100,
+    "gap": -21
+   },
+   {
+    "id": "202|r1|cars|gemma4:e2b",
+    "a": "gemma4",
+    "t": "cars",
+    "r": 2,
+    "ti": "Winter Tires: Worth the Hype or Just a Winter Headache?",
+    "g4": 97,
+    "g3": 100,
+    "gap": -3
+   },
+   {
+    "id": "202|r4|cooking|gemma3:1b",
+    "a": "gemma3",
+    "t": "cooking",
+    "r": 2,
+    "ti": "Weeknight Wonder: 20-Minute Magic!",
+    "g4": 94,
+    "g3": 100,
+    "gap": -6
+   },
+   {
+    "id": "202|r4|cooking|gemma4:e2b",
+    "a": "gemma4",
+    "t": "cooking",
+    "r": 2,
+    "ti": "Anyone got a go-to for a super fast weeknight dinner (under 20 mins)? \ud83d\ude29",
+    "g4": 61,
+    "g3": 100,
+    "gap": -39
+   }
+  ]
+ },
+ "posts_hated": {
+  "gemma4": [
+   {
+    "id": "208|r1|cars|gemma3:1b",
+    "a": "gemma3",
+    "t": "cars",
+    "r": 8,
+    "ti": "DIY Brake Job - Proceed with Caution, Seriously",
+    "g4": -63,
+    "g3": -58,
+    "gap": -5
+   },
+   {
+    "id": "205|r2|tech|gemma3:1b",
+    "a": "gemma3",
+    "t": "tech",
+    "r": 5,
+    "ti": "Wireless Earbuds \u2013 Seriously, Help?",
+    "g4": -50,
+    "g3": 66,
+    "gap": -116
+   },
+   {
+    "id": "203|r3|personal_finance|gemma3:1b",
+    "a": "gemma3",
+    "t": "personal_finance",
+    "r": 3,
+    "ti": "Seriously, this whole thing is driving me mad.",
+    "g4": -45,
+    "g3": -14,
+    "gap": -31
+   },
+   {
+    "id": "209|r3|cooking|gemma3:1b",
+    "a": "gemma3",
+    "t": "cooking",
+    "r": 9,
+    "ti": "Seriously, this whole meal prep thing is driving me crazy.",
+    "g4": -44,
+    "g3": 70,
+    "gap": -114
+   },
+   {
+    "id": "210|r1|tech|gemma3:1b",
+    "a": "gemma3",
+    "t": "tech",
+    "r": 10,
+    "ti": "Seriously, what\u2019s happening with these earbuds?",
+    "g4": -39,
+    "g3": 98,
+    "gap": -137
+   },
+   {
+    "id": "210|r3|cars|gemma3:1b",
+    "a": "gemma3",
+    "t": "cars",
+    "r": 10,
+    "ti": "Seriously, this is a nightmare.",
+    "g4": -37,
+    "g3": 46,
+    "gap": -83
+   },
+   {
+    "id": "202|r0|cars|gemma4:e2b",
+    "a": "gemma4",
+    "t": "cars",
+    "r": 2,
+    "ti": "Seriously regretting buying this high-mileage truck.",
+    "g4": -36,
+    "g3": -40,
+    "gap": 4
+   },
+   {
+    "id": "215|r1|cooking|gemma3:1b",
+    "a": "gemma3",
+    "t": "cooking",
+    "r": 15,
+    "ti": "Seriously, this bread is a disaster.",
+    "g4": -33,
+    "g3": -40,
+    "gap": 7
+   }
+  ],
+  "gemma3": [
+   {
+    "id": "207|r4|tech|gemma4:e2b",
+    "a": "gemma4",
+    "t": "tech",
+    "r": 7,
+    "ti": "These Wireless Earbuds Are a Real Headache!",
+    "g4": 48,
+    "g3": -100,
+    "gap": 148
+   },
+   {
+    "id": "213|r4|farming|gemma4:e2b",
+    "a": "gemma4",
+    "t": "farming",
+    "r": 13,
+    "ti": "Crop Insurance Paperwork: Seriously, Stop Making This a Nightmare",
+    "g4": 96,
+    "g3": -100,
+    "gap": 196
+   },
+   {
+    "id": "201|r4|cars|gemma3:1b",
+    "a": "gemma3",
+    "t": "cars",
+    "r": 1,
+    "ti": "Dealer Markups & Add-ons \u2013 Let\u2019s Talk",
+    "g4": 98,
+    "g3": -98,
+    "gap": 196
+   },
+   {
+    "id": "207|r1|cars|gemma4:e2b",
+    "a": "gemma4",
+    "t": "cars",
+    "r": 7,
+    "ti": "Seriously pissed about this mechanic rip-off in [City Name]",
+    "g4": 63,
+    "g3": -98,
+    "gap": 161
+   },
+   {
+    "id": "211|r1|personal_finance|gemma4:e2b",
+    "a": "gemma4",
+    "t": "personal_finance",
+    "r": 11,
+    "ti": "The Raise Trap: Why Getting a Raise Isn't Always a Win (Especially Post-Divorce)",
+    "g4": 100,
+    "g3": -96,
+    "gap": 196
+   },
+   {
+    "id": "215|r0|tech|gemma3:1b",
+    "a": "gemma3",
+    "t": "tech",
+    "r": 15,
+    "ti": "Seriously, these earbuds are a nightmare.",
+    "g4": 40,
+    "g3": -96,
+    "gap": 136
+   },
+   {
+    "id": "213|r4|tech|gemma3:1b",
+    "a": "gemma3",
+    "t": "tech",
+    "r": 13,
+    "ti": "Okay, let\u2019s talk about the Mac vs. Windows\u2026 seriously.",
+    "g4": 28,
+    "g3": -95,
+    "gap": 123
+   },
+   {
+    "id": "201|r0|cooking|gemma3:1b",
+    "a": "gemma3",
+    "t": "cooking",
+    "r": 1,
+    "ti": "Cast Iron \u2013 My New Nightmare",
+    "g4": 3,
+    "g3": -94,
+    "gap": 97
+   }
+  ]
+ },
+ "posts_disputed": {
+  "gemma4_more": [
+   {
+    "id": "201|r4|cars|gemma3:1b",
+    "a": "gemma3",
+    "t": "cars",
+    "r": 1,
+    "ti": "Dealer Markups & Add-ons \u2013 Let\u2019s Talk",
+    "g4": 98,
+    "g3": -98,
+    "gap": 196
+   },
+   {
+    "id": "211|r1|personal_finance|gemma4:e2b",
+    "a": "gemma4",
+    "t": "personal_finance",
+    "r": 11,
+    "ti": "The Raise Trap: Why Getting a Raise Isn't Always a Win (Especially Post-Divorce)",
+    "g4": 100,
+    "g3": -96,
+    "gap": 196
+   },
+   {
+    "id": "213|r4|farming|gemma4:e2b",
+    "a": "gemma4",
+    "t": "farming",
+    "r": 13,
+    "ti": "Crop Insurance Paperwork: Seriously, Stop Making This a Nightmare",
+    "g4": 96,
+    "g3": -100,
+    "gap": 196
+   },
+   {
+    "id": "204|r4|cars|gemma4:e2b",
+    "a": "gemma4",
+    "t": "cars",
+    "r": 4,
+    "ti": "Seriously fed up with these shady mechanics lately",
+    "g4": 100,
+    "g3": -90,
+    "gap": 190
+   },
+   {
+    "id": "213|r4|cars|gemma4:e2b",
+    "a": "gemma4",
+    "t": "cars",
+    "r": 13,
+    "ti": "Anyone else feeling ripped off by dealer add-ons lately?",
+    "g4": 96,
+    "g3": -88,
+    "gap": 184
+   },
+   {
+    "id": "211|r4|tech|gemma4:e2b",
+    "a": "gemma4",
+    "t": "tech",
+    "r": 11,
+    "ti": "My Smart Home Dream Just Ended in Expensive Frustration",
+    "g4": 80,
+    "g3": -92,
+    "gap": 172
+   },
+   {
+    "id": "203|r1|personal_finance|gemma4:e2b",
+    "a": "gemma4",
+    "t": "personal_finance",
+    "r": 3,
+    "ti": "Seriously fed up with this surprise medical bill negotiation nonsense",
+    "g4": 96,
+    "g3": -74,
+    "gap": 170
+   },
+   {
+    "id": "215|r1|personal_finance|gemma4:e2b",
+    "a": "gemma4",
+    "t": "personal_finance",
+    "r": 15,
+    "ti": "The 'Helping' Trap: Why I think we need to re-evaluate how we manage aging parents' finances",
+    "g4": 100,
+    "g3": -70,
+    "gap": 170
+   }
+  ],
+  "gemma3_more": [
+   {
+    "id": "210|r1|tech|gemma3:1b",
+    "a": "gemma3",
+    "t": "tech",
+    "r": 10,
+    "ti": "Seriously, what\u2019s happening with these earbuds?",
+    "g4": -39,
+    "g3": 98,
+    "gap": -137
+   },
+   {
+    "id": "205|r2|tech|gemma4:e2b",
+    "a": "gemma4",
+    "t": "tech",
+    "r": 5,
+    "ti": "Seriously struggling with these wireless earbuds that just won't last.",
+    "g4": -27,
+    "g3": 93,
+    "gap": -120
+   },
+   {
+    "id": "206|r0|cooking|gemma3:1b",
+    "a": "gemma3",
+    "t": "cooking",
+    "r": 6,
+    "ti": "Rice - Seriously, What\u2019s the Secret?",
+    "g4": -20,
+    "g3": 98,
+    "gap": -118
+   },
+   {
+    "id": "205|r2|tech|gemma3:1b",
+    "a": "gemma3",
+    "t": "tech",
+    "r": 5,
+    "ti": "Wireless Earbuds \u2013 Seriously, Help?",
+    "g4": -50,
+    "g3": 66,
+    "gap": -116
+   },
+   {
+    "id": "209|r3|cooking|gemma3:1b",
+    "a": "gemma3",
+    "t": "cooking",
+    "r": 9,
+    "ti": "Seriously, this whole meal prep thing is driving me crazy.",
+    "g4": -44,
+    "g3": 70,
+    "gap": -114
+   },
+   {
+    "id": "206|r4|cars|gemma4:e2b",
+    "a": "gemma4",
+    "t": "cars",
+    "r": 6,
+    "ti": "Just bought my first truck! (High mileage, but hey, it's mine!)",
+    "g4": -13,
+    "g3": 99,
+    "gap": -112
+   },
+   {
+    "id": "212|r4|tech|gemma4:e2b",
+    "a": "gemma4",
+    "t": "tech",
+    "r": 12,
+    "ti": "Help, I'm drowning in streaming services. What should I subscribe to next?",
+    "g4": -6,
+    "g3": 100,
+    "gap": -106
+   },
+   {
+    "id": "212|r4|cooking|gemma4:e2b",
+    "a": "gemma4",
+    "t": "cooking",
+    "r": 12,
+    "ti": "Seriously struggling with flat bread since moving to the city \ud83d\ude29",
+    "g4": 9,
+    "g3": 96,
+    "gap": -87
+   }
+  ]
+ },
+ "net_score_corr_between_crowds": 0.231,
+ "latency": {
+  "gemma4": {
+   "5": 1.51,
+   "25": 1.62,
+   "50": 1.72,
+   "75": 1.86,
+   "95": 2.31,
+   "99": 2.6
+  },
+  "gemma3": {
+   "5": 1.17,
+   "25": 1.35,
+   "50": 1.44,
+   "75": 1.54,
+   "95": 1.77,
+   "99": 2.38
+  }
+ },
+ "post_seconds": {
+  "gemma4": {
+   "5": 2.17,
+   "50": 3.01,
+   "95": 5.06
+  },
+  "gemma3": {
+   "5": 1.98,
+   "50": 3.35,
+   "95": 38.03
+  }
+ },
+ "post_attempts": {
+  "gemma4": {
+   "1": 368,
+   "2": 1
+  },
+  "gemma3": {
+   "1": 246,
+   "2": 63,
+   "3": 46,
+   "4": 11,
+   "5": 3
+  }
+ },
+ "users": {
+  "age_hist": [
+   5,
+   8,
+   11,
+   11,
+   7,
+   8,
+   3,
+   6,
+   9,
+   11,
+   9,
+   7,
+   5
+  ],
+  "age_edges": [
+   15,
+   20,
+   25,
+   30,
+   35,
+   40,
+   45,
+   50,
+   55,
+   60,
+   65,
+   70,
+   75,
+   80
+  ],
+  "gender": {
+   "male": 51,
+   "female": 45,
+   "non-binary": 4
+  },
+  "voting": {
+   "typical": 57,
+   "generous": 29,
+   "harsh": 14
+  },
+  "interest": {
+   "personal_finance": {
+    "-2": 11,
+    "-1": 17,
+    "0": 44,
+    "1": 24,
+    "2": 4
+   },
+   "cars": {
+    "-2": 13,
+    "-1": 20,
+    "0": 39,
+    "1": 18,
+    "2": 10
+   },
+   "farming": {
+    "-2": 8,
+    "-1": 20,
+    "0": 25,
+    "1": 27,
+    "2": 20
+   },
+   "cooking": {
+    "-2": 4,
+    "-1": 16,
+    "0": 35,
+    "1": 27,
+    "2": 18
+   },
+   "tech": {
+    "-2": 11,
+    "-1": 17,
+    "0": 28,
+    "1": 29,
+    "2": 15
+   }
+  },
+  "professions": {
+   "freelance photographer": 9,
+   "retired postal worker": 7,
+   "retired machinist": 7,
+   "college student": 6,
+   "restaurant owner": 6,
+   "journalist": 5,
+   "barista": 5,
+   "kindergarten teacher": 4,
+   "flight attendant": 4,
+   "retail store manager": 4,
+   "electrician": 4,
+   "insurance adjuster": 3
+  },
+  "countries": {
+   "United States": 69,
+   "United Kingdom": 10,
+   "Australia": 8,
+   "Canada": 5,
+   "Ireland": 3,
+   "Germany": 3,
+   "New Zealand": 2
+  }
+ }
+}

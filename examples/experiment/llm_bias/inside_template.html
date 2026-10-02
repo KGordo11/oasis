@@ -1,0 +1,507 @@
+<meta charset="utf-8">
+<title>Inside the Two-AI Feed</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+:root{
+  --bg:#F4F5F6;--paper:#FFFFFF;--ink:#1A1A1B;--ink2:#474D55;--mute:#757D87;--rule:#DADFE4;--soft:#EBEEF1;
+  --a:#0E7C66;--b:#8E3B8E;--a-soft:#D6EEE8;--b-soft:#F0DEF0;--up:#D9480F;--down:#3B5BDB;--none:#98A1AB;
+  --codebg:#F7F8FA;--hl:#FFF0B3;--k:#8E3B8E;--s:#0E7C66;--c:#7A828C;--n:#B5530F;--f:#2F5BB7;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans Condensed","Arial Narrow",Arial,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){color-scheme:dark;
+  --bg:#111315;--paper:#1A1D21;--ink:#E7E9EC;--ink2:#B4BBC3;--mute:#8A929B;--rule:#2D3238;--soft:#22262B;
+  --a:#3CC4A3;--b:#D68AD6;--a-soft:#16362F;--b-soft:#38213D;--up:#FF7A45;--down:#7D98FF;--none:#6A727C;
+  --codebg:#15181B;--hl:#3F3A1A;--k:#D68AD6;--s:#5FD3B4;--c:#7D858F;--n:#F0A060;--f:#8DB0FF;}}
+:root[data-theme="dark"]{color-scheme:dark;
+  --bg:#111315;--paper:#1A1D21;--ink:#E7E9EC;--ink2:#B4BBC3;--mute:#8A929B;--rule:#2D3238;--soft:#22262B;
+  --a:#3CC4A3;--b:#D68AD6;--a-soft:#16362F;--b-soft:#38213D;--up:#FF7A45;--down:#7D98FF;--none:#6A727C;
+  --codebg:#15181B;--hl:#3F3A1A;--k:#D68AD6;--s:#5FD3B4;--c:#7D858F;--n:#F0A060;--f:#8DB0FF;}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font:17px/1.6 var(--serif);margin:0}
+.layout{display:grid;grid-template-columns:230px minmax(0,1fr);gap:40px;max-width:1200px;margin:0 auto;padding-inline:20px}
+.toc{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;max-height:100vh;overflow:auto;padding-block:36px;font:13.5px/1.35 var(--sans)}
+.toc b{display:block;font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:11.5px;color:var(--mute);margin-bottom:10px}
+.toc a{display:block;color:var(--ink2);text-decoration:none;padding:4px 0 4px 10px;border-left:2px solid var(--rule)}
+.toc a:hover{color:var(--ink);border-left-color:var(--a)}
+main{min-width:0;padding-block:36px 90px}
+@media (max-width:900px){.layout{grid-template-columns:1fr}.toc{position:static;max-height:none;padding-block:20px 0;columns:2}.toc a{break-inside:avoid}}
+header .eyebrow{font:600 12px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+h1{font:700 42px/1.08 var(--sans);margin:10px 0 12px;text-wrap:balance}
+h2{font:700 27px/1.2 var(--sans);margin:64px 0 12px;border-top:2px solid var(--ink);padding-top:14px;text-wrap:balance;scroll-margin-top:12px}
+h3{font:600 19px/1.3 var(--sans);margin:32px 0 8px;text-wrap:balance;scroll-margin-top:12px}
+p{margin:0 0 14px;max-width:72ch}
+ul,ol{max-width:72ch;padding-left:22px}li{margin:6px 0}
+a{color:var(--a)}a:focus-visible,button:focus-visible,summary:focus-visible{outline:2px solid var(--a);outline-offset:2px}
+.lede{font-size:19px;line-height:1.55;max-width:68ch}
+.plain{background:var(--soft);padding:10px 14px;font-size:16px;max-width:72ch;margin:0 0 16px}
+.plain::before{content:"In plain words: ";font:600 13px var(--sans);letter-spacing:.04em;text-transform:uppercase;color:var(--mute)}
+.num,.mono,code{font-family:var(--mono);font-size:.88em;font-variant-numeric:tabular-nums}
+code{background:var(--soft);padding:1px 4px}
+.ai-a{color:var(--a);font-weight:600}.ai-b{color:var(--b);font-weight:600}.up{color:var(--up)}.down{color:var(--down)}
+.cref{font-family:var(--mono);font-size:.84em;text-decoration:none;border-bottom:1px dashed var(--a);white-space:nowrap}
+.cref::before{content:"⟨/⟩ ";font-size:.9em}
+figure{margin:20px 0 28px;background:var(--paper);border:1px solid var(--rule);padding:16px;overflow-x:auto}
+figcaption{font:14px/1.5 var(--sans);color:var(--ink2);margin-top:10px}
+svg{display:block;width:100%;height:auto}
+svg text{font-family:var(--sans);font-size:13px;fill:var(--ink)}
+svg .q{fill:var(--ink2);font-size:11.5px}
+svg .m{font-family:var(--mono);font-size:11px;fill:var(--ink2)}
+.tbl{overflow-x:auto;margin:12px 0 22px}
+table{border-collapse:collapse;font:14px/1.45 var(--sans);font-variant-numeric:tabular-nums;width:100%}
+th,td{padding:7px 10px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font-weight:600;color:var(--ink2);font-size:12.5px;letter-spacing:.04em;text-transform:uppercase}
+td.n{font-family:var(--mono);text-align:right;white-space:nowrap}
+td code{white-space:nowrap}
+pre.block{font:13px/1.55 var(--mono);background:var(--codebg);border:1px solid var(--rule);padding:12px 14px;overflow:auto;max-height:420px;white-space:pre;margin:10px 0 18px}
+pre.wrap{white-space:pre-wrap;word-break:break-word}
+.step{display:grid;grid-template-columns:44px minmax(0,1fr);gap:14px;margin:26px 0}
+.step .no{font:700 22px/1 var(--sans);color:var(--paper);background:var(--ink);width:36px;height:36px;display:grid;place-items:center;margin-top:2px}
+.step h3{margin-top:4px}
+.callout{border-left:3px solid var(--b);padding:2px 0 2px 14px;margin:0 0 16px;max-width:72ch}
+.callout b.t{display:block;font:600 12px var(--sans);letter-spacing:.08em;text-transform:uppercase;color:var(--b);margin-bottom:4px}
+.twocol{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:760px){.twocol{grid-template-columns:1fr}h1{font-size:33px}}
+.box{background:var(--paper);border:1px solid var(--rule);padding:14px 16px;min-width:0}
+.box h4{font:600 13px var(--sans);letter-spacing:.06em;text-transform:uppercase;margin:0 0 8px}
+details{margin:10px 0 18px}summary{cursor:pointer;font:600 14px var(--sans);color:var(--a)}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;font:14px/1.45 var(--sans)}
+.kv dt{color:var(--mute)}.kv dd{margin:0;font-family:var(--mono);font-size:13px;word-break:break-all}
+/* code viewer */
+.files{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.files button{font:13px var(--mono);background:var(--paper);border:1px solid var(--rule);color:var(--ink);padding:5px 9px;cursor:pointer}
+.files button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.viewer{border:1px solid var(--rule);background:var(--codebg)}
+.vhead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:8px 12px;border-bottom:1px solid var(--rule);font:13px var(--sans);color:var(--ink2)}
+.vbody{position:relative;overflow:auto;max-height:640px}
+.vgrid{display:grid;grid-template-columns:auto 1fr;font:12.5px/20px var(--mono);min-width:max-content}
+.gut{color:var(--mute);text-align:right;padding:8px 10px 8px 12px;user-select:none;border-right:1px solid var(--rule);white-space:pre}
+.src{padding:8px 14px;white-space:pre;position:relative}
+.band{position:absolute;left:0;right:0;background:var(--hl);pointer-events:none}
+.src code{background:none;padding:0;font-size:inherit;position:relative}
+.hljs-keyword,.hljs-built_in{color:var(--k)}.hljs-string,.hljs-doctag{color:var(--s)}.hljs-comment{color:var(--c);font-style:italic}
+.hljs-number,.hljs-literal{color:var(--n)}.hljs-title,.hljs-title.function_,.hljs-title.class_{color:var(--f)}.hljs-meta,.hljs-variable,.hljs-subst{color:var(--ink2)}
+.btn{font:600 13px var(--sans);background:var(--paper);border:1px solid var(--rule);color:var(--a);padding:4px 10px;cursor:pointer}
+.tag{display:inline-block;font:600 11px/1 var(--sans);letter-spacing:.05em;text-transform:uppercase;padding:3px 6px;border:1px solid var(--rule);color:var(--ink2)}
+</style>
+
+<div class="layout">
+<nav class="toc" aria-label="Sections">
+  <b>Inside the Two-AI Feed</b>
+  <a href="#machine">The whole machine</a>
+  <a href="#stack">The laptop and software</a>
+  <a href="#ais">The two AIs</a>
+  <a href="#users">The 100 users</a>
+  <a href="#cards">Subreddits and job cards</a>
+  <a href="#writing">Writing one post</a>
+  <a href="#oasis">The pretend Reddit (OASIS)</a>
+  <a href="#scroll">The scroll</a>
+  <a href="#vote">One vote, start to finish</a>
+  <a href="#seen">What is shown and hidden</a>
+  <a href="#speed">Speed and parallel work</a>
+  <a href="#repeat">Randomness and repeatability</a>
+  <a href="#rails">Safety rails</a>
+  <a href="#after">After each round</a>
+  <a href="#math">How the numbers are made</a>
+  <a href="#files">Every file</a>
+  <a href="#commands">Every command, in order</a>
+  <a href="#history">Every saved change (git)</a>
+  <a href="#wrong">What went wrong and was fixed</a>
+  <a href="#code">All the code</a>
+</nav>
+<main>
+<header>
+  <div class="eyebrow">LLM Bias project · test LD-18 · how it works</div>
+  <h1>Inside the Two-AI Feed</h1>
+  <p class="lede">This page takes the test apart. It covers what runs, in what order, on which machine; exactly what each AI is sent and what it sends back; how the made-up users, the posts and the pretend Reddit are built; how each number in the results is computed; and every file and command. Every example below is a real record from the run, read straight from the data files, and every <a class="cref" href="#code" data-file="run_world.py" data-from="1" data-to="26">code link</a> like this one opens the exact lines of code that do the thing being described.</p>
+  <p>The results themselves are on the companion page, <a href="{RESULTS}">The Two-AI Feed</a>.</p>
+</header>
+
+<h2 id="machine">The whole machine</h2>
+<p>One shell script runs everything. For each of the 15 rounds it does the same five things, in this order:</p>
+<figure>
+<svg viewBox="0 0 900 640" role="img" aria-label="The test pipeline, one round">
+  <defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" style="fill:var(--mute)"/></marker></defs>
+  <g style="fill:none;stroke:var(--mute);stroke-width:1.3">
+    <path d="M320 104V134" marker-end="url(#ar)"/><path d="M320 226V258" marker-end="url(#ar)"/><path d="M320 470V498" marker-end="url(#ar)"/>
+    <path d="M40 527H18V77H38" marker-end="url(#ar)"/>
+    <path d="M600 178H656" marker-end="url(#ar)"/><path d="M656 196H600" marker-end="url(#ar)" style="stroke-dasharray:4 3"/>
+    <path d="M600 352H656" marker-end="url(#ar)"/><path d="M656 370H600" marker-end="url(#ar)" style="stroke-dasharray:4 3"/>
+    <path d="M320 556V578" marker-end="url(#ar)"/>
+  </g>
+  <text x="24" y="300" transform="rotate(-90 24 300)" class="q" text-anchor="middle">next round (15 in all)</text>
+  <g><rect x="40" y="50" width="560" height="54" rx="6" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.5"/>
+    <text x="56" y="73" style="font-weight:600">1 · two_ai_campaign.sh, the boss</text><text x="56" y="93" class="q">for round 1…15: seed = 200 + round; stop if the next round can't finish before the deadline</text></g>
+  <g><rect x="40" y="136" width="560" height="90" rx="6" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.5"/>
+    <text x="56" y="159" style="font-weight:600">2 · authors.py, writing the posts (about 5 minutes)</text>
+    <text x="56" y="179" class="q">5 subreddits × 5 slots = 25 job cards (subject, kind of post, who is posting)</text>
+    <text x="56" y="197" class="q">gemma4 writes 25 posts, then gemma3 writes 25 from the same cards; each one checked, up to 5 tries</text>
+    <text x="56" y="215" class="q">saved to postbank_s2NN.jsonl (the second AI's turn reuses this file)</text></g>
+  <g><rect x="40" y="260" width="560" height="210" rx="6" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.5"/>
+    <text x="56" y="283" style="font-weight:600">3 · run_world.py, once per AI (gemma4 ≈ 37 min, then gemma3 ≈ 30 min)</text>
+    <text x="56" y="306" class="q">a · build a pretend Reddit with OASIS: 100 users + 2 posting accounts, publish the 50 posts</text>
+    <text x="56" y="326" class="q">b · scroll.feed: each user's order, favourite subreddit first, posts shuffled per user</text>
+    <text x="56" y="346" class="q">c · for each user × post: one question to the AI playing the users (llm.chat_json)</text>
+    <text x="56" y="366" class="q">     → "upvote, downvote or nothing?" + a few words of reason (4 questions at a time)</text>
+    <text x="56" y="386" class="q">d · every answer appended to decisions.jsonl the moment it arrives</text>
+    <text x="56" y="406" class="q">e · upvote/downvote also recorded in the pretend Reddit (oasis.db: like / dislike tables)</text>
+    <text x="56" y="426" class="q">f · manifest.json: every setting, the models' fingerprints, timing</text>
+    <text x="56" y="452" class="q">100 users × ~50 posts = ~5,000 votes per AI per round</text></g>
+  <g><rect x="40" y="500" width="560" height="56" rx="6" style="fill:var(--paper);stroke:var(--ink);stroke-width:1.5"/>
+    <text x="56" y="523" style="font-weight:600">4 · two_ai_after_round.sh (in the background)</text><text x="56" y="543" class="q">round time → checks (check_world.py) → math (analyze_two_ai.py) → results page → save to GitHub</text></g>
+  <g><rect x="40" y="580" width="560" height="50" rx="6" style="fill:var(--a-soft);stroke:var(--a);stroke-width:1.5"/>
+    <text x="56" y="602" style="font-weight:600">5 · after the last round</text><text x="56" y="620" class="q">analyze_two_ai.py (2,000 resamples) + analyze_deep.py → CSVs, analysis.json, deep.json → results pages</text></g>
+  <g><rect x="658" y="136" width="222" height="334" rx="6" style="fill:var(--soft);stroke:var(--ink);stroke-width:1.5"/>
+    <text x="672" y="160" style="font-weight:600">Ollama (AI server)</text>
+    <text x="672" y="180" class="m">localhost:11434</text>
+    <text x="672" y="210" class="q">runs on the laptop's GPU</text>
+    <text x="672" y="236" style="fill:var(--a);font-weight:600">gemma4:e2b</text><text x="672" y="254" class="q">7.2 GB, writes + votes</text>
+    <text x="672" y="282" style="fill:var(--b);font-weight:600">gemma3:1b</text><text x="672" y="300" class="q">0.8 GB, writes + votes</text>
+    <text x="672" y="330" class="q">4 questions at a time</text><text x="672" y="348" class="q">8,192-token window</text>
+    <text x="672" y="376" class="q">request: JSON over HTTP</text><text x="672" y="394" class="q">reply: JSON answer + timings</text>
+    <text x="672" y="430" class="q">no internet, no paid service</text></g>
+  <text x="628" y="172" class="m" text-anchor="middle">ask</text><text x="628" y="212" class="m" text-anchor="middle">post</text>
+  <text x="628" y="346" class="m" text-anchor="middle">ask</text><text x="628" y="386" class="m" text-anchor="middle">vote</text>
+</svg>
+<figcaption><b>Figure 1.</b> One round of the test. Steps 1–4 repeat 15 times. Solid arrows are requests sent to the AI server; dashed arrows are its replies.</figcaption>
+</figure>
+<div class="tbl"><table id="tparts"></table></div>
+
+<h2 id="stack">The laptop and software</h2>
+<div class="tbl"><table id="tstack"></table></div>
+<h3>The AI server's settings</h3>
+<p>Ollama is started once, before everything, with these settings. Every run records the settings the server actually used (read from the server's own log by [[ref:llm.py:server_config]]) so nobody has to trust a description:</p>
+<pre class="block" id="ollamastart"></pre>
+<div class="tbl"><table id="tollama"></table></div>
+
+<h2 id="ais">The two AIs</h2>
+<p>Both AIs are open models from Google that anyone can download for free. The test needed the two fastest that could do the job. We timed 9 free models on the real voting question (40 votes each, 4 at a time) and the real post prompt (2 posts each) with [[ref:speed_pick.py:1:46|speed_pick.py]]:</p>
+<div class="tbl"><table id="tspeed"></table></div>
+<p id="aisnote"></p>
+<p>Each run also stores the exact build of each model, its <b>digest</b> (a fingerprint of the model's file), so anyone can check they are using the same weights:</p>
+<dl class="kv" id="digests"></dl>
+
+<h2 id="users">The 100 users</h2>
+<p>The users are <b>made-up people built by a program, not written by an AI</b>, on purpose. If an AI had written the descriptions, they could carry that AI's style and nudge it toward its own writing. [[ref:personas.py:build_bank]] builds 1,000 people from fixed lists with a fixed random seed (20260923), so it produces exactly the same people every time it runs:</p>
+<ol>
+  <li>Gender (48% male, 48% female, 4% non-binary), a first name to match, a last name, an age from 18 to 78.</li>
+  <li>A job from 41 jobs. People 66 and over may be switched to a retired job, and some people 22 and under become college students.</li>
+  <li>A place from 24 places (each with its country).</li>
+  <li>Interest in each of 15 subreddits, from −2 (dislikes) to +2 (loves). It starts as a random draw, then the job pulls it (a mechanic +2 cars), rural places add +1 farming, people 60 and over get −1 games, and some people 28–50 get +1 parenting. Everyone is guaranteed at least one love and one dislike.</li>
+  <li>Big Five personality scores from 1 to 10, each with a short gloss (for example "warm, trusting and supportive" for agreeableness of 8 or more).</li>
+  <li>Education, money situation, MBTI type, what they value in a post (length, tone, evidence), a pet peeve, and a voting habit: generous (25%), typical (55%) or harsh (20%).</li>
+  <li>[[ref:personas.py:render_persona]] turns that record into the paragraph the AI reads, with the same sentence template for everyone.</li>
+</ol>
+<p>The 1,000 people were saved once to <code>personas_bank.json</code> and are never rebuilt. The test uses the first 100. Before any run, [[ref:personas.py:core100]] recomputes a fingerprint of those 100 records and refuses to run if it doesn't match the pinned value:</p>
+<dl class="kv" id="hashes"></dl>
+<p>Here is user 0, exactly as stored and exactly as the AI receives it:</p>
+<div class="twocol"><div><div class="tag">Stored record (personas_bank.json, entry 0)</div><pre class="block" id="u0json" style="max-height:520px"></pre></div><div><div class="tag">What the AI reads (the persona paragraph)</div><pre class="block wrap" id="u0text" style="max-height:520px"></pre></div></div>
+<p class="plain">The "user" is just this paragraph. There is no separate program per person. Whichever AI is playing reads the paragraph at the top of every single question and answers as that person.</p>
+
+<h2 id="cards">Subreddits and job cards</h2>
+<p>The five subreddits and their subjects are lists in [[ref:topics.py:TOPICS]]: 16 subjects for personal finance and 12 for each of the others, plus 7 kinds of post ([[ref:topics.py:POST_TYPES]]) and 12 poster voices ([[ref:topics.py:POSTER_VOICES]]).</p>
+<p>Each round has 25 <b>slots</b> (5 subreddits × 5). Each slot gets one job card, and <b>both AIs get the same card</b>, so their two posts are about the same thing and differ only in who wrote them. For this test the cards are numbered across the whole run so none ever repeats ([[ref:authors.py:slot_brief]]):</p>
+<div class="formula" style="font:14px/1.6 var(--mono);background:var(--soft);padding:12px 14px;overflow-x:auto;white-space:pre;margin:10px 0 16px">card number  i = 5 × (seed − 201) + slot          (round 3 → seed 203 → i = 10 … 14)
+subject      = the subreddit's subjects in a fixed shuffled order, item i mod 12 (16 for finance)
+kind + voice = all 7 × 12 = 84 (kind, voice) pairs in a fixed shuffled order, item i mod 84</div>
+<p>So every subject is used before any repeats, and over 15 rounds (75 cards per subreddit) no full card is ever used twice. These are all 25 cards of round 3:</p>
+<div class="tbl"><table id="tcards"></table></div>
+
+<h2 id="writing">Writing one post, behind the scenes</h2>
+<p>We follow one real post: round 3, r/cars, slot 2, written by <span class="ai-a">gemma4</span>. [[ref:authors.py:generate]] does this for every slot, first for all 25 of gemma4's posts, then all 25 of gemma3's (one model in memory at a time).</p>
+<div class="step"><div class="no">1</div><div><h3>The two messages</h3><p>Every AI request has a <b>system message</b> (who you are) and a <b>user message</b> (the task). For posts the system message is one line ([[ref:authors.py:NATURAL_SYSTEM]]) and the user message is the job card filled into [[ref:authors.py:NATURAL_USER]]:</p><div class="twocol"><div><div class="tag">system</div><pre class="block wrap" id="psys"></pre></div><div><div class="tag">user</div><pre class="block wrap" id="puser"></pre></div></div><p>The only rules are: stay on the subject, don't mention AI and don't sign it. There are no length or style limits, so each AI writes the way it naturally does.</p></div></div>
+<div class="step"><div class="no">2</div><div><h3>The request sent to Ollama</h3><p>[[ref:llm.py:chat_json]] wraps the messages in a JSON request and sends it to <code>http://localhost:11434/api/chat</code>. This is the exact request, replayed while building this page:</p><pre class="block" id="preq"></pre><ul id="preqnotes"></ul></div></div>
+<div class="step"><div class="no">3</div><div><h3>Ollama's reply</h3><p>The reply is JSON too. The post itself is a JSON string inside <code>message.content</code>; the rest is bookkeeping (durations are in nanoseconds):</p><pre class="block" id="pres"></pre><p id="presnote"></p></div></div>
+<div class="step"><div class="no">4</div><div><h3>Checking the answer</h3><p>[[ref:llm.py:extract_json]] pulls the JSON object out of the reply, even if the AI wrapped it in extra text. [[ref:authors.py:validate_natural]] then rejects it if the title or body is empty, or if it mentions AI or a model's name, using the pattern [[ref:authors.py:LEAK]]. A rejected answer is asked again with the next seed (seed + 1, + 2 …), up to 5 tries. gemma4 needed a second try for 1 of its 369 posts; gemma3 needed retries for a third of its posts and failed 6 completely.</p></div></div>
+<div class="step"><div class="no">5</div><div><h3>Saving it</h3><p>The post is appended as one line to <code>postbank_s203.jsonl</code>: the job card, the title and body exactly as written, the raw reply, the word count, the number of tries and the seconds taken:</p><pre class="block" id="psaved"></pre></div></div>
+<div class="step"><div class="no">6</div><div><h3>The same card, both AIs</h3><div class="twocol" id="pboth"></div></div></div>
+
+<h2 id="oasis">The pretend Reddit (OASIS)</h2>
+<p><b>OASIS</b> (Open Agent Social Interaction Simulations, <a href="https://github.com/camel-ai/oasis">camel-ai/oasis</a>) is an open-source research platform that simulates a social network in a small SQLite database: users, posts, likes, dislikes, follows and a log of every action. We use a fork of it (<a href="https://github.com/KGordo11/oasis">KGordo11/oasis</a>).</p>
+<p><b>What we use it for:</b> [[ref:run_world.py:build_world]] signs up all 100 users plus two posting accounts (one per AI), then publishes all 50 posts through OASIS's own <code>create_post</code> action ([[ref:run_world.py:170:175]]). Every upvote or downvote is executed as OASIS's <code>like_post</code> / <code>dislike_post</code> action ([[ref:run_world.py:278:282]]), which updates the post's counter, adds a row to the <code>like</code> or <code>dislike</code> table, writes a line to the <code>trace</code> log, and refuses a second like from the same user on the same post. Each run gets its own fresh database file, <code>oasis.db</code>.</p>
+<div class="callout"><b class="t">What we deliberately don't use</b>OASIS can also decide on its own what each user sees (its recommendation system) and let its agents choose actions through their own AI step. We switched both off for this test. We build each user's scroll ourselves ([[ref:scroll.py:feed]]) and ask the AI directly through [[ref:llm.py:chat_json]]. That gives us full control over exactly what the AI sees (no vote counts, no author names), a fixed random seed for every vote, and a record of every answer and its reason. OASIS is used as the platform that holds the posts and records the votes, and [[ref:check_world.py:check]] confirms after every run that its like and dislike counts match our vote log exactly.</div>
+<h3>What is inside one run's database</h3>
+<p id="dbcounts"></p>
+<details><summary>Table definitions (from the database itself)</summary><pre class="block" id="dbschema"></pre></details>
+<div class="tbl"><table id="dbusers"></table></div>
+
+<h2 id="scroll">The scroll</h2>
+<p>Each user scrolls every post of the round. [[ref:scroll.py:topic_order]] puts the subreddits in the user's order, favourite first, breaking ties with a coin flip fixed per user. [[ref:scroll.py:feed]] shuffles the posts inside each subreddit with a shuffle fixed per user and round. Both AIs see each user's posts in exactly the same order. Because every vote is a separate question with no memory, order can't sway a vote through memory. It is fixed so the two AIs stay perfectly comparable.</p>
+<p id="u0order"></p>
+<details open><summary>User 0's whole scroll in round 3, with both AIs' votes and reasons</summary><div class="tbl"><table id="tscroll"></table></div></details>
+
+<h2 id="vote">One vote, start to finish</h2>
+<p>Round 3, user 0 (Marcus Silva), post number <span id="vposn"></span> of his 50-post scroll: gemma4's camper-towing post in r/cars, played first by <span class="ai-a">gemma4</span>. [[ref:run_world.py:run.decide]] runs this for every user and post.</p>
+<div class="step"><div class="no">1</div><div><h3>The question is put together</h3><p>The system message is the persona paragraph inside [[ref:scroll.py:SYSTEM_TEMPLATE]]. The user message is the post inside [[ref:scroll.py:USER_TEMPLATE]] ([[ref:scroll.py:render_user]]):</p><div class="twocol"><div><div class="tag">system</div><pre class="block wrap" id="vsys"></pre></div><div><div class="tag">user</div><pre class="block wrap" id="vuser"></pre></div></div></div></div>
+<div class="step"><div class="no">2</div><div><h3>The dice for this vote</h3><p>The vote's random seed comes from its round, user and post ([[ref:llm.py:stable_seed]]), so the same vote always gets the same dice, for both AIs:</p><pre class="block" id="vseed"></pre></div></div>
+<div class="step"><div class="no">3</div><div><h3>The request</h3><pre class="block" id="vreq"></pre><ul><li><code>num_predict: 80</code>: the answer may be at most 80 tokens. A one-line JSON answer needs about 15–40.</li><li><code>temperature: 0.7</code>: some randomness, so a person isn't a robot, but the seed makes it repeatable.</li><li><code>format: "json"</code>: Ollama forces the reply to be valid JSON.</li><li><code>think: false</code>: no hidden reasoning step. gemma4 would otherwise spend its whole budget "thinking" and return nothing.</li></ul></div></div>
+<div class="step"><div class="no">4</div><div><h3>Ollama's reply</h3><pre class="block" id="vres"></pre><p id="vresnote"></p></div></div>
+<div class="step"><div class="no">5</div><div><h3>Reading the answer</h3><p>[[ref:scroll.py:validate]] accepts "like", "upvote", "up", "+1" or "liked" as an upvote (and the same for downvote and nothing), keeps up to 300 characters of the reason, and rejects anything else. A rejected or empty answer is asked again up to 2 more times. [[ref:scroll.py:outcome]] labels the result: <code>chose</code> (a readable answer), <code>cut_off</code> (hit the 80-token limit), <code>timeout</code> or <code>unreadable</code>.</p></div></div>
+<div class="step"><div class="no">6</div><div><h3>The record written to decisions.jsonl</h3><p>Written and flushed to disk immediately ([[ref:run_world.py:274:277]]), so a crash never loses a vote:</p><pre class="block" id="vrec"></pre><div class="tbl"><table id="vrecfields"></table></div></div></div>
+<div class="step"><div class="no">7</div><div><h3>The vote lands in the pretend Reddit</h3><p>Because the answer was "like", the user's OASIS account performs <code>like_post</code> on post 13. These are the actual rows in that run's database:</p><div class="tbl"><table id="vdb"></table></div><p id="vdbnote"></p></div></div>
+<div class="step"><div class="no">8</div><div><h3>The same vote, played by gemma3</h3><p>About 35 minutes later the gemma3 run asks gemma3 the identical question, with identical text and the identical seed:</p><pre class="block" id="vrec3"></pre><p id="v3note"></p></div></div>
+
+<h2 id="seen">What is shown and what is hidden</h2>
+<div class="tbl"><table id="tseen"></table></div>
+
+<h2 id="speed">Speed and parallel work</h2>
+<p>The laptop runs one AI at a time. Within a run, [[ref:run_world.py:run]] keeps up to 8 questions in flight (a semaphore of 2 × 4) through 4 worker threads, and Ollama processes 4 at once. One answer takes about 1.7 s for gemma4 and 1.4 s for gemma3. With 4 in parallel, that comes out to about 0.45 s and 0.37 s per vote, or 5,000 votes in 37 and 30 minutes.</p>
+<div class="tbl"><table id="tlat"></table></div>
+<h3>Round 3, minute by minute</h3>
+<figure><div id="ftimeline"></div><figcaption><b>Figure 2.</b> Round 3 from the run logs. Post writing happens at the start of the gemma4 run (both AIs' posts); the gemma3 run reuses them.</figcaption></figure>
+
+<h2 id="repeat">Randomness and repeatability</h2>
+<p>AI answers have some randomness (temperature 0.7). To make every vote repeatable, each request carries a seed computed from what it is about:</p>
+<ul>
+  <li><b>Vote seed</b> = [[ref:llm.py:stable_seed]] of (round seed, user, post, "scroll"). It's the same for both AIs, so they get identical dice on identical questions.</li>
+  <li><b>Post seed</b> = [[ref:authors.py:hash_seed]] of (round seed, slot, subreddit, "author"). It's the same for both AIs' posts in a slot.</li>
+  <li><b>Retries</b> use seed + 1, + 2, …, so they're new tries that can still be repeated.</li>
+  <li><b>Shuffles</b> (scroll order, card order) use Python's random generator seeded with fixed text such as <code>"203|0|cars|scroll"</code>.</li>
+</ul>
+<p>Python's built-in <code>hash()</code> changes every time Python starts, so the seed uses SHA-256, which never changes. We tested whether answers really repeat:</p>
+<div class="tbl"><table id="trepeat"></table></div>
+
+<h2 id="rails">Safety rails</h2>
+<div class="tbl"><table id="trails"></table></div>
+
+<h2 id="after">After each round</h2>
+<p>[[ref:two_ai_after_round.sh:1:26|two_ai_after_round.sh]] runs after every round. It writes down how long the round took ([[ref:two_ai_after_round.sh:7:15]]), so the boss knows whether another round fits before the deadline ([[ref:two_ai_campaign.sh:18:22]]). Then, in the background so the next round starts at once ([[ref:two_ai_after_round.sh:16:26]]):</p>
+<ol>
+  <li><b>Checks</b> ([[ref:check_world.py:check]]): the run finished; exactly one vote per user per post; the users' fingerprint matches; the right AI played everyone; no answers broke (warn if any, fail above 1%); the database's like and dislike counts equal the vote log's; and the AI's upvote rate and speed look like its other runs. Prints PASS, WARN or FAIL.</li>
+  <li><b>Math</b> ([[ref:analyze_two_ai.py:main]]) over every finished round, with 1,000 resamples.</li>
+  <li><b>Results page</b> rebuilt.</li>
+  <li><b>Saved to GitHub</b>: the round's vote logs, manifests and post bank, plus the analysis files (the databases stay on the laptop).</li>
+</ol>
+
+<h2 id="math">How the numbers are made</h2>
+<h3>The own-AI boost (double difference)</h3>
+<p>[[ref:analyze.py:did]] computes, for each AI J: (J's crowd's rate on J's posts − J's crowd's rate on the other AI's posts) − (the other crowd's rate on J's posts − the other crowd's rate on its own posts). With two AIs both get the same number, which is the headline. Rates are averaged over every vote in the group.</p>
+<h3>The 95% interval (bootstrap)</h3>
+<p>[[ref:analyze.py:cluster_bootstrap]] repeats the calculation 2,000 times. Each time, every user and every post slot gets a random weight (how many times it is "drawn" in a resample of the same size), the two weights are multiplied for each vote, and the double difference is recomputed with those weights. The middle 95% of the 2,000 answers is the interval. Resampling users and slots keeps all of one user's votes together and all of one slot's votes together, because votes from the same person or on the same posts are not independent. A second version resamples whole rounds (in [[ref:analyze_two_ai.py:84:110]]). We report the wider of the two. The p-value is twice the share of resampled answers on the other side of zero.</p>
+<h3>The length check</h3>
+<p>For each slot (pair of posts), [[ref:analyze_two_ai.py:112:135]] computes that slot's double difference and the word gap between the two posts, then fits a straight line: <code>slot boost = a + b × (word gap / 100)</code>, with uncertainty clustered by round. <code>a</code> is the boost when both posts have the same length. Each crowd's taste for length ([[ref:analyze_two_ai.py:136:146]]) is a regression of each post's upvote rate on its word count with the author held fixed.</p>
+<h3>Agreement</h3>
+<p>For every user-post pair, compare the two AIs' choices. [[ref:analyze_two_ai.py:kappa]] computes Cohen's κ = (observed agreement − agreement expected by chance) / (1 − agreement expected by chance), where chance agreement comes from how often each AI picks each answer.</p>
+<h3>Breakdowns, per user, style and reasons</h3>
+<p>[[ref:analyze_deep.py:Boot]] is the same users × slots bootstrap, written to run fast on any slice of the data (subreddit, interest, voting habit, scroll position, half of the run). Per-user boosts are the double difference on one user's ~1,476 votes. [[ref:analyze_deep.py:features]] measures 14 features of each post. A regression of each post's upvote rate on those features (plus the round), separately for each crowd, gives what each crowd rewards; recomputing the double difference on what the features predict, and on what's left over, shows how much of the boost they explain. Reason words are counted after removing filler words.</p>
+
+<h2 id="files">Every file</h2>
+<p>Files marked <span class="tag">git</span> are on GitHub (branch <code>llm-bias</code>); the rest stay on the laptop.</p>
+<div class="tbl"><table id="tfiles"></table></div>
+<h3>What the files look like inside</h3>
+<div id="samples"></div>
+
+<h2 id="commands">Every command, in order</h2>
+<p>Run in the project folder <code>~/research/oasis</code> with the project's Python environment (<code>./oasis-env/bin/python</code>). Times are US Eastern; "about" marks times taken from the conversation rather than a log.</p>
+<div class="tbl"><table id="tcmd"></table></div>
+
+<h2 id="history">Every saved change (git)</h2>
+<p>Every change to code, data, logs and pages was committed and pushed to GitHub as it happened:</p>
+<div class="tbl"><table id="tgit"></table></div>
+
+<h2 id="wrong">What went wrong and what we changed</h2>
+<div class="tbl"><table id="twrong"></table></div>
+
+<h2 id="code">All the code</h2>
+<p>Every program the test used, exactly as it is on the <code>llm-bias</code> branch (commit <span class="num" id="gitc"></span>). Pick a file, or follow any <a class="cref" href="#code" data-file="llm.py" data-from="63" data-to="113">code link</a> on this page to jump to the lines it describes (highlighted).</p>
+<div class="files" id="filebtns"></div>
+<div class="viewer"><div class="vhead"><span id="vfile"></span><span id="vrole"></span></div><div class="vbody" id="vbody"><div class="vgrid"><div class="gut" id="gut"></div><div class="src"><div class="band" id="band" hidden></div><code id="src"></code></div></div></div></div>
+</main>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="inside_data.js"></script>
+<script src="inside_code.js"></script>
+<script>
+(function(){
+const I=window.IN,$=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const J=o=>JSON.stringify(o,null,2);
+function table(id,head,rows){$(id).innerHTML="<thead><tr>"+head.map(h=>`<th>${h}</th>`).join("")+"</tr></thead><tbody>"+rows.map(r=>"<tr>"+r.map(c=>`<td>${c}</td>`).join("")+"</tr>").join("")+"</tbody>"}
+const kb=n=>n>=1048576?(n/1048576).toFixed(1)+" MB":n>=1024?(n/1024).toFixed(0)+" KB":n+" B";
+const tag=t=>`<span class="tag">${t}</span>`;
+const cref=(f,a,b,l)=>`<a class="cref" href="#code" data-file="${f}" data-from="${a}" data-to="${b}">${l||f}</a>`;
+
+table("tparts",["Part","What it is","Where"],[
+ ["The boss","a shell script that loops over rounds and stops before a deadline","two_ai_campaign.sh"],
+ ["The writers","the two AIs, asked to write posts from job cards","authors.py → llm.py → Ollama"],
+ ["The users","100 made-up people, each one a paragraph of text","personas.py, personas_bank.json"],
+ ["The players","the AI reading a user's paragraph and answering as them, one post at a time","scroll.py → llm.py → Ollama"],
+ ["The platform","a pretend Reddit holding the users, posts and votes","OASIS, oasis.db"],
+ ["The records","every post, every vote with its reason and timing, every setting","postbank_s2NN.jsonl, decisions.jsonl, manifest.json"],
+ ["The checker","confirms nothing was skipped, doubled or broken","check_world.py"],
+ ["The math","turns 147,600 votes into the results","analyze_two_ai.py, analyze_deep.py, analyze.py"]]);
+
+const V=I.versions,M=I.manifest;
+table("tstack",["Piece","Version / value","Role"],[
+ ["Computer",esc(V.platform)+" (Apple silicon MacBook)","runs everything; the AIs run on its built-in GPU"],
+ ["Python",esc(V.python),"all our programs"],
+ ["Ollama",esc(V.ollama),"downloads and runs the AI models locally; answers requests over HTTP"],
+ ...Object.entries(V.packages).map(([k,v])=>[k,v,({"camel-ai":"the agent library OASIS is built on","camel-oasis":"OASIS, the social-network simulator (our fork, installed from the project folder)","pandas":"tables of data","numpy":"math","statsmodels":"regressions"})[k]||""]),
+ ["Code version","git commit "+esc(V.git),"branch llm-bias on github.com/KGordo11/oasis"]]);
+$("ollamastart").textContent="OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h \\\n  nohup ollama serve > /tmp/ollama_serve.log 2>&1 &";
+const os=M.ollama_server;
+table("tollama",["Setting","Value used","What it means"],[
+ ["OLLAMA_NUM_PARALLEL",os.OLLAMA_NUM_PARALLEL,"answer up to 4 requests at the same time"],
+ ["OLLAMA_CONTEXT_LENGTH",os.OLLAMA_CONTEXT_LENGTH,"each request may hold up to 8,192 tokens (about 6,000 words). A vote question is about 730 tokens. Our code also sets this on every request, because an earlier project lost days to a smaller default that silently cut prompts"],
+ ["OLLAMA_FLASH_ATTENTION",os.OLLAMA_FLASH_ATTENTION,"a faster way to do the model's attention math (about 7% faster in our tests)"],
+ ["OLLAMA_KEEP_ALIVE",os.OLLAMA_KEEP_ALIVE,"keep a loaded model in memory for 24 hours instead of unloading it after 5 minutes"],
+ ["Settings sent with every request",`temperature ${M.config.temperature} (votes) / 0.8 (posts) · num_ctx ${M.config.num_ctx} · think false · format json`,"set in llm.py and authors.py, not left to the server"]]);
+
+// AIs
+const sp=I.speed;table("tspeed",["Model","Seconds per vote (40 votes, 4 at a time)","Answers","Seconds per post","Posts OK","Post lengths"],Object.entries(sp).sort((a,b)=>a[1].s_per_vote-b[1].s_per_vote).map(([m,v])=>[`<b>${esc(m)}</b>`+(m==="gemma3:1b"||m==="gemma4:e2b"?" "+tag("chosen"):""),v.s_per_vote,Object.entries(v.votes).map(([k,n])=>`${k} ${n}`).join(", "),v.s_per_post,v.posts_ok,v.post_words.join(", ")+" words"]));
+$("aisnote").innerHTML=`The two fastest were <span class="ai-b">gemma3:1b</span> (Gemma 3, 1 billion parameters, ${esc(I.models["gemma3:1b"]||"")}) and <span class="ai-a">gemma4:e2b</span> (Gemma 4, about 2 billion "effective" parameters, ${esc(I.models["gemma4:e2b"]||"")}). Every model answered every question readably, so speed decided. The speed test is small (40 votes), so its absolute times are rough. The real run measured 0.45 s and 0.37 s per vote. The catch, reported everywhere: both are Google Gemma models, so they are related.`;
+$("digests").innerHTML=Object.entries(M.ollama_models).map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join("");
+
+// users
+$("hashes").innerHTML=`<dt>all 1,000 people</dt><dd>${I.hashes.bank} (pinned 8c9cf5b67383)</dd><dt>the first 99</dt><dd>${I.hashes.core99} (pinned 964462b96652)</dd><dt>the 100 users</dt><dd>${I.hashes.core100} (pinned f51d2b0a1f7d)</dd><dt>how</dt><dd>first 12 hex characters of SHA-256 of the records written as sorted JSON</dd>`;
+const u0=Object.assign({},I.user0);const pers=u0.persona;delete u0.persona;
+$("u0json").textContent=J(u0)+'\n\n"persona": (shown on the right)';$("u0text").textContent=pers;
+
+// cards
+table("tcards",["Card i","Subreddit","Slot","Subject","Kind of post","Posted as"],I.briefs_r3.map(b=>[b.i,esc(I.topic_lists[b.topic].sub),b.slot+1,esc(b.angle),esc(b.ptype),esc(b.voice)]));
+
+// writing
+const L=I.live||{},PR=L.post_request||{};
+$("psys").textContent=I.post_prompt_system;$("puser").textContent=I.post_prompt_user;
+$("preq").textContent=PR.request?J(PR.request):"(replay not available)";
+$("preqnotes").innerHTML=`<li><code>model</code>: which AI. <code>stream: false</code>: send the whole answer at once.</li><li><code>think: false</code>: no hidden reasoning step (set for every model so none gets a private drafting step).</li><li><code>format: "json"</code>: Ollama only lets the AI produce valid JSON.</li><li><code>temperature 0.8</code> for posts (a bit more variety than votes), <code>num_predict 2000</code>: up to 2,000 tokens of output, so length is never cut.</li><li><code>seed ${I.seeds.post}</code> = stable_seed(203, 1, "cars", "author"), the same for both AIs' posts in this slot.</li>`;
+if(PR.response){const r=Object.assign({},PR.response);const cont=r.message.content;r.message=Object.assign({},r.message,{content:cont.length>260?cont.slice(0,260)+" … ("+cont.length+" characters)":cont});$("pres").textContent=J(r);
+ $("presnote").innerHTML=`It read ${r.prompt_eval_count} tokens of prompt and wrote ${r.eval_count} tokens in ${(r.eval_duration/1e9).toFixed(1)} s (${(r.eval_count/(r.eval_duration/1e9)).toFixed(1)} tokens per second; this single replay ran with nothing else in parallel). <b>The replay reproduced the saved post word for word: ${PR.matches_saved_post?"yes":"no"}.</b>`}
+const p4=Object.assign({},I.post_g4);p4.raw=p4.raw.slice(0,120)+" …";p4.body=p4.body.slice(0,200)+" …";$("psaved").textContent=J(p4);
+$("pboth").innerHTML=[[I.post_g4,"ai-a"],[I.post_g3,"ai-b"]].map(([p,c])=>`<div class="box"><h4 class="${c}">${esc(p.author)} · ${p.words} words · ${p.attempts} ${p.attempts>1?"tries":"try"} · ${p.latency_s} s</h4><b>${esc(p.title)}</b><pre class="block wrap" style="max-height:300px">${esc(p.body)}</pre></div>`).join("");
+
+// oasis
+const DB=I.db;$("dbcounts").innerHTML=`Round 3, gemma4 playing: <b>${DB.counts.user}</b> users (100 people + 2 posting accounts), <b>${DB.counts.post}</b> posts, <b>${DB.counts.like.toLocaleString()}</b> likes, <b>${DB.counts.dislike}</b> dislikes, and <b>${DB.counts.trace.toLocaleString()}</b> lines in the action log (${DB.counts.user} sign-ups + ${DB.counts.post} posts + ${DB.counts.like.toLocaleString()} likes + ${DB.counts.dislike} dislikes). "Nothing" isn't an OASIS action, so it appears only in our vote log. The database has ${DB.tables.length} tables (${DB.tables.join(", ")}); this test only writes to user, post, like, dislike and trace.`;
+$("dbschema").textContent=Object.values(DB.schema).join("\n\n");
+table("dbusers",["user_id","agent_id","user_name","name","bio","created"],DB.user_rows.map(r=>[r.user_id,r.agent_id,esc(r.user_name),esc(r.name),esc(r.bio),esc(r.created_at)]));
+
+// scroll
+const ord=I.topic_order_u0.map(t=>I.topic_lists[t].sub);
+$("u0order").innerHTML=`User 0 loves none of the five, enjoys cars and cooking, and is bored by personal finance and technology and dislikes farming, so his order is: <b>${ord.join(" → ")}</b>.`;
+const actc={like:"up",dislike:"down",nothing:""};
+table("tscroll",["#","Subreddit","Pos.","Written by","Title",`<span class="ai-a">gemma4</span> played him`,`<span class="ai-b">gemma3</span> played him`],I.scroll_u0.map(s=>[s.n,esc(I.topic_lists[s.topic].sub),s.pos+1,`<span class="${s.author==="gemma4"?"ai-a":"ai-b"}">${s.author}</span>`,esc(s.title),`<b class="${actc[s.g4]}">${s.g4}</b><br><span style="color:var(--mute)">${esc(s.g4_reason)}</span>`,`<b class="${actc[s.g3]}">${s.g3}</b><br><span style="color:var(--mute)">${esc(s.g3_reason)}</span>`]));
+
+// vote
+$("vposn").textContent=(I.scroll_u0.find(s=>s.title===I.post_g4.title)||{}).n;$("vsys").textContent=I.vote_system;$("vuser").textContent=I.vote_user;
+$("vseed").textContent=`text   = "203|0|r1|cars|gemma4:e2b|scroll"\nsha256 = ${I.seeds.sha}\nseed   = int(first 8 hex characters, base 16) mod 2^31 = ${I.seeds.vote}`;
+const LV=L["gemma4:e2b"]||{};$("vreq").textContent=LV.request?J(Object.assign({},LV.request,{messages:LV.request.messages.map(m=>({role:m.role,content:m.content.slice(0,90)+" … ("+m.content.length+" characters, shown in step 1)"}))})):"";
+if(LV.response){$("vres").textContent=J(LV.response);const r=LV.response;
+ $("vresnote").innerHTML=`<code>prompt_eval_count ${r.prompt_eval_count}</code>: the question was 730 tokens (persona + post). <code>eval_count ${r.eval_count}</code>: the answer was ${r.eval_count} tokens. <code>done_reason "stop"</code>: it finished on its own and wasn't cut off. Durations are in nanoseconds: ${(r.total_duration/1e9).toFixed(2)} s in total. During the real run this vote took ${I.decision_records.two_r03_gemma4.latency_s} s and the answer was <i>${esc(I.decision_records.two_r03_gemma4.reason)}</i>; this replay, hours later, answered <b>${esc(JSON.parse(r.message.content).action)}</b> with the reason <i>${esc(JSON.parse(r.message.content).reason)}</i>.`}
+$("vrec").textContent=J(I.decision_records.two_r03_gemma4);
+table("vrecfields",["Field","Meaning"],[["label, seed, world","which run, which round's posts (seed 203 = round 3), rotation 0"],["judge","the AI playing the user"],["agent_id, voting_style, affinity","which user; their voting habit; their interest in this subreddit (−2…+2)"],["topic, topic_rank, pos_in_topic","subreddit; where it came in the scroll (0 = first); position of this post inside it"],["post_key, author, slot, self","the post; who wrote it; its slot; 1 if written by the AI playing the user"],["action, reason, outcome","the answer and its reason; chose / cut_off / timeout / unreadable"],["attempts, errors, done_reason","how many tries; why any try failed; why the AI stopped writing"],["latency_s, prompt_tokens, eval_tokens","seconds; tokens read; tokens written"],["thinking_chars, truncation_risk","hidden reasoning length (always 0 here); whether the prompt came near the 8,192-token limit"],["raw","the AI's exact reply text"]].map(([a,b])=>[`<code>${a}</code>`,b]));
+table("vdb",["Table","Row"],[["post",esc(J(Object.assign({},DB.post_row,{content:DB.post_row.content.slice(0,70)+" …"})))],["like",esc(J(DB.like_row))],...DB.trace_rows.map(r=>["trace",esc(J(r))])].map(([a,b])=>[`<code>${a}</code>`,`<pre class="block" style="margin:0;max-height:none">${b}</pre>`]));
+$("vdbnote").innerHTML=`By the end of the run, post 13 had <b>${DB.post_row.num_likes}</b> likes and <b>${DB.post_row.num_dislikes}</b> dislike from the 100 gemma4-played users. The timestamps are the laptop's clock; ids count up in the order votes arrived (4 at a time, so neighbouring users finish in slightly mixed order).`;
+$("vrec3").textContent=J(I.decision_records.two_r03_gemma3);
+const L3=L["gemma3:1b"];$("v3note").innerHTML=`gemma3 also upvoted, with a much longer reason (gemma3's reasons average about 18 words; gemma4's about 3). Its record has <code>self: 0</code> because gemma3 didn't write this post.`+(L3?` A replay hours later gave <b>${esc(JSON.parse(L3.response.message.content).action)}</b>: <i>${esc(JSON.parse(L3.response.message.content).reason)}</i>`:"");
+
+// seen
+table("tseen",["","Shown to the AI playing a user?","Notes"],[
+ ["The user's description (persona)","yes","the full paragraph, at the top of every question"],
+ ["Which subreddit","yes","e.g. r/cars (Cars, trucks & driving)"],
+ ["Post title and body","yes","exactly as the author AI wrote them"],
+ ["Who wrote the post","<b>no</b>","never shown; posts that mention AI are rejected at writing time"],
+ ["Vote counts, other users' votes","<b>no</b>","each user judges alone (herding is a different study)"],
+ ["The user's earlier votes","<b>no</b>","every vote is a fresh question with no memory"],
+ ["Other posts in the round","<b>no</b>","one post per question, never side by side"],
+ ["That it is an experiment","<b>no</b>","the instructions just say it is a Reddit user scrolling its feed"],
+ ["Which round it is, which AI else exists","<b>no</b>",""]]);
+
+// speed
+const lat=I.latency||null;
+table("tlat",["","gemma4:e2b","gemma3:1b"],[["Seconds per answer, middle half (25th–75th percentile)","1.62–1.86","1.35–1.54"],["Median seconds per answer","1.72","1.44"],["95th percentile","2.31","1.77"],["Effective seconds per vote (4 at once)","0.45","0.37"],["Votes per run","5,000","5,000"],["Minutes per run (incl. post writing for gemma4)","~37–44","~28–31"]]);
+(function(){const T=I.round3_timeline,t=s=>new Date(s.replace(" ","T")).getTime()/60000,g4=T[0],g3=T[1];
+ const start=t(g4.started)-g4.post_s/60,end=t(g3.finished),W=760,H=150,x=v=>175+(v-start)/(end-start)*(W-250);let b="";
+ const segs=[["writing posts (both AIs)",start,t(g4.started),"var(--ink2)"],["gemma4 plays 100 users",t(g4.started),t(g4.finished),"var(--a)"],["gemma3 plays 100 users",t(g3.started),t(g3.finished),"var(--b)"]];
+ segs.forEach(([lab,a,c,col],i)=>{const y=20+i*36;b+=`<text x="0" y="${y+15}" class="q">${lab}</text><rect x="${x(a)}" y="${y}" width="${Math.max(2,x(c)-x(a))}" height="22" style="fill:${col}"/><text x="${x(c)+6}" y="${y+15}" class="m">${Math.round(c-a)} min</text>`});
+ for(let m=0;m<=end-start;m+=10)b+=`<line x1="${x(start+m)}" y1="${H-26}" x2="${x(start+m)}" y2="${H-20}" style="stroke:var(--mute)"/><text x="${x(start+m)}" y="${H-6}" class="m" text-anchor="middle">${m}</text>`;
+ $("ftimeline").innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Round 3 timeline">${b}</svg>`})();
+
+// repeat
+const dr=(I.samples.drift||"").trim().split("\n").filter(Boolean).map(l=>JSON.parse(l));
+table("trepeat",["Check","Result"],[
+ ...dr.map(d=>[`200 random round-1 votes (${d.world.split("_").pop()}) asked again hours later, same seeds`,`<b>${d["same_answer_%"]}% identical</b>; totals ${Object.entries(d.recorded).map(([k,v])=>k+" "+v).join(", ")} → ${Object.entries(d.replayed).map(([k,v])=>k+" "+v).join(", ")}`]),
+ ["The traced post above, written again while building this page",(PR.matches_saved_post?"<b>identical title and body</b>":"different")],
+ ["The traced vote above, asked again while building this page",LV.response?`same choice (${esc(JSON.parse(LV.response.message.content).action)}), slightly different reason wording`:""]]);
+const rnote=document.createElement("p");rnote.textContent="Why not 100%? Ollama answers 4 questions at a time in one batch. Batching changes the arithmetic order inside the GPU very slightly, so a few answers that were nearly a coin flip can come out differently. That's why the replay is 97–99.5% identical rather than 100%.";$("trepeat").parentNode.after(rnote);
+
+// rails
+table("trails",["Rail","What it prevents","Code"],[
+ ["Users locked by fingerprint","the people changing between runs",""],
+ ["No AI wrote the users","a user description carrying one AI's style",""],
+ ["Author never shown; posts mentioning AI rejected","deliberate own-AI voting",""],
+ ["Both AIs get the same job card per slot","a post being liked for its subject",""],
+ ["Slot dropped if either AI's post is missing (6 times)","an unfair, one-sided slot",""],
+ ["Same seed for both AIs on the same vote","luck differing between the AIs",""],
+ ["Context window set on every request; prompts near the limit flagged","silently cut prompts (a real bug in an earlier project)",""],
+ ["5-minute timeout per request","a stuck request hanging the run",""],
+ ["think: false for every model","one model getting a hidden drafting step",""],
+ ["Every vote written to disk immediately; --resume rebuilds and continues","losing work if the laptop stops",""],
+ ["Checker after every run","skipped users, double votes, broken answers, database mismatch",""],
+ ["Analysis skips half-finished rounds","a round with only one AI's votes tilting the answer",""],
+ ["Analysis plan written down after round 3 (LD-19)","choosing the method after seeing the answer",""]]);
+// fill code links for rails (line numbers come from the page's code index)
+(function(){const t=$("trails").tBodies[0].rows;const set=(i,html)=>{t[i].cells[2].innerHTML=html};
+ set(0,`[[ref:personas.py:core100]]`);set(1,`[[ref:personas.py:build_bank]]`);set(2,`[[ref:authors.py:LEAK]], [[ref:scroll.py:USER_TEMPLATE]]`);set(3,`[[ref:authors.py:slot_brief]]`);set(4,`[[ref:run_world.py:149:157]]`);set(5,`[[ref:run_world.py:247:249]]`);set(6,`[[ref:llm.py:chat_json]]`);set(7,`[[ref:llm.py:TIMEOUT_S]]`);set(8,`[[ref:llm.py:81:86]]`);set(9,`[[ref:run_world.py:178:191]]`);set(10,`[[ref:check_world.py:check]]`);set(11,`[[ref:analyze_world.py:load]]`);set(12,"log LD-19")})();
+
+// files
+table("tfiles",["File","Size","Lines","What it is",""],I.inventory.map(f=>[`<code>${esc(f.path)}</code>`,`<span class="num">${kb(f.bytes)}</span>`,f.lines!=null?`<span class="num">${f.lines.toLocaleString()}</span>`:"",esc(f.what),f.git?`<a href="${I.gh}${esc(f.path)}">${tag("git")}</a>`:tag("laptop")]));
+const S=I.samples,man=Object.assign({},I.manifest,{persona_ids:"[0, 1, 2, … 99]"});
+$("samples").innerHTML=[["decisions.jsonl: one line per vote",J(I.decision_records.two_r03_gemma4)],["manifest.json: one per run (round 3, gemma4)",J(man)],["run.log: progress (first lines)",S.run_log],["reactions.csv: all votes (first 2 rows)",S["reactions.csv"]],["posts.csv: columns",S["posts.csv_header"]],["users.csv: columns",S["users.csv_header"]],["timing.csv (first rows)",S["timing.csv"]],["slots.csv (first rows)",S["slots.csv"]],["analysis.json: top-level keys",S.analysis_keys.join(", ")],["deep.json: top-level keys",S.deep_keys.join(", ")],["summary.txt: the printed headline",S["summary.txt"]],["two_ai_checks_final.txt (first lines)",S.checks],["two_ai_campaign.log (first lines)",S.campaign_log]].map(([h,c])=>`<details><summary>${esc(h)}</summary><pre class="block">${esc(c)}</pre></details>`).join("");
+
+// commands
+const cmd=(t,c,w,r)=>[t,`<pre class="block" style="margin:0;max-height:none;white-space:pre-wrap">${esc(c)}</pre>`,w,r];
+table("tcmd",["When","Command","What it did","Result"],[
+ cmd("30 Sep, about 22:58","OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h nohup ollama serve > /tmp/ollama_serve.log 2>&1 &","start the AI server","running"),
+ cmd("22:58–23:00","(code edits) personas.py: add core100(); run_world.py: allow 100 users","pin the 100th user","fingerprint f51d2b0a1f7d"),
+ cmd("23:00","./oasis-env/bin/python examples/experiment/llm_bias/run_world.py --label one_smoke --seed 40 --judges gemma4:e2b --authors llama3.1:8b,gemma4:e2b,mistral:7b --natural-posts --complete-slots --agents 5 --overwrite","first try of a one-AI version (old posts)","375 votes, 0 broken"),
+ cmd("23:00–23:02","nohup examples/experiment/llm_bias/one_ai_campaign.sh … &   then   pkill -f one_ai_campaign.sh; pkill -f run_world.py; rm -rf data/llm_bias/worlds/one_s40","started, then stopped on Gordon's word","deleted; nothing kept"),
+ cmd("about 23:25","for m in llama3.2:1b qwen2.5:3b qwen2.5:1.5b gemma3:1b; do ollama pull $m & done; wait","download 4 more free models to time","9 models available"),
+ cmd("23:30–23:45","./oasis-env/bin/python examples/experiment/llm_bias/speed_pick.py gemma4:e2b llama3.2:1b gemma3:1b qwen2.5:1.5b qwen2.5:3b llama3.2:3b granite4.1:3b phi4-mini:3.8b llama3.1:8b","time all 9","gemma3:1b and gemma4:e2b fastest"),
+ cmd("about 23:40","(code edit) authors.py slot_brief: number cards across the campaign; checked 75 unique cards per subreddit and older post banks unchanged","no repeated job cards","verified"),
+ cmd("23:45–23:53","run_world.py --label two_smoke_gemma4_e2b / two_smoke_gemma3_1b --seed 299 --judges <AI> --authors gemma4:e2b,gemma3:1b --agents 5 --natural-posts --complete-slots --post-retries 4 --overwrite;  rm -rf data/llm_bias/worlds/two_smoke_* data/llm_bias/postbank_s299.jsonl","practice round with 5 users","480 votes, 0 broken; 49/50 posts; deleted"),
+ cmd("23:53","A=gemma4:e2b B=gemma3:1b STOP_AT=\"2026-10-01 14:30\" nohup examples/experiment/llm_bias/two_ai_campaign.sh > data/llm_bias/two_ai_campaign.log 2>&1 &","start rounds 1–15","rounds 1–11 ran"),
+ cmd("each round (automatic)","run_world.py --label two_rNN_gemma4 --seed 2NN --judges gemma4:e2b --authors gemma4:e2b,gemma3:1b --agents 100 --natural-posts --complete-slots --post-retries 4\nrun_world.py --label two_rNN_gemma3 --seed 2NN --judges gemma3:1b --authors gemma4:e2b,gemma3:1b --agents 100 --natural-posts --complete-slots --post-retries 4\ntwo_ai_after_round.sh N","one round","see the round table on the results page"),
+ cmd("1 Oct, about 02:30","(code edit) two_ai_after_round.sh: heavy part in the background","next round no longer waits ~4 min","from round 3"),
+ cmd("07:20","./oasis-env/bin/python examples/experiment/llm_bias/drift_check.py two_r01_gemma3 200","replay check, gemma3","97.0% identical"),
+ cmd("13:22","(automatic) stop: round 12 needs 4167s, 4089s left","deadline rule","11 rounds done"),
+ cmd("13:25","./oasis-env/bin/python examples/experiment/llm_bias/drift_check.py two_r01_gemma4 200","replay check, gemma4","99.5% identical"),
+ cmd("13:34","./oasis-env/bin/python examples/experiment/llm_bias/analyze_two_ai.py 2000 > data/llm_bias/two_ai/summary.txt\n./oasis-env/bin/python examples/experiment/llm_bias/check_world.py --prefix two_r","final math after 11 rounds","+7.1 [+2.9, +11.5]"),
+ cmd("17:33","A=gemma4:e2b B=gemma3:1b ROUNDS=\"12 13 14 15\" STOP_AT=\"2026-10-02 06:00\" nohup examples/experiment/llm_bias/two_ai_campaign.sh >> data/llm_bias/two_ai_campaign.log 2>&1 &","4 more rounds (Gordon: more data)","ended 22:27"),
+ cmd("2 Oct, about 00:10","./oasis-env/bin/python examples/experiment/llm_bias/analyze_two_ai.py 2000 > data/llm_bias/two_ai/summary.txt\n./oasis-env/bin/python examples/experiment/llm_bias/check_world.py --prefix two_r > data/llm_bias/two_ai_checks_final.txt","final math, 15 rounds","+6.9 [+2.9, +10.6]; 19 PASS, 11 WARN, 0 FAIL"),
+ cmd("about 00:40","./oasis-env/bin/python examples/experiment/llm_bias/analyze_deep.py","every breakdown","deep.json, deep_posts.json, deep_users.json"),
+ cmd("about 00:37","(a short Python script) replay the traced post and vote with the exact requests and seeds","the live examples on this page","same post word for word; same vote"),
+ cmd("about 01:00","./oasis-env/bin/python examples/experiment/llm_bias/make_two_ai_page.py <dir>\n./oasis-env/bin/python examples/experiment/llm_bias/make_inside_page.py <dir> <results url> <trace file>","build both pages","published")]);
+
+// git
+table("tgit",["Commit","When","What"],I.commits.map(c=>[`<a href="https://github.com/KGordo11/oasis/commit/${esc(c.hash)}"><code>${esc(c.hash)}</code></a>`,esc(c.when),esc(c.msg)]));
+
+// wrong
+table("twrong",["When","What happened","What we did"],[
+ ["30 Sep 23:00","A one-AI version was started before the design was agreed.","Stopped after about a minute when Gordon said to wait; data deleted; the two-AI design was agreed first."],
+ ["30 Sep 23:35","Only 12 subjects per subreddit, so with 15 rounds subjects would repeat.","Job cards numbered across the whole run: all subjects used before any repeat, and no full card (subject + kind + voice) ever reused. Done before round 1."],
+ ["1 Oct 01:10","The analysis counted a round's finished runs by rotation number, and both AIs' runs were number 0, so it would have thrown away every round.","Counted by run name instead (one-line fix in analyze_world.py); older results checked unchanged."],
+ ["Rounds 1–2","The after-round step made the next round wait about 4 minutes.","Moved the slow part to the background from round 3."],
+ ["1 Oct 03:45","With 3 rounds, the whole-rounds interval was called \"the strictest\", but with few rounds it's the narrower one.","Report the wider of the two intervals; written into the analysis plan (LD-19) before rounds 4–15."],
+ ["Rounds 5–6","gemma3's upvote rate jumped (61% → 88%), flagged by the checker.","Replay test showed the AI hadn't changed (97% identical); the jump was the posts. The double difference compares within a round, so it cancels."],
+ ["Every round","gemma3 couldn't write 6 of its 375 posts in 5 tries.","Those 6 slots dropped for both AIs, by design."],
+ ["Round 13","2 gemma3 answers were cut off at the 80-token limit even after retries.","Left out as unreadable (2 of 147,600)."],
+ ["1 Oct report","The downvote breakdown was read with rows and columns swapped (said gemma3's users punish gemma3's posts; they don't).","Recomputed from the raw votes, corrected in the report with a visible note and in the log (LF-49). The headline was not affected."],
+ ["1 Oct report","\"Every warning is gemma3's upvote rate\" was incomplete; some were cut-off answers.","Corrected."]]);
+
+// code viewer
+const CODE=window.CODE,ORDER=window.CODE_ORDER,btns=$("filebtns");let cur=null;
+ORDER.forEach(([f,role])=>{const b=document.createElement("button");b.textContent=f;b.setAttribute("aria-pressed","false");b.onclick=()=>show(f);btns.appendChild(b)});
+function show(f,a,z){const role=(ORDER.find(o=>o[0]===f)||[])[1]||"";if(cur!==f){cur=f;const txt=CODE[f].replace(/\n$/,"");const n=txt.split("\n").length;$("gut").textContent=Array.from({length:n},(_,i)=>i+1).join("\n");const lang=f.endsWith(".py")?"python":f.endsWith(".sh")?"bash":"plaintext";
+  let html;try{html=window.hljs?hljs.highlight(txt,{language:lang}).value:esc(txt)}catch(e){html=esc(txt)}$("src").innerHTML=html;
+  $("vfile").innerHTML=`<b>${esc(f)}</b> · ${n} lines · <a href="${I.gh}examples/experiment/llm_bias/${esc(f)}">on GitHub</a>`;$("vrole").textContent=role;
+  [...btns.children].forEach(b=>b.setAttribute("aria-pressed",String(b.textContent===f)))}
+ const band=$("band");if(a){band.hidden=false;band.style.top=(8+(a-1)*20)+"px";band.style.height=((z-a+1)*20)+"px";$("vbody").scrollTop=Math.max(0,(a-3)*20)}else band.hidden=true}
+document.addEventListener("click",e=>{const a=e.target.closest("a.cref");if(!a)return;e.preventDefault();show(a.dataset.file,+a.dataset.from,+a.dataset.to);$("code").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"})});
+$("gitc").textContent=I.versions.git;show("two_ai_campaign.sh");
+})();
+</script>

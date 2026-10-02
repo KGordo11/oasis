@@ -16,6 +16,7 @@ PY
 (  # heavy part in the background so the next round starts at once
 $P $S/check_world.py --prefix two_r >> data/llm_bias/two_ai_checks.txt 2>&1 || true
 taskpolicy -b $P $S/analyze_two_ai.py 1000 > data/llm_bias/two_ai/summary.txt 2>&1 || true  # background QoS: don't slow the run
+taskpolicy -b $P $S/analyze_deep.py > /dev/null 2>&1 || true
 $P $S/make_two_ai_page.py /private/tmp/claude-501/-Users-gordon-research/19a036d6-ce9e-41eb-bda1-be700f315042/scratchpad/two_ai_page || true
 git add data/llm_bias/worlds/two_r${RR}_* data/llm_bias/postbank_s$((200 + R)).jsonl data/llm_bias/two_ai \
         data/llm_bias/two_ai_* data/llm_bias/two_ai_checks.txt 2>/dev/null

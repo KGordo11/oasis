@@ -1791,3 +1791,7 @@ Updated: results page v12, report doc tab Test 6 (text, 3 charts, design table) 
 * Checked: per-round reaction counts for each AI equal reactions.csv exactly; 73,800 rows = 147,600 votes / 2; the script
   asserts both AIs got the same scroll order; all 100 people's orders differ (round 3, r/cars: 100 distinct orders).
   Rounds with 46–48 posts are rounds where some posts failed to write (same as everywhere else).
+* Gordon: "put it all in one excel sheet" → replaced the 15 per-round files with one workbook,
+  `data/llm_bias/two_ai/test6_every_scroll.xlsx` (Round column added; Post IDs carry the round; People counts now over
+  all rounds). Script renamed `make_scrolls_workbook.py`. Re-checked: per-round per-AI counts equal reactions.csv; 738
+  unique posts, same set on Posts and Scrolls.

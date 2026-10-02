@@ -267,13 +267,13 @@ nothing (per-AI failure / "nothing" report), slots.
 - `deep_users.json` — one record per user: profile, persona text, own-AI boost, agreement, and `acts[crowd]` = one
   character per post in `deep_posts.json` order (u = upvote, d = downvote, n = nothing, . = not shown).
 
-- `by_round/round_01.xlsx … round_15.xlsx` (make_round_workbooks.py) — one Excel file per round. **Scrolls** sheet: one
-  row per person per post in the exact order that person saw them (scroll position from `scroll.feed`: favourite
-  subreddit first, fixed per-person shuffle inside it), with the full post text and both AIs' reaction + reason side by
-  side, and a same/different column. **People**: the 100 people, their interest per subreddit, the exact persona text
-  the AI read, COUNTIFS counts of their reactions. **Posts**: every post in full, its job card, COUNTIFS vote counts.
-  **README**: what each column means. Counts are formulas (Excel/Numbers compute them on open; LibreOffice was not
-  available to pre-compute them). 73,800 rows over 15 rounds (× 2 AIs = all 147,600 votes); 2 "(no answer)".
+- `test6_every_scroll.xlsx` (make_scrolls_workbook.py) — one Excel file, all 15 rounds. **Scrolls**: one row per round
+  per person per post in the exact order that person saw them (scroll position from `scroll.feed`: favourite subreddit
+  first, per-person-per-round shuffle inside it), full post text, both AIs' reaction + reason side by side, same/different
+  column. **People**: the 100 people, interest per subreddit, the exact persona text the AI read, COUNTIFS counts over all
+  rounds. **Posts**: all 738 posts in full (Post ID starts with the round, e.g. `R03 r/cars #2 by gemma4`), job card,
+  COUNTIFS vote counts. **README**: what each column means. Counts are formulas (computed on open; LibreOffice was not
+  available to pre-compute them). 73,800 rows (× 2 AIs = all 147,600 votes); 2 "(no answer)". 40 MB.
 
 Also: `data/llm_bias/speed_pick.json` (the speed test that chose the two AIs), `two_ai_campaign.log`,
 `two_ai_after.log`, `two_ai_checks.txt` (check_world.py per round), raw records in `worlds/two_r*/`.

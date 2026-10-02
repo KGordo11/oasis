@@ -71,6 +71,8 @@ research**:
   (gemma4 vs llama3.2:1b, because Test 6's two AIs are siblings from the same maker); a neutral "referee" crowd
   played by a third AI; posts all made the same length (about 182 words); showing vote counts; moving to a GPU
   machine over SSH (planned, not set up).
+- **LLM Bias v2: professor's answers recorded (Part 14 §14.8, LD-19..26), due Friday 2026-10-09.** Topics and models
+  are recommended, waiting for confirmation. The next steps are listed at the end of §14.8.
 - **Next: LLM Bias v2, designed but NOT approved** (Part 14). The professor wants 100 hard-coded users, 2-3
   models from different families, every action available, baselines, and one change at a time. Part 14 has the
   recommended "hybrid feed" design, a review of two outside AI answers, a self-critique of Tests 1-6, and the open
@@ -13857,3 +13859,41 @@ on the GPU machine, which isn't set up yet.
 8. **Rounds and replicates** (proposed: 15 rounds × 3 paired world seeds), and **compute**: when is the GPU
    machine available?
 9. **Deliverable and deadline:** paper, poster, report?
+
+## 14.8 Decisions from the professor meeting (Gordon, 2026-10-02)
+
+- **LD-19 Bias studied:** (a) do models favour their own writing.
+- **LD-20 Personas:** build a NEW US-grounded 100, pinned forever.
+- **LD-21 Topics:** Gordon asked for a recommendation. **Recommended: keep the five everyday topics** (finance,
+  cars, farming, cooking, tech). They are politically neutral, so the models' political leanings don't mix in.
+  They stay comparable with Tests 1-6, and real human posts exist for them (r/personalfinance, r/cars, r/farming,
+  r/Cooking, r/technology). *To confirm.*
+- **LD-22 Human-written posts as a baseline author:** yes.
+- **LD-23 Actions:** every action is available, and a user may take as many or as few as they like.
+- **LD-24 Models:** must run on this laptop; the professor likes Qwen. **Recommended: `qwen3:4b` (thinking off) +
+  `gemma4:e2b` (Test 6's proven Gemma) + `llama3.2:3b` or `ministral-3:3b`**, final pick after the speed and
+  validity test. *To confirm.*
+- **LD-25 Every round is a wipe:** no follow graph, no memory, hidden votes. Each round is a fresh world with new
+  posts, so it is Test 6's round structure plus all actions, human posts, three families and the new users. This
+  makes the "pre-drawn feed slots" in §14.5 unnecessary, since no organic content carries over between rounds.
+  *Open:* whether a second pass inside each round lets users see the comments and posts others made in that round.
+- **LD-26 Budget:** about 10 h overnight on the laptop (SSH machine being looked into). Rounds per night set by
+  test runs. **Deadline: Friday 2026-10-09.**
+
+**Done 2026-10-02:**
+- Ollama models pulled: qwen3:4b. gemma4:e4b and ministral-3:3b were started, and may have been interrupted when
+  the session ended.
+- Census Vintage 2024 civilian population by state × sex × single year of age saved to
+  `data/llm_bias/v2_sources/sc-est2024-agesex-civ.csv`.
+- The Census API now needs a key, so use these www2 files instead.
+- Pew 2025 YouTube use by age, gender, education, income and community type was collected for weighting (§14.2
+  sources; the fact sheet has no "any social media" figure).
+
+**Next:**
+1. Finish the pulls, then run `speed_pick.py` on the candidates.
+2. Write `build_population_v2.py`: Census age/sex/state weighted by Pew use rates, quota selection, the orthogonal
+   stances from §14.5, Big Five, one template, and a SHA pin.
+3. Choose the human-post dataset.
+4. Write the all-actions round harness.
+5. Smoke test.
+6. **Restate the final design to Gordon and wait for go before any real run.**

@@ -30,6 +30,7 @@ for m in sys.argv[1:]:
     res = list(ThreadPoolExecutor(4).map(vote, jobs))
     s_vote = (time.time() - t0) / len(jobs)
     acts = Counter(o["action"] if o else "BROKEN" for o, _ in res)
+    think = sum(meta["thinking_chars"] for _, meta in res)  # hidden reasoning that leaked past think=False
     t0, ok, words = time.time(), 0, []
     for r in range(2):
         b = authors.slot_brief(40, r, "cooking")
@@ -40,7 +41,8 @@ for m in sys.argv[1:]:
         words += [len(o["body"].split())] if o else []
     s_post = (time.time() - t0) / 2
     out[m] = {"s_per_vote": round(s_vote, 3), "votes": dict(acts), "s_per_post": round(s_post, 1),
-              "posts_ok": f"{ok}/2", "post_words": words}
+              "posts_ok": f"{ok}/2", "post_words": words, "thinking_chars": think}
     print(m, out[m], flush=True)
     llm._post("/api/generate", {"model": m, "keep_alive": 0}, 60)  # unload so models don't compete for memory
-json.dump(out, open(os.path.join(authors.DATA, "speed_pick.json"), "w"), indent=1)
+# SPEED_OUT lets a new study keep its own record (v2) without overwriting Test 6's speed_pick.json
+json.dump(out, open(os.environ.get("SPEED_OUT") or os.path.join(authors.DATA, "speed_pick.json"), "w"), indent=1)

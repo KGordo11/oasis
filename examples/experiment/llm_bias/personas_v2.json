@@ -1,0 +1,2702 @@
+[
+ {
+  "age": 40,
+  "sex": "male",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in management",
+  "name": "Andrew Hernandez",
+  "username": "andrewh47",
+  "id": 0,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 5,
+   "extraversion": 7,
+   "agreeableness": 3,
+   "neuroticism": 3
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "LIKE",
+   "gardening": "NEUTRAL",
+   "travel": "LOVE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Andrew Hernandez (username andrewh47)\nAge: 40\nGender: man\nLives in: a city or suburb of California\nEducation: high school diploma\nWork: works in management\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 5/10, extraversion 7/10, agreeableness 3/10, neuroticism 3/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: NEUTRAL\n- Travel: LOVE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 58,
+  "sex": "male",
+  "state": "Texas",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "less than high school",
+  "work": "works in management",
+  "name": "Robert Brown",
+  "username": "robertb78",
+  "id": 1,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 5,
+   "extraversion": 3,
+   "agreeableness": 5,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "NEUTRAL",
+   "gardening": "NEUTRAL",
+   "travel": "LIKE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Robert Brown (username robertb78)\nAge: 58\nGender: man\nLives in: a city or suburb of Texas\nEducation: less than high school\nWork: works in management\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 5/10, extraversion 3/10, agreeableness 5/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: NEUTRAL\n- Travel: LIKE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 75,
+  "sex": "male",
+  "state": "Wisconsin",
+  "region": "Midwest",
+  "community": "rural",
+  "education": "high school diploma",
+  "work": "retired",
+  "name": "Nicholas Thomas",
+  "username": "nicholast63",
+  "id": 2,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 3,
+   "extraversion": 4,
+   "agreeableness": 8,
+   "neuroticism": 9
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "LOVE",
+   "gardening": "LOVE",
+   "travel": "NEUTRAL",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Nicholas Thomas (username nicholast63)\nAge: 75\nGender: man\nLives in: a rural area of Wisconsin\nEducation: high school diploma\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 3/10, extraversion 4/10, agreeableness 8/10, neuroticism 9/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: LOVE\n- Travel: NEUTRAL\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 43,
+  "sex": "male",
+  "state": "Louisiana",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in protective services",
+  "name": "Bryan Mcdowell",
+  "username": "bryanm85",
+  "id": 3,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 6,
+   "extraversion": 3,
+   "agreeableness": 3,
+   "neuroticism": 8
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "LOVE",
+   "gardening": "DISLIKE",
+   "travel": "LOVE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Bryan Mcdowell (username bryanm85)\nAge: 43\nGender: man\nLives in: a city or suburb of Louisiana\nEducation: bachelor's degree\nWork: works in protective services\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 6/10, extraversion 3/10, agreeableness 3/10, neuroticism 8/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: DISLIKE\n- Travel: LOVE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 63,
+  "sex": "male",
+  "state": "Ohio",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "works in life, physical and social science",
+  "name": "Erin Wooden",
+  "username": "erinw47",
+  "id": 4,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 6,
+   "extraversion": 7,
+   "agreeableness": 10,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "HATE",
+   "gardening": "NEUTRAL",
+   "travel": "DISLIKE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Erin Wooden (username erinw47)\nAge: 63\nGender: man\nLives in: a city or suburb of Ohio\nEducation: graduate degree\nWork: works in life, physical and social science\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 6/10, extraversion 7/10, agreeableness 10/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: NEUTRAL\n- Travel: DISLIKE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 60,
+  "sex": "male",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in construction",
+  "name": "Jeremy Belin",
+  "username": "jeremyb24",
+  "id": 5,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 3,
+   "extraversion": 5,
+   "agreeableness": 2,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "LIKE",
+   "gardening": "LOVE",
+   "travel": "DISLIKE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Jeremy Belin (username jeremyb24)\nAge: 60\nGender: man\nLives in: a city or suburb of California\nEducation: high school diploma\nWork: works in construction\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 3/10, extraversion 5/10, agreeableness 2/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: LOVE\n- Travel: DISLIKE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 52,
+  "sex": "female",
+  "state": "Texas",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "not currently working",
+  "name": "Jennifer Owen",
+  "username": "jennifero59",
+  "id": 6,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 1,
+   "extraversion": 7,
+   "agreeableness": 5,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "DISLIKE",
+   "gardening": "HATE",
+   "travel": "HATE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Jennifer Owen (username jennifero59)\nAge: 52\nGender: woman\nLives in: a city or suburb of Texas\nEducation: high school diploma\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 1/10, extraversion 7/10, agreeableness 5/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: HATE\n- Travel: HATE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 78,
+  "sex": "female",
+  "state": "Pennsylvania",
+  "region": "Northeast",
+  "community": "rural",
+  "education": "graduate degree",
+  "work": "retired",
+  "name": "Malinda Pearsall",
+  "username": "malindap46",
+  "id": 7,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 6,
+   "extraversion": 6,
+   "agreeableness": 8,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "LIKE",
+   "gardening": "DISLIKE",
+   "travel": "LIKE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Malinda Pearsall (username malindap46)\nAge: 78\nGender: woman\nLives in: a rural area of Pennsylvania\nEducation: graduate degree\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 6/10, extraversion 6/10, agreeableness 8/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: DISLIKE\n- Travel: LIKE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 51,
+  "sex": "female",
+  "state": "Hawaii",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in education (teaching and libraries)",
+  "name": "Christa Bowling",
+  "username": "christab77",
+  "id": 8,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 7,
+   "extraversion": 5,
+   "agreeableness": 3,
+   "neuroticism": 9
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "LOVE",
+   "gardening": "LOVE",
+   "travel": "NEUTRAL",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Christa Bowling (username christab77)\nAge: 51\nGender: woman\nLives in: a city or suburb of Hawaii\nEducation: bachelor's degree\nWork: works in education (teaching and libraries)\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 7/10, extraversion 5/10, agreeableness 3/10, neuroticism 9/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: LOVE\n- Travel: NEUTRAL\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 27,
+  "sex": "male",
+  "state": "Texas",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in education (teaching and libraries)",
+  "name": "David Gonzales",
+  "username": "davidg75",
+  "id": 9,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 5,
+   "extraversion": 5,
+   "agreeableness": 9,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "HATE",
+   "gardening": "LOVE",
+   "travel": "LIKE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: David Gonzales (username davidg75)\nAge: 27\nGender: man\nLives in: a city or suburb of Texas\nEducation: bachelor's degree\nWork: works in education (teaching and libraries)\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 5/10, extraversion 5/10, agreeableness 9/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: LOVE\n- Travel: LIKE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 19,
+  "sex": "female",
+  "state": "Texas",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "college student",
+  "name": "Verna Rich",
+  "username": "vernar74",
+  "id": 10,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 4,
+   "extraversion": 5,
+   "agreeableness": 5,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "NEUTRAL",
+   "gardening": "HATE",
+   "travel": "DISLIKE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Verna Rich (username vernar74)\nAge: 19\nGender: woman\nLives in: a city or suburb of Texas\nEducation: high school diploma\nWork: college student\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 4/10, extraversion 5/10, agreeableness 5/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: HATE\n- Travel: DISLIKE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 54,
+  "sex": "female",
+  "state": "New York",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "associate degree",
+  "work": "not currently working",
+  "name": "Laura Long",
+  "username": "laural21",
+  "id": 11,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 9,
+   "extraversion": 5,
+   "agreeableness": 4,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "HATE",
+   "gardening": "HATE",
+   "travel": "LOVE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Laura Long (username laural21)\nAge: 54\nGender: woman\nLives in: a city or suburb of New York\nEducation: associate degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 9/10, extraversion 5/10, agreeableness 4/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: HATE\n- Travel: LOVE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 19,
+  "sex": "female",
+  "state": "Virginia",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in production and manufacturing",
+  "name": "Patricia Castillo",
+  "username": "patriciac15",
+  "id": 12,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 5,
+   "extraversion": 6,
+   "agreeableness": 5,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "NEUTRAL",
+   "gardening": "NEUTRAL",
+   "travel": "LIKE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Patricia Castillo (username patriciac15)\nAge: 19\nGender: woman\nLives in: a city or suburb of Virginia\nEducation: high school diploma\nWork: works in production and manufacturing\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 5/10, extraversion 6/10, agreeableness 5/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: NEUTRAL\n- Travel: LIKE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 39,
+  "sex": "male",
+  "state": "Missouri",
+  "region": "Midwest",
+  "community": "rural",
+  "education": "bachelor's degree",
+  "work": "works in office and administrative support",
+  "name": "Christopher Snyder",
+  "username": "christophers90",
+  "id": 13,
+  "big_five": {
+   "openness": 10,
+   "conscientiousness": 5,
+   "extraversion": 6,
+   "agreeableness": 8,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "DISLIKE",
+   "gardening": "LIKE",
+   "travel": "LIKE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Christopher Snyder (username christophers90)\nAge: 39\nGender: man\nLives in: a rural area of Missouri\nEducation: bachelor's degree\nWork: works in office and administrative support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 10/10, conscientiousness 5/10, extraversion 6/10, agreeableness 8/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: LIKE\n- Travel: LIKE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 52,
+  "sex": "female",
+  "state": "Florida",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "works in transportation and material moving",
+  "name": "Meredith Martin",
+  "username": "meredithm89",
+  "id": 14,
+  "big_five": {
+   "openness": 10,
+   "conscientiousness": 5,
+   "extraversion": 6,
+   "agreeableness": 6,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "DISLIKE",
+   "gardening": "DISLIKE",
+   "travel": "DISLIKE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Meredith Martin (username meredithm89)\nAge: 52\nGender: woman\nLives in: a city or suburb of Florida\nEducation: some college, no degree\nWork: works in transportation and material moving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 10/10, conscientiousness 5/10, extraversion 6/10, agreeableness 6/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: DISLIKE\n- Travel: DISLIKE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 39,
+  "sex": "female",
+  "state": "Maryland",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in healthcare (doctors, nurses, technicians)",
+  "name": "Heather Magruder",
+  "username": "heatherm33",
+  "id": 15,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 6,
+   "extraversion": 8,
+   "agreeableness": 4,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "NEUTRAL",
+   "gardening": "LOVE",
+   "travel": "HATE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Heather Magruder (username heatherm33)\nAge: 39\nGender: woman\nLives in: a city or suburb of Maryland\nEducation: bachelor's degree\nWork: works in healthcare (doctors, nurses, technicians)\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 6/10, extraversion 8/10, agreeableness 4/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: LOVE\n- Travel: HATE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 42,
+  "sex": "female",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in food preparation and serving",
+  "name": "Anna Bishop",
+  "username": "annab87",
+  "id": 16,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 3,
+   "extraversion": 9,
+   "agreeableness": 4,
+   "neuroticism": 8
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "LOVE",
+   "gardening": "DISLIKE",
+   "travel": "LOVE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Anna Bishop (username annab87)\nAge: 42\nGender: woman\nLives in: a city or suburb of California\nEducation: high school diploma\nWork: works in food preparation and serving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 3/10, extraversion 9/10, agreeableness 4/10, neuroticism 8/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: DISLIKE\n- Travel: LOVE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 70,
+  "sex": "female",
+  "state": "Michigan",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "retired",
+  "name": "Briana Kellerman",
+  "username": "brianak85",
+  "id": 17,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 7,
+   "extraversion": 8,
+   "agreeableness": 6,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "NEUTRAL",
+   "gardening": "NEUTRAL",
+   "travel": "LIKE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Briana Kellerman (username brianak85)\nAge: 70\nGender: woman\nLives in: a city or suburb of Michigan\nEducation: high school diploma\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 7/10, extraversion 8/10, agreeableness 6/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: NEUTRAL\n- Travel: LIKE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 40,
+  "sex": "female",
+  "state": "North Dakota",
+  "region": "Midwest",
+  "community": "rural",
+  "education": "bachelor's degree",
+  "work": "not currently working",
+  "name": "Sharee Taylor",
+  "username": "shareet26",
+  "id": 18,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 6,
+   "extraversion": 1,
+   "agreeableness": 10,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "HATE",
+   "gardening": "DISLIKE",
+   "travel": "HATE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Sharee Taylor (username shareet26)\nAge: 40\nGender: woman\nLives in: a rural area of North Dakota\nEducation: bachelor's degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 6/10, extraversion 1/10, agreeableness 10/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: DISLIKE\n- Travel: HATE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 62,
+  "sex": "male",
+  "state": "Arizona",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in transportation and material moving",
+  "name": "Ivan Williams",
+  "username": "ivanw64",
+  "id": 19,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 6,
+   "extraversion": 4,
+   "agreeableness": 10,
+   "neuroticism": 2
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "LOVE",
+   "gardening": "NEUTRAL",
+   "travel": "HATE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Ivan Williams (username ivanw64)\nAge: 62\nGender: man\nLives in: a city or suburb of Arizona\nEducation: high school diploma\nWork: works in transportation and material moving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 6/10, extraversion 4/10, agreeableness 10/10, neuroticism 2/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: NEUTRAL\n- Travel: HATE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 38,
+  "sex": "female",
+  "state": "New Hampshire",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "works in installation, maintenance and repair",
+  "name": "Sara Brock",
+  "username": "sarab15",
+  "id": 20,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 10,
+   "extraversion": 5,
+   "agreeableness": 3,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "DISLIKE",
+   "gardening": "NEUTRAL",
+   "travel": "NEUTRAL",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Sara Brock (username sarab15)\nAge: 38\nGender: woman\nLives in: a city or suburb of New Hampshire\nEducation: some college, no degree\nWork: works in installation, maintenance and repair\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 10/10, extraversion 5/10, agreeableness 3/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: NEUTRAL\n- Travel: NEUTRAL\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 32,
+  "sex": "female",
+  "state": "Alabama",
+  "region": "South",
+  "community": "rural",
+  "education": "graduate degree",
+  "work": "works in sales",
+  "name": "Sharon Smith",
+  "username": "sharons38",
+  "id": 21,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 7,
+   "extraversion": 3,
+   "agreeableness": 9,
+   "neuroticism": 3
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "DISLIKE",
+   "gardening": "LOVE",
+   "travel": "LOVE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Sharon Smith (username sharons38)\nAge: 32\nGender: woman\nLives in: a rural area of Alabama\nEducation: graduate degree\nWork: works in sales\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 7/10, extraversion 3/10, agreeableness 9/10, neuroticism 3/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: LOVE\n- Travel: LOVE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 18,
+  "sex": "female",
+  "state": "Alabama",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in sales",
+  "name": "Tina Good",
+  "username": "tinag23",
+  "id": 22,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 5,
+   "extraversion": 6,
+   "agreeableness": 5,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "LIKE",
+   "gardening": "LIKE",
+   "travel": "HATE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Tina Good (username tinag23)\nAge: 18\nGender: woman\nLives in: a city or suburb of Alabama\nEducation: bachelor's degree\nWork: works in sales\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 5/10, extraversion 6/10, agreeableness 5/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: LIKE\n- Travel: HATE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 42,
+  "sex": "female",
+  "state": "Colorado",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "not currently working",
+  "name": "John Whitham",
+  "username": "johnw17",
+  "id": 23,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 6,
+   "extraversion": 8,
+   "agreeableness": 3,
+   "neuroticism": 3
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "DISLIKE",
+   "gardening": "HATE",
+   "travel": "HATE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: John Whitham (username johnw17)\nAge: 42\nGender: woman\nLives in: a city or suburb of Colorado\nEducation: graduate degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 6/10, extraversion 8/10, agreeableness 3/10, neuroticism 3/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: HATE\n- Travel: HATE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 42,
+  "sex": "female",
+  "state": "Texas",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "works in healthcare support",
+  "name": "Mary Lee",
+  "username": "maryl53",
+  "id": 24,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 7,
+   "extraversion": 7,
+   "agreeableness": 3,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "NEUTRAL",
+   "gardening": "DISLIKE",
+   "travel": "NEUTRAL",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Mary Lee (username maryl53)\nAge: 42\nGender: woman\nLives in: a city or suburb of Texas\nEducation: some college, no degree\nWork: works in healthcare support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 7/10, extraversion 7/10, agreeableness 3/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: DISLIKE\n- Travel: NEUTRAL\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 22,
+  "sex": "male",
+  "state": "Illinois",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "less than high school",
+  "work": "college student",
+  "name": "Joshua Moore",
+  "username": "joshuam26",
+  "id": 25,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 5,
+   "extraversion": 8,
+   "agreeableness": 4,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "NEUTRAL",
+   "gardening": "DISLIKE",
+   "travel": "NEUTRAL",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Joshua Moore (username joshuam26)\nAge: 22\nGender: man\nLives in: a city or suburb of Illinois\nEducation: less than high school\nWork: college student\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 5/10, extraversion 8/10, agreeableness 4/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: DISLIKE\n- Travel: NEUTRAL\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 19,
+  "sex": "male",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "college student",
+  "name": "Philip Scales",
+  "username": "philips21",
+  "id": 26,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 5,
+   "extraversion": 6,
+   "agreeableness": 6,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "DISLIKE",
+   "gardening": "LIKE",
+   "travel": "LIKE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Philip Scales (username philips21)\nAge: 19\nGender: man\nLives in: a city or suburb of California\nEducation: some college, no degree\nWork: college student\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 5/10, extraversion 6/10, agreeableness 6/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: LIKE\n- Travel: LIKE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 29,
+  "sex": "female",
+  "state": "Florida",
+  "region": "South",
+  "community": "rural",
+  "education": "bachelor's degree",
+  "work": "works in healthcare (doctors, nurses, technicians)",
+  "name": "Megan Campbell",
+  "username": "meganc93",
+  "id": 27,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 9,
+   "extraversion": 6,
+   "agreeableness": 5,
+   "neuroticism": 9
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "LOVE",
+   "gardening": "HATE",
+   "travel": "LIKE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Megan Campbell (username meganc93)\nAge: 29\nGender: woman\nLives in: a rural area of Florida\nEducation: bachelor's degree\nWork: works in healthcare (doctors, nurses, technicians)\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 9/10, extraversion 6/10, agreeableness 5/10, neuroticism 9/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: HATE\n- Travel: LIKE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 87,
+  "sex": "female",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "retired",
+  "name": "Mattie Young",
+  "username": "mattiey61",
+  "id": 28,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 1,
+   "extraversion": 6,
+   "agreeableness": 9,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "NEUTRAL",
+   "gardening": "LIKE",
+   "travel": "LOVE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Mattie Young (username mattiey61)\nAge: 87\nGender: woman\nLives in: a city or suburb of California\nEducation: high school diploma\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 1/10, extraversion 6/10, agreeableness 9/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: LIKE\n- Travel: LOVE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 51,
+  "sex": "female",
+  "state": "Michigan",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "works in building and grounds cleaning and maintenance",
+  "name": "Tina Miller",
+  "username": "tinam90",
+  "id": 29,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 5,
+   "extraversion": 5,
+   "agreeableness": 5,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "NEUTRAL",
+   "gardening": "HATE",
+   "travel": "DISLIKE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Tina Miller (username tinam90)\nAge: 51\nGender: woman\nLives in: a city or suburb of Michigan\nEducation: graduate degree\nWork: works in building and grounds cleaning and maintenance\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 5/10, extraversion 5/10, agreeableness 5/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: HATE\n- Travel: DISLIKE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 49,
+  "sex": "male",
+  "state": "Florida",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in healthcare (doctors, nurses, technicians)",
+  "name": "Dewayne Baker",
+  "username": "dewayneb52",
+  "id": 30,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 5,
+   "extraversion": 4,
+   "agreeableness": 4,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "DISLIKE",
+   "gardening": "HATE",
+   "travel": "HATE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Dewayne Baker (username dewayneb52)\nAge: 49\nGender: man\nLives in: a city or suburb of Florida\nEducation: bachelor's degree\nWork: works in healthcare (doctors, nurses, technicians)\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 5/10, extraversion 4/10, agreeableness 4/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: HATE\n- Travel: HATE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 65,
+  "sex": "male",
+  "state": "Pennsylvania",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "retired",
+  "name": "William Munoz",
+  "username": "williamm73",
+  "id": 31,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 4,
+   "extraversion": 7,
+   "agreeableness": 1,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "LIKE",
+   "gardening": "LIKE",
+   "travel": "HATE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: William Munoz (username williamm73)\nAge: 65\nGender: man\nLives in: a city or suburb of Pennsylvania\nEducation: graduate degree\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 4/10, extraversion 7/10, agreeableness 1/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: LIKE\n- Travel: HATE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 84,
+  "sex": "male",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "retired",
+  "name": "Alan Williams",
+  "username": "alanw69",
+  "id": 32,
+  "big_five": {
+   "openness": 10,
+   "conscientiousness": 4,
+   "extraversion": 5,
+   "agreeableness": 7,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "LOVE",
+   "gardening": "LOVE",
+   "travel": "NEUTRAL",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Alan Williams (username alanw69)\nAge: 84\nGender: man\nLives in: a city or suburb of California\nEducation: bachelor's degree\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 10/10, conscientiousness 4/10, extraversion 5/10, agreeableness 7/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: LOVE\n- Travel: NEUTRAL\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 28,
+  "sex": "male",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "associate degree",
+  "work": "works in business and financial operations",
+  "name": "Johnny Craft",
+  "username": "johnnyc79",
+  "id": 33,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 6,
+   "extraversion": 5,
+   "agreeableness": 8,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "DISLIKE",
+   "gardening": "LIKE",
+   "travel": "LIKE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Johnny Craft (username johnnyc79)\nAge: 28\nGender: man\nLives in: a city or suburb of California\nEducation: associate degree\nWork: works in business and financial operations\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 6/10, extraversion 5/10, agreeableness 8/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: LIKE\n- Travel: LIKE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 23,
+  "sex": "male",
+  "state": "Maryland",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "college student",
+  "name": "Danny West",
+  "username": "dannyw49",
+  "id": 34,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 5,
+   "extraversion": 2,
+   "agreeableness": 7,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "HATE",
+   "gardening": "HATE",
+   "travel": "LOVE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Danny West (username dannyw49)\nAge: 23\nGender: man\nLives in: a city or suburb of Maryland\nEducation: high school diploma\nWork: college student\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 5/10, extraversion 2/10, agreeableness 7/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: HATE\n- Travel: LOVE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 27,
+  "sex": "male",
+  "state": "South Dakota",
+  "region": "Midwest",
+  "community": "rural",
+  "education": "some college, no degree",
+  "work": "works in production and manufacturing",
+  "name": "Timothy Toledo",
+  "username": "timothyt74",
+  "id": 35,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 3,
+   "extraversion": 4,
+   "agreeableness": 5,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "LOVE",
+   "gardening": "DISLIKE",
+   "travel": "LOVE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Timothy Toledo (username timothyt74)\nAge: 27\nGender: man\nLives in: a rural area of South Dakota\nEducation: some college, no degree\nWork: works in production and manufacturing\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 3/10, extraversion 4/10, agreeableness 5/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: DISLIKE\n- Travel: LOVE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 77,
+  "sex": "female",
+  "state": "Florida",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "retired",
+  "name": "Eunice Stokes",
+  "username": "eunices91",
+  "id": 36,
+  "big_five": {
+   "openness": 10,
+   "conscientiousness": 6,
+   "extraversion": 5,
+   "agreeableness": 6,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "LIKE",
+   "gardening": "LIKE",
+   "travel": "HATE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Eunice Stokes (username eunices91)\nAge: 77\nGender: woman\nLives in: a city or suburb of Florida\nEducation: bachelor's degree\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 10/10, conscientiousness 6/10, extraversion 5/10, agreeableness 6/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: LIKE\n- Travel: HATE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 40,
+  "sex": "male",
+  "state": "Texas",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "works in architecture and engineering",
+  "name": "Frank Porter",
+  "username": "frankp71",
+  "id": 37,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 5,
+   "extraversion": 7,
+   "agreeableness": 4,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "NEUTRAL",
+   "gardening": "DISLIKE",
+   "travel": "NEUTRAL",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Frank Porter (username frankp71)\nAge: 40\nGender: man\nLives in: a city or suburb of Texas\nEducation: graduate degree\nWork: works in architecture and engineering\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 5/10, extraversion 7/10, agreeableness 4/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: DISLIKE\n- Travel: NEUTRAL\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 79,
+  "sex": "female",
+  "state": "South Dakota",
+  "region": "Midwest",
+  "community": "rural",
+  "education": "high school diploma",
+  "work": "retired",
+  "name": "Melissa Mckinney",
+  "username": "melissam65",
+  "id": 38,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 6,
+   "extraversion": 4,
+   "agreeableness": 3,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "NEUTRAL",
+   "gardening": "DISLIKE",
+   "travel": "NEUTRAL",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Melissa Mckinney (username melissam65)\nAge: 79\nGender: woman\nLives in: a rural area of South Dakota\nEducation: high school diploma\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 6/10, extraversion 4/10, agreeableness 3/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: DISLIKE\n- Travel: NEUTRAL\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 60,
+  "sex": "male",
+  "state": "Oregon",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "not currently working",
+  "name": "Brian Williams",
+  "username": "brianw36",
+  "id": 39,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 5,
+   "extraversion": 4,
+   "agreeableness": 8,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "HATE",
+   "gardening": "DISLIKE",
+   "travel": "HATE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Brian Williams (username brianw36)\nAge: 60\nGender: man\nLives in: a city or suburb of Oregon\nEducation: some college, no degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 5/10, extraversion 4/10, agreeableness 8/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: DISLIKE\n- Travel: HATE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 69,
+  "sex": "male",
+  "state": "West Virginia",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in food preparation and serving",
+  "name": "Michael Smith",
+  "username": "michaels42",
+  "id": 40,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 9,
+   "extraversion": 8,
+   "agreeableness": 7,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "HATE",
+   "gardening": "LOVE",
+   "travel": "LIKE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Michael Smith (username michaels42)\nAge: 69\nGender: man\nLives in: a city or suburb of West Virginia\nEducation: high school diploma\nWork: works in food preparation and serving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 9/10, extraversion 8/10, agreeableness 7/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: LOVE\n- Travel: LIKE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 56,
+  "sex": "male",
+  "state": "Florida",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "not currently working",
+  "name": "John Brown",
+  "username": "johnb47",
+  "id": 41,
+  "big_five": {
+   "openness": 1,
+   "conscientiousness": 4,
+   "extraversion": 6,
+   "agreeableness": 7,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "DISLIKE",
+   "gardening": "LOVE",
+   "travel": "LOVE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: John Brown (username johnb47)\nAge: 56\nGender: man\nLives in: a city or suburb of Florida\nEducation: graduate degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 1/10, conscientiousness 4/10, extraversion 6/10, agreeableness 7/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: LOVE\n- Travel: LOVE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 59,
+  "sex": "female",
+  "state": "Virginia",
+  "region": "South",
+  "community": "rural",
+  "education": "high school diploma",
+  "work": "works in installation, maintenance and repair",
+  "name": "Brittani Johnson",
+  "username": "brittanij74",
+  "id": 42,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 5,
+   "extraversion": 5,
+   "agreeableness": 3,
+   "neuroticism": 3
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "NEUTRAL",
+   "gardening": "NEUTRAL",
+   "travel": "LIKE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Brittani Johnson (username brittanij74)\nAge: 59\nGender: woman\nLives in: a rural area of Virginia\nEducation: high school diploma\nWork: works in installation, maintenance and repair\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 5/10, extraversion 5/10, agreeableness 3/10, neuroticism 3/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: NEUTRAL\n- Travel: LIKE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 55,
+  "sex": "male",
+  "state": "Maine",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in office and administrative support",
+  "name": "Walter Lyon",
+  "username": "walterl22",
+  "id": 43,
+  "big_five": {
+   "openness": 1,
+   "conscientiousness": 8,
+   "extraversion": 9,
+   "agreeableness": 8,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "LIKE",
+   "gardening": "HATE",
+   "travel": "NEUTRAL",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Walter Lyon (username walterl22)\nAge: 55\nGender: man\nLives in: a city or suburb of Maine\nEducation: high school diploma\nWork: works in office and administrative support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 1/10, conscientiousness 8/10, extraversion 9/10, agreeableness 8/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: HATE\n- Travel: NEUTRAL\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 53,
+  "sex": "male",
+  "state": "Illinois",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in transportation and material moving",
+  "name": "Troy Lanning",
+  "username": "troyl68",
+  "id": 44,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 6,
+   "extraversion": 5,
+   "agreeableness": 6,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "LIKE",
+   "gardening": "DISLIKE",
+   "travel": "LIKE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Troy Lanning (username troyl68)\nAge: 53\nGender: man\nLives in: a city or suburb of Illinois\nEducation: high school diploma\nWork: works in transportation and material moving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 6/10, extraversion 5/10, agreeableness 6/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: DISLIKE\n- Travel: LIKE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 33,
+  "sex": "male",
+  "state": "New York",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in office and administrative support",
+  "name": "Charles Hall",
+  "username": "charlesh55",
+  "id": 45,
+  "big_five": {
+   "openness": 2,
+   "conscientiousness": 5,
+   "extraversion": 7,
+   "agreeableness": 6,
+   "neuroticism": 2
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "DISLIKE",
+   "gardening": "LOVE",
+   "travel": "LOVE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Charles Hall (username charlesh55)\nAge: 33\nGender: man\nLives in: a city or suburb of New York\nEducation: bachelor's degree\nWork: works in office and administrative support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 2/10, conscientiousness 5/10, extraversion 7/10, agreeableness 6/10, neuroticism 2/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: LOVE\n- Travel: LOVE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 18,
+  "sex": "female",
+  "state": "Massachusetts",
+  "region": "Northeast",
+  "community": "rural",
+  "education": "some college, no degree",
+  "work": "college student",
+  "name": "Magaret Raines",
+  "username": "magaretr95",
+  "id": 46,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 5,
+   "extraversion": 7,
+   "agreeableness": 4,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "NEUTRAL",
+   "gardening": "HATE",
+   "travel": "DISLIKE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Magaret Raines (username magaretr95)\nAge: 18\nGender: woman\nLives in: a rural area of Massachusetts\nEducation: some college, no degree\nWork: college student\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 5/10, extraversion 7/10, agreeableness 4/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: HATE\n- Travel: DISLIKE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 26,
+  "sex": "male",
+  "state": "Utah",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "not currently working",
+  "name": "Jacob Williams",
+  "username": "jacobw37",
+  "id": 47,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 4,
+   "extraversion": 5,
+   "agreeableness": 2,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "DISLIKE",
+   "gardening": "HATE",
+   "travel": "HATE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Jacob Williams (username jacobw37)\nAge: 26\nGender: man\nLives in: a city or suburb of Utah\nEducation: high school diploma\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 4/10, extraversion 5/10, agreeableness 2/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: HATE\n- Travel: HATE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 72,
+  "sex": "male",
+  "state": "Connecticut",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "retired",
+  "name": "Ryan Gray",
+  "username": "ryang78",
+  "id": 48,
+  "big_five": {
+   "openness": 9,
+   "conscientiousness": 5,
+   "extraversion": 4,
+   "agreeableness": 6,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "HATE",
+   "gardening": "LIKE",
+   "travel": "NEUTRAL",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Ryan Gray (username ryang78)\nAge: 72\nGender: man\nLives in: a city or suburb of Connecticut\nEducation: high school diploma\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 9/10, conscientiousness 5/10, extraversion 4/10, agreeableness 6/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: LIKE\n- Travel: NEUTRAL\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 59,
+  "sex": "male",
+  "state": "Michigan",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "not currently working",
+  "name": "Michael Paulson",
+  "username": "michaelp62",
+  "id": 49,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 4,
+   "extraversion": 5,
+   "agreeableness": 5,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "LOVE",
+   "gardening": "DISLIKE",
+   "travel": "LOVE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Michael Paulson (username michaelp62)\nAge: 59\nGender: man\nLives in: a city or suburb of Michigan\nEducation: bachelor's degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 4/10, extraversion 5/10, agreeableness 5/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: DISLIKE\n- Travel: LOVE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 33,
+  "sex": "female",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in sales",
+  "name": "Stacey Chapa",
+  "username": "staceyc44",
+  "id": 50,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 5,
+   "extraversion": 9,
+   "agreeableness": 2,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "NEUTRAL",
+   "gardening": "LOVE",
+   "travel": "HATE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Stacey Chapa (username staceyc44)\nAge: 33\nGender: woman\nLives in: a city or suburb of California\nEducation: bachelor's degree\nWork: works in sales\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 5/10, extraversion 9/10, agreeableness 2/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: LOVE\n- Travel: HATE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 74,
+  "sex": "male",
+  "state": "South Carolina",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "retired",
+  "name": "Tristan Lundquist",
+  "username": "tristanl74",
+  "id": 51,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 9,
+   "extraversion": 7,
+   "agreeableness": 5,
+   "neuroticism": 3
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "DISLIKE",
+   "gardening": "LIKE",
+   "travel": "LIKE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Tristan Lundquist (username tristanl74)\nAge: 74\nGender: man\nLives in: a city or suburb of South Carolina\nEducation: bachelor's degree\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 9/10, extraversion 7/10, agreeableness 5/10, neuroticism 3/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: LIKE\n- Travel: LIKE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 23,
+  "sex": "female",
+  "state": "Minnesota",
+  "region": "Midwest",
+  "community": "rural",
+  "education": "less than high school",
+  "work": "works in building and grounds cleaning and maintenance",
+  "name": "Virginia Kinlaw",
+  "username": "virginiak44",
+  "id": 52,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 3,
+   "extraversion": 4,
+   "agreeableness": 3,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "LIKE",
+   "gardening": "LOVE",
+   "travel": "DISLIKE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Virginia Kinlaw (username virginiak44)\nAge: 23\nGender: woman\nLives in: a rural area of Minnesota\nEducation: less than high school\nWork: works in building and grounds cleaning and maintenance\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 3/10, extraversion 4/10, agreeableness 3/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: LOVE\n- Travel: DISLIKE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 23,
+  "sex": "male",
+  "state": "New York",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in healthcare support",
+  "name": "Gregory Bair",
+  "username": "gregoryb55",
+  "id": 53,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 7,
+   "extraversion": 7,
+   "agreeableness": 5,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "LOVE",
+   "gardening": "LOVE",
+   "travel": "NEUTRAL",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Gregory Bair (username gregoryb55)\nAge: 23\nGender: man\nLives in: a city or suburb of New York\nEducation: high school diploma\nWork: works in healthcare support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 7/10, extraversion 7/10, agreeableness 5/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: LOVE\n- Travel: NEUTRAL\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 56,
+  "sex": "male",
+  "state": "New York",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "works in office and administrative support",
+  "name": "David Webb",
+  "username": "davidw39",
+  "id": 54,
+  "big_five": {
+   "openness": 9,
+   "conscientiousness": 6,
+   "extraversion": 7,
+   "agreeableness": 6,
+   "neuroticism": 8
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "HATE",
+   "gardening": "HATE",
+   "travel": "LOVE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: David Webb (username davidw39)\nAge: 56\nGender: man\nLives in: a city or suburb of New York\nEducation: some college, no degree\nWork: works in office and administrative support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 9/10, conscientiousness 6/10, extraversion 7/10, agreeableness 6/10, neuroticism 8/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: HATE\n- Travel: LOVE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 31,
+  "sex": "male",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "less than high school",
+  "work": "works in healthcare support",
+  "name": "Rupert Davis",
+  "username": "rupertd12",
+  "id": 55,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 5,
+   "extraversion": 4,
+   "agreeableness": 4,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "LOVE",
+   "gardening": "NEUTRAL",
+   "travel": "HATE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Rupert Davis (username rupertd12)\nAge: 31\nGender: man\nLives in: a city or suburb of California\nEducation: less than high school\nWork: works in healthcare support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 5/10, extraversion 4/10, agreeableness 4/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: NEUTRAL\n- Travel: HATE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 37,
+  "sex": "female",
+  "state": "New York",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "not currently working",
+  "name": "Lisa Spadaro",
+  "username": "lisas44",
+  "id": 56,
+  "big_five": {
+   "openness": 9,
+   "conscientiousness": 4,
+   "extraversion": 7,
+   "agreeableness": 6,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "HATE",
+   "gardening": "NEUTRAL",
+   "travel": "DISLIKE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Lisa Spadaro (username lisas44)\nAge: 37\nGender: woman\nLives in: a city or suburb of New York\nEducation: high school diploma\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 9/10, conscientiousness 4/10, extraversion 7/10, agreeableness 6/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: NEUTRAL\n- Travel: DISLIKE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 66,
+  "sex": "male",
+  "state": "Michigan",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "retired",
+  "name": "Brian Johnson",
+  "username": "brianj40",
+  "id": 57,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 5,
+   "extraversion": 5,
+   "agreeableness": 6,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "HATE",
+   "gardening": "LIKE",
+   "travel": "NEUTRAL",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Brian Johnson (username brianj40)\nAge: 66\nGender: man\nLives in: a city or suburb of Michigan\nEducation: some college, no degree\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 5/10, extraversion 5/10, agreeableness 6/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: LIKE\n- Travel: NEUTRAL\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 58,
+  "sex": "female",
+  "state": "Connecticut",
+  "region": "Northeast",
+  "community": "rural",
+  "education": "some college, no degree",
+  "work": "works in food preparation and serving",
+  "name": "Helen Simmons",
+  "username": "helens42",
+  "id": 58,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 4,
+   "extraversion": 6,
+   "agreeableness": 4,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "NEUTRAL",
+   "gardening": "LIKE",
+   "travel": "LOVE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Helen Simmons (username helens42)\nAge: 58\nGender: woman\nLives in: a rural area of Connecticut\nEducation: some college, no degree\nWork: works in food preparation and serving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 4/10, extraversion 6/10, agreeableness 4/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: LIKE\n- Travel: LOVE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 40,
+  "sex": "female",
+  "state": "Pennsylvania",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "associate degree",
+  "work": "works in management",
+  "name": "Bettina Griffin",
+  "username": "bettinag19",
+  "id": 59,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 7,
+   "extraversion": 5,
+   "agreeableness": 3,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "LOVE",
+   "gardening": "NEUTRAL",
+   "travel": "HATE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Bettina Griffin (username bettinag19)\nAge: 40\nGender: woman\nLives in: a city or suburb of Pennsylvania\nEducation: associate degree\nWork: works in management\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 7/10, extraversion 5/10, agreeableness 3/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: NEUTRAL\n- Travel: HATE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 40,
+  "sex": "male",
+  "state": "Illinois",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "works in office and administrative support",
+  "name": "Paul Henderson",
+  "username": "paulh35",
+  "id": 60,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 7,
+   "extraversion": 6,
+   "agreeableness": 4,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "LIKE",
+   "gardening": "DISLIKE",
+   "travel": "LIKE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Paul Henderson (username paulh35)\nAge: 40\nGender: man\nLives in: a city or suburb of Illinois\nEducation: some college, no degree\nWork: works in office and administrative support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 7/10, extraversion 6/10, agreeableness 4/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: DISLIKE\n- Travel: LIKE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 30,
+  "sex": "male",
+  "state": "Texas",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "works in sales",
+  "name": "John Bailes",
+  "username": "johnb28",
+  "id": 61,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 5,
+   "extraversion": 4,
+   "agreeableness": 8,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "LIKE",
+   "gardening": "HATE",
+   "travel": "NEUTRAL",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: John Bailes (username johnb28)\nAge: 30\nGender: man\nLives in: a city or suburb of Texas\nEducation: some college, no degree\nWork: works in sales\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 5/10, extraversion 4/10, agreeableness 8/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: HATE\n- Travel: NEUTRAL\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 38,
+  "sex": "female",
+  "state": "Georgia",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in transportation and material moving",
+  "name": "Roberta Williams",
+  "username": "robertaw58",
+  "id": 62,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 9,
+   "extraversion": 7,
+   "agreeableness": 3,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "LIKE",
+   "gardening": "LOVE",
+   "travel": "DISLIKE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Roberta Williams (username robertaw58)\nAge: 38\nGender: woman\nLives in: a city or suburb of Georgia\nEducation: high school diploma\nWork: works in transportation and material moving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 9/10, extraversion 7/10, agreeableness 3/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: LOVE\n- Travel: DISLIKE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 37,
+  "sex": "female",
+  "state": "Florida",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in business and financial operations",
+  "name": "Maritza Adams",
+  "username": "maritzaa16",
+  "id": 63,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 2,
+   "extraversion": 7,
+   "agreeableness": 4,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "LIKE",
+   "gardening": "DISLIKE",
+   "travel": "LIKE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Maritza Adams (username maritzaa16)\nAge: 37\nGender: woman\nLives in: a city or suburb of Florida\nEducation: bachelor's degree\nWork: works in business and financial operations\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 2/10, extraversion 7/10, agreeableness 4/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: DISLIKE\n- Travel: LIKE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 68,
+  "sex": "male",
+  "state": "Georgia",
+  "region": "South",
+  "community": "rural",
+  "education": "bachelor's degree",
+  "work": "retired",
+  "name": "Edward Carman",
+  "username": "edwardc83",
+  "id": 64,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 6,
+   "extraversion": 6,
+   "agreeableness": 5,
+   "neuroticism": 8
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "HATE",
+   "gardening": "NEUTRAL",
+   "travel": "DISLIKE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Edward Carman (username edwardc83)\nAge: 68\nGender: man\nLives in: a rural area of Georgia\nEducation: bachelor's degree\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 6/10, extraversion 6/10, agreeableness 5/10, neuroticism 8/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: NEUTRAL\n- Travel: DISLIKE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 38,
+  "sex": "male",
+  "state": "Massachusetts",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "works in transportation and material moving",
+  "name": "David Jackson",
+  "username": "davidj22",
+  "id": 65,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 5,
+   "extraversion": 6,
+   "agreeableness": 7,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "DISLIKE",
+   "gardening": "LOVE",
+   "travel": "LOVE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: David Jackson (username davidj22)\nAge: 38\nGender: man\nLives in: a city or suburb of Massachusetts\nEducation: graduate degree\nWork: works in transportation and material moving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 5/10, extraversion 6/10, agreeableness 7/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: LOVE\n- Travel: LOVE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 36,
+  "sex": "female",
+  "state": "Oklahoma",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "associate degree",
+  "work": "works in production and manufacturing",
+  "name": "Brenda Young",
+  "username": "brenday15",
+  "id": 66,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 7,
+   "extraversion": 7,
+   "agreeableness": 8,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "LIKE",
+   "gardening": "NEUTRAL",
+   "travel": "LOVE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Brenda Young (username brenday15)\nAge: 36\nGender: woman\nLives in: a city or suburb of Oklahoma\nEducation: associate degree\nWork: works in production and manufacturing\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 7/10, extraversion 7/10, agreeableness 8/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: NEUTRAL\n- Travel: LOVE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 39,
+  "sex": "male",
+  "state": "Virginia",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "not currently working",
+  "name": "Jimmie Arnold",
+  "username": "jimmiea58",
+  "id": 67,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 6,
+   "extraversion": 5,
+   "agreeableness": 3,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "HATE",
+   "gardening": "LOVE",
+   "travel": "LIKE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Jimmie Arnold (username jimmiea58)\nAge: 39\nGender: man\nLives in: a city or suburb of Virginia\nEducation: high school diploma\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 6/10, extraversion 5/10, agreeableness 3/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: LOVE\n- Travel: LIKE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 32,
+  "sex": "male",
+  "state": "Oregon",
+  "region": "West",
+  "community": "rural",
+  "education": "bachelor's degree",
+  "work": "works in healthcare (doctors, nurses, technicians)",
+  "name": "Jasper Hackworth",
+  "username": "jasperh92",
+  "id": 68,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 8,
+   "extraversion": 4,
+   "agreeableness": 7,
+   "neuroticism": 3
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "LIKE",
+   "gardening": "NEUTRAL",
+   "travel": "LOVE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Jasper Hackworth (username jasperh92)\nAge: 32\nGender: man\nLives in: a rural area of Oregon\nEducation: bachelor's degree\nWork: works in healthcare (doctors, nurses, technicians)\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 8/10, extraversion 4/10, agreeableness 7/10, neuroticism 3/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: NEUTRAL\n- Travel: LOVE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 24,
+  "sex": "male",
+  "state": "Tennessee",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "works in construction",
+  "name": "David Duval",
+  "username": "davidd53",
+  "id": 69,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 4,
+   "extraversion": 7,
+   "agreeableness": 5,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "NEUTRAL",
+   "gardening": "LIKE",
+   "travel": "LOVE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: David Duval (username davidd53)\nAge: 24\nGender: man\nLives in: a city or suburb of Tennessee\nEducation: some college, no degree\nWork: works in construction\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 4/10, extraversion 7/10, agreeableness 5/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: LIKE\n- Travel: LOVE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 18,
+  "sex": "female",
+  "state": "North Carolina",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "college student",
+  "name": "Janet Smith",
+  "username": "janets25",
+  "id": 70,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 3,
+   "extraversion": 6,
+   "agreeableness": 4,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "HATE",
+   "gardening": "LOVE",
+   "travel": "LIKE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Janet Smith (username janets25)\nAge: 18\nGender: woman\nLives in: a city or suburb of North Carolina\nEducation: some college, no degree\nWork: college student\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 3/10, extraversion 6/10, agreeableness 4/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: LOVE\n- Travel: LIKE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 21,
+  "sex": "female",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "works in food preparation and serving",
+  "name": "Christina Quintanilla",
+  "username": "christinaq89",
+  "id": 71,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 4,
+   "extraversion": 4,
+   "agreeableness": 6,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "LIKE",
+   "gardening": "LIKE",
+   "travel": "HATE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Christina Quintanilla (username christinaq89)\nAge: 21\nGender: woman\nLives in: a city or suburb of California\nEducation: some college, no degree\nWork: works in food preparation and serving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 4/10, extraversion 4/10, agreeableness 6/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: LIKE\n- Travel: HATE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 34,
+  "sex": "male",
+  "state": "Pennsylvania",
+  "region": "Northeast",
+  "community": "rural",
+  "education": "high school diploma",
+  "work": "not currently working",
+  "name": "Howard Martin",
+  "username": "howardm68",
+  "id": 72,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 6,
+   "extraversion": 5,
+   "agreeableness": 5,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "DISLIKE",
+   "gardening": "DISLIKE",
+   "travel": "DISLIKE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Howard Martin (username howardm68)\nAge: 34\nGender: man\nLives in: a rural area of Pennsylvania\nEducation: high school diploma\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 6/10, extraversion 5/10, agreeableness 5/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: DISLIKE\n- Travel: DISLIKE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 25,
+  "sex": "male",
+  "state": "Florida",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in sales",
+  "name": "Jason Campbell",
+  "username": "jasonc37",
+  "id": 73,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 6,
+   "extraversion": 4,
+   "agreeableness": 4,
+   "neuroticism": 8
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "NEUTRAL",
+   "gardening": "HATE",
+   "travel": "DISLIKE",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Jason Campbell (username jasonc37)\nAge: 25\nGender: man\nLives in: a city or suburb of Florida\nEducation: high school diploma\nWork: works in sales\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 6/10, extraversion 4/10, agreeableness 4/10, neuroticism 8/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: HATE\n- Travel: DISLIKE\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 69,
+  "sex": "female",
+  "state": "Mississippi",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "retired",
+  "name": "Sara Mizelle",
+  "username": "saram95",
+  "id": 74,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 8,
+   "extraversion": 7,
+   "agreeableness": 6,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "DISLIKE",
+   "gardening": "DISLIKE",
+   "travel": "DISLIKE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Sara Mizelle (username saram95)\nAge: 69\nGender: woman\nLives in: a city or suburb of Mississippi\nEducation: high school diploma\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 8/10, extraversion 7/10, agreeableness 6/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: DISLIKE\n- Travel: DISLIKE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 39,
+  "sex": "female",
+  "state": "Michigan",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "works in computers and math",
+  "name": "Felicia Anderson",
+  "username": "feliciaa51",
+  "id": 75,
+  "big_five": {
+   "openness": 10,
+   "conscientiousness": 7,
+   "extraversion": 6,
+   "agreeableness": 7,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "LIKE",
+   "gardening": "NEUTRAL",
+   "travel": "LOVE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Felicia Anderson (username feliciaa51)\nAge: 39\nGender: woman\nLives in: a city or suburb of Michigan\nEducation: graduate degree\nWork: works in computers and math\nPersonality (Big Five, 1 = very low, 10 = very high): openness 10/10, conscientiousness 7/10, extraversion 6/10, agreeableness 7/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: NEUTRAL\n- Travel: LOVE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 25,
+  "sex": "female",
+  "state": "Illinois",
+  "region": "Midwest",
+  "community": "rural",
+  "education": "high school diploma",
+  "work": "not currently working",
+  "name": "Marina Stafford",
+  "username": "marinas10",
+  "id": 76,
+  "big_five": {
+   "openness": 1,
+   "conscientiousness": 5,
+   "extraversion": 7,
+   "agreeableness": 7,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "LOVE",
+   "gardening": "LIKE",
+   "travel": "DISLIKE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Marina Stafford (username marinas10)\nAge: 25\nGender: woman\nLives in: a rural area of Illinois\nEducation: high school diploma\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 1/10, conscientiousness 5/10, extraversion 7/10, agreeableness 7/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: LIKE\n- Travel: DISLIKE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 26,
+  "sex": "male",
+  "state": "Michigan",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in construction",
+  "name": "Ryan Rinehart",
+  "username": "ryanr18",
+  "id": 77,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 4,
+   "extraversion": 7,
+   "agreeableness": 7,
+   "neuroticism": 9
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "DISLIKE",
+   "gardening": "DISLIKE",
+   "travel": "DISLIKE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Ryan Rinehart (username ryanr18)\nAge: 26\nGender: man\nLives in: a city or suburb of Michigan\nEducation: bachelor's degree\nWork: works in construction\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 4/10, extraversion 7/10, agreeableness 7/10, neuroticism 9/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: DISLIKE\n- Travel: DISLIKE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 60,
+  "sex": "female",
+  "state": "Georgia",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in office and administrative support",
+  "name": "Martha Pitcock",
+  "username": "marthap24",
+  "id": 78,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 2,
+   "extraversion": 7,
+   "agreeableness": 4,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "LOVE",
+   "gardening": "HATE",
+   "travel": "LIKE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Martha Pitcock (username marthap24)\nAge: 60\nGender: woman\nLives in: a city or suburb of Georgia\nEducation: high school diploma\nWork: works in office and administrative support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 2/10, extraversion 7/10, agreeableness 4/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: HATE\n- Travel: LIKE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 24,
+  "sex": "female",
+  "state": "Colorado",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "associate degree",
+  "work": "college student",
+  "name": "Marlene Cortes",
+  "username": "marlenec29",
+  "id": 79,
+  "big_five": {
+   "openness": 3,
+   "conscientiousness": 5,
+   "extraversion": 2,
+   "agreeableness": 6,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "LOVE",
+   "gardening": "LIKE",
+   "travel": "DISLIKE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Marlene Cortes (username marlenec29)\nAge: 24\nGender: woman\nLives in: a city or suburb of Colorado\nEducation: associate degree\nWork: college student\nPersonality (Big Five, 1 = very low, 10 = very high): openness 3/10, conscientiousness 5/10, extraversion 2/10, agreeableness 6/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: LIKE\n- Travel: DISLIKE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 57,
+  "sex": "female",
+  "state": "North Carolina",
+  "region": "South",
+  "community": "rural",
+  "education": "bachelor's degree",
+  "work": "not currently working",
+  "name": "Chantal Mcallister",
+  "username": "chantalm79",
+  "id": 80,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 3,
+   "extraversion": 6,
+   "agreeableness": 2,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "NEUTRAL",
+   "gardening": "LIKE",
+   "travel": "LOVE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Chantal Mcallister (username chantalm79)\nAge: 57\nGender: woman\nLives in: a rural area of North Carolina\nEducation: bachelor's degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 3/10, extraversion 6/10, agreeableness 2/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: LIKE\n- Travel: LOVE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 33,
+  "sex": "male",
+  "state": "Florida",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in management",
+  "name": "Walter Clark",
+  "username": "walterc73",
+  "id": 81,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 6,
+   "extraversion": 5,
+   "agreeableness": 9,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "LIKE",
+   "gardening": "HATE",
+   "travel": "NEUTRAL",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Walter Clark (username walterc73)\nAge: 33\nGender: man\nLives in: a city or suburb of Florida\nEducation: high school diploma\nWork: works in management\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 6/10, extraversion 5/10, agreeableness 9/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: HATE\n- Travel: NEUTRAL\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 47,
+  "sex": "female",
+  "state": "Virginia",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in personal care and service",
+  "name": "Edith King",
+  "username": "edithk82",
+  "id": 82,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 4,
+   "extraversion": 4,
+   "agreeableness": 3,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "DISLIKE",
+   "gardening": "NEUTRAL",
+   "travel": "NEUTRAL",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Edith King (username edithk82)\nAge: 47\nGender: woman\nLives in: a city or suburb of Virginia\nEducation: high school diploma\nWork: works in personal care and service\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 4/10, extraversion 4/10, agreeableness 3/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: NEUTRAL\n- Travel: NEUTRAL\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 47,
+  "sex": "female",
+  "state": "Illinois",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in production and manufacturing",
+  "name": "Ellen Woodcock",
+  "username": "ellenw80",
+  "id": 83,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 5,
+   "extraversion": 8,
+   "agreeableness": 10,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "HATE",
+   "gardening": "NEUTRAL",
+   "travel": "DISLIKE",
+   "fitness": "NEUTRAL"
+  },
+  "persona": "Name: Ellen Woodcock (username ellenw80)\nAge: 47\nGender: woman\nLives in: a city or suburb of Illinois\nEducation: bachelor's degree\nWork: works in production and manufacturing\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 5/10, extraversion 8/10, agreeableness 10/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: NEUTRAL\n- Travel: DISLIKE\n- Fitness & exercise: NEUTRAL"
+ },
+ {
+  "age": 49,
+  "sex": "male",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "works in business and financial operations",
+  "name": "James Vogl",
+  "username": "jamesv91",
+  "id": 84,
+  "big_five": {
+   "openness": 2,
+   "conscientiousness": 5,
+   "extraversion": 7,
+   "agreeableness": 5,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LIKE",
+   "cooking": "HATE",
+   "gardening": "HATE",
+   "travel": "LOVE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: James Vogl (username jamesv91)\nAge: 49\nGender: man\nLives in: a city or suburb of California\nEducation: graduate degree\nWork: works in business and financial operations\nPersonality (Big Five, 1 = very low, 10 = very high): openness 2/10, conscientiousness 5/10, extraversion 7/10, agreeableness 5/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LIKE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: HATE\n- Travel: LOVE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 25,
+  "sex": "female",
+  "state": "New York",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "not currently working",
+  "name": "Vicki Sasso",
+  "username": "vickis15",
+  "id": 85,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 6,
+   "extraversion": 6,
+   "agreeableness": 6,
+   "neuroticism": 8
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "HATE",
+   "gardening": "LIKE",
+   "travel": "NEUTRAL",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Vicki Sasso (username vickis15)\nAge: 25\nGender: woman\nLives in: a city or suburb of New York\nEducation: some college, no degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 6/10, extraversion 6/10, agreeableness 6/10, neuroticism 8/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: LIKE\n- Travel: NEUTRAL\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 77,
+  "sex": "female",
+  "state": "Arizona",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "less than high school",
+  "work": "retired",
+  "name": "Joann Willis",
+  "username": "joannw14",
+  "id": 86,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 6,
+   "extraversion": 5,
+   "agreeableness": 5,
+   "neuroticism": 3
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "LOVE",
+   "gardening": "HATE",
+   "travel": "LIKE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Joann Willis (username joannw14)\nAge: 77\nGender: woman\nLives in: a city or suburb of Arizona\nEducation: less than high school\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 6/10, extraversion 5/10, agreeableness 5/10, neuroticism 3/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: HATE\n- Travel: LIKE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 51,
+  "sex": "male",
+  "state": "South Carolina",
+  "region": "South",
+  "community": "rural",
+  "education": "bachelor's degree",
+  "work": "not currently working",
+  "name": "Daniel May",
+  "username": "danielm67",
+  "id": 87,
+  "big_five": {
+   "openness": 2,
+   "conscientiousness": 7,
+   "extraversion": 7,
+   "agreeableness": 6,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "LOVE",
+   "gardening": "NEUTRAL",
+   "travel": "HATE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Daniel May (username danielm67)\nAge: 51\nGender: man\nLives in: a rural area of South Carolina\nEducation: bachelor's degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 2/10, conscientiousness 7/10, extraversion 7/10, agreeableness 6/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: NEUTRAL\n- Travel: HATE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 64,
+  "sex": "male",
+  "state": "Kentucky",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in education (teaching and libraries)",
+  "name": "Frank Mangum",
+  "username": "frankm26",
+  "id": 88,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 3,
+   "extraversion": 6,
+   "agreeableness": 7,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "DISLIKE",
+   "cooking": "HATE",
+   "gardening": "LIKE",
+   "travel": "NEUTRAL",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Frank Mangum (username frankm26)\nAge: 64\nGender: man\nLives in: a city or suburb of Kentucky\nEducation: bachelor's degree\nWork: works in education (teaching and libraries)\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 3/10, extraversion 6/10, agreeableness 7/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: DISLIKE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: LIKE\n- Travel: NEUTRAL\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 64,
+  "sex": "female",
+  "state": "Pennsylvania",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in computers and math",
+  "name": "Margaret Lietz",
+  "username": "margaretl34",
+  "id": 89,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 6,
+   "extraversion": 7,
+   "agreeableness": 7,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "DISLIKE",
+   "gardening": "NEUTRAL",
+   "travel": "NEUTRAL",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Margaret Lietz (username margaretl34)\nAge: 64\nGender: woman\nLives in: a city or suburb of Pennsylvania\nEducation: bachelor's degree\nWork: works in computers and math\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 6/10, extraversion 7/10, agreeableness 7/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: NEUTRAL\n- Travel: NEUTRAL\n- Fitness & exercise: LOVE"
+ },
+ {
+  "age": 31,
+  "sex": "female",
+  "state": "Texas",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "high school diploma",
+  "work": "works in business and financial operations",
+  "name": "Akiko Tipton",
+  "username": "akikot28",
+  "id": 90,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 8,
+   "extraversion": 4,
+   "agreeableness": 3,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "LOVE",
+   "gardening": "HATE",
+   "travel": "LIKE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Akiko Tipton (username akikot28)\nAge: 31\nGender: woman\nLives in: a city or suburb of Texas\nEducation: high school diploma\nWork: works in business and financial operations\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 8/10, extraversion 4/10, agreeableness 3/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: HATE\n- Travel: LIKE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 42,
+  "sex": "female",
+  "state": "Utah",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in food preparation and serving",
+  "name": "Gertrude Oneil",
+  "username": "gertrudeo89",
+  "id": 91,
+  "big_five": {
+   "openness": 7,
+   "conscientiousness": 6,
+   "extraversion": 8,
+   "agreeableness": 5,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "LIKE",
+   "gardening": "LOVE",
+   "travel": "DISLIKE",
+   "fitness": "HATE"
+  },
+  "persona": "Name: Gertrude Oneil (username gertrudeo89)\nAge: 42\nGender: woman\nLives in: a city or suburb of Utah\nEducation: bachelor's degree\nWork: works in food preparation and serving\nPersonality (Big Five, 1 = very low, 10 = very high): openness 7/10, conscientiousness 6/10, extraversion 8/10, agreeableness 5/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: LOVE\n- Travel: DISLIKE\n- Fitness & exercise: HATE"
+ },
+ {
+  "age": 56,
+  "sex": "female",
+  "state": "Ohio",
+  "region": "Midwest",
+  "community": "rural",
+  "education": "graduate degree",
+  "work": "not currently working",
+  "name": "Angela Simpson",
+  "username": "angelas25",
+  "id": 92,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 8,
+   "extraversion": 3,
+   "agreeableness": 3,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "LOVE",
+   "gardening": "LIKE",
+   "travel": "DISLIKE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Angela Simpson (username angelas25)\nAge: 56\nGender: woman\nLives in: a rural area of Ohio\nEducation: graduate degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 8/10, extraversion 3/10, agreeableness 3/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: LIKE\n- Travel: DISLIKE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 76,
+  "sex": "female",
+  "state": "New Jersey",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "some college, no degree",
+  "work": "retired",
+  "name": "Elizabeth Dailey",
+  "username": "elizabethd44",
+  "id": 93,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 6,
+   "extraversion": 9,
+   "agreeableness": 4,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "HATE",
+   "gardening": "DISLIKE",
+   "travel": "HATE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Elizabeth Dailey (username elizabethd44)\nAge: 76\nGender: woman\nLives in: a city or suburb of New Jersey\nEducation: some college, no degree\nWork: retired\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 6/10, extraversion 9/10, agreeableness 4/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: DISLIKE\n- Travel: HATE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 22,
+  "sex": "male",
+  "state": "Connecticut",
+  "region": "Northeast",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in legal",
+  "name": "Dane Thomas",
+  "username": "danet63",
+  "id": 94,
+  "big_five": {
+   "openness": 6,
+   "conscientiousness": 6,
+   "extraversion": 3,
+   "agreeableness": 4,
+   "neuroticism": 5
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "NEUTRAL",
+   "gardening": "LOVE",
+   "travel": "HATE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Dane Thomas (username danet63)\nAge: 22\nGender: man\nLives in: a city or suburb of Connecticut\nEducation: bachelor's degree\nWork: works in legal\nPersonality (Big Five, 1 = very low, 10 = very high): openness 6/10, conscientiousness 6/10, extraversion 3/10, agreeableness 4/10, neuroticism 5/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: LOVE\n- Travel: HATE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 30,
+  "sex": "male",
+  "state": "Michigan",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "associate degree",
+  "work": "works in arts, design, entertainment, sports and media",
+  "name": "Jack Owen",
+  "username": "jacko37",
+  "id": 95,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 8,
+   "extraversion": 4,
+   "agreeableness": 7,
+   "neuroticism": 8
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "LIKE",
+   "gardening": "HATE",
+   "travel": "NEUTRAL",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Jack Owen (username jacko37)\nAge: 30\nGender: man\nLives in: a city or suburb of Michigan\nEducation: associate degree\nWork: works in arts, design, entertainment, sports and media\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 8/10, extraversion 4/10, agreeableness 7/10, neuroticism 8/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: LIKE\n- Gardening & growing plants: HATE\n- Travel: NEUTRAL\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 68,
+  "sex": "female",
+  "state": "Texas",
+  "region": "South",
+  "community": "urban or suburban",
+  "education": "bachelor's degree",
+  "work": "works in office and administrative support",
+  "name": "Petra Lamb",
+  "username": "petral67",
+  "id": 96,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 5,
+   "extraversion": 3,
+   "agreeableness": 6,
+   "neuroticism": 6
+  },
+  "stances": {
+   "personal_finance": "NEUTRAL",
+   "cooking": "LOVE",
+   "gardening": "LIKE",
+   "travel": "DISLIKE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Petra Lamb (username petral67)\nAge: 68\nGender: woman\nLives in: a city or suburb of Texas\nEducation: bachelor's degree\nWork: works in office and administrative support\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 5/10, extraversion 3/10, agreeableness 6/10, neuroticism 6/10\nHow you feel about these topics:\n- Personal finance & money: NEUTRAL\n- Cooking & eating cheap and healthy: LOVE\n- Gardening & growing plants: LIKE\n- Travel: DISLIKE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 45,
+  "sex": "male",
+  "state": "North Carolina",
+  "region": "South",
+  "community": "rural",
+  "education": "high school diploma",
+  "work": "works in community and social services",
+  "name": "Joseph Lindemann",
+  "username": "josephl80",
+  "id": 97,
+  "big_five": {
+   "openness": 5,
+   "conscientiousness": 7,
+   "extraversion": 6,
+   "agreeableness": 10,
+   "neuroticism": 7
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "HATE",
+   "gardening": "DISLIKE",
+   "travel": "HATE",
+   "fitness": "DISLIKE"
+  },
+  "persona": "Name: Joseph Lindemann (username josephl80)\nAge: 45\nGender: man\nLives in: a rural area of North Carolina\nEducation: high school diploma\nWork: works in community and social services\nPersonality (Big Five, 1 = very low, 10 = very high): openness 5/10, conscientiousness 7/10, extraversion 6/10, agreeableness 10/10, neuroticism 7/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: HATE\n- Gardening & growing plants: DISLIKE\n- Travel: HATE\n- Fitness & exercise: DISLIKE"
+ },
+ {
+  "age": 31,
+  "sex": "male",
+  "state": "Wisconsin",
+  "region": "Midwest",
+  "community": "urban or suburban",
+  "education": "graduate degree",
+  "work": "works in education (teaching and libraries)",
+  "name": "Randall Campbell",
+  "username": "randallc16",
+  "id": 98,
+  "big_five": {
+   "openness": 8,
+   "conscientiousness": 2,
+   "extraversion": 5,
+   "agreeableness": 3,
+   "neuroticism": 4
+  },
+  "stances": {
+   "personal_finance": "HATE",
+   "cooking": "NEUTRAL",
+   "gardening": "LOVE",
+   "travel": "HATE",
+   "fitness": "LIKE"
+  },
+  "persona": "Name: Randall Campbell (username randallc16)\nAge: 31\nGender: man\nLives in: a city or suburb of Wisconsin\nEducation: graduate degree\nWork: works in education (teaching and libraries)\nPersonality (Big Five, 1 = very low, 10 = very high): openness 8/10, conscientiousness 2/10, extraversion 5/10, agreeableness 3/10, neuroticism 4/10\nHow you feel about these topics:\n- Personal finance & money: HATE\n- Cooking & eating cheap and healthy: NEUTRAL\n- Gardening & growing plants: LOVE\n- Travel: HATE\n- Fitness & exercise: LIKE"
+ },
+ {
+  "age": 55,
+  "sex": "female",
+  "state": "California",
+  "region": "West",
+  "community": "urban or suburban",
+  "education": "associate degree",
+  "work": "not currently working",
+  "name": "Stella Stout",
+  "username": "stellas93",
+  "id": 99,
+  "big_five": {
+   "openness": 4,
+   "conscientiousness": 10,
+   "extraversion": 4,
+   "agreeableness": 7,
+   "neuroticism": 8
+  },
+  "stances": {
+   "personal_finance": "LOVE",
+   "cooking": "DISLIKE",
+   "gardening": "NEUTRAL",
+   "travel": "NEUTRAL",
+   "fitness": "LOVE"
+  },
+  "persona": "Name: Stella Stout (username stellas93)\nAge: 55\nGender: woman\nLives in: a city or suburb of California\nEducation: associate degree\nWork: not currently working\nPersonality (Big Five, 1 = very low, 10 = very high): openness 4/10, conscientiousness 10/10, extraversion 4/10, agreeableness 7/10, neuroticism 8/10\nHow you feel about these topics:\n- Personal finance & money: LOVE\n- Cooking & eating cheap and healthy: DISLIKE\n- Gardening & growing plants: NEUTRAL\n- Travel: NEUTRAL\n- Fitness & exercise: LOVE"
+ }
+]

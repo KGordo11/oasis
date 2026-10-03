@@ -242,7 +242,7 @@ async def replay(out, people, posts, decisions, writes, model):
     env = oasis.make(agent_graph=g, platform=DefaultPlatformType.REDDIT, database_path=db)
     await env.reset()
     pid, owner = {}, {}
-    for p in sorted(posts.values(), key=lambda p: p["key"]):
+    for p in sorted((p for p in posts.values() if "writer" not in p), key=lambda p: p["key"]):  # seed posts only
         r = await acct_agent[p["account"]].perform_action_by_data(A.CREATE_POST, content=f"{p['title']}\n\n{p['body']}")
         pid[p["key"]], owner[p["key"]] = r.get("post_id"), acct_agent[p["account"]].social_agent_id
     for w in sorted(writes, key=lambda w: w["user_id"]):
@@ -305,7 +305,6 @@ def run(a):
     done = {(d["pass"], d["user_id"], d["post_key"]) for d in decisions}
     wrote = {w["user_id"] for w in writes}
     pool = ThreadPoolExecutor(a.parallel)
-    llm.warm(a.model)
 
     def scroll(p):
         k = (half[p["id"]] + a.round) % SLOTS_PER_TOPIC
@@ -352,6 +351,7 @@ def run(a):
     def gather(jobs, fn, path, sink, what):
         if not jobs:
             return
+        llm.warm(a.model)  # only when there is work: a --replay-only pass must not load a model
         t, n, c = time.time(), 0, Counter()
         with open(path, "a") as f:
             for r in pool.map(lambda j: fn(*j), jobs):
@@ -381,7 +381,11 @@ def run(a):
         log(f"pass 2: {len(organic)} user posts, {len(jobs)} decisions to make")
         gather(jobs, decide, dec_path, decisions, "pass 2")
     t4 = time.time()
-    asyncio.run(replay(out, people, {**posts, **organic}, decisions, writes, a.model))
+    if a.replay_only or not a.no_replay:
+        asyncio.run(replay(out, people, {**posts, **organic}, decisions, writes, a.model))
+    if a.replay_only:
+        log(f"replayed {label} into oasis.db in {time.time() - t4:.0f}s")
+        return
     man = {"label": label, "design": "v2 (log Part 14)", "round": a.round, "model": a.model, "authors": authors_,
            "agents": len(people), "finished_at": datetime.now().isoformat(), "git_commit": git_commit(),
            "personas_sha256": PINNED_PERSONAS, "human_pool_sha256": hashlib.sha256(open(os.path.join(SRC, "human_pool.jsonl"), "rb").read()).hexdigest(),
@@ -409,4 +413,6 @@ if __name__ == "__main__":
     ap.add_argument("--parallel", type=int, default=4)
     ap.add_argument("--temperature", type=float, default=0.7)
     ap.add_argument("--log-every", type=int, default=50)
+    ap.add_argument("--no-replay", action="store_true", help="skip building oasis.db (do it later with --replay-only)")
+    ap.add_argument("--replay-only", action="store_true", help="only rebuild oasis.db from a finished run's records")
     run(ap.parse_args())

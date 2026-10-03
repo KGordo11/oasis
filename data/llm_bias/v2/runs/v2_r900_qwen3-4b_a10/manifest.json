@@ -1,0 +1,57 @@
+{
+ "label": "v2_r900_qwen3-4b_a10",
+ "design": "v2 (log Part 14)",
+ "round": 900,
+ "model": "qwen3:4b",
+ "authors": [
+  "qwen3:4b",
+  "gemma4:e2b",
+  "llama3.2:3b"
+ ],
+ "agents": 10,
+ "finished_at": "2026-10-02T23:04:43.146383",
+ "git_commit": "2b66763511ec35e9c5132d4abdbd6789d2c0fad0",
+ "personas_sha256": "11ac527c6351e054dc2e054f3de892893404d58df1eb7eb32a0104a36a2f6383",
+ "human_pool_sha256": "bf9c1ce7cddead0653a8a8591a5d939a68065cef1e6b328398e8abacb3a9f1a6",
+ "seedbank_sha256": "b435f811f033416b0410e069b2943a9bca19974ee5426ee85904bcffa0809132",
+ "prompts_sha256": "47d4bf5f770e0eb5acbe2623aa52df2435dcb6e6f82af1385938d8933720a1a1",
+ "config": {
+  "temperature": 0.7,
+  "author_temperature": 0.8,
+  "num_ctx": 8192,
+  "think": false,
+  "parallel": 4,
+  "social_n": 10,
+  "slots_per_topic": 2,
+  "accounts": 20,
+  "memory": false,
+  "follow_graph": "empty",
+  "vote_counts": "hidden"
+ },
+ "ollama_server": {
+  "OLLAMA_FLASH_ATTENTION": "true",
+  "OLLAMA_NUM_PARALLEL": "4",
+  "OLLAMA_CONTEXT_LENGTH": "8192",
+  "OLLAMA_KV_CACHE_TYPE": "",
+  "OLLAMA_KEEP_ALIVE": "24h0m0s",
+  "OLLAMA_MAX_LOADED_MODELS": "0"
+ },
+ "ollama_models": {
+  "gemma4:e2b": "7fbdbf8f5e45a75bb122155ed546e765b4d9c53a1285f62fd9f506baa1c5a47e",
+  "llama3.2:3b": "a80c4f17acd55265feec403c7aef86be0c25983ab279d83f3bcd3abbcb5b8b72",
+  "qwen3:4b": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7"
+ },
+ "seconds": {
+  "seed_posts": 105.0,
+  "pass1": 404.3,
+  "posting": 12.8,
+  "pass2": 0.0,
+  "replay": 54.0
+ },
+ "counts": {
+  "decisions": 200,
+  "writes": 10,
+  "user_posts": 0,
+  "unreadable": 0
+ }
+}

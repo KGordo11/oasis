@@ -11,7 +11,7 @@ written.
 | **Part 0** | **Handoff: the whole project on one page. Start here** | written 2026-10-02 |
 | **Part 1** | Project log for Sims 1-3: setup, conventions, open threads (as of Aug 2026) | `PROJECT_LOG.md` |
 | **Part 2** | Simulation 1: basic Reddit sim and reasoning capture | `SESSION_REPORT (basic sim1).md` |
-| **Part 3** | Simulation 2: the up/control/down misinformation experiment | `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md` |
+| **Part 3** | Simulation the up/control/down misinformation experiment | `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md` |
 | **Part 4** | Simulation 3: the iAgent Shield experiment | `SHIELD_EXPERIMENT_REPORT.md` |
 | **Part 5** | Simulation 4: the complete log (status, build, scaling, every bug) | `SIM4_LOG.md` |
 | **Part 6** | Simulation 4: run plan and its review | `SIM4_RUN_PLAN.md` |
@@ -13897,3 +13897,70 @@ on the GPU machine, which isn't set up yet.
 4. Write the all-actions round harness.
 5. Smoke test.
 6. **Restate the final design to Gordon and wait for go before any real run.**
+
+## 14.9 Built and smoke-tested, 2026-10-02 night (nothing real has run yet)
+
+**Built:**
+
+- **`build_population_v2.py` → `personas_v2.json`**: the new 100 users, pinned (SHA-256 `11ac527c6351…`). Every
+  source is saved in `data/llm_bias/v2_sources/`. Target vs actual is in `population_v2_validation.md`:
+  - who is in the 100: Census Vintage 2024 population by state × sex × age, weighted by Pew 2025 social-media use
+    by age, picked by systematic sampling
+  - city or countryside: Census 2020 urban/rural share of the user's own state
+  - schooling: Census CPS 2024 attainment by age and sex
+  - working or not: BLS CPS 2025 employment ratio by age and sex
+  - kind of job: BLS OEWS May 2024 shares across 22 job groups (degree-requiring jobs go to degree holders, a
+    marked assumption)
+  - names: Census 1990 name lists
+  - personality: Big Five, a researcher choice (not survey data)
+  - stances: the orthogonal array from §14.5 (20 users per stance per topic, zero correlation between topics)
+  - results: age 23/36/24/17 against a target of 22.5/36.6/23.5/17.4; 50/50 by sex; 20 rural against 19.9
+- **Topics (LD-21, recommended), changed from Tests 1-6.** Cars, farming and tech have no recent human text posts
+  in the available data, so the five are personal finance (r/personalfinance), cheap & healthy cooking
+  (r/EatCheapAndHealthy), gardening (r/gardening), travel (r/travel) and fitness (r/Fitness).
+- **`human_pool_v2.py` → `human_pool.jsonl`**: 400 real posts per subreddit from HuggingFaceGECLM/REDDIT_submissions.
+  Each is:
+  - from Jan 2019 to Oct 2022 (pre-ChatGPT)
+  - a text post with no links, 40-400 words
+  - at least 5 upvotes on Reddit
+  - free of "EDIT:"/"UPDATE:" notes
+
+  592 to 6,743 posts per subreddit passed the filters. The full 2012+ Pushshift copy was rejected because it only
+  covers about 2012-2014, and dated posts would give away that a human wrote them.
+- **`run_v2.py`**: one round, one model, all 100 users. For the design, see its docstring and §14.5. Each seed
+  subject comes in 4 versions: the human post, plus each AI writing on the human post's title with Test 6's natural
+  prompt. In smoke tests the AIs reused the human title and wrote 102-118 words against the human's 115.
+- **`analyze_v2.py`**: plain tables first, then the own-AI boost and own-vs-human.
+- **`v2_campaign.sh`**: an overnight loop that rotates model order each round, stops before STOP_AT, and commits
+  each round.
+- **LB-v2-1 (fixed): replay crashed when a user wrote a post.** Users' own posts were looked up as if they came
+  from one of the 20 poster accounts. It only appeared with models whose users post.
+
+**Smoke test** (test round 900, 10 users, 20 seed posts each, 0 unreadable answers for every model):
+
+| Model | s/decision | Upvote % on LOVE / LIKE / NEUTRAL / DISLIKE / HATE topics | Downvote | None | Comment | Follow | Share | Users who wrote a post |
+|---|---|---|---|---|---|---|---|---|
+| qwen3:4b | 2.02 | 100 / 100 / 77 / 36 / 43 | 2% | 21% | 74% | 2% | 26% | 0/10 |
+| gemma4:e2b | 0.88 | 98 / 100 / 86 / 86 / 79 | 2% | 8% | 100% | 7% | 13% | 0/10 |
+| llama3.2:3b | 1.83 | 100 / 100 / 100 / 96 / 89 | 2% | 0% | 72% | 88% | 32% | 0/10 |
+| llama3.1:8b | 2.98 | 100 / 100 / 91 / 57 / 36 | 8% | 9% | 55% | 14% | 8% | 4/10 |
+| phi4-mini:3.8b | slow (3.6+) | 100 / 98 / 100 / 100 / 93 | 0% | 1% | 100% | 62% | 32% | 7/10 |
+| granite4.1:3b | 2.17 | 40 / 45 / 30 / 14 / 36 | 0% | 66% | 40% | 41% | 0% | 0/10 |
+
+**Reading it:**
+- llama3.2:3b and phi4-mini upvote nearly everything, even topics their user HATES, which leaves no room to
+  measure a bias.
+- granite mostly does nothing.
+- **qwen3:4b and llama3.1:8b follow the personas best.**
+- **Recommended trio: qwen3:4b (Alibaba) + gemma4:e2b (Google) + llama3.1:8b (Meta).**
+
+Posting differs sharply by model: qwen and gemma users never chose to post (0/10), while llama3.1 users posted 4/10.
+That difference is itself a model behaviour, but it means pass 2 gets little data from qwen and gemma worlds.
+
+**Time per full round** (100 users × 20 seed posts each):
+- qwen ≈ 70 min, gemma ≈ 32 min, llama3.1 ≈ 100 min, plus llama3.1's pass 2 (up to 1,000 decisions ≈ 50 min)
+- **about 4 h for a round of all three, so about 2 rounds per 10-hour night, or about 5 per day running
+  continuously**
+
+gemma4:e4b would need a newer Ollama (0.24.0 is installed). ministral-3:3b broke on 20 of 40 answers in the speed
+test.

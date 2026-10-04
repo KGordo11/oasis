@@ -7,7 +7,7 @@
 set -u
 cd "$(dirname "$0")/../../.."
 P=./oasis-env/bin/python; S=examples/experiment/llm_bias
-MODELS=(${MODELS:-qwen3:4b gemma4:e2b llama3.2:3b})
+MODELS=(${MODELS:-qwen3:4b gemma4:e2b llama3.1:8b})
 STOP=$(date -j -f "%Y-%m-%d %H:%M" "${STOP_AT:?set STOP_AT, e.g. 2026-10-03 08:00}" +%s)
 curl -s localhost:11434/api/tags >/dev/null || { echo "Ollama is down"; exit 2; }
 for R in ${ROUNDS:-$(seq 1 30)}; do

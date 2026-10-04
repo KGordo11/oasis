@@ -44,7 +44,7 @@ SRC = os.path.join(REPO, "data", "llm_bias", "v2_sources")
 PERSONAS = os.path.join(HERE, "personas_v2.json")
 PINNED_PERSONAS = "11ac527c6351e054dc2e054f3de892893404d58df1eb7eb32a0104a36a2f6383"  # build_population_v2.py
 SEED = 20261002
-AUTHORS = ["qwen3:4b", "gemma4:e2b", "llama3.2:3b"]  # LD-24 (recommended): Alibaba, Google, Meta
+AUTHORS = ["qwen3:4b", "gemma4:e2b", "llama3.1:8b"]  # LD-24 + LD-27: Alibaba, Google, Meta
 TOPICS = {"personal_finance": ("r/personalfinance", "Personal finance & money"),
           "cooking": ("r/EatCheapAndHealthy", "Cooking & eating cheap and healthy"),
           "gardening": ("r/gardening", "Gardening & growing plants"),

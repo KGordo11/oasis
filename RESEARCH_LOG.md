@@ -71,6 +71,9 @@ research**:
   (gemma4 vs llama3.2:1b, because Test 6's two AIs are siblings from the same maker); a neutral "referee" crowd
   played by a third AI; posts all made the same length (about 182 words); showing vote counts; moving to a GPU
   machine over SSH (planned, not set up).
+- **LLM Bias v2 is BUILT and smoke-tested, waiting for Gordon's go** (Part 14 §14.9-14.10, LD-27..29): 100 Census-grounded
+  users, human-post baseline, qwen3:4b + gemma4:e2b + llama3.1:8b, every action available, about 4 h per round. The
+  start command is in §14.10.
 - **LLM Bias v2: professor's answers recorded (Part 14 §14.8, LD-19..26), due Friday 2026-10-09.** Topics and models
   are recommended, waiting for confirmation. The next steps are listed at the end of §14.8.
 - **Next: LLM Bias v2, designed but NOT approved** (Part 14). The professor wants 100 hard-coded users, 2-3
@@ -13964,3 +13967,18 @@ That difference is itself a model behaviour, but it means pass 2 gets little dat
 
 gemma4:e4b would need a newer Ollama (0.24.0 is installed). ministral-3:3b broke on 20 of 40 answers in the speed
 test.
+
+## 14.10 Decisions, 2026-10-03 00:30 (Gordon)
+
+- **LD-27 Models:** qwen3:4b (Alibaba) + gemma4:e2b (Google) + **llama3.1:8b** (Meta). Set as the defaults in
+  `run_v2.py` and `v2_campaign.sh`. Round 1's seed bank will be written by these three; test round 900's seed
+  bank used llama3.2:3b and is test-only.
+- **LD-28 Posting stays optional,** as tested: users post only if they want to. Which models' users post is itself
+  a result.
+- **LD-29 Wait:** the campaign is NOT started. Gordon reviews first.
+
+**To start when Gordon says go** (Ollama first, then the campaign; each round takes about 4 h):
+
+    OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve > /tmp/ollama_serve.log 2>&1 &
+    cd /Users/gordon/research/oasis
+    STOP_AT="YYYY-MM-DD HH:MM" nohup caffeinate -i examples/experiment/llm_bias/v2_campaign.sh >> data/llm_bias/v2/campaign.log 2>&1 &

@@ -1,0 +1,5 @@
+{
+ "create_comment|failed": 1,
+ "create_post|ok": 10,
+ "do_nothing|ok": 1
+}

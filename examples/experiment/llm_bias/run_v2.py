@@ -46,7 +46,7 @@ DATA = os.path.join(REPO, "data", "llm_bias", "v2")
 PERSONAS = os.path.join(HERE, "personas_v2.json")
 PINNED_PERSONAS = "ed110626dce4b10f36d43fe6bcd9b3124be163e40b6db41979893afb4d7dc39f"  # build_population_v2.py
 SEED = 20261004
-MODELS = ["qwen3:8b", "llama3.1:8b", "mistral:7b"]  # LD-30: Alibaba, Meta, Mistral AI; all 7-8B
+MODELS = ["qwen3:8b", "llama3.1:8b", "gemma3:12b"]  # LD-30 + LD-38: Alibaba, Meta, Google (mistral out: its users never post)
 # LD-31: the five topics Americans follow most often (Pew, March 2025) -- see build_population_v2.py
 TOPICS = {"politics": ("r/politics", "Politics & government"),
           "science_tech": ("r/technology", "Science & technology"),

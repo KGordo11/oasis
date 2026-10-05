@@ -1,30 +1,40 @@
-"""One night of LLM Bias v2, round 1, spread evenly over every cell (log Part 14 sec. 14.12).
+"""Run LLM Bias v2 rounds until a stop time, spreading the work evenly over every cell (log Part 14).
 
 IN PLAIN WORDS
 --------------
+For each round:
 1. Posting turn for each AI (100 users each).
-2. Reading passes. Pass 1: every reader AI reads 8 posts per user from every post set (all 9 cells). Pass 2 tops
-   every cell up to 16. Passes go cell by cell for every cell before the next pass starts, so if time runs short
-   every cell has the same coverage.
-3. Noise floor (stage 1b): each AI re-reads its own post set, 4 posts per user, with fresh randomness.
-Before each step it estimates the step's time from the measured seconds per screen and skips it if it would run past
-STOP. After each step the OASIS database is rebuilt in the background; after each pass: analysis, commit, push.
-At the end the models are unloaded and the Ollama server stopped.
+2. Reading in growing slices: every reader AI reads the first 16 posts of each user's scroll in every post set, then
+   32, 64, then all of them (0 = all). The slices are nested -- a bigger slice only adds posts at the end of each
+   user's scroll -- so whenever time runs out, every cell has the same coverage, and the next run continues there.
+3. Optional noise floor (NOISE=4): each AI re-reads 4 posts per user of its own set with fresh randomness.
+Before each step it estimates the step's time from the seconds per screen it has measured so far (on this machine)
+and skips the step if it would run past STOP. After each round: analysis, and a commit + push if PUSH=1.
+At the end the models are unloaded (and the Ollama server stopped if STOP_OLLAMA=1).
 
-    STOP="2026-10-05 08:45" python v2_night.py
+The OASIS database rebuild (replay) is off by default (REPLAY=0) so a remote machine needs only Python, git and
+Ollama; rebuild later with `run_v2.py read ... ` without --no-replay.
+
+    STOP="2026-10-06 08:00" ROUNDS="1 2 3" SLICES="16 32 64 0" python v2_night.py
 """
-import json, os, subprocess, sys, time
+import json, os, subprocess, time
 from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-PY = os.path.join(REPO, "oasis-env", "bin", "python")
+PY = os.environ.get("PY", os.path.join(REPO, "oasis-env", "bin", "python"))
 RUN = os.path.join(HERE, "run_v2.py")
-MODELS = ["qwen3:8b", "llama3.1:8b", "mistral:7b"]
-ROUND = 1
+MODELS = os.environ.get("MODELS", "qwen3:8b llama3.1:8b gemma3:12b").split()
+ROUNDS = [int(x) for x in os.environ.get("ROUNDS", "1").split()]
+SLICES = [int(x) for x in os.environ.get("SLICES", "16 32 64 0").split()]
+NOISE = int(os.environ.get("NOISE", "4"))
 STOP = datetime.strptime(os.environ["STOP"], "%Y-%m-%d %H:%M").timestamp()
-SPS = {"qwen3:8b": 2.0, "llama3.1:8b": 3.5, "mistral:7b": 2.9}  # seconds per screen, measured in the smoke test
+REPLAY = os.environ.get("REPLAY", "0") == "1"
+PUSH = os.environ.get("PUSH", "1") == "1"
+NICE = ["taskpolicy", "-b"] if os.uname().sysname == "Darwin" else ["nice", "-n", "19"]
+SPS = {m: 3.5 for m in MODELS}  # seconds per screen; replaced by what this machine measures
 LOG = os.path.join(REPO, "data", "llm_bias", "v2", "night.log")
+os.makedirs(os.path.dirname(LOG), exist_ok=True)
 
 
 def log(msg):
@@ -33,63 +43,80 @@ def log(msg):
     open(LOG, "a").write(line + "\n")
 
 
-def n_posts(model):
-    f = os.path.join(REPO, "data", "llm_bias", "v2", f"r{ROUND:03d}", f"posting_{model.replace(':', '-')}.jsonl")
-    if not os.path.exists(f):
-        return 0
-    return sum(sum(x["action"] == "create_post" for x in json.loads(l)["actions"]) for l in open(f))
+def rdir(r):
+    return os.path.join(REPO, "data", "llm_bias", "v2", f"r{r:03d}")
 
 
-def step(args, est_s, what):
+def n_posts(r, m):
+    f = os.path.join(rdir(r), f"posting_{m.replace(':', '-')}.jsonl")
+    return sum(sum(x["action"] == "create_post" for x in json.loads(l)["actions"]) for l in open(f)) if os.path.exists(f) else 0
+
+
+def screens_done(r, name):
+    f = os.path.join(rdir(r), name + ".jsonl")
+    return sum(1 for _ in open(f)) if os.path.exists(f) else 0
+
+
+def step(r, args, est_screens, reader, what, name):
+    est = est_screens * SPS[reader]
     left = STOP - time.time()
-    if est_s > left:
-        log(f"SKIP {what}: needs ~{est_s / 60:.0f} min, {left / 60:.0f} min left")
+    if est > left:
+        log(f"SKIP {what}: needs ~{est / 60:.0f} min, {left / 60:.0f} min left")
         return False
-    log(f"start {what} (~{est_s / 60:.0f} min)")
-    t = time.time()
-    rc = subprocess.call([PY, RUN, *args, "--round", str(ROUND), "--no-replay"], cwd=REPO,
-                         stdout=open(f"/tmp/v2_night_{what.replace(' ', '_').replace(':', '-')}.log", "a"),
-                         stderr=subprocess.STDOUT)
-    log(f"end {what} rc={rc} in {(time.time() - t) / 60:.1f} min")
-    # rebuild the OASIS database from the records, at background priority (no model calls)
-    subprocess.Popen(["taskpolicy", "-b", PY, RUN, *args, "--round", str(ROUND)], cwd=REPO,
-                     stdout=open("/tmp/v2_night_replays.log", "a"), stderr=subprocess.STDOUT)
+    log(f"start {what} (~{est_screens} screens, ~{est / 60:.0f} min)")
+    t, before = time.time(), screens_done(r, name)
+    rc = subprocess.call([PY, RUN, *args, "--round", str(r)] + ([] if REPLAY else ["--no-replay"]), cwd=REPO,
+                         stdout=open(f"/tmp/v2_{name}.log", "a"), stderr=subprocess.STDOUT)
+    did = screens_done(r, name) - before
+    if did > 20:
+        SPS[reader] = (time.time() - t) / did
+    log(f"end {what} rc={rc}: {did} screens in {(time.time() - t) / 60:.1f} min ({SPS[reader]:.2f} s/screen)")
     return rc == 0
 
 
-def checkpoint(msg):
-    """Analysis + commit + push in the background, at low priority, so the next step starts at once."""
-    sh = (f"taskpolicy -b {PY} {os.path.join(HERE, 'analyze_v2.py')} > /dev/null 2>&1; "
-          f"git add data/llm_bias/v2/r{ROUND:03d} data/llm_bias/v2/summary.md data/llm_bias/v2/night.log; "
-          f"git commit -qm 'LLM Bias v2 round {ROUND}: {msg}' -m 'Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>'; "
-          f"git push -q origin llm-bias")
-    subprocess.Popen(["sh", "-c", sh], cwd=REPO, stdout=open("/tmp/v2_night_commits.log", "a"), stderr=subprocess.STDOUT)
-    log(f"checkpoint (analysis + commit running in background): {msg}")
+def checkpoint(r, msg):
+    sh = f"{' '.join(NICE)} {PY} {os.path.join(HERE, 'analyze_v2.py')} > /dev/null 2>&1; " \
+         f"git add data/llm_bias/v2/r{r:03d} data/llm_bias/v2/summary.md; " \
+         f"git commit -qm 'LLM Bias v2 round {r}: {msg}' -m 'Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>'"
+    if PUSH:
+        sh += "; git push -q origin llm-bias"
+    subprocess.Popen(["sh", "-c", sh], cwd=REPO, stdout=open("/tmp/v2_commits.log", "a"), stderr=subprocess.STDOUT)
+    log(f"checkpoint round {r}: {msg}")
 
 
-log(f"night start, stop at {datetime.fromtimestamp(STOP):%F %H:%M}")
-for m in MODELS:
-    step(["post", "--model", m], 100 * 6, f"post {m}")
-sets = {m: n_posts(m) for m in MODELS}
-log(f"post sets: {sets}")
-checkpoint("posting turns")
-for k_prev, k in ((0, 8), (8, 16)):
-    for reader in MODELS:
-        for pb in MODELS:
-            if sets[pb] == 0:
-                continue
-            new = 100 * (min(k, sets[pb] - 1) - min(k_prev, sets[pb] - 1))
-            step(["read", "--posts-by", pb, "--model", reader, "--max-posts", str(k)], new * SPS[reader],
-                 f"read {pb} by {reader} k{k}")
-    checkpoint(f"reading pass to {k} posts per user")
-for m in MODELS:
-    if sets[m]:
-        step(["read", "--posts-by", m, "--model", m, "--max-posts", "4", "--draw", "1"], 100 * min(4, sets[m] - 1) * SPS[m],
-             f"noise floor {m}")
-checkpoint("noise floor re-reads")
-time.sleep(600)  # let the last background database rebuilds finish
+log(f"start: rounds {ROUNDS}, models {MODELS}, slices {SLICES}, stop {datetime.fromtimestamp(STOP):%F %H:%M}")
+for r in ROUNDS:
+    for m in MODELS:
+        if not os.path.exists(os.path.join(rdir(r), f"posting_{m.replace(':', '-')}.manifest.json")):
+            step(r, ["post", "--model", m], 100, m, f"r{r} post {m}", f"posting_{m.replace(':', '-')}")
+    sets = {m: n_posts(r, m) for m in MODELS}
+    log(f"r{r} post sets: {sets}")
+    prev = 0
+    for k in SLICES:
+        for reader in MODELS:
+            for pb in MODELS:
+                n = sets[pb]
+                if n == 0:
+                    continue
+                want = n - 1 if k == 0 else min(k, n - 1)  # posts per user (all but their own)
+                name = f"reading_{pb.replace(':', '-')}__{reader.replace(':', '-')}"
+                todo = max(0, 100 * want - screens_done(r, name))
+                if todo:
+                    step(r, ["read", "--posts-by", pb, "--model", reader] + (["--max-posts", str(k)] if k else []),
+                         todo, reader, f"r{r} read {pb} by {reader} slice {k or 'all'}", name)
+        checkpoint(r, f"reading slice {k or 'all'}")
+    if NOISE:
+        for m in MODELS:
+            if sets[m]:
+                name = f"reading_{m.replace(':', '-')}__{m.replace(':', '-')}_d1"
+                todo = max(0, 100 * min(NOISE, sets[m] - 1) - screens_done(r, name))
+                if todo:
+                    step(r, ["read", "--posts-by", m, "--model", m, "--max-posts", str(NOISE), "--draw", "1"],
+                         todo, m, f"r{r} noise floor {m}", name)
+        checkpoint(r, "noise floor")
 for m in MODELS:
     subprocess.call(["curl", "-s", "localhost:11434/api/generate", "-d", json.dumps({"model": m, "keep_alive": 0})],
                     stdout=subprocess.DEVNULL)
-subprocess.call(["pkill", "-f", "ollama serve"])
-log("night end: models unloaded, Ollama stopped")
+if os.environ.get("STOP_OLLAMA", "1") == "1":
+    subprocess.call(["pkill", "-f", "ollama serve"])
+log("end: models unloaded")

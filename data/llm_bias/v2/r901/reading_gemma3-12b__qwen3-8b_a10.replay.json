@@ -1,0 +1,7 @@
+{
+ "create_comment|ok": 16,
+ "dislike_post|ok": 3,
+ "do_nothing|ok": 4,
+ "like_post|ok": 11,
+ "report_post|ok": 4
+}

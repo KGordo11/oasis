@@ -1,0 +1,7 @@
+{
+ "create_post|ok": 8,
+ "follow|failed": 1,
+ "follow|ok": 1,
+ "search_posts|failed": 1,
+ "search_user|failed": 5
+}

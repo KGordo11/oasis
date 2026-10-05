@@ -1,16 +1,16 @@
 {
- "name": "posting_command-r7b-latest_a10",
+ "name": "reading_gemma3-12b__gemma3-12b_a10",
  "design": "v2 two-turn (log Part 14 sec. 14.11)",
- "turn": "post",
- "round": 900,
- "model": "command-r7b:latest",
- "posts_by": null,
+ "turn": "read",
+ "round": 901,
+ "model": "gemma3:12b",
+ "posts_by": "gemma3:12b",
  "draw": 0,
  "agents": 10,
- "finished_at": "2026-10-05T17:12:11.904579",
+ "finished_at": "2026-10-05T17:57:04.259331",
  "git_commit": "3edf5c05e84b88f34691114f0c8526301527929a",
  "personas_sha256": "ed110626dce4b10f36d43fe6bcd9b3124be163e40b6db41979893afb4d7dc39f",
- "post_set_sha256": null,
+ "post_set_sha256": "52d0a6cf663e1fa99c04008156afe41bf8edfde5c5992497f0a64099e1945c87",
  "prompts_sha256": "5e5ed70540813d3db8bfb4f688895f3a4329f2d0e55b5c55331234497dc6f082",
  "config": {
   "temperature": 0.7,
@@ -34,10 +34,10 @@
   "OLLAMA_MAX_LOADED_MODELS": "0"
  },
  "ollama_models": {
-  "command-r7b:latest": "ff4e9696ef9f19b62e3f7d7261c95dcc9bb15a7c0398493366d851119fe2e1ef"
+  "gemma3:12b": "f4031aab637d1ffa37b42570452ae0e4fad0314754d17ded67322e4b95836f8a"
  },
- "seconds_llm": 0.0,
- "screens": 10,
+ "seconds_llm": 105.4,
+ "screens": 27,
  "unreadable": 0,
- "posts_written": 1
+ "posts_written": 0
 }

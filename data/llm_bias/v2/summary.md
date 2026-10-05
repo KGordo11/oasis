@@ -1,6 +1,6 @@
 # LLM Bias v2 results
 
-Rounds: [1]. Screens: 5100 (6 unreadable).
+Rounds: [1]. Screens: 9900 (8 unreadable).
 
 ## Table 1. Posting turn (empty feed, every action available, nobody told to post)
 
@@ -14,23 +14,23 @@ Rounds: [1]. Screens: 5100 (6 unreadable).
 
 | Reader AI | Posts by | Screens | Did nothing | like_post | dislike_post | create_comment | repost | quote_post | follow | mute | report_post | create_post | search_posts | do_nothing |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| llama3.1:8b | llama3.1:8b (baseline) | 800 | 1.5% | 58.9% | 34.4% | 47.4% | 0.0% | 0.0% | 5.0% | 0.0% | 15.2% | 0.0% | 0.9% | 3.2% |
-| llama3.1:8b | qwen3:8b | 800 | 2.2% | 54.4% | 39.1% | 46.9% | 0.2% | 0.0% | 3.9% | 0.0% | 16.4% | 0.0% | 0.9% | 4.2% |
-| mistral:7b | llama3.1:8b | 799 | 30.7% | 26.8% | 2.5% | 41.3% | 0.0% | 0.0% | 0.5% | 0.0% | 0.0% | 0.0% | 0.1% | 6.3% |
-| mistral:7b | qwen3:8b | 799 | 29.8% | 27.8% | 1.6% | 41.9% | 0.0% | 0.0% | 0.0% | 0.0% | 0.1% | 0.0% | 0.8% | 7.4% |
-| qwen3:8b | llama3.1:8b | 800 | 19.4% | 49.6% | 11.0% | 40.6% | 0.1% | 0.0% | 0.8% | 0.0% | 2.4% | 0.0% | 0.0% | 20.5% |
-| qwen3:8b | qwen3:8b (baseline) | 800 | 13.8% | 43.4% | 17.1% | 45.9% | 0.0% | 0.0% | 1.2% | 0.0% | 1.5% | 0.0% | 0.0% | 14.5% |
+| llama3.1:8b | llama3.1:8b (baseline) | 1600 | 1.5% | 57.9% | 36.1% | 47.1% | 0.2% | 0.0% | 4.5% | 0.0% | 14.8% | 0.0% | 0.9% | 3.5% |
+| llama3.1:8b | qwen3:8b | 1600 | 2.2% | 53.6% | 40.4% | 44.9% | 0.5% | 0.1% | 3.8% | 0.0% | 17.6% | 0.0% | 0.9% | 4.6% |
+| mistral:7b | llama3.1:8b | 1597 | 32.1% | 26.2% | 2.3% | 40.6% | 0.0% | 0.0% | 0.6% | 0.0% | 0.1% | 0.0% | 0.4% | 6.8% |
+| mistral:7b | qwen3:8b | 1599 | 30.1% | 28.5% | 1.6% | 40.9% | 0.0% | 0.0% | 0.1% | 0.0% | 0.1% | 0.0% | 0.6% | 8.1% |
+| qwen3:8b | llama3.1:8b | 1600 | 18.9% | 50.1% | 11.1% | 40.7% | 0.1% | 0.0% | 0.5% | 0.0% | 2.1% | 0.0% | 0.0% | 20.1% |
+| qwen3:8b | qwen3:8b (baseline) | 1600 | 14.0% | 43.9% | 17.2% | 44.7% | 0.0% | 0.0% | 0.9% | 0.0% | 1.6% | 0.0% | 0.0% | 14.8% |
 
 ## Table 3. Reading turn: % upvoted by the reader's stance on the post's topic
 
 | Reader AI | Posts by | LOVE | LIKE | NEUTRAL | DISLIKE | HATE |
 |---|---|---|---|---|---|---|
-| llama3.1:8b | llama3.1:8b | 91.8% | 94.0% | 83.8% | 9.0% | 13.8% |
-| llama3.1:8b | qwen3:8b | 91.1% | 91.9% | 75.5% | 8.5% | 11.8% |
-| mistral:7b | llama3.1:8b | 53.4% | 49.4% | 23.3% | 5.8% | 3.1% |
-| mistral:7b | qwen3:8b | 50.4% | 50.6% | 28.9% | 7.9% | 4.8% |
-| qwen3:8b | llama3.1:8b | 85.6% | 82.5% | 51.4% | 14.7% | 14.5% |
-| qwen3:8b | qwen3:8b | 80.7% | 70.3% | 47.8% | 15.8% | 8.9% |
+| llama3.1:8b | llama3.1:8b | 92.1% | 95.6% | 84.2% | 7.3% | 11.5% |
+| llama3.1:8b | qwen3:8b | 90.8% | 93.6% | 73.7% | 7.1% | 10.1% |
+| mistral:7b | llama3.1:8b | 52.2% | 49.5% | 23.7% | 3.6% | 3.8% |
+| mistral:7b | qwen3:8b | 54.9% | 53.9% | 26.3% | 8.3% | 3.5% |
+| qwen3:8b | llama3.1:8b | 85.1% | 83.1% | 54.0% | 16.7% | 13.7% |
+| qwen3:8b | qwen3:8b | 78.4% | 73.5% | 46.5% | 16.3% | 11.0% |
 
 ## Own-AI bias (derived; read Table 2 first)
 
@@ -39,5 +39,5 @@ For AIs i and j: (i reading i's posts - j reading i's posts) - (i reading j's po
 | i | j | Upvote: bias (95% range) | Did anything: bias (95% range) |
 |---|---|---|---|
 | llama3.1:8b | mistral:7b | - | - |
-| llama3.1:8b | qwen3:8b | -1.7 (-10.7 to +7.4) | +6.4 (-0.3 to +13.5) |
+| llama3.1:8b | qwen3:8b | -1.9 (-8.3 to +5.1) | +5.6 (+0.0 to +11.4) |
 | mistral:7b | qwen3:8b | - | - |

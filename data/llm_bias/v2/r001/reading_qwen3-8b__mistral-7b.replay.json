@@ -1,11 +1,14 @@
 {
- "create_comment|ok": 335,
- "dislike_post|ok": 13,
- "do_nothing|ok": 59,
- "like_post|ok": 222,
- "refresh|failed": 101,
+ "create_comment|ok": 654,
+ "dislike_post|ok": 26,
+ "do_nothing|ok": 129,
+ "follow|ok": 2,
+ "like_post|ok": 456,
+ "listen_from_group|ok": 1,
+ "refresh|failed": 195,
  "report_post|ok": 1,
- "search_posts|ok": 6,
- "search_user|ok": 2,
- "trend|ok": 15
+ "search_posts|ok": 9,
+ "search_user|failed": 1,
+ "search_user|ok": 5,
+ "trend|ok": 35
 }

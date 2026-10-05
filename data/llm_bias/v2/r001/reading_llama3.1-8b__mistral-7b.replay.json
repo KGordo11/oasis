@@ -1,0 +1,14 @@
+{
+ "create_comment|ok": 330,
+ "dislike_post|ok": 20,
+ "do_nothing|ok": 50,
+ "follow|ok": 4,
+ "like_post|ok": 214,
+ "listen_from_group|ok": 1,
+ "refresh|failed": 108,
+ "search_posts|ok": 1,
+ "search_user|failed": 1,
+ "search_user|ok": 5,
+ "trend|ok": 22,
+ "undo_dislike_post|failed": 1
+}

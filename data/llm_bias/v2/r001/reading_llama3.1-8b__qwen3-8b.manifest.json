@@ -7,8 +7,8 @@
  "posts_by": "llama3.1:8b",
  "draw": 0,
  "agents": 100,
- "finished_at": "2026-10-04T23:29:56.676145",
- "git_commit": "49263547a4a5e0cefcd9fdf590f422b14fe5dba5",
+ "finished_at": "2026-10-05T03:02:13.547657",
+ "git_commit": "d901e259ff41a3e1ff860f5d01641dffe27b5741",
  "personas_sha256": "ed110626dce4b10f36d43fe6bcd9b3124be163e40b6db41979893afb4d7dc39f",
  "post_set_sha256": "36eeaa004707a212ecf3d71afd942e2bee6c72e6a49e10c71cd2238312f19e96",
  "prompts_sha256": "5e5ed70540813d3db8bfb4f688895f3a4329f2d0e55b5c55331234497dc6f082",
@@ -21,7 +21,7 @@
   "follow_graph": "empty each round",
   "vote_counts": "hidden",
   "one_post_per_screen": true,
-  "max_posts_per_user": 8,
+  "max_posts_per_user": 16,
   "own_posts_hidden": true,
   "menu_actions": 27
  },
@@ -37,7 +37,7 @@
   "qwen3:8b": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41"
  },
  "seconds_llm": 0.0,
- "screens": 800,
+ "screens": 1600,
  "unreadable": 0,
  "posts_written": 0
 }

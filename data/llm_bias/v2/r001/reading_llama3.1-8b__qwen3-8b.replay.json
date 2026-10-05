@@ -1,10 +1,10 @@
 {
- "create_comment|ok": 325,
- "dislike_post|ok": 88,
- "do_nothing|ok": 164,
- "follow|ok": 6,
- "like_post|ok": 397,
- "report_post|ok": 19,
+ "create_comment|ok": 651,
+ "dislike_post|ok": 178,
+ "do_nothing|ok": 321,
+ "follow|ok": 8,
+ "like_post|ok": 802,
+ "report_post|ok": 33,
  "repost|ok": 1,
- "unlike_post|failed": 1
+ "unlike_post|failed": 2
 }

@@ -1,0 +1,7 @@
+{
+ "create_comment|failed": 4,
+ "create_post|ok": 101,
+ "do_nothing|ok": 7,
+ "like_post|failed": 7,
+ "refresh|failed": 6
+}

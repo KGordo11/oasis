@@ -71,9 +71,9 @@ research**:
   (gemma4 vs llama3.2:1b, because Test 6's two AIs are siblings from the same maker); a neutral "referee" crowd
   played by a third AI; posts all made the same length (about 182 words); showing vote counts; moving to a GPU
   machine over SSH (planned, not set up).
-- **LLM Bias v2 night 1 RUNNING (2026-10-04 22:18 → stops by 08:45)** with the two-turn crossover (Part 14 §14.11-14.12):
-  qwen3:8b + llama3.1:8b + mistral:7b. Mistral's users wrote 0 posts, so it is a reader only. Results go in
-  `data/llm_bias/v2/summary.md`.
+- **LLM Bias v2 night 1 DONE (round 1, 2026-10-05 06:22; Part 14 §14.13, LF-51).** qwen 101 posts, llama 96, mistral 0
+  (lurkers). No shared own-AI bias in round 1 (−1.9, range −8.3 to +5.1); llama leans to its own posts (+4.3), qwen
+  away from its own (−6.2). One round only. Next: more rounds, and a decision on mistral.
 - **LLM Bias v2 is BUILT and smoke-tested, waiting for Gordon's go** (Part 14 §14.9-14.10, LD-27..29): 100 Census-grounded
   users, human-post baseline, qwen3:4b + gemma4:e2b + llama3.1:8b, every action available, about 4 h per round. The
   start command is in §14.10.
@@ -14060,3 +14060,51 @@ mistral:7b 0.** No mistral user posted on an empty feed (they refresh, search, w
 3 readers × 2 post sets. Mistral is measured only as a reader, and its own-post bias cannot be measured. Whether
 to keep mistral, swap it for a family whose users post, or change the posting screen is Gordon's call; nothing is
 forced. Reading-pass estimate: pass 1 ~3.7 h, pass 2 ~3.7 h, noise floor ~0.6 h, finishing about 06:45.
+
+## 14.13 Night 1 results (round 1, finished 2026-10-05 06:22; every step rc=0)
+
+10,700 screens, 8 unreadable. Full tables: `data/llm_bias/v2/summary.md`.
+
+**Posting turn** (empty feed, nothing forced):
+- qwen3:8b: 88 users posted, 101 posts.
+- llama3.1:8b: 96 users posted, 96 posts (politics 32).
+- **mistral:7b: 0 posts.** Its users searched (32), refreshed (6) or checked trends (4) instead.
+
+**Reading turn** (100 users × 16 posts per set per reader). % of screens with each action:
+
+| Reader | Posts by | Upvote | Downvote | Comment | Report | Did nothing |
+|---|---|---|---|---|---|---|
+| llama3.1:8b | llama3.1:8b (baseline) | 57.9% | 36.1% | 47.1% | 14.8% | 1.5% |
+| llama3.1:8b | qwen3:8b | 53.6% | 40.4% | 44.9% | 17.6% | 2.2% |
+| qwen3:8b | qwen3:8b (baseline) | 43.9% | 17.2% | 44.7% | 1.6% | 14.0% |
+| qwen3:8b | llama3.1:8b | 50.1% | 11.1% | 40.7% | 2.1% | 18.9% |
+| mistral:7b | qwen3:8b | 28.5% | 1.6% | 40.9% | 0.1% | 30.1% |
+| mistral:7b | llama3.1:8b | 26.2% | 2.3% | 40.6% | 0.1% | 32.1% |
+
+**LF-51 (one round, so provisional):**
+- **llama upvotes its own AI's posts 4.3 points more** than qwen's (57.9 vs 53.6).
+- **qwen upvotes its own AI's posts 6.2 points LESS** than llama's (43.9 vs 50.1).
+- The pairwise double difference (the sum of both) is **−1.9 upvotes per 100 (95% range −8.3 to +5.1): no shared
+  own-AI bias detectable.**
+- Using mistral as a neutral referee (it rates llama's posts 2.3 points below qwen's), the quality-adjusted leans are
+  llama **+6.6** and qwen **−8.5**. These are single-round numbers; the range is wide because there is only one post
+  set per AI.
+- "Did anything" double difference: +5.6 (0.0 to +11.4), borderline.
+
+**Noise floor:**
+- Re-reading the same posts with fresh randomness gives the same upvote decision 87.8% of the time (llama) and
+  84.8% (qwen).
+- The upvote RATE barely moves: 60.0 vs 59.8, and 43.2 vs 44.0. So a difference between cells of about 2 points or
+  more is beyond pure answer-randomness.
+- The main uncertainty is which posts got written, which only more rounds fix.
+
+**Persona adherence:** all three readers follow the stances. Upvotes on LOVE topics: llama 91-92%, qwen 78-85%,
+mistral 52-55%. On HATE topics: 4-14%.
+
+**Distinct styles:**
+- llama downvotes a lot (36-40%) and reports 15-18% of posts.
+- qwen does nothing on 14-20% of screens.
+- mistral comments on about 41% but upvotes only about 27%.
+
+**Cosmetic, to fix:** Table 1 lists subreddit names as the AI typed them ("politics" vs "r/politics"). The analysis
+should group them by topic.

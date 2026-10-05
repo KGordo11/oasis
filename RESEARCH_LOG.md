@@ -14151,3 +14151,36 @@ command-r7b (Cohere) was downloaded but not tested (the session was stopped).
 professor named; 12B, so a little bigger than the others) and falcon3:7b. falcon upvotes about 60% even on HATE
 topics, so it ignores dislikes. **Recommendation: gemma3:12b.** Next: decide; test command-r7b if wanted; then run
 gemma3:12b's posting turn for round 1 and its reading cells.
+
+## 14.15 Final trio and final smoke test (2026-10-05 evening): ready for the SSH machine
+
+- **command-r7b (Cohere) tested and rejected.** Its users upvote 100% of posts on HATE topics, so it ignores the
+  personas; 1 of 10 users posted.
+- **LD-38: gemma3:12b (Google) replaces mistral.** The trio is **qwen3:8b + llama3.1:8b + gemma3:12b**, the defaults
+  in `run_v2.py` and `v2_night.py`.
+
+**Final smoke test, test round 901** (10 users, every user reads every post, one per screen, all 9 cells, OASIS
+database rebuilt):
+- 0 unreadable answers.
+- Posts written: qwen 10, llama 8, gemma 3.
+- Seconds per screen on the laptop: qwen ~2.1, llama ~3.5, gemma ~3.3.
+- Replay: all real actions succeed. The only "failed" ones had nothing to act on (refresh or search on an empty
+  feed, following before anyone exists, taking back an upvote never given). They are recorded, not hidden.
+
+**Full-round cost on the laptop.** At 100 users the post sets should be about qwen 100, llama 90 and gemma 30, so
+about 217 posts per user and about 21,700 screens per reader AI: **about 54 h per round**. Hence the SSH machine.
+
+**Runner for the SSH machine: `v2_night.py`.**
+- Configured by environment variables: ROUNDS, SLICES (default "16 32 64 0", where 0 = all), NOISE, STOP, PUSH,
+  REPLAY.
+- It measures its own seconds per screen and keeps coverage even across cells.
+- The remote machine needs only Python 3.9+, git and Ollama (no OASIS install); databases are rebuilt later.
+
+**SSH status:**
+- `~/.ssh/config` entries `kmgo257.cs.uky.edu` (does not resolve; probably campus or VPN only) and `uky.edu` (the
+  website, no SSH) do not work.
+- `known_hosts` also lists **`c220g5-110930.wisc.cloudlab.us`** (CloudLab). It is reachable, but the key is
+  refused for users kmgo257 / gordonkm / gordon.
+- CloudLab c220g5 nodes are, as far as I know, CPU-only. That needs checking: on CPU the models would run slower
+  than on this laptop.
+- **Needed from Gordon: the real host, the username, and whether it has an NVIDIA GPU.**

@@ -71,6 +71,9 @@ research**:
   (gemma4 vs llama3.2:1b, because Test 6's two AIs are siblings from the same maker); a neutral "referee" crowd
   played by a third AI; posts all made the same length (about 182 words); showing vote counts; moving to a GPU
   machine over SSH (planned, not set up).
+- **LLM Bias v2 night 1 RUNNING (2026-10-04 22:18 → stops by 08:45)** with the two-turn crossover (Part 14 §14.11-14.12):
+  qwen3:8b + llama3.1:8b + mistral:7b. Mistral's users wrote 0 posts, so it is a reader only. Results go in
+  `data/llm_bias/v2/summary.md`.
 - **LLM Bias v2 is BUILT and smoke-tested, waiting for Gordon's go** (Part 14 §14.9-14.10, LD-27..29): 100 Census-grounded
   users, human-post baseline, qwen3:4b + gemma4:e2b + llama3.1:8b, every action available, about 4 h per round. The
   start command is in §14.10.
@@ -14051,3 +14054,9 @@ Gordon: "run a sim tonight ... until 9am, try to get all of them evenly".
 
 Each step is skipped if its estimated time would run past 08:45. Analysis and a commit follow each pass. At the end
 the models are unloaded and Ollama is stopped. The log is in `data/llm_bias/v2/night.log`.
+
+**Night 1, 22:35: posting turns done.** Post sets at 100 users: **qwen3:8b 101 posts, llama3.1:8b 96,
+mistral:7b 0.** No mistral user posted on an empty feed (they refresh, search, wait). So tonight's table is
+3 readers × 2 post sets. Mistral is measured only as a reader, and its own-post bias cannot be measured. Whether
+to keep mistral, swap it for a family whose users post, or change the posting screen is Gordon's call; nothing is
+forced. Reading-pass estimate: pass 1 ~3.7 h, pass 2 ~3.7 h, noise floor ~0.6 h, finishing about 06:45.

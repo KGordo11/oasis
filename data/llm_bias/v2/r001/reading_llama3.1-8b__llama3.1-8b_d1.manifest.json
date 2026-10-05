@@ -1,13 +1,13 @@
 {
- "name": "reading_llama3.1-8b__mistral-7b",
+ "name": "reading_llama3.1-8b__llama3.1-8b_d1",
  "design": "v2 two-turn (log Part 14 sec. 14.11)",
  "turn": "read",
  "round": 1,
- "model": "mistral:7b",
+ "model": "llama3.1:8b",
  "posts_by": "llama3.1:8b",
- "draw": 0,
+ "draw": 1,
  "agents": 100,
- "finished_at": "2026-10-05T05:40:13.124181",
+ "finished_at": "2026-10-05T06:12:40.713197",
  "git_commit": "d18b5f27401a4318c3298061a3c25d038fefac3f",
  "personas_sha256": "ed110626dce4b10f36d43fe6bcd9b3124be163e40b6db41979893afb4d7dc39f",
  "post_set_sha256": "36eeaa004707a212ecf3d71afd942e2bee6c72e6a49e10c71cd2238312f19e96",
@@ -21,7 +21,7 @@
   "follow_graph": "empty each round",
   "vote_counts": "hidden",
   "one_post_per_screen": true,
-  "max_posts_per_user": 16,
+  "max_posts_per_user": 4,
   "own_posts_hidden": true,
   "menu_actions": 27
  },
@@ -34,10 +34,10 @@
   "OLLAMA_MAX_LOADED_MODELS": "0"
  },
  "ollama_models": {
-  "mistral:7b": "6577803aa9a036369e481d648a2baebb381ebc6e897f2bb9a766a2aa7bfbc1cf"
+  "llama3.1:8b": "46e0c10c039e019119339687c3c1757cc81b9da49709a3b3924863ba87ca666e"
  },
- "seconds_llm": 0.0,
- "screens": 1600,
- "unreadable": 3,
+ "seconds_llm": 1389.1,
+ "screens": 400,
+ "unreadable": 0,
  "posts_written": 0
 }

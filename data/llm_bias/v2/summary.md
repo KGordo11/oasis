@@ -1,6 +1,6 @@
 # LLM Bias v2 results
 
-Rounds: [1]. Screens: 9900 (8 unreadable).
+Rounds: [1]. Screens: 10700 (8 unreadable).
 
 ## Table 1. Posting turn (empty feed, every action available, nobody told to post)
 
@@ -41,3 +41,10 @@ For AIs i and j: (i reading i's posts - j reading i's posts) - (i reading j's po
 | llama3.1:8b | mistral:7b | - | - |
 | llama3.1:8b | qwen3:8b | -1.9 (-8.3 to +5.1) | +5.6 (+0.0 to +11.4) |
 | mistral:7b | qwen3:8b | - | - |
+
+## Noise floor (stage 1b): same AI, same posts, re-read with fresh randomness
+
+| AI | Screens compared | Same upvote decision | Upvote rate first / re-read |
+|---|---|---|---|
+| llama3.1:8b | 400 | 87.8% | 60.0% / 59.8% |
+| qwen3:8b | 400 | 84.8% | 43.2% / 44.0% |

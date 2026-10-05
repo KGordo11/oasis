@@ -1,0 +1,42 @@
+{
+ "name": "reading_qwen3-8b__mistral-7b_a10",
+ "design": "v2 two-turn (log Part 14 sec. 14.11)",
+ "turn": "read",
+ "round": 900,
+ "model": "mistral:7b",
+ "posts_by": "qwen3:8b",
+ "draw": 0,
+ "agents": 10,
+ "finished_at": "2026-10-04T22:01:45.579575",
+ "git_commit": "6c4862ae7637909e2779a45869f43c7512602afc",
+ "personas_sha256": "ed110626dce4b10f36d43fe6bcd9b3124be163e40b6db41979893afb4d7dc39f",
+ "post_set_sha256": "c747606ecac18c616f1493df4fe5b87c48dc1d3c5da40e3d5cb66dbb4437501e",
+ "prompts_sha256": "5e5ed70540813d3db8bfb4f688895f3a4329f2d0e55b5c55331234497dc6f082",
+ "config": {
+  "temperature": 0.7,
+  "num_ctx": 8192,
+  "think": false,
+  "parallel": 4,
+  "memory": false,
+  "follow_graph": "empty each round",
+  "vote_counts": "hidden",
+  "one_post_per_screen": true,
+  "own_posts_hidden": true,
+  "menu_actions": 27
+ },
+ "ollama_server": {
+  "OLLAMA_FLASH_ATTENTION": "true",
+  "OLLAMA_NUM_PARALLEL": "4",
+  "OLLAMA_CONTEXT_LENGTH": "8192",
+  "OLLAMA_KV_CACHE_TYPE": "",
+  "OLLAMA_KEEP_ALIVE": "24h0m0s",
+  "OLLAMA_MAX_LOADED_MODELS": "0"
+ },
+ "ollama_models": {
+  "mistral:7b": "6577803aa9a036369e481d648a2baebb381ebc6e897f2bb9a766a2aa7bfbc1cf"
+ },
+ "seconds_llm": 233.7,
+ "screens": 81,
+ "unreadable": 0,
+ "posts_written": 0
+}

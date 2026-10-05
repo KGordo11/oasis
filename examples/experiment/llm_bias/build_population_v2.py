@@ -34,11 +34,13 @@ SRC = os.path.join(HERE, "..", "..", "..", "data", "llm_bias", "v2_sources")
 OUT = os.path.join(HERE, "personas_v2.json")
 VALID = os.path.join(SRC, "population_v2_validation.md")
 N, SEED = 100, 20261002
-# LD-21 (recommended 2026-10-02): five everyday, non-political topics that each have thousands of recent (2019-2022)
-# human-written Reddit text posts in HuggingFaceGECLM/REDDIT_submissions, for the human baseline.
-TOPICS = ["personal_finance", "cooking", "gardening", "travel", "fitness"]
-TOPIC_NAMES = {"personal_finance": "Personal finance & money", "cooking": "Cooking & eating cheap and healthy",
-               "gardening": "Gardening & growing plants", "travel": "Travel", "fitness": "Fitness & exercise"}
+# LD-31 (2026-10-04): the five news topics Americans follow most often (Pew Research Center, survey of 9,482 US adults,
+# Mar 10-16 2025): government & politics 62%, science & technology 32%, business & finance 32%, sports 27%,
+# entertainment 19% get news on it extremely often or often.
+TOPICS = ["politics", "science_tech", "business_finance", "sports", "entertainment"]
+TOPIC_NAMES = {"politics": "Politics & government", "science_tech": "Science & technology",
+               "business_finance": "Business & finance", "sports": "Sports",
+               "entertainment": "Entertainment (movies, TV, music)"}
 STANCES = ["HATE", "DISLIKE", "NEUTRAL", "LIKE", "LOVE"]
 REGIONS = {1: "Northeast", 2: "Midwest", 3: "South", 4: "West"}
 

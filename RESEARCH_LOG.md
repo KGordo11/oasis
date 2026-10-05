@@ -13982,3 +13982,72 @@ test.
     OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve > /tmp/ollama_serve.log 2>&1 &
     cd /Users/gordon/research/oasis
     STOP_AT="YYYY-MM-DD HH:MM" nohup caffeinate -i examples/experiment/llm_bias/v2_campaign.sh >> data/llm_bias/v2/campaign.log 2>&1 &
+
+## 14.11 Redesign: the two-turn crossover (Gordon, 2026-10-04) — this replaces §14.5-14.10
+
+Gordon's corrections:
+- **No human posts.** The question is AI bias towards itself, so every post is AI-written.
+- **The baseline is one AI both posting and reacting as the 100 users.**
+- **The cross test is the other AI reacting to those same posts.**
+- **Every OASIS action is available, as many per turn as the user wants, and nothing is forced.**
+
+The human pool, seed bank and §14.5 hybrid feed are dropped; they stay in git as a record.
+
+**One round = two turns, then a wipe** (no memory, no carried-over follows, hidden votes):
+1. **Posting turn.** The poster AI plays all 100 users. Each user opens the app to an empty feed and may do any
+   menu actions. Nobody is told to post. The posts written become that AI's post set.
+2. **Reading turn.** The reader AI plays the same 100 users. Each user sees posts from the set one per screen
+   (never their own) and may do any number of menu actions on each.
+
+Every reader AI reads every poster AI's set: a 3 × 3 table. The baseline (same AI on both sides) runs the same way
+as the cross cells, so inside a column only the reader differs.
+
+**The bias measure, for AIs i and j:**
+
+    (i reading i's posts − j reading i's posts) − (i reading j's posts − j reading j's posts)
+
+The first bracket is i's edge on its own posts; the second removes i simply being more generous. Error ranges come
+from resampling posts and users together.
+
+**Decisions:**
+- **LD-30 Models:** qwen3:8b (Alibaba), llama3.1:8b (Meta), mistral:7b (Mistral AI). All 7-8B, so size is not a
+  second variable.
+- **LD-31 Topics:** the five Americans follow most often (Pew, Mar 2025, n = 9,482):
+  - politics & government 62% (r/politics)
+  - science & technology 32% (r/technology)
+  - business & finance 32% (r/business)
+  - sports 27% (r/sports)
+  - entertainment 19% (r/entertainment)
+
+  The users were rebuilt with these topics (personas SHA `ed110626…`). Politics brings in models' political lean,
+  but the double difference cancels a reader's general attitude to a topic.
+- **LD-32 Answer form:** one form for every AI, with all 27 OASIS user actions; the AI lists as many as it wants.
+  Our code performs each through OASIS's own functions (replay). An action OASIS refuses is recorded as failed.
+- **LD-33:** interview and purchase_product are not offered (researcher-only / needs a shop).
+- **LD-34 Reading format:** one post per screen. Temperature 0.7, the same for all models.
+- **LD-35 Tonight's scale:** each user reads **16 posts from each post set**, in balanced windows: every post is read
+  by 16-17 users per reader AI, and every reader sees exactly the same posts per user. Reading every post costs
+  about 9,500 screens per cell (5-9 h each), which doesn't fit in one night on the laptop. The windows can be topped
+  up later (for example on the GPU machine) without redoing anything.
+- **LD-36 Stage 1b noise floor:** each AI re-reads its own set (4 posts per user) with fresh randomness.
+
+**Smoke test (round 900, 10 users, 543 screens, 0 unreadable):**
+- qwen3:8b users wrote 9 posts, llama3.1:8b 10, **mistral:7b 0**. Mistral's users refreshed, searched or waited
+  ("nothing to interact with yet"): lurker behaviour. Its post-set column is empty unless some of its 100 users
+  post.
+- All three readers follow the stances: upvotes on LOVE topics 40-100%, on HATE topics 0-7%.
+- llama3.1 downvotes (28-30%) and reports (17-20%) far more than the others.
+- Seconds per screen: qwen 2.0, llama 3.4, mistral 2.8.
+
+## 14.12 Night 1 (2026-10-04 22:18 → 08:45 stop): round 1, run by `v2_night.py`
+
+Gordon: "run a sim tonight ... until 9am, try to get all of them evenly".
+
+**Order:**
+1. Posting turns for all three AIs.
+2. Reading pass 1 (8 posts per user, all cells).
+3. Reading pass 2 (to 16 per user, all cells).
+4. Noise-floor re-reads.
+
+Each step is skipped if its estimated time would run past 08:45. Analysis and a commit follow each pass. At the end
+the models are unloaded and Ollama is stopped. The log is in `data/llm_bias/v2/night.log`.

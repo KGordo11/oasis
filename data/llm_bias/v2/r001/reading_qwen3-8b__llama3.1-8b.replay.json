@@ -1,0 +1,16 @@
+{
+ "create_comment|ok": 375,
+ "dislike_comment|ok": 1,
+ "dislike_post|ok": 313,
+ "do_nothing|ok": 34,
+ "follow|ok": 31,
+ "like_post|ok": 435,
+ "refresh|failed": 2,
+ "report_post|ok": 131,
+ "repost|ok": 2,
+ "search_posts|failed": 5,
+ "search_posts|ok": 2,
+ "search_user|failed": 3,
+ "search_user|ok": 29,
+ "unlike_post|failed": 2
+}

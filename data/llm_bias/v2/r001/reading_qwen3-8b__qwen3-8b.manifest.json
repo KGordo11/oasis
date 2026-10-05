@@ -1,16 +1,16 @@
 {
- "name": "posting_mistral-7b",
+ "name": "reading_qwen3-8b__qwen3-8b",
  "design": "v2 two-turn (log Part 14 sec. 14.11)",
- "turn": "post",
+ "turn": "read",
  "round": 1,
- "model": "mistral:7b",
- "posts_by": null,
+ "model": "qwen3:8b",
+ "posts_by": "qwen3:8b",
  "draw": 0,
  "agents": 100,
- "finished_at": "2026-10-04T22:36:01.055251",
+ "finished_at": "2026-10-04T23:03:58.870831",
  "git_commit": "49263547a4a5e0cefcd9fdf590f422b14fe5dba5",
  "personas_sha256": "ed110626dce4b10f36d43fe6bcd9b3124be163e40b6db41979893afb4d7dc39f",
- "post_set_sha256": null,
+ "post_set_sha256": "0d03a54f818c0396f35802b631a5b41b7a460d9419232091ad2f2f22dcea2a60",
  "prompts_sha256": "5e5ed70540813d3db8bfb4f688895f3a4329f2d0e55b5c55331234497dc6f082",
  "config": {
   "temperature": 0.7,
@@ -21,7 +21,7 @@
   "follow_graph": "empty each round",
   "vote_counts": "hidden",
   "one_post_per_screen": true,
-  "max_posts_per_user": "all",
+  "max_posts_per_user": 8,
   "own_posts_hidden": true,
   "menu_actions": 27
  },
@@ -34,10 +34,10 @@
   "OLLAMA_MAX_LOADED_MODELS": "0"
  },
  "ollama_models": {
-  "mistral:7b": "6577803aa9a036369e481d648a2baebb381ebc6e897f2bb9a766a2aa7bfbc1cf"
+  "qwen3:8b": "500a1f067a9f782620b40bee6f7b0c89e17ae61f686b92c24933e4ca4b2b8b41"
  },
  "seconds_llm": 0.0,
- "screens": 100,
+ "screens": 800,
  "unreadable": 0,
  "posts_written": 0
 }

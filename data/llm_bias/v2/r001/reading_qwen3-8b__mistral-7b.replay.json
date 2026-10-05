@@ -1,0 +1,11 @@
+{
+ "create_comment|ok": 335,
+ "dislike_post|ok": 13,
+ "do_nothing|ok": 59,
+ "like_post|ok": 222,
+ "refresh|failed": 101,
+ "report_post|ok": 1,
+ "search_posts|ok": 6,
+ "search_user|ok": 2,
+ "trend|ok": 15
+}

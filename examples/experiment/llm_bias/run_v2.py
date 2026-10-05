@@ -124,6 +124,38 @@ WHAT YOU CAN DO
 {fmt}"""
 
 
+PAGE_SCREEN = """You're scrolling Reddit. These posts are on your screen:
+
+{posts}
+
+WHAT YOU CAN DO (on each post: as many of these as you like, or none)
+{menu}
+
+Do whatever you would really do with each post.
+
+Reply with JSON only -- one entry for EVERY post above, in the same order:
+{{"posts": [{{"post": 1, "actions": [{{"action": "<name from the list>", ...the fields it needs}}], "reason": "<a few words, in your own voice>"}}, ...]}}
+An empty actions list means you do nothing with that post."""
+
+
+def validate_page(obj, n):
+    """A page answer must have one entry per post shown (an empty action list is a real 'nothing')."""
+    if not isinstance(obj, dict) or not isinstance(obj.get("posts"), list):
+        raise ValueError("no posts list")
+    got = {}
+    for k, e in enumerate(obj["posts"]):
+        if not isinstance(e, dict):
+            raise ValueError("bad entry")
+        try:
+            num = int(e.get("post", k + 1))
+        except (TypeError, ValueError):
+            num = k + 1
+        got[num] = validate({"actions": e.get("actions", []), "reason": e.get("reason", "")})
+    if sorted(got) != list(range(1, n + 1)):
+        raise ValueError(f"entries for posts {sorted(got)}, want 1..{n}")
+    return [got[i] for i in range(1, n + 1)]
+
+
 def sha(obj):
     return hashlib.sha256(json.dumps(obj, sort_keys=True).encode()).hexdigest()
 
@@ -229,7 +261,7 @@ def run(a):
     subs = "\n".join(f"- {s} ({n})" for s, n in TOPICS.values())
     if a.turn == "post":
         posts = []
-        jobs = [(p, None, 0) for p in people if (p["id"], None) not in done]
+        jobs = [(p, [None], 0) for p in people if (p["id"], None) not in done]
     else:
         posts, src = post_set(a.round, a.posts_by, a.agents)
         jobs = []
@@ -246,37 +278,60 @@ def run(a):
                     if q["author_id"] != p["id"]:  # never your own post
                         feed.append(q)
             else:
-                feed = [q for q in ring if q["author_id"] != p["id"]]  # never your own post
-                random.Random(f"{SEED}|r{a.round}|{a.posts_by}|{p['id']}|feed").shuffle(feed)
-            jobs += [(p, q, i) for i, q in enumerate(feed) if (p["id"], q["key"]) not in done]
+                # every post (LD-37): the ring, started at this user's own evenly spaced point, so each post sits at
+                # every place in the scroll (and on a page) about equally often across users
+                start = (p["id"] * len(ring)) // 100
+                feed = [q for q in ring[start:] + ring[:start] if q["author_id"] != p["id"]]  # never your own post
+            if a.page_size > 1:
+                for i in range(0, len(feed), a.page_size):
+                    page = feed[i: i + a.page_size]
+                    if any((p["id"], q["key"]) not in done for q in page):
+                        jobs.append((p, page, i))
+            else:
+                jobs += [(p, [q], i) for i, q in enumerate(feed) if (p["id"], q["key"]) not in done]
     log(f"{a.turn} round {a.round}: {a.model} plays {len(people)} users"
         + (f" reading {len(posts)} posts by {a.posts_by}" if a.turn == "read" else "") + f"; {len(jobs)} screens to do")
 
-    def screen(p, q, pos):
-        if q is None:
-            user = POST_SCREEN.format(subs=subs, menu=MENU, fmt=FORMAT)
-            parts = (SEED, a.round, "post", p["id"])
-        else:
-            sub, tname = TOPICS.get(q["topic"], ("r/" + str(q["topic"]), str(q["topic"])))
-            user = READ_SCREEN.format(sub=sub, topic_name=tname, author=q["author"], title=q["title"], body=q["body"],
-                                      menu=MENU, fmt=FORMAT)
-            parts = (SEED, a.round, "read", a.posts_by, p["id"], q["key"])
-        seed = llm.stable_seed(*parts, a.draw) if a.draw else llm.stable_seed(*parts)
-        obj, meta = llm.chat_json(a.model, SYSTEM.format(persona=p["persona"]), user, seed=seed,
-                                  temperature=a.temperature, num_predict=1500 if q is None else 800,
-                                  validate=validate, retries=2)
-        acts = obj["actions"] if obj else []
+    def row(p, q, pos, act, meta, n, k=0):
         r = {"round": a.round, "turn": a.turn, "model": a.model, "posts_by": a.posts_by, "draw": a.draw,
              "user_id": p["id"], "username": p["username"], "post_key": q["key"] if q else None,
-             "pos": pos, "outcome": "chose" if obj else ("cut_off" if meta["done_reason"] == "length" else "unreadable"),
-             "actions": acts, "reason": obj["reason"] if obj else None, "n_actions": len(acts),
-             "attempts": meta["attempts"], "errors": meta["errors"][-2:], "latency_s": round(meta["latency_s"], 2),
-             "prompt_tokens": meta["prompt_tokens"], "eval_tokens": meta["eval_tokens"],
-             "thinking_chars": meta["thinking_chars"], "truncation_risk": meta["truncation_risk"], "raw": meta.get("raw")}
+             "pos": pos, "page_size": n, "page_pos": k,
+             "outcome": "chose" if act else ("cut_off" if meta["done_reason"] == "length" else "unreadable"),
+             "actions": act["actions"] if act else [], "reason": act["reason"] if act else None,
+             "n_actions": len(act["actions"]) if act else 0, "attempts": meta["attempts"], "errors": meta["errors"][-2:],
+             "latency_s": round(meta["latency_s"] / n, 2), "call_latency_s": round(meta["latency_s"], 2),
+             "prompt_tokens": meta["prompt_tokens"], "eval_tokens": meta["eval_tokens"], "call_rows": n,
+             "thinking_chars": meta["thinking_chars"], "truncation_risk": meta["truncation_risk"],
+             "raw": meta.get("raw") if k == 0 else None}  # a page's raw reply is stored once, on its first row
         if q:
             r.update({"topic": q["topic"], "stance": p["stances"].get(q["topic"]), "author_id": q["author_id"],
                       "own_ai": int(a.model == a.posts_by)})
         return r
+
+    def block(q, k):
+        sub, tname = TOPICS.get(q["topic"], ("r/" + str(q["topic"]), str(q["topic"])))
+        return f"[Post {k}] in {sub} ({tname}), posted by u/{q['author']}:\nTitle: {q['title']}\n{q['body']}"
+
+    def screen(p, page, pos):
+        q = page[0]
+        system = SYSTEM.format(persona=p["persona"])
+        if q is None:
+            user, parts, val, budget = POST_SCREEN.format(subs=subs, menu=MENU, fmt=FORMAT), (SEED, a.round, "post", p["id"]), validate, 1500
+        elif len(page) == 1:
+            sub, tname = TOPICS.get(q["topic"], ("r/" + str(q["topic"]), str(q["topic"])))
+            user = READ_SCREEN.format(sub=sub, topic_name=tname, author=q["author"], title=q["title"], body=q["body"],
+                                      menu=MENU, fmt=FORMAT)
+            parts, val, budget = (SEED, a.round, "read", a.posts_by, p["id"], q["key"]), validate, 800
+        else:
+            user = PAGE_SCREEN.format(posts="\n\n".join(block(x, k + 1) for k, x in enumerate(page)), menu=MENU)
+            parts = (SEED, a.round, "read", a.posts_by, p["id"], q["key"], "page", len(page))
+            val, budget = (lambda o: validate_page(o, len(page))), 200 + 160 * len(page)
+        seed = llm.stable_seed(*parts, a.draw) if a.draw else llm.stable_seed(*parts)
+        obj, meta = llm.chat_json(a.model, system, user, seed=seed, temperature=a.temperature, num_predict=budget,
+                                  validate=val, retries=2)
+        if len(page) == 1:
+            return [row(p, q, pos, obj, meta, 1)]
+        return [row(p, x, pos + k, obj[k] if obj else None, meta, len(page), k) for k, x in enumerate(page)]
 
     t0 = time.time()
     if jobs:
@@ -284,10 +339,12 @@ def run(a):
         pool = ThreadPoolExecutor(a.parallel)
         c, n = Counter(), 0
         with open(out, "a") as f:
-            for r in pool.map(lambda j: screen(*j), jobs):
-                f.write(json.dumps(r) + "\n"); f.flush()
-                rows.append(r); n += 1
-                c.update(x["action"] for x in r["actions"]) if r["actions"] else c.update(["(nothing)" if r["outcome"] == "chose" else r["outcome"]])
+            for rs in pool.map(lambda j: screen(*j), jobs):
+                for r in rs:
+                    f.write(json.dumps(r) + "\n")
+                    rows.append(r)
+                    c.update(x["action"] for x in r["actions"]) if r["actions"] else c.update(["(nothing)" if r["outcome"] == "chose" else r["outcome"]])
+                f.flush(); n += 1
                 if n % a.log_every == 0 or n == len(jobs):
                     el = time.time() - t0
                     log(f"  {n}/{len(jobs)} ({el / n:.2f} s each, ETA {(len(jobs) - n) * el / n / 60:.0f} min) "
@@ -299,10 +356,10 @@ def run(a):
            "model": a.model, "posts_by": a.posts_by, "draw": a.draw, "agents": len(people),
            "finished_at": datetime.now().isoformat(), "git_commit": git_commit(), "personas_sha256": PINNED_PERSONAS,
            "post_set_sha256": sha(posts) if posts else None,
-           "prompts_sha256": sha([SYSTEM, POST_SCREEN, READ_SCREEN, MENU, FORMAT]),
+           "prompts_sha256": sha([SYSTEM, POST_SCREEN, READ_SCREEN, MENU, FORMAT] + ([PAGE_SCREEN] if a.page_size > 1 else [])),
            "config": {"temperature": a.temperature, "num_ctx": llm.NUM_CTX, "think": False, "parallel": a.parallel,
                       "memory": False, "follow_graph": "empty each round", "vote_counts": "hidden",
-                      "one_post_per_screen": True, "max_posts_per_user": a.max_posts or "all", "own_posts_hidden": True, "menu_actions": len(ACTION_NAMES)},
+                      "posts_per_screen": a.page_size, "max_posts_per_user": a.max_posts or "all", "own_posts_hidden": True, "menu_actions": len(ACTION_NAMES)},
            "ollama_server": llm.server_config(), "ollama_models": llm.model_digests([a.model]),
            "seconds_llm": round(wall, 1), "screens": len(rows),
            "unreadable": sum(r["outcome"] != "chose" for r in rows),
@@ -385,6 +442,7 @@ if __name__ == "__main__":
     ap.add_argument("--posts-by", help="read: which AI's post set to read")
     ap.add_argument("--draw", type=int, default=0, help="0 = the standard draw; 1, 2.. = a re-run with fresh randomness (stage 1b)")
     ap.add_argument("--agents", type=int, default=100)
+    ap.add_argument("--page-size", type=int, default=1, help="read: posts shown per screen (each still gets its own reaction)")
     ap.add_argument("--max-posts", type=int, default=0, help="read: posts each user reads from the set (0 = all)")
     ap.add_argument("--parallel", type=int, default=4)
     ap.add_argument("--temperature", type=float, default=0.7)

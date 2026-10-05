@@ -14108,3 +14108,46 @@ mistral 52-55%. On HATE topics: 4-14%.
 
 **Cosmetic, to fix:** Table 1 lists subreddit names as the AI typed them ("politics" vs "r/politics"). The analysis
 should group them by topic.
+
+## 14.14 2026-10-05 morning: replacing mistral, and "every user reacts to every post" (stopped 10:30, laptop needed)
+
+Gordon: (1) replace mistral; (2) every user should read and react to every post, as evenly as possible, however
+many are on a screen at once, as long as reactions stay authentic.
+
+**Page mode tested (`--page-size`) on the same 10 users and 9 posts, qwen3:8b reading:**
+
+| Posts per screen | Time | Upvote | Downvote | Comment | Follow / report |
+|---|---|---|---|---|---|
+| 1 (night 1 format) | 2.6 min | 54% | 21% | **27%** | 1% / 1% |
+| 3 | 1.9 min | 52% | 19% | **5%** | 0% / 9% |
+| 10 | 1.2 min | 51% | 32% | **0%** | 0% / 0% |
+
+Votes hold, but **comments, follows and reports collapse when several posts share a screen.** That fails
+"authentic", so **one post per screen stays (LD-37)**. Code is kept (`--page-size`, default 1); the full-reading
+order uses the same evenly spaced ring as night 1, so every post sits at every place in the scroll about equally
+often.
+
+**Cost of every user reading every post, one per screen, on this laptop:**
+- About 297 posts per user per round (3 sets of about 100), so about 29,700 screens per reader AI and about 89,000
+  per round.
+- At measured speeds that is **about 2.5-3 days per round.** It needs either continuous laptop time or the GPU
+  machine.
+
+**Candidate replacements for mistral** (test round 900, 10 users; posting turn, then reading qwen's 9 posts):
+
+| Model | Users who posted | Upvote % LOVE / LIKE / NEUTRAL / DISLIKE / HATE | Comment | Did nothing | s/screen |
+|---|---|---|---|---|---|
+| qwen3:8b (in) | 9/10 | 100 / 95 / 52 / 0 / 7 | 27% | 0% | 1.9 |
+| llama3.1:8b (in) | 10/10 | 100 / 100 / 90 / 0 / 0 | 51% | 0% | 3.2 |
+| mistral:7b (out) | 0/10 | 86 / 74 / 38 / 8 / 0 | 41% | 14% | 2.9 |
+| **gemma3:12b (Google)** | **3/10** | **100 / 95 / 86 / 0 / 0** | 4% | 0% | 3.3 |
+| falcon3:7b (TII) | 3/10 | 100 / 100 / 90 / **58 / 60** | 9% | 12% | 3.4 |
+| granite3.3:8b (IBM) | 0/10 | 21 / 11 / 0 / 0 / 0 | 19% | 75% | 3.0 |
+| olmo2:7b (AI2) | 0/10 | 0 / 0 / 0 / 0 / 0 | 0% | 100% | 1.8 |
+
+command-r7b (Cohere) was downloaded but not tested (the session was stopped).
+
+**Reading:** the only candidates whose users post AND follow the personas are **gemma3:12b** (Google, the family the
+professor named; 12B, so a little bigger than the others) and falcon3:7b. falcon upvotes about 60% even on HATE
+topics, so it ignores dislikes. **Recommendation: gemma3:12b.** Next: decide; test command-r7b if wanted; then run
+gemma3:12b's posting turn for round 1 and its reading cells.

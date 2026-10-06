@@ -14229,3 +14229,17 @@ numbered **101 and up**, so they never mix with the laptop's rounds (1 = night 1
 - Stop only your own processes: `pkill -u $USER -f "ollama serve"`.
 - Expect its one-request speed to be similar to the laptop's (memory bandwidth about 273 vs 400 GB/s); the gain is
   in parallel throughput. The smoke test measures it.
+
+## 14.18 UK CS department guide, checked 2026-10-05 (ukcs.atlassian.net, space ukycsud)
+
+- **Login:** LinkBlue ID without @uky.edu, plus the LinkBlue password.
+- **Off campus:** GlobalProtect VPN, portal ra.uky.edu; ITS must approve VPN access. **On campus: eduroam only**
+  (UK-Guest and UK-Devices cannot reach internal machines).
+- On 2026-10-05 honda.csr.uky.edu was reachable from the laptop on port 22 with no VPN. Key login is not set up yet
+  (password only).
+- **CSR home directories** are `/homes/<LinkBlueID>` on shared NFS servers (sparrow / amos, 83-98% full), with a
+  **quota of 100 GB (soft 80 GB)**. The guide says not to keep large datasets in home. Our footprint is about 23 GB
+  (Ollama about 4, code 0.5, models 18): within quota. Move the models to a local or lab disk if one exists.
+- Python prerequisites are preinstalled on CSR machines. Our runner needs only standard-library Python 3.9+.
+- On "REMOTE HOST IDENTIFICATION HAS CHANGED" (machines get rebuilt): `ssh-keygen -R honda.csr.uky.edu`, then
+  reconnect.

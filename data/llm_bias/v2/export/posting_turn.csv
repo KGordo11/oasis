@@ -1,0 +1,301 @@
+round,user_id,username,ai_playing_users,outcome,posts_written,actions,reason,seconds
+1,0,andrewh47,llama3.1:8b,chose,1,"create_post, search_user",Get ready for some sports talk and catch up with a friend,17.75
+1,1,robertb78,llama3.1:8b,chose,1,"create_post, send_to_group",Gotta get this off my chest.,23.71
+1,2,nicholast63,llama3.1:8b,chose,1,"create_post, follow",Time to share some tech enthusiasm with fellow Redditors,19.51
+1,3,bryanm85,llama3.1:8b,chose,1,create_post,Got to share my latest project with the community,15.9
+1,4,erinw47,llama3.1:8b,chose,0,do_nothing,,9.85
+1,5,jeremyb24,llama3.1:8b,chose,1,"create_post, search_user",Time to make some noise and get informed!,16.84
+1,6,jennifero59,llama3.1:8b,chose,0,"search_user, refresh",I'm bored and want to see what's going on around here,10.81
+1,7,malindap46,llama3.1:8b,chose,1,create_post,time for me to share my two cents,16.63
+1,8,christab77,llama3.1:8b,chose,1,create_post,Got to share the latest tech news,14.71
+1,9,davidg75,llama3.1:8b,chose,1,"create_post, search_user",checking out some new posts,14.47
+1,10,vernar74,llama3.1:8b,chose,1,create_post,time to share my fave TV show,14.99
+1,11,laural21,llama3.1:8b,chose,1,"create_post, search_user",Getting started with a new post and thinking about old friends,15.69
+1,12,patriciac15,llama3.1:8b,chose,1,create_post,Got to share my thoughts on this!,17.23
+1,13,christophers90,llama3.1:8b,chose,1,create_post,"Time to post something useful, unlike most Reddit posts",14.64
+1,14,meredithm89,llama3.1:8b,chose,1,create_post,Share my thoughts on politics,14.41
+1,15,heatherm33,llama3.1:8b,chose,1,"create_post, search_user",Time to think about the day's work and connect with old friends,21.37
+1,16,annab87,llama3.1:8b,chose,1,"create_post, search_user",Got to share something exciting and see what's going on in the Reddit community!,17.22
+1,17,brianak85,llama3.1:8b,chose,0,search_user,want to see what's going on in my community,8.67
+1,18,shareet26,llama3.1:8b,chose,1,"create_post, search_user",Time to get this conversation started!,19.04
+1,19,ivanw64,llama3.1:8b,chose,1,"create_post, create_comment",Time to share some cool science news with my fellow Redditors!,22.47
+1,20,sarab15,llama3.1:8b,chose,1,create_post,Need to vent about my day,19.4
+1,21,sharons38,llama3.1:8b,chose,1,create_post,Gotta share the excitement!,13.19
+1,22,tinag23,llama3.1:8b,chose,1,"create_post, search_user",need some entertainment news!,15.21
+1,23,johnw17,llama3.1:8b,chose,1,create_post,Time to share my thoughts on something interesting,14.34
+1,24,maryl53,llama3.1:8b,chose,1,create_post,Time to get something off my chest,14.54
+1,25,joshuam26,llama3.1:8b,chose,1,create_post,Just had to vent about something,14.08
+1,26,philips21,llama3.1:8b,chose,1,create_post,Want to share my success with others,15.61
+1,27,meganc93,llama3.1:8b,chose,1,"create_post, search_posts",I'm passionate about politics and want to share my thoughts.,19.37
+1,28,mattiey61,llama3.1:8b,chose,1,create_post,Gotta get my politics out there!,13.12
+1,29,tinam90,llama3.1:8b,chose,1,create_post,Gotta share my thoughts on the latest film,13.16
+1,30,dewayneb52,llama3.1:8b,chose,1,"create_post, create_comment",just gotta get something off my chest,20.1
+1,31,williamm73,llama3.1:8b,chose,1,"create_post, follow",Time to share my thoughts on the latest Star Wars movie and connect with fellow fans!,25.07
+1,32,alanw69,llama3.1:8b,chose,1,create_post,Time to share my enthusiasm for tech,13.75
+1,33,johnnyc79,llama3.1:8b,chose,1,create_post,share my excitement about the new job,13.69
+1,34,dannyw49,llama3.1:8b,chose,1,create_post,"Gotta post about sports, can't let others know how excited I am!",14.4
+1,35,timothyt74,llama3.1:8b,chose,1,"create_post, search_user",Getting this feed started with some tech talk,18.75
+1,36,eunices91,llama3.1:8b,chose,1,create_post,Time for some movie talk!,14.7
+1,37,frankp71,llama3.1:8b,chose,1,create_post,Post my neutral take on politics,14.63
+1,38,melissam65,llama3.1:8b,chose,1,"search_user, create_post","Just curious about my neighbors, might want to share some thoughts",18.2
+1,39,brianw36,llama3.1:8b,chose,1,"create_post, follow",time to share my thoughts and connect with like-minded folks,15.62
+1,40,michaels42,llama3.1:8b,chose,1,create_post,Gotta share my success story with my fellow entrepreneurs,16.44
+1,41,johnb47,llama3.1:8b,chose,1,create_post,Time to get back into the game,14.92
+1,42,brittanij74,llama3.1:8b,chose,1,create_post,Got to share my opinion on this one thing that really matters to me.,20.18
+1,43,walterl22,llama3.1:8b,chose,1,"search_user, create_post",Get some info on politics and share something science-y,14.5
+1,44,troyl68,llama3.1:8b,chose,1,create_post,Gotta share my enthusiasm for the Cubs!,12.57
+1,45,charlesh55,llama3.1:8b,chose,1,"create_post, search_user",Getting ready for work and need to catch up on business news,15.74
+1,46,magaretr95,llama3.1:8b,chose,1,create_post,Got to share my fave with fellow Redditors,18.65
+1,47,jacobw37,llama3.1:8b,chose,1,create_post,might as well start the day with some gossip,13.9
+1,48,ryang78,llama3.1:8b,chose,1,create_post,Time to share some thoughts on business and finance,12.82
+1,49,michaelp62,llama3.1:8b,chose,1,create_post,Got to share this awesome news!,16.76
+1,50,staceyc44,llama3.1:8b,chose,1,create_post,Gotta share my success with the Reddit community,17.51
+1,51,tristanl74,llama3.1:8b,chose,1,create_post,Time to share some knowledge,12.76
+1,52,virginiak44,llama3.1:8b,chose,1,"create_post, search_user",Time to stir up some trouble on Reddit!,15.12
+1,53,gregoryb55,llama3.1:8b,chose,1,"create_post, follow",Time to share some cool tech news and follow a new user,17.51
+1,54,davidw39,llama3.1:8b,chose,1,"create_post, follow",Time to talk baseball,14.08
+1,55,rupertd12,llama3.1:8b,chose,1,"create_post, follow",time to share some tech love,14.75
+1,56,lisas44,llama3.1:8b,chose,1,create_post,Gotta express my frustration,28.94
+1,57,brianj40,llama3.1:8b,chose,1,create_post,"Time to share my expertise, I suppose.",13.42
+1,58,helens42,llama3.1:8b,chose,1,"create_post, follow",Time to stir up some trouble!,15.18
+1,59,bettinag19,llama3.1:8b,chose,1,create_post,Got excited about a new sci-fi article I just read,14.13
+1,60,paulh35,llama3.1:8b,chose,1,"create_post, search_posts",Time to catch up on some sports news and share my enthusiasm,16.2
+1,61,johnb28,llama3.1:8b,chose,1,create_post,need to get some feedback from tech enthusiasts,15.01
+1,62,robertaw58,llama3.1:8b,chose,1,"create_post, follow","Got my daily dose of politics in here, gotta stay informed!",19.51
+1,63,maritzaa16,llama3.1:8b,chose,1,create_post,share my enthusiasm for sports,15.95
+1,64,edwardc83,llama3.1:8b,chose,0,do_nothing,,6.92
+1,65,davidj22,llama3.1:8b,chose,1,create_post,Gotta share my excitement about the markets,14.71
+1,66,brenday15,llama3.1:8b,chose,1,"create_post, like_post, refresh",Feelin' sports withdrawal!,17.72
+1,67,jimmiea58,llama3.1:8b,chose,1,create_post,just trying to make a buck,13.81
+1,68,jasperh92,llama3.1:8b,chose,1,create_post,Time to share my sports enthusiasm with the community!,16.06
+1,69,davidd53,llama3.1:8b,chose,1,"create_post, follow","Getting ready for a long day on the construction site, might as well catch up with some politics",16.31
+1,70,janets25,llama3.1:8b,chose,1,create_post,Time to share my good news with the business community!,17.45
+1,71,christinaq89,llama3.1:8b,chose,1,"create_post, search_user",time to share my thoughts and connect with fellow fans,18.83
+1,72,howardm68,llama3.1:8b,chose,1,create_post,time to share my thoughts,11.24
+1,73,jasonc37,llama3.1:8b,chose,1,create_post,Gotta share my thoughts,14.58
+1,74,saram95,llama3.1:8b,chose,1,"create_post, search_posts",Gotta share my opinions and catch up on the news!,19.78
+1,75,feliciaa51,llama3.1:8b,chose,1,create_post,I love sports and want to share my enthusiasm with others,12.82
+1,76,marinas10,llama3.1:8b,chose,1,create_post,Gotta share my excitement with the community,14.12
+1,77,ryanr18,llama3.1:8b,chose,1,"create_post, follow",Just want to share my thoughts and follow some other Redditors,19.98
+1,78,marthap24,llama3.1:8b,chose,1,create_post,Got to spread the word about politics!,19.21
+1,79,marlenec29,llama3.1:8b,chose,1,create_post,Share my excitement with the tech community,16.85
+1,80,chantalm79,llama3.1:8b,chose,1,create_post,Gotta get my opinion out there,16.67
+1,81,walterc73,llama3.1:8b,chose,1,create_post,Time to share my latest tech project,14.95
+1,82,edithk82,llama3.1:8b,chose,1,"create_post, search_user",just gotta get some stuff off my chest,15.77
+1,83,ellenw80,llama3.1:8b,chose,1,create_post,Had to get something off my chest,15.5
+1,84,jamesv91,llama3.1:8b,chose,1,"create_post, like_post, create_comment",Need to get the conversation started about sports!,20.97
+1,85,vickis15,llama3.1:8b,chose,1,create_post,Time to get back into the game,13.4
+1,86,joannw14,llama3.1:8b,chose,1,"create_post, search_user",Just gotta get my opinions out there!,15.81
+1,87,danielm67,llama3.1:8b,chose,1,"create_post, follow",Time to share some tech enthusiasm,14.28
+1,88,frankm26,llama3.1:8b,chose,1,create_post,Want to share my enthusiasm for this new initiative,18.85
+1,89,margaretl34,llama3.1:8b,chose,1,"create_post, search_user",Getting started with my morning routine and feeling inspired to share my thoughts,14.87
+1,90,akikot28,llama3.1:8b,chose,1,"create_post, follow",Get this conversation started!,19.15
+1,91,gertrudeo89,llama3.1:8b,chose,1,create_post,Got to share the excitement with fellow politicos,16.8
+1,92,angelas25,llama3.1:8b,chose,1,"create_post, follow",Time to get the conversation started on something positive!,18.11
+1,93,elizabethd44,llama3.1:8b,chose,1,"create_post, search_user","Time to make some noise on Reddit, and see who's behind the scenes.",19.7
+1,94,danet63,llama3.1:8b,chose,1,create_post,Time to share my expertise,14.71
+1,95,jacko37,llama3.1:8b,chose,1,create_post,Time to share some cool news with my fellow tech enthusiasts,16.58
+1,96,petral67,llama3.1:8b,chose,1,create_post,Time to share some science-y stuff!,13.88
+1,97,josephl80,llama3.1:8b,chose,1,create_post,Got to share my thoughts on politics,13.41
+1,98,randallc16,llama3.1:8b,chose,1,create_post,time to share my expertise,11.07
+1,99,stellas93,llama3.1:8b,chose,1,create_post,"Got to express myself, finally!",8.52
+1,0,andrewh47,mistral:7b,chose,0,search_posts,I'm interested in staying updated on the latest technology developments.,10.37
+1,1,robertb78,mistral:7b,chose,0,(nothing),"I haven't seen anything interesting or pressing on my feed yet, so I'll take a moment to refresh and see if there's anything new.",12.32
+1,2,nicholast63,mistral:7b,chose,0,search_posts,I'm interested in what's happening politically in my home state.,12.32
+1,3,bryanm85,mistral:7b,chose,0,search_posts,I want to catch up on the latest tech news.,10.21
+1,4,erinw47,mistral:7b,chose,0,(nothing),"No posts on my screen to interact with, I'll wait for something interesting to appear.",10.9
+1,5,jeremyb24,mistral:7b,chose,0,search_posts,I want to see what's happening in the political world.,15.77
+1,6,jennifero59,mistral:7b,chose,0,(nothing),Just checking out my feed to see what's new.,7.29
+1,7,malindap46,mistral:7b,chose,0,refresh,I want to see if there's anything new on my feed.,11.58
+1,8,christab77,mistral:7b,chose,0,(nothing),"Since there are no posts on my screen yet, I'll wait for something interesting to come up before taking any action.",10.29
+1,9,davidg75,mistral:7b,chose,0,(nothing),"Since there are no posts on my screen yet, I'll take a moment to refresh my feed to see if anything interesting catches my eye.",11.25
+1,10,vernar74,mistral:7b,chose,0,search_posts,I want to see if there's any interesting entertainment posts.,10.73
+1,11,laural21,mistral:7b,chose,0,(nothing),"There's nothing to interact with on my feed at the moment, so I'll just refresh it to see if anything new pops up.",10.73
+1,12,patriciac15,mistral:7b,chose,0,(nothing),There's nothing new on my feed to interact with yet.,9.21
+1,13,christophers90,mistral:7b,chose,0,refresh,Checking if there's anything new on my feed,9.61
+1,14,meredithm89,mistral:7b,chose,0,search_posts,"As a person interested in politics, I'd like to see what's new and interesting on the topic.",12.73
+1,15,heatherm33,mistral:7b,chose,0,(nothing),"There's nothing interesting or relevant to interact with on my feed right now, so I'll refresh and see if anything catches my eye.",9.02
+1,16,annab87,mistral:7b,chose,0,search_posts,I love technology and want to see if there's anything interesting to read or discuss.,11.02
+1,17,brianak85,mistral:7b,chose,0,(nothing),A fresh start to the day on Reddit. Let's see what's trending first.,8.08
+1,18,shareet26,mistral:7b,chose,0,search_posts,I'd like to stay updated on the current political happenings.,10.03
+1,19,ivanw64,mistral:7b,chose,0,(nothing),"Since there are no posts on my screen yet and I don't have a specific interest in any topic at the moment, I'll just refresh my feed to see if something interesting appears.",14.4
+1,20,sarab15,mistral:7b,chose,0,trend,I'm checking out what's trending today.,5.72
+1,21,sharons38,mistral:7b,chose,0,(nothing),There's nothing new to interact with on my feed right now. Let's wait for some interesting content.,7.06
+1,22,tinag23,mistral:7b,chose,0,search_posts,I want to see if there are any new posts about the latest news.,13.32
+1,23,johnw17,mistral:7b,chose,0,refresh,Checking to see if any new posts have appeared since I last refreshed.,10.55
+1,24,maryl53,mistral:7b,chose,0,trend,I want to see what's popular on Reddit today.,7.86
+1,25,joshuam26,mistral:7b,chose,0,(nothing),"There's nothing interesting on my feed yet, I'll wait for some posts to appear.",7.47
+1,26,philips21,mistral:7b,chose,0,(nothing),"There's nothing interesting to interact with on an empty feed, I'll just refresh my feed to see if anything catches my attention.",9.82
+1,27,meganc93,mistral:7b,chose,0,search_posts,I'm interested in staying updated on local political matters.,10.44
+1,28,mattiey61,mistral:7b,chose,0,search_posts,I like to stay updated on my local politics.,9.22
+1,29,tinam90,mistral:7b,chose,0,(nothing),"There's nothing interesting or relevant on my feed at the moment, so I decide to do nothing and wait for new posts.",9.62
+1,30,dewayneb52,mistral:7b,chose,0,(nothing),The feed is empty so I'll refresh my feed to see if anything new has been posted since.,9.2
+1,31,williamm73,mistral:7b,chose,0,(nothing),"As a 65-year-old man who lives in Pennsylvania with a graduate degree and retired, I don't feel like interacting on Reddit right now. I prefer to take some time to relax and enjoy my retirement.",14.32
+1,32,alanw69,mistral:7b,chose,0,search_posts,Staying updated with the latest advancements in technology is always a pleasure.,10.55
+1,33,johnnyc79,mistral:7b,chose,0,refresh,Checking if there's anything new on my feed before posting or commenting.,7.59
+1,34,dannyw49,mistral:7b,chose,0,(nothing),"There's nothing interesting on my feed right now, let's check out what's trending.",9.29
+1,35,timothyt74,mistral:7b,chose,0,(nothing),"I'm just checking my feed for now, no need to post or comment anything immediately.",9.13
+1,36,eunices91,mistral:7b,chose,0,search_posts,Keeping up-to-date with current events.,9.61
+1,37,frankp71,mistral:7b,chose,0,(nothing),There's nothing interesting or worth commenting on my empty feed at the moment.,7.26
+1,38,melissam65,mistral:7b,chose,0,(nothing),"As Melissam65, a retired woman living in a rural area of South Dakota with a low openness and extraversion score, I don't feel inclined to engage too much on Reddit today. I think I'll just take a moment to refresh my feed and see if there's anything interesting that catches my eye.",17.75
+1,39,brianw36,mistral:7b,chose,0,(nothing),There's nothing interesting or relevant on my feed right now. Let's wait for some new posts.,7.49
+1,40,michaels42,mistral:7b,chose,0,(nothing),"Nothing new on the feed to interact with yet, I'll just enjoy browsing for a bit.",9.26
+1,41,johnb47,mistral:7b,chose,0,(nothing),The feed is empty and there's nothing to interact with yet.,7.03
+1,42,brittanij74,mistral:7b,chose,0,search_posts,"Since I'm interested in politics and there's nothing new on my feed yet, I'll search for some political posts.",12.63
+1,43,walterl22,mistral:7b,chose,0,(nothing),"A fresh start on a quiet feed, let's see what comes up as the day progresses.",7.61
+1,44,troyl68,mistral:7b,chose,0,(nothing),"Since there's nothing on my screen and I don't like politics, I will refresh my feed to see if anything interesting in the areas of science & technology or sports pops up.",10.6
+1,45,charlesh55,mistral:7b,chose,0,(nothing),"Nothing new or interesting on my feed to interact with, I'll just refresh for now.",8.66
+1,46,magaretr95,mistral:7b,chose,0,search_posts,I want to see if there are any new entertainment posts I might be interested in.,10.1
+1,47,jacobw37,mistral:7b,chose,0,(nothing),"There's nothing interesting or thought-provoking on my feed at the moment, so I'll just take a minute to refresh and see if something catches my attention.",10.25
+1,48,ryang78,mistral:7b,chose,0,(nothing),"As a 72-year-old retired man with low conscientiousness and high neuroticism, I find myself less inclined to engage in active discussions on Reddit at this moment. I prefer to passively consume content for now.",12.93
+1,49,michaelp62,mistral:7b,chose,0,(nothing),I'm currently not interested in anything on my feed. Let's see if something interesting pops up.,7.61
+1,50,staceyc44,mistral:7b,chose,0,(nothing),There's no post or comment on my screen to interact with yet. Let's wait for something interesting to pop up.,7.91
+1,51,tristanl74,mistral:7b,chose,0,(nothing),"There's nothing interesting on my feed right now, let's wait for some posts to appear.",9.26
+1,52,virginiak44,mistral:7b,chose,0,search_posts,I'm interested in staying informed about local issues.,10.19
+1,53,gregoryb55,mistral:7b,chose,0,search_posts,I want to catch up on the latest updates across various topics.,11.5
+1,54,davidw39,mistral:7b,chose,0,search_posts,I want to stay updated on the latest political news.,11.38
+1,55,rupertd12,mistral:7b,chose,0,(nothing),Nothing interesting to interact with on an empty feed yet.,5.14
+1,56,lisas44,mistral:7b,chose,0,refresh,Checking if there's anything new on my feed.,9.02
+1,57,brianj40,mistral:7b,chose,0,(nothing),"There's nothing interesting to engage with on my feed at the moment, let's give it a refresh before considering any actions.",9.55
+1,58,helens42,mistral:7b,chose,0,trend,I want to see what's trending today.,7.31
+1,59,bettinag19,mistral:7b,chose,0,(nothing),It's early and I don't feel like diving into any heated political discussions or entertainment nonsense right now. I'll wait for some interesting technology posts to pop up.,13.75
+1,60,paulh35,mistral:7b,chose,0,(nothing),There's nothing to interact with on an empty feed.,3.43
+1,61,johnb28,mistral:7b,chose,0,(nothing),Nothing interesting to see or interact with on my feed right now.,8.66
+1,62,robertaw58,mistral:7b,chose,0,search_posts,I want to see what's being discussed in politics today.,11.45
+1,63,maritzaa16,mistral:7b,chose,0,(nothing),"There's nothing on my feed to interact with yet. I prefer not to engage with politics or business & finance content, but since my feed is empty, I'll wait for some interesting posts about science & technology or sports to appear.",14.7
+1,64,edwardc83,mistral:7b,chose,0,(nothing),"Since my feed is empty and I'm currently retired, I don't have anything specific to engage with at the moment. I'll just sit back and enjoy the peace of my rural Georgia home.",12.48
+1,65,davidj22,mistral:7b,chose,0,refresh,Starting off by refreshing my feed to check for new posts,10.37
+1,66,brenday15,mistral:7b,chose,0,(nothing),The feed is empty and there's nothing to interact with yet.,5.38
+1,67,jimmiea58,mistral:7b,chose,0,(nothing),There's nothing to interact with on an empty feed. I'll just wait for new posts.,10.91
+1,68,jasperh92,mistral:7b,chose,0,(nothing),There's nothing to interact with yet on my feed.,6.78
+1,69,davidd53,mistral:7b,chose,0,search_posts,Want to stay updated on local politics.,9.45
+1,70,janets25,mistral:7b,chose,0,(nothing),"There's no post or comment on my screen to interact with, so I'll just refresh my feed for now.",9.32
+1,71,christinaq89,mistral:7b,chose,0,(nothing),There's nothing interesting on my feed to interact with yet.,8.57
+1,72,howardm68,mistral:7b,chose,0,(nothing),"I'm just taking a moment to browse and see what's new, since there are no posts on my feed yet.",9.52
+1,73,jasonc37,mistral:7b,chose,0,(nothing),Nothing interesting or urgent to interact with on my empty feed.,6.81
+1,74,saram95,mistral:7b,chose,0,(nothing),"As a 69-year-old woman who lives in Mississippi and is retired, I don't have much need or interest in upvoting or commenting on posts right now. I'll just take a moment to refresh my feed and see what's trending.",18.53
+1,75,feliciaa51,mistral:7b,chose,0,search_posts,I want to stay updated on the latest developments in technology.,8.08
+1,76,marinas10,mistral:7b,chose,0,search_posts,Want to stay updated on the latest technology news,9.65
+1,77,ryanr18,mistral:7b,chose,0,trend,Want to see what's trending on Reddit today.,7.48
+1,78,marthap24,mistral:7b,chose,0,search_posts,I want to stay updated with the latest news.,9.64
+1,79,marlenec29,mistral:7b,chose,0,search_posts,I'm a tech enthusiast and like to stay updated on the latest news.,11.92
+1,80,chantalm79,mistral:7b,chose,0,(nothing),"As it's an empty feed, I thought I'd take a moment to browse and see what's trending.",9.75
+1,81,walterc73,mistral:7b,chose,0,(nothing),There's nothing to interact with on my empty feed yet.,5.33
+1,82,edithk82,mistral:7b,chose,0,(nothing),"There's nothing interesting on my feed to interact with right now, so I'll take a moment to catch up on the latest political news.",11.55
+1,83,ellenw80,mistral:7b,chose,0,(nothing),Nothing new or interesting on my feed to interact with yet.,6.85
+1,84,jamesv91,mistral:7b,chose,0,search_posts,I want to check out what's happening in the politics world.,11.46
+1,85,vickis15,mistral:7b,chose,0,(nothing),"Since there's nothing posted yet, I'll take this opportunity to catch up on some entertainment news.",9.12
+1,86,joannw14,mistral:7b,chose,0,search_posts,"As a retiree with an interest in politics, I like to stay updated on the latest news.",10.33
+1,87,danielm67,mistral:7b,chose,0,(nothing),"There's nothing interesting or relevant on my feed right now, so I'll just refresh and see if anything catches my eye.",8.01
+1,88,frankm26,mistral:7b,chose,0,(nothing),"As there's nothing to react to on my feed, I'll take a moment to browse through trending posts for some entertaining content.",9.89
+1,89,margaretl34,mistral:7b,chose,0,search_posts,I'm interested in staying updated on politics.,9.63
+1,90,akikot28,mistral:7b,chose,0,search_posts,I want to see if there are any interesting political discussions happening.,11.42
+1,91,gertrudeo89,mistral:7b,chose,0,(nothing),"Nothing new on my feed yet, let's see what's trending first.",8.92
+1,92,angelas25,mistral:7b,chose,0,search_posts,"As a tech enthusiast, I want to stay updated on the latest technological advancements.",10.16
+1,93,elizabethd44,mistral:7b,chose,0,(nothing),"As a retired woman with strong political interests and less enthusiasm for technology or entertainment, I'll check out what's trending and the r/politics subreddit to see if anything catches my eye.",12.52
+1,94,danet63,mistral:7b,chose,0,(nothing),"There's nothing new on my feed to interact with, so I will refresh the page.",7.39
+1,95,jacko37,mistral:7b,chose,0,search_posts,I prefer to stay updated on technology news.,9.66
+1,96,petral67,mistral:7b,chose,0,(nothing),There's no post to interact with yet. Let's take a look around.,9.09
+1,97,josephl80,mistral:7b,chose,0,search_posts,Want to stay updated on the latest political news,7.85
+1,98,randallc16,mistral:7b,chose,0,(nothing),"I'm not really interested in anything on my feed right now, so I'll just refresh to see if something new comes up.",5.98
+1,99,stellas93,mistral:7b,chose,0,search_posts,Stella Stout (stellas93) wants to stay updated on the latest political news.,4.06
+1,0,andrewh47,qwen3:8b,chose,1,create_post,I love sports and wanted to share my thoughts on the NBA season.,9.8
+1,1,robertb78,qwen3:8b,chose,1,create_post,I like politics and want to discuss the budget,18.35
+1,2,nicholast63,qwen3:8b,chose,1,"create_post, like_post",I have strong opinions on politics and want to share them.,11.66
+1,3,bryanm85,qwen3:8b,chose,3,"create_post, create_post, create_post",I want to share my thoughts on topics I love and engage with the community.,33.17
+1,4,erinw47,qwen3:8b,chose,0,do_nothing,Nothing to do yet.,4.43
+1,5,jeremyb24,qwen3:8b,chose,1,create_post,I love politics and want to discuss climate change,8.71
+1,6,jennifero59,qwen3:8b,chose,1,create_post,I want to share my thoughts on the new movie.,9.12
+1,7,malindap46,qwen3:8b,chose,2,"create_post, create_post",I want to share my thoughts on AI and sports as they are topics I enjoy.,29.2
+1,8,christab77,qwen3:8b,chose,1,create_post,I enjoy sharing my thoughts on politics and its impact on society.,19.3
+1,9,davidg75,qwen3:8b,chose,1,create_post,I enjoy business and tech topics.,16.13
+1,10,vernar74,qwen3:8b,chose,1,create_post,I love entertainment and want to share my thoughts.,9.42
+1,11,laural21,qwen3:8b,chose,1,create_post,I enjoy sharing my passion for sports.,10.03
+1,12,patriciac15,qwen3:8b,chose,1,"create_post, refresh",I want to share my thoughts on local politics and refresh my feed to see what others are discussing.,13.41
+1,13,christophers90,qwen3:8b,chose,2,"create_post, create_post",I want to share my thoughts on business and sports.,33.03
+1,14,meredithm89,qwen3:8b,chose,1,create_post,I want to share my positive views on politics.,10.08
+1,15,heatherm33,qwen3:8b,chose,1,create_post,I want to discuss healthcare business opportunities.,8.27
+1,16,annab87,qwen3:8b,chose,1,create_post,I love entertainment and want to share my thoughts.,9.54
+1,17,brianak85,qwen3:8b,chose,1,create_post,I like politics and want to stay informed.,8.79
+1,18,shareet26,qwen3:8b,chose,1,create_post,I love politics and want to share my opinion on local governance.,23.99
+1,19,ivanw64,qwen3:8b,chose,1,create_post,I want to share my enthusiasm for technology.,19.21
+1,20,sarab15,qwen3:8b,chose,1,create_post,I love politics and want to share my thoughts,7.28
+1,21,sharons38,qwen3:8b,chose,2,"create_post, create_post","Sharing my experiences in sales and sports, which I love.",16.19
+1,22,tinag23,qwen3:8b,chose,1,create_post,I love entertainment and want to share my opinion,6.14
+1,23,johnw17,qwen3:8b,chose,1,create_post,I want to share my thoughts on entertainment in a neutral subreddit.,15.18
+1,24,maryl53,qwen3:8b,chose,1,create_post,Express my feelings,11.9
+1,25,joshuam26,qwen3:8b,chose,1,create_post,Post about hating entertainment,8.27
+1,26,philips21,qwen3:8b,chose,1,create_post,I like business and want to share my thoughts on investing.,42.42
+1,27,meganc93,qwen3:8b,chose,2,"create_post, create_post",Sharing insights on topics I love,18.16
+1,28,mattiey61,qwen3:8b,chose,1,create_post,I love politics and want to share my thoughts.,7.45
+1,29,tinam90,qwen3:8b,chose,1,create_post,I love entertainment and want to share my favorite movie.,8.91
+1,30,dewayneb52,qwen3:8b,chose,1,"create_post, refresh",Want to share my thoughts on healthcare policy and check for new content.,11.89
+1,31,williamm73,qwen3:8b,chose,1,create_post,I want to share my thoughts on civic responsibility in politics.,10.9
+1,32,alanw69,qwen3:8b,chose,1,create_post,I love discussing politics and want to share my thoughts on the future of democracy.,8.63
+1,33,johnnyc79,qwen3:8b,chose,2,"create_post, create_post",I want to share my knowledge and interests in business and sports.,16.74
+1,34,dannyw49,qwen3:8b,chose,1,create_post,I love sports and want to share my opinion,8.1
+1,35,timothyt74,qwen3:8b,chose,3,"create_post, create_post, create_post",I want to share my thoughts and excitement about topics I love.,23.24
+1,36,eunices91,qwen3:8b,chose,1,create_post,I want to share my thoughts on voting and civic responsibility.,11.05
+1,37,frankp71,qwen3:8b,chose,1,create_post,Express my opinion,8.45
+1,38,melissam65,qwen3:8b,chose,1,create_post,Express my opinion,10.55
+1,39,brianw36,qwen3:8b,chose,1,"create_post, refresh",I want to share my views on politics and keep my feed updated.,11.74
+1,40,michaels42,qwen3:8b,chose,1,create_post,I want to share my love for business and good deals.,9.51
+1,41,johnb47,qwen3:8b,chose,1,create_post,I love business and want to discuss real estate opportunities.,11.06
+1,42,brittanij74,qwen3:8b,chose,2,"create_post, create_post",Sharing my opinions on topics I care about.,17.18
+1,43,walterl22,qwen3:8b,chose,0,do_nothing,,6.21
+1,44,troyl68,qwen3:8b,chose,1,create_post,I like sports and want to share my opinion.,10.39
+1,45,charlesh55,qwen3:8b,chose,1,create_post,I love business and want to share some insights.,20.59
+1,46,magaretr95,qwen3:8b,chose,1,create_post,I love entertainment and want to share my favorite movie.,11.12
+1,47,jacobw37,qwen3:8b,chose,1,"create_post, refresh",Looking to engage in a neutral discussion,10.21
+1,48,ryang78,qwen3:8b,chose,1,"create_post, create_comment, like_post",I want to share my thoughts on investing and get some advice.,11.73
+1,49,michaelp62,qwen3:8b,chose,1,create_post,"I love science and tech, so I want to start a discussion on AI's future.",12.58
+1,50,staceyc44,qwen3:8b,chose,1,create_post,I love sharing business tips and insights.,32.82
+1,51,tristanl74,qwen3:8b,chose,1,"create_post, like_post",I want to share my thoughts on investing and connect with others who have similar interests.,12.38
+1,52,virginiak44,qwen3:8b,chose,1,create_post,I love politics and want to talk about rural issues.,10.01
+1,53,gregoryb55,qwen3:8b,chose,2,"create_post, create_post",I want to share my thoughts on topics I'm passionate about.,15.6
+1,54,davidw39,qwen3:8b,chose,1,"create_post, like_post",I love sports and want to share my passion.,8.64
+1,55,rupertd12,qwen3:8b,unreadable,0,(nothing),,37.61
+1,56,lisas44,qwen3:8b,chose,0,do_nothing,Nothing to do here.,4.79
+1,57,brianj40,qwen3:8b,chose,1,"create_post, like_post",I like to discuss business and need advice on investing.,7.97
+1,58,helens42,qwen3:8b,chose,1,create_post,I love politics and want to discuss local issues.,9.51
+1,59,bettinag19,qwen3:8b,unreadable,0,(nothing),,37.23
+1,60,paulh35,qwen3:8b,chose,1,create_post,Share my opinion on sports,10.48
+1,61,johnb28,qwen3:8b,chose,0,do_nothing,Nothing to do here.,3.9
+1,62,robertaw58,qwen3:8b,chose,1,create_post,I love politics and want to start a discussion.,9.66
+1,63,maritzaa16,qwen3:8b,chose,0,refresh,Want to see what's new,3.26
+1,64,edwardc83,qwen3:8b,chose,0,do_nothing,,3.29
+1,65,davidj22,qwen3:8b,chose,2,"create_post, create_post",Posting in subreddits I love,13.83
+1,66,brenday15,qwen3:8b,chose,1,create_post,I love sports and want to share my excitement with the community.,9.83
+1,67,jimmiea58,qwen3:8b,chose,2,"create_post, create_post",I want to share my interests in business and sports.,22.51
+1,68,jasperh92,qwen3:8b,chose,1,create_post,I enjoy sharing my passion for sports.,8.07
+1,69,davidd53,qwen3:8b,chose,1,create_post,I love politics and want to discuss infrastructure in Tennessee.,10.55
+1,70,janets25,qwen3:8b,chose,1,"create_post, like_post",I want to share my experience and help others.,15.08
+1,71,christinaq89,qwen3:8b,chose,1,create_post,I love entertainment and want to share my thoughts on a classic film.,10.35
+1,72,howardm68,qwen3:8b,chose,1,"create_post, like_post",I want to share my opinion on local politics and support my own post.,28.97
+1,73,jasonc37,qwen3:8b,chose,1,create_post,I love entertainment,17.62
+1,74,saram95,qwen3:8b,chose,1,create_post,I want to share my opinion on local politics.,8.71
+1,75,feliciaa51,qwen3:8b,chose,1,create_post,Sharing my passion for sports,5.94
+1,76,marinas10,qwen3:8b,chose,1,create_post,I want to share my excitement about technology.,8.99
+1,77,ryanr18,qwen3:8b,chose,1,create_post,Want to share my thoughts on politics,10.69
+1,78,marthap24,qwen3:8b,chose,1,create_post,I love politics and want to start a conversation.,33.73
+1,79,marlenec29,qwen3:8b,chose,1,create_post,I want to share my enthusiasm for technology in healthcare,24.07
+1,80,chantalm79,qwen3:8b,chose,1,create_post,I want to share my perspective on politics as a rural NC resident.,11.48
+1,81,walterc73,qwen3:8b,chose,0,do_nothing,,3.19
+1,82,edithk82,qwen3:8b,chose,1,create_post,I love politics and want to share my thoughts.,10.57
+1,83,ellenw80,qwen3:8b,chose,0,do_nothing,Nothing to do yet.,3.88
+1,84,jamesv91,qwen3:8b,chose,1,create_post,I love sports and want to share my passion.,9.69
+1,85,vickis15,qwen3:8b,chose,1,create_post,I like discussing business opportunities.,30.99
+1,86,joannw14,qwen3:8b,chose,1,create_post,I love politics and want to share my thoughts.,9.39
+1,87,danielm67,qwen3:8b,chose,1,"create_post, refresh",I want to share my thoughts on AI and its impact on renewable energy.,33.91
+1,88,frankm26,qwen3:8b,chose,1,"create_post, create_comment",I want to share my experience and help others in the business community.,22.86
+1,89,margaretl34,qwen3:8b,chose,1,create_post,I enjoy sharing my passion for politics.,7.09
+1,90,akikot28,qwen3:8b,chose,1,create_post,I love discussing politics and want to start a conversation on current issues.,7.23
+1,91,gertrudeo89,qwen3:8b,chose,1,create_post,I love politics and want to share my thoughts.,20.76
+1,92,angelas25,qwen3:8b,chose,1,create_post,"I love science and tech, so I want to share my thoughts on AI.",8.64
+1,93,elizabethd44,qwen3:8b,unreadable,0,(nothing),,31.53
+1,94,danet63,qwen3:8b,chose,1,create_post,I love discussing business and finance.,8.03
+1,95,jacko37,qwen3:8b,chose,1,"create_post, create_comment",Want to discuss AI's role in creativity.,12.08
+1,96,petral67,qwen3:8b,unreadable,0,(nothing),,23.85
+1,97,josephl80,qwen3:8b,chose,1,create_post,I love politics and want to share my thoughts.,9.6
+1,98,randallc16,qwen3:8b,chose,1,"create_post, create_comment",I want to share my thoughts on education tech in a relevant subreddit and engage in a discussion.,13.05
+1,99,stellas93,qwen3:8b,chose,1,create_post,I love politics and want to share my thoughts on civic engagement.,8.55

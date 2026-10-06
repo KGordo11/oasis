@@ -54,6 +54,17 @@ def n_posts(r, m):
     return sum(sum(x["action"] == "create_post" for x in json.loads(l)["actions"]) for l in open(f)) if os.path.exists(f) else 0
 
 
+def expected(r, pb, k):
+    """Screens a reading cell needs at slice k: each user reads min(k, posts not their own); k=0 means all."""
+    f = os.path.join(rdir(r), f"posting_{pb.replace(':', '-')}.jsonl")
+    own = {}
+    for l in open(f):
+        d = json.loads(l)
+        own[d["user_id"]] = sum(x["action"] == "create_post" for x in d["actions"])
+    n = sum(own.values())
+    return sum((n - own.get(u, 0)) if k == 0 else min(k, n - own.get(u, 0)) for u in range(100))
+
+
 def screens_done(r, name):
     f = os.path.join(rdir(r), name + ".jsonl")
     return sum(1 for _ in open(f)) if os.path.exists(f) else 0
@@ -100,9 +111,8 @@ for r in ROUNDS:
                 n = sets[pb]
                 if n == 0:
                     continue
-                want = n - 1 if k == 0 else min(k, n - 1)  # posts per user (all but their own)
                 name = f"reading_{pb.replace(':', '-')}__{reader.replace(':', '-')}"
-                todo = max(0, 100 * want - screens_done(r, name))
+                todo = max(0, expected(r, pb, k) - screens_done(r, name))
                 if todo:
                     step(r, ["read", "--posts-by", pb, "--model", reader] + (["--max-posts", str(k)] if k else []),
                          todo, reader, f"r{r} read {pb} by {reader} slice {k or 'all'}", name)

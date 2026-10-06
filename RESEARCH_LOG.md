@@ -14284,3 +14284,21 @@ Same 108 reading screens (round 902, qwen's set, draw 7), 10 users:
 
 At 16 slots the three models hold 25 + 23 + 30 = 78 GB, leaving 42 GB available on a shared machine. The Spark is
 compute-bound past 8, so **8 is kept for the whole study**: the gain is small and mixed, and the memory cost is large.
+
+## 14.21 Pre-run fixes, export and graphs (2026-10-05 21:45)
+
+- **LB-v2-2 (fixed before any real run): a possible endless loop.** In window mode, a user who wrote several posts
+  in a small post set could never collect enough posts to read, and `run_v2.py` would hang forever. The loop now
+  stops after one lap of the ring.
+- **`v2_night.py` counts remaining screens exactly**, per user: min(slice, posts not their own). Before, it assumed
+  everyone skips exactly one post, which could skip a nearly-finished cell on resume.
+- **`export_v2.py`** writes `<results folder>/export/`: users.csv, posts.csv, posting_turn.csv, reactions.csv (one
+  row per post seen, every action as a 0/1 column, plus comment, quote and report text, reason, user profile),
+  actions_long.csv, summary_by_round.csv, and **LLM_bias_v2.xlsx** with all of them as sheets. Checked on night 1:
+  it reproduces summary.md exactly.
+- **`make_graphs_v2.py`** writes `graphs/round_NNN/` (1 posting, 2 upvote table, 3 every action, 4 stance gradient,
+  5 own vs others, 6 bias with 95% range, 7 noise) and `graphs/all_rounds/` (pooled, plus 8 bias by round). AI
+  colours are fixed (qwen blue, llama orange, gemma green) and passed the colour-blind validator. Night 1's bias
+  reproduces: −1.9 (−8.2 to +4.7).
+- **Gordon's plan: one round at a time** (101 now, then 102 and 103 on later days). The run lives on the Spark in
+  tmux, so closing the laptop or dropping the VPN does not stop it.

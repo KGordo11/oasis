@@ -273,8 +273,8 @@ def run(a):
                 # around it, so every post is read by (almost) the same number of users. A larger --max-posts only
                 # extends each window, so a run can be topped up later without changing what was already read.
                 start, feed, j = (p["id"] * len(ring)) // 100, [], 0
-                while len(feed) < a.max_posts:
-                    q = ring[(start + j) % len(ring)]; j += 1
+                while len(feed) < a.max_posts and j < len(ring):  # stop after one lap: a user with several own
+                    q = ring[(start + j) % len(ring)]; j += 1          # posts in a small set must not loop forever
                     if q["author_id"] != p["id"]:  # never your own post
                         feed.append(q)
             else:

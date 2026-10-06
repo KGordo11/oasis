@@ -1,0 +1,101 @@
+user_id,username,name,age,gender,state,region,community,education,work,big5_openness,big5_conscientiousness,big5_extraversion,big5_agreeableness,big5_neuroticism,stance_politics,stance_science_tech,stance_business_finance,stance_sports,stance_entertainment
+0,andrewh47,Andrew Hernandez,40,male,California,West,urban or suburban,high school diploma,works in management,7,5,7,3,3,NEUTRAL,LIKE,NEUTRAL,LOVE,LIKE
+1,robertb78,Robert Brown,58,male,Texas,South,urban or suburban,less than high school,works in management,6,5,3,5,7,LIKE,NEUTRAL,NEUTRAL,LIKE,DISLIKE
+2,nicholast63,Nicholas Thomas,75,male,Wisconsin,Midwest,rural,high school diploma,retired,5,3,4,8,9,LIKE,LOVE,LOVE,NEUTRAL,NEUTRAL
+3,bryanm85,Bryan Mcdowell,43,male,Louisiana,South,urban or suburban,bachelor's degree,works in protective services,7,6,3,3,8,HATE,LOVE,DISLIKE,LOVE,LOVE
+4,erinw47,Erin Wooden,63,male,Ohio,Midwest,urban or suburban,graduate degree,"works in life, physical and social science",8,6,7,10,5,HATE,HATE,NEUTRAL,DISLIKE,NEUTRAL
+5,jeremyb24,Jeremy Belin,60,male,California,West,urban or suburban,high school diploma,works in construction,6,3,5,2,5,LOVE,LIKE,LOVE,DISLIKE,HATE
+6,jennifero59,Jennifer Owen,52,female,Texas,South,urban or suburban,high school diploma,not currently working,6,1,7,5,6,NEUTRAL,DISLIKE,HATE,HATE,NEUTRAL
+7,malindap46,Malinda Pearsall,78,female,Pennsylvania,Northeast,rural,graduate degree,retired,7,6,6,8,7,DISLIKE,LIKE,DISLIKE,LIKE,NEUTRAL
+8,christab77,Christa Bowling,51,female,Hawaii,West,urban or suburban,bachelor's degree,works in education (teaching and libraries),5,7,5,3,9,LIKE,LOVE,LOVE,NEUTRAL,NEUTRAL
+9,davidg75,David Gonzales,27,male,Texas,South,urban or suburban,bachelor's degree,works in education (teaching and libraries),7,5,5,9,7,NEUTRAL,HATE,LOVE,LIKE,LOVE
+10,vernar74,Verna Rich,19,female,Texas,South,urban or suburban,high school diploma,college student,5,4,5,5,7,DISLIKE,NEUTRAL,HATE,DISLIKE,LOVE
+11,laural21,Laura Long,54,female,New York,Northeast,urban or suburban,associate degree,not currently working,5,9,5,4,6,LIKE,HATE,HATE,LOVE,HATE
+12,patriciac15,Patricia Castillo,19,female,Virginia,South,urban or suburban,high school diploma,works in production and manufacturing,4,5,6,5,5,LIKE,NEUTRAL,NEUTRAL,LIKE,DISLIKE
+13,christophers90,Christopher Snyder,39,male,Missouri,Midwest,rural,bachelor's degree,works in office and administrative support,10,5,6,8,5,HATE,DISLIKE,LIKE,LIKE,HATE
+14,meredithm89,Meredith Martin,52,female,Florida,South,urban or suburban,"some college, no degree",works in transportation and material moving,10,5,6,6,4,LIKE,DISLIKE,DISLIKE,DISLIKE,LIKE
+15,heatherm33,Heather Magruder,39,female,Maryland,South,urban or suburban,bachelor's degree,"works in healthcare (doctors, nurses, technicians)",5,6,8,4,6,HATE,NEUTRAL,LOVE,HATE,LIKE
+16,annab87,Anna Bishop,42,female,California,West,urban or suburban,high school diploma,works in food preparation and serving,8,3,9,4,8,HATE,LOVE,DISLIKE,LOVE,LOVE
+17,brianak85,Briana Kellerman,70,female,Michigan,Midwest,urban or suburban,high school diploma,retired,5,7,8,6,5,LIKE,NEUTRAL,NEUTRAL,LIKE,DISLIKE
+18,shareet26,Sharee Taylor,40,female,North Dakota,Midwest,rural,bachelor's degree,not currently working,5,6,1,10,4,LOVE,HATE,DISLIKE,HATE,DISLIKE
+19,ivanw64,Ivan Williams,62,male,Arizona,West,urban or suburban,high school diploma,works in transportation and material moving,7,6,4,10,2,DISLIKE,LOVE,NEUTRAL,HATE,HATE
+20,sarab15,Sara Brock,38,female,New Hampshire,Northeast,urban or suburban,"some college, no degree","works in installation, maintenance and repair",5,10,5,3,7,LOVE,DISLIKE,NEUTRAL,NEUTRAL,LOVE
+21,sharons38,Sharon Smith,32,female,Alabama,South,rural,graduate degree,works in sales,3,7,3,9,3,DISLIKE,DISLIKE,LOVE,LOVE,DISLIKE
+22,tinag23,Tina Good,18,female,Alabama,South,urban or suburban,bachelor's degree,works in sales,5,5,6,5,6,LIKE,LIKE,LIKE,HATE,LOVE
+23,johnw17,John Whitham,42,female,Colorado,West,urban or suburban,graduate degree,not currently working,6,6,8,3,3,NEUTRAL,DISLIKE,HATE,HATE,NEUTRAL
+24,maryl53,Mary Lee,42,female,Texas,South,urban or suburban,"some college, no degree",works in healthcare support,6,7,7,3,4,NEUTRAL,NEUTRAL,DISLIKE,NEUTRAL,HATE
+25,joshuam26,Joshua Moore,22,male,Illinois,Midwest,urban or suburban,less than high school,college student,3,5,8,4,4,NEUTRAL,NEUTRAL,DISLIKE,NEUTRAL,HATE
+26,philips21,Philip Scales,19,male,California,West,urban or suburban,"some college, no degree",college student,6,5,6,6,5,HATE,DISLIKE,LIKE,LIKE,HATE
+27,meganc93,Megan Campbell,29,female,Florida,South,rural,bachelor's degree,"works in healthcare (doctors, nurses, technicians)",6,9,6,5,9,LOVE,LOVE,HATE,LIKE,LIKE
+28,mattiey61,Mattie Young,87,female,California,West,urban or suburban,high school diploma,retired,7,1,6,9,5,LOVE,NEUTRAL,LIKE,LOVE,NEUTRAL
+29,tinam90,Tina Miller,51,female,Michigan,Midwest,urban or suburban,graduate degree,works in building and grounds cleaning and maintenance,3,5,5,5,6,DISLIKE,NEUTRAL,HATE,DISLIKE,LOVE
+30,dewayneb52,Dewayne Baker,49,male,Florida,South,urban or suburban,bachelor's degree,"works in healthcare (doctors, nurses, technicians)",4,5,4,4,6,NEUTRAL,DISLIKE,HATE,HATE,NEUTRAL
+31,williamm73,William Munoz,65,male,Pennsylvania,Northeast,urban or suburban,graduate degree,retired,5,4,7,1,7,LIKE,LIKE,LIKE,HATE,LOVE
+32,alanw69,Alan Williams,84,male,California,West,urban or suburban,bachelor's degree,retired,10,4,5,7,6,LIKE,LOVE,LOVE,NEUTRAL,NEUTRAL
+33,johnnyc79,Johnny Craft,28,male,California,West,urban or suburban,associate degree,works in business and financial operations,7,6,5,8,7,HATE,DISLIKE,LIKE,LIKE,HATE
+34,dannyw49,Danny West,23,male,Maryland,South,urban or suburban,high school diploma,college student,4,5,2,7,7,LIKE,HATE,HATE,LOVE,HATE
+35,timothyt74,Timothy Toledo,27,male,South Dakota,Midwest,rural,"some college, no degree",works in production and manufacturing,8,3,4,5,6,HATE,LOVE,DISLIKE,LOVE,LOVE
+36,eunices91,Eunice Stokes,77,female,Florida,South,urban or suburban,bachelor's degree,retired,10,6,5,6,7,LIKE,LIKE,LIKE,HATE,LOVE
+37,frankp71,Frank Porter,40,male,Texas,South,urban or suburban,graduate degree,works in architecture and engineering,3,5,7,4,7,NEUTRAL,NEUTRAL,DISLIKE,NEUTRAL,HATE
+38,melissam65,Melissa Mckinney,79,female,South Dakota,Midwest,rural,high school diploma,retired,5,6,4,3,4,NEUTRAL,NEUTRAL,DISLIKE,NEUTRAL,HATE
+39,brianw36,Brian Williams,60,male,Oregon,West,urban or suburban,"some college, no degree",not currently working,7,5,4,8,4,LOVE,HATE,DISLIKE,HATE,DISLIKE
+40,michaels42,Michael Smith,69,male,West Virginia,South,urban or suburban,high school diploma,works in food preparation and serving,5,9,8,7,5,NEUTRAL,HATE,LOVE,LIKE,LOVE
+41,johnb47,John Brown,56,male,Florida,South,urban or suburban,graduate degree,not currently working,1,4,6,7,4,DISLIKE,DISLIKE,LOVE,LOVE,DISLIKE
+42,brittanij74,Brittani Johnson,59,female,Virginia,South,rural,high school diploma,"works in installation, maintenance and repair",6,5,5,3,3,LIKE,NEUTRAL,NEUTRAL,LIKE,DISLIKE
+43,walterl22,Walter Lyon,55,male,Maine,Northeast,urban or suburban,high school diploma,works in office and administrative support,1,8,9,8,6,HATE,LIKE,HATE,NEUTRAL,DISLIKE
+44,troyl68,Troy Lanning,53,male,Illinois,Midwest,urban or suburban,high school diploma,works in transportation and material moving,3,6,5,6,6,DISLIKE,LIKE,DISLIKE,LIKE,NEUTRAL
+45,charlesh55,Charles Hall,33,male,New York,Northeast,urban or suburban,bachelor's degree,works in office and administrative support,2,5,7,6,2,DISLIKE,DISLIKE,LOVE,LOVE,DISLIKE
+46,magaretr95,Magaret Raines,18,female,Massachusetts,Northeast,rural,"some college, no degree",college student,8,5,7,4,5,DISLIKE,NEUTRAL,HATE,DISLIKE,LOVE
+47,jacobw37,Jacob Williams,26,male,Utah,West,urban or suburban,high school diploma,not currently working,5,4,5,2,5,NEUTRAL,DISLIKE,HATE,HATE,NEUTRAL
+48,ryang78,Ryan Gray,72,male,Connecticut,Northeast,urban or suburban,high school diploma,retired,9,5,4,6,7,DISLIKE,HATE,LIKE,NEUTRAL,LIKE
+49,michaelp62,Michael Paulson,59,male,Michigan,Midwest,urban or suburban,bachelor's degree,not currently working,7,4,5,5,6,HATE,LOVE,DISLIKE,LOVE,LOVE
+50,staceyc44,Stacey Chapa,33,female,California,West,urban or suburban,bachelor's degree,works in sales,8,5,9,2,5,HATE,NEUTRAL,LOVE,HATE,LIKE
+51,tristanl74,Tristan Lundquist,74,male,South Carolina,South,urban or suburban,bachelor's degree,retired,5,9,7,5,3,HATE,DISLIKE,LIKE,LIKE,HATE
+52,virginiak44,Virginia Kinlaw,23,female,Minnesota,Midwest,rural,less than high school,works in building and grounds cleaning and maintenance,7,3,4,3,5,LOVE,LIKE,LOVE,DISLIKE,HATE
+53,gregoryb55,Gregory Bair,23,male,New York,Northeast,urban or suburban,high school diploma,works in healthcare support,4,7,7,5,5,LIKE,LOVE,LOVE,NEUTRAL,NEUTRAL
+54,davidw39,David Webb,56,male,New York,Northeast,urban or suburban,"some college, no degree",works in office and administrative support,9,6,7,6,8,LIKE,HATE,HATE,LOVE,HATE
+55,rupertd12,Rupert Davis,31,male,California,West,urban or suburban,less than high school,works in healthcare support,5,5,4,4,4,DISLIKE,LOVE,NEUTRAL,HATE,HATE
+56,lisas44,Lisa Spadaro,37,female,New York,Northeast,urban or suburban,high school diploma,not currently working,9,4,7,6,4,HATE,HATE,NEUTRAL,DISLIKE,NEUTRAL
+57,brianj40,Brian Johnson,66,male,Michigan,Midwest,urban or suburban,"some college, no degree",retired,7,5,5,6,7,DISLIKE,HATE,LIKE,NEUTRAL,LIKE
+58,helens42,Helen Simmons,58,female,Connecticut,Northeast,rural,"some college, no degree",works in food preparation and serving,8,4,6,4,6,LOVE,NEUTRAL,LIKE,LOVE,NEUTRAL
+59,bettinag19,Bettina Griffin,40,female,Pennsylvania,Northeast,urban or suburban,associate degree,works in management,7,7,5,3,6,DISLIKE,LOVE,NEUTRAL,HATE,HATE
+60,paulh35,Paul Henderson,40,male,Illinois,Midwest,urban or suburban,"some college, no degree",works in office and administrative support,8,7,6,4,6,DISLIKE,LIKE,DISLIKE,LIKE,NEUTRAL
+61,johnb28,John Bailes,30,male,Texas,South,urban or suburban,"some college, no degree",works in sales,6,5,4,8,4,HATE,LIKE,HATE,NEUTRAL,DISLIKE
+62,robertaw58,Roberta Williams,38,female,Georgia,South,urban or suburban,high school diploma,works in transportation and material moving,4,9,7,3,5,LOVE,LIKE,LOVE,DISLIKE,HATE
+63,maritzaa16,Maritza Adams,37,female,Florida,South,urban or suburban,bachelor's degree,works in business and financial operations,6,2,7,4,6,DISLIKE,LIKE,DISLIKE,LIKE,NEUTRAL
+64,edwardc83,Edward Carman,68,male,Georgia,South,rural,bachelor's degree,retired,3,6,6,5,8,HATE,HATE,NEUTRAL,DISLIKE,NEUTRAL
+65,davidj22,David Jackson,38,male,Massachusetts,Northeast,urban or suburban,graduate degree,works in transportation and material moving,5,5,6,7,5,DISLIKE,DISLIKE,LOVE,LOVE,DISLIKE
+66,brenday15,Brenda Young,36,female,Oklahoma,South,urban or suburban,associate degree,works in production and manufacturing,8,7,7,8,5,NEUTRAL,LIKE,NEUTRAL,LOVE,LIKE
+67,jimmiea58,Jimmie Arnold,39,male,Virginia,South,urban or suburban,high school diploma,not currently working,3,6,5,3,4,NEUTRAL,HATE,LOVE,LIKE,LOVE
+68,jasperh92,Jasper Hackworth,32,male,Oregon,West,rural,bachelor's degree,"works in healthcare (doctors, nurses, technicians)",6,8,4,7,3,NEUTRAL,LIKE,NEUTRAL,LOVE,LIKE
+69,davidd53,David Duval,24,male,Tennessee,South,urban or suburban,"some college, no degree",works in construction,4,4,7,5,6,LOVE,NEUTRAL,LIKE,LOVE,NEUTRAL
+70,janets25,Janet Smith,18,female,North Carolina,South,urban or suburban,"some college, no degree",college student,7,3,6,4,7,NEUTRAL,HATE,LOVE,LIKE,LOVE
+71,christinaq89,Christina Quintanilla,21,female,California,West,urban or suburban,"some college, no degree",works in food preparation and serving,5,4,4,6,4,LIKE,LIKE,LIKE,HATE,LOVE
+72,howardm68,Howard Martin,34,male,Pennsylvania,Northeast,rural,high school diploma,not currently working,7,6,5,5,4,LIKE,DISLIKE,DISLIKE,DISLIKE,LIKE
+73,jasonc37,Jason Campbell,25,male,Florida,South,urban or suburban,high school diploma,works in sales,3,6,4,4,8,DISLIKE,NEUTRAL,HATE,DISLIKE,LOVE
+74,saram95,Sara Mizelle,69,female,Mississippi,South,urban or suburban,high school diploma,retired,5,8,7,6,5,LIKE,DISLIKE,DISLIKE,DISLIKE,LIKE
+75,feliciaa51,Felicia Anderson,39,female,Michigan,Midwest,urban or suburban,graduate degree,works in computers and math,10,7,6,7,5,NEUTRAL,LIKE,NEUTRAL,LOVE,LIKE
+76,marinas10,Marina Stafford,25,female,Illinois,Midwest,rural,high school diploma,not currently working,1,5,7,7,4,NEUTRAL,LOVE,LIKE,DISLIKE,DISLIKE
+77,ryanr18,Ryan Rinehart,26,male,Michigan,Midwest,urban or suburban,bachelor's degree,works in construction,4,4,7,7,9,LIKE,DISLIKE,DISLIKE,DISLIKE,LIKE
+78,marthap24,Martha Pitcock,60,female,Georgia,South,urban or suburban,high school diploma,works in office and administrative support,3,2,7,4,5,LOVE,LOVE,HATE,LIKE,LIKE
+79,marlenec29,Marlene Cortes,24,female,Colorado,West,urban or suburban,associate degree,college student,3,5,2,6,6,NEUTRAL,LOVE,LIKE,DISLIKE,DISLIKE
+80,chantalm79,Chantal Mcallister,57,female,North Carolina,South,rural,bachelor's degree,not currently working,6,3,6,2,4,LOVE,NEUTRAL,LIKE,LOVE,NEUTRAL
+81,walterc73,Walter Clark,33,male,Florida,South,urban or suburban,high school diploma,works in management,6,6,5,9,4,HATE,LIKE,HATE,NEUTRAL,DISLIKE
+82,edithk82,Edith King,47,female,Virginia,South,urban or suburban,high school diploma,works in personal care and service,8,4,4,3,6,LOVE,DISLIKE,NEUTRAL,NEUTRAL,LOVE
+83,ellenw80,Ellen Woodcock,47,female,Illinois,Midwest,urban or suburban,bachelor's degree,works in production and manufacturing,7,5,8,10,5,HATE,HATE,NEUTRAL,DISLIKE,NEUTRAL
+84,jamesv91,James Vogl,49,male,California,West,urban or suburban,graduate degree,works in business and financial operations,2,5,7,5,5,LIKE,HATE,HATE,LOVE,HATE
+85,vickis15,Vicki Sasso,25,female,New York,Northeast,urban or suburban,"some college, no degree",not currently working,5,6,6,6,8,DISLIKE,HATE,LIKE,NEUTRAL,LIKE
+86,joannw14,Joann Willis,77,female,Arizona,West,urban or suburban,less than high school,retired,6,6,5,5,3,LOVE,LOVE,HATE,LIKE,LIKE
+87,danielm67,Daniel May,51,male,South Carolina,South,rural,bachelor's degree,not currently working,2,7,7,6,5,DISLIKE,LOVE,NEUTRAL,HATE,HATE
+88,frankm26,Frank Mangum,64,male,Kentucky,South,urban or suburban,bachelor's degree,works in education (teaching and libraries),4,3,6,7,6,DISLIKE,HATE,LIKE,NEUTRAL,LIKE
+89,margaretl34,Margaret Lietz,64,female,Pennsylvania,Northeast,urban or suburban,bachelor's degree,works in computers and math,6,6,7,7,4,LOVE,DISLIKE,NEUTRAL,NEUTRAL,LOVE
+90,akikot28,Akiko Tipton,31,female,Texas,South,urban or suburban,high school diploma,works in business and financial operations,6,8,4,3,6,LOVE,LOVE,HATE,LIKE,LIKE
+91,gertrudeo89,Gertrude Oneil,42,female,Utah,West,urban or suburban,bachelor's degree,works in food preparation and serving,7,6,8,5,5,LOVE,LIKE,LOVE,DISLIKE,HATE
+92,angelas25,Angela Simpson,56,female,Ohio,Midwest,rural,graduate degree,not currently working,4,8,3,3,6,NEUTRAL,LOVE,LIKE,DISLIKE,DISLIKE
+93,elizabethd44,Elizabeth Dailey,76,female,New Jersey,Northeast,urban or suburban,"some college, no degree",retired,8,6,9,4,5,LOVE,HATE,DISLIKE,HATE,DISLIKE
+94,danet63,Dane Thomas,22,male,Connecticut,Northeast,urban or suburban,bachelor's degree,works in legal,6,6,3,4,5,HATE,NEUTRAL,LOVE,HATE,LIKE
+95,jacko37,Jack Owen,30,male,Michigan,Midwest,urban or suburban,associate degree,"works in arts, design, entertainment, sports and media",5,8,4,7,8,HATE,LIKE,HATE,NEUTRAL,DISLIKE
+96,petral67,Petra Lamb,68,female,Texas,South,urban or suburban,bachelor's degree,works in office and administrative support,5,5,3,6,6,NEUTRAL,LOVE,LIKE,DISLIKE,DISLIKE
+97,josephl80,Joseph Lindemann,45,male,North Carolina,South,rural,high school diploma,works in community and social services,5,7,6,10,7,LOVE,HATE,DISLIKE,HATE,DISLIKE
+98,randallc16,Randall Campbell,31,male,Wisconsin,Midwest,urban or suburban,graduate degree,works in education (teaching and libraries),8,2,5,3,4,HATE,NEUTRAL,LOVE,HATE,LIKE
+99,stellas93,Stella Stout,55,female,California,West,urban or suburban,associate degree,not currently working,4,10,4,7,8,LOVE,DISLIKE,NEUTRAL,NEUTRAL,LOVE

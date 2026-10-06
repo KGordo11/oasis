@@ -1,0 +1,7 @@
+round,reader_ai,posts_by_ai,screens,upvote,upvote_%,downvote,downvote_%,comment,comment_%,share,share_%,quote,quote_%,report,report_%,follow,follow_%,mute,mute_%,did_anything,did_anything_%,cell
+1,llama3.1:8b,llama3.1:8b,1600,926,57.9,577,36.1,754,47.1,4,0.2,0,0.0,237,14.8,72,4.5,0,0.0,1576,98.5,baseline
+1,llama3.1:8b,qwen3:8b,1600,857,53.6,647,40.4,719,44.9,8,0.5,2,0.1,282,17.6,61,3.8,0,0.0,1565,97.8,cross
+1,mistral:7b,llama3.1:8b,1597,418,26.2,36,2.3,648,40.6,0,0.0,0,0.0,1,0.1,9,0.6,0,0.0,1084,67.9,cross
+1,mistral:7b,qwen3:8b,1599,456,28.5,26,1.6,654,40.9,0,0.0,0,0.0,1,0.1,2,0.1,0,0.0,1117,69.9,cross
+1,qwen3:8b,llama3.1:8b,1600,802,50.1,178,11.1,651,40.7,1,0.1,0,0.0,33,2.1,8,0.5,0,0.0,1297,81.1,cross
+1,qwen3:8b,qwen3:8b,1600,702,43.9,276,17.2,715,44.7,0,0.0,0,0.0,26,1.6,14,0.9,0,0.0,1376,86.0,baseline

@@ -14494,7 +14494,7 @@ Status at the pause:
 - **All three baselines are complete.** Post sets: **qwen 101, llama 103, gemma 25**.
 - Seconds per screen: llama baseline 0.49 s, gemma baseline 0.97 s.
 - Cross stage 1 (16 posts per user) is done for all 6 cells.
-- Cross stage 2 is done for qwen reading llama's and gemma's posts, and llama reading qwen's posts was at 2,770/3,200.
+- Cross stage 2 is done for qwen reading llama's and gemma's posts, and llama reading qwen's posts (finished 15:03, just before the pause; it was at 2,770/3,200 when last checked).
 
 From about 13:50, user hsa303 ran 2-3 GPU jobs (`residual_concepts.clean.qwen` / `.fit`, about 22 + 24 GB GPU each).
 Our reading slowed about 5× (2.7 s instead of 0.53 s per screen). They said they would use the machine more if it
@@ -14512,6 +14512,10 @@ ffafa95 (preflight 108/108), so no pull and no new preflight. Expected by 10:00 
 finished (cross stage 2 rest, stages 3-4, noise floor) and round 102's posting turns, baselines and early cross
 stages. If hsa303 runs jobs overnight, everything is ~5× slower and the runner simply does less. Results to be
 added here after the morning check.
+
+**First check, 19:16:** the runner skipped everything already done (no posting or baseline reruns) and went straight
+to the next cross step: `end r101 CROSS llama3.1:8b reads gemma3:12b slice 32 rc=0: 628 screens in 5.9 min (0.56
+s/screen)`. 0.56 s per screen is the normal unshared speed, so the GPU is not contended. Runner alive (count 1).
 
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 
@@ -14599,7 +14603,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 15:00 pause:
 - Complete: posting turns for all 3 AIs, **all 3 baselines**, stage 1 of all 6 cross cells, and stage 2 of
   qwen←llama and qwen←gemma.
-- In progress at the pause: llama←qwen, at 2,770/3,200.
+- llama←qwen stage 2 finished at 15:03, just before the pause (it was 2,770/3,200 when last checked).
 - The noise floor for qwen came from the earlier run (`_d1`).
 - Measured seconds per screen when the Spark is not shared: qwen ≈ 0.4, llama ≈ 0.5, gemma ≈ 0.95.
 - Remaining work for round 101 is about 6.5 h. A full round takes about 12-14 h.

@@ -14211,3 +14211,21 @@ numbered **101 and up**, so they never mix with the laptop's rounds (1 = night 1
     `STOP=... ROUNDS="101 102 103" PY=python3 PUSH=0 STOP_OLLAMA=0 python3 examples/experiment/llm_bias/v2_night.py`
 11. Copy the results back to the laptop:
     `rsync -avz YOUR_USERNAME@YOUR_SERVER:~/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2/`
+
+## 14.17 The real machine: NVIDIA DGX Spark `honda.csr.uky.edu` (172.31.40.215). Replaces the §14.16 runbook
+
+**Facts that change the setup:**
+- It is ARM (aarch64), with a GB10 GPU and 128 GB of memory shared by CPU and GPU, so all three models fit at once.
+- It is shared and probably has no sudo, so Ollama 0.24.0 is installed into the home folder
+  (`ollama-linux-arm64.tar.zst` from the GitHub release).
+- It runs **on a private port, 11500**, so it never touches another user's Ollama on 11434. The code reads
+  `OLLAMA_URL`, `OLLAMA_SERVE_LOG` and `PARALLEL` from the environment (commit b600fcc).
+- The address is campus-internal, so the UK VPN is needed when off campus.
+
+**Planned settings:**
+- NUM_PARALLEL=8 and client PARALLEL=8. The Spark gains from many requests at once, and this changes speed, not
+  answers.
+- MAX_LOADED_MODELS=3.
+- Stop only your own processes: `pkill -u $USER -f "ollama serve"`.
+- Expect its one-request speed to be similar to the laptop's (memory bandwidth about 273 vs 400 GB/s); the gain is
+  in parallel throughput. The smoke test measures it.

@@ -237,6 +237,8 @@ def post_set(r, model, agents):
 
 
 def run(a):
+    if llm.BACKEND == "llamacpp" and a.model not in llm.available_models():
+        raise SystemExit(f"the llama.cpp server for {a.model} is not running (llamacpp_servers.sh only {a.model})")
     if not llm.server_up():
         raise SystemExit("Ollama is not running. Start it with:\n  OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 "
                          "OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h ollama serve > /tmp/ollama_serve.log 2>&1 &")

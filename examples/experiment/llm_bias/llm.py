@@ -162,9 +162,9 @@ def _post_get(path):
 
 
 def server_up():
+    if BACKEND == "llamacpp":  # LB-v2-3: any ONE healthy server counts -- a stopped server must not end the check
+        return bool(available_models())
     try:
-        if BACKEND == "llamacpp":
-            return any(_get(u + "/health").get("status") == "ok" for u in LLAMACPP_URLS.values())
         _post_get("/api/tags")
         return True
     except Exception:

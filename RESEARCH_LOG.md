@@ -14394,3 +14394,27 @@ this study, while only one model is ever in use per step. Gordon: "I'm using hal
 - Expected footprint is about 20-25 GB. Each switch costs about 30 s, roughly 10 per round.
 - Answers are unaffected: same servers, same settings.
 - Applied to round 101 mid-run by restarting the runner, which resumes where it was.
+
+## 14.27 Round 101 night: qwen done, llama and gemma failed (LB-v2-3, fixed 2026-10-06 09:10)
+
+**What ran correctly:**
+- qwen posting: 101 posts.
+- **qwen BASELINE: all 9,999 screens**, 0.38 s per screen with one model loaded.
+- qwen noise floor: 400 screens.
+- 10,499 screens in total, 4 unreadable.
+
+**What failed:** every llama and gemma step ended with rc=1 and 0 screens, within seconds, at 23:55-23:57.
+
+**LB-v2-3 (cause):** `llm.server_up()` for llama.cpp used `any(...)` inside one try/except. With one model loaded at a
+time (LD-42), qwen's server, the first in the list, was off during llama's and gemma's steps. The first failed
+health call raised, `server_up()` returned False, and `run_v2.py` quit with its old "Ollama is not running" message.
+Each `only` switch itself worked (`READY llama3.1:8b`, `READY gemma3:12b` in night.log).
+
+**Fixes:**
+- `server_up()` now uses `available_models()`, which checks each server separately. Tested: qwen down and llama up
+  gives True.
+- `run_v2.py` names the missing llama.cpp server.
+- **`v2_night.py` stops the whole run** if a step fails with 0 screens, instead of failing every remaining step.
+
+**Resume:** run the same command again. Completed qwen turns are skipped, and llama and gemma continue. About 10-11 h
+remain for this round (llama posting + baseline, gemma posting + baseline, the 6 cross cells).

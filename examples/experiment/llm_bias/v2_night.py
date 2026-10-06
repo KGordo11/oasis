@@ -98,6 +98,11 @@ def step(r, args, est_screens, reader, what, name):
     if did > 20:
         SPS[reader] = (time.time() - t) / did
     log(f"end {what} rc={rc}: {did} screens in {(time.time() - t) / 60:.1f} min ({SPS[reader]:.2f} s/screen)")
+    if rc != 0 and did == 0:
+        # LB-v2-3 lesson: a step that fails before a single screen means something is broken (server, code, env);
+        # stop the whole run instead of failing every remaining step in seconds. Re-running resumes.
+        log(f"STOPPING: '{what}' failed with nothing done -- see /tmp/v2_{name}.log; fix it, then run the same command again")
+        raise SystemExit(2)
     return rc == 0
 
 

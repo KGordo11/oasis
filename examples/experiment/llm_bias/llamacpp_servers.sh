@@ -18,9 +18,14 @@ blob() {  # model name -> its model file, read from Ollama's manifest (no Ollama
 
 case "${1:-status}" in
 start)
+  if pgrep -u "$USER" -f "llama-server -m" >/dev/null; then echo "servers already running -- run: $0 stop   first"; exit 1; fi
   urls="{"
   for m in qwen3:8b llama3.1:8b gemma3:12b; do
-    p=${PORT[$m]}; f=$ROOT/models/blobs/$(blob "$m")
+    p=${PORT[$m]}
+    # a standard GGUF in models/gguf/<name>.gguf (e.g. gemma3-12b.gguf) wins over Ollama's file -- for a model whose
+    # Ollama file llama.cpp cannot read
+    alt=$ROOT/models/gguf/${m/:/-}.gguf
+    if [ -f "$alt" ]; then f=$alt; else f=$ROOT/models/blobs/$(blob "$m"); fi
     [ -f "$f" ] || { echo "missing model file for $m: $f"; exit 1; }
     nohup "$BIN" -m "$f" --alias "$m" --host 127.0.0.1 --port "$p" -np "$SLOTS" -c $((SLOTS * 8192)) \
       -fa on --jinja -ngl 99 > "$ROOT/logs/llamacpp_${m%%:*}.log" 2>&1 &
@@ -29,7 +34,9 @@ start)
   done
   urls="${urls%, }}"
   for m in qwen3:8b llama3.1:8b gemma3:12b; do
-    until curl -s "127.0.0.1:${PORT[$m]}/health" | grep -q ok; do sleep 2; done; echo "READY $m"
+    for i in $(seq 1 90); do curl -s "127.0.0.1:${PORT[$m]}/health" | grep -q ok && break; sleep 2; done
+    if curl -s "127.0.0.1:${PORT[$m]}/health" | grep -q ok; then echo "READY $m"
+    else echo "FAILED $m -- see: tail -30 $ROOT/logs/llamacpp_${m%%:*}.log"; exit 1; fi
   done
   printf 'export LLM_BACKEND=llamacpp\nexport LLAMACPP_URLS=%q\n' "$urls" > "$ROOT/env_llamacpp.sh"
   echo "wrote $ROOT/env_llamacpp.sh -- now run:  source $ROOT/env_llamacpp.sh" ;;

@@ -39,6 +39,9 @@ TIMEOUT_S = 300
 # A different engine is a different setup: every round of one study must use the same backend.
 BACKEND = _os.environ.get("LLM_BACKEND", "ollama")
 LLAMACPP_URLS = json.loads(_os.environ.get("LLAMACPP_URLS", "{}"))
+# LD-41: on llama.cpp every model gets the SAME sampling settings (Ollama silently applied a different top_k/top_p/
+# repeat penalty per model from each Modelfile). Temperature still comes from the caller (0.7 for every model).
+SAMPLING = {"top_k": 40, "top_p": 0.9, "min_p": 0.0, "repeat_penalty": 1.0}
 
 
 class LLMError(RuntimeError):
@@ -125,7 +128,8 @@ def _llamacpp(model, msgs, opts, timeout):
     """One chat request to the model's llama.cpp server, returned in Ollama's response shape."""
     payload = {"model": model, "messages": msgs, "stream": False, "temperature": opts["temperature"],
                "max_tokens": opts["num_predict"], "response_format": {"type": "json_object"},
-               "chat_template_kwargs": {"enable_thinking": False}}  # same as Ollama's think=False
+               "chat_template_kwargs": {"enable_thinking": False},  # same as Ollama's think=False
+               **SAMPLING}
     if "seed" in opts:
         payload["seed"] = opts["seed"]
     req = urllib.request.Request(LLAMACPP_URLS[model] + "/v1/chat/completions", json.dumps(payload).encode(),

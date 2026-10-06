@@ -139,5 +139,6 @@ for m in MODELS:
     subprocess.call(["curl", "-s", URL + "/api/generate", "-d", json.dumps({"model": m, "keep_alive": 0})],
                     stdout=subprocess.DEVNULL)
 if os.environ.get("STOP_OLLAMA", "1") == "1":
-    subprocess.call(["pkill", "-f", "ollama serve"])
+    subprocess.call(["pkill", "-u", os.environ.get("USER", ""), "-f", "ollama serve"])
+    subprocess.call(["pkill", "-u", os.environ.get("USER", ""), "-f", "llama-server -m"])  # llama.cpp servers too
 log("end: models unloaded")

@@ -14343,3 +14343,25 @@ template and its own defaults. So:
 - Decide only after a measured speed-up, with the benchmark after round 101 ends.
 
 Never run the benchmark while a round is running (B-32).
+
+## 14.24 Engine speed test on the Spark: llama.cpp ≈ 2.5-3× faster than Ollama (2026-10-05 22:09)
+
+Round 101 was frozen (SIGSTOP) during the test and resumed afterwards (SIGCONT): STAT back to S, GPU back to 89%,
+about 20 min lost. Same 108 test screens (round 902, qwen's set, read by llama3.1:8b, 10 users):
+
+| Engine | Time | Unreadable |
+|---|---|---|
+| Ollama, 8 slots | 3.2 min (includes a 20-40 s model load) | 0 |
+| **llama.cpp, 8 slots** | **1.1 min** | 0 |
+| llama.cpp, 32 slots | 0.9 min | 0 |
+
+The llama.cpp server was built from b11434 and used the same model file.
+
+**Prepared for a switch (LD-41, pending Gordon's go):**
+- `llamacpp_servers.sh start|stop|status` starts one server per model (qwen 11601, llama 11602, gemma 11603). Each
+  has 8 slots × 8192 tokens, flash attention, all layers on the GPU, and `--jinja`. The model files are read from
+  Ollama's manifests, so nothing is re-downloaded. It writes `~/llm_bias/env_llamacpp.sh`.
+- **Uniform sampling for every model:** top_k 40, top_p 0.9, min_p 0, repeat penalty 1.0, temperature 0.7. Under
+  Ollama each model silently got its own Modelfile defaults, which is a hidden extra variable that llama.cpp
+  removes.
+- The run manifest records the backend and sampling. At the end, `v2_night` also stops your llama.cpp servers.

@@ -4,8 +4,9 @@ IN PLAIN WORDS
 --------------
 For each round:
 1. Posting turn for each AI (100 users each).
-2. Reading in growing slices: every reader AI reads the first 16 posts of each user's scroll in every post set, then
-   32, 64, then all of them (0 = all). The slices are nested -- a bigger slice only adds posts at the end of each
+2. Baselines first (LD-40): each AI posts, then the same AI reads ALL of its own posts, one AI after another.
+3. Then the cross tests in growing slices: every reader AI reads the first 16 posts of each user's scroll in the
+   other AIs' sets, then 32, 64, then all of them (0 = all). The slices are nested -- a bigger slice only adds posts at the end of each
    user's scroll -- so whenever time runs out, every cell has the same coverage, and the next run continues there.
 3. Optional noise floor (NOISE=4): each AI re-reads 4 posts per user of its own set with fresh randomness.
 Before each step it estimates the step's time from the seconds per screen it has measured so far (on this machine)
@@ -99,24 +100,32 @@ def checkpoint(r, msg):
 
 log(f"start: rounds {ROUNDS}, models {MODELS}, slices {SLICES}, stop {datetime.fromtimestamp(STOP):%F %H:%M}")
 for r in ROUNDS:
+    # LD-40 (Gordon): baselines first, one AI at a time -- AI posts, then the same AI reads ALL of its own posts --
+    # and only then the cross tests. Order does not change any answer (every screen is independent); it means the
+    # three baselines are complete before any cross reading starts.
     for m in MODELS:
         if not os.path.exists(os.path.join(rdir(r), f"posting_{m.replace(':', '-')}.manifest.json")):
             step(r, ["post", "--model", m], 100, m, f"r{r} post {m}", f"posting_{m.replace(':', '-')}")
+        n = n_posts(r, m)
+        name = f"reading_{m.replace(':', '-')}__{m.replace(':', '-')}"
+        todo = max(0, expected(r, m, 0) - screens_done(r, name)) if n else 0
+        if todo:
+            step(r, ["read", "--posts-by", m, "--model", m], todo, m, f"r{r} BASELINE {m} reads own posts (all)", name)
     sets = {m: n_posts(r, m) for m in MODELS}
-    log(f"r{r} post sets: {sets}")
-    prev = 0
+    log(f"r{r} post sets: {sets}; baselines done")
+    checkpoint(r, "baselines")
+    # cross tests, in growing slices so all six cells stay evenly covered if time runs short
     for k in SLICES:
         for reader in MODELS:
             for pb in MODELS:
-                n = sets[pb]
-                if n == 0:
+                if pb == reader or sets[pb] == 0:
                     continue
                 name = f"reading_{pb.replace(':', '-')}__{reader.replace(':', '-')}"
                 todo = max(0, expected(r, pb, k) - screens_done(r, name))
                 if todo:
                     step(r, ["read", "--posts-by", pb, "--model", reader] + (["--max-posts", str(k)] if k else []),
-                         todo, reader, f"r{r} read {pb} by {reader} slice {k or 'all'}", name)
-        checkpoint(r, f"reading slice {k or 'all'}")
+                         todo, reader, f"r{r} CROSS {reader} reads {pb} slice {k or 'all'}", name)
+        checkpoint(r, f"cross tests slice {k or 'all'}")
     if NOISE:
         for m in MODELS:
             if sets[m]:

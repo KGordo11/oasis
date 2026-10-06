@@ -14302,3 +14302,18 @@ compute-bound past 8, so **8 is kept for the whole study**: the gain is small an
   reproduces: −1.9 (−8.2 to +4.7).
 - **Gordon's plan: one round at a time** (101 now, then 102 and 103 on later days). The run lives on the Spark in
   tmux, so closing the laptop or dropping the VPN does not stop it.
+
+## 14.22 LD-40: baselines first (Gordon, 2026-10-05 22:00)
+
+"AI1 will post and be the users as baseline, then AI2, then AI3, before any cross testing." `v2_night.py` order per
+round is now:
+1. qwen posts, then qwen reads ALL its own posts.
+2. llama posts, then llama reads ALL its own posts.
+3. gemma posts, then gemma reads ALL its own posts.
+4. Checkpoint.
+5. The 6 cross cells in even slices (16, 32, 64, all).
+6. The noise floor.
+
+Order changes no answer, since every screen is independent; it guarantees complete baselines first. Verified by a dry
+run with a stub. The baselines should be done about 6-7 h into a round (qwen ~1.3 h, llama ~4 h, gemma ~1 h); the
+cross tests take about 12 h.

@@ -14365,3 +14365,22 @@ The llama.cpp server was built from b11434 and used the same model file.
   Ollama each model silently got its own Modelfile defaults, which is a hidden extra variable that llama.cpp
   removes.
 - The run manifest records the backend and sampling. At the end, `v2_night` also stops your llama.cpp servers.
+
+## 14.25 Switched to llama.cpp (LD-41, Gordon, 2026-10-05 22:20): round 101 on Ollama stopped and set aside
+
+Gordon: "we're stopping round 101 and doing the updated ones now, that is a huge change."
+- The partial Ollama round 101 (qwen's posting turn and part of its baseline, about 1 h) was moved to
+  `~/llm_bias/pilot_ollama/r101_ollama` on the Spark. It is a pilot only, never mixed with llama.cpp rounds.
+- **Ollama's gemma3:12b file cannot be read by llama.cpp** ("key not found: gemma3.attention.layer_norm_rms_epsilon",
+  an Ollama-specific format). It was replaced by the standard file `ggml-org/gemma-3-12b-it-GGUF`
+  `gemma-3-12b-it-Q4_K_M.gguf`: the same Google model and the same Q4_K_M compression, saved as
+  `~/llm_bias/models/gguf/gemma3-12b.gguf`. qwen3:8b and llama3.1:8b use Ollama's own files (standard GGUF).
+- The three servers use about 50 GB together, leaving 71 GB available on the Spark.
+
+**Smoke test on llama.cpp, round 903 (10 users, all posts read): 12/12 turns, 0 unreadable.**
+- Posts written: qwen 11, llama 11, **gemma 1**. On Ollama it was 4/10, so gemma posts less under this
+  engine/sampling, and gemma's post set will be small.
+- Seconds per screen by reader: qwen ≈ 0.42, llama ≈ 0.58 (Ollama 1.65), gemma ≈ 1.0 (Ollama ≈ 0.7).
+- The manifest records the backend, the uniform sampling, the model digest and per-server slots/context (build
+  5e03bdd).
+- **Estimated round time: about 12-14 h** (Ollama ≈ 19 h).

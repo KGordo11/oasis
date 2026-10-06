@@ -16,7 +16,24 @@ blob() {  # model name -> its model file, read from Ollama's manifest (no Ollama
   python3 -c "import json,sys; m=json.load(open(sys.argv[1])); print([l['digest'] for l in m['layers'] if l['mediaType'].endswith('.model')][0].replace(':','-'))" "$MAN/${1%%:*}/${1#*:}"
 }
 
+start_one() {  # start one model's server and wait until it answers (3-min limit)
+  local m=$1 p=${PORT[$1]} f alt=$ROOT/models/gguf/${1/:/-}.gguf
+  if [ -f "$alt" ]; then f=$alt; else f=$ROOT/models/blobs/$(blob "$m"); fi
+  [ -f "$f" ] || { echo "missing model file for $m: $f"; exit 1; }
+  nohup "$BIN" -m "$f" --alias "$m" --host 127.0.0.1 --port "$p" -np "$SLOTS" -c $((SLOTS * 8192)) \
+    -fa on --jinja -ngl 99 > "$ROOT/logs/llamacpp_${m%%:*}.log" 2>&1 &
+  for i in $(seq 1 90); do curl -s "127.0.0.1:$p/health" | grep -q ok && break; sleep 2; done
+  curl -s "127.0.0.1:$p/health" | grep -q ok && echo "READY $m (only this model loaded)" || { echo "FAILED $m"; exit 1; }
+}
+
 case "${1:-status}" in
+only)
+  # LD-42: keep ONE model in memory (the one the current step uses) so the shared Spark keeps ~95 GB free
+  m=${2:?usage: $0 only <model>}
+  if curl -s "127.0.0.1:${PORT[$m]}/health" | grep -q ok && [ "$(pgrep -u "$USER" -fc "llama-server -m")" = "1" ]; then
+    echo "already only $m"; exit 0; fi
+  pkill -u "$USER" -f "llama-server -m"; sleep 3
+  start_one "$m" ;;
 start)
   if pgrep -u "$USER" -f "llama-server -m" >/dev/null; then echo "servers already running -- run: $0 stop   first"; exit 1; fi
   urls="{"

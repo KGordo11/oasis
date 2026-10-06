@@ -71,7 +71,20 @@ def screens_done(r, name):
     return sum(1 for _ in open(f)) if os.path.exists(f) else 0
 
 
+MANAGE = os.environ.get("MANAGE_SERVERS", "0") == "1" and os.environ.get("LLM_BACKEND") == "llamacpp"
+SERVERS = os.path.join(HERE, "llamacpp_servers.sh")
+
+
+def only(model):
+    """LD-42: load only the model this step uses (llama.cpp); the other servers are stopped."""
+    if MANAGE:
+        rc = subprocess.call(["bash", SERVERS, "only", model], stdout=open(LOG, "a"), stderr=subprocess.STDOUT)
+        if rc != 0:
+            log(f"could not start the {model} server (rc={rc})")
+
+
 def step(r, args, est_screens, reader, what, name):
+    only(reader)
     est = est_screens * SPS[reader]
     left = STOP - time.time()
     if est > left:

@@ -14384,3 +14384,13 @@ Gordon: "we're stopping round 101 and doing the updated ones now, that is a huge
 - The manifest records the backend, the uniform sampling, the model digest and per-server slots/context (build
   5e03bdd).
 - **Estimated round time: about 12-14 h** (Ollama ≈ 19 h).
+
+## 14.26 LD-42: one model in memory at a time (2026-10-05 23:05)
+
+With all three llama.cpp servers loaded, the Spark showed 76 GB used and 45 GB available. That is about 70 GB for
+this study, while only one model is ever in use per step. Gordon: "I'm using half the thing."
+- `llamacpp_servers.sh only <model>` stops the other servers and starts just that one.
+- `v2_night.py` with `MANAGE_SERVERS=1` calls it before every step (post or read, for the AI that step uses).
+- Expected footprint is about 20-25 GB. Each switch costs about 30 s, roughly 10 per round.
+- Answers are unaffected: same servers, same settings.
+- Applied to round 101 mid-run by restarting the runner, which resumes where it was.

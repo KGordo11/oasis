@@ -28,6 +28,8 @@ MODELS = os.environ.get("MODELS", "qwen3:8b llama3.1:8b gemma3:12b").split()
 ROUNDS = [int(x) for x in os.environ.get("ROUNDS", "1").split()]
 SLICES = [int(x) for x in os.environ.get("SLICES", "16 32 64 0").split()]
 NOISE = int(os.environ.get("NOISE", "4"))
+PARALLEL = os.environ.get("PARALLEL", "4")  # requests in flight; match the server's OLLAMA_NUM_PARALLEL
+URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 STOP = datetime.strptime(os.environ["STOP"], "%Y-%m-%d %H:%M").timestamp()
 REPLAY = os.environ.get("REPLAY", "0") == "1"
 PUSH = os.environ.get("PUSH", "1") == "1"
@@ -65,7 +67,7 @@ def step(r, args, est_screens, reader, what, name):
         return False
     log(f"start {what} (~{est_screens} screens, ~{est / 60:.0f} min)")
     t, before = time.time(), screens_done(r, name)
-    rc = subprocess.call([PY, RUN, *args, "--round", str(r)] + ([] if REPLAY else ["--no-replay"]), cwd=REPO,
+    rc = subprocess.call([PY, RUN, *args, "--round", str(r), "--parallel", PARALLEL] + ([] if REPLAY else ["--no-replay"]), cwd=REPO,
                          stdout=open(f"/tmp/v2_{name}.log", "a"), stderr=subprocess.STDOUT)
     did = screens_done(r, name) - before
     if did > 20:
@@ -115,7 +117,7 @@ for r in ROUNDS:
                          todo, m, f"r{r} noise floor {m}", name)
         checkpoint(r, "noise floor")
 for m in MODELS:
-    subprocess.call(["curl", "-s", "localhost:11434/api/generate", "-d", json.dumps({"model": m, "keep_alive": 0})],
+    subprocess.call(["curl", "-s", URL + "/api/generate", "-d", json.dumps({"model": m, "keep_alive": 0})],
                     stdout=subprocess.DEVNULL)
 if os.environ.get("STOP_OLLAMA", "1") == "1":
     subprocess.call(["pkill", "-f", "ollama serve"])

@@ -28,7 +28,10 @@ import time
 import urllib.error
 import urllib.request
 
-OLLAMA_URL = "http://localhost:11434"
+import os as _os
+
+# OLLAMA_URL lets a shared machine (the DGX Spark) use a private Ollama on its own port instead of 11434
+OLLAMA_URL = _os.environ.get("OLLAMA_URL", "http://localhost:11434")
 NUM_CTX = 8192
 TIMEOUT_S = 300
 

@@ -14317,3 +14317,29 @@ round is now:
 Order changes no answer, since every screen is independent; it guarantees complete baselines first. Verified by a dry
 run with a stub. The baselines should be done about 6-7 h into a round (qwen ~1.3 h, llama ~4 h, gemma ~1 h); the
 cross tests take about 12 h.
+
+## 14.23 Faster engine: feasibility on the Spark, and a llama.cpp backend (2026-10-05 22:00)
+
+**On the Spark:**
+- No Docker access: kmgo257 is not in the docker group (groups: csgrad, siddiquelab, linkblue), so NVIDIA's vLLM,
+  SGLang and TensorRT containers are out unless access is granted.
+- CUDA 13.0, cmake, gcc and venv are available.
+- **The llama.cpp server is built** in `~/llm_bias/engines/llama.cpp` (tag b11434, CUDA, sm_121), and it can run
+  **the same model files Ollama downloaded**:
+  - qwen3:8b = blob a3de86cd…
+  - llama3.1:8b = 667b0c19…
+  - gemma3:12b = e8ad13ef…
+
+**`llm.py` now has `LLM_BACKEND=llamacpp`** with `LLAMACPP_URLS` (model → server). It sends requests to the OpenAI-style
+`/v1/chat/completions` endpoint with JSON mode and `enable_thinking: false`. It records the server's slots, build and
+context, and the model file digest. Tested end to end on the laptop with llama3.2:1b via Homebrew llama.cpp: the
+pipeline works and the manifest records everything.
+
+**Caveat before switching:** the same weights do not make the same setup. Ollama applies its own chat template and
+default sampling (top_k/top_p/repeat penalty from each model's Modelfile), while llama-server uses the model file's own
+template and its own defaults. So:
+- **All rounds of one study must use one engine.**
+- Switching means matching the sampling settings and redoing round 101 on llama.cpp.
+- Decide only after a measured speed-up, with the benchmark after round 101 ends.
+
+Never run the benchmark while a round is running (B-32).

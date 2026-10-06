@@ -29,6 +29,8 @@ MODELS = os.environ.get("MODELS", "qwen3:8b llama3.1:8b gemma3:12b").split()
 ROUNDS = [int(x) for x in os.environ.get("ROUNDS", "1").split()]
 SLICES = [int(x) for x in os.environ.get("SLICES", "16 32 64 0").split()]
 NOISE = int(os.environ.get("NOISE", "4"))
+AGENTS = int(os.environ.get("AGENTS", "100"))  # fewer users = a quick end-to-end test of the whole runner
+TAG = f"_a{AGENTS}" if AGENTS < 100 else ""  # run_v2.py names files this way when --agents < 100
 PARALLEL = os.environ.get("PARALLEL", "4")  # requests in flight; match the server's OLLAMA_NUM_PARALLEL
 URL = os.environ.get("OLLAMA_URL", "http://localhost:11434")
 STOP = datetime.strptime(os.environ["STOP"], "%Y-%m-%d %H:%M").timestamp()
@@ -51,19 +53,19 @@ def rdir(r):
 
 
 def n_posts(r, m):
-    f = os.path.join(rdir(r), f"posting_{m.replace(':', '-')}.jsonl")
+    f = os.path.join(rdir(r), f"posting_{m.replace(':', '-')}{TAG}.jsonl")
     return sum(sum(x["action"] == "create_post" for x in json.loads(l)["actions"]) for l in open(f)) if os.path.exists(f) else 0
 
 
 def expected(r, pb, k):
     """Screens a reading cell needs at slice k: each user reads min(k, posts not their own); k=0 means all."""
-    f = os.path.join(rdir(r), f"posting_{pb.replace(':', '-')}.jsonl")
+    f = os.path.join(rdir(r), f"posting_{pb.replace(':', '-')}{TAG}.jsonl")
     own = {}
     for l in open(f):
         d = json.loads(l)
         own[d["user_id"]] = sum(x["action"] == "create_post" for x in d["actions"])
     n = sum(own.values())
-    return sum((n - own.get(u, 0)) if k == 0 else min(k, n - own.get(u, 0)) for u in range(100))
+    return sum((n - own.get(u, 0)) if k == 0 else min(k, n - own.get(u, 0)) for u in range(AGENTS))
 
 
 def screens_done(r, name):
@@ -84,6 +86,7 @@ def only(model):
 
 
 def step(r, args, est_screens, reader, what, name):
+    name += TAG
     only(reader)
     est = est_screens * SPS[reader]
     left = STOP - time.time()
@@ -92,7 +95,7 @@ def step(r, args, est_screens, reader, what, name):
         return False
     log(f"start {what} (~{est_screens} screens, ~{est / 60:.0f} min)")
     t, before = time.time(), screens_done(r, name)
-    rc = subprocess.call([PY, RUN, *args, "--round", str(r), "--parallel", PARALLEL] + ([] if REPLAY else ["--no-replay"]), cwd=REPO,
+    rc = subprocess.call([PY, RUN, *args, "--round", str(r), "--parallel", PARALLEL, "--agents", str(AGENTS)] + ([] if REPLAY else ["--no-replay"]), cwd=REPO,
                          stdout=open(f"/tmp/v2_{name}.log", "a"), stderr=subprocess.STDOUT)
     did = screens_done(r, name) - before
     if did > 20:
@@ -122,11 +125,11 @@ for r in ROUNDS:
     # and only then the cross tests. Order does not change any answer (every screen is independent); it means the
     # three baselines are complete before any cross reading starts.
     for m in MODELS:
-        if not os.path.exists(os.path.join(rdir(r), f"posting_{m.replace(':', '-')}.manifest.json")):
+        if not os.path.exists(os.path.join(rdir(r), f"posting_{m.replace(':', '-')}{TAG}.manifest.json")):
             step(r, ["post", "--model", m], 100, m, f"r{r} post {m}", f"posting_{m.replace(':', '-')}")
         n = n_posts(r, m)
         name = f"reading_{m.replace(':', '-')}__{m.replace(':', '-')}"
-        todo = max(0, expected(r, m, 0) - screens_done(r, name)) if n else 0
+        todo = max(0, expected(r, m, 0) - screens_done(r, name + TAG)) if n else 0
         if todo:
             step(r, ["read", "--posts-by", m, "--model", m], todo, m, f"r{r} BASELINE {m} reads own posts (all)", name)
     sets = {m: n_posts(r, m) for m in MODELS}
@@ -139,7 +142,7 @@ for r in ROUNDS:
                 if pb == reader or sets[pb] == 0:
                     continue
                 name = f"reading_{pb.replace(':', '-')}__{reader.replace(':', '-')}"
-                todo = max(0, expected(r, pb, k) - screens_done(r, name))
+                todo = max(0, expected(r, pb, k) - screens_done(r, name + TAG))
                 if todo:
                     step(r, ["read", "--posts-by", pb, "--model", reader] + (["--max-posts", str(k)] if k else []),
                          todo, reader, f"r{r} CROSS {reader} reads {pb} slice {k or 'all'}", name)
@@ -148,7 +151,7 @@ for r in ROUNDS:
         for m in MODELS:
             if sets[m]:
                 name = f"reading_{m.replace(':', '-')}__{m.replace(':', '-')}_d1"
-                todo = max(0, 100 * min(NOISE, sets[m] - 1) - screens_done(r, name))
+                todo = max(0, AGENTS * min(NOISE, sets[m] - 1) - screens_done(r, name + TAG))
                 if todo:
                     step(r, ["read", "--posts-by", m, "--model", m, "--max-posts", str(NOISE), "--draw", "1"],
                          todo, m, f"r{r} noise floor {m}", name)

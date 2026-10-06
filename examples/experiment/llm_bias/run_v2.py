@@ -208,6 +208,24 @@ def validate(obj):
     return {"actions": out, "reason": str(obj.get("reason", ""))[:300]}
 
 
+def load_rows(path):
+    """Read a results file for resuming. A run killed while writing can leave a half-written last line: keep every
+    complete row, rewrite the file without the broken one, so new rows never get glued onto it."""
+    if not os.path.exists(path):
+        return []
+    good, broken = [], 0
+    for line in open(path):
+        try:
+            good.append(json.loads(line))
+        except json.JSONDecodeError:
+            broken += 1
+    if broken:
+        with open(path, "w") as f:
+            f.writelines(json.dumps(r) + "\n" for r in good)
+        print(f"resume: dropped {broken} half-written line(s) from {os.path.basename(path)}", flush=True)
+    return good
+
+
 def git_commit():
     try:
         return subprocess.check_output(["git", "-C", REPO, "rev-parse", "HEAD"], text=True).strip()
@@ -258,7 +276,7 @@ def run(a):
         line = f"{datetime.now():%H:%M:%S} {msg}"
         print(line, flush=True); logf.write(line + "\n"); logf.flush()
 
-    rows = [json.loads(l) for l in open(out)] if os.path.exists(out) else []
+    rows = load_rows(out)
     done = {(d["user_id"], d.get("post_key")) for d in rows}
     subs = "\n".join(f"- {s} ({n})" for s, n in TOPICS.values())
     if a.turn == "post":

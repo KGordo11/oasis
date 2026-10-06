@@ -14418,3 +14418,34 @@ Each `only` switch itself worked (`READY llama3.1:8b`, `READY gemma3:12b` in nig
 
 **Resume:** run the same command again. Completed qwen turns are skipped, and llama and gemma continue. About 10-11 h
 remain for this round (llama posting + baseline, gemma posting + baseline, the 6 cross cells).
+
+## 14.28 Full preflight before leaving runs unattended (Gordon: "full proof testing ... make sure all is normal")
+
+`preflight_v2.py` runs on the Spark in about 20-30 min, using test round 904 with 10 users. It prints PASS/FAIL per
+check and finishes with "ALL CLEAR" or "NOT SAFE":
+- **A. Setup:** the fix is in the code, env files, the llama-server program, the 3 model files, disk, nothing else
+  running.
+- **B. Code:** pinned personas, the answer checker accepts good answers and rejects bad ones, uniform sampling.
+- **C/D. Each AI alone, then switching** qwen → llama → gemma → qwen: exactly one server loaded, it is the one seen,
+  a real JSON answer comes back, no hidden thinking. This is the path that broke (LB-v2-3).
+- **E. The real runner on a mini-round:**
+  - every step rc=0
+  - every user read every post
+  - no duplicates, nobody read their own post
+  - unreadable answers under 5%
+  - every file records llama.cpp and the uniform sampling
+  - the analysis runs
+- **F. Resume:** a step is hard-killed (SIGKILL) a third of the way through, restarted, and must end complete with
+  no duplicates.
+- **G. Clean finish:** servers stopped and memory back.
+
+**Found while writing and dry-running it:**
+- **LB-v2-4: a hard kill mid-write could leave a half-written last line.** On resume that crashed, or glued new
+  rows onto it. `run_v2.load_rows()` now drops a broken line and repairs the file. Unit-tested.
+- **LB-v2-5 (the checker itself):** `pgrep -f` inside `sh -c` matches its own shell, so a "1 server loaded" check
+  would have read 2. Process checks now use plain `ps`, excluding the checker's own process (works on Linux and
+  macOS).
+- `v2_night.py` gained `AGENTS=` so the whole runner can be tested at 10 users. Files are tagged `_a10`, as
+  `run_v2.py` names them.
+
+Dry run on the laptop, with no servers: it runs end to end and reports instead of crashing. Section B all PASS.

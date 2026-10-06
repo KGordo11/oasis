@@ -14483,3 +14483,20 @@ Every check passed:
 - servers stopped and memory back
 
 Round 101 resumes from here (llama and gemma posting and baselines, then the 6 cross cells and the noise floor).
+
+## 14.31 Round 101 paused for the other Spark user (2026-10-06 ~15:00)
+
+Status at the pause:
+- **All three baselines are complete.** Post sets: **qwen 101, llama 103, gemma 25**.
+- Seconds per screen: llama baseline 0.49 s, gemma baseline 0.97 s.
+- Cross stage 1 (16 posts per user) is done for all 6 cells.
+- Cross stage 2 is done for qwen reading llama's and gemma's posts, and llama reading qwen's posts was at 2,770/3,200.
+
+From about 13:50, user hsa303 ran 2-3 GPU jobs (`residual_concepts.clean.qwen` / `.fit`, about 22 + 24 GB GPU each).
+Our reading slowed about 5× (2.7 s instead of 0.53 s per screen). They said they would use the machine more if it
+were free.
+
+Gordon paused the run (runner, run_v2 and the llama-server all stopped; resume is proven safe by the preflight) and
+proposed overnight GPU time for us (about 19:00-09:00).
+
+**Plan:** resume tonight with `ROUNDS="101 102" STOP=09:00`.

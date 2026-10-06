@@ -64,16 +64,18 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-06 15:00): read this first
+## 0.2 Where things stand (2026-10-06 19:10): read this first
 
 - **Current work: LLM Bias v2 on the DGX Spark `honda.csr.uky.edu`.** Design, machine, file layout, the exact
   resume commands and how Gordon likes to work are all in **Part 14 §14.32 (HANDOFF)**. Read that next.
-- **Round 101 is PAUSED** (since Tue 2026-10-06 ~15:00). Another Spark user, hsa303, needed the GPU, and both of us
+- **Round 101 was paused** Tue 2026-10-06 ~15:00-19:10, now running overnight. Another Spark user, hsa303, needed the GPU, and both of us
   were running about 5× slower.
   - Done: **all 3 baselines** (post sets qwen 101 / llama 103 / gemma 25), cross-test stage 1 for all 6 cells,
     and part of stage 2.
-  - **Plan:** Gordon resumes overnight (~19:00-09:00) with `ROUNDS="101 102" STOP=09:00`, then the following
-    nights, for 3 rounds (101-103) by the **deadline, Friday 2026-10-09**.
+  - **Tue 2026-10-06 ~19:10: resumed overnight** with `ROUNDS="101 102 103" STOP="2026-10-07 10:00"` (Gordon:
+    "keep going until 10am, as much as it can"). That is ~14.8 h, enough to finish round 101 (~6.5 h) and most of
+    round 102; 103 is listed only so no time is wasted. The runner never starts a step it can't finish by 10:00.
+    Then the following nights, for 3 rounds (101-103) by the **deadline, Friday 2026-10-09**.
 - **The final design** (§14.11 + §14.22 + §14.25):
   - Two-turn rounds: a posting turn, then a reading turn, one post per screen, every OASIS action available, a
     wipe after each round.
@@ -14503,6 +14505,14 @@ proposed overnight GPU time for us (about 19:00-09:00).
 
 **Plan:** resume tonight with `ROUNDS="101 102" STOP=09:00`.
 
+## 14.31a Overnight resume, Tue 2026-10-06 ~19:10 → Wed 10:00
+
+Gordon resumed the run for the night with `ROUNDS="101 102 103" STOP="2026-10-07 10:00"`. No code change since
+ffafa95 (preflight 108/108), so no pull and no new preflight. Expected by 10:00 if the GPU is not shared: round 101
+finished (cross stage 2 rest, stages 3-4, noise floor) and round 102's posting turns, baselines and early cross
+stages. If hsa303 runs jobs overnight, everything is ~5× slower and the runner simply does less. Results to be
+added here after the morning check.
+
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 
 ### What the study is
@@ -14584,8 +14594,9 @@ into the running window (typed text gets queued as shell input).
 
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
-### Status (2026-10-06 15:00)
-**Round 101 is paused.**
+### Status (2026-10-06 19:10)
+**Round 101 resumed overnight until Wed 2026-10-07 10:00** (§14.31a), `ROUNDS="101 102 103"`. Status at the
+15:00 pause:
 - Complete: posting turns for all 3 AIs, **all 3 baselines**, stage 1 of all 6 cross cells, and stage 2 of
   qwen←llama and qwen←gemma.
 - In progress at the pause: llama←qwen, at 2,770/3,200.

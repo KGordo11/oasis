@@ -161,5 +161,5 @@ for m in MODELS:
                     stdout=subprocess.DEVNULL)
 if os.environ.get("STOP_OLLAMA", "1") == "1":
     subprocess.call(["pkill", "-u", os.environ.get("USER", ""), "-f", "ollama serve"])
-    subprocess.call(["pkill", "-u", os.environ.get("USER", ""), "-f", "llama-server -m"])  # llama.cpp servers too
+    subprocess.call(["bash", SERVERS, "stop"], stdout=open(LOG, "a"), stderr=subprocess.STDOUT)  # waits until exited
 log("end: models unloaded")

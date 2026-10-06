@@ -16,6 +16,12 @@ blob() {  # model name -> its model file, read from Ollama's manifest (no Ollama
   python3 -c "import json,sys; m=json.load(open(sys.argv[1])); print([l['digest'] for l in m['layers'] if l['mediaType'].endswith('.model')][0].replace(':','-'))" "$MAN/${1%%:*}/${1#*:}"
 }
 
+stop_all() {  # LB-v2-7: ask every server to stop, WAIT until it has exited (GPU memory released), force any straggler
+  pkill -u "$USER" -f "llama-server -m" || return 0
+  for i in $(seq 1 30); do pgrep -u "$USER" -f "llama-server -m" >/dev/null || return 0; sleep 1; done
+  pkill -9 -u "$USER" -f "llama-server -m"; sleep 2
+}
+
 start_one() {  # start one model's server and wait until it answers (3-min limit)
   local m=$1 p=${PORT[$1]} f alt=$ROOT/models/gguf/${1/:/-}.gguf
   if [ -f "$alt" ]; then f=$alt; else f=$ROOT/models/blobs/$(blob "$m"); fi
@@ -32,7 +38,7 @@ only)
   m=${2:?usage: $0 only <model>}
   if curl -s "127.0.0.1:${PORT[$m]}/health" | grep -q ok && [ "$(pgrep -u "$USER" -fc "llama-server -m")" = "1" ]; then
     echo "already only $m"; exit 0; fi
-  pkill -u "$USER" -f "llama-server -m"; sleep 3
+  stop_all
   start_one "$m" ;;
 start)
   if pgrep -u "$USER" -f "llama-server -m" >/dev/null; then echo "servers already running -- run: $0 stop   first"; exit 1; fi
@@ -58,7 +64,7 @@ start)
   printf 'export LLM_BACKEND=llamacpp\nexport LLAMACPP_URLS=%q\n' "$urls" > "$ROOT/env_llamacpp.sh"
   echo "wrote $ROOT/env_llamacpp.sh -- now run:  source $ROOT/env_llamacpp.sh" ;;
 stop)
-  pkill -u "$USER" -f "llama-server -m" && echo "stopped" || echo "none running" ;;
+  stop_all; pgrep -u "$USER" -f "llama-server -m" >/dev/null && echo "STILL RUNNING" || echo "stopped" ;;
 status)
   for m in qwen3:8b llama3.1:8b gemma3:12b; do
     printf '%-12s port %s: %s\n' "$m" "${PORT[$m]}" "$(curl -s 127.0.0.1:${PORT[$m]}/health || echo down)"

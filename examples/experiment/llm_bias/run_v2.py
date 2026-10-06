@@ -288,7 +288,7 @@ def run(a):
         ring = posts[:]
         random.Random(f"{SEED}|r{a.round}|{a.posts_by}|ring").shuffle(ring)  # one fixed order, same for every reader AI
         for p in people:
-            if a.max_posts and a.max_posts < len(ring) - 1:
+            if a.max_posts and a.max_posts < len(ring):  # LB-v2-6: window whenever it limits; was len-1, so a tiny set read ALL
                 # LD-35: each user reads a window of --max-posts consecutive posts from the ring, windows evenly spaced
                 # around it, so every post is read by (almost) the same number of users. A larger --max-posts only
                 # extends each window, so a run can be topped up later without changing what was already read.

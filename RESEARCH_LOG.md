@@ -14449,3 +14449,24 @@ check and finishes with "ALL CLEAR" or "NOT SAFE":
   `run_v2.py` names them.
 
 Dry run on the laptop, with no servers: it runs end to end and reports instead of crashing. Section B all PASS.
+
+## 14.29 Preflight on the Spark, run 1: 104 PASS, 4 FAIL, two real issues fixed (2026-10-06 09:33)
+
+**Everything core passed:**
+- each AI alone, and switching qwen → llama → gemma → qwen
+- the full mini-round through the real runner (all rc=0)
+- every user read every post, no duplicates, nobody read their own post, 0 unreadable answers
+- llama.cpp and the uniform sampling recorded in every file
+- kill and resume: 24 done before the kill, 72/72 after, no duplicates
+
+**The 4 failures:**
+- **LB-v2-7 (3 failures: "servers stopped", "memory back").** The stop step checked immediately after sending
+  stop. A llama-server needs a few seconds to exit and release GPU memory, so one was still closing. Fix: the
+  `stop_all` function in `llamacpp_servers.sh` waits up to 30 s for every server to exit, then force-kills any
+  straggler. The "only" switch and v2_night's end use it. The preflight's memory check is now relative ("more free
+  than with one AI loaded") instead of a fixed 90 GB.
+- **LB-v2-6 (1 failure: the gemma noise floor read 27 posts where 20 were intended).** run_v2 used the reading
+  window only if `max_posts < len(set) − 1`. With a tiny set (gemma wrote ~3 posts for 10 users), max_posts 2 fell
+  through to "read everything". Fix: the window applies whenever `max_posts < len(set)`, so each user reads exactly
+  min(max_posts, posts not their own). Unit-checked on tiny sets and on users owning several posts. Earlier data
+  is unaffected (qwen's set is 101).

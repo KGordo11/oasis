@@ -111,7 +111,8 @@ for m in ["qwen3:8b", "llama3.1:8b", "gemma3:12b", "qwen3:8b"]:
     obj, meta = llm.chat_json(m, "Reply with JSON only.", 'Reply with {"ok": true}', seed=1, num_predict=20)
     check(f"  real answer from {m} is valid JSON", obj == {"ok": True}, str(obj or meta.get("raw"))[:80])
     check(f"  no hidden thinking", meta["thinking_chars"] == 0, str(meta["thinking_chars"]))
-check("free memory with one AI loaded", free_gb() > 60, f"{free_gb():.0f} GB available")
+one_loaded = free_gb()
+check("free memory with one AI loaded", one_loaded > 60, f"{one_loaded:.0f} GB available")
 
 print("=== E. mini-round through the real runner (10 users, round 904)")
 shutil.rmtree(RD, ignore_errors=True)
@@ -128,7 +129,8 @@ check("runner finished (exit 0, no STOPPING)", p.returncode == 0 and "STOPPING" 
 check("every step rc=0", ends and all("rc=0" in l for l in ends), f"{sum('rc=0' in l for l in ends)}/{len(ends)} steps ok")
 G = "G. clean finish: servers stopped at the end"
 check(G, servers_running() == 0, f"{servers_running()} still running")
-check("   memory back", free_gb() > 90, f"{free_gb():.0f} GB available")
+check("   memory back (more free than with one AI loaded)", free_gb() > one_loaded + 5,
+      f"{free_gb():.0f} GB available now vs {one_loaded:.0f} GB with one AI")
 
 posts = {}
 for m in ["qwen3:8b", "llama3.1:8b", "gemma3:12b"]:

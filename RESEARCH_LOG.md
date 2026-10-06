@@ -14271,3 +14271,16 @@ about 24,300 screens per reader):
 - qwen ≈ 2.8 h, gemma ≈ 4.4 h, llama ≈ 11.5 h
 - plus posting and the noise floor: **about 19 h per round**
 - **three rounds (101-103) by Thursday about 06:00-08:00.**
+
+## 14.20 NUM_PARALLEL 8 vs 16 on the Spark (2026-10-05 21:14): keep 8 (LD-39)
+
+Same 108 reading screens (round 902, qwen's set, draw 7), 10 users:
+
+| Reader | 8 slots | 16 slots |
+|---|---|---|
+| llama3.1:8b | 3.2 min | 2.7 min (1.19x faster) |
+| gemma3:12b | 1.3 min | 1.3 min |
+| qwen3:8b | 0.8 min | 1.7 min (slower) |
+
+At 16 slots the three models hold 25 + 23 + 30 = 78 GB, leaving 42 GB available on a shared machine. The Spark is
+compute-bound past 8, so **8 is kept for the whole study**: the gain is small and mixed, and the memory cost is large.

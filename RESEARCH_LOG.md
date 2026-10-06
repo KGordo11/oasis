@@ -1,5 +1,10 @@
 # OASIS research log — everything, in one file
 
+> **WORKING ENVIRONMENT (since 2026-10-05): the study runs over SSH on the NVIDIA DGX Spark `honda.csr.uky.edu`,
+> not on the laptop.** Gordon types the commands on the Spark himself. Claude writes the code here (laptop repo,
+> pushed to GitHub); the Spark pulls it. **A new Claude: read Part 0 §0.2, then Part 14 §14.32 (HANDOFF). They
+> are kept current after every change, and you must keep them current too (rule in §14.32).**
+
 **If you are new: read Part 0 (below) and nothing else to start.** It says what this project is, what was done
 from July to October 2026, what was found, where things stand today, and how every piece works. Parts 1-13 are
 the full record behind it: every run, bug, decision and correction, written at the time and kept word for word.
@@ -14660,3 +14665,67 @@ All are covered by `preflight_v2.py`.
 3. After each round: rsync, export, graphs, and the results written here (plain tables first).
 4. Before Friday: a pooled 3-round summary for the professor.
 5. Later (new study only): speculative decoding, Docker/vLLM, MoE models (§14 replies, 2026-10-06).
+
+### 14.32a Standing rule: keep this handoff 100% current
+After **every** code change, bug fix, new command given to Gordon, decision, or run event:
+1. Update **§14.32** (status, procedures, decisions, bugs) and **Part 0 §0.2** (one-paragraph status).
+2. Add a row to the change history below. Add a dated §14.x entry for anything substantive.
+3. Commit and push. Tell Gordon the commit code if the Spark must `git pull --no-edit` it.
+
+A new Claude must be able to open this file and carry on with no other context. Anything that exists only in chat
+or in memory is lost.
+
+### 14.32b How the Spark environment was built (exact commands Gordon ran, 2026-10-05; reproducible)
+```
+# login (campus eduroam or GlobalProtect VPN ra.uky.edu); LinkBlue password
+ssh kmgo257@honda.csr.uky.edu
+# project folders + settings
+mkdir -p ~/llm_bias/ollama ~/llm_bias/models ~/llm_bias/logs
+cat > ~/llm_bias/env.sh <<'X'
+export OLLAMA_HOST=127.0.0.1:11500
+export OLLAMA_URL=http://127.0.0.1:11500
+export OLLAMA_MODELS=$HOME/llm_bias/models
+export OLLAMA_SERVE_LOG=$HOME/llm_bias/logs/ollama_serve.log
+export PATH=$HOME/llm_bias/ollama/bin:$PATH
+X
+# Ollama 0.24.0 (ARM) -- used only to download qwen3:8b and llama3.1:8b; the study now runs on llama.cpp
+cd ~/llm_bias/ollama && curl -fL -o ollama.tar.zst https://github.com/ollama/ollama/releases/download/v0.24.0/ollama-linux-arm64.tar.zst && tar --zstd -xf ollama.tar.zst && rm ollama.tar.zst
+source ~/llm_bias/env.sh && OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=8 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h OLLAMA_MAX_LOADED_MODELS=3 nohup ollama serve > $OLLAMA_SERVE_LOG 2>&1 &
+ollama pull qwen3:8b && ollama pull llama3.1:8b && ollama pull gemma3:12b
+# code
+cd ~/llm_bias && git clone --depth 1 --branch llm-bias https://github.com/KGordo11/oasis.git
+cd ~/llm_bias/oasis && git config user.name "Gordon" && git config user.email "gordonkm05@gmail.com" && git config pull.rebase false
+# llama.cpp (CUDA 13, GB10 = sm_121)
+mkdir -p ~/llm_bias/engines && cd ~/llm_bias/engines && git clone --depth 1 https://github.com/ggml-org/llama.cpp && cd llama.cpp
+export PATH=/usr/local/cuda/bin:$PATH CUDACXX=/usr/local/cuda/bin/nvcc
+nice -n 19 cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=121 -DLLAMA_CURL=OFF -DCMAKE_BUILD_TYPE=Release
+nice -n 19 cmake --build build --config Release -j 8 --target llama-server
+# gemma3:12b standard GGUF (Ollama's gemma file is not readable by llama.cpp)
+mkdir -p ~/llm_bias/models/gguf && curl -fL -o ~/llm_bias/models/gguf/gemma3-12b.gguf https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/resolve/main/gemma-3-12b-it-Q4_K_M.gguf
+# servers + env file for the runs (writes ~/llm_bias/env_llamacpp.sh)
+bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh start && bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop
+# the Ollama server is no longer used:  pkill -u $USER -f "ollama serve"
+# full check before any unattended run (25 min, test round 904):
+cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/experiment/llm_bias/preflight_v2.py 2>&1 | tee ~/llm_bias/logs/preflight.txt
+```
+
+### 14.32c Change history of the v2 code (git, newest last). Add a row for every change.
+
+| Commit | When | Change |
+|---|---|---|
+| 2b66763 | 10-02 22:55 | 100 Census/BLS/Pew users (pinned), human post pool, first all-actions harness, model speed test |
+| 3c02c46 | 10-03 00:24 | smoke tests of 6 models; LB-v2-1 replay fix; analysis + campaign scripts |
+| 6c4862a | 10-04 17:39 | llama3.1:8b as third family, optional posting |
+| da6f5b5 | 10-04 22:18 | **two-turn design** (posting + reading turn, 3×3 crossover), 27 actions, Pew topics, balanced reading windows, night runner |
+| 3edf5c0 | 10-05 10:37 | page-mode test (pages kill comments → one post per screen); mistral replacement candidates |
+| f19c27a | 10-05 17:57 | gemma3:12b replaces mistral; final laptop smoke (full reading); runner made SSH-ready (slices, measured speed) |
+| b600fcc | 10-05 20:09 | `OLLAMA_URL` / `PARALLEL` settable (private port on the shared Spark) |
+| 27cc742 | 10-05 21:27 | **LB-v2-2** possible endless loop fixed; exact remaining-work count; `export_v2.py`; `make_graphs_v2.py` |
+| fce25f9 | 10-05 21:31 | **baselines first** (LD-40) |
+| 4890067 | 10-05 21:58 | `llm.py` llama.cpp backend |
+| 46ea7cf | 10-05 22:14 | `llamacpp_servers.sh`; uniform sampling; backend recorded in manifests (LD-41) |
+| 069540d | 10-05 22:34 | server script: GGUF override per model, 3-min timeout, refuse double start |
+| 41b6009 | 10-05 23:02 | **one model in memory** (`only`, `MANAGE_SERVERS=1`, LD-42) |
+| 5f794c9 | 10-06 08:59 | **LB-v2-3** fixed (server check with one server off); runner stops on a 0-screen failure |
+| 1457456 | 10-06 09:10 | **`preflight_v2.py`**; **LB-v2-4** crash-safe resume; runner `AGENTS=` test size |
+| ffafa95 | 10-06 09:34 | **LB-v2-6** exact window on tiny sets; **LB-v2-7** wait for servers to exit; preflight passes 108/108 |

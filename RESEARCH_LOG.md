@@ -14184,3 +14184,30 @@ about 217 posts per user and about 21,700 screens per reader AI: **about 54 h pe
 - CloudLab c220g5 nodes are, as far as I know, CPU-only. That needs checking: on CPU the models would run slower
   than on this laptop.
 - **Needed from Gordon: the real host, the username, and whether it has an NVIDIA GPU.**
+
+## 14.16 Runbook: setting up and testing the SSH (GPU) machine (written 2026-10-05 for Gordon to run himself)
+
+Replace YOUR_USERNAME and YOUR_SERVER. Everything after step 0 runs ON THE SERVER. Rounds on the server are
+numbered **101 and up**, so they never mix with the laptop's rounds (1 = night 1, 900+ = tests).
+
+0. Laptop terminal: `ssh YOUR_USERNAME@YOUR_SERVER`. For CloudLab, the exact command is on the experiment's
+   List View page.
+1. Check the machine: `hostname; nproc; free -g; df -h ~; nvidia-smi`. Needed: an NVIDIA GPU with at least 16 GB,
+   and at least 30 GB free disk.
+2. Install tools: `sudo apt-get update && sudo apt-get install -y git tmux curl python3 && python3 --version`
+   (needs 3.9+).
+3. Install Ollama 0.24.0, the same version as the laptop:
+   `curl -fsSL https://ollama.com/install.sh | OLLAMA_VERSION=0.24.0 sh`, then
+   `sudo systemctl stop ollama; sudo systemctl disable ollama`. The built-in service would run with Ollama's
+   4096-token default (B-28).
+4. Start a persistent session: `tmux new -s llm`. Detach with Ctrl-b then d; come back with `tmux attach -t llm`.
+5. Start Ollama with the study settings:
+   `OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=4 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h OLLAMA_MAX_LOADED_MODELS=1 nohup ollama serve > /tmp/ollama_serve.log 2>&1 &`
+6. Download the models: `ollama pull qwen3:8b && ollama pull llama3.1:8b && ollama pull gemma3:12b`.
+7. Get the code: `git clone --depth 1 --branch llm-bias https://github.com/KGordo11/oasis.git`.
+8. Check the setup (no simulation): server settings, models, pinned users, and one call per model.
+9. Smoke test, test round 902 with 10 users: 3 posting turns plus 9 reading cells, every user reading every post.
+10. Full run (only after the check is reviewed):
+    `STOP=... ROUNDS="101 102 103" PY=python3 PUSH=0 STOP_OLLAMA=0 python3 examples/experiment/llm_bias/v2_night.py`
+11. Copy the results back to the laptop:
+    `rsync -avz YOUR_USERNAME@YOUR_SERVER:~/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2/`

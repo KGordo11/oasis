@@ -14470,3 +14470,16 @@ Dry run on the laptop, with no servers: it runs end to end and reports instead o
   through to "read everything". Fix: the window applies whenever `max_posts < len(set)`, so each user reads exactly
   min(max_posts, posts not their own). Unit-checked on tiny sets and on users owning several posts. Earlier data
   is unaffected (qwen's set is 101).
+
+## 14.30 Preflight run 2: 108 PASS, 0 FAIL, ALL CLEAR (2026-10-06 09:46)
+
+Every check passed:
+- setup and code
+- each AI alone, and switching between them
+- the full mini-round through the real runner
+- every user read every post, no duplicates, no own posts, 0 unreadable
+- llama.cpp and the uniform sampling recorded
+- kill and resume: 28 before the kill, 81/81 after
+- servers stopped and memory back
+
+Round 101 resumes from here (llama and gemma posting and baselines, then the 6 cross cells and the noise floor).

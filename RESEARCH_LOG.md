@@ -14243,3 +14243,31 @@ numbered **101 and up**, so they never mix with the laptop's rounds (1 = night 1
 - Python prerequisites are preinstalled on CSR machines. Our runner needs only standard-library Python 3.9+.
 - On "REMOTE HOST IDENTIFICATION HAS CHANGED" (machines get rebuilt): `ssh-keygen -R honda.csr.uky.edu`, then
   reconnect.
+
+## 14.19 DGX Spark set up and smoke-tested (2026-10-05 21:04, by Gordon)
+
+Layout on honda: `~/llm_bias/{README.txt, env.sh, ollama/ (0.24.0), models/, logs/, oasis/}`. Private Ollama on
+127.0.0.1:11500, `source ~/llm_bias/env.sh` in every window, tmux session `llm`. Machine: GB10, 121 GB memory,
+GPU idle before the run, home on NFS with 2.5 TB free (48 KB used before setup). No sudo, none needed.
+
+**Server settings recorded:** flash attention true, NUM_PARALLEL 8, context 8192, keep-alive 24h, max loaded models
+3. `ollama ps` shows qwen3:8b at 15 GB, **100% GPU**.
+
+**Smoke test, round 902 (10 users, all posts read): 12/12 turns, 0 unreadable.** Posts written: qwen 12,
+llama 8, gemma 4.
+
+Seconds per post read, Spark vs laptop:
+
+| Reader | Spark | Laptop |
+|---|---|---|
+| qwen3:8b | 0.42 | 2.0 |
+| gemma3:12b | 0.49-0.77 | 3.3 |
+| llama3.1:8b | 1.41-1.79 | 3.4 |
+
+llama is the slowest reader: it writes long comments.
+
+**A full round at 100 users** (post sets of about 120 + 90 + 35 posts, every user reads every post but their own,
+about 24,300 screens per reader):
+- qwen ≈ 2.8 h, gemma ≈ 4.4 h, llama ≈ 11.5 h
+- plus posting and the noise floor: **about 19 h per round**
+- **three rounds (101-103) by Thursday about 06:00-08:00.**

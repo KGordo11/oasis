@@ -14741,6 +14741,75 @@ All are covered by `preflight_v2.py`.
 4. Before Friday: a pooled 3-round summary for the professor.
 5. Later (new study only): speculative decoding, Docker/vLLM, MoE models (§14 replies, 2026-10-06).
 
+### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
+
+**0. Log in** (on the Mac; VPN on if off campus)
+```
+ssh -o PubkeyAuthentication=no kmgo257@honda.csr.uky.edu
+```
+
+**1. Check the run**
+```
+date; grep -E "end|post sets|WATCHDOG|STOPPING|SKIP" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -8; echo "runner alive: $(ps -u $USER -o args | grep -c '^python3 .*[v]2_night')"; echo "== current step:"; tail -1 $(ls -t /tmp/v2_reading*.log /tmp/v2_posting*.log 2>/dev/null | head -1) | cut -c1-90
+```
+✅ `runner alive: 1`; current step shows e.g. `1200/3200 (0.55 s each, ETA 18 min)`. Speed: ~0.5 s (qwen/llama) or ~1.0 s (gemma) = GPU to ourselves; 2-3 s = shared; 20 s = something is hogging it.
+
+**2. Who's on the machine**
+```
+who; echo "== hsa303 busiest:"; ps -u hsa303 -o etime,pcpu,args --sort=-pcpu | head -5 | cut -c1-110; echo "== on the GPU:"; nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader
+```
+Our GPU program is `llama-server`; hsa303's are `.venv/bin/python`.
+
+**3. How much memory I'm using / the whole machine**
+```
+echo "== mine:"; ps -u $USER -o rss=,comm= --sort=-rss | head -4 | awk '{printf "   %5.1f GB  %s\n", $1/1048576, $2}'; echo "== whole Spark (121 GB total):"; free -g | head -2
+```
+Ours is ~9-14 GB (one AI loaded). If `available` drops under ~10 GB, things can get killed.
+
+**4. Disk space I'm using** (home quota 100 GB)
+```
+du -sh ~/llm_bias ~/llm_bias/models ~/llm_bias/oasis/data/llm_bias/v2 2>/dev/null
+```
+
+**5. Is the watchdog on?**
+```
+crontab -l; grep WATCHDOG ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -3
+```
+✅ One line `*/10 * * * * bash .../watchdog.sh`. Any `WATCHDOG ... restarting` line = it died and came back by itself.
+
+**6. EMERGENCY STOP: everything, watchdog included** (watchdog first, or it restarts the run within 10 min)
+```
+crontab -l | grep -v watchdog.sh | crontab -; pkill -u $USER -f v2_night.py; pkill -u $USER -f run_v2.py; bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop; sleep 2; crontab -l; ps -u $USER -o pid,args | grep -E "[v]2_night|[r]un_v2|[l]lama-server" || echo "ALL STOPPED"
+```
+✅ `stopped`, then `no crontab for kmgo257` (or nothing), then `ALL STOPPED`. Nothing finished is lost.
+
+**7. Start again after a stop** (change the date/time to when it should stop)
+```
+sed -i 's/^STOP=.*/STOP="2026-10-08 10:00"/' ~/llm_bias/watchdog.sh; cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && echo "backend: $LLM_BACKEND" && MANAGE_SERVERS=1 STOP="2026-10-08 10:00" ROUNDS="101 102 103" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 setsid nohup python3 examples/experiment/llm_bias/v2_night.py >> ~/llm_bias/logs/night_run.out 2>&1 < /dev/null &
+```
+then turn the watchdog back on:
+```
+(crontab -l 2>/dev/null | grep -v watchdog.sh; echo "*/10 * * * * bash $HOME/llm_bias/watchdog.sh") | crontab - && crontab -l
+```
+✅ `backend: llamacpp`; after 2 min, command 1 shows `runner alive: 1`. Put the **same date in both places**.
+
+**8. Has a round finished?**
+```
+grep -E "post sets|checkpoint" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -6
+```
+`r102 post sets: ...` = round 101 fully done and 102 under way. `checkpoint round N: noise floor` = round N complete.
+
+**9. Copy results to the laptop** (on the **Mac**, not the Spark)
+```
+rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/
+```
+Then tell Claude to export and graph.
+
+**10. After the run is over (Thu after 10:00): remove the watchdog**
+```
+crontab -l | grep -v watchdog.sh | crontab -
+```
+
 ### 14.32a Standing rule: keep this handoff 100% current
 After **every** code change, bug fix, new command given to Gordon, decision, or run event:
 1. Update **§14.32** (status, procedures, decisions, bugs) and **Part 0 §0.2** (one-paragraph status).

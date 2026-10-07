@@ -64,7 +64,7 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-06 19:10): read this first
+## 0.2 Where things stand (2026-10-07 10:22): read this first
 
 - **Current work: LLM Bias v2 on the DGX Spark `honda.csr.uky.edu`.** Design, machine, file layout, the exact
   resume commands and how Gordon likes to work are all in **Part 14 §14.32 (HANDOFF)**. Read that next.
@@ -72,7 +72,9 @@ research**:
   were running about 5× slower.
   - Done: **all 3 baselines** (post sets qwen 101 / llama 103 / gemma 25), cross-test stage 1 for all 6 cells,
     and part of stage 2.
-  - **Tue 2026-10-06 ~19:10: resumed overnight** with `ROUNDS="101 102 103" STOP="2026-10-07 10:00"` (Gordon:
+  - **Wed 2026-10-07 10:21: restarted detached (`setsid nohup`), STOP Thu 10:00.** The overnight run died at
+    ~22:50, likely a Spark reboot (§14.31b). Round 101 stage 2 is done for all 6 cells.
+  - Tue 2026-10-06 ~19:10: resumed overnight with `ROUNDS="101 102 103" STOP="2026-10-07 10:00"` (Gordon:
     "keep going until 10am, as much as it can"). That is ~14.8 h, enough to finish round 101 (~6.5 h) and most of
     round 102; 103 is listed only so no time is wasted. The runner never starts a step it can't finish by 10:00.
     Then the following nights, for 3 rounds (101-103) by the **deadline, Friday 2026-10-09**.
@@ -14517,6 +14519,25 @@ added here after the morning check.
 to the next cross step: `end r101 CROSS llama3.1:8b reads gemma3:12b slice 32 rc=0: 628 screens in 5.9 min (0.56
 s/screen)`. 0.56 s per screen is the normal unshared speed, so the GPU is not contended. Runner alive (count 1).
 
+## 14.31b The overnight runner died at ~22:50; restarted detached Wed 10:21 (2026-10-07)
+
+**What got done overnight (19:08-22:50):** llama←gemma stage 2 (628 screens), gemma←qwen stage 2 (1,600, 2.89
+s/screen: shared GPU), gemma←llama stage 2 (1,600, 2.43 s/screen), qwen←llama stage 3 (3,200, 1.29 s/screen), and
+572 screens of llama←qwen stage 3. **Stage 2 is complete for all 6 cells of round 101.**
+
+**What happened:** the last log line is `22:50:15 start r101 CROSS llama3.1:8b reads qwen3:8b slice 64`. There is
+no end line, no STOPPING and no "models unloaded", and at 10:18 the runner and the server were both gone. So it was
+killed from outside. The login banner at 10:15 said `*** System restart required ***`, "Users logged in: 0",
+memory 2%: a likely sign that the Spark was rebooted overnight (system updates). The evidence was saved on the
+Spark in `~/llm_bias/logs/crash_1007.txt` (uptime -s, tmux ls, the reader and server log tails, dmesg OOM lines,
+`last -x`). **Cause to be confirmed from that file.** About 11 h of night (22:50-10:00) were lost.
+
+**Restart (Wed 10:21):** the Spark is shared, not hsa303's in the daytime (Gordon only lets them use the days), so
+the run restarted right away, **detached with `setsid nohup`** (no tmux; it survives a dropped connection or a
+closed tab, though not a reboot), `STOP="2026-10-08 10:00"`, `ROUNDS="101 102 103"`, output to
+`~/llm_bias/logs/night_run.out`. Resume worked: it skipped all done work and started
+`r101 CROSS llama3.1:8b reads qwen3:8b slice 64 (~2628 screens)`.
+
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 
 ### What the study is
@@ -14598,9 +14619,9 @@ into the running window (typed text gets queued as shell input).
 
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
-### Status (2026-10-06 19:10)
-**Round 101 resumed overnight until Wed 2026-10-07 10:00** (§14.31a), `ROUNDS="101 102 103"`. Status at the
-15:00 pause:
+### Status (2026-10-07 10:22)
+**Running, detached, until Thu 2026-10-08 10:00** (§14.31b). Round 101: stage 2 done for all 6 cells, stage 3 in
+progress. The overnight run died at ~22:50 (likely a reboot). Older status at the 15:00 pause:
 - Complete: posting turns for all 3 AIs, **all 3 baselines**, stage 1 of all 6 cross cells, and stage 2 of
   qwen←llama and qwen←gemma.
 - llama←qwen stage 2 finished at 15:03, just before the pause (it was 2,770/3,200 when last checked).
@@ -14610,11 +14631,14 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 
 ### Exact procedures (Gordon runs them; give him copy-paste commands with the expected output)
 
-**Resume / run rounds.** Log in, run `tmux attach -t llm`, then:
+**Resume / run rounds (since 2026-10-07: detached, no tmux).** Log in with
+`ssh -o PubkeyAuthentication=no kmgo257@honda.csr.uky.edu` (the key attempt wastes one of the few allowed tries:
+"Too many authentication failures"), then:
 ```
-cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && echo "backend: $LLM_BACKEND" && MANAGE_SERVERS=1 STOP="YYYY-MM-DD 09:00" ROUNDS="101 102" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 python3 examples/experiment/llm_bias/v2_night.py
+cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && echo "backend: $LLM_BACKEND" && MANAGE_SERVERS=1 STOP="YYYY-MM-DD HH:MM" ROUNDS="101 102 103" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 setsid nohup python3 examples/experiment/llm_bias/v2_night.py >> ~/llm_bias/logs/night_run.out 2>&1 < /dev/null &
 ```
-Wait for the first `end ... rc=0`, then close the tab.
+Wait 2 min, check (below) for `runner alive: 1` and a `start ...` line, then close the tab. It survives a dropped
+connection but **not a reboot of the Spark**; after a reboot run the same command again (it resumes).
 
 **Check:**
 ```

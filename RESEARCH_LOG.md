@@ -64,7 +64,7 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-07 10:22): read this first
+## 0.2 Where things stand (2026-10-07 16:16): read this first
 
 - **Current work: LLM Bias v2 on the DGX Spark `honda.csr.uky.edu`.** Design, machine, file layout, the exact
   resume commands and how Gordon likes to work are all in **Part 14 §14.32 (HANDOFF)**. Read that next.
@@ -72,6 +72,8 @@ research**:
   were running about 5× slower.
   - Done: **all 3 baselines** (post sets qwen 101 / llama 103 / gemma 25), cross-test stage 1 for all 6 cells,
     and part of stage 2.
+  - **Wed 16:16: round 101 nearly complete** (last cross cell plus the noise floor; done ~17:10), then round 102
+    runs until Thu 10:00 (§14.31d).
   - **Wed 2026-10-07 10:21: restarted detached (`setsid nohup`), STOP Thu 10:00.** The overnight run died at
     ~02:00 when its whole session was killed (not a reboot; hsa303's job started 22:55, §14.31c). A cron
     **watchdog** (`~/llm_bias/watchdog.sh`) now restarts it within 10 min; **remove it after Thu 10:00**:
@@ -14572,6 +14574,17 @@ echo "$(date '+%F %T') WATCHDOG: runner was dead -> restarting" >> $HOME/llm_bia
 cd $HOME/llm_bias/oasis && . $HOME/llm_bias/env_llamacpp.sh && MANAGE_SERVERS=1 STOP="$STOP" ROUNDS="101 102 103" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 exec python3 examples/experiment/llm_bias/v2_night.py >> $HOME/llm_bias/logs/night_run.out 2>&1 < /dev/null
 ```
 Gordon to ask hsa303 to keep big jobs off the nights until Friday.
+
+## 14.31d Progress check, Wed 2026-10-07 16:16: round 101 almost complete
+
+- No watchdog restarts since 10:21.
+- Stage 3 (64 posts per user) finished for all cells at 12:41.
+- Stage 4 (every post): qwen←llama, llama←qwen and gemma←qwen are done. gemma←llama is at 1,350/3,797
+  (ETA ~16:55). Then comes the noise floor for llama and gemma, and round 102 starts automatically (~17:10).
+- Speeds between 12:41 and 15:55 were 1.17-1.42 s/screen for qwen and gemma, against 0.45 and 0.95 unshared:
+  partial sharing. At 16:16 the run was back at 0.95 for gemma, with only our llama-server on the GPU and
+  90 GB available.
+- Disk 29 GB of 100.
 
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 

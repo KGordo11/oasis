@@ -73,7 +73,9 @@ research**:
   - Done: **all 3 baselines** (post sets qwen 101 / llama 103 / gemma 25), cross-test stage 1 for all 6 cells,
     and part of stage 2.
   - **Wed 2026-10-07 10:21: restarted detached (`setsid nohup`), STOP Thu 10:00.** The overnight run died at
-    ~22:50, likely a Spark reboot (§14.31b). Round 101 stage 2 is done for all 6 cells.
+    ~02:00 when its whole session was killed (not a reboot; hsa303's job started 22:55, §14.31c). A cron
+    **watchdog** (`~/llm_bias/watchdog.sh`) now restarts it within 10 min; **remove it after Thu 10:00**:
+    `crontab -l | grep -v watchdog.sh | crontab -`. Round 101 stage 2 is done for all 6 cells.
   - Tue 2026-10-06 ~19:10: resumed overnight with `ROUNDS="101 102 103" STOP="2026-10-07 10:00"` (Gordon:
     "keep going until 10am, as much as it can"). That is ~14.8 h, enough to finish round 101 (~6.5 h) and most of
     round 102; 103 is listed only so no time is wasted. The runner never starts a step it can't finish by 10:00.
@@ -14538,6 +14540,39 @@ closed tab, though not a reboot), `STOP="2026-10-08 10:00"`, `ROUNDS="101 102 10
 `~/llm_bias/logs/night_run.out`. Resume worked: it skipped all done work and started
 `r101 CROSS llama3.1:8b reads qwen3:8b slice 64 (~2628 screens)`.
 
+## 14.31c Why it died, and a watchdog (2026-10-07 ~10:40)
+
+**Evidence** (`~/llm_bias/logs/crash_1007.txt`):
+- **Not a reboot:** the Spark has been up since 2026-09-20.
+- **The tmux server itself was gone** ("no server running").
+- **At 22:55 hsa303 started a new tmux job** (22:55-05:46 in `last`). At the same minute our reading speed fell
+  from 0.59 to **20.7 s/screen**: 500 → 550 screens took 22:55 → 02:00. After 02:00 the whole session died
+  together (tmux, runner, run_v2, llama-server; the server log ends with "stop: cancel task").
+- `KillUserProcesses` is off, so logging out does not kill programs. `systemd-oomd` is inactive. The kernel log is
+  not readable for users, so the exact killer is **unconfirmed**. Best guess: memory exhaustion while both users'
+  jobs ran.
+
+**Fix: a cron watchdog** (`~/llm_bias/watchdog.sh`, crontab `*/10 * * * * bash $HOME/llm_bias/watchdog.sh`).
+Every 10 min it checks whether the runner is alive. If it is not, it kills any orphan run_v2, writes
+`WATCHDOG: runner was dead -> restarting` to night.log and relaunches the runner with the same settings (resume is
+safe, LB-v2-4). It does nothing from STOP − 30 min. It sets `USER` itself, because cron does not and
+`llamacpp_servers.sh` uses `set -u`. Tested at 10:40: with the runner alive it exits 0 and starts nothing.
+**Remove after Thu 10:00:** `crontab -l | grep -v watchdog.sh | crontab -` (for a later run, edit STOP in the
+script instead).
+
+The script:
+```
+#!/bin/bash
+export USER=$(id -un)
+STOP="2026-10-08 10:00"
+[ "$(date +%s)" -lt "$(( $(date -d "$STOP" +%s) - 1800 ))" ] || exit 0
+ps -u "$USER" -o args | grep -q '^python3 .*[v]2_night' && exit 0
+pkill -u "$USER" -f run_v2.py; sleep 3
+echo "$(date '+%F %T') WATCHDOG: runner was dead -> restarting" >> $HOME/llm_bias/oasis/data/llm_bias/v2/night.log
+cd $HOME/llm_bias/oasis && . $HOME/llm_bias/env_llamacpp.sh && MANAGE_SERVERS=1 STOP="$STOP" ROUNDS="101 102 103" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 exec python3 examples/experiment/llm_bias/v2_night.py >> $HOME/llm_bias/logs/night_run.out 2>&1 < /dev/null
+```
+Gordon to ask hsa303 to keep big jobs off the nights until Friday.
+
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 
 ### What the study is
@@ -14621,7 +14656,8 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 
 ### Status (2026-10-07 10:22)
 **Running, detached, until Thu 2026-10-08 10:00** (§14.31b). Round 101: stage 2 done for all 6 cells, stage 3 in
-progress. The overnight run died at ~22:50 (likely a reboot). Older status at the 15:00 pause:
+progress. The overnight run died ~02:00 (not a reboot; whole session killed while hsa303's job ran, §14.31c); a cron
+**watchdog** now restarts it within 10 min (remove after Thu 10:00). Older status at the 15:00 pause:
 - Complete: posting turns for all 3 AIs, **all 3 baselines**, stage 1 of all 6 cross cells, and stage 2 of
   qwen←llama and qwen←gemma.
 - llama←qwen stage 2 finished at 15:03, just before the pause (it was 2,770/3,200 when last checked).

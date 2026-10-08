@@ -80,7 +80,10 @@ research**:
   - Round 102 was 60% done (post sets qwen 94 / llama 105 / gemma 23; baselines and stages 16 and 32 done). ETA
     ~16:45.
   - Round 103 ETA ~Fri 04:50 if the GPU stays free.
-- **Deadline: Gordon's meeting Fri 2026-10-09 13:00; everything ready by 10:00.** Friday morning:
+- **PLAN CHANGED (Thu 12:00, §14.31g):** the meeting moved to **Tue 2026-10-13**. Round 102 finishes, then the
+  run stops (`ROUNDS="101 102"`). Round 103 (and maybe 104) will use an updated design that Gordon is preparing.
+  Remove the watchdog once round 102 is complete.
+- *(Superseded)* Deadline: Gordon's meeting Fri 2026-10-09 13:00; everything ready by 10:00. Friday morning:
   1. Check (`progress_v2.py`).
   2. rsync to the laptop.
   3. Claude runs `make_report_v2.py` (pools every complete round automatically), recalculates the workbook,
@@ -14628,6 +14631,19 @@ Gordon to ask hsa303 to keep big jobs off the nights until Friday.
 Gordon restarted the runner with `STOP="2026-10-09 06:00"` and set the same STOP in `~/llm_bias/watchdog.sh` (sed),
 so the run continues through Thursday. Resume was clean: `start r102 BASELINE llama3.1:8b reads own posts (all)
 (~8518 screens)`. **Remove the watchdog after Fri 06:00.**
+
+## 14.31g Plan change (Thu 2026-10-08 ~12:00): stop after round 102; round 103 will be a changed design
+
+Gordon: the meeting moved to Tuesday 2026-10-13. "We need the second one to finish then stop there. We are making
+updates for the third run, and maybe hopefully can get a fourth."
+- The runner was restarted with `ROUNDS="101 102"` and `STOP="2026-10-10 12:00"` (a generous limit: the run ends on
+  its own when round 102 is complete, then stops the server and frees the GPU).
+- The watchdog was changed to the same `ROUNDS` and `STOP`, plus one new line: it exits if night.log already has
+  `checkpoint round 102: noise floor`. Without that, it would relaunch the runner every 10 minutes after the round
+  finished.
+- **Remove the watchdog once round 102 is complete.**
+- Round 103 will NOT be run with the current code. Gordon will describe the changes, and they get the usual
+  restate → go → code → preflight cycle before round 103 runs.
 
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 

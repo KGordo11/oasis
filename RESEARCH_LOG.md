@@ -69,9 +69,10 @@ research**:
 - **Current work: LLM Bias v2 on the DGX Spark `honda.csr.uky.edu`.** Design, machine, file layout, exact commands
   and how Gordon likes to work: **Part 14 §14.32 (HANDOFF)**. Read that next. The whole system explained with every
   code file, prompt and command: the page **Inside LLM Bias v2** (§14.34).
-- **Round 101 is COMPLETE** (Wed 2026-10-07 17:17, 69,213 reading screens). Results in **§14.33**: no own-AI upvote
-  bias in round 101 (all three pairs −2 to −5 points, every 95% range includes 0); the AIs clearly play the users'
-  stances. Workbook + 14 graphs on Gordon's Desktop (`~/Desktop/LLM_Bias_v2/`, §14.34).
+- **Main measure = TOTAL ENGAGEMENT** (all 27 actions except do-nothing, per 100 screens; LD-43, §14.33).
+- **Round 101 is COMPLETE** (Wed 2026-10-07 17:17). Results in **§14.33**. On total engagement, one clear bias:
+  **qwen vs gemma −17.1** (qwen favours gemma's posts, mostly by commenting). The other pairs are unclear, and
+  there is no upvote bias. Workbook + 14 graphs on Gordon's Desktop (`~/Desktop/LLM_Bias_v2/`, §14.34).
 - **Round 102 is running** on the Spark, fully detached (`setsid nohup`), **until Fri 2026-10-09 06:00** (§14.31f),
   slowed by the other user's GPU jobs (§14.31e). A cron **watchdog** restarts the runner within 10 min if it dies
   (§14.31c). **Remove the watchdog after Fri 06:00:** `crontab -l | grep -v watchdog.sh | crontab -`.
@@ -14903,7 +14904,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | dfc3a2e | 10-07 22:45 | **`make_report_v2.py`**: the full Excel workbook (formulas, 13 sheets) + 14 graphs incl. time vs users / rounds |
 | 06ef8cd | 10-07 23:15 | **`make_inside_v2.py` + `inside_v2_template.html`**: the Inside LLM Bias v2 page (§14.34) |
 | 238e4c0 | 10-07 23:30 | log cleanup: §0.2 rewritten to the current state, §0.3 v2 rows, Part 14 contents + section order, §14.34 |
-| (this) | 10-08 11:45 | report: graphs on their own tabs, grouped + coloured tabs, pooled complete rounds with a round picker; page text |
+| 2d770b5 | 10-08 11:45 | report: graphs on their own tabs, grouped + coloured tabs, pooled complete rounds with a round picker; page text |
+| (this) | 10-08 16:00 | **LD-43 total engagement is the main measure**: analyze_v2 (Table 2 + bias + noise), make_report_v2 (grids, bias, stance, topic, posts, people, noise, graphs 01/02/05-08, results.json), Inside page results section data-driven |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -14988,7 +14990,52 @@ crontab -l | grep -v watchdog.sh | crontab -
 
 ## 14.33 Round 101 results (the first complete round; copied to the laptop Wed 2026-10-07 22:20)
 
-**Where the files are.** The data is in `data/llm_bias/v2_spark/r101`. It was copied from the Spark by rsync, then
+**LD-43 (Gordon, 2026-10-08): the main measure is TOTAL ENGAGEMENT, not upvotes.** "We are not watching the upvote
+data, we are watching the engagement data ... total engagement across all actions is the main goal, and whether
+there is bias in the total engagement."
+- **Total engagement** = every action a user takes on a screen, across all 27 actions except `do_nothing`, per 100
+  screens. A user who upvotes and comments counts 2.
+- **Engaged** = % of screens with at least one action.
+- Upvotes and the single actions stay as detail.
+- `analyze_v2.py`, `make_report_v2.py` (workbook, graphs, results.json) and the Inside page were all switched to
+  lead with it.
+
+**Round 101 on total engagement (actions per 100 screens; diagonal = baseline):**
+
+| Reader ↓ / posts by → | qwen | llama | gemma |
+|---|---|---|---|
+| qwen | **113.2** | 105.1 | 130.7 |
+| llama | 226.5 | **224.7** | 221.9 |
+| gemma | 94.8 | 93.7 | **95.2** |
+
+**Engaged (% of screens with at least one action):** qwen 91.1 / 85.6 / 96.8; llama 96.6 / 96.5 / 96.6;
+gemma 92.7 / 91.8 / 93.5.
+
+**Own-AI bias on total engagement** (actions per 100 screens, 95% range):
+
+| Pair | Total engagement | Engaged (points) | Upvote (points) |
+|---|---|---|---|
+| qwen vs llama | +6.2 (−4.1 to +16.7) | +5.4 (+1.7 to +9.0) | −2.7 (−7.0 to +1.5) |
+| qwen vs gemma | **−17.1 (−25.7 to −8.6)** | −4.9 (−8.5 to −1.7) | −5.4 (−12.3 to +1.4) |
+| llama vs gemma | +4.3 (−7.8 to +16.5) | +1.6 (−1.9 to +5.2) | −2.2 (−8.0 to +3.2) |
+
+**In plain words:**
+- **One clear result in round 101: qwen vs gemma, −17.1. That is a bias toward the OTHER AI's posts, not its own.**
+  qwen engages far more with gemma's posts (130.7 actions per 100 screens) than with its own (113.2), mostly by
+  commenting: 61.8% vs 49.3% of screens. The double difference also removes gemma's own preferences.
+- The other two pairs are not clear on total engagement. On "engaged", qwen vs llama is +5.4: qwen ignores llama's
+  posts more often (14.4% of screens with nothing done vs 8.9% on its own posts).
+- **Noise floor for total engagement:** re-reading moves it by only 0.7-2.6 actions per 100 screens:
+  - qwen 112.8 → 110.2
+  - llama 221.2 → 219.8
+  - gemma 96.5 → 95.8
+  So −17.1 is far beyond chance.
+- llama makes about 2 actions per screen. It often takes several actions at once (comment, report, search,
+  follow), and only 29% of its re-reads repeat the exact number of actions. Its "engaged or not" decision is
+  stable, though (95%).
+- One round; round 102 is pooled next.
+
+ It was copied from the Spark by rsync, then
 `export_v2.py` and `make_graphs_v2.py` were run on it. The graphs are in `data/llm_bias/v2_spark/graphs/round_101/`
 (1_posting … 7_noise). The tables below come from `analyze_v2.py` run on round 101 alone and are saved as
 `data/llm_bias/v2_spark/summary_r101.md`.

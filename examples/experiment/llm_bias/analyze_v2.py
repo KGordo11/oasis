@@ -5,10 +5,11 @@ IN PLAIN WORDS
 Reads every finished turn in data/llm_bias/v2/r*/ and writes data/llm_bias/v2/summary.md (or summary_test.md):
 
   Table 1  posting turn: per AI, how many users posted, how many posts, which topics
-  Table 2  reading turn: reader AI x whose posts -> % of screens with each action (upvote, downvote, comment, ...)
+  Table 2  reading turn: reader AI x whose posts -> TOTAL ENGAGEMENT (actions per 100 screens, LD-43 main measure),
+           % engaged, and % of screens with each action (upvote, downvote, comment, ...)
            and % where the user did nothing. The diagonal (same AI posted and read) is the baseline.
   Table 3  % upvoted by the reader's stance on the post's topic (love .. hate): does the AI play the person?
-  Bias     for every pair of AIs i, j (upvote rate, and "did anything" rate):
+  Bias     for every pair of AIs i, j: total engagement (main), engaged rate, upvote rate:
              (i reading i's posts - j reading i's posts) - (i reading j's posts - j reading j's posts)
            The first bracket is i's edge on its own posts, the second removes i simply being more generous.
            95% range from resampling posts and users together (1,000 draws).
@@ -41,6 +42,11 @@ def load(test):
 
 def has(r, act):
     return any(x["action"] == act for x in r["actions"])
+
+
+def n_engage(r):
+    """Total engagement on one screen: every action taken except 'do nothing' (LD-43: the main measure)."""
+    return sum(x["action"] != "do_nothing" for x in r["actions"])
 
 
 def did_anything(r):
@@ -99,9 +105,9 @@ def main(test):
         topics = Counter(str(x.get("subreddit", "?")).lower() for x in wrote)
         L.append(f"| {m} | {len(ps)} | {sum(has(r, 'create_post') for r in ps)} | {len(wrote)} | "
                  f"{', '.join(f'{k} {v}' for k, v in topics.most_common())} | {', '.join(f'{k} {v}' for k, v in other.most_common(6))} |")
-    L += ["", "## Table 2. Reading turn: reader AI x whose posts -> % of screens with each action", "",
-          "| Reader AI | Posts by | Screens | Did nothing | " + " | ".join(SHOW) + " |",
-          "|---|---|---|---|" + "---|" * len(SHOW)]
+    L += ["", "## Table 2. Reading turn: reader AI x whose posts -> total engagement, % engaged, and % of screens with each action", "",
+          "| Reader AI | Posts by | Screens | **Total engagement (actions per 100 screens)** | **Engaged (any action)** | Did nothing | " + " | ".join(SHOW) + " |",
+          "|---|---|---|---|---|---|" + "---|" * len(SHOW)]
     cell = defaultdict(list)
     for r in read:
         cell[(r["model"], r["posts_by"])].append(r)
@@ -111,7 +117,8 @@ def main(test):
             if not c:
                 continue
             tag = " (baseline)" if m == pb else ""
-            L.append(f"| {m} | {pb}{tag} | {len(c)} | {pct(sum(not did_anything(r) for r in c), len(c))} | "
+            L.append(f"| {m} | {pb}{tag} | {len(c)} | {100 * sum(n_engage(r) for r in c) / len(c):.1f} | "
+                     f"{pct(sum(did_anything(r) for r in c), len(c))} | {pct(sum(not did_anything(r) for r in c), len(c))} | "
                      + " | ".join(pct(sum(has(r, a) for r in c), len(c)) for a in SHOW) + " |")
     L += ["", "## Table 3. Reading turn: % upvoted by the reader's stance on the post's topic", "",
           "| Reader AI | Posts by | " + " | ".join(STANCES) + " |", "|---|---|" + "---|" * len(STANCES)]
@@ -125,27 +132,32 @@ def main(test):
     L += ["", "## Own-AI bias (derived; read Table 2 first)", "",
           "For AIs i and j: (i reading i's posts - j reading i's posts) - (i reading j's posts - j reading j's posts). "
           "Positive = i favours its own AI's posts beyond simply being more generous. Points per 100 screens.", "",
-          "| i | j | Upvote: bias (95% range) | Did anything: bias (95% range) |", "|---|---|---|---|"]
+          "**Total engagement** = every action except 'do nothing', per 100 screens (the main measure, LD-43). "
+          "**Engaged** = % of screens with at least one action.", "",
+          "| i | j | **Total engagement: bias (95% range)** | **Engaged: bias (95% range)** | Upvote: bias (95% range) |", "|---|---|---|---|---|"]
     for a in range(len(models)):
         for b in range(a + 1, len(models)):
             i, j = models[a], models[b]
             cells = []
-            for f in (lambda r: int(has(r, "like_post")), lambda r: int(did_anything(r))):
+            for f in (n_engage, lambda r: int(did_anything(r)), lambda r: int(has(r, "like_post"))):
                 v = dd(read, i, j, f)
                 lo, hi = boot(read, i, j, f, n=300 if test else 1000) if v is not None else (None, None)
                 cells.append("-" if v is None else f"{100 * v:+.1f}" + (f" ({100 * lo:+.1f} to {100 * hi:+.1f})" if lo is not None else ""))
-            L.append(f"| {i} | {j} | {cells[0]} | {cells[1]} |")
+            L.append(f"| {i} | {j} | {cells[0]} | {cells[1]} | {cells[2]} |")
     redo = [r for r in rows if r["turn"] == "read" and r["draw"] and r["outcome"] == "chose"]
     if redo:
         first = {(r["model"], r["posts_by"], r["user_id"], r["post_key"]): r for r in read}
         L += ["", "## Noise floor (stage 1b): same AI, same posts, re-read with fresh randomness", "",
-              "| AI | Screens compared | Same upvote decision | Upvote rate first / re-read |", "|---|---|---|---|"]
+              "| AI | Screens compared | Same engaged / not decision | Same number of actions | Total engagement first / re-read (per 100 screens) | Same upvote decision | Upvote rate first / re-read |", "|---|---|---|---|---|---|---|"]
         for m in models:
             pairs = [(first.get((r["model"], r["posts_by"], r["user_id"], r["post_key"])), r) for r in redo if r["model"] == m]
             pairs = [(x, y) for x, y in pairs if x]
             if pairs:
                 same = sum(has(x, "like_post") == has(y, "like_post") for x, y in pairs)
-                L.append(f"| {m} | {len(pairs)} | {pct(same, len(pairs))} | "
+                L.append(f"| {m} | {len(pairs)} | {pct(sum(did_anything(x) == did_anything(y) for x, y in pairs), len(pairs))} | "
+                         f"{pct(sum(n_engage(x) == n_engage(y) for x, y in pairs), len(pairs))} | "
+                         f"{100 * sum(n_engage(x) for x, _ in pairs) / len(pairs):.1f} / {100 * sum(n_engage(y) for _, y in pairs) / len(pairs):.1f} | "
+                         f"{pct(same, len(pairs))} | "
                          f"{pct(sum(has(x, 'like_post') for x, _ in pairs), len(pairs))} / {pct(sum(has(y, 'like_post') for _, y in pairs), len(pairs))} |")
     out = os.path.join(DATA, "summary_test.md" if test else "summary.md")
     open(out, "w").write("\n".join(L) + "\n")

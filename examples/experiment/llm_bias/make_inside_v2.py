@@ -1,7 +1,7 @@
 """Build the 'Inside LLM Bias v2' page: one HTML file with every code file (click to read it), the exact prompts the
 AIs receive, real answers from round 101, every Spark command, and how the pieces fit.
 
-    python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark <out.html>
+    python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark <out.html> ~/Desktop/LLM_Bias_v2/results.json
 
 The page text lives in inside_v2_template.html; this script only fills in the data (file sources, line numbers of the
 functions the text points to, real prompts and answers), so the code shown is always the code in the repo.
@@ -169,6 +169,7 @@ data = {
     "read_answers": {m: ({"raw": d.get("raw"), "seconds": d.get("latency_s"), "in": d.get("prompt_tokens"), "out": d.get("eval_tokens")} if d else None)
                      for m, d in reading.items()},
     "user0": {"username": u0["username"], "persona": u0["persona"]},
+    "results": json.load(open(sys.argv[3])) if len(sys.argv) > 3 else None,  # results.json from make_report_v2.py
 }
 tpl = open(os.path.join(HERE, "inside_v2_template.html")).read()
 blob = json.dumps(data).replace("</", "<\\/")

@@ -175,7 +175,7 @@ pre.mermaid{background:var(--panel);border:1px solid var(--rule);border-radius:1
     <div><b>100</b><span>pinned users, the same in every round</span></div>
     <div><b>3</b><span>AIs: qwen3:8b · llama3.1:8b · gemma3:12b</span></div>
     <div><b>27</b><span>OASIS actions on every screen</span></div>
-    <div><b>69,213</b><span>reading screens in round 101</span></div>
+    <div><b id="f_screens">69,213</b><span id="f_screens_l">reading screens in round 101</span></div>
     <div><b>12.1 h</b><span>one full round, GPU to ourselves</span></div>
   </div>
 </header>
@@ -210,7 +210,8 @@ flowchart LR
       <h3 style="margin-top:0">The bias number</h3>
       <p>Some AIs simply upvote more than others, so comparing raw rates would be unfair. The <b>double difference</b> removes that:</p>
       <p class="mono" style="font-size:13.5px">bias(i, j) = (i reads i − j reads i) − (i reads j − j reads j)</p>
-      <p>The first bracket asks how much more AI i likes i's posts than AI j does. The second subtracts how much more i likes
+      <p>It is computed on <b>total engagement</b> (every action across all 27, the main measure) and, as detail, on engaged % and upvotes.
+      The first bracket asks how much more AI i engages with i's posts than AI j does. The second subtracts how much more i likes
       <i>everything</i> (measured on j's posts). Positive means i favours its own AI's writing. The 95% range comes from
       re-drawing posts and users 1,000 times (a <b>bootstrap</b>). If the range crosses zero, the data can't tell the bias from chance.</p>
     </div>
@@ -423,28 +424,24 @@ flowchart LR
 </section>
 
 <section id="results">
-  <div class="eyebrow">09 · Round 101</div>
-  <h2>First complete round: no sign of own-AI favouritism yet</h2>
+  <div class="eyebrow">09 · Results</div>
+  <h2 id="res_h">Results</h2>
+  <p><b>The main measure is total engagement</b>: every action a user takes on a screen across all 27 actions, except "do nothing",
+  counted per 100 screens. A user who upvotes and comments counts 2. <b>Engaged</b> is the share of screens with at least one action.
+  Upvotes alone are shown as detail.</p>
   <div class="grid2">
-    <div><p class="muted">% of screens upvoted (diagonal = baseline)</p>
-      <div class="tablewrap"><table>
-        <tr><th>Reader ↓ / posts by →</th><th class="num">qwen</th><th class="num">llama</th><th class="num">gemma</th></tr>
-        <tr><td><span class="dot q"></span>qwen</td><td class="num diag">43.3</td><td class="num">48.0</td><td class="num">45.1</td></tr>
-        <tr><td><span class="dot l"></span>llama</td><td class="num">60.2</td><td class="num diag">62.2</td><td class="num">60.9</td></tr>
-        <tr><td><span class="dot g"></span>gemma</td><td class="num">51.7</td><td class="num">51.6</td><td class="num diag">48.0</td></tr>
-      </table></div></div>
-    <div><p class="muted">Own-AI bias in points per 100 screens (95% range)</p>
-      <div class="tablewrap"><table>
-        <tr><th>Pair</th><th class="num">Upvote</th><th class="num">Did anything</th></tr>
-        <tr><td>qwen vs llama</td><td class="num">−2.7 (−7.0 to +1.5)</td><td class="num">+5.4 (+1.7 to +9.0)</td></tr>
-        <tr><td>qwen vs gemma</td><td class="num">−5.4 (−12.3 to +1.4)</td><td class="num">−4.9 (−8.5 to −1.7)</td></tr>
-        <tr><td>llama vs gemma</td><td class="num">−2.2 (−7.9 to +3.2)</td><td class="num">+1.6 (−1.9 to +5.2)</td></tr>
-      </table></div></div>
+    <div><p class="muted">Total engagement: actions per 100 screens (diagonal = baseline)</p><div class="tablewrap"><table id="t_tot"></table></div></div>
+    <div><p class="muted">Engaged: % of screens with at least one action</p><div class="tablewrap"><table id="t_any"></table></div></div>
   </div>
-  <p style="margin-top:14px">Every upvote range crosses zero, so in round 101 no AI clearly upvotes its own AI's posts more. Each AI has a
-  strong style of its own (llama upvotes about 61% and reports 26%; gemma downvotes 35-38% and rarely comments; qwen comments the most
-  and does nothing most often). The AIs do play the people: users who love a topic upvote 70-99% of its posts, users who hate it 1-16%.
-  It is one round. Rounds 102-103 pooled will say more.</p>
+  <h3>Own-AI bias</h3>
+  <p class="muted">Above 0 = the AI favours its own AI's posts; below 0 = it favours the other AI's posts. A 95% range that crosses 0 means
+  no clear bias. Total engagement is in actions per 100 screens; engaged and upvote are in percentage points.</p>
+  <div class="tablewrap"><table id="t_bias"></table></div>
+  <h3>Noise floor</h3>
+  <p class="muted">The same AI re-reads the same post as the same user with fresh randomness. A real bias has to be bigger than this wobble.</p>
+  <div class="tablewrap"><table id="t_noise"></table></div>
+  <p style="margin-top:14px" id="res_text"></p>
+  <p class="muted">Upvote grid, for reference:</p><div class="tablewrap"><table id="t_up"></table></div>
 </section>
 </main>
 
@@ -517,6 +514,26 @@ $("#m_title").textContent = D.read_post.title;
 $("#m_body").textContent = D.read_post.body;
 $("#m_prompt").textContent = "SYSTEM:\n" + D.read_prompt.system + "\n\nUSER:\n" + D.read_prompt.user;
 
+
+/* ---------- results (from make_report_v2.py's results.json) ---------- */
+if (D.results) try {
+  const R = D.results, M = ["qwen3:8b","llama3.1:8b","gemma3:12b"], S = {"qwen3:8b":"qwen","llama3.1:8b":"llama","gemma3:12b":"gemma"}, DOT = {"qwen3:8b":"q","llama3.1:8b":"l","gemma3:12b":"g"};
+  $("#res_h").textContent = R.label + ": total engagement and own-AI bias";
+  const grid = (id, g, suf) => { $(id).innerHTML = `<tr><th>Reader ↓ / posts by →</th>${M.map(m=>`<th class="num">${S[m]}</th>`).join("")}</tr>` +
+    M.map(m=>`<tr><td><span class="dot ${DOT[m]}"></span>${S[m]}</td>${M.map(pb=>`<td class="num${m===pb?" diag":""}">${g[m+"|"+pb].toFixed(1)}${suf}</td>`).join("")}</tr>`).join(""); };
+  grid("#t_tot", R.tot, ""); grid("#t_any", R.any, "%"); grid("#t_up", R.up, "%");
+  const f = v => (v>0?"+":"") + v.toFixed(1).replace("-","−");
+  const cell = ([v,lo,hi]) => `${f(v)} <span class="muted">(${f(lo)} to ${f(hi)})</span>`;
+  const verdict = ([v,lo,hi]) => lo>0 ? "favours its own AI" : hi<0 ? "favours the other AI" : "no clear bias";
+  $("#t_bias").innerHTML = `<tr><th>Pair (i vs j)</th><th class="num">Total engagement</th><th>Reading</th><th class="num">Engaged</th><th class="num">Upvote</th></tr>` +
+    R.bias.map(b=>`<tr><td>${S[b.i]} vs ${S[b.j]}</td><td class="num"><b>${cell(b.tot)}</b></td><td>${verdict(b.tot)}</td><td class="num">${cell(b.any)}</td><td class="num">${cell(b.up)}</td></tr>`).join("");
+  $("#t_noise").innerHTML = `<tr><th>AI</th><th class="num">Screens</th><th class="num">Same engaged / not</th><th class="num">Same number of actions</th><th class="num">Total engagement: first → re-read</th></tr>` +
+    M.filter(m=>R.noise[m]).map(m=>{const n=R.noise[m]; return `<tr><td><span class="dot ${DOT[m]}"></span>${S[m]}</td><td class="num">${n.n}</td><td class="num">${n.same_eng.toFixed(1)}%</td><td class="num">${n.same_n.toFixed(1)}%</td><td class="num">${n.ta.toFixed(1)} → ${n.tb.toFixed(1)}</td></tr>`}).join("");
+  const clear = R.bias.filter(b=>b.tot[1]>0||b.tot[2]<0);
+  $("#res_text").textContent = (clear.length ? "Clear total-engagement bias: " + clear.map(b=>`${S[b.i]} vs ${S[b.j]} ${f(b.tot[0])} (${verdict(b.tot)})`).join("; ") + ". " : "No pair shows a clear total-engagement bias. ") +
+    `Based on ${R.screens.toLocaleString()} reading screens (${R.label}). Each AI has a strong engagement style of its own (look along a row), which the double difference removes.`;
+} catch(e){ console.error("results", e); }
+
 /* ---------- commands ---------- */
 const C = [
  ["A","One-time setup (done 5 Oct 2026; only needed again on a new machine)",[
@@ -555,7 +572,7 @@ const C = [
  ]],
  ["F","Results to the laptop",[
   ["Mac","Copy everything from the Spark","rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/","Run in a Mac terminal tab (prompt gordon@Kalebs-MacBook-Pro), not inside the ssh session."],
-  ["Mac","Tables, CSVs, graphs, the workbook, this page","cd ~/research/oasis\noasis-env/bin/python examples/experiment/llm_bias/export_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_graphs_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias_v2\npython3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark inside_v2.html","The workbook's formulas are recalculated with LibreOffice before delivery."],
+  ["Mac","Tables, CSVs, graphs, the workbook, this page","cd ~/research/oasis\noasis-env/bin/python examples/experiment/llm_bias/export_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_graphs_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias_v2\npython3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark inside_v2.html ~/Desktop/LLM_Bias_v2/results.json","The workbook's formulas are recalculated with LibreOffice before delivery."],
  ]],
  ["G","When the study is finished",[
   ["Spark","Remove the watchdog and free the GPU","crontab -l | grep -v watchdog.sh | crontab -; bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop","After the last STOP (currently Fri 9 Oct 06:00)."],

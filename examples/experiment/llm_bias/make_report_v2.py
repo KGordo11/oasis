@@ -152,26 +152,30 @@ def graphs(out, R, post_rows, posts, steps, best, rnd, bias, noise, label):
     files = []
     cell = {(m, pb): [r for r in R if r["model"] == m and r["posts_by"] == pb] for m in MODELS for pb in MODELS}
     has = lambda a: (lambda r: any(x["action"] == a for x in r["actions"]))
+    eng = lambda r: sum(x["action"] != "do_nothing" for x in r["actions"])  # LD-43: total engagement, the main measure
+    engaged = lambda r: any(x["action"] != "do_nothing" for x in r["actions"])
 
     # G1: 3x3 grids for the main engagement measures
-    meas = [("did anything", lambda r: any(x["action"] != "do_nothing" for x in r["actions"])),
-            ("upvote", has("like_post")), ("downvote", has("dislike_post")), ("comment", has("create_comment")),
-            ("report", has("report_post")), ("follow", has("follow")), ("share (repost)", has("repost")),
-            ("quote", has("quote_post")), ("search posts", has("search_posts")), ("chose 'do nothing'", has("do_nothing"))]
-    fig, axs = plt.subplots(2, 5, figsize=(17, 7.4))
-    for k, (ax, (t, f)) in enumerate(zip(axs.flat, meas)):
-        heat(ax, [[rate(cell[(m, pb)], f) for pb in MODELS] for m in MODELS], t, ylab=k % 5 == 0)
-    fig.subplots_adjust(wspace=0.3, hspace=0.35)
-    fig.suptitle(f"{label}: % of screens with each action - AI playing the users (rows) x AI that wrote the posts "
-                 f"(columns). Boxed diagonal = baseline (an AI reading its own AI's posts).", fontsize=11.5, x=.5, y=1.0)
+    meas = [("TOTAL ENGAGEMENT\n(actions per 100 screens)", eng, "{:.0f}"), ("engaged: any action (%)", engaged, "{:.1f}%"),
+            ("upvote (%)", has("like_post"), "{:.1f}%"), ("downvote (%)", has("dislike_post"), "{:.1f}%"),
+            ("comment (%)", has("create_comment"), "{:.1f}%"), ("report (%)", has("report_post"), "{:.1f}%"),
+            ("follow (%)", has("follow"), "{:.1f}%"), ("share (repost) (%)", has("repost"), "{:.1f}%"),
+            ("search posts (%)", has("search_posts"), "{:.1f}%"), ("chose 'do nothing' (%)", has("do_nothing"), "{:.1f}%")]
+    fig, axs = plt.subplots(2, 5, figsize=(17, 7.6))
+    for k, (ax, (t, f, fm)) in enumerate(zip(axs.flat, meas)):
+        heat(ax, [[rate(cell[(m, pb)], f) for pb in MODELS] for m in MODELS], t, fmt=fm, ylab=k % 5 == 0)
+    fig.subplots_adjust(wspace=0.3, hspace=0.45)
+    fig.suptitle(f"{label}: AI playing the users (rows) x AI that wrote the posts (columns). First grid = total engagement "
+                 f"(every action except 'do nothing'); the rest = % of screens with that action. Boxed diagonal = baseline.",
+                 fontsize=11.5, x=.5, y=1.0)
     files.append(save(fig, out, "01_engagement_3x3_grids.png"))
 
     # G1b: one big upvote grid + did-anything grid with counts
-    fig, axs = plt.subplots(1, 2, figsize=(11, 4.6))
-    for ax, (t, f) in zip(axs, meas[:2]):
-        heat(ax, [[rate(cell[(m, pb)], f) for pb in MODELS] for m in MODELS], f"{t} (% of screens)")
-    fig.suptitle(f"{label}: the two headline grids", fontsize=12)
-    files.append(save(fig, out, "02_upvote_and_engagement_grid.png"))
+    fig, axs = plt.subplots(1, 2, figsize=(11, 4.8))
+    for ax, (t, f, fm) in zip(axs, meas[:2]):
+        heat(ax, [[rate(cell[(m, pb)], f) for pb in MODELS] for m in MODELS], t, fmt=fm)
+    fig.suptitle(f"{label}: the headline - total engagement across all 27 actions", fontsize=12, y=1.04)
+    files.append(save(fig, out, "02_total_engagement_grids.png"))
 
     # G2: all 27 actions, per reader x poster, per 100 screens
     tot = Counter(x["action"] for r in R for x in r["actions"])
@@ -238,61 +242,69 @@ def graphs(out, R, post_rows, posts, steps, best, rnd, bias, noise, label):
     for ax, m in zip(axs, MODELS):
         for pb in MODELS:
             rs = cell[(m, pb)]
-            v = [rate([r for r in rs if r["stance"] == s], has("like_post")) for s in STANCES]
+            v = [rate([r for r in rs if r["stance"] == s], eng) for s in STANCES]
             ax.plot(range(5), v, marker="o", ms=6, lw=2, color=COLOR[pb], label=f"posts by {SHORT[pb]}")
         ax.set_xticks(range(5), [s.lower() for s in STANCES])
         ax.set_title(f"{SHORT[m]} playing the users")
         ax.set_xlabel("how the user feels about the post's topic")
-    axs[0].set_ylabel("% of screens upvoted")
+    axs[0].set_ylabel("total engagement (actions per 100 screens)")
     axs[0].legend(frameon=False)
-    fig.suptitle(f"{label}: do the AIs play the person? Upvotes by the user's stance on the topic", fontsize=12)
-    files.append(save(fig, out, "05_upvote_by_stance.png"))
+    fig.suptitle(f"{label}: total engagement by the user's stance on the post's topic", fontsize=12)
+    files.append(save(fig, out, "05_engagement_by_stance.png"))
 
     # G5: topic grid per reader
     fig, axs = plt.subplots(1, 3, figsize=(16, 4.6), sharey=True)
     for ax, m in zip(axs, MODELS):
         for k, pb in enumerate(MODELS):
             rs = cell[(m, pb)]
-            v = [rate([r for r in rs if r.get("topic") == t], has("like_post")) for t in tops]
+            v = [rate([r for r in rs if r.get("topic") == t], eng) for t in tops]
             ax.bar(np.arange(5) + (k - 1) * .27, v, width=.25, color=COLOR[pb], label=f"posts by {SHORT[pb]}")
         ax.set_xticks(range(5), [TOPICS[t][0].replace("r/", "") for t in tops], fontsize=8.5)
         ax.set_title(f"{SHORT[m]} playing the users")
         ax.grid(axis="x", visible=False)
-    axs[0].set_ylabel("% of screens upvoted")
+    axs[0].set_ylabel("total engagement (actions per 100 screens)")
     axs[0].legend(frameon=False, fontsize=8)
-    fig.suptitle(f"{label}: upvote % by the post's subreddit", fontsize=12)
-    files.append(save(fig, out, "06_upvote_by_topic.png"))
+    fig.suptitle(f"{label}: total engagement by the post's subreddit", fontsize=12)
+    files.append(save(fig, out, "06_engagement_by_topic.png"))
 
     # G6: bias forest
-    fig, ax = plt.subplots(figsize=(10, 3.8))
+    fig, ax = plt.subplots(figsize=(10, 4.6))
     labels = []
     for k, b in enumerate(bias):
-        for off, (key, col) in enumerate([("up", "#2a78d6"), ("any", "#4a3aa7")]):
+        for off, (key, col, name) in enumerate([("tot", "#2a78d6", "TOTAL ENGAGEMENT (actions per 100 screens)"),
+                                               ("any", "#4a3aa7", "engaged: any action (points)"),
+                                               ("up", "#9aa3ad", "upvote (points)")]):
             v, lo, hi = b[key]
-            yy = k * 1.0 + (off - .5) * .3
-            ax.plot([lo, hi], [yy, yy], color=col, lw=2.2)
-            ax.plot([v], [yy], "o", color=col, ms=8, mec="white", mew=1.5, label=("upvote" if key == "up" else "did anything") if k == 0 else None)
+            yy = k * 1.0 + (off - 1) * .26
+            ax.plot([lo, hi], [yy, yy], color=col, lw=2.6 if key == "tot" else 1.8)
+            ax.plot([v], [yy], "o", color=col, ms=9 if key == "tot" else 7, mec="white", mew=1.5, label=name if k == 0 else None)
             ax.text(hi + .4, yy, f"{v:+.1f}", va="center", fontsize=9, color=INK)
         labels.append(f"{SHORT[b['i']]} vs {SHORT[b['j']]}")
     ax.axvline(0, color=INK, lw=1)
     ax.set_yticks(range(len(bias)), labels)
     ax.invert_yaxis()
     ax.set_xlabel("own-AI bias, points per 100 screens (dot = estimate, line = 95% range)")
-    ax.legend(frameon=False, loc="upper left")
+    ax.legend(frameon=False, loc="lower left", fontsize=8.5)
     ax.grid(axis="y", visible=False)
-    ax.set_title(f"{label}: own-AI bias = (i reads i - j reads i) - (i reads j - j reads j). Range crossing 0 = no clear bias")
+    ax.set_title(f"{label}: own-AI bias = (i reads i - j reads i) - (i reads j - j reads j).\n"
+                 "Above 0 = favours its own AI's posts; below 0 = favours the other AI's; a range crossing 0 = no clear bias")
     files.append(save(fig, out, "07_own_ai_bias.png"))
 
     # G7: noise floor
-    fig, ax = plt.subplots(figsize=(7.5, 3.6))
+    fig, ax = plt.subplots(figsize=(9, 3.8))
     for k, m in enumerate(MODELS):
         if m in noise:
-            ax.barh([k], [noise[m]["same"]], color=COLOR[m], height=.55)
-            ax.text(noise[m]["same"] + 1, k, f"{noise[m]['same']:.1f}% of {noise[m]['n']} screens", va="center", fontsize=9)
+            n = noise[m]
+            ax.barh([k - .18], [n["same_eng"]], color=COLOR[m], height=.34)
+            ax.barh([k + .18], [n["same_n"]], color=COLOR[m], height=.34, alpha=.5)
+            ax.text(n["same_eng"] + 1, k - .18, f"same engaged / not: {n['same_eng']:.1f}%", va="center", fontsize=8.5)
+            ax.text(n["same_n"] + 1, k + .18, f"same number of actions: {n['same_n']:.1f}%   (engagement {n['ta']:.0f} -> {n['tb']:.0f} per 100)",
+                    va="center", fontsize=8.5)
     ax.set_yticks(range(3), [SHORT[m] for m in MODELS])
-    ax.set_xlim(0, 115)
+    ax.set_xlim(0, 175)
+    ax.set_xticks(range(0, 101, 20))
     ax.invert_yaxis()
-    ax.set_xlabel("% of screens where a re-read gave the same upvote decision")
+    ax.set_xlabel("% of re-read screens that came out the same")
     ax.grid(axis="y", visible=False)
     ax.set_title(f"{label} noise floor: same AI, same post, same user, fresh randomness")
     files.append(save(fig, out, "08_noise_floor.png"))
@@ -442,7 +454,7 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
             "Post ID", "Post author #", "Topic", "Person's stance on topic", "Scroll position", "Outcome", "Did anything (1/0)",
             "Actions on this screen"] + [lbl(a) if a in LABEL else a for a in ACTION_NAMES] + \
            ["Comment text", "Quote text", "Report reason", "Reason given", "Seconds (one call)", "Prompt tokens", "Output tokens",
-            "In the round picker's selection (1/0)"]
+            "Total engagement (actions except 'do nothing')", "In the round picker's selection (1/0)"]
     header(S, 1, cols)
     acol = {a: 16 + k for k, a in enumerate(ACTION_NAMES)}
     R_all = sorted(R_all, key=lambda r: (r["round"], r["model"], r["posts_by"], r["draw"], r["user_id"], r["pos"]))
@@ -456,7 +468,8 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
                   r["pos"] + 1, r["outcome"], int(any(x["action"] != "do_nothing" for x in r["actions"])), len(r["actions"])]
                  + [c[a] for a in ACTION_NAMES]
                  + [first("create_comment", "content"), first("quote_post", "content"), first("report_post", "reason"),
-                    (r.get("reason") or "")[:300], r.get("latency_s"), r.get("prompt_tokens"), r.get("eval_tokens")])
+                    (r.get("reason") or "")[:300], r.get("latency_s"), r.get("prompt_tokens"), r.get("eval_tokens"),
+                    sum(x["action"] != "do_nothing" for x in r["actions"])])
         S.cell(i, sel, f'=IF(\'Engagement 3x3\'!$B$4="pooled",IF(OR({pooled_or.format(i=i)}),1,0),IF(A{i}=\'Engagement 3x3\'!$B$4,1,0))')
     N = S.max_row
     S.freeze_panes = "D2"
@@ -466,6 +479,7 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     rng = lambda col: f"Screens!${col}$2:${col}${N}"
     cA, cD, cE, cG, cJ, cK, cM, cN = (rng(x) for x in "ADEGJKMN")
     cSel = rng(L(sel))
+    cEng = rng(L(sel - 1))  # total engagement per screen
     base = lambda R, P, rcell: f'{cSel},1,{cD},"{R}",{cE},"{P}",{cG},0,{cM},"chose"'  # rcell kept for call sites
 
     # ---- README
@@ -492,6 +506,9 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
          "columns = AI that wrote the posts, value = % of screens with that action. Change the yellow round cell to see another "
          "round. All numbers are formulas counting the Screens sheet.", F()),
         ("All actions: the same nine cells as rows, with the count and % of screens for every one of the 27 actions.", F()),
+        ("MAIN MEASURE = TOTAL ENGAGEMENT: every action a user takes on a screen except 'do nothing', counted across all 27 "
+         "actions, per 100 screens (decision LD-43, Gordon 2026-10-08). 'Engaged' = % of screens with at least one action. "
+         "Upvotes and the other single actions are shown too, as detail.", F(bold=True)),
         ("Own-AI bias: the double difference built from the Engagement grids (formulas), with the 95% range from resampling "
          "posts and users (analyze_v2.py, 1,000 draws; blue = computed in Python).", F()),
         ("By stance / By topic: upvote, downvote and did-anything % split by how the user feels about the topic, and by subreddit.", F()),
@@ -536,7 +553,8 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     E.column_dimensions["A"].width = 30
     for c in "BCDEFGHI":
         E.column_dimensions[c].width = 15
-    measures = [("Did anything (any action except 'do nothing')", "N")] + [(f"{lbl(a)}  [{a}]", L(acol[a])) for a in ACTION_NAMES]
+    measures = [("TOTAL ENGAGEMENT: actions per 100 screens (every action except 'do nothing'; the main measure)", "TOT"),
+                ("Engaged: % of screens with at least one action", "N")] + [(f"{lbl(a)}  [{a}]", L(acol[a])) for a in ACTION_NAMES]
     row = 6
     grid_at = {}
     E.cell(row, 1, "Screens in each cell").font = F(bold=True, size=11)
@@ -548,18 +566,19 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
             c.number_format, c.border = "#,##0", BOX
     row += 6
     for title, col in measures:
-        E.cell(row, 1, title).font = F(bold=True, size=11)
-        header(E, row + 1, ["% of screens"] + [SHORT[m] for m in MODELS], 1)
-        header(E, row + 1, ["count"] + [SHORT[m] for m in MODELS], 6)
+        E.cell(row, 1, title).font = F(bold=True, size=12 if col == "TOT" else 11, color="2A4D69" if col == "TOT" else None)
+        header(E, row + 1, ["per 100 screens" if col == "TOT" else "% of screens"] + [SHORT[m] for m in MODELS], 1)
+        header(E, row + 1, ["actions" if col == "TOT" else "count"] + [SHORT[m] for m in MODELS], 6)
         for i, m in enumerate(MODELS):
             E.cell(row + 2 + i, 1, SHORT[m]).font = F(bold=True)
             E.cell(row + 2 + i, 6, SHORT[m]).font = F(bold=True)
             for j, pb in enumerate(MODELS):
-                cnt = E.cell(row + 2 + i, 7 + j, f'=COUNTIFS({base(m, pb, RC)},{rng(col)},">0")')
+                cnt = E.cell(row + 2 + i, 7 + j, f"=SUMIFS({cEng},{base(m, pb, RC)})" if col == "TOT"
+                             else f'=COUNTIFS({base(m, pb, RC)},{rng(col)},">0")')
                 cnt.number_format, cnt.border = "#,##0", BOX
                 tot = f"$%s$%d" % (L(2 + j), 8 + i)
-                pc = E.cell(row + 2 + i, 2 + j, f"=IF({tot}=0,\"\",{L(7 + j)}{row + 2 + i}/{tot})")
-                pc.number_format, pc.border = "0.0%", BOX
+                pc = E.cell(row + 2 + i, 2 + j, f"=IF({tot}=0,\"\",{'100*' if col == 'TOT' else ''}{L(7 + j)}{row + 2 + i}/{tot})")
+                pc.number_format, pc.border = ("0.0" if col == "TOT" else "0.0%"), BOX
                 if i == j:
                     pc.font, pc.fill = F(bold=True), DFILL
         grid_at[col] = row + 2
@@ -588,40 +607,50 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
               "simply being more generous with everyone. The estimate is a formula over the Engagement grids (round in the yellow cell); "
               f"the 95% range (blue) was computed in Python for {label} (resampling posts and users together, 1,000 draws) and does "
               "not change with the yellow cell.")
-    header(B, 4, ["i", "j", "Upvote bias (points)", f"95% range low ({label})", "95% range high", "Did-anything bias (points)",
-                  "95% range low", "95% range high", "Clear bias? (range excludes 0)"])
+    header(B, 4, ["i", "j", "TOTAL ENGAGEMENT bias (actions per 100 screens)", f"95% range low ({label})", "95% range high",
+                  "Engaged bias (points)", "95% range low", "95% range high", "Upvote bias (points)", "95% range low", "95% range high",
+                  "Clear bias? (range excludes 0)"])
     ix = {m: k for k, m in enumerate(MODELS)}
     for k, b in enumerate(bias):
         r = 5 + k
         i, j = ix[b["i"]], ix[b["j"]]
         B.cell(r, 1, SHORT[b["i"]]); B.cell(r, 2, SHORT[b["j"]])
-        for col, gcol in ((3, "like"), (6, "N")):
-            g = grid_at[L(acol["like_post"])] if gcol == "like" else grid_at["N"]
+        for col, key, mult in ((3, "TOT", ""), (6, "N", "100*"), (9, L(acol["like_post"]), "100*")):
+            g = grid_at[key]
             cellref = lambda a, bb: f"'Engagement 3x3'!{L(2 + bb)}{g + a}"
-            B.cell(r, col, f"=100*(({cellref(i, i)}-{cellref(j, i)})-({cellref(i, j)}-{cellref(j, j)}))").number_format = "+0.0;-0.0;0.0"
-        for col, v in ((4, b["up"][1]), (5, b["up"][2]), (7, b["any"][1]), (8, b["any"][2])):
+            c = B.cell(r, col, f"={mult}(({cellref(i, i)}-{cellref(j, i)})-({cellref(i, j)}-{cellref(j, j)}))")
+            c.number_format = "+0.0;-0.0;0.0"
+            if col == 3:
+                c.font = F(bold=True)
+        for col, v in ((4, b["tot"][1]), (5, b["tot"][2]), (7, b["any"][1]), (8, b["any"][2]), (10, b["up"][1]), (11, b["up"][2])):
             B.cell(r, col, round(v, 2)).font = BLUE
             B.cell(r, col).number_format = "+0.0;-0.0;0.0"
-        B.cell(r, 9, f'=IF(AND(D{r}<0,E{r}>0),"upvote: no",IF(D{r}>0,"upvote: YES (favours own)","upvote: YES (favours other)"))'
-                     f'&" / "&IF(AND(G{r}<0,H{r}>0),"did anything: no",IF(G{r}>0,"did anything: YES (more with own)","did anything: YES (more with other)"))')
-    B.column_dimensions["I"].width = 60
-    for c in "ABCDEFGH":
-        B.column_dimensions[c].width = 16
+        verdict = lambda name, lo, hi: (f'IF(AND({lo}{r}<0,{hi}{r}>0),"{name}: no",IF({lo}{r}>0,"{name}: YES, favours own AI",'
+                                        f'"{name}: YES, favours the other AI"))')
+        B.cell(r, 12, "=" + verdict("TOTAL ENGAGEMENT", "D", "E") + '&" / "&' + verdict("engaged", "G", "H") + '&" / "&' + verdict("upvote", "J", "K"))
+    B.column_dimensions["L"].width = 90
+    for c in "ABCDEFGHIJK":
+        B.column_dimensions[c].width = 15
 
     # ---- By stance / By topic
     def split_sheet(name, title, keycol, keys, keyname):
         W = sheet(name, title, f"Rows = AI playing the users x AI that wrote the posts. Columns = {keyname}. Value = % of those "
                   "screens. Round = the yellow cell on 'Engagement 3x3'. Formulas over Screens.")
         r = 4
-        for mname, col in (("Upvoted", L(acol["like_post"])), ("Downvoted", L(acol["dislike_post"])), ("Commented", L(acol["create_comment"])), ("Did anything", "N")):
-            W.cell(r, 1, f"{mname} (% of screens)").font = F(bold=True, size=11)
+        for mname, col in (("TOTAL ENGAGEMENT (actions per 100 screens)", "TOT"), ("Engaged: any action (% of screens)", "N"),
+                           ("Upvoted (% of screens)", L(acol["like_post"])), ("Downvoted (% of screens)", L(acol["dislike_post"])),
+                           ("Commented (% of screens)", L(acol["create_comment"]))):
+            W.cell(r, 1, mname).font = F(bold=True, size=11)
             header(W, r + 1, ["AI playing the users", "Posts by"] + list(keys))
             for q, (m, pb) in enumerate([(m, pb) for m in MODELS for pb in MODELS]):
                 rr = r + 2 + q
                 W.cell(rr, 1, SHORT[m]); W.cell(rr, 2, SHORT[pb])
                 for z, kv in enumerate(keys):
                     crit = f'{base(m, pb, RC)},{rng(keycol)},"{kv}"'
-                    W.cell(rr, 3 + z, f'=IFERROR(COUNTIFS({crit},{rng(col)},">0")/COUNTIFS({crit}),"")').number_format = "0.0%"
+                    if col == "TOT":
+                        W.cell(rr, 3 + z, f'=IFERROR(100*SUMIFS({cEng},{crit})/COUNTIFS({crit}),"")').number_format = "0.0"
+                    else:
+                        W.cell(rr, 3 + z, f'=IFERROR(COUNTIFS({crit},{rng(col)},">0")/COUNTIFS({crit}),"")').number_format = "0.0%"
                 if m == pb:
                     for z in range(len(keys) + 2):
                         W.cell(rr, 1 + z).fill = DFILL
@@ -664,13 +693,13 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
                "One row per post. Upvoted % / Did anything % = share of the users who saw this post (as played by that AI) who "
                "upvoted it / took any action. Formulas over Screens (all rounds; re-reads left out).")
     header(PS, 4, ["Round", "Written by AI", "Post ID", "Author #", "Author", "Subreddit", "Title", "Body", "Words"]
-           + [f"{SHORT[m]} users: upvoted %" for m in MODELS] + [f"{SHORT[m]} users: did anything %" for m in MODELS])
+           + [f"{SHORT[m]} users: total engagement (actions per 100 screens)" for m in MODELS] + [f"{SHORT[m]} users: engaged %" for m in MODELS])
     for k, (key, p) in enumerate(sorted(posts.items(), key=lambda kv: (kv[1]["round"], MODELS.index(kv[1]["ai"]), kv[0]))):
         r = 5 + k
         PS.append([p["round"], p["ai"], key, p["author_id"], p["author"], p["subreddit"], p["title"], p["body"], len(p["body"].split())])
         for q, m in enumerate(MODELS):
             crit = f'{cD},"{m}",{rng("H")},$C{r},{cG},0,{cM},"chose"'
-            PS.cell(r, 10 + q, f'=IFERROR(COUNTIFS({crit},{rng(L(acol["like_post"]))},">0")/COUNTIFS({crit}),"")').number_format = "0.0%"
+            PS.cell(r, 10 + q, f'=IFERROR(100*SUMIFS({cEng},{crit})/COUNTIFS({crit}),"")').number_format = "0.0"
             PS.cell(r, 13 + q, f'=IFERROR(COUNTIFS({crit},{cN},1)/COUNTIFS({crit}),"")').number_format = "0.0%"
     PS.column_dimensions["G"].width = 45
     PS.column_dimensions["H"].width = 80
@@ -683,7 +712,7 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
                "pasted word for word into every prompt as the user's self-description. Reaction columns are formulas over Screens.")
     header(PE, 4, ["Person #", "Username", "Name", "Age", "Sex", "State", "Community", "Education", "Work", "Openness", "Conscientiousness",
                    "Extraversion", "Agreeableness", "Neuroticism"] + [f"Stance: {TOPICS[t][1]}" for t in TOPICS]
-           + ["Description the AI is given"] + [f"{SHORT[m]} as this user: upvoted %" for m in MODELS] + [f"{SHORT[m]}: did anything %" for m in MODELS])
+           + ["Description the AI is given"] + [f"{SHORT[m]} as this user: total engagement (per 100 screens)" for m in MODELS] + [f"{SHORT[m]}: engaged %" for m in MODELS])
     for p in people:
         r = PE.max_row + 1
         b5 = p["big_five"]
@@ -692,7 +721,7 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
                   + [p["stances"][t] for t in TOPICS] + [p["persona"]])
         for q, m in enumerate(MODELS):
             crit = f'{cD},"{m}",{rng("B")},$A{r},{cG},0,{cM},"chose"'
-            PE.cell(r, 21 + q, f'=IFERROR(COUNTIFS({crit},{rng(L(acol["like_post"]))},">0")/COUNTIFS({crit}),"")').number_format = "0.0%"
+            PE.cell(r, 21 + q, f'=IFERROR(100*SUMIFS({cEng},{crit})/COUNTIFS({crit}),"")').number_format = "0.0"
             PE.cell(r, 24 + q, f'=IFERROR(COUNTIFS({crit},{cN},1)/COUNTIFS({crit}),"")').number_format = "0.0%"
         PE.cell(r, 20).alignment = Alignment(wrap_text=True, vertical="top")
     PE.column_dimensions["T"].width = 70
@@ -702,15 +731,19 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     NF = sheet("Noise floor", "Noise floor: the same AI re-reads 4 posts per user with fresh randomness",
                f"{label}. Same user, same post, same AI; only the random seed changes. 'Same decision' = the upvote choice came out "
                "the same both times. Computed in Python (blue). A real bias has to be bigger than this wobble.")
-    header(NF, 4, ["AI", "Screens compared", "Same upvote decision %", "Upvote % first read", "Upvote % re-read"])
+    header(NF, 4, ["AI", "Screens compared", "Same engaged / not decision %", "Same number of actions %",
+                   "Total engagement, first read (per 100 screens)", "Total engagement, re-read", "Same upvote decision %",
+                   "Upvote % first read", "Upvote % re-read"])
     for k, m in enumerate(MODELS):
         if m in noise:
-            vals = [m, noise[m]["n"], noise[m]["same"] / 100, noise[m]["a"] / 100, noise[m]["b"] / 100]
+            n = noise[m]
+            vals = [m, n["n"], n["same_eng"] / 100, n["same_n"] / 100, n["ta"], n["tb"], n["same"] / 100, n["a"] / 100, n["b"] / 100]
             for z, v in enumerate(vals):
                 c = NF.cell(5 + k, 1 + z, v)
                 c.font = BLUE if z else F()
-                if z >= 2:
-                    c.number_format = "0.0%"
+                c.number_format = "0.0" if z in (4, 5) else "0.0%" if z >= 2 else "General"
+    for c in "ABCDEFGHI":
+        NF.column_dimensions[c].width = 17
 
     # ---- Time per step
     T = sheet("Time per step", "Time: every step the runner finished on the DGX Spark",
@@ -764,15 +797,15 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
         ws.add_image(img, anchor)
         return row + int(img.height / 20) + 3  # next free row below the picture (default rows are 20 px)
 
-    r = place(E, "01", "K7", 1050, f"Graph: share of screens for the 10 main actions ({label})")
-    place(E, "02", f"K{r}", 760, "Graph: the two headline grids")
+    r = place(E, "01", "K7", 1050, f"Graph: total engagement + the 9 main actions ({label})")
+    place(E, "02", f"K{r}", 760, "Graph: the headline - total engagement and % engaged")
     r = place(A, "03", "A17", 1050, "Graph: every one of the 27 actions, per 100 screens")
     place(A, "09", f"A{r}", 760, "Graph: how many actions per screen")
-    place(B, "07", "A11", 900, "Graph: own-AI bias with 95% ranges")
-    place(wb["By stance"], "05", "J5", 1000, "Graph: upvote % by the user's stance")
-    place(wb["By topic"], "06", "J5", 1000, "Graph: upvote % by subreddit")
+    place(B, "07", "A11", 900, "Graph: own-AI bias (total engagement first) with 95% ranges")
+    place(wb["By stance"], "05", "J5", 1000, "Graph: total engagement by the user's stance")
+    place(wb["By topic"], "06", "J5", 1000, "Graph: total engagement by subreddit")
     place(PT, "04", "A14", 1050, "Graph: the posting turn")
-    place(NF, "08", "A11", 640, "Graph: same upvote decision on a re-read")
+    place(NF, "08", "A11", 640, "Graph: how often a re-read comes out the same")
     r = place(T, "10", "T6", 760, "Graph: speed per AI, GPU free vs shared")
     r = place(T, "11", f"T{r}", 760, "Graph: minutes vs screens (GPU-free steps)")
     r = place(T, "12", f"T{r}", 1050, "Graph: the run timeline")
@@ -830,11 +863,12 @@ def main(res, out):
     bias = []
     f_up = lambda r: int(any(x["action"] == "like_post" for x in r["actions"]))
     f_any = lambda r: int(any(x["action"] != "do_nothing" for x in r["actions"]))
+    f_tot = lambda r: sum(x["action"] != "do_nothing" for x in r["actions"])
     for a in range(3):
         for b in range(a + 1, 3):
             i, j = MODELS[a], MODELS[b]
             e = {}
-            for key, f in (("up", f_up), ("any", f_any)):
+            for key, f in (("tot", f_tot), ("any", f_any), ("up", f_up)):
                 v = analyze_v2.dd(R, i, j, f)
                 lo, hi = analyze_v2.boot(R, i, j, f, n=1000)
                 e[key] = (100 * v, 100 * lo, 100 * hi)
@@ -847,9 +881,16 @@ def main(res, out):
         pairs = [(x, y) for x, y in pairs if x]
         if pairs:
             noise[m] = {"n": len(pairs), "same": 100 * sum(f_up(x) == f_up(y) for x, y in pairs) / len(pairs),
+                        "same_eng": 100 * sum(f_any(x) == f_any(y) for x, y in pairs) / len(pairs),
+                        "same_n": 100 * sum(f_tot(x) == f_tot(y) for x, y in pairs) / len(pairs),
+                        "ta": 100 * sum(f_tot(x) for x, _ in pairs) / len(pairs), "tb": 100 * sum(f_tot(y) for _, y in pairs) / len(pairs),
                         "a": 100 * sum(f_up(x) for x, _ in pairs) / len(pairs), "b": 100 * sum(f_up(y) for _, y in pairs) / len(pairs)}
     gfiles, sps, ppu, post_s, hours = graphs(out, R, post_rows, posts, steps, best, rnd, bias, noise, label)
     p = workbook(out, reads, post_rows, posts, steps, best, rnd, bias, noise, people, gfiles, sps, hours, label, complete)
+    grid = lambda f: {f"{m}|{pb}": round(100 * sum(f(r) for r in R if r["model"] == m and r["posts_by"] == pb) /
+                                         max(1, sum(1 for r in R if r["model"] == m and r["posts_by"] == pb)), 1) for m in MODELS for pb in MODELS}
+    json.dump({"label": label, "rounds": complete, "screens": len(R), "tot": grid(f_tot), "any": grid(f_any), "up": grid(f_up),
+               "bias": bias, "noise": noise}, open(os.path.join(out, "results.json"), "w"), indent=1)
     print(json.dumps({"rounds": complete, "label": label, "screens_in_round": len(R), "all_screens": len(reads), "bias": bias, "noise": noise,
                       "free_s_per_screen": sps, "posts_per_user": ppu, "posting_s": post_s,
                       "hours_per_round": {u: round(hours(u), 2) for u in (10, 25, 50, 100, 1000)}, "workbook": p}, indent=1, default=str))

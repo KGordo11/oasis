@@ -16,7 +16,7 @@ written.
 | **Part 0** | **Handoff: the whole project on one page. Start here** | written 2026-10-02 |
 | **Part 1** | Project log for Sims 1-3: setup, conventions, open threads (as of Aug 2026) | `PROJECT_LOG.md` |
 | **Part 2** | Simulation 1: basic Reddit sim and reasoning capture | `SESSION_REPORT (basic sim1).md` |
-| **Part 3** | Simulation the up/control/down misinformation experiment | `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md` |
+| **Part 3** | Simulation 2: the up/control/down misinformation experiment | `COUNTERFACTUAL_EXPERIMENT_REPORT(sim 2, groups).md` |
 | **Part 4** | Simulation 3: the iAgent Shield experiment | `SHIELD_EXPERIMENT_REPORT.md` |
 | **Part 5** | Simulation 4: the complete log (status, build, scaling, every bug) | `SIM4_LOG.md` |
 | **Part 6** | Simulation 4: run plan and its review | `SIM4_RUN_PLAN.md` |
@@ -60,33 +60,25 @@ research**:
 
 1. **Simulations 1-4 (July - mid-September 2026).** How do AI users behave on a social network? Do they follow
    the crowd? What decides which posts they react to? How much does a bigger simulation cost in time?
-2. **The LLM Bias project (23 September - 2 October 2026).** If one AI both *writes* the posts and *plays* the
+2. **The LLM Bias project (Tests 1-6: 23 September - 2 October 2026; v2 on the DGX Spark: from 2 October).** If one AI both *writes* the posts and *plays* the
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-07 22:20): read this first
+## 0.2 Where things stand (2026-10-07 23:30): read this first
 
-- **Current work: LLM Bias v2 on the DGX Spark `honda.csr.uky.edu`.** Design, machine, file layout, the exact
-  resume commands and how Gordon likes to work are all in **Part 14 §14.32 (HANDOFF)**. Read that next.
-- **Round 101 was paused** Tue 2026-10-06 ~15:00-19:10, now running overnight. Another Spark user, hsa303, needed the GPU, and both of us
-  were running about 5× slower.
-  - Done: **all 3 baselines** (post sets qwen 101 / llama 103 / gemma 25), cross-test stage 1 for all 6 cells,
-    and part of stage 2.
-  - **Stop is now Fri 2026-10-09 06:00** (runner and watchdog, §14.31f). Remove the watchdog after that.
-  - **Round 101 results (§14.33):** no own-AI upvote bias. All three pairs are −2 to −5 points, and every range
-    includes 0. The AIs clearly play the users' stances. Pooled 101-103 still to come.
-  - **ROUND 101 COMPLETE Wed 17:17** (69,213 screens). Round 102 is running, slowed ~5× by hsa303's three GPU
-    jobs (§14.31e).
-  - Wed 16:16: round 101 nearly complete (last cross cell plus the noise floor; done ~17:10), then round 102
-    runs until Thu 10:00 (§14.31d).
-  - **Wed 2026-10-07 10:21: restarted detached (`setsid nohup`), STOP Thu 10:00.** The overnight run died at
-    ~02:00 when its whole session was killed (not a reboot; hsa303's job started 22:55, §14.31c). A cron
-    **watchdog** (`~/llm_bias/watchdog.sh`) now restarts it within 10 min; **remove it after Thu 10:00**:
-    `crontab -l | grep -v watchdog.sh | crontab -`. Round 101 stage 2 is done for all 6 cells.
-  - Tue 2026-10-06 ~19:10: resumed overnight with `ROUNDS="101 102 103" STOP="2026-10-07 10:00"` (Gordon:
-    "keep going until 10am, as much as it can"). That is ~14.8 h, enough to finish round 101 (~6.5 h) and most of
-    round 102; 103 is listed only so no time is wasted. The runner never starts a step it can't finish by 10:00.
-    Then the following nights, for 3 rounds (101-103) by the **deadline, Friday 2026-10-09**.
+- **Current work: LLM Bias v2 on the DGX Spark `honda.csr.uky.edu`.** Design, machine, file layout, exact commands
+  and how Gordon likes to work: **Part 14 §14.32 (HANDOFF)**. Read that next. The whole system explained with every
+  code file, prompt and command: the page **Inside LLM Bias v2** (§14.34).
+- **Round 101 is COMPLETE** (Wed 2026-10-07 17:17, 69,213 reading screens). Results in **§14.33**: no own-AI upvote
+  bias in round 101 (all three pairs −2 to −5 points, every 95% range includes 0); the AIs clearly play the users'
+  stances. Workbook + 14 graphs on Gordon's Desktop (`~/Desktop/LLM_Bias_v2/`, §14.34).
+- **Round 102 is running** on the Spark, fully detached (`setsid nohup`), **until Fri 2026-10-09 06:00** (§14.31f),
+  slowed by the other user's GPU jobs (§14.31e). A cron **watchdog** restarts the runner within 10 min if it dies
+  (§14.31c). **Remove the watchdog after Fri 06:00:** `crontab -l | grep -v watchdog.sh | crontab -`.
+- **Deadline: Friday 2026-10-09.** Then: copy results (rsync), rerun `make_report_v2.py`, pooled summary.
+- How we got here (each in its own section): paused for the other user Tue 15:03 (§14.31), resumed Tue 19:08
+  (§14.31a), killed ~02:00 Wed (§14.31b-c), restarted with the watchdog Wed 10:21, round 101 done Wed 17:17
+  (§14.31d-e), stop moved to Fri 06:00 (§14.31f).
 - **The final design** (§14.11 + §14.22 + §14.25):
   - Two-turn rounds: a posting turn, then a reading turn, one post per screen, every OASIS action available, a
     wipe after each round.
@@ -94,8 +86,8 @@ research**:
   - qwen3:8b + llama3.1:8b + gemma3:12b on **llama.cpp** with identical sampling.
   - 100 Census/BLS/Pew-grounded pinned users; the five Pew top news topics.
   - The bias measure is a double difference.
-- **Results so far live only on the Spark** (`~/llm_bias/oasis/data/llm_bias/v2/r101`). Copy them to the laptop
-  with rsync, then run `export_v2.py` and `make_graphs_v2.py` (§14.32).
+- **Results:** the Spark writes them to `~/llm_bias/oasis/data/llm_bias/v2/`. Copy to the laptop with rsync into
+  `data/llm_bias/v2_spark/`, then `export_v2.py`, `make_graphs_v2.py` and `make_report_v2.py` (§14.32d item 9).
 - **Pilots, not part of the final data:**
   - laptop night 1 (round 1: Ollama, mistral, 16 posts per user, §14.13)
   - the Ollama round-101 attempt (moved to `~/llm_bias/pilot_ollama` on the Spark)
@@ -103,7 +95,7 @@ research**:
 - **Older work:**
   - LLM Bias Tests 1-6 are finished (Test 6: +6.9 upvotes per 100 for the reader AI's own posts; Part 9, LF-49).
   - Sim 4 has been paused since 2026-09-17 (next run on its list: Q-24).
-  - All claude.ai artifacts were deleted on 2026-10-02.
+  - All older claude.ai artifacts were deleted on 2026-10-02. The one live page is Inside LLM Bias v2 (§14.34).
 - **Code:** GitHub `KGordo11/oasis`, branch `llm-bias`, always pushed. The Spark has its own clone in
   `~/llm_bias/oasis` with local data commits (PUSH=0), so update it with `git pull --no-edit` (merge).
 
@@ -124,6 +116,11 @@ research**:
 | Sep 27-29 | Test 4: 3 AIs writing freely. Test 5: one AI plays the whole crowd on a ranked feed | Part 9 |
 | Sep 30 - Oct 1 | **Test 6**: 2 AIs, 100 users, brand-new posts every round, 15 rounds | Part 9 §0, LF-48..50 |
 | Oct 2 | Deep breakdown of Test 6, Excel workbook of every scroll, forgotten scheduled job stopped, all pages deleted, all logs merged into this file | Part 9 LF-50, Part 0 |
+| Oct 2-4 | **LLM Bias v2** designed with the professor's requirements: 100 Census-grounded users, 3 AI families, all 27 actions, two-turn rounds, 3×3 crossover | Part 14 §14.1-14.11 |
+| Oct 4-5 | Laptop night 1 (pilot), mistral replaced by gemma3:12b, one post per screen | §14.12-14.15 |
+| Oct 5 | Moved to the **DGX Spark**; llama.cpp replaces Ollama (2.5-3× faster, identical sampling) | §14.17-14.26 |
+| Oct 6 | First-night bug fixed (LB-v2-3); preflight 108/108; round 101 runs, paused for the other user, killed overnight | §14.27-14.31b |
+| Oct 7 | Watchdog added; **round 101 complete**; results, workbook, graphs, the Inside page; round 102 running to Fri 06:00 | §14.31c-14.34 |
 
 ## 0.4 What we found, in plain words
 
@@ -13678,6 +13675,13 @@ Part records the professor's requirements, a review of two outside AI answers Go
 Tests 1-6, the recommended design, and the questions to settle. Decisions made in the meeting go below as `LD-19`
 and onward.*
 
+*Current state (2026-10-07): built, tested and running; the note above was true when it was written.*
+
+**Contents of Part 14.** Design: 14.1-14.11 (professor's requirements → the two-turn crossover in §14.11). Laptop
+pilot: 14.12-14.15. Moving to the Spark and the engine: 14.16-14.26. The runs: 14.27-14.31f (bugs, preflight,
+pauses, the overnight kill, the watchdog). **Handoff: 14.32** (14.32a rule, 14.32b Spark setup commands, 14.32c code
+change history, 14.32d command cheat sheet). **Results: 14.33** (round 101). **Report and the Inside page: 14.34.**
+
 ## 14.1 What the professor asked for (as relayed by Gordon)
 
 1. **100 hard-coded users**, realistic and never changed.
@@ -14615,6 +14619,339 @@ Gordon restarted the runner with `STOP="2026-10-09 06:00"` and set the same STOP
 so the run continues through Thursday. Resume was clean: `start r102 BASELINE llama3.1:8b reads own posts (all)
 (~8518 screens)`. **Remove the watchdog after Fri 06:00.**
 
+## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
+
+### What the study is
+**Question (LD-19):** do AIs favour posts written by their own AI?
+
+**One round:**
+1. **Posting turn.** One AI plays all 100 pinned users. Each user opens an empty Reddit feed with all 27 OASIS user
+   actions available and may write posts or not; nobody is told to post. The result is that AI's post set.
+2. **Reading turn.** A reader AI plays the same 100 users. Each user sees every post of a set except their own, one
+   post per screen, and may take any number of actions per screen.
+3. **Wipe.** No memory, no carried-over follows, and vote counts are hidden throughout.
+
+Every reader AI reads every poster AI's set, giving a **3 × 3 crossover**. **Baselines** (an AI reading its own set)
+run first (LD-40), then the 6 cross cells in nested stages (each user's first 16, 32, 64, then all posts of their
+fixed scroll), so coverage stays even if time runs out. Then a noise floor: each AI re-reads 4 posts per user of
+its own set with fresh randomness.
+
+**Bias for AIs i and j** = (i reads i − j reads i) − (i reads j − j reads j), with 95% ranges from resampling posts
+and users together.
+
+**Models:**
+- qwen3:8b (Alibaba): Ollama blob a3de86cd…
+- llama3.1:8b (Meta): Ollama blob 667b0c19…
+- gemma3:12b (Google): standard GGUF `ggml-org/gemma-3-12b-it-GGUF` Q4_K_M, because Ollama's gemma file is
+  unreadable by llama.cpp
+
+**Engine settings:**
+- **llama.cpp** (b11434 / commit 5e03bdd, CUDA sm_121), one server per model, 8 slots × 8192 tokens, flash
+  attention, `--jinja`, all layers on the GPU
+- **identical sampling for every model:** temperature 0.7, top_k 40, top_p 0.9, min_p 0, repeat penalty 1.0, thinking off
+- **one model in memory at a time** (LD-42)
+
+**Users:** `personas_v2.json`, SHA ed110626…, never change it. Built by `build_population_v2.py` from Census 2024
+(age, sex, state), Census 2020 (rural), CPS 2024 (education), BLS (work) and Pew 2025 (social-media use weights).
+Stances use an orthogonal array: 20 users per stance per topic, no correlation between topics.
+
+**Topics:** the five Pew news topics Americans follow most: r/politics, r/technology, r/business, r/sports,
+r/entertainment.
+
+### The machine
+- **NVIDIA DGX Spark `honda.csr.uky.edu`** (172.31.40.215): ARM, GB10 GPU, 121 GB shared CPU/GPU memory.
+- **Login:** `ssh kmgo257@honda.csr.uky.edu` with Gordon's LinkBlue password. Key login is not set up, so Claude
+  cannot reach it directly. Off campus it needs the GlobalProtect VPN (ra.uky.edu); on campus, eduroam.
+- No sudo, no Docker.
+- **Shared with user hsa303** (`residual_concepts` Qwen jobs, about 46 GB of GPU). They are friendly and agreed to
+  share. Plan: we take nights (~19:00-09:00).
+- The home folder is NFS with a 100 GB quota.
+
+**Layout `~/llm_bias/`:**
+
+| Path | What it is |
+|---|---|
+| `README.txt` | what's where |
+| `env.sh` | old Ollama settings, unused now |
+| **`env_llamacpp.sh`** | `LLM_BACKEND=llamacpp` plus the server URLs (ports qwen 11601, llama 11602, gemma 11603) |
+| `ollama/` | Ollama 0.24.0, unused now |
+| `models/` | Ollama blobs, plus `gguf/gemma3-12b.gguf` |
+| `engines/llama.cpp/` | the built llama-server |
+| `logs/` | server logs, `preflight.txt` |
+| `pilot_ollama/` | the abandoned Ollama r101 |
+| **`oasis/`** | a git clone; results go in `oasis/data/llm_bias/v2/` |
+
+**tmux session `llm`:** Ctrl-b does NOT work as the prefix there. Leave by closing the terminal tab, and never type
+into the running window (typed text gets queued as shell input).
+
+### Code (`examples/experiment/llm_bias/`)
+
+| File | What it does |
+|---|---|
+| `run_v2.py` | one turn: `post` or `read` (`--posts-by`, `--max-posts`, `--draw`, `--agents`, `--page-size`) |
+| `v2_night.py` | the runner. Env: ROUNDS, STOP, SLICES, NOISE, AGENTS, PARALLEL, MANAGE_SERVERS, PUSH, STOP_OLLAMA. Skips finished work, resumes, and stops itself on a step that fails with 0 screens |
+| `llamacpp_servers.sh` | start / only / stop / status of the servers |
+| `llm.py` | the backend switch (ollama / llamacpp) |
+| **`preflight_v2.py`** | 108 PASS/FAIL checks, about 25 min. Run it before any unattended run after a code change |
+| **`progress_v2.py`** | read-only: screens done / left per cell for each round and an estimated finish time (latest measured speed per AI); safe while the run is going |
+| `analyze_v2.py` | the plain tables and the double difference, written to `summary.md` (stdlib only, so it runs on the Spark) |
+| `export_v2.py` | CSVs plus `LLM_bias_v2.xlsx` (needs pandas, so laptop only) |
+| `make_graphs_v2.py` | graphs per round and pooled (needs matplotlib, so laptop only) |
+| `build_population_v2.py` | rebuilds the pinned users; `--check` confirms they are unchanged |
+
+Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
+
+### Status (2026-10-07 23:30)
+- **Round 101 complete** (Wed 17:17): 69,213 reading screens + 3 posting turns + 3 noise floors. Results §14.33.
+- **Round 102 running**, detached, `STOP="2026-10-09 06:00"`, `ROUNDS="101 102 103"`. At 22:05: qwen posted 94,
+  llama 105; qwen baseline done; llama baseline under way at 2.6 s/screen (shared GPU). Check with `progress_v2.py`.
+- **Watchdog** (`~/llm_bias/watchdog.sh`, cron every 10 min, STOP Fri 06:00) restarts a dead runner. Remove it after
+  the stop (§14.32d item 10).
+- Speeds with the GPU to ourselves (GPU-free real-round steps): qwen 0.41, llama 0.51, gemma 0.95 s per screen;
+  one full 100-user round ≈ 12.1 h (§14.34).
+
+History of the round-101 status, kept as written (2026-10-07 10:22): running, detached, until Thu 2026-10-08 10:00
+(§14.31b). Round 101: stage 2 done for all 6 cells, stage 3 in progress. The overnight run died ~02:00 (not a reboot;
+whole session killed while hsa303's job ran, §14.31c); a cron watchdog now restarts it within 10 min. Older status
+at the 15:00 pause:
+- Complete: posting turns for all 3 AIs, **all 3 baselines**, stage 1 of all 6 cross cells, and stage 2 of
+  qwen←llama and qwen←gemma.
+- llama←qwen stage 2 finished at 15:03, just before the pause (it was 2,770/3,200 when last checked).
+- The noise floor for qwen came from the earlier run (`_d1`).
+- Measured seconds per screen when the Spark is not shared: qwen ≈ 0.4, llama ≈ 0.5, gemma ≈ 0.95.
+- Remaining work for round 101 is about 6.5 h. A full round takes about 12-14 h.
+
+### Exact procedures (Gordon runs them; give him copy-paste commands with the expected output)
+
+**Resume / run rounds (since 2026-10-07: detached, no tmux).** Log in with
+`ssh -o PubkeyAuthentication=no kmgo257@honda.csr.uky.edu` (the key attempt wastes one of the few allowed tries:
+"Too many authentication failures"), then:
+```
+cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && echo "backend: $LLM_BACKEND" && MANAGE_SERVERS=1 STOP="YYYY-MM-DD HH:MM" ROUNDS="101 102 103" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 setsid nohup python3 examples/experiment/llm_bias/v2_night.py >> ~/llm_bias/logs/night_run.out 2>&1 < /dev/null &
+```
+Wait 2 min, check (below) for `runner alive: 1` and a `start ...` line, then close the tab. It survives a dropped
+connection but **not a reboot of the Spark**; after a reboot run the same command again (it resumes).
+
+**Check:**
+```
+grep -E "end|post sets|SKIP|STOPPING" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -15
+```
+Runner alive: `ps -u $USER -o args | grep -c '[v]2_night.py'`
+
+**Pause / free the GPU:**
+```
+pkill -u $USER -f v2_night.py; pkill -u $USER -f run_v2.py; bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop
+```
+
+**Update the code on the Spark:**
+```
+cd ~/llm_bias/oasis && git pull --no-edit
+```
+The Spark has local data commits, so this is a merge. Then rerun the preflight if run_v2, v2_night, llm or the
+server script changed.
+
+**Results to the laptop (run on the Mac):**
+```
+rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/
+```
+Then:
+```
+oasis-env/bin/python examples/experiment/llm_bias/export_v2.py data/llm_bias/v2_spark
+oasis-env/bin/python examples/experiment/llm_bias/make_graphs_v2.py data/llm_bias/v2_spark
+```
+
+### Decisions (Part 14): LD-19 … LD-42, in one line each
+19 own-writing bias · 20 new US-grounded 100 · 21/31 topics (now the Pew top 5) · 22 human posts (later dropped,
+§14.11) · 23 all actions, any number per screen · 24/27/30/38 models (now qwen3:8b, llama3.1:8b, gemma3:12b) ·
+25 every round is a wipe · 26 overnight runs, deadline Fri 10-09 · 28 posting optional · 32 one JSON form with all
+27 actions · 33 no interview / purchase · 34 one post per screen (pages kill comments, §14.14) · 35/37 every user
+reads every post, in nested stages · 36 noise floor · 39 NUM_PARALLEL 8 · 40 baselines first · 41 llama.cpp +
+uniform sampling · 42 one model in memory.
+
+### Bugs found and fixed (LB-v2-1 … 7)
+1. Replay crashed on users' own posts.
+2. A possible endless loop in the reading window.
+3. **The llama.cpp server check failed when the first server was off.** This wasted the first night's llama and
+   gemma steps.
+4. A half-written line on a hard kill.
+5. The checker's `pgrep` matched itself.
+6. A tiny post set read everything instead of the window.
+7. Stop didn't wait for servers to exit.
+
+All are covered by `preflight_v2.py`.
+
+### How Gordon works (follow these)
+- He runs everything on the Spark himself. Give **exact copy-paste commands**, numbered, each with ✅ what he
+  should see and 🛑 what to do if not. Be extra careful, organised (everything in `~/llm_bias`), and plain-spoken.
+- **Never start a real run before he says go** after any design change, and **test fully (preflight) before he
+  goes idle.**
+- Results: plain counts and % first, then derived numbers with every term explained in place. Everything goes
+  into this log; commit and push to `origin` (KGordo11) after every change.
+- The professor's requirements: 100 hard-coded users, 2-3 models from different families, all actions available,
+  baselines, one change at a time.
+
+### Next steps
+1. ~~Finish round 101~~ (done Wed 17:17). Round 102 runs until Fri 06:00; round 103 only if time allows.
+2. After each round: rsync, `make_report_v2.py` (workbook + graphs, recalculated with LibreOffice), rebuild the
+   Inside page (`make_inside_v2.py`, republish to the same URL), and the results written here (plain tables first).
+3. Before Friday: a pooled summary of all complete rounds for the professor.
+4. After Fri 06:00: remove the watchdog, stop the servers (§14.32d item 10).
+5. Later (new study only): speculative decoding, vLLM, MoE models. More slots per server gave no real gain (§14.20).
+
+*(Original next steps, 2026-10-06: finish round 101 tonight and run round 102; then round 103 Wed/Thu nights;
+after each round rsync, export, graphs; before Friday a pooled 3-round summary; later speculative decoding,
+Docker/vLLM, MoE models.)*
+
+### 14.32a Standing rule: keep this handoff 100% current
+After **every** code change, bug fix, new command given to Gordon, decision, or run event:
+1. Update **§14.32** (status, procedures, decisions, bugs) and **Part 0 §0.2** (one-paragraph status).
+2. Add a row to the change history below. Add a dated §14.x entry for anything substantive.
+3. Commit and push. Tell Gordon the commit code if the Spark must `git pull --no-edit` it.
+
+A new Claude must be able to open this file and carry on with no other context. Anything that exists only in chat
+or in memory is lost.
+
+### 14.32b How the Spark environment was built (exact commands Gordon ran, 2026-10-05; reproducible)
+```
+# login (campus eduroam or GlobalProtect VPN ra.uky.edu); LinkBlue password
+ssh kmgo257@honda.csr.uky.edu
+# project folders + settings
+mkdir -p ~/llm_bias/ollama ~/llm_bias/models ~/llm_bias/logs
+cat > ~/llm_bias/env.sh <<'X'
+export OLLAMA_HOST=127.0.0.1:11500
+export OLLAMA_URL=http://127.0.0.1:11500
+export OLLAMA_MODELS=$HOME/llm_bias/models
+export OLLAMA_SERVE_LOG=$HOME/llm_bias/logs/ollama_serve.log
+export PATH=$HOME/llm_bias/ollama/bin:$PATH
+X
+# Ollama 0.24.0 (ARM) -- used only to download qwen3:8b and llama3.1:8b; the study now runs on llama.cpp
+cd ~/llm_bias/ollama && curl -fL -o ollama.tar.zst https://github.com/ollama/ollama/releases/download/v0.24.0/ollama-linux-arm64.tar.zst && tar --zstd -xf ollama.tar.zst && rm ollama.tar.zst
+source ~/llm_bias/env.sh && OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=8 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h OLLAMA_MAX_LOADED_MODELS=3 nohup ollama serve > $OLLAMA_SERVE_LOG 2>&1 &
+ollama pull qwen3:8b && ollama pull llama3.1:8b && ollama pull gemma3:12b
+# code
+cd ~/llm_bias && git clone --depth 1 --branch llm-bias https://github.com/KGordo11/oasis.git
+cd ~/llm_bias/oasis && git config user.name "Gordon" && git config user.email "gordonkm05@gmail.com" && git config pull.rebase false
+# llama.cpp (CUDA 13, GB10 = sm_121)
+mkdir -p ~/llm_bias/engines && cd ~/llm_bias/engines && git clone --depth 1 https://github.com/ggml-org/llama.cpp && cd llama.cpp
+export PATH=/usr/local/cuda/bin:$PATH CUDACXX=/usr/local/cuda/bin/nvcc
+nice -n 19 cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=121 -DLLAMA_CURL=OFF -DCMAKE_BUILD_TYPE=Release
+nice -n 19 cmake --build build --config Release -j 8 --target llama-server
+# gemma3:12b standard GGUF (Ollama's gemma file is not readable by llama.cpp)
+mkdir -p ~/llm_bias/models/gguf && curl -fL -o ~/llm_bias/models/gguf/gemma3-12b.gguf https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/resolve/main/gemma-3-12b-it-Q4_K_M.gguf
+# servers + env file for the runs (writes ~/llm_bias/env_llamacpp.sh)
+bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh start && bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop
+# the Ollama server is no longer used:  pkill -u $USER -f "ollama serve"
+# full check before any unattended run (25 min, test round 904):
+cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/experiment/llm_bias/preflight_v2.py 2>&1 | tee ~/llm_bias/logs/preflight.txt
+```
+
+### 14.32c Change history of the v2 code (git, newest last). Add a row for every change.
+
+| Commit | When | Change |
+|---|---|---|
+| 2b66763 | 10-02 22:55 | 100 Census/BLS/Pew users (pinned), human post pool, first all-actions harness, model speed test |
+| 3c02c46 | 10-03 00:24 | smoke tests of 6 models; LB-v2-1 replay fix; analysis + campaign scripts |
+| 6c4862a | 10-04 17:39 | llama3.1:8b as third family, optional posting |
+| da6f5b5 | 10-04 22:18 | **two-turn design** (posting + reading turn, 3×3 crossover), 27 actions, Pew topics, balanced reading windows, night runner |
+| 3edf5c0 | 10-05 10:37 | page-mode test (pages kill comments → one post per screen); mistral replacement candidates |
+| f19c27a | 10-05 17:57 | gemma3:12b replaces mistral; final laptop smoke (full reading); runner made SSH-ready (slices, measured speed) |
+| b600fcc | 10-05 20:09 | `OLLAMA_URL` / `PARALLEL` settable (private port on the shared Spark) |
+| 27cc742 | 10-05 21:27 | **LB-v2-2** possible endless loop fixed; exact remaining-work count; `export_v2.py`; `make_graphs_v2.py` |
+| fce25f9 | 10-05 21:31 | **baselines first** (LD-40) |
+| 4890067 | 10-05 21:58 | `llm.py` llama.cpp backend |
+| 46ea7cf | 10-05 22:14 | `llamacpp_servers.sh`; uniform sampling; backend recorded in manifests (LD-41) |
+| 069540d | 10-05 22:34 | server script: GGUF override per model, 3-min timeout, refuse double start |
+| 41b6009 | 10-05 23:02 | **one model in memory** (`only`, `MANAGE_SERVERS=1`, LD-42) |
+| 5f794c9 | 10-06 08:59 | **LB-v2-3** fixed (server check with one server off); runner stops on a 0-screen failure |
+| 1457456 | 10-06 09:10 | **`preflight_v2.py`**; **LB-v2-4** crash-safe resume; runner `AGENTS=` test size |
+| ffafa95 | 10-06 09:34 | **LB-v2-6** exact window on tiny sets; **LB-v2-7** wait for servers to exit; preflight passes 108/108 |
+| 23b91bd | 10-07 22:00 | `progress_v2.py`: progress per cell + ETA per round (read-only); cron watchdog `~/llm_bias/watchdog.sh` (on the Spark, not in git, §14.31c) |
+| cbf869b | 10-07 22:10 | `progress_v2.py` uses the live speed of the running step |
+| dfc3a2e | 10-07 22:45 | **`make_report_v2.py`**: the full Excel workbook (formulas, 13 sheets) + 14 graphs incl. time vs users / rounds |
+| 06ef8cd | 10-07 23:15 | **`make_inside_v2.py` + `inside_v2_template.html`**: the Inside LLM Bias v2 page (§14.34) |
+| (this) | 10-07 23:30 | log cleanup: §0.2 rewritten to the current state, §0.3 v2 rows, Part 14 contents + section order, §14.34 |
+
+### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
+
+**0. Log in** (on the Mac; VPN on if off campus)
+```
+ssh -o PubkeyAuthentication=no kmgo257@honda.csr.uky.edu
+```
+
+**1. Check the run**
+```
+date; grep -E "end|post sets|WATCHDOG|STOPPING|SKIP" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -8; echo "runner alive: $(ps -u $USER -o args | grep -c '^python3 .*[v]2_night')"; echo "== current step:"; tail -1 $(ls -t /tmp/v2_reading*.log /tmp/v2_posting*.log 2>/dev/null | head -1) | cut -c1-90
+```
+✅ `runner alive: 1`; current step shows e.g. `1200/3200 (0.55 s each, ETA 18 min)`. Speed: ~0.5 s (qwen/llama) or ~1.0 s (gemma) = GPU to ourselves; 2-3 s = shared; 20 s = something is hogging it.
+
+**2. Who's on the machine**
+```
+who; echo "== hsa303 busiest:"; ps -u hsa303 -o etime,pcpu,args --sort=-pcpu | head -5 | cut -c1-110; echo "== on the GPU:"; nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader
+```
+Our GPU program is `llama-server`; hsa303's are `.venv/bin/python`.
+
+**3. How much memory I'm using / the whole machine**
+```
+echo "== mine:"; ps -u $USER -o rss=,comm= --sort=-rss | head -4 | awk '{printf "   %5.1f GB  %s\n", $1/1048576, $2}'; echo "== whole Spark (121 GB total):"; free -g | head -2
+```
+Ours is ~9-14 GB (one AI loaded). If `available` drops under ~10 GB, things can get killed.
+
+**4. Disk space I'm using** (home quota 100 GB)
+```
+du -sh ~/llm_bias ~/llm_bias/models ~/llm_bias/oasis/data/llm_bias/v2 2>/dev/null
+```
+
+**5. Is the watchdog on?**
+```
+crontab -l; grep WATCHDOG ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -3
+```
+✅ One line `*/10 * * * * bash .../watchdog.sh`. Any `WATCHDOG ... restarting` line = it died and came back by itself.
+
+**6. EMERGENCY STOP: everything, watchdog included** (watchdog first, or it restarts the run within 10 min)
+```
+crontab -l | grep -v watchdog.sh | crontab -; pkill -u $USER -f v2_night.py; pkill -u $USER -f run_v2.py; bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop; sleep 2; crontab -l; ps -u $USER -o pid,args | grep -E "[v]2_night|[r]un_v2|[l]lama-server" || echo "ALL STOPPED"
+```
+✅ `stopped`, then `no crontab for kmgo257` (or nothing), then `ALL STOPPED`. Nothing finished is lost.
+
+**7. Start again after a stop** (change the date/time to when it should stop)
+```
+sed -i 's/^STOP=.*/STOP="2026-10-08 10:00"/' ~/llm_bias/watchdog.sh; cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && echo "backend: $LLM_BACKEND" && MANAGE_SERVERS=1 STOP="2026-10-08 10:00" ROUNDS="101 102 103" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 setsid nohup python3 examples/experiment/llm_bias/v2_night.py >> ~/llm_bias/logs/night_run.out 2>&1 < /dev/null &
+```
+then turn the watchdog back on:
+```
+(crontab -l 2>/dev/null | grep -v watchdog.sh; echo "*/10 * * * * bash $HOME/llm_bias/watchdog.sh") | crontab - && crontab -l
+```
+✅ `backend: llamacpp`; after 2 min, command 1 shows `runner alive: 1`. Put the **same date in both places**.
+
+**7b. Where are we, how much is left, when does each round land?**
+```
+cd ~/llm_bias/oasis && python3 examples/experiment/llm_bias/progress_v2.py
+```
+Per round: every cell's screens done / needed, hours left and the landing time. Sets not written yet are guessed
+from the newest written ones, and the speed is the last one measured (shared GPU → slower ETA).
+
+**8. Has a round finished?**
+```
+grep -E "post sets|checkpoint" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -6
+```
+`r102 post sets: ...` = round 101 fully done and 102 under way. `checkpoint round N: noise floor` = round N complete.
+
+**9. Copy results to the laptop** (on the **Mac**, not the Spark)
+```
+rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/
+```
+Then, on the Mac, the workbook + graphs (formulas recalculated with LibreOffice) and the Inside page:
+```
+cd ~/research/oasis && oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias_v2
+python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark /tmp/inside_v2.html
+```
+(Claude runs these: it also recalculates the workbook with `recalc.py` and republishes the page to the same URL.)
+
+**10. After the run is over (Thu after 10:00): remove the watchdog**
+```
+crontab -l | grep -v watchdog.sh | crontab -
+```
+
 ## 14.33 Round 101 results (the first complete round; copied to the laptop Wed 2026-10-07 22:20)
 
 **Where the files are.** The data is in `data/llm_bias/v2_spark/r101`. It was copied from the Spark by rsync, then
@@ -14703,314 +15040,57 @@ For AIs i and j: (i reading i's posts - j reading i's posts) - (i reading j's po
 | llama3.1:8b | 400 | 88.8% | 60.2% / 61.5% |
 | qwen3:8b | 400 | 79.2% | 40.0% / 38.8% |
 
+## 14.34 The round-101 report: workbook, graphs and the Inside page (Wed 2026-10-07 22:30-23:30)
 
-## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
+Gordon asked for an Excel sheet "similar to before" with the AI × AI engagement grids, graphs of every action and
+of time / rounds / users, every detail, and one page that explains the whole simulation from the code up, with
+clickable files, plus every Spark command in order.
 
-### What the study is
-**Question (LD-19):** do AIs favour posts written by their own AI?
+**Workbook `~/Desktop/LLM_Bias_v2/LLM_Bias_v2.xlsx`** (built by `make_report_v2.py`; 15 MB; 13 sheets):
+- README; Graphs; **Engagement 3x3**: one grid per measure (did anything + each of the 27 actions), rows = AI playing
+  the users, columns = AI that wrote the posts, % and counts. A yellow **round picker** cell: change 101 to 102 once
+  round 102 is complete.
+- All actions; Own-AI bias (the double difference as a formula over the grids, plus the Python bootstrap ranges);
+  By stance; By topic; Posting turn; Posts (all 428, with per-AI reactions); People (the 100 users, their exact
+  descriptions, and reactions); Noise floor; Time per step (every runner step from night.log; GPU free/shared);
+  Screens (all 80,481 rows, one per screen, 1/0 or a count per action).
+- 4,960 formulas, all COUNTIFS/SUMIFS over the Screens sheet. Recalculated with LibreOffice (installed 7 Oct with
+  `brew install --cask libreoffice` for this): **0 errors**. Spot-checked against `analyze_v2.py`: the upvote grid,
+  the did-anything grid and all three bias values match exactly.
+- Same layout ideas as the Test 6 workbook (README first, bias sheet, splits by interest, time & cost, raw rows).
 
-**One round:**
-1. **Posting turn.** One AI plays all 100 pinned users. Each user opens an empty Reddit feed with all 27 OASIS user
-   actions available and may write posts or not; nobody is told to post. The result is that AI's post set.
-2. **Reading turn.** A reader AI plays the same 100 users. Each user sees every post of a set except their own, one
-   post per screen, and may take any number of actions per screen.
-3. **Wipe.** No memory, no carried-over follows, and vote counts are hidden throughout.
+**Graphs `~/Desktop/LLM_Bias_v2/graphs/`** (14 PNG, also embedded in the workbook): 01 engagement grids for 10
+measures, 02 upvote + did-anything grids, 03 all 27 actions in the reading turn, 04 posting turn (who posted,
+subreddits, every action), 05 upvote by stance, 06 by topic, 07 own-AI bias with 95% ranges, 08 noise floor,
+09 actions per screen, 10 speed per AI (GPU free vs shared), 11 minutes vs screens (straight lines), 12 the run
+timeline with shared and dead periods, 13 hours per round vs number of users, 14 hours vs number of rounds.
 
-Every reader AI reads every poster AI's set, giving a **3 × 3 crossover**. **Baselines** (an AI reading its own set)
-run first (LD-40), then the 6 cross cells in nested stages (each user's first 16, 32, 64, then all posts of their
-fixed scroll), so coverage stays even if time runs out. Then a noise floor: each AI re-reads 4 posts per user of
-its own set with fresh randomness.
+**Time numbers** (only GPU-free steps: a step is "shared" when it is >1.25× slower than that AI's best real-round
+speed): qwen 0.41, llama 0.51, gemma 0.95 s per screen; one full 100-user round ≈ **12.1 h**. Because every user
+reads every post, the work grows with the square of the users: 10 users ≈ 0.14 h, 50 ≈ 3.1 h, 200 ≈ 48 h,
+1,000 ≈ 1,190 h (about 50 days) per round.
 
-**Bias for AIs i and j** = (i reads i − j reads i) − (i reads j − j reads j), with 95% ranges from resampling posts
-and users together.
+**The Inside LLM Bias v2 page:** https://claude.ai/artifact/E1eicdgjHpgDzex2qj18hR (private to Gordon until he
+shares it). Built by `make_inside_v2.py` from `inside_v2_template.html`, so the code it shows is the repo's code.
+Sections:
+1. The design.
+2. The code: 17 files, click to read. Each is tagged new / updated / from OASIS / made by code / Spark-only / real
+   output, with where it came from.
+3. Step by step: 12 steps, each with buttons that open the exact line.
+4. What the AI sees: the exact system and screen prompts for user 0, and the three AIs' real round-101 answers to
+   the same posting screen and the same reading screen. Plus what it can and cannot see.
+5. The screen as a phone card next to the raw prompt.
+6. The Spark: the machine, the engine, the safety nets and the event timeline.
+7. Every command in order (A setup → G finish), with copy buttons.
+8. The data files.
+9. Round 101 results.
 
-**Models:**
-- qwen3:8b (Alibaba): Ollama blob a3de86cd…
-- llama3.1:8b (Meta): Ollama blob 667b0c19…
-- gemma3:12b (Google): standard GGUF `ggml-org/gemma-3-12b-it-GGUF` Q4_K_M, because Ollama's gemma file is
-  unreadable by llama.cpp
+To update it, rebuild the page and publish the same file to the same URL.
 
-**Engine settings:**
-- **llama.cpp** (b11434 / commit 5e03bdd, CUDA sm_121), one server per model, 8 slots × 8192 tokens, flash
-  attention, `--jinja`, all layers on the GPU
-- **identical sampling for every model:** temperature 0.7, top_k 40, top_p 0.9, min_p 0, repeat penalty 1.0, thinking off
-- **one model in memory at a time** (LD-42)
+**Things the page states plainly that are easy to get wrong:**
+- The real Spark rounds run with the OASIS **replay off**, so OASIS supplies the action menu and the shape of the
+  prompt (`oasis/social_agent/agent_action.py`, `oasis/social_platform/config/user.py`, both unchanged). The
+  results come from the recorded answers, not from an OASIS database.
+- `llm.py` is the only file carried over from Tests 1-6 (changed for llama.cpp). Everything else in v2 was written
+  for v2.
 
-**Users:** `personas_v2.json`, SHA ed110626…, never change it. Built by `build_population_v2.py` from Census 2024
-(age, sex, state), Census 2020 (rural), CPS 2024 (education), BLS (work) and Pew 2025 (social-media use weights).
-Stances use an orthogonal array: 20 users per stance per topic, no correlation between topics.
-
-**Topics:** the five Pew news topics Americans follow most: r/politics, r/technology, r/business, r/sports,
-r/entertainment.
-
-### The machine
-- **NVIDIA DGX Spark `honda.csr.uky.edu`** (172.31.40.215): ARM, GB10 GPU, 121 GB shared CPU/GPU memory.
-- **Login:** `ssh kmgo257@honda.csr.uky.edu` with Gordon's LinkBlue password. Key login is not set up, so Claude
-  cannot reach it directly. Off campus it needs the GlobalProtect VPN (ra.uky.edu); on campus, eduroam.
-- No sudo, no Docker.
-- **Shared with user hsa303** (`residual_concepts` Qwen jobs, about 46 GB of GPU). They are friendly and agreed to
-  share. Plan: we take nights (~19:00-09:00).
-- The home folder is NFS with a 100 GB quota.
-
-**Layout `~/llm_bias/`:**
-
-| Path | What it is |
-|---|---|
-| `README.txt` | what's where |
-| `env.sh` | old Ollama settings, unused now |
-| **`env_llamacpp.sh`** | `LLM_BACKEND=llamacpp` plus the server URLs (ports qwen 11601, llama 11602, gemma 11603) |
-| `ollama/` | Ollama 0.24.0, unused now |
-| `models/` | Ollama blobs, plus `gguf/gemma3-12b.gguf` |
-| `engines/llama.cpp/` | the built llama-server |
-| `logs/` | server logs, `preflight.txt` |
-| `pilot_ollama/` | the abandoned Ollama r101 |
-| **`oasis/`** | a git clone; results go in `oasis/data/llm_bias/v2/` |
-
-**tmux session `llm`:** Ctrl-b does NOT work as the prefix there. Leave by closing the terminal tab, and never type
-into the running window (typed text gets queued as shell input).
-
-### Code (`examples/experiment/llm_bias/`)
-
-| File | What it does |
-|---|---|
-| `run_v2.py` | one turn: `post` or `read` (`--posts-by`, `--max-posts`, `--draw`, `--agents`, `--page-size`) |
-| `v2_night.py` | the runner. Env: ROUNDS, STOP, SLICES, NOISE, AGENTS, PARALLEL, MANAGE_SERVERS, PUSH, STOP_OLLAMA. Skips finished work, resumes, and stops itself on a step that fails with 0 screens |
-| `llamacpp_servers.sh` | start / only / stop / status of the servers |
-| `llm.py` | the backend switch (ollama / llamacpp) |
-| **`preflight_v2.py`** | 108 PASS/FAIL checks, about 25 min. Run it before any unattended run after a code change |
-| **`progress_v2.py`** | read-only: screens done / left per cell for each round and an estimated finish time (latest measured speed per AI); safe while the run is going |
-| `analyze_v2.py` | the plain tables and the double difference, written to `summary.md` (stdlib only, so it runs on the Spark) |
-| `export_v2.py` | CSVs plus `LLM_bias_v2.xlsx` (needs pandas, so laptop only) |
-| `make_graphs_v2.py` | graphs per round and pooled (needs matplotlib, so laptop only) |
-| `build_population_v2.py` | rebuilds the pinned users; `--check` confirms they are unchanged |
-
-Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
-
-### Status (2026-10-07 10:22)
-**Running, detached, until Thu 2026-10-08 10:00** (§14.31b). Round 101: stage 2 done for all 6 cells, stage 3 in
-progress. The overnight run died ~02:00 (not a reboot; whole session killed while hsa303's job ran, §14.31c); a cron
-**watchdog** now restarts it within 10 min (remove after Thu 10:00). Older status at the 15:00 pause:
-- Complete: posting turns for all 3 AIs, **all 3 baselines**, stage 1 of all 6 cross cells, and stage 2 of
-  qwen←llama and qwen←gemma.
-- llama←qwen stage 2 finished at 15:03, just before the pause (it was 2,770/3,200 when last checked).
-- The noise floor for qwen came from the earlier run (`_d1`).
-- Measured seconds per screen when the Spark is not shared: qwen ≈ 0.4, llama ≈ 0.5, gemma ≈ 0.95.
-- Remaining work for round 101 is about 6.5 h. A full round takes about 12-14 h.
-
-### Exact procedures (Gordon runs them; give him copy-paste commands with the expected output)
-
-**Resume / run rounds (since 2026-10-07: detached, no tmux).** Log in with
-`ssh -o PubkeyAuthentication=no kmgo257@honda.csr.uky.edu` (the key attempt wastes one of the few allowed tries:
-"Too many authentication failures"), then:
-```
-cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && echo "backend: $LLM_BACKEND" && MANAGE_SERVERS=1 STOP="YYYY-MM-DD HH:MM" ROUNDS="101 102 103" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 setsid nohup python3 examples/experiment/llm_bias/v2_night.py >> ~/llm_bias/logs/night_run.out 2>&1 < /dev/null &
-```
-Wait 2 min, check (below) for `runner alive: 1` and a `start ...` line, then close the tab. It survives a dropped
-connection but **not a reboot of the Spark**; after a reboot run the same command again (it resumes).
-
-**Check:**
-```
-grep -E "end|post sets|SKIP|STOPPING" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -15
-```
-Runner alive: `ps -u $USER -o args | grep -c '[v]2_night.py'`
-
-**Pause / free the GPU:**
-```
-pkill -u $USER -f v2_night.py; pkill -u $USER -f run_v2.py; bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop
-```
-
-**Update the code on the Spark:**
-```
-cd ~/llm_bias/oasis && git pull --no-edit
-```
-The Spark has local data commits, so this is a merge. Then rerun the preflight if run_v2, v2_night, llm or the
-server script changed.
-
-**Results to the laptop (run on the Mac):**
-```
-rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/
-```
-Then:
-```
-oasis-env/bin/python examples/experiment/llm_bias/export_v2.py data/llm_bias/v2_spark
-oasis-env/bin/python examples/experiment/llm_bias/make_graphs_v2.py data/llm_bias/v2_spark
-```
-
-### Decisions (Part 14): LD-19 … LD-42, in one line each
-19 own-writing bias · 20 new US-grounded 100 · 21/31 topics (now the Pew top 5) · 22 human posts (later dropped,
-§14.11) · 23 all actions, any number per screen · 24/27/30/38 models (now qwen3:8b, llama3.1:8b, gemma3:12b) ·
-25 every round is a wipe · 26 overnight runs, deadline Fri 10-09 · 28 posting optional · 32 one JSON form with all
-27 actions · 33 no interview / purchase · 34 one post per screen (pages kill comments, §14.14) · 35/37 every user
-reads every post, in nested stages · 36 noise floor · 39 NUM_PARALLEL 8 · 40 baselines first · 41 llama.cpp +
-uniform sampling · 42 one model in memory.
-
-### Bugs found and fixed (LB-v2-1 … 7)
-1. Replay crashed on users' own posts.
-2. A possible endless loop in the reading window.
-3. **The llama.cpp server check failed when the first server was off.** This wasted the first night's llama and
-   gemma steps.
-4. A half-written line on a hard kill.
-5. The checker's `pgrep` matched itself.
-6. A tiny post set read everything instead of the window.
-7. Stop didn't wait for servers to exit.
-
-All are covered by `preflight_v2.py`.
-
-### How Gordon works (follow these)
-- He runs everything on the Spark himself. Give **exact copy-paste commands**, numbered, each with ✅ what he
-  should see and 🛑 what to do if not. Be extra careful, organised (everything in `~/llm_bias`), and plain-spoken.
-- **Never start a real run before he says go** after any design change, and **test fully (preflight) before he
-  goes idle.**
-- Results: plain counts and % first, then derived numbers with every term explained in place. Everything goes
-  into this log; commit and push to `origin` (KGordo11) after every change.
-- The professor's requirements: 100 hard-coded users, 2-3 models from different families, all actions available,
-  baselines, one change at a time.
-
-### Next steps
-1. Finish round 101 tonight, and run round 102.
-2. Then round 103 (Wed/Thu nights).
-3. After each round: rsync, export, graphs, and the results written here (plain tables first).
-4. Before Friday: a pooled 3-round summary for the professor.
-5. Later (new study only): speculative decoding, Docker/vLLM, MoE models (§14 replies, 2026-10-06).
-
-### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
-
-**0. Log in** (on the Mac; VPN on if off campus)
-```
-ssh -o PubkeyAuthentication=no kmgo257@honda.csr.uky.edu
-```
-
-**1. Check the run**
-```
-date; grep -E "end|post sets|WATCHDOG|STOPPING|SKIP" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -8; echo "runner alive: $(ps -u $USER -o args | grep -c '^python3 .*[v]2_night')"; echo "== current step:"; tail -1 $(ls -t /tmp/v2_reading*.log /tmp/v2_posting*.log 2>/dev/null | head -1) | cut -c1-90
-```
-✅ `runner alive: 1`; current step shows e.g. `1200/3200 (0.55 s each, ETA 18 min)`. Speed: ~0.5 s (qwen/llama) or ~1.0 s (gemma) = GPU to ourselves; 2-3 s = shared; 20 s = something is hogging it.
-
-**2. Who's on the machine**
-```
-who; echo "== hsa303 busiest:"; ps -u hsa303 -o etime,pcpu,args --sort=-pcpu | head -5 | cut -c1-110; echo "== on the GPU:"; nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader
-```
-Our GPU program is `llama-server`; hsa303's are `.venv/bin/python`.
-
-**3. How much memory I'm using / the whole machine**
-```
-echo "== mine:"; ps -u $USER -o rss=,comm= --sort=-rss | head -4 | awk '{printf "   %5.1f GB  %s\n", $1/1048576, $2}'; echo "== whole Spark (121 GB total):"; free -g | head -2
-```
-Ours is ~9-14 GB (one AI loaded). If `available` drops under ~10 GB, things can get killed.
-
-**4. Disk space I'm using** (home quota 100 GB)
-```
-du -sh ~/llm_bias ~/llm_bias/models ~/llm_bias/oasis/data/llm_bias/v2 2>/dev/null
-```
-
-**5. Is the watchdog on?**
-```
-crontab -l; grep WATCHDOG ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -3
-```
-✅ One line `*/10 * * * * bash .../watchdog.sh`. Any `WATCHDOG ... restarting` line = it died and came back by itself.
-
-**6. EMERGENCY STOP: everything, watchdog included** (watchdog first, or it restarts the run within 10 min)
-```
-crontab -l | grep -v watchdog.sh | crontab -; pkill -u $USER -f v2_night.py; pkill -u $USER -f run_v2.py; bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop; sleep 2; crontab -l; ps -u $USER -o pid,args | grep -E "[v]2_night|[r]un_v2|[l]lama-server" || echo "ALL STOPPED"
-```
-✅ `stopped`, then `no crontab for kmgo257` (or nothing), then `ALL STOPPED`. Nothing finished is lost.
-
-**7. Start again after a stop** (change the date/time to when it should stop)
-```
-sed -i 's/^STOP=.*/STOP="2026-10-08 10:00"/' ~/llm_bias/watchdog.sh; cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && echo "backend: $LLM_BACKEND" && MANAGE_SERVERS=1 STOP="2026-10-08 10:00" ROUNDS="101 102 103" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 setsid nohup python3 examples/experiment/llm_bias/v2_night.py >> ~/llm_bias/logs/night_run.out 2>&1 < /dev/null &
-```
-then turn the watchdog back on:
-```
-(crontab -l 2>/dev/null | grep -v watchdog.sh; echo "*/10 * * * * bash $HOME/llm_bias/watchdog.sh") | crontab - && crontab -l
-```
-✅ `backend: llamacpp`; after 2 min, command 1 shows `runner alive: 1`. Put the **same date in both places**.
-
-**7b. Where are we, how much is left, when does each round land?**
-```
-cd ~/llm_bias/oasis && python3 examples/experiment/llm_bias/progress_v2.py
-```
-Per round: every cell's screens done / needed, hours left and the landing time. Sets not written yet are guessed
-from the newest written ones, and the speed is the last one measured (shared GPU → slower ETA).
-
-**8. Has a round finished?**
-```
-grep -E "post sets|checkpoint" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -6
-```
-`r102 post sets: ...` = round 101 fully done and 102 under way. `checkpoint round N: noise floor` = round N complete.
-
-**9. Copy results to the laptop** (on the **Mac**, not the Spark)
-```
-rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/
-```
-Then tell Claude to export and graph.
-
-**10. After the run is over (Thu after 10:00): remove the watchdog**
-```
-crontab -l | grep -v watchdog.sh | crontab -
-```
-
-### 14.32a Standing rule: keep this handoff 100% current
-After **every** code change, bug fix, new command given to Gordon, decision, or run event:
-1. Update **§14.32** (status, procedures, decisions, bugs) and **Part 0 §0.2** (one-paragraph status).
-2. Add a row to the change history below. Add a dated §14.x entry for anything substantive.
-3. Commit and push. Tell Gordon the commit code if the Spark must `git pull --no-edit` it.
-
-A new Claude must be able to open this file and carry on with no other context. Anything that exists only in chat
-or in memory is lost.
-
-### 14.32b How the Spark environment was built (exact commands Gordon ran, 2026-10-05; reproducible)
-```
-# login (campus eduroam or GlobalProtect VPN ra.uky.edu); LinkBlue password
-ssh kmgo257@honda.csr.uky.edu
-# project folders + settings
-mkdir -p ~/llm_bias/ollama ~/llm_bias/models ~/llm_bias/logs
-cat > ~/llm_bias/env.sh <<'X'
-export OLLAMA_HOST=127.0.0.1:11500
-export OLLAMA_URL=http://127.0.0.1:11500
-export OLLAMA_MODELS=$HOME/llm_bias/models
-export OLLAMA_SERVE_LOG=$HOME/llm_bias/logs/ollama_serve.log
-export PATH=$HOME/llm_bias/ollama/bin:$PATH
-X
-# Ollama 0.24.0 (ARM) -- used only to download qwen3:8b and llama3.1:8b; the study now runs on llama.cpp
-cd ~/llm_bias/ollama && curl -fL -o ollama.tar.zst https://github.com/ollama/ollama/releases/download/v0.24.0/ollama-linux-arm64.tar.zst && tar --zstd -xf ollama.tar.zst && rm ollama.tar.zst
-source ~/llm_bias/env.sh && OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=8 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h OLLAMA_MAX_LOADED_MODELS=3 nohup ollama serve > $OLLAMA_SERVE_LOG 2>&1 &
-ollama pull qwen3:8b && ollama pull llama3.1:8b && ollama pull gemma3:12b
-# code
-cd ~/llm_bias && git clone --depth 1 --branch llm-bias https://github.com/KGordo11/oasis.git
-cd ~/llm_bias/oasis && git config user.name "Gordon" && git config user.email "gordonkm05@gmail.com" && git config pull.rebase false
-# llama.cpp (CUDA 13, GB10 = sm_121)
-mkdir -p ~/llm_bias/engines && cd ~/llm_bias/engines && git clone --depth 1 https://github.com/ggml-org/llama.cpp && cd llama.cpp
-export PATH=/usr/local/cuda/bin:$PATH CUDACXX=/usr/local/cuda/bin/nvcc
-nice -n 19 cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=121 -DLLAMA_CURL=OFF -DCMAKE_BUILD_TYPE=Release
-nice -n 19 cmake --build build --config Release -j 8 --target llama-server
-# gemma3:12b standard GGUF (Ollama's gemma file is not readable by llama.cpp)
-mkdir -p ~/llm_bias/models/gguf && curl -fL -o ~/llm_bias/models/gguf/gemma3-12b.gguf https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/resolve/main/gemma-3-12b-it-Q4_K_M.gguf
-# servers + env file for the runs (writes ~/llm_bias/env_llamacpp.sh)
-bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh start && bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop
-# the Ollama server is no longer used:  pkill -u $USER -f "ollama serve"
-# full check before any unattended run (25 min, test round 904):
-cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/experiment/llm_bias/preflight_v2.py 2>&1 | tee ~/llm_bias/logs/preflight.txt
-```
-
-### 14.32c Change history of the v2 code (git, newest last). Add a row for every change.
-
-| Commit | When | Change |
-|---|---|---|
-| 2b66763 | 10-02 22:55 | 100 Census/BLS/Pew users (pinned), human post pool, first all-actions harness, model speed test |
-| 3c02c46 | 10-03 00:24 | smoke tests of 6 models; LB-v2-1 replay fix; analysis + campaign scripts |
-| 6c4862a | 10-04 17:39 | llama3.1:8b as third family, optional posting |
-| da6f5b5 | 10-04 22:18 | **two-turn design** (posting + reading turn, 3×3 crossover), 27 actions, Pew topics, balanced reading windows, night runner |
-| 3edf5c0 | 10-05 10:37 | page-mode test (pages kill comments → one post per screen); mistral replacement candidates |
-| f19c27a | 10-05 17:57 | gemma3:12b replaces mistral; final laptop smoke (full reading); runner made SSH-ready (slices, measured speed) |
-| b600fcc | 10-05 20:09 | `OLLAMA_URL` / `PARALLEL` settable (private port on the shared Spark) |
-| 27cc742 | 10-05 21:27 | **LB-v2-2** possible endless loop fixed; exact remaining-work count; `export_v2.py`; `make_graphs_v2.py` |
-| fce25f9 | 10-05 21:31 | **baselines first** (LD-40) |
-| 4890067 | 10-05 21:58 | `llm.py` llama.cpp backend |
-| 46ea7cf | 10-05 22:14 | `llamacpp_servers.sh`; uniform sampling; backend recorded in manifests (LD-41) |
-| 069540d | 10-05 22:34 | server script: GGUF override per model, 3-min timeout, refuse double start |
-| 41b6009 | 10-05 23:02 | **one model in memory** (`only`, `MANAGE_SERVERS=1`, LD-42) |
-| 5f794c9 | 10-06 08:59 | **LB-v2-3** fixed (server check with one server off); runner stops on a 0-screen failure |
-| 1457456 | 10-06 09:10 | **`preflight_v2.py`**; **LB-v2-4** crash-safe resume; runner `AGENTS=` test size |
-| ffafa95 | 10-06 09:34 | **LB-v2-6** exact window on tiny sets; **LB-v2-7** wait for servers to exit; preflight passes 108/108 |
-| 23b91bd | 10-07 22:00 | `progress_v2.py`: progress per cell + ETA per round (read-only); cron watchdog `~/llm_bias/watchdog.sh` (on the Spark, not in git, §14.31c) |
-| (this) | 10-07 22:10 | `progress_v2.py` uses the live speed of the running step |

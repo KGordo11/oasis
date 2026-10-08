@@ -14300,6 +14300,10 @@ Same 108 reading screens (round 902, qwen's set, draw 7), 10 users:
 At 16 slots the three models hold 25 + 23 + 30 = 78 GB, leaving 42 GB available on a shared machine. The Spark is
 compute-bound past 8, so **8 is kept for the whole study**: the gain is small and mixed, and the memory cost is large.
 
+*Note 2026-10-07:* this test ran on **Ollama** (before the llama.cpp switch, LD-41) with only 108 screens. Claude
+wrongly suggested "16 slots, likely 1.5-2.5×" in chat before re-reading this section, and retracted it. Whether
+llama.cpp behaves differently at 16 slots is untested. Given this result, expect little gain.
+
 ## 14.21 Pre-run fixes, export and graphs (2026-10-05 21:45)
 
 - **LB-v2-2 (fixed before any real run): a possible endless loop.** In window mode, a user who wrote several posts

@@ -14645,6 +14645,13 @@ updates for the third run, and maybe hopefully can get a fourth."
 - Round 103 will NOT be run with the current code. Gordon will describe the changes, and they get the usual
   restate → go → code → preflight cycle before round 103 runs.
 
+**Done and confirmed at 15:00:**
+- Night.log shows `14:43:49 start: rounds [101, 102] ... stop 2026-10-10 12:00`, and both rounds' post sets were
+  recognised, so no posting was redone. The watchdog shows the new STOP, ROUNDS and round-102 exit line.
+- Round 102 is at 58,271 / 67,134 screens (87%). Left: the end of llama←qwen, gemma←qwen and gemma←llama (all
+  posts), then the three noise floors.
+- hsa303 started one GPU job at ~14:50 (17 GB); llama slowed to 1.30 s/screen. ETA ~17:40-20:00 depending on sharing.
+
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 
 ### What the study is

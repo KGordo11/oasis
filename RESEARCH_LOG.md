@@ -75,7 +75,17 @@ research**:
 - **Round 102 is running** on the Spark, fully detached (`setsid nohup`), **until Fri 2026-10-09 06:00** (§14.31f),
   slowed by the other user's GPU jobs (§14.31e). A cron **watchdog** restarts the runner within 10 min if it dies
   (§14.31c). **Remove the watchdog after Fri 06:00:** `crontab -l | grep -v watchdog.sh | crontab -`.
-- **Deadline: Friday 2026-10-09.** Then: copy results (rsync), rerun `make_report_v2.py`, pooled summary.
+- **Check Thu 2026-10-08 11:14 (all healthy):**
+  - The runner had been alive 13 h with no watchdog restarts, at full speed, and hsa303 was idle.
+  - Round 102 was 60% done (post sets qwen 94 / llama 105 / gemma 23; baselines and stages 16 and 32 done). ETA
+    ~16:45.
+  - Round 103 ETA ~Fri 04:50 if the GPU stays free.
+- **Deadline: Gordon's meeting Fri 2026-10-09 13:00; everything ready by 10:00.** Friday morning:
+  1. Check (`progress_v2.py`).
+  2. rsync to the laptop.
+  3. Claude runs `make_report_v2.py` (pools every complete round automatically), recalculates the workbook,
+     rebuilds and republishes the Inside page, and writes the pooled results here.
+  4. Remove the watchdog.
 - How we got here (each in its own section): paused for the other user Tue 15:03 (§14.31), resumed Tue 19:08
   (§14.31a), killed ~02:00 Wed (§14.31b-c), restarted with the watchdog Wed 10:21, round 101 done Wed 17:17
   (§14.31d-e), stop moved to Fri 06:00 (§14.31f).
@@ -14869,7 +14879,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | cbf869b | 10-07 22:10 | `progress_v2.py` uses the live speed of the running step |
 | dfc3a2e | 10-07 22:45 | **`make_report_v2.py`**: the full Excel workbook (formulas, 13 sheets) + 14 graphs incl. time vs users / rounds |
 | 06ef8cd | 10-07 23:15 | **`make_inside_v2.py` + `inside_v2_template.html`**: the Inside LLM Bias v2 page (§14.34) |
-| (this) | 10-07 23:30 | log cleanup: §0.2 rewritten to the current state, §0.3 v2 rows, Part 14 contents + section order, §14.34 |
+| 238e4c0 | 10-07 23:30 | log cleanup: §0.2 rewritten to the current state, §0.3 v2 rows, Part 14 contents + section order, §14.34 |
+| (this) | 10-08 11:45 | report: graphs on their own tabs, grouped + coloured tabs, pooled complete rounds with a round picker; page text |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -15046,7 +15057,31 @@ Gordon asked for an Excel sheet "similar to before" with the AI × AI engagement
 of time / rounds / users, every detail, and one page that explains the whole simulation from the code up, with
 clickable files, plus every Spark command in order.
 
-**Workbook `~/Desktop/LLM_Bias_v2/LLM_Bias_v2.xlsx`** (built by `make_report_v2.py`; 15 MB; 13 sheets):
+**Update Thu 2026-10-08 11:30 (Gordon: "graphs need to be in their respective sheets ... don't clutter ... tabs
+organised"):**
+- The separate Graphs tab is gone. Each graph sits on its own tab, beside or below the table:
+  - Engagement 3x3: 01 and 02, to the right
+  - All actions: 03 and 09, below
+  - Own-AI bias: 07, below
+  - By stance: 05, to the right
+  - By topic: 06, to the right
+  - Posting turn: 04, between the totals and the rows
+  - Noise floor: 08, below
+  - Time per step: 10-14, from column T
+- The 12 tabs are grouped and colour-coded:
+  - README (grey)
+  - Results (blue): Engagement 3x3, Own-AI bias, All actions, By stance, By topic
+  - Behaviour (green): Posting turn, Noise floor
+  - Who and what (orange): People, Posts
+  - Run (purple): Time per step
+  - Raw data (dark grey): Screens
+  - The README ends with clickable links to every tab.
+- **Pooled rounds:** a round is "complete" when night.log has `checkpoint round N: noise floor`. The graphs and the
+  bias ranges pool all complete rounds. The round picker (a dropdown) takes `pooled` or one round number, and drives
+  a 1/0 selection column on Screens that every grid uses.
+- Both picker modes were recalculated (85,441 formulas, 0 errors) and match `analyze_v2.py`.
+
+**Workbook `~/Desktop/LLM_Bias_v2/LLM_Bias_v2.xlsx`** (built by `make_report_v2.py`; 15 MB; as first built, Wed 22:45; 13 sheets):
 - README; Graphs; **Engagement 3x3**: one grid per measure (did anything + each of the 27 actions), rows = AI playing
   the users, columns = AI that wrote the posts, % and counts. A yellow **round picker** cell: change 101 to 102 once
   round 102 is complete.

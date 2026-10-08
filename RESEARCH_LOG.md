@@ -64,7 +64,7 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-07 22:05): read this first
+## 0.2 Where things stand (2026-10-07 22:10): read this first
 
 - **Current work: LLM Bias v2 on the DGX Spark `honda.csr.uky.edu`.** Design, machine, file layout, the exact
   resume commands and how Gordon likes to work are all in **Part 14 §14.32 (HANDOFF)**. Read that next.
@@ -72,6 +72,7 @@ research**:
   were running about 5× slower.
   - Done: **all 3 baselines** (post sets qwen 101 / llama 103 / gemma 25), cross-test stage 1 for all 6 cells,
     and part of stage 2.
+  - **Stop is now Fri 2026-10-09 06:00** (runner and watchdog, §14.31f). Remove the watchdog after that.
   - **ROUND 101 COMPLETE Wed 17:17** (69,213 screens). Round 102 is running, slowed ~5× by hsa303's three GPU
     jobs (§14.31e).
   - Wed 16:16: round 101 nearly complete (last cross cell plus the noise floor; done ~17:10), then round 102
@@ -14601,6 +14602,12 @@ Gordon to ask hsa303 to keep big jobs off the nights until Friday.
 - At shared speed, round 102 will not finish by the Thu 10:00 stop.
 - `progress_v2.py` now uses the **live** speed of the step that is running (its /tmp log, if updated in the last
   10 min). Before, it used the last *finished* step's speed and so showed llama at 0.55 instead of 2.59.
+
+## 14.31f Stop moved to Fri 2026-10-09 06:00 (Wed 22:10)
+
+Gordon restarted the runner with `STOP="2026-10-09 06:00"` and set the same STOP in `~/llm_bias/watchdog.sh` (sed),
+so the run continues through Thursday. Resume was clean: `start r102 BASELINE llama3.1:8b reads own posts (all)
+(~8518 screens)`. **Remove the watchdog after Fri 06:00.**
 
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 

@@ -24,6 +24,15 @@ if os.path.exists(log):
         m = re.search(r"end r\d+ (?:CROSS|BASELINE|noise floor)? ?(\S+) .*\(([\d.]+) s/screen\)", line)
         if m and m.group(1) in SPS:
             SPS[m.group(1)] = float(m.group(2))
+# the step running now: its live speed beats the last finished step's (the GPU may have become shared since)
+live = sorted((p for p in (os.path.join("/tmp", n) for n in os.listdir("/tmp")) if re.match(r".*/v2_reading_\S+__\S+\.log$", p)),
+              key=os.path.getmtime)[-1:]
+for p in live:
+    tail = open(p, errors="ignore").read()[-2000:]
+    m = re.findall(r"\(([\d.]+) s each", tail)
+    rd = next((x for x in SPS if f(x) == re.match(r".*__(.+?)(_d1)?(_a\d+)?\.log$", p).group(1)), None)
+    if m and rd and time.time() - os.path.getmtime(p) < 600:
+        SPS[rd] = float(m[-1])
 stop = None
 wd = os.path.expanduser("~/llm_bias/watchdog.sh")
 if os.path.exists(wd):

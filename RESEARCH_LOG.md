@@ -64,7 +64,7 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-07 16:16): read this first
+## 0.2 Where things stand (2026-10-07 22:05): read this first
 
 - **Current work: LLM Bias v2 on the DGX Spark `honda.csr.uky.edu`.** Design, machine, file layout, the exact
   resume commands and how Gordon likes to work are all in **Part 14 §14.32 (HANDOFF)**. Read that next.
@@ -72,7 +72,9 @@ research**:
   were running about 5× slower.
   - Done: **all 3 baselines** (post sets qwen 101 / llama 103 / gemma 25), cross-test stage 1 for all 6 cells,
     and part of stage 2.
-  - **Wed 16:16: round 101 nearly complete** (last cross cell plus the noise floor; done ~17:10), then round 102
+  - **ROUND 101 COMPLETE Wed 17:17** (69,213 screens). Round 102 is running, slowed ~5× by hsa303's three GPU
+    jobs (§14.31e).
+  - Wed 16:16: round 101 nearly complete (last cross cell plus the noise floor; done ~17:10), then round 102
     runs until Thu 10:00 (§14.31d).
   - **Wed 2026-10-07 10:21: restarted detached (`setsid nohup`), STOP Thu 10:00.** The overnight run died at
     ~02:00 when its whole session was killed (not a reboot; hsa303's job started 22:55, §14.31c). A cron
@@ -14586,6 +14588,20 @@ Gordon to ask hsa303 to keep big jobs off the nights until Friday.
   90 GB available.
 - Disk 29 GB of 100.
 
+## 14.31e ROUND 101 COMPLETE (Wed 2026-10-07 17:17); round 102 slowed by sharing (check at 22:05)
+
+- **Round 101 is the first complete round:** 69,213 / 69,213 screens. All 9 cells read in full, plus the 3 noise
+  floors. Post sets: qwen 101, llama 103, gemma 25. Last step: gemma's noise floor, ending 17:17.
+- **Round 102 so far:**
+  - posts: qwen 94 (17:22), llama 105 (20:48)
+  - qwen baseline done: 9,306 screens at 1.28 s/screen (shared)
+  - llama baseline at 1,782 / 10,395, at **2.59 s/screen**
+- **Why so slow:** hsa303 has run three GPU jobs since ~17:00 (15 + 24 + 26 GB GPU memory). Available memory is
+  37 GB and swap is 43%, the same conditions as the night the run was killed (§14.31c). The watchdog is armed.
+- At shared speed, round 102 will not finish by the Thu 10:00 stop.
+- `progress_v2.py` now uses the **live** speed of the step that is running (its /tmp log, if updated in the last
+  10 min). Before, it used the last *finished* step's speed and so showed llama at 0.55 instead of 2.59.
+
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 
 ### What the study is
@@ -14894,4 +14910,5 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 5f794c9 | 10-06 08:59 | **LB-v2-3** fixed (server check with one server off); runner stops on a 0-screen failure |
 | 1457456 | 10-06 09:10 | **`preflight_v2.py`**; **LB-v2-4** crash-safe resume; runner `AGENTS=` test size |
 | ffafa95 | 10-06 09:34 | **LB-v2-6** exact window on tiny sets; **LB-v2-7** wait for servers to exit; preflight passes 108/108 |
-| (this) | 10-07 22:10 | `progress_v2.py`: progress per cell + ETA per round (read-only); cron watchdog `~/llm_bias/watchdog.sh` (on the Spark, not in git, §14.31c) |
+| 23b91bd | 10-07 22:00 | `progress_v2.py`: progress per cell + ETA per round (read-only); cron watchdog `~/llm_bias/watchdog.sh` (on the Spark, not in git, §14.31c) |
+| (this) | 10-07 22:10 | `progress_v2.py` uses the live speed of the running step |

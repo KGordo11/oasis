@@ -1,0 +1,572 @@
+<title>Inside LLM Bias v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a lab notebook. One reading column, a sticky section bar, and a two-pane code browser (file list | source). */
+:root{
+  --paper:#f3f6f8; --panel:#ffffff; --ink:#13212e; --muted:#566473; --rule:#d6dee6; --soft:#e8eef3;
+  --accent:#0b6c88; --accent-ink:#ffffff; --mark:#fff2b8;
+  --code-bg:#0f1b26; --code-fg:#dce6ee; --code-mut:#6f8495; --code-line:rgba(255,214,102,.16);
+  --qwen:#2a78d6; --llama:#eb6834; --gemma:#1baf7a;
+  --new:#0b6c88; --updated:#9a5b00; --oasis:#6a3fb5; --made:#4b6b2a; --spark:#a23b54; --data:#566473;
+  --tk-key:#7cc4ff; --tk-str:#b5e48c; --tk-com:#7d8f9e; --tk-num:#ffb86b; --tk-fn:#f7d774; --tk-lit:#ff8fa3;
+  --display:"Newsreader",Georgia,"Times New Roman",serif;
+  --body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#0e151c; --panel:#141f29; --ink:#e4ecf2; --muted:#9aa9b7; --rule:#26343f; --soft:#1a2733;
+  --accent:#4cb4d4; --accent-ink:#06131a; --mark:#4a3f12;
+  --code-bg:#09121a; --code-fg:#dce6ee; --code-mut:#6f8495;
+  --qwen:#3987e5; --llama:#d95926; --gemma:#199e70;
+  --new:#4cb4d4; --updated:#e0a040; --oasis:#a98be8; --made:#9cc46a; --spark:#e07a92; --data:#9aa9b7;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0e151c; --panel:#141f29; --ink:#e4ecf2; --muted:#9aa9b7; --rule:#26343f; --soft:#1a2733;
+  --accent:#4cb4d4; --accent-ink:#06131a; --mark:#4a3f12;
+  --code-bg:#09121a; --code-fg:#dce6ee; --code-mut:#6f8495;
+  --qwen:#3987e5; --llama:#d95926; --gemma:#199e70;
+  --new:#4cb4d4; --updated:#e0a040; --oasis:#a98be8; --made:#9cc46a; --spark:#e07a92; --data:#9aa9b7;
+  color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--paper);color:var(--ink);font:15px/1.6 var(--body);margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:0 80px}
+h1,h2,h3{font-family:var(--display);font-weight:600;text-wrap:balance;line-height:1.15;margin:0}
+h1{font-size:clamp(34px,5vw,54px);letter-spacing:-.01em}
+h2{font-size:clamp(26px,3.2vw,34px);margin-bottom:10px}
+h3{font-size:21px;margin:26px 0 8px}
+p{margin:0 0 12px;max-width:72ch}
+a{color:var(--accent)}
+code,kbd,.mono{font-family:var(--mono);font-size:.9em}
+:not(pre)>code{background:var(--soft);padding:1px 5px;border-radius:4px}
+.eyebrow{font:500 12px/1.2 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.lede{font-size:18px;color:var(--ink);max-width:68ch}
+.muted{color:var(--muted)}
+section{padding-top:56px;scroll-margin-top:60px}
+section>.eyebrow{margin-bottom:6px}
+hr{border:0;border-top:1px solid var(--rule);margin:40px 0 0}
+
+/* section bar */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--paper) 92%,transparent);backdrop-filter:blur(6px);border-bottom:1px solid var(--rule)}
+.bar .wrap{display:flex;gap:4px 14px;flex-wrap:wrap;align-items:center;padding-block:9px;padding-bottom:9px}
+.bar a{font:500 13px/1.3 var(--body);color:var(--muted);text-decoration:none;white-space:nowrap}
+.bar a:hover,.bar a:focus-visible{color:var(--accent)}
+.bar b{font:600 13px var(--mono);color:var(--ink);margin-right:6px}
+
+/* hero */
+.hero{padding-top:44px}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:10px;overflow:hidden;margin-top:26px}
+.facts div{background:var(--panel);padding:14px 16px}
+.facts b{display:block;font:600 26px/1.1 var(--display);font-variant-numeric:tabular-nums}
+.facts span{font-size:12.5px;color:var(--muted)}
+
+/* generic */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr));gap:18px}
+.grid2>*{min-width:0}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:16px 18px;min-width:0}
+.tablewrap{overflow-x:auto;border:1px solid var(--rule);border-radius:10px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{padding:8px 12px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+th{font:600 12px/1.3 var(--body);color:var(--muted);text-transform:uppercase;letter-spacing:.04em;background:var(--soft)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+td.diag{font-weight:600;background:var(--soft)}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:1px}
+.q{background:var(--qwen)}.l{background:var(--llama)}.g{background:var(--gemma)}
+.steps{counter-reset:s;list-style:none;padding:0;margin:0;display:grid;gap:12px}
+.steps>li{counter-increment:s;position:relative;padding:14px 16px 14px 56px;background:var(--panel);border:1px solid var(--rule);border-radius:10px}
+.steps>li::before{content:counter(s);position:absolute;left:14px;top:13px;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font:600 13px var(--mono);background:var(--accent);color:var(--accent-ink)}
+.steps h4{margin:0 0 4px;font:600 16px var(--body)}
+.steps p{margin:0 0 6px}
+.ref{font:500 12.5px var(--mono);background:none;border:1px solid var(--rule);color:var(--accent);border-radius:999px;padding:2px 9px;cursor:pointer;margin:2px 4px 2px 0}
+.ref:hover,.ref:focus-visible{border-color:var(--accent);outline:none}
+.tag{display:inline-block;font:600 10.5px/1 var(--mono);letter-spacing:.05em;text-transform:uppercase;padding:4px 7px;border-radius:4px;color:#fff;vertical-align:2px}
+.tag.new{background:var(--new)}.tag.updated{background:var(--updated)}.tag.oasis{background:var(--oasis)}.tag.made{background:var(--made)}.tag.spark{background:var(--spark)}.tag.data{background:var(--data)}
+:root[data-theme="dark"] .tag,.tag{color:var(--panel)}
+
+/* code browser */
+.browser{display:grid;grid-template-columns:330px minmax(0,1fr);gap:0;border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--panel);margin-top:18px}
+@media (max-width:860px){.browser{grid-template-columns:1fr}}
+.flist{border-right:1px solid var(--rule);max-height:760px;overflow:auto}
+@media (max-width:860px){.flist{border-right:0;border-bottom:1px solid var(--rule);max-height:320px}}
+.flist h5{margin:0;padding:12px 14px 6px;font:600 11px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.fbtn{display:block;width:100%;text-align:left;background:none;border:0;border-left:3px solid transparent;padding:8px 12px 8px 14px;cursor:pointer;color:var(--ink);font:500 13.5px/1.3 var(--mono)}
+.fbtn small{display:block;font:400 12px/1.35 var(--body);color:var(--muted);margin-top:2px}
+.fbtn:hover,.fbtn:focus-visible{background:var(--soft);outline:none}
+.fbtn[aria-current="true"]{background:var(--soft);border-left-color:var(--accent)}
+.viewer{min-width:0;display:flex;flex-direction:column}
+.vhead{padding:14px 18px;border-bottom:1px solid var(--rule)}
+.vhead .path{font:600 14px var(--mono);word-break:break-all}
+.vhead p{margin:6px 0 0;font-size:14px}
+.vhead .origin{color:var(--muted);font-size:13.5px}
+.code{position:relative;background:var(--code-bg);color:var(--code-fg);overflow:auto;max-height:620px;font:12.5px/20px var(--mono)}
+.code .inner{display:flex;position:relative;min-width:max-content}
+.code pre{margin:0;padding:12px 16px 12px 0;font:inherit;white-space:pre;tab-size:4}
+.code pre.gut{padding:12px 12px 12px 14px;color:var(--code-mut);text-align:right;user-select:none;border-right:1px solid rgba(255,255,255,.07);margin-right:14px}
+.code .band{position:absolute;left:0;right:0;height:20px;background:var(--code-line);pointer-events:none;display:none}
+.hljs-keyword,.hljs-built_in,.hljs-type{color:var(--tk-key)}
+.hljs-string,.hljs-template-string{color:var(--tk-str)}
+.hljs-comment,.hljs-meta{color:var(--tk-com);font-style:italic}
+.hljs-number,.hljs-attr{color:var(--tk-num)}
+.hljs-title,.hljs-function .hljs-title,.hljs-title.function_{color:var(--tk-fn)}
+.hljs-literal,.hljs-variable{color:var(--tk-lit)}
+
+/* prompts */
+.prompt{background:var(--code-bg);color:var(--code-fg);border-radius:10px;overflow:auto;max-height:520px}
+.prompt pre{margin:0;padding:14px 16px;font:12.5px/1.55 var(--mono);white-space:pre-wrap;word-break:break-word}
+.prompt .lbl{position:sticky;top:0;display:flex;justify-content:space-between;gap:10px;padding:8px 14px;background:rgba(255,255,255,.06);font:600 11.5px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#9fb3c3}
+.answer{border:1px solid var(--rule);border-radius:10px;background:var(--panel);overflow:hidden;min-width:0}
+.answer .who{padding:8px 14px;font:600 13px var(--body);border-bottom:1px solid var(--rule);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.answer .who span{font:400 12px var(--mono);color:var(--muted)}
+.answer pre{margin:0;padding:12px 14px;font:12.5px/1.5 var(--mono);white-space:pre-wrap;word-break:break-word}
+.seeno{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:14px}
+.seeno ul{margin:6px 0 0;padding-left:18px}
+.seeno li{margin:4px 0}
+.yes h4,.no h4{margin:0;font:600 15px var(--body)}
+.yes{border-top:3px solid var(--gemma)}.no{border-top:3px solid var(--spark)}
+
+/* phone mock */
+.mock{max-width:380px;border:1px solid var(--rule);border-radius:22px;padding:14px;background:var(--soft)}
+.mock .post{background:var(--panel);border-radius:12px;padding:12px 14px;border:1px solid var(--rule)}
+.mock .meta{font-size:12px;color:var(--muted)}
+.mock .title{font:600 16px/1.3 var(--body);margin:6px 0}
+.mock .actions{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.mock .actions span{font-size:12px;border:1px solid var(--rule);border-radius:999px;padding:3px 9px;background:var(--panel)}
+.mock .hidden{margin-top:10px;font-size:12px;color:var(--muted);border-top:1px dashed var(--rule);padding-top:8px}
+
+/* commands */
+.cmd{border:1px solid var(--rule);border-radius:10px;background:var(--panel);margin:12px 0;overflow:hidden}
+.cmd .ch{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:10px 14px;border-bottom:1px solid var(--rule)}
+.cmd .ch b{font:600 14.5px var(--body)}
+.cmd .ch .where{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap}
+.cmd pre{margin:0;padding:12px 14px;background:var(--code-bg);color:var(--code-fg);font:12.5px/1.55 var(--mono);white-space:pre-wrap;word-break:break-all}
+.cmd .exp{padding:9px 14px;font-size:13.5px;color:var(--muted)}
+.copy{font:600 12px var(--body);border:1px solid var(--rule);background:var(--soft);color:var(--ink);border-radius:6px;padding:4px 10px;cursor:pointer;white-space:nowrap}
+.copy:focus-visible,.ref:focus-visible,.fbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.phase{margin-top:30px}
+.phase>h3{display:flex;gap:10px;align-items:baseline}
+.phase>h3 .eyebrow{font-size:12px}
+.timeline{list-style:none;margin:0;padding:0;border-left:2px solid var(--rule)}
+.timeline li{position:relative;padding:4px 0 12px 18px}
+.timeline li::before{content:"";position:absolute;left:-6px;top:11px;width:10px;height:10px;border-radius:50%;background:var(--accent)}
+.timeline li.bad::before{background:var(--spark)}
+.timeline time{font:600 12.5px var(--mono);color:var(--muted);display:block}
+pre.mermaid{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px;overflow-x:auto}
+.note{border-left:3px solid var(--accent);padding:6px 0 6px 14px;margin:14px 0;color:var(--ink);max-width:76ch}
+</style>
+
+<nav class="bar" aria-label="Sections"><div class="wrap">
+  <b>LLM Bias v2</b>
+  <a href="#design">The design</a><a href="#code">The code</a><a href="#steps">Step by step</a><a href="#sees">What the AI sees</a>
+  <a href="#screen">Screen view</a><a href="#spark">On the Spark</a><a href="#commands">Every command</a><a href="#data">Data</a><a href="#results">Round 101</a>
+</div></nav>
+
+<main class="wrap">
+<header class="hero">
+  <div class="eyebrow">OASIS research · LLM Bias v2 · DGX Spark honda.csr.uky.edu · built from the repo on <span id="built"></span></div>
+  <h1>Inside the simulation</h1>
+  <p class="lede" style="margin-top:14px">Do AIs favour posts written by their own AI? Three AIs from different companies each play the same 100 made-up
+  Americans on a pretend Reddit. Each AI writes posts, then every AI reads every AI's posts. This page shows the whole machine:
+  every code file (click to read it), what each AI is shown word for word, what it answered, how the Spark runs it, and every
+  command used.</p>
+  <div class="facts">
+    <div><b>100</b><span>pinned users, the same in every round</span></div>
+    <div><b>3</b><span>AIs: qwen3:8b · llama3.1:8b · gemma3:12b</span></div>
+    <div><b>27</b><span>OASIS actions on every screen</span></div>
+    <div><b>69,213</b><span>reading screens in round 101</span></div>
+    <div><b>12.1 h</b><span>one full round, GPU to ourselves</span></div>
+  </div>
+</header>
+
+<section id="design">
+  <div class="eyebrow">01 · The design</div>
+  <h2>One round = a posting turn, a reading turn, then a wipe</h2>
+  <p>An <b>AI</b> here is a large language model (a text-predicting program like ChatGPT) running on the Spark. A <b>user</b> is one of
+  100 made-up people. The AI is handed that person's description and asked to act as them. A <b>screen</b> is one user looking at
+  one thing and deciding what to do: one AI call.</p>
+  <pre class="mermaid">
+flowchart LR
+  P1["Posting turn<br/>qwen plays all 100 users<br/>empty feed, 27 actions"] --> S1[("qwen's post set")]
+  P2["Posting turn<br/>llama plays all 100 users"] --> S2[("llama's post set")]
+  P3["Posting turn<br/>gemma plays all 100 users"] --> S3[("gemma's post set")]
+  S1 & S2 & S3 --> R["Reading turn<br/>each AI plays the same 100 users<br/>and reads EVERY set,<br/>one post per screen"]
+  R --> W["Wipe<br/>no memory, no follows,<br/>nothing carries over"]
+  </pre>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3 style="margin-top:0">The 3 × 3 grid</h3>
+      <p>Every AI reads every AI's posts, so each round fills nine cells. The diagonal is the <b>baseline</b>: an AI reading posts its
+      own AI wrote. The other six are <b>cross</b> cells. Only one thing changes inside a column: which AI plays the reader.</p>
+      <div class="tablewrap"><table>
+        <tr><th>AI playing the users ↓ / posts by →</th><th>qwen</th><th>llama</th><th>gemma</th></tr>
+        <tr><td><span class="dot q"></span>qwen</td><td class="diag">baseline</td><td>cross</td><td>cross</td></tr>
+        <tr><td><span class="dot l"></span>llama</td><td>cross</td><td class="diag">baseline</td><td>cross</td></tr>
+        <tr><td><span class="dot g"></span>gemma</td><td>cross</td><td>cross</td><td class="diag">baseline</td></tr>
+      </table></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">The bias number</h3>
+      <p>Some AIs simply upvote more than others, so comparing raw rates would be unfair. The <b>double difference</b> removes that:</p>
+      <p class="mono" style="font-size:13.5px">bias(i, j) = (i reads i − j reads i) − (i reads j − j reads j)</p>
+      <p>The first bracket asks how much more AI i likes i's posts than AI j does. The second subtracts how much more i likes
+      <i>everything</i> (measured on j's posts). Positive means i favours its own AI's writing. The 95% range comes from
+      re-drawing posts and users 1,000 times (a <b>bootstrap</b>). If the range crosses zero, the data can't tell the bias from chance.</p>
+    </div>
+  </div>
+</section>
+
+<section id="code">
+  <div class="eyebrow">02 · The code</div>
+  <h2>Every file, and where it came from</h2>
+  <p>Click a file to read it. Buttons elsewhere on the page (like <button class="ref" data-ref="screen">run_v2.py · screen()</button>) open the
+  file at the exact line.</p>
+  <p class="muted" style="font-size:14px">
+    <span class="tag new">new</span> written for this study ·
+    <span class="tag updated">updated</span> from our earlier LLM Bias work, changed for v2 ·
+    <span class="tag oasis">oasis</span> from camel-ai/oasis, unchanged ·
+    <span class="tag made">made by code</span> generated by one of our scripts ·
+    <span class="tag spark">spark</span> lives only on the Spark ·
+    <span class="tag data">data</span> a real output file.
+    Not shown because they aren't ours to show: <b>llama.cpp</b> (ggml-org/llama.cpp, the engine that runs the AIs; built on the
+    Spark from source, build b1-5e03bdd), the <b>model files</b> (qwen3:8b and llama3.1:8b downloaded with Ollama; gemma3:12b
+    from Hugging Face ggml-org/gemma-3-12b-it-GGUF), and the Census/BLS/Pew tables in <code>data/llm_bias/v2_sources/</code>.</p>
+  <div class="browser">
+    <div class="flist" id="flist" role="list"></div>
+    <div class="viewer">
+      <div class="vhead" id="vhead"></div>
+      <div class="code" id="codebox" tabindex="0" aria-label="Source code"><div class="inner"><div class="band" id="band"></div><pre class="gut" id="gut"></pre><pre id="src"></pre></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="steps">
+  <div class="eyebrow">03 · Step by step</div>
+  <h2>What happens in one round, in order</h2>
+  <ol class="steps">
+    <li><h4>The runner loads one AI</h4>
+      <p><code>v2_night.py</code> works through the round in a fixed order. Before each step it asks <code>llamacpp_servers.sh only &lt;AI&gt;</code>
+      to make sure exactly that AI's server is running and the others are stopped, so only one model sits in the Spark's memory (≈13-15 GB).</p>
+      <button class="ref" data-ref="night_loop">v2_night.py · the round loop</button><button class="ref" data-ref="night_step">v2_night.py · step()</button><button class="ref" data-ref="only">llamacpp_servers.sh · only</button></li>
+    <li><h4>Posting turn: 100 screens, one per user</h4>
+      <p><code>run_v2.py post</code> builds one screen per user: the user's description, an empty feed, the five subreddits and the 27-action
+      menu. Nobody is told to post. Whatever <code>create_post</code> actions come back become that AI's <b>post set</b> for the round.</p>
+      <button class="ref" data-ref="post_screen">POST_SCREEN prompt</button><button class="ref" data-ref="menu">the 27-action MENU</button><button class="ref" data-ref="system">SYSTEM prompt</button></li>
+    <li><h4>Every call goes through one function</h4>
+      <p><code>llm.chat_json()</code> sends the system message and the screen to the AI's server with the same settings for every AI
+      (temperature 0.7, top-k 40, top-p 0.9, min-p 0, repeat penalty 1.0, thinking off) and asks for a JSON answer. Each screen has its
+      own <b>seed</b> (a number that fixes the randomness), computed from the round, turn, AI, user and post, so a rerun gives the same draw.</p>
+      <button class="ref" data-ref="chat_json">llm.py · chat_json()</button><button class="ref" data-ref="llamacpp">llm.py · _llamacpp()</button><button class="ref" data-ref="sampling">SAMPLING</button><button class="ref" data-ref="seed">stable_seed()</button></li>
+    <li><h4>The answer is checked, or retried</h4>
+      <p><code>validate()</code> accepts any number of menu actions but rejects unknown action names, missing fields (a comment with no text,
+      a post with no title) or a post in a subreddit that doesn't exist. A rejected answer is retried twice with a new seed. After three
+      failures the screen is saved as <b>unreadable</b> (0.08% of round 101) and left out of every table.</p>
+      <button class="ref" data-ref="validate">run_v2.py · validate()</button></li>
+    <li><h4>The baseline: the same AI reads its own AI's posts</h4>
+      <p><code>run_v2.py read</code> takes the post set, shuffles it once into a fixed <b>ring</b> (the same order for every reader AI), and
+      gives each user the whole ring starting at their own evenly spaced point, skipping their own post. Each post is one screen.</p>
+      <button class="ref" data-ref="post_set">post_set()</button><button class="ref" data-ref="ring">the ring</button><button class="ref" data-ref="own">never your own post</button><button class="ref" data-ref="screen">screen()</button></li>
+    <li><h4>Eight screens at a time</h4>
+      <p>A thread pool keeps 8 calls in flight; the server answers them together (8 <b>slots</b>, each with room for 8,192 tokens).
+      Each answer is written to the step's <code>.jsonl</code> file the moment it arrives, so a crash loses at most the screens in flight.</p>
+      <button class="ref" data-ref="pool">the thread pool</button><button class="ref" data-ref="row">row(): what is saved per screen</button></li>
+    <li><h4>Steps 2-6 repeat for llama, then gemma</h4>
+      <p>So all three baselines exist before any cross reading starts (decision LD-40).</p></li>
+    <li><h4>The six cross cells, in growing stages</h4>
+      <p>Each AI reads the other two AIs' sets: first each user's first 16 posts, then 32, then 64, then all. If time runs out, all six cells
+      are still evenly covered.</p><button class="ref" data-ref="slices">v2_night.py · the stages</button></li>
+    <li><h4>The noise floor</h4>
+      <p>Each AI re-reads 4 posts per user of its own set with a different seed. How often it gives the same answer shows how much
+      answers wobble by pure chance.</p></li>
+    <li><h4>A manifest closes every step</h4>
+      <p>Git commit, fingerprints of the users, post set and prompts, engine and sampling, time, and the unreadable count go into
+      <code>.manifest.json</code>. Then the runner makes a local git commit (a <b>checkpoint</b>) and moves on.</p>
+      <button class="ref" data-ref="manifest">run_v2.py · the manifest</button></li>
+    <li><h4>Wipe</h4>
+      <p>Nothing is carried into the next round: every screen is a fresh call with no memory, follows are never applied, and the next
+      round writes brand-new post sets.</p></li>
+    <li><h4>On the laptop: copy, analyse, report</h4>
+      <p>rsync copies the result folder from the Spark. <code>analyze_v2.py</code> writes the tables and the bias, and <code>make_report_v2.py</code>
+      builds the workbook and graphs.</p></li>
+  </ol>
+  <div class="note"><b>Where OASIS fits.</b> The menu of 27 actions and the shape of the system prompt come from OASIS. run_v2 can also
+  replay every recorded action through OASIS's own functions into a real OASIS Reddit database
+  (<button class="ref" data-ref="replay">replay()</button>), but the Spark rounds run with the replay <b>off</b> (the runner's default). The
+  results come from the recorded answers, not from an OASIS database. <button class="ref" data-ref="oasis_actions">OASIS · agent_action.py</button>
+  <button class="ref" data-ref="oasis_prompt">OASIS · the Reddit prompt</button></div>
+</section>
+
+<section id="sees">
+  <div class="eyebrow">04 · What the AI sees</div>
+  <h2>The exact words, and three real answers</h2>
+  <p>Below is everything the AI receives for user 0, <b id="u0name"></b>, built with the real templates from <code>run_v2.py</code>.
+  The <b>system message</b> sets who the AI is playing; the <b>user message</b> is the screen. Nothing else is sent.</p>
+
+  <h3>Posting turn: the empty feed</h3>
+  <div class="grid2">
+    <div class="prompt"><div class="lbl"><span>system message</span><span>same in every turn</span></div><pre id="p_sys"></pre></div>
+    <div class="prompt"><div class="lbl"><span>user message: the screen</span><span>posting turn</span></div><pre id="p_user"></pre></div>
+  </div>
+  <p style="margin-top:14px">What each AI answered as this same user in round 101 (word for word):</p>
+  <div class="grid2" id="p_answers" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))"></div>
+
+  <h3>Reading turn: one post on the screen</h3>
+  <p>The same user is shown a post written in qwen's posting turn by user <b id="r_author"></b>. This user's stance on
+  <b id="r_topic"></b> is <b id="r_stance"></b>.</p>
+  <div class="prompt"><div class="lbl"><span>user message: the screen</span><span>reading turn (system message as above)</span></div><pre id="r_user"></pre></div>
+  <p style="margin-top:14px">The same screen, played by each AI (round 101; the qwen answer is the baseline):</p>
+  <div class="grid2" id="r_answers" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))"></div>
+
+  <h3>What the AI can and cannot see</h3>
+  <div class="seeno">
+    <div class="card yes"><h4>Sees</h4><ul>
+      <li>The user's description: age, gender, state, city or countryside, schooling, work, Big Five personality (1-10), and how they feel about each of the five topics (love → hate)</li>
+      <li>On a reading screen: the subreddit, the author's <b>username</b>, the title and the body of ONE post</li>
+      <li>The full menu of 27 actions and the answer format</li>
+    </ul></div>
+    <div class="card no"><h4>Never sees</h4><ul>
+      <li><b>Which AI wrote the post.</b> Only the made-up author's username, which is the same in every AI's set</li>
+      <li>Votes, comments or reactions by anyone else (vote counts are hidden)</li>
+      <li>Anything from its earlier screens: every screen is a separate call with no memory</li>
+      <li>Its own posts (they are skipped) or the author's description</li>
+      <li>Other posts at the same time: one post per screen (pages of several posts made AIs stop commenting, log 14.14)</li>
+      <li>Hidden "thinking": switched off for every AI</li>
+    </ul></div>
+  </div>
+</section>
+
+<section id="screen">
+  <div class="eyebrow">05 · The screen, as a person would picture it</div>
+  <h2>What the user "sees" vs what the AI is actually sent</h2>
+  <p>There is no app and no pixels. The "screen" is the text on the right. The card on the left is how that text would look on a
+  phone: what the made-up person is meant to be looking at.</p>
+  <div class="grid2" style="align-items:start">
+    <div class="mock" aria-label="Phone mock of the reading screen">
+      <div class="post">
+        <div class="meta" id="m_meta"></div>
+        <div class="title" id="m_title"></div>
+        <div id="m_body" style="font-size:14px"></div>
+        <div class="actions"><span>▲ upvote</span><span>▼ downvote</span><span>💬 comment</span><span>↻ share</span><span>❝ quote</span><span>⚑ report</span><span>+ follow</span><span>mute</span><span>…19 more</span></div>
+        <div class="hidden">Not shown: score, comments, who else voted, which AI wrote it.</div>
+      </div>
+    </div>
+    <div class="prompt"><div class="lbl"><span>what the AI receives</span><span>one call</span></div><pre id="m_prompt"></pre></div>
+  </div>
+</section>
+
+<section id="spark">
+  <div class="eyebrow">06 · Behind the scenes on the Spark</div>
+  <h2>The machine, the engine, and what went wrong</h2>
+  <div class="grid2">
+    <div class="card"><h3 style="margin-top:0">The machine</h3>
+      <p><b>NVIDIA DGX Spark</b> <code>honda.csr.uky.edu</code> (UK Computer Science): an ARM computer with a GB10 GPU and 121 GB of memory
+      shared by the CPU and GPU. Login <code>kmgo257</code> with the LinkBlue password, on campus or over the GlobalProtect VPN. No admin
+      rights, no Docker. <b>Shared</b> with another user (hsa303), whose GPU jobs slowed our runs 2-35×.</p>
+      <p>Everything lives in <code>~/llm_bias/</code>: <code>oasis/</code> (a git clone; results in <code>oasis/data/llm_bias/v2/</code>),
+      <code>engines/llama.cpp/</code>, <code>models/</code>, <code>logs/</code>, <code>env_llamacpp.sh</code>, <code>watchdog.sh</code>.</p></div>
+    <div class="card"><h3 style="margin-top:0">The engine</h3>
+      <p><b>llama.cpp</b> runs each AI as a small web server on the Spark (qwen port 11601, llama 11602, gemma 11603), with all layers on
+      the GPU, flash attention, the model's own chat template, and 8 slots of 8,192 tokens. We switched from Ollama to llama.cpp on
+      5 Oct (LD-41) because it was 2.5-3× faster and lets every AI use identical sampling settings. Ollama had quietly applied
+      different settings per model.</p>
+      <p>Speed with the GPU to ourselves: <b>qwen 0.41 s</b>, <b>llama 0.51 s</b>, <b>gemma 0.95 s</b> per screen (8 at a time).</p></div>
+  </div>
+  <h3>Safety nets</h3>
+  <div class="grid2">
+    <div class="card"><p><b>Resume.</b> Every screen is saved the moment it's answered. On restart, finished screens are skipped and a
+    half-written last line is dropped. A run can be killed at any moment and restarted with the same command.</p>
+    <p><b>STOP time.</b> The runner never starts a step it can't finish before STOP; at the end it stops the AI server and frees the GPU.</p></div>
+    <div class="card"><p><b>Preflight.</b> <code>preflight_v2.py</code> runs 108 checks in a 10-user test round, including a hard kill
+    and resume. It must say ALL CLEAR after any code change.</p>
+    <p><b>Watchdog.</b> A cron job checks every 10 minutes and restarts the runner if it has died. It was added after the run was killed
+    overnight on 6-7 Oct.</p></div>
+  </div>
+  <h3>What actually happened</h3>
+  <ul class="timeline">
+    <li><time>Mon 5 Oct 22:49</time>Round 101 starts on llama.cpp. qwen posts (101 posts) and finishes its baseline by 23:55.</li>
+    <li class="bad"><time>Mon 23:55 - Tue 09:20</time>llama and gemma steps fail in seconds: the server check failed when the first server was off (bug LB-v2-3). Fixed; preflight written; 108/108 pass.</li>
+    <li><time>Tue 6 Oct 09:49 - 13:50</time>llama and gemma post and finish their baselines; cross stage 1 done for all six cells.</li>
+    <li class="bad"><time>Tue 13:50 - 15:03</time>Another user's GPU jobs start: our speed drops about 5×. Paused at 15:03.</li>
+    <li><time>Tue 19:08</time>Resumed for the night (tmux).</li>
+    <li class="bad"><time>Tue 22:55 - Wed ~02:00</time>The other user starts a new job: 0.59 → 20.7 s per screen. Around 02:00 our whole session was killed. Not a reboot; exact cause unknown.</li>
+    <li><time>Wed 7 Oct 10:21</time>Restarted fully detached (setsid nohup) with the cron watchdog.</li>
+    <li><time>Wed 17:17</time><b>Round 101 complete</b>: 69,213 screens. Round 102 starts automatically.</li>
+    <li><time>Wed 22:10</time>Stop time moved to Fri 9 Oct 06:00; round 102 continues (slowed by sharing).</li>
+  </ul>
+</section>
+
+<section id="commands">
+  <div class="eyebrow">07 · Every command, in order</div>
+  <h2>Everything typed on the Spark (and the Mac) to run this</h2>
+  <p>Run on the Spark unless the label says <b>Mac</b>. The setup (A) was done once on 5 Oct. Everything after it is the normal cycle.</p>
+  <div id="cmds"></div>
+</section>
+
+<section id="data">
+  <div class="eyebrow">08 · The data</div>
+  <h2>What gets saved, and where</h2>
+  <div class="tablewrap"><table>
+    <tr><th>File</th><th>One row / one file per</th><th>What's in it</th></tr>
+    <tr><td><code>r101/posting_&lt;AI&gt;.jsonl</code></td><td>user in the posting turn</td><td>the actions (posts with subreddit, title, body), the reason, the raw answer, seconds, tokens</td></tr>
+    <tr><td><code>r101/reading_&lt;posts by&gt;__&lt;reader&gt;.jsonl</code></td><td>screen (user × post)</td><td>user, post ID, topic, the user's stance, scroll position, outcome, every action with its fields, reason, raw answer, seconds, tokens, own_ai (1 if the reader AI wrote the post)</td></tr>
+    <tr><td><code>… _d1.jsonl</code></td><td>noise-floor screen</td><td>the same, re-read with a new seed</td></tr>
+    <tr><td><code>….manifest.json</code></td><td>step</td><td>git commit, fingerprints, engine, sampling, time, unreadable count (see the sample file in the code browser)</td></tr>
+    <tr><td><code>….log</code></td><td>step</td><td>progress lines: screens done, seconds each, the running action counts</td></tr>
+    <tr><td><code>night.log</code></td><td>whole run</td><td>every step's start and end with screens, minutes and seconds per screen; the source of the time graphs</td></tr>
+  </table></div>
+  <p style="margin-top:14px"><b>On the laptop:</b> <code>~/Desktop/LLM_Bias_v2/LLM_Bias_v2.xlsx</code> (13 sheets: 3×3 grids for every action,
+  bias, stance, topic, posting, every post, every person, noise, time per step, graphs, and all 80,481 screens) and
+  <code>~/Desktop/LLM_Bias_v2/graphs/</code> (14 graphs). Rebuild them with <code>make_report_v2.py</code>. The full written record is
+  <code>RESEARCH_LOG.md</code> Part 14 (handoff in §14.32, round 101 results in §14.33).</p>
+</section>
+
+<section id="results">
+  <div class="eyebrow">09 · Round 101</div>
+  <h2>First complete round: no sign of own-AI favouritism yet</h2>
+  <div class="grid2">
+    <div><p class="muted">% of screens upvoted (diagonal = baseline)</p>
+      <div class="tablewrap"><table>
+        <tr><th>Reader ↓ / posts by →</th><th class="num">qwen</th><th class="num">llama</th><th class="num">gemma</th></tr>
+        <tr><td><span class="dot q"></span>qwen</td><td class="num diag">43.3</td><td class="num">48.0</td><td class="num">45.1</td></tr>
+        <tr><td><span class="dot l"></span>llama</td><td class="num">60.2</td><td class="num diag">62.2</td><td class="num">60.9</td></tr>
+        <tr><td><span class="dot g"></span>gemma</td><td class="num">51.7</td><td class="num">51.6</td><td class="num diag">48.0</td></tr>
+      </table></div></div>
+    <div><p class="muted">Own-AI bias in points per 100 screens (95% range)</p>
+      <div class="tablewrap"><table>
+        <tr><th>Pair</th><th class="num">Upvote</th><th class="num">Did anything</th></tr>
+        <tr><td>qwen vs llama</td><td class="num">−2.7 (−7.0 to +1.5)</td><td class="num">+5.4 (+1.7 to +9.0)</td></tr>
+        <tr><td>qwen vs gemma</td><td class="num">−5.4 (−12.3 to +1.4)</td><td class="num">−4.9 (−8.5 to −1.7)</td></tr>
+        <tr><td>llama vs gemma</td><td class="num">−2.2 (−7.9 to +3.2)</td><td class="num">+1.6 (−1.9 to +5.2)</td></tr>
+      </table></div></div>
+  </div>
+  <p style="margin-top:14px">Every upvote range crosses zero, so in round 101 no AI clearly upvotes its own AI's posts more. Each AI has a
+  strong style of its own (llama upvotes about 61% and reports 26%; gemma downvotes 35-38% and rarely comments; qwen comments the most
+  and does nothing most often). The AIs do play the people: users who love a topic upvote 70-99% of its posts, users who hate it 1-16%.
+  It is one round. Rounds 102-103 pooled will say more.</p>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp" crossorigin="anonymous"></script>
+<script>
+const D = /*__DATA__*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+document.getElementById("built").textContent = new Date(document.lastModified).toISOString().slice(0,10);
+
+/* ---------- code browser ---------- */
+const GROUPS = [["new","Written for this study"],["updated","Updated from earlier work"],["oasis","From OASIS"],["made","Made by our code"],["spark","On the Spark only"],["data","Real output"]];
+const TAGTXT = {new:"new",updated:"updated",oasis:"oasis",made:"made by code",spark:"spark",data:"data"};
+let current = -1;
+function listFiles(){
+  const box = $("#flist"); let h = "";
+  for (const [g,name] of GROUPS){
+    const fs = D.files.map((f,i)=>[f,i]).filter(([f])=>f.group===g); if(!fs.length) continue;
+    h += `<h5>${name}</h5>`;
+    for (const [f,i] of fs) h += `<button class="fbtn" data-i="${i}" role="listitem">${esc(f.path.split("/").pop().split(" (")[0])}<small>${esc(f.title)}</small></button>`;
+  }
+  box.innerHTML = h;
+  box.querySelectorAll(".fbtn").forEach(b=>b.addEventListener("click",()=>openFile(+b.dataset.i)));
+}
+function openFile(i, line){
+  const f = D.files[i];
+  if (i !== current){
+    current = i;
+    document.querySelectorAll(".fbtn").forEach(b=>b.setAttribute("aria-current", +b.dataset.i===i ? "true":"false"));
+    $("#vhead").innerHTML = `<div><span class="tag ${f.group}">${TAGTXT[f.group]}</span> <span class="path">${esc(f.path)}</span> <span class="muted mono" style="font-size:12px">· ${f.lines.toLocaleString()} lines</span></div>
+      <p><b>${esc(f.title)}.</b> ${esc(f.what)}</p><p class="origin">Where it came from: ${esc(f.origin)}</p>`;
+    let html;
+    try { html = window.hljs ? hljs.highlight(f.src, {language: f.lang, ignoreIllegals: true}).value : esc(f.src); } catch(e){ html = esc(f.src); }
+    $("#src").innerHTML = html;
+    $("#gut").textContent = Array.from({length: f.lines}, (_, k) => k + 1).join("\n");
+    $("#codebox").scrollTop = 0;
+  }
+  const band = $("#band");
+  if (line){
+    band.style.display = "block"; band.style.top = (12 + (line - 1) * 20) + "px";
+    const box = $("#codebox"); box.scrollTop = Math.max(0, (line - 4) * 20);
+  } else band.style.display = "none";
+}
+function goRef(key){
+  const r = D.refs[key]; if(!r) return;
+  const i = D.files.findIndex(f=>f.path===r[0]);
+  openFile(i, r[1]);
+  document.getElementById("code").scrollIntoView({block:"start"});
+}
+document.addEventListener("click", e=>{ const b = e.target.closest(".ref"); if(b){ goRef(b.dataset.ref); } });
+listFiles(); openFile(0);
+
+/* ---------- prompts & answers ---------- */
+const NAME = {"qwen3:8b":["qwen3:8b","q"],"llama3.1:8b":["llama3.1:8b","l"],"gemma3:12b":["gemma3:12b","g"]};
+const pretty = raw => { try { return JSON.stringify(JSON.parse(raw), null, 2); } catch(e){ return raw ?? "(no answer)"; } };
+function answers(el, obj, note){
+  el.innerHTML = Object.entries(obj).map(([m,a])=>`<div class="answer"><div class="who"><b><span class="dot ${NAME[m][1]}"></span>${NAME[m][0]}${note&&note(m)||""}</b>${a?`<span>${a.seconds}s · ${a.in} tokens in · ${a.out} out</span>`:""}</div><pre>${esc(a?pretty(a.raw):"(not in the copied data)")}</pre></div>`).join("");
+}
+$("#u0name").textContent = D.user0.username;
+$("#p_sys").textContent = D.post_prompt.system;
+$("#p_user").textContent = D.post_prompt.user;
+answers($("#p_answers"), D.post_answers);
+$("#r_author").textContent = "u/" + D.read_post.author;
+$("#r_topic").textContent = D.read_post.tname;
+$("#r_stance").textContent = D.read_post.stance;
+$("#r_user").textContent = D.read_prompt.user;
+answers($("#r_answers"), D.read_answers, m => m==="qwen3:8b" ? " (baseline)" : "");
+$("#m_meta").textContent = `${D.read_post.sub} · posted by u/${D.read_post.author}`;
+$("#m_title").textContent = D.read_post.title;
+$("#m_body").textContent = D.read_post.body;
+$("#m_prompt").textContent = "SYSTEM:\n" + D.read_prompt.system + "\n\nUSER:\n" + D.read_prompt.user;
+
+/* ---------- commands ---------- */
+const C = [
+ ["A","One-time setup (done 5 Oct 2026; only needed again on a new machine)",[
+  ["Mac","Log in to the Spark","ssh -o PubkeyAuthentication=no kmgo257@honda.csr.uky.edu","LinkBlue password. Off campus: GlobalProtect VPN (ra.uky.edu) first. '-o PubkeyAuthentication=no' saves a login attempt (the server allows only a few)."],
+  ["Spark","Project folders and the old Ollama settings file","mkdir -p ~/llm_bias/ollama ~/llm_bias/models ~/llm_bias/logs\ncat > ~/llm_bias/env.sh <<'X'\nexport OLLAMA_HOST=127.0.0.1:11500\nexport OLLAMA_URL=http://127.0.0.1:11500\nexport OLLAMA_MODELS=$HOME/llm_bias/models\nexport OLLAMA_SERVE_LOG=$HOME/llm_bias/logs/ollama_serve.log\nexport PATH=$HOME/llm_bias/ollama/bin:$PATH\nX","Everything lives in ~/llm_bias."],
+  ["Spark","Ollama (used only to download qwen and llama)","cd ~/llm_bias/ollama && curl -fL -o ollama.tar.zst https://github.com/ollama/ollama/releases/download/v0.24.0/ollama-linux-arm64.tar.zst && tar --zstd -xf ollama.tar.zst && rm ollama.tar.zst\nsource ~/llm_bias/env.sh && OLLAMA_FLASH_ATTENTION=1 OLLAMA_NUM_PARALLEL=8 OLLAMA_CONTEXT_LENGTH=8192 OLLAMA_KEEP_ALIVE=24h OLLAMA_MAX_LOADED_MODELS=3 nohup ollama serve > $OLLAMA_SERVE_LOG 2>&1 &\nollama pull qwen3:8b && ollama pull llama3.1:8b && ollama pull gemma3:12b","The model files land in ~/llm_bias/models."],
+  ["Spark","Get the code","cd ~/llm_bias && git clone --depth 1 --branch llm-bias https://github.com/KGordo11/oasis.git\ncd ~/llm_bias/oasis && git config user.name \"Gordon\" && git config user.email \"gordonkm05@gmail.com\" && git config pull.rebase false","The Spark's own clone of the repo."],
+  ["Spark","Build llama.cpp for the GB10 GPU","mkdir -p ~/llm_bias/engines && cd ~/llm_bias/engines && git clone --depth 1 https://github.com/ggml-org/llama.cpp && cd llama.cpp\nexport PATH=/usr/local/cuda/bin:$PATH CUDACXX=/usr/local/cuda/bin/nvcc\nnice -n 19 cmake -B build -DGGML_CUDA=ON -DCMAKE_CUDA_ARCHITECTURES=121 -DLLAMA_CURL=OFF -DCMAKE_BUILD_TYPE=Release\nnice -n 19 cmake --build build --config Release -j 8 --target llama-server","sm_121 = the GB10. Takes a while; nice keeps it polite on a shared machine."],
+  ["Spark","gemma3:12b in a format llama.cpp can read","mkdir -p ~/llm_bias/models/gguf && curl -fL -o ~/llm_bias/models/gguf/gemma3-12b.gguf https://huggingface.co/ggml-org/gemma-3-12b-it-GGUF/resolve/main/gemma-3-12b-it-Q4_K_M.gguf","Ollama's gemma file can't be read by llama.cpp."],
+  ["Spark","Start the servers once (writes env_llamacpp.sh), then stop them","bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh start && bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop\npkill -u $USER -f \"ollama serve\"","You should see READY for all three, then 'stopped'. Ollama is no longer used."],
+ ]],
+ ["B","After any code change: update and test",[
+  ["Spark","Get the newest code","cd ~/llm_bias/oasis && git pull --no-edit","A merge (the Spark has its own data commits). If it says index.lock exists, wait 10 s and repeat."],
+  ["Spark","Full preflight: 108 checks, about 25 min","cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/experiment/llm_bias/preflight_v2.py 2>&1 | tee ~/llm_bias/logs/preflight.txt","Must end with ALL CLEAR. Needed after changes to run_v2, v2_night, llm or the server script."],
+ ]],
+ ["C","Start a run (the way it runs now: detached, with a watchdog)",[
+  ["Spark","Start the runner (set STOP to when it must stop)","cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && echo \"backend: $LLM_BACKEND\" && MANAGE_SERVERS=1 STOP=\"2026-10-09 06:00\" ROUNDS=\"101 102 103\" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 setsid nohup python3 examples/experiment/llm_bias/v2_night.py >> ~/llm_bias/logs/night_run.out 2>&1 < /dev/null &","Prints 'backend: llamacpp'. It survives closing the tab or losing the connection; it resumes where it stopped."],
+  ["Spark","Set the watchdog's stop time to match, and switch it on","sed -i 's/^STOP=.*/STOP=\"2026-10-09 06:00\"/' ~/llm_bias/watchdog.sh\n(crontab -l 2>/dev/null | grep -v watchdog.sh; echo \"*/10 * * * * bash $HOME/llm_bias/watchdog.sh\") | crontab - && crontab -l","Last line: */10 * * * * bash /homes/kmgo257/llm_bias/watchdog.sh. The watchdog script itself is in the code browser."],
+  ["Spark","Check it started (wait 2 minutes)","tail -4 ~/llm_bias/oasis/data/llm_bias/v2/night.log; echo \"runner alive: $(ps -u $USER -o args | grep -c '^python3 .*[v]2_night')\"","runner alive: 1 and a 'start r…' line. Then close the tab."],
+  ["Spark","(Before 7 Oct) the old way: inside tmux","tmux new -A -s llm\n# then the same start command without 'setsid nohup … &'","Replaced: the tmux session was killed overnight. Ctrl-b doesn't work on this machine; leave by closing the tab."],
+ ]],
+ ["D","Check on it (all read-only, safe any time)",[
+  ["Spark","Where are we, what's left, when does each round land","cd ~/llm_bias/oasis && python3 examples/experiment/llm_bias/progress_v2.py","Every cell: screens done / needed, hours left, landing time (uses the live speed)."],
+  ["Spark","Run status and the current step","date; grep -E \"end|post sets|WATCHDOG|STOPPING|SKIP\" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -8; echo \"runner alive: $(ps -u $USER -o args | grep -c '^python3 .*[v]2_night')\"; echo \"== current step:\"; tail -1 $(ls -t /tmp/v2_reading*.log /tmp/v2_posting*.log 2>/dev/null | head -1) | cut -c1-90","Speed guide: ~0.4-0.5 s (qwen, llama) or ~1.0 s (gemma) = GPU to ourselves; 2-3 s = shared; ~20 s = something is hogging it."],
+  ["Spark","Who is on the machine, and what's on the GPU","who; echo \"== hsa303 busiest:\"; ps -u hsa303 -o etime,pcpu,args --sort=-pcpu | head -5 | cut -c1-110; echo \"== on the GPU:\"; nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader","Ours is llama-server; the other user's are .venv/bin/python."],
+  ["Spark","Memory: mine and the whole machine","echo \"== mine:\"; ps -u $USER -o rss=,comm= --sort=-rss | head -4 | awk '{printf \"   %5.1f GB  %s\\n\", $1/1048576, $2}'; echo \"== whole Spark (121 GB total):\"; free -g | head -2","Ours ≈ 9-15 GB. If 'available' drops under ~10 GB, programs can get killed."],
+  ["Spark","Disk space and the watchdog","du -sh ~/llm_bias; crontab -l; grep WATCHDOG ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -3","Quota 100 GB (we use ~29). A 'WATCHDOG … restarting' line means it died and came back by itself."],
+  ["Spark","Has a round finished?","grep -E \"post sets|checkpoint\" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -6","'checkpoint round N: noise floor' = round N complete."],
+  ["Spark","More detail: servers, server log, runner output, uptime, logins","bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh status\ntail -20 ~/llm_bias/logs/llamacpp_llama3.1.log\ntail -20 ~/llm_bias/logs/night_run.out\nuptime; last -n 10 kmgo257\nps -u $USER -o pid,etime,pcpu,args | grep -E '[v]2_night|[r]un_v2|[l]lama-server' | cut -c1-140","The server log name is llamacpp_qwen3.log / llamacpp_llama3.1.log / llamacpp_gemma3.log."],
+  ["Spark","Save evidence if the run died","{ uptime -s; tmux ls; tail -4 ~/llm_bias/oasis/data/llm_bias/v2/night.log; tail -8 $(ls -t /tmp/v2_reading*.log | head -1); tail -8 ~/llm_bias/logs/llamacpp_*.log; last -x -n 8; } > ~/llm_bias/logs/crash_$(date +%m%d).txt 2>&1; echo saved","What found the 7 Oct cause: not a reboot (up since 20 Sep), the whole session was killed."],
+ ]],
+ ["E","Stop, restart, change the stop time",[
+  ["Spark","EMERGENCY STOP: everything, watchdog first","crontab -l | grep -v watchdog.sh | crontab -; pkill -u $USER -f v2_night.py; pkill -u $USER -f run_v2.py; bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop; sleep 2; crontab -l; ps -u $USER -o pid,args | grep -E \"[v]2_night|[r]un_v2|[l]lama-server\" || echo \"ALL STOPPED\"","'stopped', then no watchdog line, then ALL STOPPED. Nothing finished is lost. (Without removing the watchdog first, it restarts the run within 10 min.)"],
+  ["Spark","Restart after a stop","Run C1 (start) and C2 (watchdog) again with the stop time you want.","It resumes from the last saved screen."],
+  ["Spark","Move the stop time without losing work","sed -i 's/^STOP=.*/STOP=\"2026-10-09 06:00\"/' ~/llm_bias/watchdog.sh; pkill -u $USER -f v2_night.py; pkill -u $USER -f run_v2.py; sleep 3\n# then C1 with the same STOP","Done on 7 Oct 22:10 to keep running through Thursday."],
+ ]],
+ ["F","Results to the laptop",[
+  ["Mac","Copy everything from the Spark","rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/","Run in a Mac terminal tab (prompt gordon@Kalebs-MacBook-Pro), not inside the ssh session."],
+  ["Mac","Tables, CSVs, graphs, the workbook, this page","cd ~/research/oasis\noasis-env/bin/python examples/experiment/llm_bias/export_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_graphs_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias_v2\npython3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark inside_v2.html","The workbook's formulas are recalculated with LibreOffice before delivery."],
+ ]],
+ ["G","When the study is finished",[
+  ["Spark","Remove the watchdog and free the GPU","crontab -l | grep -v watchdog.sh | crontab -; bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop","After the last STOP (currently Fri 9 Oct 06:00)."],
+ ]],
+];
+$("#cmds").innerHTML = C.map(([k,title,items])=>`<div class="phase"><h3><span class="eyebrow">${k}</span>${esc(title)}</h3>${items.map(([where,t,cmd,exp],n)=>`
+  <div class="cmd"><div class="ch"><div><span class="where">${k}${n+1} · ${where}</span><br><b>${esc(t)}</b></div><button class="copy" type="button">Copy</button></div>
+  <pre>${esc(cmd)}</pre><div class="exp">${esc(exp)}</div></div>`).join("")}</div>`).join("");
+document.querySelectorAll(".cmd .copy").forEach(b=>b.addEventListener("click",()=>{
+  const txt = b.closest(".cmd").querySelector("pre").textContent;
+  const done = ()=>{ b.textContent = "Copied"; setTimeout(()=>b.textContent="Copy",1400); };
+  const fallback = ()=>{ const r = document.createRange(); r.selectNodeContents(b.closest(".cmd").querySelector("pre")); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selected: press Cmd+C"; };
+  try { navigator.clipboard.writeText(txt).then(done, fallback); } catch(e){ fallback(); }
+}));
+</script>

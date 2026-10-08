@@ -14660,6 +14660,7 @@ into the running window (typed text gets queued as shell input).
 | `llamacpp_servers.sh` | start / only / stop / status of the servers |
 | `llm.py` | the backend switch (ollama / llamacpp) |
 | **`preflight_v2.py`** | 108 PASS/FAIL checks, about 25 min. Run it before any unattended run after a code change |
+| **`progress_v2.py`** | read-only: screens done / left per cell for each round and an estimated finish time (latest measured speed per AI); safe while the run is going |
 | `analyze_v2.py` | the plain tables and the double difference, written to `summary.md` (stdlib only, so it runs on the Spark) |
 | `export_v2.py` | CSVs plus `LLM_bias_v2.xlsx` (needs pandas, so laptop only) |
 | `make_graphs_v2.py` | graphs per round and pooled (needs matplotlib, so laptop only) |
@@ -14806,6 +14807,13 @@ then turn the watchdog back on:
 ```
 ✅ `backend: llamacpp`; after 2 min, command 1 shows `runner alive: 1`. Put the **same date in both places**.
 
+**7b. Where are we, how much is left, when does each round land?**
+```
+cd ~/llm_bias/oasis && python3 examples/experiment/llm_bias/progress_v2.py
+```
+Per round: every cell's screens done / needed, hours left and the landing time. Sets not written yet are guessed
+from the newest written ones, and the speed is the last one measured (shared GPU → slower ETA).
+
 **8. Has a round finished?**
 ```
 grep -E "post sets|checkpoint" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tail -6
@@ -14886,3 +14894,4 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 5f794c9 | 10-06 08:59 | **LB-v2-3** fixed (server check with one server off); runner stops on a 0-screen failure |
 | 1457456 | 10-06 09:10 | **`preflight_v2.py`**; **LB-v2-4** crash-safe resume; runner `AGENTS=` test size |
 | ffafa95 | 10-06 09:34 | **LB-v2-6** exact window on tiny sets; **LB-v2-7** wait for servers to exit; preflight passes 108/108 |
+| (this) | 10-07 22:10 | `progress_v2.py`: progress per cell + ETA per round (read-only); cron watchdog `~/llm_bias/watchdog.sh` (on the Spark, not in git, §14.31c) |

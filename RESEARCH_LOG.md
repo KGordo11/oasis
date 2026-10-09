@@ -70,7 +70,7 @@ research**:
   only the person to play). **LLM Bias V2** = rounds 103-104 (the same, plus "I am <model>, simulating this
   profile:", LD-44). Rounds are pooled only within a version. Older text below says "v2" for the whole Spark study;
   code and data folders keep the `_v2` / `v2_spark` names. The September **Tests 1-6** are a separate, older study.
-- **V2 is starting:** preflight launched on the Spark Fri 11:05 (110 checks); then Gordon starts rounds 103-104
+- **V2 is starting:** preflight ALL CLEAR (110/110, Fri ~12:00); then Gordon starts rounds 103-104
   (STOP Mon 2026-10-12 12:00) and the watchdog (§14.35a). Gordon runs and checks it himself.
 - **Reports:** `~/Desktop/LLM_Bias/V1/LLM_Bias_V1.xlsx` (+ graphs, results.json); V2 gets `~/Desktop/LLM_Bias/V2/`.
   The Inside page (same URL) now shows both versions, the code change and both prompts.
@@ -14804,7 +14804,8 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 ### Status (2026-10-09 11:30)
 - **V1 / V2 naming (LD-45, §14.36):** V1 = rounds 101-102, V2 = rounds 103-104. Workbooks per version in
   `~/Desktop/LLM_Bias/<V>/`; `make_report_v2.py <results> <out> <V>`; the Inside page shows both.
-- **V2 preflight** running on the Spark since Fri 11:05; then rounds 103-104 (§14.35a).
+- **V2 preflight: 110 PASS, 0 FAIL, ALL CLEAR** (Fri 2026-10-09, kill-and-resume included). Gordon starts rounds
+  103-104 + watchdog (§14.35a). Update this line when he reports it running.
 
 ### Status (2026-10-09 10:22)
 - **Rounds 101 and 102 complete.** 133,068 usable reading screens pooled + 6 posting turns + 6 noise floors.

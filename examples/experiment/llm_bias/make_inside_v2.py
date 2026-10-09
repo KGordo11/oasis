@@ -1,7 +1,8 @@
-"""Build the 'Inside LLM Bias v2' page: one HTML file with every code file (click to read it), the exact prompts the
-AIs receive, real answers from round 101, every Spark command, and how the pieces fit.
+"""Build the 'Inside LLM Bias' page (V1 = rounds 101-102, V2 = rounds 103-104): one HTML file with every code file
+(click to read it), the exact prompts the AIs receive in V1 and V2, real answers from round 101, every Spark command,
+and how the pieces fit.
 
-    python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark <out.html> ~/Desktop/LLM_Bias_v2/results.json
+    python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark <out.html> ~/Desktop/LLM_Bias/V1/results.json
 
 The page text lives in inside_v2_template.html; this script only fills in the data (file sources, line numbers of the
 functions the text points to, real prompts and answers), so the code shown is always the code in the repo.
@@ -20,9 +21,10 @@ X = "examples/experiment/llm_bias/"
 FILES = [
     (X + "run_v2.py", "new", "One turn: the posting turn or the reading turn",
      "Builds every screen (who sees what), writes the exact prompt, calls the AI, checks the answer, saves one row per screen. "
-     "Holds the prompt templates, the 27-action menu and the answer checker. The heart of the study.",
-     "Written for v2 (first commit 2b66763, 2 Oct 2026; 11 commits). The prompt's three headings and the action list are "
-     "adapted from OASIS (see the two OASIS files)."),
+     "Holds the prompt templates, the 27-action menu and the answer checker. The heart of the study. Also decides V1 vs V2: "
+     "system_prompt() adds 'I am <model>, simulating this profile:' from round 103 (SELF_ID, MODEL_NAMES).",
+     "Written for the Spark study (first commit 2b66763, 2 Oct 2026; 13 commits). V2 line added 9 Oct (09b28df, 50649e3). The "
+     "prompt's three headings and the action list are adapted from OASIS (see the two OASIS files)."),
     (X + "v2_night.py", "new", "The runner: does a whole round in the right order",
      "Loads one AI at a time, runs posting, then the baseline, then the six cross cells in growing stages (16, 32, 64, all posts "
      "per user), then the noise floor. Skips finished work, so a restart resumes. Never starts a step it can't finish by STOP.",
@@ -36,9 +38,10 @@ FILES = [
      "One llama.cpp server per AI (ports 11601-11603), 8 screens at a time, 8,192 tokens each. 'only' keeps just the AI in "
      "use loaded; 'stop' waits until the server has really exited.",
      "Written for v2 (46ea7cf, 5 Oct; 4 commits)."),
-    (X + "preflight_v2.py", "new", "108 safety checks before leaving a run alone",
-     "Setup, code, each AI alone, switching AIs, a full mini-round through the real runner, kill-and-resume, clean finish.",
-     "Written for v2 (1457456, 6 Oct). Passed 108/108 on the Spark."),
+    (X + "preflight_v2.py", "new", "110 safety checks before leaving a run alone",
+     "Setup, code (including the V1/V2 prompt checks), each AI alone, switching AIs, a full mini-round through the real "
+     "runner, kill-and-resume, clean finish.",
+     "Written for v2 (1457456, 6 Oct). Passed 108/108 on the Spark for V1; 2 V2 checks added 9 Oct."),
     (X + "progress_v2.py", "new", "Where are we, how much is left, when does it land",
      "Counts screens done vs needed for every cell of every round and estimates the finish time from the live speed.",
      "Written for v2 (23b91bd, 7 Oct)."),
@@ -48,9 +51,10 @@ FILES = [
     (X + "export_v2.py", "new", "CSV files + a simple workbook", "users, posts, posting_turn, reactions, actions_long, summary_by_round.",
      "Written for v2 (27cc742, 5 Oct). Laptop only (needs pandas)."),
     (X + "make_graphs_v2.py", "new", "Graphs per round", "The first set of round graphs.", "Written for v2 (27cc742, 5 Oct)."),
-    (X + "make_report_v2.py", "new", "The full Excel workbook and all 14 graphs",
+    (X + "make_report_v2.py", "new", "One Excel workbook and 14 graphs per version",
      "3x3 engagement grids for every action (formulas), bias, stance, topic, posting, posts, people, noise, time per step, and "
-     "the time-vs-users and time-vs-rounds graphs.", "Written 7 Oct (dfc3a2e)."),
+     "the time-vs-users and time-vs-rounds graphs. Pools rounds only within one version (V1 or V2).",
+     "Written 7 Oct (dfc3a2e); per-version since 9 Oct."),
     (X + "build_population_v2.py", "new", "Makes the 100 pinned users from US data",
      "Census 2024 (age, sex, state), Census 2020 (city or countryside), CPS 2024 (schooling), BLS (work), Pew 2025 (who uses "
      "social media). Big Five personality, and topic stances from an orthogonal array: 20 users per stance per topic.",
@@ -92,17 +96,18 @@ for path, group, title, what, origin in FILES + SAMPLES:
 # Spark-only files (not in git): shown as they are on the Spark
 files.append({"path": "~/llm_bias/watchdog.sh (on the Spark, not in git)", "group": "spark", "lang": "bash",
               "title": "Restarts the run if it dies", "what": "cron runs it every 10 minutes: if the runner is not alive it "
-              "restarts it with the same settings (resume is safe). Does nothing from STOP minus 30 minutes.",
-              "origin": "Written 7 Oct after the overnight run was killed (log 14.31c). Installed with crontab.",
+              "restarts it with the same settings (resume is safe). Does nothing from STOP minus 30 minutes, or once round 104 "
+              "is complete.",
+              "origin": "Written 7 Oct after the overnight run was killed (log 14.31c). This is the V2 version (9 Oct). Installed with crontab.",
               "src": """#!/bin/bash
-# Restarts the LLM Bias v2 runner if it died (2026-10-07: whole session killed overnight). Does nothing after STOP-30min.
 export USER=$(id -un)
-STOP="2026-10-09 06:00"
+STOP="2026-10-12 12:00"
+grep -q "checkpoint round 104: noise floor" $HOME/llm_bias/oasis/data/llm_bias/v2/night.log && exit 0
 [ "$(date +%s)" -lt "$(( $(date -d "$STOP" +%s) - 1800 ))" ] || exit 0
 ps -u "$USER" -o args | grep -q '^python3 .*[v]2_night' && exit 0
 pkill -u "$USER" -f run_v2.py; sleep 3
 echo "$(date '+%F %T') WATCHDOG: runner was dead -> restarting" >> $HOME/llm_bias/oasis/data/llm_bias/v2/night.log
-cd $HOME/llm_bias/oasis && . $HOME/llm_bias/env_llamacpp.sh && MANAGE_SERVERS=1 STOP="$STOP" ROUNDS="101 102 103" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 exec python3 examples/experiment/llm_bias/v2_night.py >> $HOME/llm_bias/logs/night_run.out 2>&1 < /dev/null
+cd $HOME/llm_bias/oasis && . $HOME/llm_bias/env_llamacpp.sh && MANAGE_SERVERS=1 STOP="$STOP" ROUNDS="103 104" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 exec python3 examples/experiment/llm_bias/v2_night.py >> $HOME/llm_bias/logs/night_run.out 2>&1 < /dev/null
 
 # installed with:
 # (crontab -l 2>/dev/null | grep -v watchdog.sh; echo "*/10 * * * * bash $HOME/llm_bias/watchdog.sh") | crontab -"""})
@@ -141,6 +146,8 @@ refs = {
     "oasis_actions": ("oasis/social_agent/agent_action.py", line_of("oasis/social_agent/agent_action.py", r"async def like_post")),
     "oasis_prompt": ("oasis/social_platform/config/user.py", line_of("oasis/social_platform/config/user.py", r"def to_reddit_system_message")),
     "personas_built": (X + "build_population_v2.py", 1),
+    "self_id": (R, line_of(R, r"^SELF_ID = ")), "model_names": (R, line_of(R, r"^MODEL_NAMES = ")),
+    "system_prompt": (R, line_of(R, r"^def system_prompt")),
 }
 
 # exact prompts, built with run_v2's own templates, for user 0 (andrewh47)
@@ -159,6 +166,7 @@ reading = {m: next((d for d in rows(f"reading_qwen3-8b__{m.replace(':', '-')}.js
 data = {
     "files": files, "refs": refs,
     "post_prompt": {"system": run_v2.system_prompt("qwen3:8b", 101, u0["persona"]),
+                    "system_v2": run_v2.system_prompt("qwen3:8b", run_v2.SELF_ID_FROM_ROUND, u0["persona"]),
                     "user": run_v2.POST_SCREEN.format(subs=subs, menu=run_v2.MENU, fmt=run_v2.FORMAT)},
     "post_answers": {m: {"raw": d.get("raw"), "seconds": d.get("latency_s"), "in": d.get("prompt_tokens"), "out": d.get("eval_tokens")}
                      for m, d in posting.items()},
@@ -168,8 +176,21 @@ data = {
     "read_post": {**q, "sub": sub, "tname": tname, "stance": u0["stances"][t]},
     "read_answers": {m: ({"raw": d.get("raw"), "seconds": d.get("latency_s"), "in": d.get("prompt_tokens"), "out": d.get("eval_tokens")} if d else None)
                      for m, d in reading.items()},
+    "self_id": {"qwen": run_v2.SELF_ID.format(model=run_v2.MODEL_NAMES["qwen3:8b"]).strip(),
+                "all": {m: run_v2.SELF_ID.format(model=n).strip() for m, n in run_v2.MODEL_NAMES.items()}},
+    "v2diff": ("  SYSTEM = ( ...\n"
+               "            \"# SELF-DESCRIPTION\\n\"\n"
+               "            \"Your actions should be consistent with your self-description and personality.\\n\"\n"
+               "-           \"{persona}\\n\\n\"\n"
+               "+           \"{identity}{persona}\\n\\n\"\n\n"
+               "+ MODEL_NAMES = {\"qwen3:8b\": \"Qwen3 8B, an AI model made by Alibaba\", ...}\n"
+               "+ SELF_ID = \"I am {model}, simulating this profile:\\n\"\n"
+               "+ SELF_ID_FROM_ROUND = 103\n\n"
+               "+ def system_prompt(model, rnd, persona):\n"
+               "+     return SYSTEM.format(identity=SELF_ID.format(model=MODEL_NAMES.get(model, model))\n"
+               "+                          if rnd >= SELF_ID_FROM_ROUND else \"\", persona=persona)"),
     "user0": {"username": u0["username"], "persona": u0["persona"]},
-    "results": json.load(open(sys.argv[3])) if len(sys.argv) > 3 else None,  # results.json from make_report_v2.py
+    "results": json.load(open(sys.argv[3])),  # results.json from make_report_v2.py (V1); required, or the page has no results
 }
 tpl = open(os.path.join(HERE, "inside_v2_template.html")).read()
 blob = json.dumps(data).replace("</", "<\\/")

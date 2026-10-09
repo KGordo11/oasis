@@ -1,11 +1,13 @@
-"""LLM Bias v2 report: one Excel workbook + every graph, built from the raw result files copied off the Spark.
+"""LLM Bias report for ONE version of the study: one Excel workbook + every graph, from the result files copied off
+the Spark. Versions (LD-45, log 14.36): V1 = rounds 101-102 (the AI is not told which model it is), V2 = rounds 103+
+(the profile starts "I am <model>, simulating this profile:", LD-44). Rounds are pooled only within a version.
 
-    oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias_v2
+    oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V1 V1
 
 IN PLAIN WORDS
 --------------
 Reads every real-round file (rounds 100-899) in <results>/r*/ plus <results>/night.log, and writes into <out>/:
-  LLM_Bias_v2.xlsx   README, 3x3 engagement grids for every action (formulas over the Screens sheet, with a round
+  LLM_Bias_<V>.xlsx  README, 3x3 engagement grids for every action (formulas over the Screens sheet, with a round
                      picker), all 27 actions, own-AI bias, by stance, by topic, posting turn, every post, every person,
                      noise floor, time per step, the graphs, and every screen as one row.
   graphs/*.png       the engagement grids, all 27 actions, posting, stance, topic, bias, noise, and the time graphs
@@ -26,7 +28,7 @@ from matplotlib.patches import Rectangle
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import analyze_v2  # noqa: E402  (dd + boot: the double difference and its 95% range)
-from run_v2 import ACTION_NAMES, TOPICS  # noqa: E402
+from run_v2 import ACTION_NAMES, SELF_ID_FROM_ROUND, TOPICS  # noqa: E402
 
 MODELS = ["qwen3:8b", "llama3.1:8b", "gemma3:12b"]
 SHORT = {"qwen3:8b": "qwen", "llama3.1:8b": "llama", "gemma3:12b": "gemma"}
@@ -40,6 +42,15 @@ plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 10, "axes.edgeco
                      "xtick.color": MUTED, "ytick.color": MUTED, "axes.spines.top": False, "axes.spines.right": False,
                      "axes.grid": True, "grid.color": GRID, "grid.linewidth": 0.8, "axes.axisbelow": True,
                      "figure.dpi": 130, "savefig.bbox": "tight", "axes.titleweight": "bold", "axes.titlesize": 11})
+
+
+def version_of(rnd):
+    return "V2" if rnd >= SELF_ID_FROM_ROUND else "V1"
+
+
+VERSION_NOTE = {"V1": "V1 (rounds 101-102): the AI is only given the person's profile.",
+                "V2": "V2 (rounds 103-104): the same, plus one line before the profile telling the AI which model it is "
+                      "(\"I am Qwen3 8B, an AI model made by Alibaba, simulating this profile:\"). Nothing else changed."}
 
 
 def lbl(a):
@@ -487,7 +498,8 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     ws.title = "README"
     ws.column_dimensions["A"].width = 130
     lines = [
-        ("LLM Bias v2: do AIs favour posts written by their own AI?", F(bold=True, size=15)),
+        (f"LLM Bias {version_of(complete[0])}: do AIs favour posts written by their own AI?", F(bold=True, size=15)),
+        (VERSION_NOTE[version_of(complete[0])] + " Rounds are pooled only within a version; the other version has its own workbook.", F()),
         (f"Built {datetime.now():%Y-%m-%d %H:%M} from the DGX Spark result files (data/llm_bias/v2_spark). Rounds in this file: "
          f"{sorted({r['round'] for r in R_all})}. Complete rounds: {complete} (graphs and bias ranges: {label}); a round still "
          "running is partial. The yellow round picker on 'Engagement 3x3' drives every grid and split table.", F()),
@@ -842,14 +854,17 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
             c.font = F(color="0563C1", underline="single")
     wb.active = 0
 
-    p = os.path.join(out, "LLM_Bias_v2.xlsx")
+    p = os.path.join(out, f"LLM_Bias_{version_of(complete[0])}.xlsx")
     wb.save(p)
     return p
 
 
-def main(res, out):
+def main(res, out, version=None):
     os.makedirs(out, exist_ok=True)
     reads, post_rows = load(res)
+    version = version or max(version_of(r["round"]) for r in reads)
+    reads = [r for r in reads if version_of(r["round"]) == version]
+    post_rows = [r for r in post_rows if version_of(r["round"]) == version]
     posts = post_index(post_rows)
     people = json.load(open(os.path.join(HERE, "personas_v2.json")))
     steps, best = steps_from_log(os.path.join(res, "night.log"))
@@ -858,7 +873,7 @@ def main(res, out):
     complete = sorted(done & set(full)) or [max(r for r in full if all(any(x["model"] == m and x["posts_by"] == pb and x["round"] == r
                                                                           for x in reads) for m in MODELS for pb in MODELS))]
     rnd = complete[-1]  # newest complete round: posting graph and post rates for the time projection
-    label = f"Round {rnd}" if len(complete) == 1 else f"Rounds {', '.join(map(str, complete))} pooled"
+    label = f"LLM Bias {version}, " + (f"round {rnd}" if len(complete) == 1 else f"rounds {' + '.join(map(str, complete))} pooled")
     R = [r for r in reads if r["round"] in complete and r["outcome"] == "chose" and not r["draw"]]
     bias = []
     f_up = lambda r: int(any(x["action"] == "like_post" for x in r["actions"]))
@@ -889,7 +904,7 @@ def main(res, out):
     p = workbook(out, reads, post_rows, posts, steps, best, rnd, bias, noise, people, gfiles, sps, hours, label, complete)
     grid = lambda f: {f"{m}|{pb}": round(100 * sum(f(r) for r in R if r["model"] == m and r["posts_by"] == pb) /
                                          max(1, sum(1 for r in R if r["model"] == m and r["posts_by"] == pb)), 1) for m in MODELS for pb in MODELS}
-    json.dump({"label": label, "rounds": complete, "screens": len(R), "tot": grid(f_tot), "any": grid(f_any), "up": grid(f_up),
+    json.dump({"version": version, "label": label, "rounds": complete, "screens": len(R), "tot": grid(f_tot), "any": grid(f_any), "up": grid(f_up),
                "bias": bias, "noise": noise}, open(os.path.join(out, "results.json"), "w"), indent=1)
     print(json.dumps({"rounds": complete, "label": label, "screens_in_round": len(R), "all_screens": len(reads), "bias": bias, "noise": noise,
                       "free_s_per_screen": sps, "posts_per_user": ppu, "posting_s": post_s,
@@ -897,4 +912,4 @@ def main(res, out):
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], os.path.expanduser(sys.argv[2]))
+    main(sys.argv[1], os.path.expanduser(sys.argv[2]), sys.argv[3] if len(sys.argv) > 3 else None)

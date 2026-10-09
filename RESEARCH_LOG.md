@@ -27,7 +27,7 @@ written.
 | **Part 11** | Simulation 4 design spec (2026-08-24) | `docs/superpowers/specs/2026-08-24-social-timeline-design.md` |
 | **Part 12** | Research agenda (2026-09-11) | `docs/superpowers/specs/2026-09-11-research-agenda.md` |
 | **Part 13** | Sim 4 run folders: what the run names mean | `data/runs/README.md` |
-| **Part 14** | **LLM Bias v2: design, build, Spark runs; HANDOFF in §14.32** | written 2026-10-02 onward |
+| **Part 14** | **LLM Bias on the Spark: V1 (rounds 101-102) and V2 (rounds 103-104); design, build, runs; HANDOFF in §14.32** | written 2026-10-02 onward |
 
 **How this file grew.** It was seven documents until 2026-09-13 and three until 2026-10-02. They were merged
 because every search had to be run several times and the cross-references kept breaking. Nothing was dropped.
@@ -64,7 +64,16 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-09 10:45): read this first
+## 0.2 Where things stand (2026-10-09 11:30): read this first
+
+- **NAMES (LD-45, §14.36): the Spark study now has two versions.** **LLM Bias V1** = rounds 101-102 (the AI gets
+  only the person to play). **LLM Bias V2** = rounds 103-104 (the same, plus "I am <model>, simulating this
+  profile:", LD-44). Rounds are pooled only within a version. Older text below says "v2" for the whole Spark study;
+  code and data folders keep the `_v2` / `v2_spark` names. The September **Tests 1-6** are a separate, older study.
+- **V2 is starting:** preflight launched on the Spark Fri 11:05 (110 checks); then Gordon starts rounds 103-104
+  (STOP Mon 2026-10-12 12:00) and the watchdog (§14.35a). Gordon runs and checks it himself.
+- **Reports:** `~/Desktop/LLM_Bias/V1/LLM_Bias_V1.xlsx` (+ graphs, results.json); V2 gets `~/Desktop/LLM_Bias/V2/`.
+  The Inside page (same URL) now shows both versions, the code change and both prompts.
 
 - **NOW: rounds 101 AND 102 are COMPLETE. The Spark is idle on our side** (the runner stopped itself Fri 02:03; the
   watchdog was removed Fri ~10:10). Round 102 and the pooled 101+102 results: **§14.35**. Why SSH failed Thu
@@ -73,7 +82,7 @@ research**:
   qwen vs llama **+8.4** (qwen favours its own over llama's, mainly by ignoring llama's posts more often); llama vs
   gemma unclear. No upvote bias in any pair.
 - **Next: rounds 103-104 with a changed design, LD-44** (§14.35): the system prompt says "I am <model>, simulating
-  this profile:" in both turns; authors stay hidden. Coded Fri 11:20; Gordon runs pull → preflight → start →
+  this profile:" in both turns; authors stay hidden. Coded Fri 10:57-11:01; Gordon runs pull → preflight → start →
   watchdog (§14.35a), STOP Mon 2026-10-12 12:00. Meeting Tue 2026-10-13.
 
 *Below: the status as of 2026-10-07 23:30, kept as written.*
@@ -14700,7 +14709,7 @@ Gordon got in at 10:01 Friday. What the Spark showed:
   timeout came at ~10:00, the moment the other user started a new 50 GB job (10:00:40).
 - The system log check (`journalctl -b 0 …`) was given to Gordon; its output was not pasted back, so there is no
   direct OOM-killer proof. If it matters, help@cs.uky.edu can read the system log.
-- **Prevention (set up Fri 11:45):** the Spark allows key login (`publickey` is offered). The Mac's `~/.ssh/config`
+- **Prevention (set up Fri ~11:00):** the Spark allows key login (`publickey` is offered). The Mac's `~/.ssh/config`
   now has `Host honda` with `ControlMaster auto`, `ControlPersist 12h` and keep-alives: the first `ssh honda` opens
   one connection that stays open in the background, and every later `ssh honda` / rsync reuses it with no new
   handshake, so an overloaded sshd can't lock Gordon out while that connection lives. Gordon runs
@@ -14792,7 +14801,12 @@ into the running window (typed text gets queued as shell input).
 
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
-### Status (2026-10-09 10:45)
+### Status (2026-10-09 11:30)
+- **V1 / V2 naming (LD-45, §14.36):** V1 = rounds 101-102, V2 = rounds 103-104. Workbooks per version in
+  `~/Desktop/LLM_Bias/<V>/`; `make_report_v2.py <results> <out> <V>`; the Inside page shows both.
+- **V2 preflight** running on the Spark since Fri 11:05; then rounds 103-104 (§14.35a).
+
+### Status (2026-10-09 10:22)
 - **Rounds 101 and 102 complete.** 133,068 usable reading screens pooled + 6 posting turns + 6 noise floors.
   Results §14.33 (101) and §14.35 (102 + pooled). Workbook, graphs and the Inside page rebuilt from both rounds.
 - **Nothing runs on the Spark for us.** Runner exited Fri 02:03 ("end: models unloaded"); watchdog cron removed.
@@ -14889,7 +14903,7 @@ All are covered by `preflight_v2.py`.
   baselines, one change at a time.
 
 ### Next steps
-*(2026-10-09 11:20)* 1. LD-44 coded. Gordon: pull, preflight (110 checks must pass), start `ROUNDS="103 104"`
+*(2026-10-09 11:00)* 1. LD-44 coded. Gordon: pull, preflight (110 checks must pass), start `ROUNDS="103 104"`
 with `STOP="2026-10-12 12:00"`, then the new watchdog: exact commands in §14.35a. 2. After each round: rsync, report, page, log, as
 below. 3. Optional: re-ask the 829 timed-out screens of round 102 (§14.35). 4. Meeting Tue 2026-10-13.
 
@@ -14976,11 +14990,13 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 2d770b5 | 10-08 11:45 | report: graphs on their own tabs, grouped + coloured tabs, pooled complete rounds with a round picker; page text |
 | 1ac22c8 | 10-08 16:00 | **LD-43 total engagement is the main measure**: analyze_v2 (Table 2 + bias + noise), make_report_v2 (grids, bias, stance, topic, posts, people, noise, graphs 01/02/05-08, results.json), Inside page results section data-driven |
 
-| 489c7a0 | 10-09 10:45 | Round 102 analysed: export, graphs, workbook (141,612 formulas, 0 errors), `summary_r102.md`, Inside page (timeline, pooled screens); log §14.31i, §14.35, LD-44 proposal |
+| 489c7a0 | 10-09 10:22 | Round 102 analysed: export, graphs, workbook (141,612 formulas, 0 errors), `summary_r102.md`, Inside page (timeline, pooled screens); log §14.31i, §14.35, LD-44 proposal |
 
-| 09b28df | 10-09 11:20 | **LD-44**: `run_v2.system_prompt()` adds "I am <model>, simulating this profile:" from round 103; preflight +2 checks (110); commands for rounds 103-104 (§14.35a) |
+| 09b28df | 10-09 10:57 | **LD-44**: `run_v2.system_prompt()` adds "I am <model>, simulating this profile:" from round 103; preflight +2 checks (110); commands for rounds 103-104 (§14.35a) |
 
-| 50649e3 | 10-09 11:45 | LD-44 wording: each AI's public name + maker (`MODEL_NAMES`); Mac `Host honda` with connection reuse + key login (§14.31i) |
+| 50649e3 | 10-09 11:01 | LD-44 wording: each AI's public name + maker (`MODEL_NAMES`); Mac `Host honda` with connection reuse + key login (§14.31i) |
+
+| (this) | 10-09 11:30 | **LD-45 V1/V2 naming**: `make_report_v2.py` pools per version (`LLM_Bias_<V>.xlsx`, `~/Desktop/LLM_Bias/<V>/`); Inside page: both versions, the code diff, V1 + V2 system messages, V2 commands + watchdog, key login; results.json now required (the 10:22 page had empty results) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -15053,8 +15069,9 @@ rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research
 ```
 Then, on the Mac, the workbook + graphs (formulas recalculated with LibreOffice) and the Inside page:
 ```
-cd ~/research/oasis && oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias_v2
-python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark /tmp/inside_v2.html
+cd ~/research/oasis && oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V1 V1
+oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V2 V2   # once round 103 is complete
+python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark /tmp/inside_v2.html ~/Desktop/LLM_Bias/V1/results.json
 ```
 (Claude runs these: it also recalculates the workbook with `recalc.py` and republishes the page to the same URL.)
 
@@ -15327,7 +15344,7 @@ posts, so leaving them out should not tilt the result. They can be re-asked in ~
 those rows from `r102/reading_qwen3-8b__gemma3-12b.jsonl` on the Spark and rerun that step (resume asks only the
 missing screens, with the same seeds). Gordon's call; not done.
 
-### LD-44 (DECIDED Fri 2026-10-09 ~11:15, Gordon: "give me the commands to run it"): rounds 103-104 tell each AI which model it is
+### LD-44 (DECIDED Fri 2026-10-09 ~10:55, Gordon: "give me the commands to run it"): rounds 103-104 tell each AI which model it is
 
 Gordon (Fri 2026-10-09 10:15): "for the posting and reacting add this for rounds 103 and 104 As part of their
 profile. I am this model, simulating this profile…"
@@ -15345,7 +15362,7 @@ floor):
   knowing who wrote the post.)
 - Cost: ~12 h per round with the GPU free, so 103 + 104 ≈ 24-30 h.
 
-**Wording settled by Gordon (Fri ~11:40):** "the name should be whatever it will understand best that it is indeed
+**Wording settled by Gordon (Fri ~11:00):** "the name should be whatever it will understand best that it is indeed
 that model ... the … is whatever we had given to the models before ... everything stays the same, it's just now they
 are being told what model they are." So each AI gets its public name and maker (how it names itself), not the engine
 tag, and the full person description follows unchanged:
@@ -15361,12 +15378,12 @@ with nothing, so the round 101-102 prompt is byte-for-byte unchanged (checked ag
 `SELF_ID` from round 103. `preflight_v2.py` has 2 new checks (110 in all). `make_inside_v2.py` still shows the
 round-101 prompt, because the page shows round-101 answers next to it.
 
-**Why order and mixing don't matter (Gordon asked, Fri ~11:00):** every screen is a separate call with no memory;
+**Why order and mixing don't matter (Gordon asked, Fri ~10:50):** every screen is a separate call with no memory;
 the seed is fixed by round, poster AI, user and post (`run_v2.py`, not by run order); each post set is shuffled once
 into a ring that every reader AI gets in the same order. So running the baselines first, or mixing AIs' posts, can't
 change an answer. Baselines go first only so the bias can always be computed if time runs out.
 
-## 14.35a Commands for rounds 103-104 (given to Gordon Fri 2026-10-09 11:20)
+## 14.35a Commands for rounds 103-104 (given to Gordon Fri 2026-10-09 ~11:00)
 
 Order matters: pull → preflight → start the runner → only then the watchdog (the preflight refuses to run while
 anything of ours is running).
@@ -15379,4 +15396,39 @@ anything of ours is running).
    once `checkpoint round 104: noise floor` is in night.log; cron every 10 min.
 5. **Check**: the §14.32d full check with `progress_v2.py 103 104`.
 6. **After round 104** (night.log `end: models unloaded`): remove the watchdog, rsync, Claude builds the report.
+
+## 14.36 LD-45: the Spark study has two versions, V1 and V2 (Gordon, Fri 2026-10-09 ~11:15)
+
+Gordon: "rounds 101 and 102 are one version but mostly the same, so LLM Bias V1 is 101 and 102, these new rounds will
+be LLM Bias V2 103 and 104 ... make sure all is consistent."
+- **LLM Bias V1** = rounds 101-102: the AI is given only the person's description.
+- **LLM Bias V2** = rounds 103-104: identical, plus one line before the description telling the AI which model it is
+  (LD-44, §14.35). Still never told who wrote a post.
+- **Rounds are pooled only within a version.** Each version has its own workbook, graphs and results.json. The V1
+  vs V2 comparison (does the bias change when the AI knows who it is?) comes after V2 finishes.
+- **Older names stay as they were written.** Sections before this one call the whole Spark study "LLM Bias v2" (to set it
+  apart from the September Tests 1-6, Part 9). From here on, "V1" and "V2" mean the two Spark versions. Code
+  (`run_v2.py`, `make_report_v2.py`, …), the data folder `data/llm_bias/v2_spark/` and bug ids (`LB-v2-n`) keep their
+  names. The same code runs both versions: `run_v2.system_prompt()` switches on the round number.
+
+**What changed in the outputs:**
+- `make_report_v2.py <results> <out> [V1|V2]` keeps only that version's rounds (timing graphs still use every step,
+  since they measure the machine). It writes `LLM_Bias_<V>.xlsx`, and the README says which version and what it
+  means. V1 rebuilt: `~/Desktop/LLM_Bias/V1/LLM_Bias_V1.xlsx`, 141,612 formulas, 0 errors, same numbers as §14.35
+  (qwen-llama +8.4, qwen-gemma −18.1, llama-gemma +5.1). The old `~/Desktop/LLM_Bias_v2/` folder became
+  `~/Desktop/LLM_Bias/V1/`.
+- **Inside page** (https://claude.ai/artifact/E1eicdgjHpgDzex2qj18hR, title now "Inside LLM Bias"):
+  - V1/V2 in the header and facts.
+  - A "V1 and V2: the only change" card with the three exact lines and the `run_v2.py` diff, with buttons to
+    `SELF_ID`, `MODEL_NAMES` and `system_prompt()`.
+  - The V1 and V2 system messages side by side, with the V2 line highlighted.
+  - "Sees: V2 only, its own name".
+  - Timeline entries for 9 Oct.
+  - Commands updated for V2: `ssh honda`, a 110-check preflight, start `ROUNDS="103 104"` with STOP Mon 12:00, the
+    full V2 watchdog, `progress_v2.py 103 104`, rsync via `honda`, reports per version.
+  - The file notes (`run_v2.py`, `preflight_v2.py` with 110 checks, `make_report_v2.py` per version, the V2 watchdog).
+  - Results labelled V1, with a note that V2 is coming.
+  - **Fixed:** the 10:22 republish had no results.json, so the results section was empty. `make_inside_v2.py` now
+    requires it.
+  - Checked in a headless browser: every new part is filled, no script errors, no sideways scrolling.
 

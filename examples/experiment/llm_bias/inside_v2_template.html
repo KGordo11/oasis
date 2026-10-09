@@ -160,7 +160,7 @@ pre.mermaid{background:var(--panel);border:1px solid var(--rule);border-radius:1
 <nav class="bar" aria-label="Sections"><div class="wrap">
   <b>LLM Bias v2</b>
   <a href="#design">The design</a><a href="#code">The code</a><a href="#steps">Step by step</a><a href="#sees">What the AI sees</a>
-  <a href="#screen">Screen view</a><a href="#spark">On the Spark</a><a href="#commands">Every command</a><a href="#data">Data</a><a href="#results">Round 101</a>
+  <a href="#screen">Screen view</a><a href="#spark">On the Spark</a><a href="#commands">Every command</a><a href="#data">Data</a><a href="#results">Results</a>
 </div></nav>
 
 <main class="wrap">
@@ -175,7 +175,7 @@ pre.mermaid{background:var(--panel);border:1px solid var(--rule);border-radius:1
     <div><b>100</b><span>pinned users, the same in every round</span></div>
     <div><b>3</b><span>AIs: qwen3:8b · llama3.1:8b · gemma3:12b</span></div>
     <div><b>27</b><span>OASIS actions on every screen</span></div>
-    <div><b id="f_screens">69,213</b><span id="f_screens_l">reading screens in round 101</span></div>
+    <div><b id="f_screens">133,068</b><span id="f_screens_l">reading screens, rounds 101 + 102</span></div>
     <div><b>12.1 h</b><span>one full round, GPU to ourselves</span></div>
   </div>
 </header>
@@ -394,6 +394,9 @@ flowchart LR
     <li><time>Wed 7 Oct 10:21</time>Restarted fully detached (setsid nohup) with the cron watchdog.</li>
     <li><time>Wed 17:17</time><b>Round 101 complete</b>: 69,213 screens. Round 102 starts automatically.</li>
     <li><time>Wed 22:10</time>Stop time moved to Fri 9 Oct 06:00; round 102 continues (slowed by sharing).</li>
+    <li><time>Thu 8 Oct 12:00</time>Plan change: stop after round 102; rounds 103-104 will use a changed design.</li>
+    <li class="bad"><time>Thu 15:19 - Fri 00:44</time>The Spark runs out of memory (our gemma + another user's ~50 GB job share 121 GB). gemma reading qwen slows from ~1 to 11.7 s per screen, SSH logins time out, and 829 screens time out (left out as unreadable). No reboot; the runner kept going.</li>
+    <li><time>Fri 9 Oct 02:03</time><b>Round 102 complete</b>: 67,134 screens. The runner stops itself; watchdog removed.</li>
   </ul>
 </section>
 
@@ -420,7 +423,7 @@ flowchart LR
   who and what, the run, raw data). Each graph sits on the tab it belongs to, beside or below its table. A round picker
   on 'Engagement 3x3' switches every grid between one round and all complete rounds pooled. Also
   <code>~/Desktop/LLM_Bias_v2/graphs/</code> (the same 14 graphs as PNG files). Rebuild them with <code>make_report_v2.py</code>. The full written record is
-  <code>RESEARCH_LOG.md</code> Part 14 (handoff in §14.32, round 101 results in §14.33).</p>
+  <code>RESEARCH_LOG.md</code> Part 14 (handoff in §14.32, round 101 results in §14.33, round 102 and the pooled results in §14.35).</p>
 </section>
 
 <section id="results">

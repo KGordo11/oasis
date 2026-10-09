@@ -64,7 +64,20 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-07 23:30): read this first
+## 0.2 Where things stand (2026-10-09 10:45): read this first
+
+- **NOW: rounds 101 AND 102 are COMPLETE. The Spark is idle on our side** (the runner stopped itself Fri 02:03; the
+  watchdog was removed Fri ~10:10). Round 102 and the pooled 101+102 results: **§14.35**. Why SSH failed Thu
+  17:00-Fri: **§14.31i** (out of memory under a shared load, no reboot).
+- **Pooled result (101+102, total engagement):** qwen vs gemma **−18.1** (qwen favours gemma's posts, both rounds);
+  qwen vs llama **+8.4** (qwen favours its own over llama's, mainly by ignoring llama's posts more often); llama vs
+  gemma unclear. No upvote bias in any pair.
+- **Next: rounds 103-104 with a changed design** (Gordon, Fri 10:15: the profile says which AI is playing it,
+  "I am this model, simulating this profile…", in both turns). Proposal **LD-44 in §14.35**, waiting for Gordon's
+  wording and go. Then code, preflight, run. Meeting Tue 2026-10-13.
+
+*Below: the status as of 2026-10-07 23:30, kept as written.*
+
 
 - **Current work: LLM Bias v2 on the DGX Spark `honda.csr.uky.edu`.** Design, machine, file layout, exact commands
   and how Gordon likes to work: **Part 14 §14.32 (HANDOFF)**. Read that next. The whole system explained with every
@@ -73,7 +86,7 @@ research**:
 - **Round 101 is COMPLETE** (Wed 2026-10-07 17:17). Results in **§14.33**. On total engagement, one clear bias:
   **qwen vs gemma −17.1** (qwen favours gemma's posts, mostly by commenting). The other pairs are unclear, and
   there is no upvote bias. Workbook + 14 graphs on Gordon's Desktop (`~/Desktop/LLM_Bias_v2/`, §14.34).
-- **Round 102 is running** on the Spark, fully detached (`setsid nohup`), **until Fri 2026-10-09 06:00** (§14.31f),
+- *(Done, see top)* **Round 102 is running** on the Spark, fully detached (`setsid nohup`), **until Fri 2026-10-09 06:00** (§14.31f),
   slowed by the other user's GPU jobs (§14.31e). A cron **watchdog** restarts the runner within 10 min if it dies
   (§14.31c). **Remove the watchdog after Fri 06:00:** `crontab -l | grep -v watchdog.sh | crontab -`.
 - **Check Thu 2026-10-08 11:14 (all healthy):**
@@ -14667,6 +14680,29 @@ job, swap 27%.
 - **Action:** Gordon emails help@cs.uky.edu if it does not recover. When it does: run the full check, then rsync.
   The watchdog restarts the runner if it died.
 
+## 14.31i Why SSH failed Thu 17:00 - Fri morning: the Spark ran out of memory (checked Fri 2026-10-09 10:02)
+
+Gordon got in at 10:01 Friday. What the Spark showed:
+- **No crash and no reboot.** Up since Sun Sep 20 (`uptime -s`). Our runner kept working the whole time and
+  finished round 102 by itself at 02:03.
+- **The machine was choking, not dead.** The step "gemma reads qwen's posts" ran Thu 15:19 → Fri 00:44 at
+  **11.7 s per screen** (about 1 s when the GPU is ours): 9.4 h instead of about 50 min. The next step ran at a
+  normal 0.92 s per screen. The SSH outage (from ~17:00) sits inside that window.
+- **829 of that step's screens timed out** (each waited ~17 min over 3 tries, error `transport: timed out`) and are
+  saved as unreadable. They are left out of every table (§14.35).
+- **Memory is the likely cause.** The Spark's 121 GB is shared by the CPU and the GPU. The other user's training jobs
+  use ~50 GB of ordinary memory plus GPU memory (at 10:02 one had 50 GB after 2 minutes), and our gemma server adds
+  ~15 GB. Swap was already 27% at the 15:00 check. The kernel's memory-stall counter (`/proc/pressure/memory`,
+  "full") says that since boot there were **16.8 hours** when every running program was waiting for memory. It is a
+  total, so it cannot be dated exactly, but nothing else we run comes close. A machine in that state can't even
+  answer SSH: sshd never sends its greeting, which is exactly the "banner exchange timed out" error.
+- Friday's first two failed logins ("Could not resolve hostname") were the VPN not yet connected. One more banner
+  timeout came at ~10:00, the moment the other user started a new 50 GB job (10:00:40).
+- The system log check (`journalctl -b 0 …`) was given to Gordon; its output was not pasted back, so there is no
+  direct OOM-killer proof. If it matters, help@cs.uky.edu can read the system log.
+- **For future runs:** a slowed step is the warning sign (`progress_v2.py` shows the live s/screen). If the other
+  user runs a large job, expect 5-35× slower steps and possible timeouts.
+
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 
 ### What the study is
@@ -14749,7 +14785,13 @@ into the running window (typed text gets queued as shell input).
 
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
-### Status (2026-10-07 23:30)
+### Status (2026-10-09 10:45)
+- **Rounds 101 and 102 complete.** 133,068 usable reading screens pooled + 6 posting turns + 6 noise floors.
+  Results §14.33 (101) and §14.35 (102 + pooled). Workbook, graphs and the Inside page rebuilt from both rounds.
+- **Nothing runs on the Spark for us.** Runner exited Fri 02:03 ("end: models unloaded"); watchdog cron removed.
+- **Round 103-104 design change pending** (LD-44, §14.35): waiting for Gordon's exact wording and go.
+
+### Status (2026-10-07 23:30, kept as written)
 - **Round 101 complete** (Wed 17:17): 69,213 reading screens + 3 posting turns + 3 noise floors. Results §14.33.
 - **Round 102 running**, detached, `STOP="2026-10-09 06:00"`, `ROUNDS="101 102 103"`. At 22:05: qwen posted 94,
   llama 105; qwen baseline done; llama baseline under way at 2.6 s/screen (shared GPU). Check with `progress_v2.py`.
@@ -14839,6 +14881,11 @@ All are covered by `preflight_v2.py`.
   baselines, one change at a time.
 
 ### Next steps
+*(2026-10-09)* 1. Gordon confirms the LD-44 wording (§14.35) → code it (only rounds ≥ 103 change) → preflight
+on the Spark (108 checks must pass) → run `ROUNDS="103 104"`. 2. After each round: rsync, report, page, log, as
+below. 3. Optional: re-ask the 829 timed-out screens of round 102 (§14.35). 4. Meeting Tue 2026-10-13.
+
+*(As of 2026-10-07:)*
 1. ~~Finish round 101~~ (done Wed 17:17). Round 102 runs until Fri 06:00; round 103 only if time allows.
 2. After each round: rsync, `make_report_v2.py` (workbook + graphs, recalculated with LibreOffice), rebuild the
    Inside page (`make_inside_v2.py`, republish to the same URL), and the results written here (plain tables first).
@@ -14919,7 +14966,9 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 06ef8cd | 10-07 23:15 | **`make_inside_v2.py` + `inside_v2_template.html`**: the Inside LLM Bias v2 page (§14.34) |
 | 238e4c0 | 10-07 23:30 | log cleanup: §0.2 rewritten to the current state, §0.3 v2 rows, Part 14 contents + section order, §14.34 |
 | 2d770b5 | 10-08 11:45 | report: graphs on their own tabs, grouped + coloured tabs, pooled complete rounds with a round picker; page text |
-| (this) | 10-08 16:00 | **LD-43 total engagement is the main measure**: analyze_v2 (Table 2 + bias + noise), make_report_v2 (grids, bias, stance, topic, posts, people, noise, graphs 01/02/05-08, results.json), Inside page results section data-driven |
+| 1ac22c8 | 10-08 16:00 | **LD-43 total engagement is the main measure**: analyze_v2 (Table 2 + bias + noise), make_report_v2 (grids, bias, stance, topic, posts, people, noise, graphs 01/02/05-08, results.json), Inside page results section data-driven |
+
+| (this) | 10-09 10:45 | Round 102 analysed: export, graphs, workbook (141,612 formulas, 0 errors), `summary_r102.md`, Inside page (timeline, pooled screens); log §14.31i, §14.35, LD-44 proposal |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -15212,4 +15261,78 @@ To update it, rebuild the page and publish the same file to the same URL.
   results come from the recorded answers, not from an OASIS database.
 - `llm.py` is the only file carried over from Tests 1-6 (changed for llama.cpp). Everything else in v2 was written
   for v2.
+
+## 14.35 Round 102 results, and rounds 101 + 102 pooled (copied to the laptop Fri 2026-10-09 10:10)
+
+Round 102 ran Wed 2026-10-07 17:17 → Fri 02:03 with the same design and code as round 101. 67,134 reading screens;
+829 unreadable (all in gemma reading qwen's posts, the timeouts of §14.31i; 8.9% of that cell). `analyze_v2.py` on
+round 102 alone → `data/llm_bias/v2_spark/summary_r102.md`. Pooled numbers come from `make_report_v2.py`
+(`~/Desktop/LLM_Bias_v2/results.json`, workbook recalculated: 141,612 formulas, 0 errors).
+
+**Posting turn, round 102** (round 101 in brackets): qwen 85 users posted, 94 posts (86, 101); llama 99 users,
+105 posts (98, 103); gemma 23 users, 23 posts (25, 25). Same pattern: gemma's users mostly just refresh.
+
+**Total engagement, actions per 100 screens (diagonal = baseline):**
+
+| Reader ↓ / posts by → | qwen | llama | gemma |
+|---|---|---|---|
+| **Round 102** qwen | **109.6** | 103.2 | 128.6 |
+| llama | 221.9 | **226.1** | 222.1 |
+| gemma | 96.0 | 93.9 | **95.8** |
+| **Pooled 101+102** qwen | **111.4** | 104.2 | 129.7 |
+| llama | 224.3 | **225.4** | 222.0 |
+| gemma | 95.4 | 93.8 | **95.5** |
+
+**Engaged (% of screens with any action), pooled:** qwen 90.6 / 85.0 / 95.3; llama 96.4 / 96.7 / 96.9;
+gemma 93.0 / 91.8 / 93.7.
+
+**Own-AI bias** (double difference; above 0 = favours its own AI's posts; 95% range):
+
+| Pair | Round 101 | Round 102 | **Pooled: total engagement** | Pooled: engaged (points) | Pooled: upvote (points) |
+|---|---|---|---|---|---|
+| qwen vs llama | +6.2 (−4.1 to +16.7) | +10.5 (+0.4 to +20.1) | **+8.4 (+0.7 to +15.1)** | +5.9 (+3.4 to +8.3) | −2.0 (−5.0 to +1.2) |
+| qwen vs gemma | −17.1 (−25.7 to −8.6) | −19.3 (−30.2 to −8.9) | **−18.1 (−25.0 to −11.6)** | −4.0 (−7.0 to −1.0) | −4.4 (−10.5 to +1.4) |
+| llama vs gemma | +4.3 (−7.8 to +16.5) | +5.9 (−4.4 to +16.9) | **+5.1 (−3.0 to +13.2)** | +1.8 (−0.6 to +4.7) | −1.8 (−6.5 to +3.0) |
+
+**In plain words:**
+- **Round 102 repeats round 101.** Every number lands close to its round-101 value, so the results are not luck of one
+  round.
+- **qwen vs gemma: −18.1, favours the OTHER AI, in both rounds.** qwen does much more with gemma's posts (129.7
+  actions per 100 screens) than with its own (111.4), mostly by commenting (about 60% of gemma's posts vs 43-49% of
+  its own).
+- **qwen vs llama: +8.4, favours its OWN AI.** Pooled, the range now just clears 0. It comes mainly from qwen
+  ignoring llama's posts more often: "did nothing" on 15.6% of llama's posts vs 10.0% of its own (round 102). The
+  "engaged" bias (+5.9) is clear in both rounds.
+- **llama vs gemma: no clear bias.**
+- **Upvotes: no own-AI bias in any pair** (all ranges include 0), as in round 101.
+- **Noise floor** (same AI re-reads 400 screens per round with fresh randomness): total engagement moves by
+  0.1-3.1 actions per 100 screens (pooled: qwen 110.6 → 110.0, llama 225.3 → 222.1, gemma 96.4 → 96.3). The
+  biases above are well beyond that.
+- **Caution:** gemma wrote only 23-25 posts per round, so every gemma comparison rests on about 48 posts in total.
+
+**The 829 timed-out screens.** They timed out because the Spark was overloaded, not because of anything in the
+posts, so leaving them out should not tilt the result. They can be re-asked in ~15 min on a free GPU: delete
+those rows from `r102/reading_qwen3-8b__gemma3-12b.jsonl` on the Spark and rerun that step (resume asks only the
+missing screens, with the same seeds). Gordon's call; not done.
+
+### LD-44 (PROPOSED, waiting for Gordon's go): rounds 103-104 tell each AI which model it is
+
+Gordon (Fri 2026-10-09 10:15): "for the posting and reacting add this for rounds 103 and 104 As part of their
+profile. I am this model, simulating this profile…"
+
+Proposed change, nothing else changes (same 100 users, 3 AIs, two turns, 3×3 crossover, baselines first, noise
+floor):
+- The SELF-DESCRIPTION part of the system prompt gets one line before the person's description:
+  `I am <model>, simulating this profile:` (e.g. `I am qwen3:8b, simulating this profile:`), in **both** the
+  posting and the reading turn.
+- The reader is still **not** told which AI wrote the post on its screen (authors stay usernames only).
+- Only rounds ≥ 103 get the line, so rounds 101-102 stay exactly reproducible. The prompt fingerprint in every
+  manifest changes automatically.
+- Comparing 103-104 with 101-102 answers: does knowing its own identity change how much an AI favours its own
+  posts? (The AI still can't see who wrote a post, so any change comes from the AI knowing who it is, not from
+  knowing who wrote the post.)
+- Cost: ~12 h per round with the GPU free, so 103 + 104 ≈ 24-30 h.
+
+Open: the exact model name shown (tag `qwen3:8b` or a plain name like "Qwen3 8B by Alibaba"), and whether the
+"…" stands for more text.
 

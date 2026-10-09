@@ -14971,7 +14971,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 
 | 489c7a0 | 10-09 10:45 | Round 102 analysed: export, graphs, workbook (141,612 formulas, 0 errors), `summary_r102.md`, Inside page (timeline, pooled screens); log §14.31i, §14.35, LD-44 proposal |
 
-| (this) | 10-09 11:20 | **LD-44**: `run_v2.system_prompt()` adds "I am <model>, simulating this profile:" from round 103; preflight +2 checks (110); commands for rounds 103-104 (§14.35a) |
+| 09b28df | 10-09 11:20 | **LD-44**: `run_v2.system_prompt()` adds "I am <model>, simulating this profile:" from round 103; preflight +2 checks (110); commands for rounds 103-104 (§14.35a) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 

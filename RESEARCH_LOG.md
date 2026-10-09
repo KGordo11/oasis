@@ -14700,6 +14700,13 @@ Gordon got in at 10:01 Friday. What the Spark showed:
   timeout came at ~10:00, the moment the other user started a new 50 GB job (10:00:40).
 - The system log check (`journalctl -b 0 …`) was given to Gordon; its output was not pasted back, so there is no
   direct OOM-killer proof. If it matters, help@cs.uky.edu can read the system log.
+- **Prevention (set up Fri 11:45):** the Spark allows key login (`publickey` is offered). The Mac's `~/.ssh/config`
+  now has `Host honda` with `ControlMaster auto`, `ControlPersist 12h` and keep-alives: the first `ssh honda` opens
+  one connection that stays open in the background, and every later `ssh honda` / rsync reuses it with no new
+  handshake, so an overloaded sshd can't lock Gordon out while that connection lives. Gordon runs
+  `ssh-copy-id -i ~/.ssh/id_ed25519.pub honda` once (password one last time). After that, Claude can also check the
+  Spark directly. The real fix is machine-side (protect sshd from memory starvation, or per-user memory limits):
+  only the admins (help@cs.uky.edu) can do that.
 - **For future runs:** a slowed step is the warning sign (`progress_v2.py` shows the live s/screen). If the other
   user runs a large job, expect 5-35× slower steps and possible timeouts.
 
@@ -14972,6 +14979,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 489c7a0 | 10-09 10:45 | Round 102 analysed: export, graphs, workbook (141,612 formulas, 0 errors), `summary_r102.md`, Inside page (timeline, pooled screens); log §14.31i, §14.35, LD-44 proposal |
 
 | 09b28df | 10-09 11:20 | **LD-44**: `run_v2.system_prompt()` adds "I am <model>, simulating this profile:" from round 103; preflight +2 checks (110); commands for rounds 103-104 (§14.35a) |
+
+| (this) | 10-09 11:45 | LD-44 wording: each AI's public name + maker (`MODEL_NAMES`); Mac `Host honda` with connection reuse + key login (§14.31i) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -15336,11 +15345,17 @@ floor):
   knowing who wrote the post.)
 - Cost: ~12 h per round with the GPU free, so 103 + 104 ≈ 24-30 h.
 
-Open questions settled by default (Gordon asked for the run commands without choosing): the exact tag
-(`qwen3:8b`, `llama3.1:8b`, `gemma3:12b`) and no extra text after "simulating this profile:".
+**Wording settled by Gordon (Fri ~11:40):** "the name should be whatever it will understand best that it is indeed
+that model ... the … is whatever we had given to the models before ... everything stays the same, it's just now they
+are being told what model they are." So each AI gets its public name and maker (how it names itself), not the engine
+tag, and the full person description follows unchanged:
+- `I am Qwen3 8B, an AI model made by Alibaba, simulating this profile:`
+- `I am Llama 3.1 8B, an AI model made by Meta, simulating this profile:`
+- `I am Gemma 3 12B, an AI model made by Google, simulating this profile:`
+(First coded with the bare tag, `09b28df`; changed before any round-103 screen was run.)
 
 **Code (`run_v2.py`):** `SYSTEM` has an `{identity}` slot before `{persona}`. `system_prompt(model, round, persona)`
-fills it with `SELF_ID = "I am {model}, simulating this profile:\n"` when round ≥ `SELF_ID_FROM_ROUND` (103), else
+fills it with `SELF_ID = "I am {model}, simulating this profile:\n"` (`{model}` = `MODEL_NAMES[model]`) when round ≥ `SELF_ID_FROM_ROUND` (103), else
 with nothing, so the round 101-102 prompt is byte-for-byte unchanged (checked against the old text). Test rounds
 (≥ 900) also get the line, so the preflight's round 904 runs the new prompt. The manifest's `prompts_sha256` includes
 `SELF_ID` from round 103. `preflight_v2.py` has 2 new checks (110 in all). `make_inside_v2.py` still shows the
@@ -15356,7 +15371,8 @@ change an answer. Baselines go first only so the bias can always be computed if 
 Order matters: pull → preflight → start the runner → only then the watchdog (the preflight refuses to run while
 anything of ours is running).
 
-1. **Get the new code** (Spark): `cd ~/llm_bias/oasis && git pull --no-edit && git log --oneline -1 && grep -c SELF_ID examples/experiment/llm_bias/run_v2.py`
+0. **Once, on the Mac:** `ssh-copy-id -i ~/.ssh/id_ed25519.pub honda`, then log in with `ssh honda` (§14.31i).
+1. **Get the new code** (Spark): `cd ~/llm_bias/oasis && git pull --no-edit && git log --oneline -1 && grep -c MODEL_NAMES examples/experiment/llm_bias/run_v2.py`
 2. **Preflight** (~25 min): `cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/experiment/llm_bias/preflight_v2.py 2>&1 | tee ~/llm_bias/logs/preflight.txt | tail -15` → must end `ALL CLEAR`, 110 PASS.
 3. **Start**: `MANAGE_SERVERS=1 STOP="2026-10-12 12:00" ROUNDS="103 104" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 setsid nohup python3 examples/experiment/llm_bias/v2_night.py >> ~/llm_bias/logs/night_run.out 2>&1 < /dev/null &`
 4. **Watchdog**: the §14.31c script with `STOP="2026-10-12 12:00"`, `ROUNDS="103 104"` and a first line that exits

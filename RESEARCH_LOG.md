@@ -14968,7 +14968,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 2d770b5 | 10-08 11:45 | report: graphs on their own tabs, grouped + coloured tabs, pooled complete rounds with a round picker; page text |
 | 1ac22c8 | 10-08 16:00 | **LD-43 total engagement is the main measure**: analyze_v2 (Table 2 + bias + noise), make_report_v2 (grids, bias, stance, topic, posts, people, noise, graphs 01/02/05-08, results.json), Inside page results section data-driven |
 
-| (this) | 10-09 10:45 | Round 102 analysed: export, graphs, workbook (141,612 formulas, 0 errors), `summary_r102.md`, Inside page (timeline, pooled screens); log §14.31i, §14.35, LD-44 proposal |
+| 489c7a0 | 10-09 10:45 | Round 102 analysed: export, graphs, workbook (141,612 formulas, 0 errors), `summary_r102.md`, Inside page (timeline, pooled screens); log §14.31i, §14.35, LD-44 proposal |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 

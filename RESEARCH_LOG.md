@@ -14807,6 +14807,11 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 - **V2 preflight: 110 PASS, 0 FAIL, ALL CLEAR** (Fri 2026-10-09). **V2 RUNNING since Fri 11:42** (`ROUNDS="103 104"`,
   STOP Mon 2026-10-12 12:00, watchdog on, test exit 0). r103: qwen posted in 3.4 min; qwen baseline ~9,504 screens
   at 0.64 s/screen, 9,450 done at 13:27. Gordon checks it himself.
+  **Check Fri 14:30:** all healthy. r103 17% (post sets qwen 96, llama 107; gemma not yet posted); llama baseline
+  5,800/10,593 at 0.62 s/screen. ETA r103 ~Sat 07:20, r104 ~Sun 02:30 (before STOP Mon 12:00). hsa303 has no job
+  running, GPU = only our llama-server (12.9 GB), 96 GB available, swap 0, memory stall 0, no watchdog restarts.
+  Speeds are ~20-50% slower than the best V1 speeds even with the GPU free (qwen 0.64 vs 0.41, llama 0.62 vs 0.51);
+  the cause is not known yet (check when the V2 data is in).
 
 ### Status (2026-10-09 10:22)
 - **Rounds 101 and 102 complete.** 133,068 usable reading screens pooled + 6 posting turns + 6 noise floors.

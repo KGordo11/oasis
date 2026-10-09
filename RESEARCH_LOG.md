@@ -14653,6 +14653,20 @@ updates for the third run, and maybe hopefully can get a fourth."
   posts), then the three noise floors.
 - hsa303 started one GPU job at ~14:50 (17 GB); llama slowed to 1.30 s/screen. ETA ~17:40-20:00 depending on sharing.
 
+## 14.31h The Spark stopped answering SSH logins (Thu 2026-10-08 from ~17:00)
+
+From about 17:00 Thursday, SSH to honda hangs and times out. Checked from the laptop at 17:26 and 21:38:
+- The network is fine: 5 ms ping, and TCP port 22 connects instantly.
+- The SSH server never sends its greeting ("Connection timed out during banner exchange", even after 90 s).
+
+So the machine itself is unresponsive. That usually means it is out of memory or swapping hard, or sshd is
+stuck; it is not a VPN or password problem. The last good check was 15:00: round 102 at 87%, hsa303 running one GPU
+job, swap 27%.
+- **Data:** round 101 is safe on the laptop. Round 102 is on the laptop only up to Wed 22:15 (rsync); everything
+  after that is still on the Spark.
+- **Action:** Gordon emails help@cs.uky.edu if it does not recover. When it does: run the full check, then rsync.
+  The watchdog restarts the runner if it died.
+
 ## 14.32 HANDOFF: everything needed to pick up LLM Bias v2 (written 2026-10-06 15:30)
 
 ### What the study is

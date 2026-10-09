@@ -14980,7 +14980,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 
 | 09b28df | 10-09 11:20 | **LD-44**: `run_v2.system_prompt()` adds "I am <model>, simulating this profile:" from round 103; preflight +2 checks (110); commands for rounds 103-104 (§14.35a) |
 
-| (this) | 10-09 11:45 | LD-44 wording: each AI's public name + maker (`MODEL_NAMES`); Mac `Host honda` with connection reuse + key login (§14.31i) |
+| 50649e3 | 10-09 11:45 | LD-44 wording: each AI's public name + maker (`MODEL_NAMES`); Mac `Host honda` with connection reuse + key login (§14.31i) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 

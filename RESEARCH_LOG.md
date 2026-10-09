@@ -72,9 +72,9 @@ research**:
 - **Pooled result (101+102, total engagement):** qwen vs gemma **−18.1** (qwen favours gemma's posts, both rounds);
   qwen vs llama **+8.4** (qwen favours its own over llama's, mainly by ignoring llama's posts more often); llama vs
   gemma unclear. No upvote bias in any pair.
-- **Next: rounds 103-104 with a changed design** (Gordon, Fri 10:15: the profile says which AI is playing it,
-  "I am this model, simulating this profile…", in both turns). Proposal **LD-44 in §14.35**, waiting for Gordon's
-  wording and go. Then code, preflight, run. Meeting Tue 2026-10-13.
+- **Next: rounds 103-104 with a changed design, LD-44** (§14.35): the system prompt says "I am <model>, simulating
+  this profile:" in both turns; authors stay hidden. Coded Fri 11:20; Gordon runs pull → preflight → start →
+  watchdog (§14.35a), STOP Mon 2026-10-12 12:00. Meeting Tue 2026-10-13.
 
 *Below: the status as of 2026-10-07 23:30, kept as written.*
 
@@ -14789,7 +14789,8 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 - **Rounds 101 and 102 complete.** 133,068 usable reading screens pooled + 6 posting turns + 6 noise floors.
   Results §14.33 (101) and §14.35 (102 + pooled). Workbook, graphs and the Inside page rebuilt from both rounds.
 - **Nothing runs on the Spark for us.** Runner exited Fri 02:03 ("end: models unloaded"); watchdog cron removed.
-- **Round 103-104 design change pending** (LD-44, §14.35): waiting for Gordon's exact wording and go.
+- **Rounds 103-104 (LD-44) coded**, commands given (§14.35a): pull → preflight → start → watchdog, STOP Mon
+  2026-10-12 12:00. Update this line when Gordon reports it running.
 
 ### Status (2026-10-07 23:30, kept as written)
 - **Round 101 complete** (Wed 17:17): 69,213 reading screens + 3 posting turns + 3 noise floors. Results §14.33.
@@ -14881,8 +14882,8 @@ All are covered by `preflight_v2.py`.
   baselines, one change at a time.
 
 ### Next steps
-*(2026-10-09)* 1. Gordon confirms the LD-44 wording (§14.35) → code it (only rounds ≥ 103 change) → preflight
-on the Spark (108 checks must pass) → run `ROUNDS="103 104"`. 2. After each round: rsync, report, page, log, as
+*(2026-10-09 11:20)* 1. LD-44 coded. Gordon: pull, preflight (110 checks must pass), start `ROUNDS="103 104"`
+with `STOP="2026-10-12 12:00"`, then the new watchdog: exact commands in §14.35a. 2. After each round: rsync, report, page, log, as
 below. 3. Optional: re-ask the 829 timed-out screens of round 102 (§14.35). 4. Meeting Tue 2026-10-13.
 
 *(As of 2026-10-07:)*
@@ -14969,6 +14970,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 1ac22c8 | 10-08 16:00 | **LD-43 total engagement is the main measure**: analyze_v2 (Table 2 + bias + noise), make_report_v2 (grids, bias, stance, topic, posts, people, noise, graphs 01/02/05-08, results.json), Inside page results section data-driven |
 
 | 489c7a0 | 10-09 10:45 | Round 102 analysed: export, graphs, workbook (141,612 formulas, 0 errors), `summary_r102.md`, Inside page (timeline, pooled screens); log §14.31i, §14.35, LD-44 proposal |
+
+| (this) | 10-09 11:20 | **LD-44**: `run_v2.system_prompt()` adds "I am <model>, simulating this profile:" from round 103; preflight +2 checks (110); commands for rounds 103-104 (§14.35a) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -15315,7 +15318,7 @@ posts, so leaving them out should not tilt the result. They can be re-asked in ~
 those rows from `r102/reading_qwen3-8b__gemma3-12b.jsonl` on the Spark and rerun that step (resume asks only the
 missing screens, with the same seeds). Gordon's call; not done.
 
-### LD-44 (PROPOSED, waiting for Gordon's go): rounds 103-104 tell each AI which model it is
+### LD-44 (DECIDED Fri 2026-10-09 ~11:15, Gordon: "give me the commands to run it"): rounds 103-104 tell each AI which model it is
 
 Gordon (Fri 2026-10-09 10:15): "for the posting and reacting add this for rounds 103 and 104 As part of their
 profile. I am this model, simulating this profile…"
@@ -15333,6 +15336,31 @@ floor):
   knowing who wrote the post.)
 - Cost: ~12 h per round with the GPU free, so 103 + 104 ≈ 24-30 h.
 
-Open: the exact model name shown (tag `qwen3:8b` or a plain name like "Qwen3 8B by Alibaba"), and whether the
-"…" stands for more text.
+Open questions settled by default (Gordon asked for the run commands without choosing): the exact tag
+(`qwen3:8b`, `llama3.1:8b`, `gemma3:12b`) and no extra text after "simulating this profile:".
+
+**Code (`run_v2.py`):** `SYSTEM` has an `{identity}` slot before `{persona}`. `system_prompt(model, round, persona)`
+fills it with `SELF_ID = "I am {model}, simulating this profile:\n"` when round ≥ `SELF_ID_FROM_ROUND` (103), else
+with nothing, so the round 101-102 prompt is byte-for-byte unchanged (checked against the old text). Test rounds
+(≥ 900) also get the line, so the preflight's round 904 runs the new prompt. The manifest's `prompts_sha256` includes
+`SELF_ID` from round 103. `preflight_v2.py` has 2 new checks (110 in all). `make_inside_v2.py` still shows the
+round-101 prompt, because the page shows round-101 answers next to it.
+
+**Why order and mixing don't matter (Gordon asked, Fri ~11:00):** every screen is a separate call with no memory;
+the seed is fixed by round, poster AI, user and post (`run_v2.py`, not by run order); each post set is shuffled once
+into a ring that every reader AI gets in the same order. So running the baselines first, or mixing AIs' posts, can't
+change an answer. Baselines go first only so the bias can always be computed if time runs out.
+
+## 14.35a Commands for rounds 103-104 (given to Gordon Fri 2026-10-09 11:20)
+
+Order matters: pull → preflight → start the runner → only then the watchdog (the preflight refuses to run while
+anything of ours is running).
+
+1. **Get the new code** (Spark): `cd ~/llm_bias/oasis && git pull --no-edit && git log --oneline -1 && grep -c SELF_ID examples/experiment/llm_bias/run_v2.py`
+2. **Preflight** (~25 min): `cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/experiment/llm_bias/preflight_v2.py 2>&1 | tee ~/llm_bias/logs/preflight.txt | tail -15` → must end `ALL CLEAR`, 110 PASS.
+3. **Start**: `MANAGE_SERVERS=1 STOP="2026-10-12 12:00" ROUNDS="103 104" PARALLEL=8 PY=python3 PUSH=0 STOP_OLLAMA=1 setsid nohup python3 examples/experiment/llm_bias/v2_night.py >> ~/llm_bias/logs/night_run.out 2>&1 < /dev/null &`
+4. **Watchdog**: the §14.31c script with `STOP="2026-10-12 12:00"`, `ROUNDS="103 104"` and a first line that exits
+   once `checkpoint round 104: noise floor` is in night.log; cron every 10 min.
+5. **Check**: the §14.32d full check with `progress_v2.py 103 104`.
+6. **After round 104** (night.log `end: models unloaded`): remove the watchdog, rsync, Claude builds the report.
 

@@ -91,6 +91,9 @@ try:
     check("100 pinned users unchanged (hash)", len(P) == 100)
 except SystemExit as e:
     check("100 pinned users unchanged (hash)", False, str(e))
+sp = lambda m, r: run_v2.system_prompt(m, r, "PERSONA")
+check("LD-44: rounds >= 103 say 'I am <model>, simulating this profile:'", "I am qwen3:8b, simulating this profile:\nPERSONA" in sp("qwen3:8b", 103))
+check("LD-44: rounds 101-102 keep the old prompt (no identity line)", "I am" not in sp("qwen3:8b", 102))
 good = run_v2.validate({"actions": [{"action": "upvote"}, {"action": "comment", "content": "nice"}], "reason": "x"})
 check("answer checker accepts a good answer", [a["action"] for a in good["actions"]] == ["like_post", "create_comment"])
 for bad in ({"actions": [{"action": "fly"}]}, {"actions": [{"action": "create_post", "subreddit": "r/cats", "title": "a", "body": "b"}]},

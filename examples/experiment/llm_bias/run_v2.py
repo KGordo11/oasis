@@ -102,9 +102,19 @@ SYSTEM = ("# OBJECTIVE\n"
           "exactly as you would on the real app.\n\n"
           "# SELF-DESCRIPTION\n"
           "Your actions should be consistent with your self-description and personality.\n"
-          "{persona}\n\n"
+          "{identity}{persona}\n\n"
           "# RESPONSE METHOD\n"
           "Reply with a single JSON object and nothing else.")
+# LD-44 (log 14.35): from round 103 the AI is told which model it is (never who wrote a post). Rounds 101-102 had no
+# such line, so they stay exactly reproducible. Test rounds (>= 900) get it too, so the preflight checks it.
+SELF_ID = "I am {model}, simulating this profile:\n"
+SELF_ID_FROM_ROUND = 103
+
+
+def system_prompt(model, rnd, persona):
+    return SYSTEM.format(identity=SELF_ID.format(model=model) if rnd >= SELF_ID_FROM_ROUND else "", persona=persona)
+
+
 POST_SCREEN = """You open Reddit. Your feed is empty -- nothing has been posted yet.
 Subreddits you can post in:
 {subs}
@@ -334,7 +344,7 @@ def run(a):
 
     def screen(p, page, pos):
         q = page[0]
-        system = SYSTEM.format(persona=p["persona"])
+        system = system_prompt(a.model, a.round, p["persona"])
         if q is None:
             user, parts, val, budget = POST_SCREEN.format(subs=subs, menu=MENU, fmt=FORMAT), (SEED, a.round, "post", p["id"]), validate, 1500
         elif len(page) == 1:
@@ -376,7 +386,7 @@ def run(a):
            "model": a.model, "posts_by": a.posts_by, "draw": a.draw, "agents": len(people),
            "finished_at": datetime.now().isoformat(), "git_commit": git_commit(), "personas_sha256": PINNED_PERSONAS,
            "post_set_sha256": sha(posts) if posts else None,
-           "prompts_sha256": sha([SYSTEM, POST_SCREEN, READ_SCREEN, MENU, FORMAT] + ([PAGE_SCREEN] if a.page_size > 1 else [])),
+           "prompts_sha256": sha([SYSTEM] + ([SELF_ID] if a.round >= SELF_ID_FROM_ROUND else []) + [POST_SCREEN, READ_SCREEN, MENU, FORMAT] + ([PAGE_SCREEN] if a.page_size > 1 else [])),
            "config": {"backend": llm.BACKEND, "sampling": llm.SAMPLING if llm.BACKEND == "llamacpp" else "ollama per-model defaults",
                       "temperature": a.temperature, "num_ctx": llm.NUM_CTX, "think": False, "parallel": a.parallel,
                       "memory": False, "follow_graph": "empty each round", "vote_counts": "hidden",

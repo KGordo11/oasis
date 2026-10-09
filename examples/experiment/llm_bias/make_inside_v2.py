@@ -158,11 +158,11 @@ reading = {m: next((d for d in rows(f"reading_qwen3-8b__{m.replace(':', '-')}.js
                     if d["user_id"] == 0 and d["post_key"] == post_key and not d["draw"]), None) for m in run_v2.MODELS}
 data = {
     "files": files, "refs": refs,
-    "post_prompt": {"system": run_v2.SYSTEM.format(persona=u0["persona"]),
+    "post_prompt": {"system": run_v2.system_prompt("qwen3:8b", 101, u0["persona"]),
                     "user": run_v2.POST_SCREEN.format(subs=subs, menu=run_v2.MENU, fmt=run_v2.FORMAT)},
     "post_answers": {m: {"raw": d.get("raw"), "seconds": d.get("latency_s"), "in": d.get("prompt_tokens"), "out": d.get("eval_tokens")}
                      for m, d in posting.items()},
-    "read_prompt": {"system": run_v2.SYSTEM.format(persona=u0["persona"]),
+    "read_prompt": {"system": run_v2.system_prompt("qwen3:8b", 101, u0["persona"]),
                     "user": run_v2.READ_SCREEN.format(sub=sub, topic_name=tname, author=q["author"], title=q["title"],
                                                       body=q["body"], menu=run_v2.MENU, fmt=run_v2.FORMAT)},
     "read_post": {**q, "sub": sub, "tname": tname, "stance": u0["stances"][t]},

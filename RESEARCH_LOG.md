@@ -14812,6 +14812,10 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
   running, GPU = only our llama-server (12.9 GB), 96 GB available, swap 0, memory stall 0, no watchdog restarts.
   Speeds are ~20-50% slower than the best V1 speeds even with the GPU free (qwen 0.64 vs 0.41, llama 0.62 vs 0.51);
   the cause is not known yet (check when the V2 data is in).
+  **Check Fri 22:12:** healthy. r103 65% (44,485 / 68,916); post sets qwen 96, llama 107, **gemma 25** (same as V1's
+  23-25: being told it is Gemma did not make its users post more). All 3 baselines done; cross stage 64 under way.
+  ETA r103 ~Sat 05:31, r104 ~Sun 00:57. hsa303 started a 53 GB job ~21:19 (6.6 GB GPU); our speed 0.8-1.24 s/screen
+  (mildly slowed, not Thursday's 11.7). 75 GB available, swap 3 of 15 GB, memory stall 0 now; no watchdog restarts.
 
 ### Status (2026-10-09 10:22)
 - **Rounds 101 and 102 complete.** 133,068 usable reading screens pooled + 6 posting turns + 6 noise floors.

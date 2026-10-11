@@ -58,4 +58,4 @@ Work (BLS CPS 2025 employment ratio by age and sex; BLS OEWS 2024 job groups):
 
 Topic stances: every topic has exactly 20 users at each stance; every pair of topics has each of the 25 stance combinations exactly 4 times (zero correlation).
 
-SHA-256 of personas_v2.json content: `ed110626dce4b10f36d43fe6bcd9b3124be163e40b6db41979893afb4d7dc39f`
+SHA-256 of personas_v2.json content: `11ac527c6351e054dc2e054f3de892893404d58df1eb7eb32a0104a36a2f6383`

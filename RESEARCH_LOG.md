@@ -14816,6 +14816,10 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
   23-25: being told it is Gemma did not make its users post more). All 3 baselines done; cross stage 64 under way.
   ETA r103 ~Sat 05:31, r104 ~Sun 00:57. hsa303 started a 53 GB job ~21:19 (6.6 GB GPU); our speed 0.8-1.24 s/screen
   (mildly slowed, not Thursday's 11.7). 75 GB available, swap 3 of 15 GB, memory stall 0 now; no watchdog restarts.
+  **V2 COMPLETE (check Sun 2026-10-11 10:34):** round 103 done Sat 10-10 09:14 (68,916 screens; post sets qwen 96,
+  llama 107, gemma 25), round 104 done Sat 22:10 (67,728 screens; qwen 96, llama 103, gemma 25). Runner exited
+  ("end: models unloaded"), no watchdog restarts, no reboot. Next: Gordon removes the watchdog and rsyncs; then the V2
+  workbook, V1-vs-V2 comparison, page and log.
 
 ### Status (2026-10-09 10:22)
 - **Rounds 101 and 102 complete.** 133,068 usable reading screens pooled + 6 posting turns + 6 noise floors.

@@ -423,7 +423,11 @@ const ALL = __DATA__;
 const NS = 'http://www.w3.org/2000/svg';
 const svg = document.getElementById('graph');
 const slider = document.getElementById('round');
-const W = 1000, H = 560;
+// Layout canvas. Not constant: it grows with the population (see loadRun), so
+// density stays roughly fixed instead of 99 agents being crushed into the box
+// that suited 36. SC is that scale factor, and every drawn size multiplies by
+// it so the picture keeps the same apparent size on screen.
+let W = 1000, H = 560, SC = 1;
 
 let DATA, agents, byId, inter, exposure, nodes, nodeById, maxRound;
 let focusId = null, lastRound = 0;
@@ -481,10 +485,17 @@ function loadRun(label) {
   slider.max = maxRound;
   slider.value = maxRound;
 
+  // Area per node is held constant against the 36-agent case that the original
+  // constants were tuned for, with a floor so small worlds do not become
+  // a few specks adrift in a large empty box.
+  SC = Math.max(0.8, Math.sqrt(Object.keys(agents).length / 36));
+  W = Math.round(1000 * SC);
+  H = Math.round(560 * SC);
+
   nodes = Object.values(agents).map((a, i, arr) => {
     const t = (i / arr.length) * Math.PI * 2;
     return { id: a.agent_id, name: a.username || ('agent' + a.agent_id),
-             x: W/2 + Math.cos(t) * 200, y: H/2 + Math.sin(t) * 200,
+             x: W/2 + Math.cos(t) * 200 * SC, y: H/2 + Math.sin(t) * 200 * SC,
              vx: 0, vy: 0 };
   });
   nodeById = {};
@@ -524,9 +535,23 @@ function simulate(edges) {
     for (let i = 0; i < nodes.length; i++)
       for (let j = i + 1; j < nodes.length; j++) {
         const a = nodes[i], b = nodes[j];
-        const dx = b.x - a.x, dy = b.y - a.y;
-        const d2 = dx*dx + dy*dy || 1, d = Math.sqrt(d2);
-        const rep = (7000 + 150 * nodes.length) / d2;
+        let dx = b.x - a.x, dy = b.y - a.y;
+        let d2 = dx*dx + dy*dy;
+        // Two nodes at EXACTLY the same point have dx = dy = 0, so the unit
+        // vector below is (0,0) and the repulsion evaluates to zero however
+        // large `rep` is -- they are welded together permanently. The old hard
+        // clamp drove nodes into the corners, where several would land on the
+        // identical pixel and stack up for the rest of the run. Nudge them
+        // apart along a deterministic direction instead (no RNG, so the layout
+        // stays reproducible).
+        if (d2 < 1e-9) {
+          const ang = i * 2.399963229728653 + j;   // golden-angle spread
+          dx = Math.cos(ang) * 0.5;
+          dy = Math.sin(ang) * 0.5;
+          d2 = 0.25;
+        }
+        const d = Math.sqrt(d2);
+        const rep = (3000 + 50 * nodes.length) * SC * SC * SC / d2;
         const ux = dx/d, uy = dy/d;
         a.vx -= ux*rep; a.vy -= uy*rep; b.vx += ux*rep; b.vy += uy*rep;
       }
@@ -535,15 +560,72 @@ function simulate(edges) {
       if (!a || !b) continue;
       const dx = b.x - a.x, dy = b.y - a.y;
       const d = Math.sqrt(dx*dx + dy*dy) || 1;
-      const f = (d - 140) * 0.012, ux = dx/d, uy = dy/d;
+      const f = (d - 140 * SC) * 0.012, ux = dx/d, uy = dy/d;
       a.vx += ux*f; a.vy += uy*f; b.vx -= ux*f; b.vy -= uy*f;
     }
     for (const n of nodes) {
-      const pull = 0.004 + 0.00012 * nodes.length;
+      const pull = 0.008 + 0.00012 * nodes.length;
       n.vx += (W/2 - n.x) * pull; n.vy += (H/2 - n.y) * pull;
-      n.x = Math.max(70, Math.min(W-70, n.x + n.vx));
-      n.y = Math.max(40, Math.min(H-40, n.y + n.vy));
+      // Soft walls. A hard clamp pinned every escaping node onto the exact
+      // same boundary pixel, which is what produced the stacks in the corners;
+      // bouncing them back inside keeps positions distinct.
+      const mx = 70 * SC, my = 40 * SC;
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < mx)     { n.x = mx + (mx - n.x) * 0.3;     n.vx = Math.abs(n.vx) * 0.5; }
+      if (n.x > W - mx) { n.x = W - mx - (n.x - (W - mx)) * 0.3; n.vx = -Math.abs(n.vx) * 0.5; }
+      if (n.y < my)     { n.y = my + (my - n.y) * 0.3;     n.vy = Math.abs(n.vy) * 0.5; }
+      if (n.y > H - my) { n.y = H - my - (n.y - (H - my)) * 0.3; n.vy = -Math.abs(n.vy) * 0.5; }
+      n.x = Math.max(2, Math.min(W - 2, n.x));
+      n.y = Math.max(2, Math.min(H - 2, n.y));
     }
+  }
+
+  // Fit the cloud to the canvas. The forces above set the SHAPE; this sets
+  // the SIZE, so a gentle repulsion does not leave a small world huddled in the
+  // middle of a large empty box, and a big one still uses the whole frame.
+  let mnX = Infinity, mxX = -Infinity, mnY = Infinity, mxY = -Infinity;
+  for (const n of nodes) {
+    if (n.x < mnX) mnX = n.x; if (n.x > mxX) mxX = n.x;
+    if (n.y < mnY) mnY = n.y; if (n.y > mxY) mxY = n.y;
+  }
+  const padX = 80 * SC, padY = 55 * SC;
+  const spanX = Math.max(1, mxX - mnX), spanY = Math.max(1, mxY - mnY);
+  const k = Math.min((W - 2*padX) / spanX, (H - 2*padY) / spanY);
+  const offX = padX + ((W - 2*padX) - spanX*k) / 2;
+  const offY = padY + ((H - 2*padY) - spanY*k) / 2;
+  for (const n of nodes) {
+    n.x = offX + (n.x - mnX) * k;
+    n.y = offY + (n.y - mnY) * k;
+  }
+
+  // Separation pass. The force model above is a balance, not a guarantee -- at
+  // 99 nodes it still left ~16 sitting under another one, and a node you cannot
+  // see is a node the reader thinks is missing. This pushes any pair closer
+  // than MIN apart until none are, which is cheap and deterministic. Verified
+  // to take 99 agents from 83 distinct positions to 99 with no overlaps.
+  const MIN = 26 * SC;
+  for (let pass = 0; pass < 120; pass++) {
+    let moved = false;
+    for (let i = 0; i < nodes.length; i++)
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        let dx = b.x - a.x, dy = b.y - a.y;
+        let d = Math.sqrt(dx*dx + dy*dy);
+        if (d >= MIN) continue;
+        if (d < 1e-9) {
+          const ang = i * 2.399963229728653 + j;
+          dx = Math.cos(ang); dy = Math.sin(ang); d = 1;
+        }
+        const push = (MIN - d) / 2, ux = dx/d, uy = dy/d;
+        a.x -= ux*push; a.y -= uy*push;
+        b.x += ux*push; b.y += uy*push;
+        moved = true;
+      }
+    for (const n of nodes) {
+      n.x = Math.max(12 * SC, Math.min(W - 12 * SC, n.x));
+      n.y = Math.max(12 * SC, Math.min(H - 12 * SC, n.y));
+    }
+    if (!moved) break;
   }
 }
 
@@ -645,7 +727,7 @@ function render(round) {
     const dx = b.x - a.x, dy = b.y - a.y;
     const d = Math.sqrt(dx*dx + dy*dy) || 1;
     const mx = (a.x + b.x)/2 + (-dy/d)*curve, my = (a.y + b.y)/2 + (dx/d)*curve;
-    const r = 9 + 3*Math.sqrt(fc[b.id] || 0);
+    const r = (9 + 3*Math.sqrt(fc[b.id] || 0)) * SC;
     const path = document.createElementNS(NS, 'path');
     path.setAttribute('d', `M${a.x},${a.y} Q${mx},${my} ${b.x-(dx/d)*r},${b.y-(dy/d)*r}`);
     path.setAttribute('fill', 'none');
@@ -660,11 +742,11 @@ function render(round) {
   const maxW = Math.max(1, ...interactions.map(e => e.weight));
   for (const e of interactions) {
     const a = nodeById[e.source], b = nodeById[e.target];
-    if (a && b) drawEdge(a, b, 'interact', 1 + 3.5*(e.weight/maxW), 26);
+    if (a && b) drawEdge(a, b, 'interact', (1 + 3.5*(e.weight/maxW)) * SC, 26 * SC);
   }
   for (const e of follows) {
     const a = nodeById[e.source], b = nodeById[e.target];
-    if (a && b) drawEdge(a, b, 'follow', 1.7, -26);
+    if (a && b) drawEdge(a, b, 'follow', 1.7 * SC, -26 * SC);
   }
 
   for (const n of nodes) {
@@ -673,7 +755,7 @@ function render(round) {
       interactions.some(e => (e.source===focusId && e.target===n.id) || (e.target===focusId && e.source===n.id));
     const g = document.createElementNS(NS, 'g');
     g.setAttribute('class', 'node'); g.style.cursor = 'pointer';
-    const r = 6 + 3*Math.sqrt(fc[n.id] || 0);
+    const r = (6 + 3*Math.sqrt(fc[n.id] || 0)) * SC;
     const c = document.createElementNS(NS, 'circle');
     c.setAttribute('cx', n.x); c.setAttribute('cy', n.y); c.setAttribute('r', r);
     c.setAttribute('fill', n.id === focusId ? 'var(--interact)' : 'var(--node)');
@@ -686,11 +768,13 @@ followers here: ${fc[n.id] || 0}
 click to isolate this person's connections</title>`;
     g.appendChild(c);
     const t = document.createElementNS(NS, 'text');
-    t.setAttribute('x', n.x); t.setAttribute('y', n.y - r - 5);
+    t.setAttribute('x', n.x); t.setAttribute('y', n.y - r - 5 * SC);
+    t.setAttribute('font-size', (9 * SC).toFixed(1));
     t.setAttribute('text-anchor', 'middle');
     t.setAttribute('opacity', near ? 1 : 0.22);
     t.setAttribute('paint-order', 'stroke');
-    t.setAttribute('stroke', 'var(--panel)'); t.setAttribute('stroke-width', '3');
+    t.setAttribute('stroke', 'var(--panel)');
+    t.setAttribute('stroke-width', String(3 * SC));
     t.textContent = n.name.length > 16 ? n.name.slice(0,15) + '...' : n.name;
     g.appendChild(t);
     g.addEventListener('click', () => {

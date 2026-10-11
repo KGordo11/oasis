@@ -1,6 +1,6 @@
 # LLM Bias v2 results (SMOKE TEST)
 
-Rounds: [900, 901]. Screens: 1676 (0 unreadable).
+Rounds: [900, 901]. Screens: 1766 (10 unreadable).
 
 ## Table 1. Posting turn (empty feed, every action available, nobody told to post)
 
@@ -11,6 +11,7 @@ Rounds: [900, 901]. Screens: 1676 (0 unreadable).
 | gemma3:12b | 20 | 6 | 6 | r/politics 2, r/technology 2, politics 2 | refresh 14, search_posts 1 |
 | granite3.3:8b | 10 | 0 | 0 |  | do_nothing 1 |
 | llama3.1:8b | 20 | 18 | 18 | r/politics 8, r/sports 3, r/technology 3, r/entertainment 2, r/business 2 | search_user 9, search_posts 2, follow 2, report_post 1, unfollow 1 |
+| llama3.2:1b | 0 | 0 | 0 |  |  |
 | mistral:7b | 10 | 0 | 0 |  | search_posts 2, refresh 1 |
 | olmo2:7b | 10 | 0 | 0 |  |  |
 | qwen3:8b | 20 | 16 | 19 | technology 5, politics 4, business 4, r/politics 3, sports 2, r/sports 1 | do_nothing 2, like_post 1, create_comment 1 |
@@ -63,27 +64,35 @@ For AIs i and j: (i reading i's posts - j reading i's posts) - (i reading j's po
 | command-r7b:latest | gemma3:12b | - | - |
 | command-r7b:latest | granite3.3:8b | - | - |
 | command-r7b:latest | llama3.1:8b | - | - |
+| command-r7b:latest | llama3.2:1b | - | - |
 | command-r7b:latest | mistral:7b | - | - |
 | command-r7b:latest | olmo2:7b | - | - |
 | command-r7b:latest | qwen3:8b | - | - |
 | falcon3:7b | gemma3:12b | - | - |
 | falcon3:7b | granite3.3:8b | - | - |
 | falcon3:7b | llama3.1:8b | - | - |
+| falcon3:7b | llama3.2:1b | - | - |
 | falcon3:7b | mistral:7b | - | - |
 | falcon3:7b | olmo2:7b | - | - |
 | falcon3:7b | qwen3:8b | - | - |
 | gemma3:12b | granite3.3:8b | - | - |
 | gemma3:12b | llama3.1:8b | +5.1 (-22.2 to +42.4) | -0.5 (-5.6 to +6.4) |
+| gemma3:12b | llama3.2:1b | - | - |
 | gemma3:12b | mistral:7b | - | - |
 | gemma3:12b | olmo2:7b | - | - |
 | gemma3:12b | qwen3:8b | -1.6 (-30.1 to +30.8) | +6.6 (-11.8 to +38.4) |
 | granite3.3:8b | llama3.1:8b | - | - |
+| granite3.3:8b | llama3.2:1b | - | - |
 | granite3.3:8b | mistral:7b | - | - |
 | granite3.3:8b | olmo2:7b | - | - |
 | granite3.3:8b | qwen3:8b | - | - |
+| llama3.1:8b | llama3.2:1b | - | - |
 | llama3.1:8b | mistral:7b | - | - |
 | llama3.1:8b | olmo2:7b | - | - |
 | llama3.1:8b | qwen3:8b | -2.5 (-17.0 to +13.7) | +7.3 (-5.9 to +23.4) |
+| llama3.2:1b | mistral:7b | - | - |
+| llama3.2:1b | olmo2:7b | - | - |
+| llama3.2:1b | qwen3:8b | - | - |
 | mistral:7b | olmo2:7b | - | - |
 | mistral:7b | qwen3:8b | - | - |
 | olmo2:7b | qwen3:8b | - | - |

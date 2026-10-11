@@ -15032,7 +15032,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 
 | 50649e3 | 10-09 11:01 | LD-44 wording: each AI's public name + maker (`MODEL_NAMES`); Mac `Host honda` with connection reuse + key login (§14.31i) |
 
-| (see git) | 10-11 11:20 | **`make_compare.py`**: rounds 101-104 + V1 vs V2, every measure (`LLM_Bias_Compare.xlsx`, `compare.json`); Inside page section 09 = results explorer, V2 answers, V2 timeline; `make_inside_v2.py` takes compare.json (§14.38) |
+| 4068d8a | 10-11 11:20 | **`make_compare.py`**: rounds 101-104 + V1 vs V2, every measure (`LLM_Bias_Compare.xlsx`, `compare.json`); Inside page section 09 = results explorer, V2 answers, V2 timeline; `make_inside_v2.py` takes compare.json (§14.38) |
 
 | 8753c7c | 10-09 11:30 | **LD-45 V1/V2 naming**: `make_report_v2.py` pools per version (`LLM_Bias_<V>.xlsx`, `~/Desktop/LLM_Bias/<V>/`); Inside page: both versions, the code diff, V1 + V2 system messages, V2 commands + watchdog, key login; results.json now required (the 10:22 page had empty results) |
 

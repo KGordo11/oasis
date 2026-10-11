@@ -15467,7 +15467,8 @@ make sure everything is correct, formatted nicely, works as it is supposed to, a
 
 **State when the laptop restarted:** V2 data copied. A background run of `export_v2.py` → `make_graphs_v2.py` →
 `make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V2 V2` had been started and was probably killed by the
-restart. **Rerun it** (it is idempotent), then recalc with LibreOffice (§14.34 recipe:
+restart. **UPDATE: it finished before the restart** (export, graphs, and `~/Desktop/LLM_Bias/V2/LLM_Bias_V2.xlsx` +
+results.json, 134,244 screens). **Still to do: recalc it** with LibreOffice (§14.34 recipe:
 `PATH=/Applications/LibreOffice.app/Contents/MacOS:$PATH oasis-env/bin/python <xlsx skill>/scripts/recalc.py <xlsx> 300`,
 the recalc.py path is `~/.claude/skills/synced/*/xlsx/scripts/recalc.py`).
 
@@ -15510,6 +15511,10 @@ the recalc.py path is `~/.claude/skills/synced/*/xlsx/scripts/recalc.py`).
    - §14.38 with the V2 results and the V1-vs-V2 comparison (plain tables first, then bias, in plain words).
    - Update §0.2, the §14.32 status, the change history and memory.
    - Commit and push (never `upstream`).
+
+**V2 pooled first look (results.json, not yet checked):** total engagement grid (reader|poster) qwen 109.9 / 104.6 /
+130.9; llama 216.0 / 216.3 / 211.7; gemma 91.0 / 89.0 / 91.8. Bias (total engagement): qwen-llama +5.6 (−2.8 to
++13.5), qwen-gemma −20.1 (−28.3 to −12.4), llama-gemma +7.5 (−0.9 to +15.8). Upvote: llama-gemma −4.0 (−7.8 to −0.0).
 
 **V2 run facts:** round 103 (Fri 11:42 → Sat 09:14), 68,916 screens; post sets qwen 96, llama 107, gemma 25.
 Round 104 (→ Sat 22:10), 67,728 screens; qwen 96, llama 103, gemma 25. Preflight 110/110. No watchdog restarts.

@@ -64,14 +64,24 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-11 ~11:00): read this first
+## 0.2 Where things stand (2026-10-11 ~11:20): read this first
 
-- **>>> RESUME POINT (Gordon restarted the laptop Sun 2026-10-11 ~11:00). A new Claude: do the task in §14.37
-  ("NEXT TASK"), step by step. <<<**
+- **§14.37 is DONE (Sun 11:20). Results: §14.38.** V1 (rounds 101-102) and V2 (rounds 103-104) compared round by
+  round and pooled, for total engagement, engaged, did nothing and every one of the 27 actions:
+  - **Workbook:** `~/Desktop/LLM_Bias/LLM_Bias_Compare.xlsx` (+ `compare.json`), made by `make_compare.py`.
+  - **Page:** the Inside page (https://claude.ai/artifact/E1eicdgjHpgDzex2qj18hR), section 09, is a clickable
+    results explorer.
+  - The V2 per-version workbook `~/Desktop/LLM_Bias/V2/LLM_Bias_V2.xlsx` is recalculated (0 errors).
+- **Headline:** telling the AI which model it is (V2) did **not** change the own-AI bias: no clear V2 − V1 change for
+  any pair on any of the 30 measures. qwen vs gemma stays clearly negative (V1 −18.1, V2 −20.1: gemma's posts get
+  more from qwen, mostly comments). What V2 did change: **llama and gemma readers are less active overall** (llama
+  about −9, gemma about −4 to −5 actions per 100 screens), equally on every AI's posts.
+- Nothing is running. Meeting with the professor **Tue 2026-10-13**.
 - **V1 (rounds 101-102) and V2 (rounds 103-104) are BOTH COMPLETE.** All data is on the laptop in
   `data/llm_bias/v2_spark/` (rsynced Sun ~10:45; r103 + r104 have 45 files each). The Spark is idle; Gordon was
   told to remove the watchdog cron (verify: `crontab -l` on the Spark shows nothing).
-- Meeting with the professor **Tue 2026-10-13**.
+
+*Status as of 2026-10-11 ~11:00 (before §14.37 was done), kept as written:* V1 and V2 both complete, data on the laptop.
 
 *Status as of 2026-10-09 11:30, kept as written:*
 
@@ -13727,6 +13737,7 @@ and onward.*
 pilot: 14.12-14.15. Moving to the Spark and the engine: 14.16-14.26. The runs: 14.27-14.31f (bugs, preflight,
 pauses, the overnight kill, the watchdog). **Handoff: 14.32** (14.32a rule, 14.32b Spark setup commands, 14.32c code
 change history, 14.32d command cheat sheet). **Results: 14.33** (round 101). **Report and the Inside page: 14.34.**
+Round 102 + V1 pooled: 14.35. V1/V2 naming: 14.36. **V2 results and V1 vs V2, every round and action: 14.38.**
 
 ## 14.1 What the professor asked for (as relayed by Gordon)
 
@@ -15021,6 +15032,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 
 | 50649e3 | 10-09 11:01 | LD-44 wording: each AI's public name + maker (`MODEL_NAMES`); Mac `Host honda` with connection reuse + key login (§14.31i) |
 
+| (see git) | 10-11 11:20 | **`make_compare.py`**: rounds 101-104 + V1 vs V2, every measure (`LLM_Bias_Compare.xlsx`, `compare.json`); Inside page section 09 = results explorer, V2 answers, V2 timeline; `make_inside_v2.py` takes compare.json (§14.38) |
+
 | 8753c7c | 10-09 11:30 | **LD-45 V1/V2 naming**: `make_report_v2.py` pools per version (`LLM_Bias_<V>.xlsx`, `~/Desktop/LLM_Bias/<V>/`); Inside page: both versions, the code diff, V1 + V2 system messages, V2 commands + watchdog, key login; results.json now required (the 10:22 page had empty results) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
@@ -15457,7 +15470,7 @@ be LLM Bias V2 103 and 104 ... make sure all is consistent."
     requires it.
   - Checked in a headless browser: every new part is filled, no script errors, no sideways scrolling.
 
-## 14.37 NEXT TASK (Gordon, Sun 2026-10-11 ~10:50): compare all four rounds and V1 vs V2, in the workbook AND the page
+## 14.37 (DONE Sun 11:20, results in §14.38) NEXT TASK (Gordon, Sun 2026-10-11 ~10:50): compare all four rounds and V1 vs V2, in the workbook AND the page
 
 **Gordon's words:** "I want data comparisons between 101, 102, 103, 104, then data comparisons 101+102 against
 103+104. I want all the data, the metrics, starting with total engagement, then we can narrow it down into what actions
@@ -15520,3 +15533,92 @@ the recalc.py path is `~/.claude/skills/synced/*/xlsx/scripts/recalc.py`).
 Round 104 (→ Sat 22:10), 67,728 screens; qwen 96, llama 103, gemma 25. Preflight 110/110. No watchdog restarts.
 hsa303 ran a 53 GB job Fri evening (mild slowdown, 1.24 s/screen at worst).
 
+
+## 14.38 V2 results and V1 vs V2, every round and every action (done Sun 2026-10-11 ~11:20)
+
+§14.37 is done. Everything below is in three places that show the same numbers:
+- **Workbook** `~/Desktop/LLM_Bias/LLM_Bias_Compare.xlsx` (11 sheets: README, Total engagement, V1 vs V2, Round by
+  round, All grids, All biases, Posting turn, Noise floor, By stance, By topic, Unreadable). The long sheets have
+  filters. Blue cell = the 95% range is entirely above 0, orange = entirely below 0.
+- **Page** https://claude.ai/artifact/E1eicdgjHpgDzex2qj18hR, section 09 is now a results explorer: buttons for
+  "V1 vs V2", "Round by round", 101, 102, 103, 104, V1, V2; a picker for the measure (total engagement first, then
+  engaged, did nothing, each of the 27 actions); a clickable "every measure at a glance" table; stance/topic per
+  reader AI; posting, noise floor and unreadable per round. "What the AI sees" now also shows the real round-103
+  (V2) answers of the same user.
+- **V2 workbook** `~/Desktop/LLM_Bias/V2/LLM_Bias_V2.xlsx` (the per-version report, like V1's), recalculated with
+  LibreOffice: 142,069 formulas, 0 errors.
+
+Words used: a **screen** = one user looking at one post (one AI call). **Total engagement** = every action on a
+screen except "do nothing", per 100 screens (upvote + comment = 2). **Engaged** = % of screens with any action.
+**Baseline** = an AI reading its own AI's posts (the diagonal of the grid).
+
+### Plain table: total engagement (actions per 100 screens), reader AI (rows) × whose posts (columns)
+
+| Reader | V1: qwen | V1: llama | V1: gemma | V2: qwen | V2: llama | V2: gemma | V2 − V1 (qwen / llama / gemma posts) |
+|---|---|---|---|---|---|---|---|
+| qwen | **111.4** | 104.2 | 129.7 | **109.9** | 104.6 | 130.9 | −1.5 / +0.4 / +1.2 |
+| llama | 224.3 | **225.4** | 222.0 | 216.0 | **216.3** | 211.7 | **−8.2 / −9.1 / −10.3** |
+| gemma | 95.4 | 93.8 | **95.5** | 91.0 | 89.0 | **91.8** | **−4.4 / −4.8** / −3.7 |
+
+Bold change = its 95% range excludes 0. Screens: V1 133,068 (r101 67,963 + r102 65,105), V2 134,244 (r103 67,716 +
+r104 66,528).
+
+**In plain words:** telling the AI which model it is made **llama and gemma less active** as readers, on every
+AI's posts alike (llama about 9 fewer actions per 100 screens, gemma about 4-5 fewer; engaged % fell 2-5 points;
+llama downvoted 4-6 points less). qwen barely changed (its upvotes on its own posts rose 44.4% → 48.1%). Because
+the drop is the same whoever wrote the post, it does **not** show up as own-AI bias.
+
+### Own-AI bias (double difference; the same number whichever AI is called i)
+
+Above 0 = in this pair, posts get more engagement from the same AI that wrote them; below 0 = from the other AI.
+
+| Pair | 101 | 102 | 103 | 104 | **V1** | **V2** | **V2 − V1** | R102 − R101 | R104 − R103 |
+|---|---|---|---|---|---|---|---|---|---|
+| qwen vs llama | +6.3 | **+10.5** | +9.5 | +1.6 | **+8.4** (+0.8 to +15.6) | +5.6 (−2.1 to +12.8) | −2.8 (−13.7 to +7.6) | +4.3 | −8.0 |
+| qwen vs gemma | **−17.1** | **−19.3** | **−23.8** | **−16.5** | **−18.1** (−25.1 to −11.3) | **−20.1** (−28.0 to −11.6) | −2.0 (−12.5 to +8.6) | −2.1 | +7.3 |
+| llama vs gemma | +4.3 | +5.9 | +7.0 | +7.9 | +5.1 (−3.5 to +13.7) | +7.5 (−1.3 to +15.9) | +2.4 (−9.3 to +13.5) | +1.5 | +1.0 |
+
+Bold = 95% range excludes 0.
+- **qwen vs gemma** is the one solid result: in all 4 rounds, both versions, gemma's posts get more engagement from
+  qwen than qwen's own posts do (mainly comments: comment bias V1 −12.7, V2 −17.9, both clear).
+- **qwen vs llama** was clear in V1 (+8.4) and is positive but unclear in V2 (+5.6). Its "engaged" bias stays clear
+  in both (V1 +5.9, V2 +4.2): qwen ignores llama's posts more often than its own.
+- **llama vs gemma:** unclear in both versions on total engagement.
+- **V2 − V1: no clear change for any pair, on any of the 30 measures** (90 checks, 0 with a range excluding 0; by
+  chance alone about 4-5 would be expected). The changes are also no bigger than the wobble between two rounds of
+  the same version (R102 − R101, R104 − R103). **Answer to the V2 question: knowing which model it is did not change
+  how much an AI favours its own AI's posts.**
+
+### Narrowed to single actions (bias, V1 / V2, only where a range excludes 0)
+- **comment:** qwen-gemma −12.7 / −17.9 (both clear); qwen-llama +7.1 (clear) / unclear.
+- **upvote:** only llama-gemma in V2, −4.0 (−7.9 to −0.0), borderline; nothing in V1. No upvote bias otherwise.
+- **downvote:** V2 only: qwen-llama +3.4, qwen-gemma +6.4, llama-gemma +5.7 (all clear in V2, none in V1; the V2 −
+  V1 changes themselves are not clear).
+- **follow:** llama-gemma +1.8 / +2.1 (both clear, small). **refresh:** llama-gemma +1.4 / +1.2.
+- Group-chat actions are almost never used (join group: never).
+
+### Posting turn, noise floor, unreadable (per round)
+- **Posts written** (qwen / llama / gemma): r101 101/103/25, r102 94/105/23, r103 96/107/25, r104 96/103/25. gemma
+  wrote no sports posts in V1 (shown as "–" in the by-topic tables).
+- **Noise floor** (same AI re-reads 400 screens with new randomness): same engaged/not decision 90-97% in every
+  round; total engagement first vs re-read within ~8 per 100 screens. Similar in V1 and V2.
+- **Unreadable** screens: r101 50, r102 829 (the out-of-memory night, §14.31i), r103 0, r104 0. Left out everywhere.
+
+### How it was made, and the checks
+- New script `examples/experiment/llm_bias/make_compare.py` (`oasis-env/bin/python ... make_compare.py
+  data/llm_bias/v2_spark ~/Desktop/LLM_Bias`, ~10 s). 95% ranges: 1,000 resamples of users and posts with numpy;
+  the same user draw is used for every round (same 100 people), post keys are unique per round.
+- **Check 1:** every round's 9 cells × 30 measures and every bias point estimate equal `analyze_v2.py` run on that
+  round alone (scratchpad symlink trick): 0 mismatches.
+- **Check 2:** V1 pooled = §14.35 exactly (+8.4 / −18.1 / +5.1); V2 = the first look in §14.37. Ranges within
+  ~0.5 of `analyze_v2.boot` (e.g. qwen-llama V1 +0.8 to +15.6 vs +0.7 to +15.1).
+- **Check 3:** the page in headless Chromium: all 8 comparisons × 30 measures (240 combinations) render, 0 console
+  errors, no "undefined"/"NaN", no sideways scroll at phone width (390 px); row clicks and the stance/topic chips work.
+- **Check 4:** the comparison workbook rendered to PDF and looked at; column widths fixed (bias tables were showing
+  "###"). Values only, no formulas (nothing to recalculate).
+- **Wording fix:** the double difference is symmetric (bias(i, j) = bias(j, i)), so the page and the workbook now say
+  "in this pair, posts get more from the same AI that wrote them" instead of "i favours its own posts".
+- `make_inside_v2.py` now takes `compare.json` as its 3rd argument (it replaces V1's results.json) and shows
+  `make_compare.py` in the code browser.
+
+**Next:** meeting with the professor Tue 2026-10-13. Nothing is running; no new runs are planned until Gordon decides.

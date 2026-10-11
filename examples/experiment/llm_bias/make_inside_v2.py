@@ -1,8 +1,8 @@
 """Build the 'Inside LLM Bias' page (V1 = rounds 101-102, V2 = rounds 103-104): one HTML file with every code file
-(click to read it), the exact prompts the AIs receive in V1 and V2, real answers from round 101, every Spark command,
-and how the pieces fit.
+(click to read it), the exact prompts the AIs receive in V1 and V2, real answers from rounds 101 and 103, every Spark
+command, how the pieces fit, and the results explorer (every round, V1 vs V2, every action).
 
-    python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark <out.html> ~/Desktop/LLM_Bias/V1/results.json
+    python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark <out.html> ~/Desktop/LLM_Bias/compare.json
 
 The page text lives in inside_v2_template.html; this script only fills in the data (file sources, line numbers of the
 functions the text points to, real prompts and answers), so the code shown is always the code in the repo.
@@ -55,6 +55,11 @@ FILES = [
      "3x3 engagement grids for every action (formulas), bias, stance, topic, posting, posts, people, noise, time per step, and "
      "the time-vs-users and time-vs-rounds graphs. Pools rounds only within one version (V1 or V2).",
      "Written 7 Oct (dfc3a2e); per-version since 9 Oct."),
+    (X + "make_compare.py", "new", "Every round and V1 vs V2, every measure",
+     "Rounds 101-104, V1 (101+102) and V2 (103+104): the 3x3 grid and the own-AI bias for total engagement, engaged, did "
+     "nothing and each of the 27 actions, with 95% ranges, and the changes V2 - V1, R102 - R101, R104 - R103. Writes "
+     "compare.json (the results explorer on this page) and LLM_Bias_Compare.xlsx.",
+     "Written 11 Oct 2026 (log 14.37-14.38). numpy bootstrap; checked against analyze_v2.py on every round."),
     (X + "build_population_v2.py", "new", "Makes the 100 pinned users from US data",
      "Census 2024 (age, sex, state), Census 2020 (city or countryside), CPS 2024 (schooling), BLS (work), Pew 2025 (who uses "
      "social media). Big Five personality, and topic stances from an orthogonal array: 20 users per stance per topic.",
@@ -154,7 +159,7 @@ refs = {
 people = json.load(open(os.path.join(HERE, "personas_v2.json")))
 u0 = people[0]
 subs = "\n".join(f"- {s} ({n})" for s, n in run_v2.TOPICS.values())
-rows = lambda f: [json.loads(l) for l in open(os.path.join(RES, "r101", f))]
+rows = lambda f, rd=101: [json.loads(l) for l in open(os.path.join(RES, f"r{rd}", f))]
 posting = {m: next(d for d in rows(f"posting_{m.replace(':', '-')}.jsonl") if d["user_id"] == 0) for m in run_v2.MODELS}
 post_key = "r101|qwen3-8b|u73|0"
 q = next({"title": a["title"], "body": a["body"], "sub": a.get("subreddit"), "author": d["username"]}
@@ -163,6 +168,27 @@ t = run_v2.topic_of(q["sub"])
 sub, tname = run_v2.TOPICS[t]
 reading = {m: next((d for d in rows(f"reading_qwen3-8b__{m.replace(':', '-')}.jsonl")
                     if d["user_id"] == 0 and d["post_key"] == post_key and not d["draw"]), None) for m in run_v2.MODELS}
+# V2: the same user in round 103 (posting), and a post by the same author (u73) in qwen's round-103 set (reading)
+posting_v2 = {m: next(d for d in rows(f"posting_{m.replace(':', '-')}.jsonl", 103) if d["user_id"] == 0) for m in run_v2.MODELS}
+q2 = next({"title": a["title"], "body": a["body"], "sub": a.get("subreddit"), "author": d["username"]}
+          for d in rows("posting_qwen3-8b.jsonl", 103) if d["user_id"] == 73 for a in d["actions"] if a["action"] == "create_post")
+t2 = run_v2.topic_of(q2["sub"])
+reading_v2 = {m: next((d for d in rows(f"reading_qwen3-8b__{m.replace(':', '-')}.jsonl", 103)
+                       if d["user_id"] == 0 and d["post_key"] == "r103|qwen3-8b|u73|0" and not d["draw"]), None) for m in run_v2.MODELS}
+ans = lambda d: {"raw": d.get("raw"), "seconds": d.get("latency_s"), "in": d.get("prompt_tokens"), "out": d.get("eval_tokens")} if d else None
+
+
+def compact(x):
+    """compare.json for the page: floats to 3 decimals (the page shows 1)."""
+    if isinstance(x, float):
+        return round(x, 3)
+    if isinstance(x, dict):
+        return {k: compact(v) for k, v in x.items()}
+    if isinstance(x, list):
+        return [compact(v) for v in x]
+    return x
+
+
 data = {
     "files": files, "refs": refs,
     "post_prompt": {"system": run_v2.system_prompt("qwen3:8b", 101, u0["persona"]),
@@ -189,8 +215,11 @@ data = {
                "+ def system_prompt(model, rnd, persona):\n"
                "+     return SYSTEM.format(identity=SELF_ID.format(model=MODEL_NAMES.get(model, model))\n"
                "+                          if rnd >= SELF_ID_FROM_ROUND else \"\", persona=persona)"),
+    "post_answers_v2": {m: ans(d) for m, d in posting_v2.items()},
+    "read_post_v2": {**q2, "sub": run_v2.TOPICS[t2][0], "tname": run_v2.TOPICS[t2][1], "stance": u0["stances"][t2]},
+    "read_answers_v2": {m: ans(d) for m, d in reading_v2.items()},
     "user0": {"username": u0["username"], "persona": u0["persona"]},
-    "results": json.load(open(sys.argv[3])),  # results.json from make_report_v2.py (V1); required, or the page has no results
+    "compare": compact(json.load(open(sys.argv[3]))),  # compare.json from make_compare.py; required, or the page has no results
 }
 tpl = open(os.path.join(HERE, "inside_v2_template.html")).read()
 blob = json.dumps(data).replace("</", "<\\/")

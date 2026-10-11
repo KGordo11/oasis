@@ -156,6 +156,32 @@ td.diag{font-weight:600;background:var(--soft)}
 pre.mermaid{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:14px;overflow-x:auto}
 .prompt mark{background:rgba(255,214,102,.3);color:#fff;border-radius:3px;padding:0 2px}
 .note{border-left:3px solid var(--accent);padding:6px 0 6px 14px;margin:14px 0;color:var(--ink);max-width:76ch}
+
+/* results explorer */
+.xctl{position:sticky;top:44px;z-index:10;background:color-mix(in srgb,var(--paper) 94%,transparent);backdrop-filter:blur(6px);padding:10px 0;border-bottom:1px solid var(--rule);margin:18px 0 6px;display:grid;gap:8px}
+.xrow{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.xrow .lab{font:600 11.5px var(--mono);letter-spacing:.07em;text-transform:uppercase;color:var(--muted);min-width:70px}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg button,.chips button{font:500 13.5px var(--body);border:1px solid var(--rule);background:var(--panel);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+.seg button[aria-pressed="true"],.chips button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg button:focus-visible,.chips button:focus-visible,#x_metric:focus-visible,#x_all tr:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+#x_metric{font:500 14px var(--body);padding:6px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--panel);color:var(--ink);max-width:100%}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}
+.grids{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.grids>div{min-width:0}
+.grids .gt{font:600 14px var(--body);margin:0 0 6px}
+td .rng{display:block;font-size:11.5px;color:var(--muted);white-space:nowrap}
+td.pos{background:color-mix(in srgb,var(--accent) 18%,var(--panel))}
+td.neg{background:color-mix(in srgb,var(--spark) 18%,var(--panel))}
+td.zero{color:var(--muted)}
+.key{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-1px;margin:0 4px 0 2px}
+.key.pos{background:color-mix(in srgb,var(--accent) 35%,var(--panel))}.key.neg{background:color-mix(in srgb,var(--spark) 35%,var(--panel))}
+#x_all tr.pick{cursor:pointer}
+#x_all tr.pick:hover td{background:var(--soft)}
+#x_all tr.cur td{box-shadow:inset 0 -2px 0 var(--accent)}
+.verdict{font-size:16px;max-width:80ch}
+.verdict li{margin:4px 0}
+@media (max-width:700px){.xctl{position:static}}
 </style>
 
 <nav class="bar" aria-label="Sections"><div class="wrap">
@@ -180,7 +206,7 @@ pre.mermaid{background:var(--panel);border:1px solid var(--rule);border-radius:1
     <div><b>100</b><span>pinned users, the same in every round</span></div>
     <div><b>3</b><span>AIs: qwen3:8b · llama3.1:8b · gemma3:12b</span></div>
     <div><b>27</b><span>OASIS actions on every screen</span></div>
-    <div><b id="f_screens">133,068</b><span id="f_screens_l">reading screens in V1 (rounds 101 + 102)</span></div>
+    <div><b id="f_screens">267,312</b><span id="f_screens_l">reading screens: V1 133,068 + V2 134,244</span></div>
     <div><b>2</b><span>versions: V1 = rounds 101-102, V2 = rounds 103-104</span></div>
     <div><b>12.1 h</b><span>one full round, GPU to ourselves</span></div>
   </div>
@@ -338,8 +364,10 @@ flowchart LR
     <div class="prompt"><div class="lbl"><span>system message · V2 (qwen shown)</span><span>rounds 103-104, both turns</span></div><pre id="p_sys2"></pre></div>
   </div>
   <div class="prompt" style="margin-top:14px"><div class="lbl"><span>user message: the screen</span><span>posting turn, V1 and V2</span></div><pre id="p_user"></pre></div>
-  <p style="margin-top:14px">What each AI answered as this same user in round 101 (V1, word for word). V2 answers appear here once round 103 is in:</p>
+  <p style="margin-top:14px">What each AI answered as this same user in <b>round 101 (V1)</b>, word for word:</p>
   <div class="grid2" id="p_answers" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))"></div>
+  <p style="margin-top:14px">And in <b>round 103 (V2)</b>, when each AI was also told which model it is:</p>
+  <div class="grid2" id="p_answers2" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))"></div>
 
   <h3>Reading turn: one post on the screen</h3>
   <p>The same user is shown a post written in qwen's posting turn by user <b id="r_author"></b>. This user's stance on
@@ -347,6 +375,9 @@ flowchart LR
   <div class="prompt"><div class="lbl"><span>user message: the screen</span><span>reading turn (system message as above, V1 or V2)</span></div><pre id="r_user"></pre></div>
   <p style="margin-top:14px">The same screen, played by each AI (round 101, V1; the qwen answer is the baseline):</p>
   <div class="grid2" id="r_answers" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))"></div>
+  <p style="margin-top:14px"><b>V2, round 103:</b> every post set is new each round, so here is the post the same author (<b id="r2_author"></b>)
+  wrote in qwen's round-103 set, <i id="r2_title"></i> (<span id="r2_topic"></span>; this user's stance: <b id="r2_stance"></b>), read by the same user:</p>
+  <div class="grid2" id="r_answers2" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr))"></div>
 
   <h3>What the AI can and cannot see</h3>
   <div class="seeno">
@@ -429,7 +460,11 @@ flowchart LR
     <li class="bad"><time>Thu 15:19 - Fri 00:44</time>The Spark runs out of memory (our gemma + another user's ~50 GB job share 121 GB). gemma reading qwen slows from ~1 to 11.7 s per screen, SSH logins time out, and 829 screens time out (left out as unreadable). No reboot; the runner kept going.</li>
     <li><time>Fri 9 Oct 02:03</time><b>Round 102 complete</b>: 67,134 screens. The runner stops itself; watchdog removed. <b>V1 done.</b></li>
     <li><time>Fri 9 Oct 10:00-11:00</time>V2 coded: each AI is told which model it is (LD-44). Key login + connection reuse set up for SSH.</li>
-    <li><time>Fri 9 Oct 11:05</time>Preflight for V2 on the Spark (110 checks). Then rounds 103-104 start, with a new watchdog; STOP Mon 12 Oct 12:00.</li>
+    <li><time>Fri 9 Oct 11:05</time>Preflight for V2 on the Spark: 110/110 ALL CLEAR. Rounds 103-104 start at 11:42, with a new watchdog; STOP Mon 12 Oct 12:00.</li>
+    <li><time>Fri 9 Oct evening</time>The other user runs a 53 GB job: a mild slowdown (1.24 s per screen at worst), no crash, no watchdog restarts.</li>
+    <li><time>Sat 10 Oct 09:14</time><b>Round 103 complete</b>: 68,916 screens (post sets: qwen 96, llama 107, gemma 25).</li>
+    <li><time>Sat 10 Oct 22:10</time><b>Round 104 complete</b>: 67,728 screens (qwen 96, llama 103, gemma 25). The runner stops itself. <b>V2 done.</b></li>
+    <li><time>Sun 11 Oct</time>Data copied to the laptop; V2 workbook, the V1-vs-V2 comparison workbook and the results explorer below built and checked.</li>
   </ul>
 </section>
 
@@ -452,35 +487,56 @@ flowchart LR
     <tr><td><code>….log</code></td><td>step</td><td>progress lines: screens done, seconds each, the running action counts</td></tr>
     <tr><td><code>night.log</code></td><td>whole run</td><td>every step's start and end with screens, minutes and seconds per screen; the source of the time graphs</td></tr>
   </table></div>
-  <p style="margin-top:14px"><b>On the laptop:</b> one folder per version, <code>~/Desktop/LLM_Bias/V1/LLM_Bias_V1.xlsx</code> (and
-  <code>V2/LLM_Bias_V2.xlsx</code> once rounds 103-104 are in): 12 tabs in colour-coded groups (results, behaviour,
+  <p style="margin-top:14px"><b>On the laptop:</b> one folder per version, <code>~/Desktop/LLM_Bias/V1/LLM_Bias_V1.xlsx</code> and
+  <code>V2/LLM_Bias_V2.xlsx</code>: 12 tabs in colour-coded groups (results, behaviour,
   who and what, the run, raw data). Each graph sits on the tab it belongs to, beside or below its table. A round picker
   on 'Engagement 3x3' switches every grid between one round and that version's complete rounds pooled. Also
   <code>graphs/</code> in each version's folder (the same 14 graphs as PNG files). Rebuild them with <code>make_report_v2.py</code>. The full written record is
-  <code>RESEARCH_LOG.md</code> Part 14 (handoff in §14.32, round 101 results in §14.33, round 102 and the pooled V1 results in §14.35, the V1/V2 naming in §14.36).</p>
+  <code>RESEARCH_LOG.md</code> Part 14 (handoff in §14.32, round 101 results in §14.33, round 102 and the pooled V1 results in §14.35, the V1/V2 naming in §14.36,
+  V2 and the V1-vs-V2 comparison in §14.38).</p>
+  <p><b>The comparison:</b> <code>~/Desktop/LLM_Bias/LLM_Bias_Compare.xlsx</code> (made by <code>make_compare.py</code>) has every number in the
+  results explorer below: rounds 101-104 and V1 vs V2 for total engagement, engaged, did nothing and each of the 27 actions, the own-AI bias
+  with 95% ranges, the changes, and long tables with filters. <code>compare.json</code> next to it is the same data, which this page reads.</p>
 </section>
 
 <section id="results">
   <div class="eyebrow">09 · Results</div>
-  <h2 id="res_h">Results</h2>
-  <p class="note"><b>V1 results below</b> (rounds 101 + 102). <b>V2</b> (rounds 103-104) is running; its results, and the V1-vs-V2
-  comparison, are added here when it finishes.</p>
+  <h2>Every round, V1 vs V2, every action</h2>
+  <p class="note" id="x_head"></p>
   <p><b>The main measure is total engagement</b>: every action a user takes on a screen across all 27 actions, except "do nothing",
-  counted per 100 screens. A user who upvotes and comments counts 2. <b>Engaged</b> is the share of screens with at least one action.
-  Upvotes alone are shown as detail.</p>
-  <div class="grid2">
-    <div><p class="muted">Total engagement: actions per 100 screens (diagonal = baseline)</p><div class="tablewrap"><table id="t_tot"></table></div></div>
-    <div><p class="muted">Engaged: % of screens with at least one action</p><div class="tablewrap"><table id="t_any"></table></div></div>
+  counted per 100 screens (a user who upvotes and comments counts 2). <b>Engaged</b> = % of screens with at least one action;
+  <b>did nothing</b> = % with none; each single action = % of screens where the user took it.</p>
+  <p><b>Own-AI bias</b> for a pair of AIs = (i reads i − j reads i) − (i reads j − j reads j). It is the same number whichever AI you call i.
+  <b>Above 0</b>: in this pair, posts get more of the measure from the same AI that wrote them. <b>Below 0</b>: posts get more from the
+  other AI. The <b>95% range</b> comes from 1,000 re-draws of users and posts; if it crosses 0, the data can't tell the bias from chance.
+  <span class="key pos"></span>range above 0 <span class="key neg"></span>range below 0.</p>
+  <div class="xctl" role="region" aria-label="Choose what to compare">
+    <div class="xrow"><span class="lab">Compare</span><div class="seg" id="x_mode" role="group" aria-label="Comparison"></div></div>
+    <div class="xrow"><span class="lab">Measure</span><select id="x_metric" aria-label="Measure"></select><span class="muted" id="x_unit"></span></div>
   </div>
+  <h3 id="x_title" style="margin-top:18px"></h3>
+  <ul class="verdict" id="x_verdict"></ul>
+  <div class="grids" id="x_grids"></div>
   <h3>Own-AI bias</h3>
-  <p class="muted">Above 0 = the AI favours its own AI's posts; below 0 = it favours the other AI's posts. A 95% range that crosses 0 means
-  no clear bias. Total engagement is in actions per 100 screens; engaged and upvote are in percentage points.</p>
-  <div class="tablewrap"><table id="t_bias"></table></div>
+  <div class="tablewrap"><table id="x_bias"></table></div>
+  <h3>Every measure at a glance</h3>
+  <p class="muted">Same comparison, every measure in one table. Click a row to look at that measure above.</p>
+  <div class="tablewrap"><table id="x_all"></table></div>
+  <h3>By the reader's stance, and by topic</h3>
+  <p class="muted">Does the AI play the person? Stance = how this user feels about the post's topic. Total engagement, engaged and upvote only
+  (other measures show total engagement here). "–" = that AI wrote no posts on that topic in that round.</p>
+  <div class="chips" id="x_split" role="group" aria-label="Split by"></div>
+  <div class="chips" id="x_reader" role="group" aria-label="Reader AI"></div>
+  <div class="tablewrap"><table id="x_splitt"></table></div>
+  <h3>Posting turn</h3>
+  <p class="muted">Empty feed, every action available, nobody told to post. The posts written become that AI's post set for the round.</p>
+  <div class="tablewrap"><table id="x_post"></table></div>
   <h3>Noise floor</h3>
-  <p class="muted">The same AI re-reads the same post as the same user with fresh randomness. A real bias has to be bigger than this wobble.</p>
-  <div class="tablewrap"><table id="t_noise"></table></div>
-  <p style="margin-top:14px" id="res_text"></p>
-  <p class="muted">Upvote grid, for reference:</p><div class="tablewrap"><table id="t_up"></table></div>
+  <p class="muted">The same AI re-reads 4 of its own AI's posts per user with fresh randomness. A real bias has to be bigger than this wobble.</p>
+  <div class="tablewrap"><table id="x_noise"></table></div>
+  <h3>Unreadable answers</h3>
+  <p class="muted">Screens whose answer could not be read after 3 tries (or timed out). Left out of every number above.</p>
+  <div class="tablewrap"><table id="x_unread"></table></div>
 </section>
 </main>
 
@@ -546,34 +602,140 @@ $("#selfid_list").innerHTML = Object.values(D.self_id.all).map(t=>`<li><code>${e
 $("#v2diff").textContent = D.v2diff;
 $("#p_user").textContent = D.post_prompt.user;
 answers($("#p_answers"), D.post_answers);
+answers($("#p_answers2"), D.post_answers_v2);
 $("#r_author").textContent = "u/" + D.read_post.author;
 $("#r_topic").textContent = D.read_post.tname;
 $("#r_stance").textContent = D.read_post.stance;
 $("#r_user").textContent = D.read_prompt.user;
 answers($("#r_answers"), D.read_answers, m => m==="qwen3:8b" ? " (baseline)" : "");
+$("#r2_author").textContent = "u/" + D.read_post_v2.author;
+$("#r2_title").textContent = "\u201c" + D.read_post_v2.title + "\u201d";
+$("#r2_topic").textContent = D.read_post_v2.tname;
+$("#r2_stance").textContent = D.read_post_v2.stance;
+answers($("#r_answers2"), D.read_answers_v2, m => m==="qwen3:8b" ? " (baseline)" : "");
 $("#m_meta").textContent = `${D.read_post.sub} · posted by u/${D.read_post.author}`;
 $("#m_title").textContent = D.read_post.title;
 $("#m_body").textContent = D.read_post.body;
 $("#m_prompt").textContent = "SYSTEM:\n" + D.read_prompt.system + "\n\nUSER:\n" + D.read_prompt.user;
 
 
-/* ---------- results (from make_report_v2.py's results.json) ---------- */
-if (D.results) try {
-  const R = D.results, M = ["qwen3:8b","llama3.1:8b","gemma3:12b"], S = {"qwen3:8b":"qwen","llama3.1:8b":"llama","gemma3:12b":"gemma"}, DOT = {"qwen3:8b":"q","llama3.1:8b":"l","gemma3:12b":"g"};
-  $("#res_h").textContent = R.label + ": total engagement and own-AI bias";
-  const grid = (id, g, suf) => { $(id).innerHTML = `<tr><th>Reader ↓ / posts by →</th>${M.map(m=>`<th class="num">${S[m]}</th>`).join("")}</tr>` +
-    M.map(m=>`<tr><td><span class="dot ${DOT[m]}"></span>${S[m]}</td>${M.map(pb=>`<td class="num${m===pb?" diag":""}">${g[m+"|"+pb].toFixed(1)}${suf}</td>`).join("")}</tr>`).join(""); };
-  grid("#t_tot", R.tot, ""); grid("#t_any", R.any, "%"); grid("#t_up", R.up, "%");
-  const f = v => (v>0?"+":"") + v.toFixed(1).replace("-","−");
-  const cell = ([v,lo,hi]) => `${f(v)} <span class="muted">(${f(lo)} to ${f(hi)})</span>`;
-  const verdict = ([v,lo,hi]) => lo>0 ? "favours its own AI" : hi<0 ? "favours the other AI" : "no clear bias";
-  $("#t_bias").innerHTML = `<tr><th>Pair (i vs j)</th><th class="num">Total engagement</th><th>Reading</th><th class="num">Engaged</th><th class="num">Upvote</th></tr>` +
-    R.bias.map(b=>`<tr><td>${S[b.i]} vs ${S[b.j]}</td><td class="num"><b>${cell(b.tot)}</b></td><td>${verdict(b.tot)}</td><td class="num">${cell(b.any)}</td><td class="num">${cell(b.up)}</td></tr>`).join("");
-  $("#t_noise").innerHTML = `<tr><th>AI</th><th class="num">Screens</th><th class="num">Same engaged / not</th><th class="num">Same number of actions</th><th class="num">Total engagement: first → re-read</th></tr>` +
-    M.filter(m=>R.noise[m]).map(m=>{const n=R.noise[m]; return `<tr><td><span class="dot ${DOT[m]}"></span>${S[m]}</td><td class="num">${n.n}</td><td class="num">${n.same_eng.toFixed(1)}%</td><td class="num">${n.same_n.toFixed(1)}%</td><td class="num">${n.ta.toFixed(1)} → ${n.tb.toFixed(1)}</td></tr>`}).join("");
-  const clear = R.bias.filter(b=>b.tot[1]>0||b.tot[2]<0);
-  $("#res_text").textContent = (clear.length ? "Clear total-engagement bias: " + clear.map(b=>`${S[b.i]} vs ${S[b.j]} ${f(b.tot[0])} (${verdict(b.tot)})`).join("; ") + ". " : "No pair shows a clear total-engagement bias. ") +
-    `Based on ${R.screens.toLocaleString()} reading screens (${R.label}). Each AI has a strong engagement style of its own (look along a row), which the double difference removes.`;
+/* ---------- results explorer (from make_compare.py's compare.json) ---------- */
+if (D.compare) try {
+  const C = D.compare, M = C.models, S = C.short, DOT = {"qwen3:8b":"q","llama3.1:8b":"l","gemma3:12b":"g"};
+  const MET = Object.fromEntries(C.metrics.map(m=>[m.key,m]));
+  const MODES = [["V1v2","V1 vs V2"],["rounds","Round by round"],["R101","101"],["R102","102"],["R103","103"],["R104","104"],["V1","V1 (101+102)"],["V2","V2 (103+104)"]];
+  const MODE_TXT = Object.fromEntries(MODES);
+  const RV = ["R101","R102","R103","R104"];
+  let mode = "V1v2", metric = "tot", reader = M[0], split = "stance";
+  const f = v => { if (v==null) return "–"; const r = Math.round(v*10)/10; return r===0 ? "0.0" : (r>0?"+":"−") + Math.abs(r).toFixed(1); };
+  const n1 = v => v==null ? "–" : v.toFixed(1);
+  const sig = (lo,hi) => lo!=null && lo>0 ? "pos" : hi!=null && hi<0 ? "neg" : "";
+  const srng = (lo,hi) => lo==null ? "" : `<span class="rng">${f(lo)} to ${f(hi)}</span>`;
+  const prng = (lo,hi) => lo==null ? "" : `<span class="rng">${n1(lo)}–${n1(hi)}</span>`;
+  const word = (lo,hi) => lo==null ? "–" : lo>0 ? "own AI's posts favoured" : hi<0 ? "other AI's posts favoured" : "no clear bias";
+  const cword = (lo,hi) => lo==null ? "–" : lo>0 ? "clearly higher in V2" : hi<0 ? "clearly lower in V2" : "no clear change";
+  const pn = b => `${S[b.i]} vs ${S[b.j]}`;
+  const views = () => mode==="V1v2" ? ["V1","V2"] : mode==="rounds" ? RV : [mode];
+  const rounds = () => [...new Set(views().flatMap(v=>C.views[v].rounds))];
+  const vname = v => v.startsWith("R") ? v.slice(1) : v;
+  const never = (v,mk) => M.every(m=>M.every(pb=>C.grid[v][mk][m+"|"+pb][0]===0));
+  const dot = m => `<span class="dot ${DOT[m]}"></span>${S[m]}`;
+  const unit = () => MET[metric].unit;
+
+  function grid(title, cell){
+    return `<div><p class="gt">${title}</p><div class="tablewrap"><table><tr><th>Reader ↓ / posts by →</th>${M.map(m=>`<th class="num">${S[m]}</th>`).join("")}</tr>` +
+      M.map(m=>`<tr><td>${dot(m)}</td>${M.map(pb=>cell(m,pb)).join("")}</tr>`).join("") + `</table></div></div>`;
+  }
+  const plainCell = v => (m,pb) => { const [x,lo,hi,n] = C.grid[v][metric][m+"|"+pb];
+    return `<td class="num${m===pb?" diag":""}${x===0?" zero":""}" title="${n.toLocaleString()} screens">${n1(x)}${prng(lo,hi)}</td>`; };
+  const chgCell = c => (m,pb) => { const [x,lo,hi] = C.contrast[c].grid[metric][m+"|"+pb];
+    return `<td class="num ${sig(lo,hi)}">${f(x)}${srng(lo,hi)}</td>`; };
+
+  function drawControls(){
+    $("#x_mode").innerHTML = MODES.map(([k,t])=>`<button type="button" data-k="${k}" aria-pressed="${k===mode}">${t}</button>`).join("");
+    $("#x_split").innerHTML = [["stance","By stance"],["topic","By topic"]].map(([k,t])=>`<button type="button" data-k="${k}" aria-pressed="${k===split}">${t}</button>`).join("");
+    $("#x_reader").innerHTML = M.map(m=>`<button type="button" data-k="${m}" aria-pressed="${m===reader}">${S[m]} reads</button>`).join("");
+  }
+  $("#x_metric").innerHTML = `<optgroup label="Overall">${C.metrics.slice(0,3).map(m=>`<option value="${m.key}">${esc(m.name)}</option>`).join("")}</optgroup>` +
+    `<optgroup label="Each of the 27 actions">${C.metrics.slice(3).map(m=>`<option value="${m.key}">${esc(m.name)}</option>`).join("")}</optgroup>`;
+
+  function draw(){
+    drawControls();
+    $("#x_metric").value = metric;
+    $("#x_unit").textContent = unit();
+    $("#x_title").textContent = `${MET[metric].name} · ${MODE_TXT[mode]}`;
+    const B = v => C.bias[v][metric], CB = c => C.contrast[c].bias[metric];
+    // plain-words verdict
+    let L = [];
+    if (views().every(v=>never(v,metric))) L.push(`Nobody took this action in ${views().map(vname).join(", ")}: every cell is 0.`);
+    else if (mode==="V1v2") {
+      L = CB("V2-V1").map((c,p)=>{ const a = B("V1")[p], b = B("V2")[p];
+        return `<b>${pn(c)}</b>: V1 ${f(a.v)} (${word(a.lo,a.hi)}), V2 ${f(b.v)} (${word(b.lo,b.hi)}). Change ${f(c.v)} (${f(c.lo)} to ${f(c.hi)}): <b>${cword(c.lo,c.hi)}</b>.`; });
+    } else if (mode==="rounds") {
+      L = B("R101").map((_,p)=>{ const bs = RV.map(v=>B(v)[p]); const own = bs.filter(b=>b.lo>0).length, oth = bs.filter(b=>b.hi<0).length;
+        return `<b>${pn(bs[0])}</b>: ${bs.map((b,k)=>`${vname(RV[k])} ${f(b.v)}`).join(", ")}. Clear in ${own+oth} of 4 rounds` +
+          (own ? ` (${own}× own AI's posts favoured)` : "") + (oth ? ` (${oth}× other AI's posts favoured)` : "") + "."; });
+    } else L = B(mode).map(b=>`<b>${pn(b)}</b>: ${f(b.v)} (${f(b.lo)} to ${f(b.hi)}): <b>${word(b.lo,b.hi)}</b>.`);
+    $("#x_verdict").innerHTML = L.map(x=>`<li>${x}</li>`).join("");
+    // grids
+    if (mode==="V1v2") $("#x_grids").innerHTML = grid("V1 (rounds 101 + 102)", plainCell("V1")) + grid("V2 (rounds 103 + 104)", plainCell("V2")) + grid("Change: V2 − V1", chgCell("V2-V1"));
+    else if (mode==="rounds") $("#x_grids").innerHTML = `<div style="grid-column:1/-1"><div class="tablewrap"><table><tr><th>Reader</th><th>Posts by</th>${RV.map(v=>`<th class="num">${vname(v)}</th>`).join("")}<th class="num">V1</th><th class="num">V2</th><th class="num">V2 − V1</th></tr>` +
+      M.flatMap(m=>M.map(pb=>{ const k = m+"|"+pb, c = C.contrast["V2-V1"].grid[metric][k];
+        return `<tr><td>${dot(m)}</td><td>${S[pb]}${m===pb?" <span class=muted>(baseline)</span>":""}</td>${[...RV,"V1","V2"].map(v=>`<td class="num${m===pb?" diag":""}">${n1(C.grid[v][metric][k][0])}</td>`).join("")}<td class="num ${sig(c[1],c[2])}">${f(c[0])}${srng(c[1],c[2])}</td></tr>`; })).join("") + `</table></div></div>`;
+    else $("#x_grids").innerHTML = grid(`${C.views[mode].label}: ${unit()} (small: 95% range)`, plainCell(mode));
+    // bias table
+    const bc = b => `<td class="num ${sig(b.lo,b.hi)}"><b>${f(b.v)}</b>${srng(b.lo,b.hi)}</td>`;
+    if (mode==="V1v2") $("#x_bias").innerHTML = `<tr><th>Pair</th><th class="num">V1</th><th class="num">V2</th><th class="num">V2 − V1</th><th>Change</th><th class="num">R102 − R101</th><th class="num">R104 − R103</th></tr>` +
+      CB("V2-V1").map((c,p)=>`<tr><td>${pn(c)}</td>${bc(B("V1")[p])}${bc(B("V2")[p])}${bc(c)}<td>${cword(c.lo,c.hi)}</td>${bc(CB("R102-R101")[p])}${bc(CB("R104-R103")[p])}</tr>`).join("") +
+      `<tr><td colspan="7" class="muted" style="font-size:13px">R102 − R101 and R104 − R103: how much the bias moves between two rounds of the same version. A real V1-vs-V2 change should be bigger than that.</td></tr>`;
+    else if (mode==="rounds") $("#x_bias").innerHTML = `<tr><th>Pair</th>${RV.map(v=>`<th class="num">${vname(v)}</th>`).join("")}<th class="num">V1</th><th class="num">V2</th></tr>` +
+      B("R101").map((_,p)=>`<tr><td>${pn(B("R101")[p])}</td>${[...RV,"V1","V2"].map(v=>bc(B(v)[p])).join("")}</tr>`).join("");
+    else $("#x_bias").innerHTML = `<tr><th>Pair</th><th class="num">Bias (95% range)</th><th>Reading</th></tr>` + B(mode).map(b=>`<tr><td>${pn(b)}</td>${bc(b)}<td>${word(b.lo,b.hi)}</td></tr>`).join("");
+    // every measure at a glance
+    const P3 = C.bias.V1.tot.map(pn);
+    let head, row;
+    if (mode==="V1v2") {
+      head = `<tr><th rowspan="2">Measure</th>${P3.map(p=>`<th colspan="3" class="num">${p}</th>`).join("")}</tr><tr>${P3.map(()=>`<th class="num">V1</th><th class="num">V2</th><th class="num">Change</th>`).join("")}</tr>`;
+      row = mk => [0,1,2].map(p=>{ const a = C.bias.V1[mk][p], b = C.bias.V2[mk][p], c = C.contrast["V2-V1"].bias[mk][p];
+        return `<td class="num ${sig(a.lo,a.hi)}">${f(a.v)}</td><td class="num ${sig(b.lo,b.hi)}">${f(b.v)}</td><td class="num ${sig(c.lo,c.hi)}"><b>${f(c.v)}</b></td>`; }).join("");
+    } else if (mode==="rounds") {
+      head = `<tr><th rowspan="2">Measure</th>${P3.map(p=>`<th colspan="4" class="num">${p}: bias</th>`).join("")}</tr><tr>${P3.map(()=>RV.map(v=>`<th class="num">${vname(v)}</th>`).join("")).join("")}</tr>`;
+      row = mk => [0,1,2].map(p=>RV.map(v=>{ const b = C.bias[v][mk][p]; return `<td class="num ${sig(b.lo,b.hi)}">${f(b.v)}</td>`; }).join("")).join("");
+    } else {
+      head = `<tr><th rowspan="2">Measure</th>${M.map(m=>`<th colspan="3" class="num">${S[m]} reads</th>`).join("")}<th colspan="3" class="num">Own-AI bias</th></tr><tr>${M.map(()=>M.map(pb=>`<th class="num">${S[pb]}</th>`).join("")).join("")}${P3.map(p=>`<th class="num">${p}</th>`).join("")}</tr>`;
+      row = mk => M.map(m=>M.map(pb=>{ const x = C.grid[mode][mk][m+"|"+pb][0]; return `<td class="num${m===pb?" diag":""}${x===0?" zero":""}">${n1(x)}</td>`; }).join("")).join("") +
+        C.bias[mode][mk].map(b=>`<td class="num ${sig(b.lo,b.hi)}">${f(b.v)}</td>`).join("");
+    }
+    $("#x_all").innerHTML = head + C.metrics.map(m=>`<tr class="pick${m.key===metric?" cur":""}" data-k="${m.key}" tabindex="0"><td>${esc(m.name)}${views().every(v=>never(v,m.key))?' <span class="muted">(never)</span>':""}</td>${row(m.key)}</tr>`).join("");
+    // stance / topic
+    const sp = C.split[split], key = {tot:"tot", any:"any", "a:like_post":"up"}[metric] || "tot";
+    const vs = views(), lab = {tot:"total engagement", any:"engaged %", up:"upvote %"}[key];
+    const groups = sp.order;
+    const look = {}; sp.rows.forEach(r=>{ look[[r.view,r.reader,r.poster,r.group].join("|")] = r; });
+    const gname = g => split==="topic" ? ({politics:"Politics",science_tech:"Science & tech",business_finance:"Business & finance",sports:"Sports",entertainment:"Entertainment"}[g]||g) : g;
+    $("#x_splitt").innerHTML = `<tr><th rowspan="2">${split==="stance"?"Reader's stance":"Topic"} · ${lab}</th>${vs.map(v=>`<th colspan="3" class="num">${vname(v)}</th>`).join("")}</tr><tr>${vs.map(()=>M.map(pb=>`<th class="num">posts by ${S[pb]}</th>`).join("")).join("")}</tr>` +
+      groups.map(g=>`<tr><td>${gname(g)}</td>${vs.map(v=>M.map(pb=>{ const r = look[[v,reader,pb,g].join("|")]; return `<td class="num${reader===pb?" diag":""}" title="${r?r.n.toLocaleString()+" screens":""}">${r?n1(r[key]):"–"}</td>`; }).join("")).join("")}</tr>`).join("");
+    // posting, noise, unreadable for the rounds in view
+    const rs = rounds();
+    $("#x_post").innerHTML = `<tr><th>Round</th><th>AI</th><th class="num">Users who posted</th><th class="num">Posts</th><th>Posts by topic</th><th>Other actions</th></tr>` +
+      rs.flatMap(r=>M.map(m=>{ const p = C.posting[r][m]; return `<tr><td>${r}</td><td>${dot(m)}</td><td class="num">${p.posters} of ${p.users}</td><td class="num"><b>${p.posts}</b></td><td>${Object.entries(p.topics).map(([t,n])=>`${gname(t)} ${n}`).join(", ")}</td><td class="muted">${Object.entries(p.other).slice(0,5).map(([a,n])=>`${esc(MET["a:"+a]?MET["a:"+a].name:a)} ${n}`).join(", ")||"none"}</td></tr>`; })).join("");
+    $("#x_noise").innerHTML = `<tr><th>Round</th><th>AI</th><th class="num">Screens</th><th class="num">Same engaged / not</th><th class="num">Same number of actions</th><th class="num">Same upvote decision</th><th class="num">Total engagement: first → re-read</th></tr>` +
+      rs.flatMap(r=>M.filter(m=>C.noise[r][m]).map(m=>{ const n = C.noise[r][m]; return `<tr><td>${r}</td><td>${dot(m)}</td><td class="num">${n.n.toLocaleString()}</td><td class="num">${n1(n.same_eng)}%</td><td class="num">${n1(n.same_n)}%</td><td class="num">${n1(n.same_up)}%</td><td class="num">${n1(n.tot_a)} → ${n1(n.tot_b)}</td></tr>`; })).join("");
+    $("#x_unread").innerHTML = `<tr><th>Round</th><th>Reader</th>${M.map(pb=>`<th class="num">posts by ${S[pb]}</th>`).join("")}</tr>` +
+      rs.flatMap(r=>M.map(m=>`<tr><td>${r}</td><td>${dot(m)}</td>${M.map(pb=>{ const u = C.unreadable[r][m+"|"+pb]; return `<td class="num${u.unreadable?"":" zero"}">${u.unreadable.toLocaleString()} of ${u.screens.toLocaleString()} <span class="muted">(${u.pct.toFixed(2)}%)</span></td>`; }).join("")}</tr>`)).join("");
+  }
+  $("#x_mode").addEventListener("click", e=>{ const b = e.target.closest("button"); if (b){ mode = b.dataset.k; draw(); } });
+  $("#x_split").addEventListener("click", e=>{ const b = e.target.closest("button"); if (b){ split = b.dataset.k; draw(); } });
+  $("#x_reader").addEventListener("click", e=>{ const b = e.target.closest("button"); if (b){ reader = b.dataset.k; draw(); } });
+  $("#x_metric").addEventListener("change", e=>{ metric = e.target.value; draw(); });
+  const pickRow = tr => { if (tr){ metric = tr.dataset.k; draw(); $("#x_title").scrollIntoView({block:"start"}); } };
+  $("#x_all").addEventListener("click", e=>pickRow(e.target.closest("tr.pick")));
+  $("#x_all").addEventListener("keydown", e=>{ if (e.key==="Enter"||e.key===" "){ e.preventDefault(); pickRow(e.target.closest("tr.pick")); } });
+  // headline: total engagement, V1 vs V2
+  const T = k => C.bias[k].tot, TC = C.contrast["V2-V1"].bias.tot;
+  $("#x_head").innerHTML = `<b>Headline (total engagement).</b> ` + TC.map((c,p)=>`${pn(c)}: V1 ${f(T("V1")[p].v)}, V2 ${f(T("V2")[p].v)} (change ${f(c.v)}, ${cword(c.lo,c.hi)})`).join("; ") +
+    `. Based on ${C.views.V1.screens.toLocaleString()} V1 and ${C.views.V2.screens.toLocaleString()} V2 reading screens. Pick any comparison and any measure below.`;
+  draw();
 } catch(e){ console.error("results", e); }
 
 /* ---------- commands ---------- */
@@ -614,7 +776,7 @@ const C = [
  ]],
  ["F","Results to the laptop",[
   ["Mac", "Copy everything from the Spark", "rsync -avz honda:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/", "Run in a Mac terminal tab (prompt gordon@Kalebs-MacBook-Pro), not inside the ssh session."],
-  ["Mac", "Tables, CSVs, graphs, one workbook per version, this page", "cd ~/research/oasis\noasis-env/bin/python examples/experiment/llm_bias/export_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_graphs_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V1 V1\noasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V2 V2\npython3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark /tmp/inside.html ~/Desktop/LLM_Bias/V1/results.json", "Claude runs these, recalculates the workbooks with LibreOffice and republishes this page. Rounds are pooled only within a version."],
+  ["Mac", "Tables, CSVs, graphs, one workbook per version, this page", "cd ~/research/oasis\noasis-env/bin/python examples/experiment/llm_bias/export_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_graphs_v2.py data/llm_bias/v2_spark\noasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V1 V1\noasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V2 V2\noasis-env/bin/python examples/experiment/llm_bias/make_compare.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias\npython3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark /tmp/inside.html ~/Desktop/LLM_Bias/compare.json", "Claude runs these, recalculates the workbooks with LibreOffice and republishes this page. Rounds are pooled only within a version; make_compare.py puts rounds 101-104 and V1 vs V2 side by side (LLM_Bias_Compare.xlsx + compare.json for the results explorer)."],
  ]],
  ["G","When the study is finished",[
   ["Spark", "Remove the watchdog and free the GPU", "crontab -l | grep -v watchdog.sh | crontab -; bash ~/llm_bias/oasis/examples/experiment/llm_bias/llamacpp_servers.sh stop", "After round 104 finishes (night.log: 'end: models unloaded') or the last STOP (Mon 12 Oct 12:00)."],

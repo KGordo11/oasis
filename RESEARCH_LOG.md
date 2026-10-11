@@ -64,7 +64,17 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-09 11:30): read this first
+## 0.2 Where things stand (2026-10-11 ~11:00): read this first
+
+- **>>> RESUME POINT (Gordon restarted the laptop Sun 2026-10-11 ~11:00). A new Claude: do the task in §14.37
+  ("NEXT TASK"), step by step. <<<**
+- **V1 (rounds 101-102) and V2 (rounds 103-104) are BOTH COMPLETE.** All data is on the laptop in
+  `data/llm_bias/v2_spark/` (rsynced Sun ~10:45; r103 + r104 have 45 files each). The Spark is idle; Gordon was
+  told to remove the watchdog cron (verify: `crontab -l` on the Spark shows nothing).
+- Meeting with the professor **Tue 2026-10-13**.
+
+*Status as of 2026-10-09 11:30, kept as written:*
+
 
 - **NAMES (LD-45, §14.36): the Spark study now has two versions.** **LLM Bias V1** = rounds 101-102 (the AI gets
   only the person to play). **LLM Bias V2** = rounds 103-104 (the same, plus "I am <model>, simulating this
@@ -15446,4 +15456,62 @@ be LLM Bias V2 103 and 104 ... make sure all is consistent."
   - **Fixed:** the 10:22 republish had no results.json, so the results section was empty. `make_inside_v2.py` now
     requires it.
   - Checked in a headless browser: every new part is filled, no script errors, no sideways scrolling.
+
+## 14.37 NEXT TASK (Gordon, Sun 2026-10-11 ~10:50): compare all four rounds and V1 vs V2, in the workbook AND the page
+
+**Gordon's words:** "I want data comparisons between 101, 102, 103, 104, then data comparisons 101+102 against
+103+104. I want all the data, the metrics, starting with total engagement, then we can narrow it down into what actions
+were taken exactly. Add this to the artifact where I can click on different comparison types like above, and each
+individual, and go through all the data. I want it all broken down, and also on the Excel sheet. Then go through and
+make sure everything is correct, formatted nicely, works as it is supposed to, and no bugs."
+
+**State when the laptop restarted:** V2 data copied. A background run of `export_v2.py` → `make_graphs_v2.py` →
+`make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V2 V2` had been started and was probably killed by the
+restart. **Rerun it** (it is idempotent), then recalc with LibreOffice (§14.34 recipe:
+`PATH=/Applications/LibreOffice.app/Contents/MacOS:$PATH oasis-env/bin/python <xlsx skill>/scripts/recalc.py <xlsx> 300`,
+the recalc.py path is `~/.claude/skills/synced/*/xlsx/scripts/recalc.py`).
+
+**Plan (decided, no open questions for Gordon):**
+1. **V2 per-version workbook:** `~/Desktop/LLM_Bias/V2/LLM_Bias_V2.xlsx` (as above). The V1 one already exists.
+2. **New script `examples/experiment/llm_bias/make_compare.py`:** reads rounds 101-104 (outcome "chose", draw 0 for
+   the reading; draw 1 = noise floor; posting rows). **Views:** R101, R102, R103, R104, V1 (101+102), V2 (103+104).
+   **Metrics, total engagement first:** total engagement (actions except do_nothing per 100 screens), engaged
+   (% screens with any action), did nothing (%), then each of the 27 actions (% of screens). For each view × metric:
+   the 3×3 grid (reader AI × poster AI) with n screens, and the own-AI bias (double difference, §14.32) for the 3
+   pairs with 95% ranges. **Contrasts:** V2 − V1 per cell and per bias, with 95% ranges. Also posting turn per round,
+   noise floor per round, by stance and by topic (total engagement), unreadable counts per round × cell.
+   - **Bootstrap:** analyze_v2.boot is pure Python and too slow for ~30 metrics × 6 views. Write a numpy version: per
+     cell, aggregate (post, user) → value sum and count; each draw gives multinomial weights to users (ONE draw shared
+     by all rounds, because the same 100 users are in every round) and to posts (union over rounds; post keys are
+     unique per round). Cell mean = Σw·sum / Σw·count. 1,000 draws, seed fixed. Check: the V1 pooled point estimates
+     must equal §14.35 exactly (qwen-llama +8.4, qwen-gemma −18.1, llama-gemma +5.1), and the ranges must be close.
+   - Outputs: `compare.json` (for the page) and `~/Desktop/LLM_Bias/LLM_Bias_Compare.xlsx`. Sheets: README;
+     "Total engagement" (rounds side by side + V1 | V2 | V2−V1 grids + bias table); "V1 vs V2" (every metric:
+     grids and bias, with the change and its range); "Round by round" (every metric, 4 rounds); long filterable tables
+     "All grids" and "All biases"; "Posting turn"; "Noise floor"; "By stance"; "By topic"; "Unreadable". Freeze
+     panes, autofilter, number formats, column widths, colour for significant (range excludes 0).
+3. **Inside page** (https://claude.ai/artifact/E1eicdgjHpgDzex2qj18hR; template `inside_v2_template.html`,
+   builder `make_inside_v2.py`): replace section 09 Results with an **explorer**:
+   - Comparison buttons: "V1 vs V2", "Round by round (101-104)", and each single view (101, 102, 103, 104, V1,
+     V2).
+   - A metric picker: total engagement first, then engaged, did nothing, then each action.
+   - Show the grids, the bias table with ranges and a plain-words verdict, posting, noise and unreadable counts.
+   - In "What the AI sees", add the real V2 answers (round 103) next to the V1 ones.
+   - Update the facts (V2 screen count) and the timeline (V2 done Sat 22:10).
+   - Pass compare.json to `make_inside_v2.py`. Read the artifact before republishing, and test it in a headless
+     browser (serve over http, check that every view × metric renders with no console errors and no sideways
+     scroll on a phone).
+4. **Verify everything:**
+   - The page and workbook numbers match each other and match `analyze_v2.py` run on single rounds (the
+     scratchpad-symlink trick, §14.35).
+   - Both per-version workbooks recalculate with 0 errors.
+   - Formatting is checked.
+5. **Log:**
+   - §14.38 with the V2 results and the V1-vs-V2 comparison (plain tables first, then bias, in plain words).
+   - Update §0.2, the §14.32 status, the change history and memory.
+   - Commit and push (never `upstream`).
+
+**V2 run facts:** round 103 (Fri 11:42 → Sat 09:14), 68,916 screens; post sets qwen 96, llama 107, gemma 25.
+Round 104 (→ Sat 22:10), 67,728 screens; qwen 96, llama 103, gemma 25. Preflight 110/110. No watchdog restarts.
+hsa303 ran a 53 GB job Fri evening (mild slowdown, 1.24 s/screen at worst).
 

@@ -16,7 +16,7 @@ user draw is shared by all rounds; post keys are unique per round. A cell's mean
   sum(w_post * w_user * value) / sum(w_post * w_user * screens)
 which is exactly what analyze_v2.boot does by copying rows, just done with numpy.
 Also: posting turn, noise floor, by stance, by topic and unreadable screens, per round.
-Writes <out>/compare.json and <out>/LLM_Bias_Compare.xlsx.
+Writes <out>/compare.json, <out>/LLM_Bias_Compare.xlsx and <out>/LLM_Bias_Data.html (every table as one page).
 """
 import json, os, sys
 from collections import Counter, defaultdict
@@ -179,11 +179,14 @@ def main(res, out):
          "views": {v: {"label": VIEW_LABEL[v], "rounds": VIEWS[v], "screens": sum(N[v].values())} for v in VIEWS},
          "contrasts": {c: {"label": CONTRAST_LABEL[c], "a": a, "b": b} for c, (a, b) in CONTRASTS.items()},
          "grid": grid, "bias": bias, "contrast": contrast, "posting": posting, "noise": noise, "unreadable": unread,
-         "split": split, "boot": {"draws": B, "seed": SEED, "users": len(users), "posts": len(posts)}}
+         "split": split, "topics": {t: list(TOPICS[t]) for t in TOPICS},
+         "boot": {"draws": B, "seed": SEED, "users": len(users), "posts": len(posts)}}
     jp = os.path.join(out, "compare.json")
     json.dump(J, open(jp, "w"), indent=0)
     xp = workbook(J, os.path.join(out, "LLM_Bias_Compare.xlsx"))
-    print(f"wrote {jp} ({os.path.getsize(jp) / 1e3:.0f} kB) and {xp}")
+    hp = os.path.join(out, "LLM_Bias_Data.html")  # the same tables as the workbook, as one page
+    open(hp, "w").write(open(os.path.join(HERE, "data_template.html")).read().replace("/*DATA*/null", json.dumps(J).replace("</", "<\\/")))
+    print(f"wrote {jp} ({os.path.getsize(jp) / 1e3:.0f} kB), {xp} and {hp}")
     for v in ("V1", "V2"):
         print(v, {f"{SHORT[b['i']]}-{SHORT[b['j']]}": [round(b[x], 1) for x in ("v", "lo", "hi")] for b in bias[v]["tot"]})
     print("V2-V1", {f"{SHORT[b['i']]}-{SHORT[b['j']]}": [round(b[x], 1) for x in ("v", "lo", "hi")] for b in contrast["V2-V1"]["bias"]["tot"]})

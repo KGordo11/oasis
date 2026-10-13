@@ -64,7 +64,11 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-11 ~11:20): read this first
+## 0.2 Where things stand (2026-10-13 ~10:30): read this first
+
+- **NEW Tue 10:30 (§14.39): every table on one page, "LLM Bias Data", https://claude.ai/artifact/2GKAoowEENbCpmr5ztitE9.**
+  It has tabs, filters and Copy for Excel. 43,160 numbers were checked against `LLM_Bias_Compare.xlsx` with 0
+  mismatches. `make_compare.py` also writes `~/Desktop/LLM_Bias/LLM_Bias_Data.html`.
 
 - **§14.37 is DONE (Sun 11:20). Results: §14.38.** V1 (rounds 101-102) and V2 (rounds 103-104) compared round by
   round and pooled, for total engagement, engaged, did nothing and every one of the 27 actions:
@@ -13737,7 +13741,7 @@ and onward.*
 pilot: 14.12-14.15. Moving to the Spark and the engine: 14.16-14.26. The runs: 14.27-14.31f (bugs, preflight,
 pauses, the overnight kill, the watchdog). **Handoff: 14.32** (14.32a rule, 14.32b Spark setup commands, 14.32c code
 change history, 14.32d command cheat sheet). **Results: 14.33** (round 101). **Report and the Inside page: 14.34.**
-Round 102 + V1 pooled: 14.35. V1/V2 naming: 14.36. **V2 results and V1 vs V2, every round and action: 14.38.**
+Round 102 + V1 pooled: 14.35. V1/V2 naming: 14.36. **V2 results and V1 vs V2, every round and action: 14.38.** One page with every table: 14.39.
 
 ## 14.1 What the professor asked for (as relayed by Gordon)
 
@@ -15622,3 +15626,34 @@ Bold = 95% range excludes 0.
   `make_compare.py` in the code browser.
 
 **Next:** meeting with the professor Tue 2026-10-13. Nothing is running; no new runs are planned until Gordon decides.
+
+## 14.39 One page with every table: "LLM Bias Data" (done Tue 2026-10-13 ~10:30)
+
+Gordon (Tue 10-13): "for the excel sheet i either want it all organized on one singular excel sheet or make a whole
+new artifact with all of the data neatly organized and make sure it works and accurately shows stuff and is
+accurate". The workbook has 11 sheets and about 4,900 rows, too many for one readable sheet. So it became a
+**new page with every table: https://claude.ai/artifact/2GKAoowEENbCpmr5ztitE9** ("LLM Bias Data").
+- **Tabs:**
+  - **Start here:** what every word means, then the total-engagement bias for V1, V2 and the changes, then how
+    many of the 30 measures are clear for each view and pair.
+  - **One measure:** pick any of the 30 measures and see 9 rows (reader × whose posts) by R101-R104, V1, V2 and
+    the three changes, plus screens and the bias table.
+  - **All measures:** pick a view or change and see all 30 measures, by bias pair and by grid cell. Clicking a
+    measure opens it.
+  - **Posting turn, Noise floor, Unreadable:** per round.
+  - **By stance / By topic:** pick a view and a number (total engagement, engaged, upvote).
+  - **Every number:** the "All grids" (2,430 rows) and "All biases" (810 rows) tables, with filters and a
+    "clear results only" switch.
+- Every table has **Copy for Excel**, which copies tab-separated text, and each range becomes low/high columns.
+  Copying copies only the rows the filters show. The page cannot start a download, because the viewer blocks it.
+- Made by `make_compare.py` from the new `examples/experiment/llm_bias/data_template.html`; it also writes
+  `~/Desktop/LLM_Bias/LLM_Bias_Data.html`. `compare.json` gained a `topics` key holding the topic labels. The
+  numbers did not change (same seed).
+- **Checks** (headless Chromium, then every number on the page compared with `LLM_Bias_Compare.xlsx` read by
+  openpyxl):
+  - 43,160 comparisons, 0 mismatches. They cover every value, every range, every blue/orange colour, every row of
+    both long tables (each key found exactly once), posting, noise, unreadable counts, all 36 stance/topic states,
+    and the copied text.
+  - The filter counts match: 64 clear biases and 735 clear grid cells of all rows. `V2 − V1` alone shows 270 rows.
+  - 0 console errors, no NaN or undefined, and no sideways scroll at 390 px or 1280 px, in light and dark.
+- The one-sheet Excel version was not made, because the page covers the request. Make it only if Gordon asks.

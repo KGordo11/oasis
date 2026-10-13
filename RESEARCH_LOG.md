@@ -15038,6 +15038,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 
 | 4068d8a | 10-11 11:20 | **`make_compare.py`**: rounds 101-104 + V1 vs V2, every measure (`LLM_Bias_Compare.xlsx`, `compare.json`); Inside page section 09 = results explorer, V2 answers, V2 timeline; `make_inside_v2.py` takes compare.json (§14.38) |
 
+| dcce88b | 10-13 10:30 | **LLM Bias Data page** (§14.39): `data_template.html`, written by `make_compare.py` (every table, filters, Copy for Excel); `compare.json` + topic labels |
+
 | 8753c7c | 10-09 11:30 | **LD-45 V1/V2 naming**: `make_report_v2.py` pools per version (`LLM_Bias_<V>.xlsx`, `~/Desktop/LLM_Bias/<V>/`); Inside page: both versions, the code diff, V1 + V2 system messages, V2 commands + watchdog, key login; results.json now required (the 10:22 page had empty results) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)

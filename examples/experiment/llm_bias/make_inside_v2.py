@@ -175,13 +175,39 @@ q2 = next({"title": a["title"], "body": a["body"], "sub": a.get("subreddit"), "a
 t2 = run_v2.topic_of(q2["sub"])
 reading_v2 = {m: next((d for d in rows(f"reading_qwen3-8b__{m.replace(':', '-')}.jsonl", 103)
                        if d["user_id"] == 0 and d["post_key"] == "r103|qwen3-8b|u73|0" and not d["draw"]), None) for m in run_v2.MODELS}
+# every screen any AI was given (rounds 101-104): the 100 people, the templates, every post set, every posting answer, and
+# what each reader did on each reading screen (action letters a.. = run_v2.ACTION_NAMES order; "!" = unreadable)
+LETTERS = "abcdefghijklmnopqrstuvwxyzA"
+screens = {"rounds": [101, 102, 103, 104], "people": [{k: p[k] for k in ("id", "username", "name", "age", "sex", "state", "persona", "stances")} for p in people],
+           "system": run_v2.SYSTEM, "self_id": {m: run_v2.SELF_ID.format(model=n) for m, n in run_v2.MODEL_NAMES.items()},
+           "self_from": run_v2.SELF_ID_FROM_ROUND, "post_user": run_v2.POST_SCREEN.format(subs=subs, menu=run_v2.MENU, fmt=run_v2.FORMAT),
+           "read_tpl": run_v2.READ_SCREEN.replace("{menu}", run_v2.MENU).replace("{fmt}", run_v2.FORMAT),
+           "topics": {t: list(v) for t, v in run_v2.TOPICS.items()}, "actions": run_v2.ACTION_NAMES, "posts": {}, "posting": {}, "did": {}}
+for rd in screens["rounds"]:
+    screens["posts"][rd], screens["posting"][rd], screens["did"][rd] = {}, {}, {}
+    for m in run_v2.MODELS:
+        ps = []
+        for d in rows(f"posting_{run_v2.short(m)}.jsonl", rd):  # the same post set run_v2.post_set() builds
+            for k, a in enumerate(x for x in d["actions"] if x["action"] == "create_post"):
+                ps.append({"key": f"r{rd}|{run_v2.short(m)}|u{d['user_id']}|{k}", "author_id": d["user_id"], "author": d["username"],
+                           "topic": run_v2.topic_of(a.get("subreddit")), "title": str(a["title"]), "body": str(a["body"])})
+            screens["posting"][rd].setdefault(m, {})[d["user_id"]] = {"raw": d.get("raw"), "outcome": d.get("outcome")}
+        screens["posts"][rd][m] = sorted(ps, key=lambda p: p["key"])
+    for m in run_v2.MODELS:  # m = the AI playing the user
+        did = screens["did"][rd].setdefault(m, {})
+        for pb in run_v2.MODELS:
+            for d in rows(f"reading_{run_v2.short(pb)}__{run_v2.short(m)}.jsonl", rd):
+                if d["draw"]:
+                    continue
+                did.setdefault(d["post_key"], {})[d["user_id"]] = ("".join(LETTERS[run_v2.ACTION_NAMES.index(x["action"])] for x in d["actions"])
+                                                                   if d["outcome"] == "chose" else "!")
 ans = lambda d: {"raw": d.get("raw"), "seconds": d.get("latency_s"), "in": d.get("prompt_tokens"), "out": d.get("eval_tokens")} if d else None
 
 
 def compact(x):
-    """compare.json for the page: floats to 3 decimals (the page shows 1)."""
+    """compare.json for the page: floats to 6 decimals (3 made the page round twice: 95.4497 -> 95.45 -> 95.5)."""
     if isinstance(x, float):
-        return round(x, 3)
+        return round(x, 6)
     if isinstance(x, dict):
         return {k: compact(v) for k, v in x.items()}
     if isinstance(x, list):
@@ -219,6 +245,7 @@ data = {
     "read_post_v2": {**q2, "sub": run_v2.TOPICS[t2][0], "tname": run_v2.TOPICS[t2][1], "stance": u0["stances"][t2]},
     "read_answers_v2": {m: ans(d) for m, d in reading_v2.items()},
     "user0": {"username": u0["username"], "persona": u0["persona"]},
+    "screens": screens,
     "compare": compact(json.load(open(sys.argv[3]))),  # compare.json from make_compare.py; required, or the page has no results
 }
 tpl = open(os.path.join(HERE, "inside_v2_template.html")).read()

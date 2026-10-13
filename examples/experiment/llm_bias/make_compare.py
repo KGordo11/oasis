@@ -16,7 +16,7 @@ user draw is shared by all rounds; post keys are unique per round. A cell's mean
   sum(w_post * w_user * value) / sum(w_post * w_user * screens)
 which is exactly what analyze_v2.boot does by copying rows, just done with numpy.
 Also: posting turn, noise floor, by stance, by topic and unreadable screens, per round.
-Writes <out>/compare.json, <out>/LLM_Bias_Compare.xlsx and <out>/LLM_Bias_Data.html (every table as one page).
+Writes <out>/compare.json and <out>/LLM_Bias_Compare.xlsx.
 """
 import json, os, sys
 from collections import Counter, defaultdict
@@ -28,7 +28,7 @@ from openpyxl.utils import get_column_letter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
-from make_report_v2 import MODELS, SHORT, STANCES, analyze_topic, lbl, load, post_index  # noqa: E402
+from make_report_v2 import MODELS, SHORT, STANCES, TRAITS, analyze_topic, lbl, load, post_index  # noqa: E402
 from run_v2 import ACTION_NAMES, TOPICS  # noqa: E402
 
 ROUNDS = [101, 102, 103, 104]
@@ -43,6 +43,7 @@ METRICS = ([("tot", "Total engagement", "actions per 100 screens"), ("any", "Eng
            [("a:" + a, lbl(a), "% of screens") for a in ACTION_NAMES])
 PAIRS = [(MODELS[a], MODELS[b]) for a in range(3) for b in range(a + 1, 3)]
 B, SEED = 1000, 7
+AI = {a: k for k, a in enumerate(ACTION_NAMES)}
 
 
 def values(r):
@@ -125,6 +126,16 @@ def main(res, out):
                                         **dict(zip(("lo", "hi"), lohi(bias_of(D[a], i, j)[:, k] - bias_of(D[b], i, j)[:, k])))}
                                        for i, j in PAIRS]
 
+    # ---- how many times each action was taken (not do_nothing), for "share of all actions" on the Inside page
+    counts = {v: {f"{m}|{pb}": {} for m in MODELS for pb in MODELS} for v in VIEWS}
+    for r in R:
+        for v in VIEWS:
+            if r["round"] in VIEWS[v]:
+                c = counts[v][f"{r['model']}|{r['posts_by']}"]
+                for x in r["actions"]:
+                    if x["action"] != "do_nothing":
+                        c[x["action"]] = c.get(x["action"], 0) + 1
+
     # ---- posting turn, noise floor, unreadable: per round
     posting = {}
     for rd in ROUNDS:
@@ -160,36 +171,41 @@ def main(res, out):
                 bad = sum(r["outcome"] != "chose" for r in rs)
                 unread[rd][f"{m}|{pb}"] = {"screens": len(rs), "unreadable": bad, "pct": 100 * bad / len(rs) if rs else None}
 
-    # ---- by stance and by topic (points only): tot, any, upvote
+    # ---- by stance, by topic and by person type (points only): tot, any, upvote, downvote, comment
+    pid = {p["id"]: p for p in json.load(open(os.path.join(HERE, "personas_v2.json")))}
+    person_order = [f"{n}|{g}" for n, _, order in TRAITS for g in order]
     split = {}
-    for name, keyf, order in (("stance", lambda r: r["stance"], STANCES), ("topic", lambda r: r["topic"], list(TOPICS))):
-        acc = defaultdict(lambda: [0, 0, 0, 0])  # screens, tot, any, up (x100 sums)
+    for name, keyf, order in (("stance", lambda r: [r["stance"]], STANCES), ("topic", lambda r: [r["topic"]], list(TOPICS)),
+                              ("person", lambda r: [f"{n}|{fn(pid[r['user_id']])}" for n, fn, _ in TRAITS], person_order)):
+        acc = defaultdict(lambda: [0, 0, 0, 0, 0, 0])  # screens, tot, any, up, down, comment (x100 sums)
         for r in R:
             vs = values(r)
             for v in VIEWS:
                 if r["round"] in VIEWS[v]:
-                    a = acc[(v, r["model"], r["posts_by"], keyf(r))]
-                    a[0] += 1; a[1] += vs[0]; a[2] += vs[1]; a[3] += vs[3]
+                    for g in keyf(r):
+                        a = acc[(v, r["model"], r["posts_by"], g)]
+                        a[0] += 1; a[1] += vs[0]; a[2] += vs[1]; a[3] += vs[3 + AI["like_post"]]
+                        a[4] += vs[3 + AI["dislike_post"]]; a[5] += vs[3 + AI["create_comment"]]
         split[name] = {"order": order, "rows": [{"view": v, "reader": m, "poster": pb, "group": g, "n": a[0],
-                                                  "tot": a[1] / a[0], "any": a[2] / a[0], "up": a[3] / a[0]}
+                                                  "tot": a[1] / a[0], "any": a[2] / a[0], "up": a[3] / a[0], "down": a[4] / a[0], "comment": a[5] / a[0]}
                                                  for (v, m, pb, g), a in sorted(acc.items(), key=lambda kv: (list(VIEWS).index(kv[0][0]),
                                                  MODELS.index(kv[0][1]), MODELS.index(kv[0][2]), order.index(kv[0][3]) if kv[0][3] in order else 99))]}
+    split["person"]["people"] = {k: sum(1 for p in pid.values() if f"{n}|{fn(p)}" == k) for n, fn, _ in TRAITS for k in person_order if k.startswith(n + "|")}
 
     J = {"models": MODELS, "short": SHORT, "metrics": [{"key": k, "name": n, "unit": u} for k, n, u in METRICS],
          "views": {v: {"label": VIEW_LABEL[v], "rounds": VIEWS[v], "screens": sum(N[v].values())} for v in VIEWS},
          "contrasts": {c: {"label": CONTRAST_LABEL[c], "a": a, "b": b} for c, (a, b) in CONTRASTS.items()},
-         "grid": grid, "bias": bias, "contrast": contrast, "posting": posting, "noise": noise, "unreadable": unread,
+         "grid": grid, "bias": bias, "contrast": contrast, "counts": counts, "posting": posting, "noise": noise, "unreadable": unread,
          "split": split, "topics": {t: list(TOPICS[t]) for t in TOPICS},
          "boot": {"draws": B, "seed": SEED, "users": len(users), "posts": len(posts)}}
     jp = os.path.join(out, "compare.json")
     json.dump(J, open(jp, "w"), indent=0)
     xp = workbook(J, os.path.join(out, "LLM_Bias_Compare.xlsx"))
-    hp = os.path.join(out, "LLM_Bias_Data.html")  # the same tables as the workbook, as one page
-    open(hp, "w").write(open(os.path.join(HERE, "data_template.html")).read().replace("/*DATA*/null", json.dumps(J).replace("</", "<\\/")))
-    print(f"wrote {jp} ({os.path.getsize(jp) / 1e3:.0f} kB), {xp} and {hp}")
+    print(f"wrote {jp} ({os.path.getsize(jp) / 1e3:.0f} kB) and {xp}")
     for v in ("V1", "V2"):
         print(v, {f"{SHORT[b['i']]}-{SHORT[b['j']]}": [round(b[x], 1) for x in ("v", "lo", "hi")] for b in bias[v]["tot"]})
     print("V2-V1", {f"{SHORT[b['i']]}-{SHORT[b['j']]}": [round(b[x], 1) for x in ("v", "lo", "hi")] for b in contrast["V2-V1"]["bias"]["tot"]})
+    return J
 
 
 # ================================================================ workbook
@@ -248,11 +264,16 @@ class Sheet:
         self.r += n
 
 
-def workbook(J, path):
+def workbook(J, path, wb=None, only=None):
+    """Write the comparison sheets. With wb, add them to that workbook instead (make_report_v2's combined workbook),
+    keep only the sheet names in `only`, and do not save."""
     S, M = J["short"], J["models"]
     metrics = J["metrics"]
-    wb = Workbook()
-    wb.remove(wb.active)
+    own = wb is None
+    if own:
+        wb = Workbook()
+        wb.remove(wb.active)
+    before = set(wb.sheetnames)
 
     # README
     s = Sheet(wb, "README", [110])
@@ -478,6 +499,11 @@ def workbook(J, path):
                 s.row([rd, S[m], S[pb], u["screens"], u["unreadable"], u["pct"]], fmt={6: "0.00"})
     s.ws.freeze_panes = "A3"
 
+    if only:
+        for n in [n for n in wb.sheetnames if n not in before and n not in only]:
+            wb.remove(wb[n])
+    if not own:
+        return wb
     for ws in wb.worksheets:
         ws.sheet_view.zoomScale = 110
     wb.save(path)

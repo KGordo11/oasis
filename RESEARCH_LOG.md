@@ -64,7 +64,14 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-13 ~10:30): read this first
+## 0.2 Where things stand (2026-10-13 ~11:00): read this first
+
+- **NEW Tue 11:00 (§14.40):**
+  - **ONE workbook with all the data:** `~/Desktop/LLM_Bias/LLM_Bias_All.xlsx` (picker V1 / V2 / one round; new "By person
+    type" tab; every graph for V1 and V2). Rebuild with `make_report_v2.py ... ~/Desktop/LLM_Bias ALL`.
+  - **Inside page section 09** = plain-percentage tabs. **Section 04** = any screen's exact prompts (posting + reading).
+  - Users are 50 men / 50 women, none non-binary.
+  - The "LLM Bias Data" page below is superseded.
 
 - **NEW Tue 10:30 (§14.39): every table on one page, "LLM Bias Data", https://claude.ai/artifact/2GKAoowEENbCpmr5ztitE9.**
   It has tabs, filters and Copy for Excel. 43,160 numbers were checked against `LLM_Bias_Compare.xlsx` with 0
@@ -13741,7 +13748,7 @@ and onward.*
 pilot: 14.12-14.15. Moving to the Spark and the engine: 14.16-14.26. The runs: 14.27-14.31f (bugs, preflight,
 pauses, the overnight kill, the watchdog). **Handoff: 14.32** (14.32a rule, 14.32b Spark setup commands, 14.32c code
 change history, 14.32d command cheat sheet). **Results: 14.33** (round 101). **Report and the Inside page: 14.34.**
-Round 102 + V1 pooled: 14.35. V1/V2 naming: 14.36. **V2 results and V1 vs V2, every round and action: 14.38.** One page with every table: 14.39.
+Round 102 + V1 pooled: 14.35. V1/V2 naming: 14.36. **V2 results and V1 vs V2, every round and action: 14.38.** One page with every table: 14.39 (superseded). Plain-% results, exact prompts, one all-data workbook: 14.40.
 
 ## 14.1 What the professor asked for (as relayed by Gordon)
 
@@ -15659,3 +15666,62 @@ accurate". The workbook has 11 sheets and about 4,900 rows, too many for one rea
   - The filter counts match: 64 clear biases and 735 clear grid cells of all rows. `V2 − V1` alone shows 270 rows.
   - 0 console errors, no NaN or undefined, and no sideways scroll at 390 px or 1280 px, in light and dark.
 - The one-sheet Excel version was not made, because the page covers the request. Make it only if Gordon asks.
+
+## 14.40 Plain-percentage results, every screen's exact prompt, and ONE workbook with all the data (Tue 2026-10-13 ~11:00)
+
+What Gordon asked for (Tue 10-13), in order:
+1. "idk what all the +8.4 −.2 means ... just make it percentages of total engagement and everything else ... just make it
+   so easy to understand".
+2. "I don't like the new artifact [LLM Bias Data] ... just combine the excel files for all of this data ... all people,
+   persona, post, all the graphs in one place, very similar to what we did 2 weeks ago ... I also need metrics for men
+   women non-binary and so on".
+3. "I still wanted all the tabs and stuff on this artifact [Inside page] so I can break down the data more".
+4. "include what the AI sees on the posting rounds and reacting rounds as well ... who to act like and what exactly is being
+   shown to them".
+
+**Non-binary:** the 100 pinned users are 50 male and 50 female (Census-based `build_population_v2.py`). Nobody is
+non-binary, so there can be no non-binary metric. The breakdown uses every trait the users do have.
+
+What changed:
+- **Inside page, section 09** (https://claude.ai/artifact/E1eicdgjHpgDzex2qj18hR, v9) is now plain percentages with no bias
+  numbers. One row of buttons picks the rounds (V1 vs V2, all 4 rounds, any one round, V1, V2). Then one table at a time:
+  - **How much they engaged:** engaged %, did nothing %, actions per screen, and for V1 vs V2 a change in words ("down
+    3.7 pts", "clear change" or "could be chance").
+  - **What they did:** each action as a share of all actions (= 100%) or as % of screens, per reader AI.
+  - **One measure, 3 × 3:** any of the 29 measures as grids.
+  - **By person type:** sex, age group, region, community, education, work, and each Big Five trait low (1-3) / middle (4-7)
+    / high (8-10). You can show engaged %, actions per screen, upvote %, downvote % or comment %.
+  - **By stance, By topic, Posting turn, Noise floor, Unreadable.**
+- **Inside page, section 04 "What the AI sees"** has a picker for any screen: posting or reading turn, round 101-104,
+  the AI, any of the 100 users, and any post. It shows:
+  - (1) the exact system message, "who to act like": the persona in blue, V2's self-ID line in yellow;
+  - (2) the exact user message, "what is on the screen": the screen part in green, then the 27 actions and the answer format;
+  - (3) what the AI did: its real posting answer word for word, or the actions it took on that post.
+  The old user-0 side-by-side answers stay below it.
+- **`~/Desktop/LLM_Bias/LLM_Bias_All.xlsx`** (77 MB): every round in one workbook, made by
+  `make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias ALL`.
+  - The yellow picker (Engagement 3x3!B4) offers V1, V2, 101, 102, 103 or 104. V1 and V2 are never pooled (LD-45).
+  - Tabs:
+    - **Results:** Engagement 3x3, All actions, **By person type** (new), By stance, By topic.
+    - **V1 vs V2 (with 95% ranges, from make_compare):** Total engagement, V1 vs V2, Round by round, All grids, All biases.
+    - **Behaviour:** Posting turn, Noise floor (per round), Unreadable.
+    - **Who and what:** People (follows the picker), Posts.
+    - **Run:** Time per step.
+    - **Raw data:** Screens (272,991 rows, with each user's traits and version).
+  - Every graph appears twice (V1, then V2 below it), plus the new graph 15 "total engagement by person type".
+    V1/V2 graphs are refreshed in `~/Desktop/LLM_Bias/V1|V2/graphs/`.
+- The "LLM Bias Data" page (§14.39) is no longer built (`data_template.html` removed). Gordon decides whether to delete
+  its URL.
+- `compare.json` gained `counts` (times each action was used) and `split.person`, and the stance/topic splits now also have
+  downvote and comment. `make_compare.workbook()` can add its sheets to another workbook.
+- `make_inside_v2.py` now keeps 6 decimals; it kept 3 before, which rounded twice (95.4497 → 95.45 → shown 95.5).
+
+Checks:
+- Page section 09: all 672 states (8 round views × 9 tables × readers × options), 57,344 numbers equal compare.json, 0 off.
+- Person-type numbers recomputed straight from the raw screens: 999 cells, 0 off.
+- Action counts sum to total engagement × screens in every cell.
+- Section 04: 144 random screens (both turns, 4 rounds, 3 AIs). The page's system message and user message are exactly
+  `run_v2.system_prompt()` / `POST_SCREEN` / `READ_SCREEN`. The post lists exclude the user's own posts. The answers and
+  actions equal the raw rows.
+- No console errors and no sideways scroll at 390 px.
+- Workbook: see the result line below.

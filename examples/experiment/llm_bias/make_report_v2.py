@@ -3,6 +3,8 @@ the Spark. Versions (LD-45, log 14.36): V1 = rounds 101-102 (the AI is not told 
 (the profile starts "I am <model>, simulating this profile:", LD-44). Rounds are pooled only within a version.
 
     oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V1 V1
+    oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias ALL
+        = everything in ONE workbook, LLM_Bias_All.xlsx (V1 + V2, the comparison sheets, by person type, every graph twice)
 
 IN PLAIN WORDS
 --------------
@@ -55,6 +57,23 @@ VERSION_NOTE = {"V1": "V1 (rounds 101-102): the AI is only given the person's pr
 
 def lbl(a):
     return LABEL.get(a, a.replace("_", " "))
+
+
+# Person types for 'By person type': (name, person -> group, groups in order). The 100 users are 50 male, 50 female
+# (Census); nobody in the population is non-binary, so there is no such group. Big Five scores run 1-10.
+EDUCATION = ["less than high school", "high school diploma", "some college, no degree", "associate degree",
+             "bachelor's degree", "graduate degree"]
+B5 = ["openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"]
+b5_level = lambda v: "low (1-3)" if v <= 3 else "middle (4-7)" if v <= 7 else "high (8-10)"
+TRAITS = ([("Sex", lambda p: p["sex"], ["female", "male"]),
+           ("Age group", lambda p: "18-29" if p["age"] < 30 else "30-44" if p["age"] < 45 else "45-59" if p["age"] < 60 else "60 and over",
+            ["18-29", "30-44", "45-59", "60 and over"]),
+           ("Region", lambda p: p["region"], ["Northeast", "Midwest", "South", "West"]),
+           ("Community", lambda p: p["community"], ["urban or suburban", "rural"]),
+           ("Education", lambda p: p["education"], EDUCATION),
+           ("Work", lambda p: p["work"] if p["work"] in ("retired", "college student") else "not working" if p["work"] == "not currently working" else "working",
+            ["working", "not working", "retired", "college student"])] +
+          [(f"Big Five: {t}", lambda p, t=t: b5_level(p["big_five"][t]), ["low (1-3)", "middle (4-7)", "high (8-10)"]) for t in B5])
 
 
 # ---------------------------------------------------------------- data
@@ -158,7 +177,7 @@ def heat(ax, M, title, fmt="{:.1f}%", ylab=True):
     ax.set_title(title, fontsize=10)
 
 
-def graphs(out, R, post_rows, posts, steps, best, rnd, bias, noise, label):
+def graphs(out, R, post_rows, posts, steps, best, rnd, bias, noise, label, people=None):
     os.makedirs(os.path.join(out, "graphs"), exist_ok=True)
     files = []
     cell = {(m, pb): [r for r in R if r["model"] == m and r["posts_by"] == pb] for m in MODELS for pb in MODELS}
@@ -334,6 +353,25 @@ def graphs(out, R, post_rows, posts, steps, best, rnd, bias, noise, label):
     ax.set_title(f"{label}: how many actions per screen")
     files.append(save(fig, out, "09_actions_per_screen.png"))
 
+    # G15: total engagement by person type (sex, age, ...), one bar per AI playing the users, all posts together
+    if people:
+        pid = {p["id"]: p for p in people}
+        fig, axs = plt.subplots(3, 4, figsize=(17, 11))
+        for ax, (name, fn, order) in zip(axs.flat, TRAITS):
+            xs = np.arange(len(order))
+            for k, m in enumerate(MODELS):
+                v = [rate([r for r in R if r["model"] == m and fn(pid[r["user_id"]]) == g], eng) for g in order]
+                ax.bar(xs + (k - 1) * 0.27, v, 0.27, color=COLOR[m], label=SHORT[m])
+            ax.set_xticks(xs, [g.replace(" degree", "").replace(", no degree", "").replace("high school diploma", "high school")
+                               .replace("less than high school", "< high school") for g in order], rotation=25, ha="right", fontsize=8)
+            ax.set_title(name, fontsize=10)
+        axs.flat[0].legend(fontsize=8, frameon=False)
+        for ax in list(axs.flat)[len(TRAITS):]:
+            ax.axis("off")
+        fig.subplots_adjust(hspace=0.75, wspace=0.25)
+        fig.suptitle(f"{label}: total engagement (actions per 100 screens) by the kind of person the AI plays", fontsize=12, y=0.95)
+        files.append(save(fig, out, "15_by_person_type.png"))
+
     # ------------------------------------------------------------ time graphs (GPU-free steps only where speed matters)
     real = [s for s in steps if s["users"] == 100 and s["type"] != "posting" and s["screens"] >= 50]
     fig, ax = plt.subplots(figsize=(9, 4))
@@ -429,7 +467,10 @@ def graphs(out, R, post_rows, posts, steps, best, rnd, bias, noise, label):
 
 
 # ---------------------------------------------------------------- workbook
-def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people, gfiles, sps, hours, label, complete):
+def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people, gfiles, sps, hours, label, complete, J=None, gfiles2=None):
+    """J (compare.json) given = the combined workbook for every version: the round picker offers V1, V2 and each round
+    (versions are never pooled together, LD-45), the comparison sheets come from make_compare, and every graph is
+    there twice (gfiles = V1's, gfiles2 = V2's)."""
     from openpyxl import Workbook
     from openpyxl.drawing.image import Image
     from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -442,6 +483,9 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     BOX = Border(left=thin, right=thin, top=thin, bottom=thin)
     wb = Workbook()
     wb._fonts[0] = Font(name="Arial", size=10)  # every cell without its own font is Arial (80k-row sheet: no per-cell styling)
+    ALL = J is not None
+    VER = "All" if ALL else version_of(complete[0])
+    pid = {p["id"]: p for p in people}
 
     def sheet(name, title, note):
         ws = wb.create_sheet(name)
@@ -466,10 +510,13 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
             "Actions on this screen"] + [lbl(a) if a in LABEL else a for a in ACTION_NAMES] + \
            ["Comment text", "Quote text", "Report reason", "Reason given", "Seconds (one call)", "Prompt tokens", "Output tokens",
             "Total engagement (actions except 'do nothing')", "In the round picker's selection (1/0)"]
+    sel = len(cols)
+    cols += [f"Person: {t[0]}" for t in TRAITS] + ["Version"]
+    tcol = {t[0]: L(sel + 1 + k) for k, t in enumerate(TRAITS)}
+    vcol = L(len(cols))
     header(S, 1, cols)
     acol = {a: 16 + k for k, a in enumerate(ACTION_NAMES)}
     R_all = sorted(R_all, key=lambda r: (r["round"], r["model"], r["posts_by"], r["draw"], r["user_id"], r["pos"]))
-    sel = len(cols)
     pooled_or = ",".join(f"A{{i}}={c}" for c in complete)
     for i, r in enumerate(R_all, 2):
         c = Counter(x["action"] for x in r["actions"])
@@ -480,12 +527,14 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
                  + [c[a] for a in ACTION_NAMES]
                  + [first("create_comment", "content"), first("quote_post", "content"), first("report_post", "reason"),
                     (r.get("reason") or "")[:300], r.get("latency_s"), r.get("prompt_tokens"), r.get("eval_tokens"),
-                    sum(x["action"] != "do_nothing" for x in r["actions"])])
-        S.cell(i, sel, f'=IF(\'Engagement 3x3\'!$B$4="pooled",IF(OR({pooled_or.format(i=i)}),1,0),IF(A{i}=\'Engagement 3x3\'!$B$4,1,0))')
+                    sum(x["action"] != "do_nothing" for x in r["actions"]), None]
+                 + [t[1](pid[r["user_id"]]) for t in TRAITS] + [version_of(r["round"])])
+        S.cell(i, sel, f'=IF(OR({vcol}{i}=\'Engagement 3x3\'!$B$4,A{i}=\'Engagement 3x3\'!$B$4),1,0)' if ALL else
+               f'=IF(\'Engagement 3x3\'!$B$4="pooled",IF(OR({pooled_or.format(i=i)}),1,0),IF(A{i}=\'Engagement 3x3\'!$B$4,1,0))')
     N = S.max_row
     S.freeze_panes = "D2"
     S.auto_filter.ref = f"A1:{L(len(cols))}{N}"
-    for k, w in enumerate([7, 8, 13, 14, 14, 9, 8, 26, 8, 22, 12, 9, 10, 9, 9] + [8] * 27 + [40, 30, 20, 40, 9, 9, 9]):
+    for k, w in enumerate([7, 8, 13, 14, 14, 9, 8, 26, 8, 22, 12, 9, 10, 9, 9] + [8] * 27 + [40, 30, 20, 40, 9, 9, 9, 12, 10] + [16] * len(TRAITS) + [8]):
         S.column_dimensions[L(k + 1)].width = w
     rng = lambda col: f"Screens!${col}$2:${col}${N}"
     cA, cD, cE, cG, cJ, cK, cM, cN = (rng(x) for x in "ADEGJKMN")
@@ -497,12 +546,20 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     ws = wb.active
     ws.title = "README"
     ws.column_dimensions["A"].width = 130
-    lines = [
+    lines = ([
+        ("LLM Bias, all the data: V1 (rounds 101-102) and V2 (rounds 103-104) in one workbook", F(bold=True, size=15)),
+        ("Question: do AIs favour posts written by their own AI? And does telling the AI which model it is (V2) change that?", F()),
+        (VERSION_NOTE["V1"], F()), (VERSION_NOTE["V2"], F()),
+        (f"Built {datetime.now():%Y-%m-%d %H:%M} from the DGX Spark result files (data/llm_bias/v2_spark): rounds {complete}, "
+         f"{len(R_all):,} screens. THE YELLOW PICKER on 'Engagement 3x3' (cell B4) says what every formula table shows: V1, V2, or one "
+         "round (101, 102, 103, 104). V1 and V2 are never added together (decision LD-45). Each graph is shown twice: V1, then V2 below it.", F(bold=True)),
+    ] if ALL else [
         (f"LLM Bias {version_of(complete[0])}: do AIs favour posts written by their own AI?", F(bold=True, size=15)),
         (VERSION_NOTE[version_of(complete[0])] + " Rounds are pooled only within a version; the other version has its own workbook.", F()),
         (f"Built {datetime.now():%Y-%m-%d %H:%M} from the DGX Spark result files (data/llm_bias/v2_spark). Rounds in this file: "
          f"{sorted({r['round'] for r in R_all})}. Complete rounds: {complete} (graphs and bias ranges: {label}); a round still "
          "running is partial. The yellow round picker on 'Engagement 3x3' drives every grid and split table.", F()),
+    ]) + [
         ("", F()),
         ("How a round works", F(bold=True, size=12)),
         ("1. Posting turn: one AI plays all 100 pinned users. Each user opens Reddit to an EMPTY feed with all 27 OASIS actions "
@@ -522,12 +579,21 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
          "actions, per 100 screens (decision LD-43, Gordon 2026-10-08). 'Engaged' = % of screens with at least one action. "
          "Upvotes and the other single actions are shown too, as detail.", F(bold=True)),
         ("Own-AI bias: the double difference built from the Engagement grids (formulas), with the 95% range from resampling "
-         "posts and users (analyze_v2.py, 1,000 draws; blue = computed in Python).", F()),
+         "posts and users (analyze_v2.py, 1,000 draws; blue = computed in Python).", F()) if not ALL else
+        ("V1 vs V2 group (numbers computed in Python by make_compare.py, with 95% ranges): 'Total engagement' = V1 | V2 | change grids "
+         "and the own-AI bias; 'V1 vs V2' and 'Round by round' = the same for every measure; 'All grids' / 'All biases' = every number "
+         "in one filterable list. Own-AI bias for AIs i and j = (i reading i's posts - j reading i's posts) - (i reading j's posts - "
+         "j reading j's posts): above 0 = in that pair, posts get more from the AI that wrote them. Blue cell = range all above 0, "
+         "orange = all below 0.", F()),
+        ("By person type: the same measures split by the kind of person the AI plays: sex, age group, region, community, education, "
+         "work, and each Big Five personality trait (low / middle / high). The 100 users are 50 men and 50 women (Census); there is "
+         "no non-binary user, so there is no such row.", F()),
         ("By stance / By topic: upvote, downvote and did-anything % split by how the user feels about the topic, and by subreddit.", F()),
         ("Posting turn: every user x AI in the posting turn, what they did, and per-AI totals (formulas).", F()),
         ("Posts: every post in full, who wrote it, and how each AI's users reacted to it (formulas).", F()),
         ("People: the 100 pinned users, their stances, the exact description the AI is given, and their reactions (formulas).", F()),
-        ("Noise floor: the same AI re-reading 4 posts per user with fresh randomness (how much answers wobble by chance).", F()),
+        ("Noise floor: the same AI re-reading 4 posts per user with fresh randomness (how much answers wobble by chance)"
+         + (", per round. Unreadable: answers that could not be read, per round." if ALL else "."), F()),
         ("Time per step: every step the runner finished on the Spark (measured times in blue), seconds per screen, and whether "
          "another user's jobs were sharing the GPU (shared = more than 1.25x that AI's best speed).", F()),
         ("Graphs sit on the sheet they belong to, beside or below its table (and as PNG files in the graphs folder).", F()),
@@ -552,12 +618,14 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
               "Rows = the AI playing the 100 users. Columns = the AI that wrote the posts. Diagonal (bold, shaded) = baseline: an "
               "AI reading its own AI's posts. Value = % of that cell's screens where the user took the action at least once. "
               "Counts on the right. Re-reads (noise floor) and unreadable answers are left out. Change the yellow cell to pick the round.")
-    E["A4"], E["B4"] = "Round shown:", "pooled" if len(complete) > 1 else rnd
-    E["C4"] = (f"'pooled' = the complete rounds {', '.join(map(str, complete))} together; or type one round number "
+    E["A4"], E["B4"] = "Round shown:", ("V1" if ALL else "pooled" if len(complete) > 1 else rnd)
+    E["C4"] = ("Pick V1 (rounds 101 + 102), V2 (rounds 103 + 104) or one round: 101, 102, 103, 104. Every formula table in this "
+               "workbook follows this cell." if ALL else
+               f"'pooled' = the complete rounds {', '.join(map(str, complete))} together; or type one round number "
                f"({', '.join(map(str, sorted({r['round'] for r in R_all})))}). A round still running is partial.")
     E["C4"].font = F(italic=True, color="555555")
     from openpyxl.worksheet.datavalidation import DataValidation
-    dv = DataValidation(type="list", formula1='"' + ",".join(["pooled"] + [str(x) for x in sorted({r["round"] for r in R_all})]) + '"')
+    dv = DataValidation(type="list", formula1='"' + ",".join((["V1", "V2"] if ALL else ["pooled"]) + [str(x) for x in sorted({r["round"] for r in R_all})]) + '"')
     E.add_data_validation(dv)
     dv.add("B4")
     E["A4"].font, E["B4"].font, E["B4"].fill = F(bold=True), BLUE, YFILL
@@ -614,16 +682,16 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     A.column_dimensions["A"].width = 18
 
     # ---- Own-AI bias
-    B = sheet("Own-AI bias", "Own-AI bias (double difference)", "For AIs i and j: (i reading i's posts - j reading i's posts) - "
+    B = None if ALL else sheet("Own-AI bias", "Own-AI bias (double difference)", "For AIs i and j: (i reading i's posts - j reading i's posts) - "
               "(i reading j's posts - j reading j's posts), in points per 100 screens. Positive = i favours its own AI's posts beyond "
               "simply being more generous with everyone. The estimate is a formula over the Engagement grids (round in the yellow cell); "
               f"the 95% range (blue) was computed in Python for {label} (resampling posts and users together, 1,000 draws) and does "
               "not change with the yellow cell.")
-    header(B, 4, ["i", "j", "TOTAL ENGAGEMENT bias (actions per 100 screens)", f"95% range low ({label})", "95% range high",
+    ALL or header(B, 4, ["i", "j", "TOTAL ENGAGEMENT bias (actions per 100 screens)", f"95% range low ({label})", "95% range high",
                   "Engaged bias (points)", "95% range low", "95% range high", "Upvote bias (points)", "95% range low", "95% range high",
                   "Clear bias? (range excludes 0)"])
     ix = {m: k for k, m in enumerate(MODELS)}
-    for k, b in enumerate(bias):
+    for k, b in enumerate([] if ALL else bias):
         r = 5 + k
         i, j = ix[b["i"]], ix[b["j"]]
         B.cell(r, 1, SHORT[b["i"]]); B.cell(r, 2, SHORT[b["j"]])
@@ -640,9 +708,8 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
         verdict = lambda name, lo, hi: (f'IF(AND({lo}{r}<0,{hi}{r}>0),"{name}: no",IF({lo}{r}>0,"{name}: YES, favours own AI",'
                                         f'"{name}: YES, favours the other AI"))')
         B.cell(r, 12, "=" + verdict("TOTAL ENGAGEMENT", "D", "E") + '&" / "&' + verdict("engaged", "G", "H") + '&" / "&' + verdict("upvote", "J", "K"))
-    B.column_dimensions["L"].width = 90
-    for c in "ABCDEFGHIJK":
-        B.column_dimensions[c].width = 15
+    for c, w in ([] if ALL else [("L", 90)] + [(c, 15) for c in "ABCDEFGHIJK"]):
+        B.column_dimensions[c].width = w
 
     # ---- By stance / By topic
     def split_sheet(name, title, keycol, keys, keyname):
@@ -672,11 +739,42 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     split_sheet("By stance", "Reactions by how the user feels about the post's topic", "K", STANCES, "the user's stance on the topic")
     split_sheet("By topic", "Reactions by the post's subreddit", "J", [TOPICS[t][1] for t in TOPICS], "the post's topic")
 
+    # ---- By person type: every measure split by sex, age, region, community, education, work, Big Five
+    PTY = sheet("By person type", "Reactions by the kind of person the AI plays (sex, age, region, education, work, personality)",
+                "Rows = a group of users (e.g. the 50 women). Columns = AI playing the users x AI that wrote the posts, then all "
+                "nine together. Value = that measure for those users' screens. Round = the yellow cell on 'Engagement 3x3'. "
+                "Formulas over Screens. The 100 users are 50 men and 50 women (Census): there is no non-binary user, so there is no such row.")
+    pcount = Counter((t[0], t[1](p)) for p in people for t in TRAITS)
+    r = 4
+    for mname, col in (("TOTAL ENGAGEMENT (actions per 100 screens)", "TOT"), ("Engaged: any action (% of screens)", "N"),
+                       ("Upvoted (% of screens)", L(acol["like_post"])), ("Downvoted (% of screens)", L(acol["dislike_post"])),
+                       ("Commented (% of screens)", L(acol["create_comment"]))):
+        PTY.cell(r, 1, mname).font = F(bold=True, size=12 if col == "TOT" else 11, color="2A4D69" if col == "TOT" else None)
+        header(PTY, r + 1, ["Person type", "Group", "Users"] + [f"{SHORT[m]} reads {SHORT[pb]}" for m in MODELS for pb in MODELS] + ["All nine"])
+        rr = r + 2
+        for name, fn, order in TRAITS:
+            for g in order:
+                PTY.cell(rr, 1, name); PTY.cell(rr, 2, g); PTY.cell(rr, 3, pcount[(name, g)])
+                for q, (m, pb) in enumerate([(m, pb) for m in MODELS for pb in MODELS] + [(None, None)]):
+                    crit = (f'{base(m, pb, RC)}' if m else f'{cSel},1,{cG},0,{cM},"chose"') + f',{rng(tcol[name])},"{g}"'
+                    c = PTY.cell(rr, 4 + q, f'=IFERROR(100*SUMIFS({cEng},{crit})/COUNTIFS({crit}),"")' if col == "TOT"
+                                 else f'=IFERROR(COUNTIFS({crit},{rng(col)},">0")/COUNTIFS({crit}),"")')
+                    c.number_format = "0.0" if col == "TOT" else "0.0%"
+                    if m and m == pb:
+                        c.fill = DFILL
+                rr += 1
+        r = rr + 2
+    PTY.column_dimensions["A"].width = 26
+    PTY.column_dimensions["B"].width = 24
+    for k in range(3, 14):
+        PTY.column_dimensions[L(k)].width = 12
+    PTY.freeze_panes = "C4"
+
     # ---- Posting turn
     PT = sheet("Posting turn", "Posting turn: each AI plays the 100 users on an empty feed",
                "Top: totals per AI and round (formulas over the rows below). Below: one row per user per AI per round: what they did "
                "on the empty feed. Nobody is told to post.")
-    prow0 = 48  # rows 13-46 hold the posting graph
+    prow0 = 84 if ALL else 48  # rows 13-46 hold the posting graph (13-82: V1's and V2's)
     header(PT, prow0, ["Round", "AI playing the users", "Person #", "Username", "Posts written", "Actions taken", "Reason given"]
            + [lbl(a) if a in LABEL else a for a in ACTION_NAMES])
     PR = sorted([d for d in post_rows], key=lambda d: (d["round"], MODELS.index(d["model"]) if d["model"] in MODELS else 9, d["user_id"]))
@@ -721,7 +819,8 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     # ---- People
     PE = sheet("People", "The 100 pinned users (the same 100 in every round, every turn, every AI)",
                "Built from Census / BLS / Pew data by build_population_v2.py (SHA ed110626). 'Description the AI is given' is "
-               "pasted word for word into every prompt as the user's self-description. Reaction columns are formulas over Screens.")
+               "pasted word for word into every prompt as the user's self-description. Reaction columns are formulas over Screens"
+               + (" for the round picked in the yellow cell on 'Engagement 3x3'." if ALL else "."))
     header(PE, 4, ["Person #", "Username", "Name", "Age", "Sex", "State", "Community", "Education", "Work", "Openness", "Conscientiousness",
                    "Extraversion", "Agreeableness", "Neuroticism"] + [f"Stance: {TOPICS[t][1]}" for t in TOPICS]
            + ["Description the AI is given"] + [f"{SHORT[m]} as this user: total engagement (per 100 screens)" for m in MODELS] + [f"{SHORT[m]}: engaged %" for m in MODELS])
@@ -732,7 +831,7 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
                    b5["openness"], b5["conscientiousness"], b5["extraversion"], b5["agreeableness"], b5["neuroticism"]]
                   + [p["stances"][t] for t in TOPICS] + [p["persona"]])
         for q, m in enumerate(MODELS):
-            crit = f'{cD},"{m}",{rng("B")},$A{r},{cG},0,{cM},"chose"'
+            crit = f'{cD},"{m}",{rng("B")},$A{r},{cG},0,{cM},"chose"' + (f",{cSel},1" if ALL else "")
             PE.cell(r, 21 + q, f'=IFERROR(100*SUMIFS({cEng},{crit})/COUNTIFS({crit}),"")').number_format = "0.0"
             PE.cell(r, 24 + q, f'=IFERROR(COUNTIFS({crit},{cN},1)/COUNTIFS({crit}),"")').number_format = "0.0%"
         PE.cell(r, 20).alignment = Alignment(wrap_text=True, vertical="top")
@@ -740,13 +839,13 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
     PE.freeze_panes = "C5"
 
     # ---- Noise floor
-    NF = sheet("Noise floor", "Noise floor: the same AI re-reads 4 posts per user with fresh randomness",
+    NF = None if ALL else sheet("Noise floor", "Noise floor: the same AI re-reads 4 posts per user with fresh randomness",
                f"{label}. Same user, same post, same AI; only the random seed changes. 'Same decision' = the upvote choice came out "
                "the same both times. Computed in Python (blue). A real bias has to be bigger than this wobble.")
-    header(NF, 4, ["AI", "Screens compared", "Same engaged / not decision %", "Same number of actions %",
+    ALL or header(NF, 4, ["AI", "Screens compared", "Same engaged / not decision %", "Same number of actions %",
                    "Total engagement, first read (per 100 screens)", "Total engagement, re-read", "Same upvote decision %",
                    "Upvote % first read", "Upvote % re-read"])
-    for k, m in enumerate(MODELS):
+    for k, m in enumerate([] if ALL else MODELS):
         if m in noise:
             n = noise[m]
             vals = [m, n["n"], n["same_eng"] / 100, n["same_n"] / 100, n["ta"], n["tb"], n["same"] / 100, n["a"] / 100, n["b"] / 100]
@@ -754,7 +853,7 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
                 c = NF.cell(5 + k, 1 + z, v)
                 c.font = BLUE if z else F()
                 c.number_format = "0.0" if z in (4, 5) else "0.0%" if z >= 2 else "General"
-    for c in "ABCDEFGHI":
+    for c in ("" if ALL else "ABCDEFGHI"):
         NF.column_dimensions[c].width = 17
 
     # ---- Time per step
@@ -795,11 +894,17 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
         T.column_dimensions[c].width = w
     T.freeze_panes = "A5"
 
+    if ALL:  # the V1 vs V2 comparison sheets (values computed by make_compare.py, with 95% ranges)
+        import make_compare
+        make_compare.workbook(J, None, wb=wb, only=["Total engagement", "V1 vs V2", "Round by round", "All grids", "All biases",
+                                                    "Noise floor", "Unreadable"])
+
     # ---- graphs: each on the sheet it belongs to, beside or below that sheet's table (no separate graphs tab)
     png = {os.path.basename(p)[:2]: p for p in gfiles}
+    png2 = {os.path.basename(p)[:2]: p for p in gfiles2 or []}
 
-    def place(ws, key, anchor, width, label):
-        img = Image(png[key])
+    def place(ws, key, anchor, width, label, src=None):
+        img = Image((src or png)[key])
         k = width / img.width
         img.width, img.height = img.width * k, img.height * k
         col = re.match(r"[A-Z]+", anchor).group(0)
@@ -809,15 +914,34 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
         ws.add_image(img, anchor)
         return row + int(img.height / 20) + 3  # next free row below the picture (default rows are 20 px)
 
-    r = place(E, "01", "K7", 1050, f"Graph: total engagement + the 9 main actions ({label})")
-    place(E, "02", f"K{r}", 760, "Graph: the headline - total engagement and % engaged")
-    r = place(A, "03", "A17", 1050, "Graph: every one of the 27 actions, per 100 screens")
-    place(A, "09", f"A{r}", 760, "Graph: how many actions per screen")
-    place(B, "07", "A11", 900, "Graph: own-AI bias (total engagement first) with 95% ranges")
-    place(wb["By stance"], "05", "J5", 1000, "Graph: total engagement by the user's stance")
-    place(wb["By topic"], "06", "J5", 1000, "Graph: total engagement by subreddit")
-    place(PT, "04", "A14", 1050, "Graph: the posting turn")
-    place(NF, "08", "A11", 640, "Graph: how often a re-read comes out the same")
+    if ALL:  # every graph twice: V1, then V2 below it
+        def both(ws, key, anchor, width, text):
+            col = re.match(r"[A-Z]+", anchor).group(0)
+            r = place(ws, key, anchor, width, f"Graph (V1, rounds 101 + 102): {text}")
+            return place(ws, key, f"{col}{r}", width, f"Graph (V2, rounds 103 + 104): {text}", png2)
+        r = both(E, "01", "K7", 1050, "total engagement + the 9 main actions")
+        both(E, "02", f"K{r}", 760, "the headline - total engagement and % engaged")
+        r = both(A, "03", "A17", 1050, "every one of the 27 actions, per 100 screens")
+        both(A, "09", f"A{r}", 760, "how many actions per screen")
+        both(wb["Total engagement"], "07", "V4", 900, "own-AI bias (total engagement first) with 95% ranges")
+        both(wb["By stance"], "05", "J5", 1000, "total engagement by the user's stance")
+        both(wb["By topic"], "06", "J5", 1000, "total engagement by subreddit")
+        both(PTY, "15", "P5", 1100, "total engagement by the kind of person the AI plays")
+        both(PT, "04", "A14", 900, "the posting turn")
+        both(wb["Noise floor"], "08", "L4", 640, "how often a re-read comes out the same")
+        png = png2  # the time graphs come from the whole night.log: the same for both versions, shown once
+    else:
+        r = place(E, "01", "K7", 1050, f"Graph: total engagement + the 9 main actions ({label})")
+        place(E, "02", f"K{r}", 760, "Graph: the headline - total engagement and % engaged")
+        r = place(A, "03", "A17", 1050, "Graph: every one of the 27 actions, per 100 screens")
+        place(A, "09", f"A{r}", 760, "Graph: how many actions per screen")
+        place(B, "07", "A11", 900, "Graph: own-AI bias (total engagement first) with 95% ranges")
+        place(wb["By stance"], "05", "J5", 1000, "Graph: total engagement by the user's stance")
+        place(wb["By topic"], "06", "J5", 1000, "Graph: total engagement by subreddit")
+        if "15" in png:
+            place(PTY, "15", "P5", 1100, "Graph: total engagement by the kind of person the AI plays")
+        place(PT, "04", "A14", 1050, "Graph: the posting turn")
+        place(NF, "08", "A11", 640, "Graph: how often a re-read comes out the same")
     r = place(T, "10", "T6", 760, "Graph: speed per AI, GPU free vs shared")
     r = place(T, "11", f"T{r}", 760, "Graph: minutes vs screens (GPU-free steps)")
     r = place(T, "12", f"T{r}", 1050, "Graph: the run timeline")
@@ -826,11 +950,18 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
 
     # tabs: grouped, coloured by group, README first and the raw rows last
     groups = [("README", "7F7F7F", ["README"]),
-              ("Results", "2A78D6", ["Engagement 3x3", "Own-AI bias", "All actions", "By stance", "By topic"]),
+              ("Results (pick V1, V2 or a round in the yellow cell)", "2A78D6", ["Engagement 3x3", "All actions", "By person type", "By stance", "By topic"]),
+              ("V1 vs V2 (with 95% ranges)", "A23B54", ["Total engagement", "V1 vs V2", "Round by round", "All grids", "All biases"]),
+              ("Behaviour", "1BAF7A", ["Posting turn", "Noise floor", "Unreadable"]),
+              ] if ALL else [("README", "7F7F7F", ["README"]),
+              ("Results", "2A78D6", ["Engagement 3x3", "Own-AI bias", "All actions", "By person type", "By stance", "By topic"]),
               ("Behaviour", "1BAF7A", ["Posting turn", "Noise floor"]),
               ("Who and what", "EB6834", ["People", "Posts"]),
               ("Run", "4A3AA7", ["Time per step"]),
               ("Raw data", "404040", ["Screens"])]
+    if ALL:
+        groups[4:4] = [("Who and what", "EB6834", ["People", "Posts"]), ("Run", "4A3AA7", ["Time per step"]), ("Raw data", "404040", ["Screens"])]
+        groups = groups[:7]
     order = [n for _, _, names in groups for n in names]
     wb._sheets = [wb[n] for n in order]
     for _, color, names in groups:
@@ -841,7 +972,15 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
              "All actions": "all 27 actions; graphs below", "By stance": "by stance; graph to the right",
              "By topic": "by subreddit; graph to the right", "Posting turn": "the posting turn; graph below the totals",
              "Noise floor": "re-read agreement; graph below", "People": "the 100 users", "Posts": "every post",
-             "Time per step": "every step's timing; 5 time graphs to the right (column T)", "Screens": "one row per screen"}
+             "Time per step": "every step's timing; 5 time graphs to the right (column T)", "Screens": "one row per screen",
+             "By person type": "by sex, age, region, community, education, work, personality; graph to the right",
+             "Total engagement": "V1 | V2 | change grids and the own-AI bias, with 95% ranges; bias graphs to the right",
+             "V1 vs V2": "every measure: V1, V2, the change and its range", "Round by round": "every measure, rounds 101-104 side by side",
+             "All grids": "every grid number in one filterable list", "All biases": "every own-AI bias in one filterable list",
+             "Unreadable": "answers that could not be read, per round"}
+    if ALL:
+        where["Engagement 3x3"] = "grids for every action (V1, V2 or a round: yellow cell); graphs to the right"
+        where["Noise floor"] = "re-read agreement per round; graphs to the right"
     rr = ws.max_row + 2
     ws.cell(rr, 1, "Tabs (click to jump)").font = F(bold=True, size=12)
     for gname, color, names in groups[1:]:
@@ -854,20 +993,13 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
             c.font = F(color="0563C1", underline="single")
     wb.active = 0
 
-    p = os.path.join(out, f"LLM_Bias_{version_of(complete[0])}.xlsx")
+    p = os.path.join(out, f"LLM_Bias_{VER}.xlsx")
     wb.save(p)
     return p
 
 
-def main(res, out, version=None):
-    os.makedirs(out, exist_ok=True)
-    reads, post_rows = load(res)
-    version = version or max(version_of(r["round"]) for r in reads)
-    reads = [r for r in reads if version_of(r["round"]) == version]
-    post_rows = [r for r in post_rows if version_of(r["round"]) == version]
-    posts = post_index(post_rows)
-    people = json.load(open(os.path.join(HERE, "personas_v2.json")))
-    steps, best = steps_from_log(os.path.join(res, "night.log"))
+def summarize(res, reads, version):
+    """One version's complete rounds, the label, the screens used, the own-AI bias with 95% ranges and the noise floor."""
     full = sorted({r["round"] for r in reads})
     done = {int(x) for x in re.findall(r"checkpoint round (\d+): noise floor", open(os.path.join(res, "night.log")).read())}
     complete = sorted(done & set(full)) or [max(r for r in full if all(any(x["model"] == m and x["posts_by"] == pb and x["round"] == r
@@ -900,7 +1032,40 @@ def main(res, out, version=None):
                         "same_n": 100 * sum(f_tot(x) == f_tot(y) for x, y in pairs) / len(pairs),
                         "ta": 100 * sum(f_tot(x) for x, _ in pairs) / len(pairs), "tb": 100 * sum(f_tot(y) for _, y in pairs) / len(pairs),
                         "a": 100 * sum(f_up(x) for x, _ in pairs) / len(pairs), "b": 100 * sum(f_up(y) for _, y in pairs) / len(pairs)}
-    gfiles, sps, ppu, post_s, hours = graphs(out, R, post_rows, posts, steps, best, rnd, bias, noise, label)
+    return {"complete": complete, "rnd": rnd, "label": label, "R": R, "bias": bias, "noise": noise,
+            "f": {"tot": f_tot, "any": f_any, "up": f_up}}
+
+
+def main(res, out, version=None):
+    os.makedirs(out, exist_ok=True)
+    reads, post_rows = load(res)
+    people = json.load(open(os.path.join(HERE, "personas_v2.json")))
+    steps, best = steps_from_log(os.path.join(res, "night.log"))
+    version = version or max(version_of(r["round"]) for r in reads)
+    if version == "ALL":  # one workbook for every version: graphs per version into <out>/V1, <out>/V2; comparison from make_compare
+        import make_compare
+        J = make_compare.main(res, out)  # in memory: round keys stay numbers
+        part = {}
+        for v in ("V1", "V2"):
+            rd = [r for r in reads if version_of(r["round"]) == v]
+            pr = [r for r in post_rows if version_of(r["round"]) == v]
+            sm = summarize(res, rd, v)
+            part[v] = (sm, graphs(os.path.join(out, v), sm["R"], pr, post_index(pr), steps, best, sm["rnd"], sm["bias"], sm["noise"], sm["label"], people))
+        complete = part["V1"][0]["complete"] + part["V2"][0]["complete"]
+        reads = [r for r in reads if r["round"] in complete]
+        post_rows = [r for r in post_rows if r["round"] in complete]
+        gfiles2, sps, ppu, post_s, hours = part["V2"][1]
+        p = workbook(out, reads, post_rows, post_index(post_rows), steps, best, part["V2"][0]["rnd"], [], {}, people, part["V1"][1][0],
+                     sps, hours, "LLM Bias V1 + V2", complete, J=J, gfiles2=gfiles2)
+        print(json.dumps({"rounds": complete, "all_screens": len(reads), "workbook": p}, indent=1))
+        return
+    reads = [r for r in reads if version_of(r["round"]) == version]
+    post_rows = [r for r in post_rows if version_of(r["round"]) == version]
+    posts = post_index(post_rows)
+    sm = summarize(res, reads, version)
+    complete, rnd, label, R, bias, noise = (sm[k] for k in ("complete", "rnd", "label", "R", "bias", "noise"))
+    f_tot, f_any, f_up = (sm["f"][k] for k in ("tot", "any", "up"))
+    gfiles, sps, ppu, post_s, hours = graphs(out, R, post_rows, posts, steps, best, rnd, bias, noise, label, people)
     p = workbook(out, reads, post_rows, posts, steps, best, rnd, bias, noise, people, gfiles, sps, hours, label, complete)
     grid = lambda f: {f"{m}|{pb}": round(100 * sum(f(r) for r in R if r["model"] == m and r["posts_by"] == pb) /
                                          max(1, sum(1 for r in R if r["model"] == m and r["posts_by"] == pb)), 1) for m in MODELS for pb in MODELS}

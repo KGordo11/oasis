@@ -6,19 +6,19 @@ Two questions a reader asks about a simulation: how long does a round take,
 and what happens if I add more people. This draws both, from measured runs
 only, and writes SVG that can be pasted straight into the scaling artifact.
 
-Re-run it whenever new runs land. It reads `data/sim4_package/` -- which means
+Re-run it whenever new runs land. It reads `data/sim4_social_timeline/sim4_package/` -- which means
 it reads the CORRECTED round timings (B-27), sourced from each run's manifest
 rather than scraped from a log.
 
     oasis-env/bin/python examples/experiment/social_timeline/make_timing_charts.py
 
-Writes charts.svg fragments to data/charts/.
+Writes charts.svg fragments to data/sim4_social_timeline/charts/.
 """
 from __future__ import annotations
 import csv, collections, os, statistics as st
 
-PKG = "data/sim4_package"
-OUT = "data/charts"
+PKG = "data/sim4_social_timeline/sim4_package"
+OUT = "data/sim4_social_timeline/charts"
 W, H = 720, 380
 PAD = dict(l=68, r=22, t=22, b=52)
 

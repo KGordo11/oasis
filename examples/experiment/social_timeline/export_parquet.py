@@ -58,8 +58,8 @@ Two of the schema traps in the build log are fixed here rather than passed on:
 
 Usage
 -----
-    python export_parquet.py --db data/social_timeline_baseline.db
-    python export_parquet.py --all --data-dir data --out data/parquet
+    python export_parquet.py --db data/sim4_social_timeline/social_timeline_baseline.db
+    python export_parquet.py --all --data-dir data/sim4_social_timeline --out data/sim4_social_timeline/parquet
 
 Then, in whatever you like:
 
@@ -469,7 +469,7 @@ def main() -> int:
     ap.add_argument("--db", help="one database to export")
     ap.add_argument("--all", action="store_true",
                     help="export every social_timeline_*.db in --data-dir")
-    ap.add_argument("--data-dir", default="data")
+    ap.add_argument("--data-dir", default="data/sim4_social_timeline")
     ap.add_argument("--out", default=None,
                     help="output root (default: <data-dir>/parquet)")
     ap.add_argument("--csv", action="store_true",
@@ -482,7 +482,7 @@ def main() -> int:
     out_root = args.out or os.path.join(args.data_dir, "parquet")
 
     if args.all:
-        # Runs live either directly in data/ or grouped under data/runs/<arm>/
+        # Runs live either directly in data/ or grouped under data/sim4_social_timeline/runs/<arm>/
         # (and data/_archive/... ). Search recursively so the layout can change
         # without the export silently finding nothing.
         dbs = sorted(set(

@@ -113,7 +113,7 @@ def test_verify_reports_the_drift_in_words():
 def test_verify_passes_a_real_pair_of_reference_runs():
     """ctx8192_a12 and ctx8192_a36 are the same configuration at two sizes."""
     here = os.path.dirname(os.path.abspath(__file__))
-    root = os.path.abspath(os.path.join(here, "..", "..", "..", "data", "parquet"))
+    root = os.path.abspath(os.path.join(here, "..", "..", "..", "data", "sim4_social_timeline", "parquet"))
     a = os.path.join(root, "ctx8192_a12", "manifest.json")
     b = os.path.join(root, "ctx8192_a36", "manifest.json")
     if not (os.path.exists(a) and os.path.exists(b)):

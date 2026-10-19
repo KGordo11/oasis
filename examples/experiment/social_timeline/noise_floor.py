@@ -35,7 +35,7 @@ paired standard deviation is then taken for every pair of runs.
 
 Usage:
     noise_floor.py
-    noise_floor.py --runs v10_register v10_replicate --out data/nf.txt
+    noise_floor.py --runs v10_register v10_replicate --out data/sim4_social_timeline/nf.txt
 """
 
 from __future__ import annotations
@@ -58,7 +58,7 @@ ACTIONS = ("create_post", "create_comment", "like_post", "follow")
 NOT_A_CHOICE = ("refresh", "sign_up", "do_nothing")
 
 
-def agent_shares(label, data_dir="data"):
+def agent_shares(label, data_dir="data/sim4_social_timeline"):
     """For one run, each agent's percentage split across the tracked actions."""
     path = os.path.join(data_dir, f"social_timeline_{label}_analysis.json")
     with open(path) as fh:
@@ -140,7 +140,7 @@ def main():
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--runs", nargs="*", default=list(IDENTICAL_RUNS))
-    ap.add_argument("--data-dir", default="data")
+    ap.add_argument("--data-dir", default="data/sim4_social_timeline")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 

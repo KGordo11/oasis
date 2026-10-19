@@ -3,7 +3,7 @@
 IN PLAIN WORDS
 --------------
 Reads every finished turn in a results folder (data/llm_bias/v2 on the laptop, or a copy from the DGX Spark such as
-data/llm_bias/v2_spark) and writes <folder>/export/:
+data/llm_bias/v1_v2_spark) and writes <folder>/export/:
 
   users.csv           the 100 pinned users: age, gender, state, education, work, personality, stance on each topic
   posts.csv           every post written in a posting turn: round, which AI's users wrote it, author, topic, text
@@ -16,7 +16,7 @@ data/llm_bias/v2_spark) and writes <folder>/export/:
   LLM_bias_v2.xlsx    all of the above as sheets (reactions capped at Excel's row limit, see the README sheet)
 
     python export_v2.py                         # data/llm_bias/v2, real rounds (< 900)
-    python export_v2.py data/llm_bias/v2_spark  # the Spark copy
+    python export_v2.py data/llm_bias/v1_v2_spark  # the Spark copy
     python export_v2.py data/llm_bias/v2 --test # smoke-test rounds (>= 900)
 """
 import glob, json, os, sys

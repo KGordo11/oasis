@@ -104,14 +104,14 @@ tmp
 # Overnight batch logs: 241MB of verbose camel/LLM output. The run manifests
 # (data/social_timeline_*.json) already carry per-round timings and counters,
 # which is the provenance that matters.
-data/overnight_logs/
+data/sim4_social_timeline/overnight_logs/
 
 # Parquet exports are derived artifacts: export_parquet.py regenerates them
 # from the .db files in seconds, and the .db files are themselves ignored.
 # Committing 6.5 MB of output that is reproducible by one command adds noise
 # to every diff and nothing to the record. The exporter and its fidelity gate
 # are what need to be under version control, and they are.
-data/parquet/
+data/sim4_social_timeline/parquet/
 
 # ---- Simulation output is DERIVED, and git is not where it belongs ----
 # `.db` and `data/parquet/` were already excluded on exactly this reasoning.
@@ -120,15 +120,15 @@ data/parquet/
 # is ~126 MB against 0.4 MB of actual code. The run manifests and analysis JSONs
 # are the durable record, so they live in the handover package and the logs --
 # not in the history of a fork of someone else's repo.
-data/runs/
-data/_archive/
-data/sim4_package/
-data/charts/
-data/social_timeline_*.json
-data/social_timeline_*.txt
-data/sweep18_results.txt
-data/load_*.csv
-data/night_queue.txt
+data/sim4_social_timeline/runs/
+data/sim4_social_timeline/_archive/
+data/sim4_social_timeline/sim4_package/
+data/sim4_social_timeline/charts/
+data/sim4_social_timeline/social_timeline_*.json
+data/sim4_social_timeline/social_timeline_*.txt
+data/sim4_social_timeline/sweep18_results.txt
+data/sim4_social_timeline/load_*.csv
+data/sim4_social_timeline/night_queue.txt
 
 # Camel/OASIS runtime logs. 163 MB and 1,500 files as of 2026-09-13, one set per
 # run (oasis-*, social.agent-*, social.twitter-*, table-*). Derived output, same
@@ -136,10 +136,9 @@ data/night_queue.txt
 # and every fact a run produces is in its manifest. log/.gitkeep stays tracked so
 # the directory still exists on a fresh clone.
 log/*.log
-data/overnight_cmp_*.txt
-data/graph.html
+data/sim4_social_timeline/overnight_cmp_*.txt
+data/sim4_social_timeline/graph.html
 
 # LLM Bias: oasis.db files are covered by *.db above; decisions/manifests/post banks ARE committed
 # (small, and the only record of what each judge chose). Smoke runs are throwaway.
-data/llm_bias/runs/smoke*/
-data/llm_bias/postbank_s900.jsonl
+data/llm_bias/old_tests_sep2026/test1_pick_a_favourite/runs/smoke*/

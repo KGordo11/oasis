@@ -78,7 +78,7 @@ ALPHA = 0.05
 POWER = 0.80
 
 
-def load_run(label, data_dir="data"):
+def load_run(label, data_dir="data/sim4_social_timeline"):
     """Read one run's analysis JSON plus the manifest that recorded its config."""
     apath = os.path.join(data_dir, f"social_timeline_{label}_analysis.json")
     with open(apath) as fh:
@@ -306,7 +306,7 @@ def main():
     ap.add_argument("--runs", nargs=2, required=True,
                     metavar=("BEFORE", "AFTER"),
                     help="two run labels, e.g. baseline v10_register")
-    ap.add_argument("--data-dir", default="data")
+    ap.add_argument("--data-dir", default="data/sim4_social_timeline")
     ap.add_argument("--actions", nargs="*", default=list(DEFAULT_ACTIONS))
     ap.add_argument("--replicate", action="store_true",
                     help="the two runs are meant to be identical; report the "

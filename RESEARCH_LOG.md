@@ -66,6 +66,15 @@ research**:
 
 ## 0.2 Where things stand (2026-10-19): read this first
 
+- **NEW Mon 10-19 night: oasis/ reorganised (moves only, nothing lost).** Map = `START_HERE.md` (repo root),
+  `data/README.md`, `data/llm_bias/README.md`. **LLM Bias raw data = `data/llm_bias/v1_v2_spark/`** (was `v2_spark`;
+  fingerprint unchanged `7ace91dc41c5f431`; rsync target renamed, every command in this log updated). September Tests 1-6
+  -> `data/llm_bias/old_tests_sep2026/test1..test6_*/` (their old programs expect the old paths; move files back to rerun).
+  Sim 4 (100+ loose files, runs, parquet, package, _archive) -> `data/sim4_social_timeline/`; its code defaults updated, its
+  self-tests pass (assert_comparable, build_package 9/9, export_parquet 28/28, persona_supply). `overnight_replicates.sh` ->
+  `examples/experiment/social_timeline/`. Holding bin for Gordon to look at and delete: `~/research/oasis_TO_DELETE/`
+  (`log/` = 272 MB OASIS engine logs, the outdated `00_LLM_BIAS_START_HERE/` shortcuts, the `postbank_s900` smoke test).
+  The Spark is not touched; `data/llm_bias/v2/` (the code's working folder) keeps its name.
 - **NEW Mon 10-19 evening (§14.42): gemma deep dive after the professor meeting.** Laptop audit of all 274,191 saved
   rows: **0 parsing errors** (every raw reply re-parses to exactly the saved actions). The empty lists exist (gemma 8,658
   reading screens + 71 posting turns; qwen never uses them, it picks `do_nothing`). Gemma's posting turn: 227 of 400 just
@@ -79,7 +88,7 @@ research**:
   'Engagement 3x3', a Version column on All actions / By stance / By topic, each By person type block twice) was
   started and interrupted: it is **uncommitted and does not compile yet** (unterminated string near line 825). Finish
   it, build to a scratch folder (Gordon may have the workbook open), recalc (~13 min), check, then swap in.
-- Gordon also asked where gemma's raw posts are: `data/llm_bias/v2_spark/export/posts.csv` (filter
+- Gordon also asked where gemma's raw posts are: `data/llm_bias/v1_v2_spark/export/posts.csv` (filter
   `written_by_ai = gemma3:12b`, 98 posts) and `r10X/posting_gemma3-12b.jsonl` (raw, incl. users who did not post).
 - **NEW Mon 10-19 (§14.41): no own-AI bias.** llama and gemma treat every AI's posts the same; only qwen differs, and it
   likes **gemma's** posts best (not its own), even matched on topic and stance. Next step is Gordon's choice (options
@@ -108,7 +117,7 @@ research**:
   about −9, gemma about −4 to −5 actions per 100 screens), equally on every AI's posts.
 - Nothing is running. Meeting with the professor **Tue 2026-10-13**.
 - **V1 (rounds 101-102) and V2 (rounds 103-104) are BOTH COMPLETE.** All data is on the laptop in
-  `data/llm_bias/v2_spark/` (rsynced Sun ~10:45; r103 + r104 have 45 files each). The Spark is idle; Gordon was
+  `data/llm_bias/v1_v2_spark/` (rsynced Sun ~10:45; r103 + r104 have 45 files each). The Spark is idle; Gordon was
   told to remove the watchdog cron (verify: `crontab -l` on the Spark shows nothing).
 
 *Status as of 2026-10-11 ~11:00 (before §14.37 was done), kept as written:* V1 and V2 both complete, data on the laptop.
@@ -173,7 +182,7 @@ research**:
   - 100 Census/BLS/Pew-grounded pinned users; the five Pew top news topics.
   - The bias measure is a double difference.
 - **Results:** the Spark writes them to `~/llm_bias/oasis/data/llm_bias/v2/`. Copy to the laptop with rsync into
-  `data/llm_bias/v2_spark/`, then `export_v2.py`, `make_graphs_v2.py` and `make_report_v2.py` (§14.32d item 9).
+  `data/llm_bias/v1_v2_spark/`, then `export_v2.py`, `make_graphs_v2.py` and `make_report_v2.py` (§14.32d item 9).
 - **Pilots, not part of the final data:**
   - laptop night 1 (round 1: Ollama, mistral, 16 posts per user, §14.13)
   - the Ollama round-101 attempt (moved to `~/llm_bias/pilot_ollama` on the Spark)
@@ -14930,12 +14939,12 @@ server script changed.
 
 **Results to the laptop (run on the Mac):**
 ```
-rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/
+rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v1_v2_spark/
 ```
 Then:
 ```
-oasis-env/bin/python examples/experiment/llm_bias/export_v2.py data/llm_bias/v2_spark
-oasis-env/bin/python examples/experiment/llm_bias/make_graphs_v2.py data/llm_bias/v2_spark
+oasis-env/bin/python examples/experiment/llm_bias/export_v2.py data/llm_bias/v1_v2_spark
+oasis-env/bin/python examples/experiment/llm_bias/make_graphs_v2.py data/llm_bias/v1_v2_spark
 ```
 
 ### Decisions (Part 14): LD-19 … LD-42, in one line each
@@ -15073,6 +15082,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | c84e4f2 | 10-19 13:41 | `check_qwen_gemma.py`: no own-AI bias; qwen's taste for gemma's posts survives topic × stance matching (§14.41); Inside page note |
 
 | 8b91ef5 | 10-19 evening | **`audit_v2_data.py`** (re-parse every raw reply, nothing-routes, non-post actions, post-only bias) + **`gemma_probe.py`** (template / replay / posting variants / reading variants / ask; §14.42) |
+| (this) | 10-19 night | **Reorganised oasis/**: START_HERE.md + data READMEs; `v2_spark` -> `v1_v2_spark`; Tests 1-6 -> `data/llm_bias/old_tests_sep2026/`; Sim 4 -> `data/sim4_social_timeline/` (code defaults + .gitignore updated, self-tests pass); junk to `~/research/oasis_TO_DELETE/` |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -15141,13 +15151,13 @@ grep -E "post sets|checkpoint" ~/llm_bias/oasis/data/llm_bias/v2/night.log | tai
 
 **9. Copy results to the laptop** (on the **Mac**, not the Spark)
 ```
-rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v2_spark/
+rsync -avz kmgo257@honda.csr.uky.edu:llm_bias/oasis/data/llm_bias/v2/ ~/research/oasis/data/llm_bias/v1_v2_spark/
 ```
 Then, on the Mac, the workbook + graphs (formulas recalculated with LibreOffice) and the Inside page:
 ```
-cd ~/research/oasis && oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V1 V1
-oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V2 V2   # once round 103 is complete
-python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark /tmp/inside_v2.html ~/Desktop/LLM_Bias/V1/results.json
+cd ~/research/oasis && oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v1_v2_spark ~/Desktop/LLM_Bias/V1 V1
+oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v1_v2_spark ~/Desktop/LLM_Bias/V2 V2   # once round 103 is complete
+python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v1_v2_spark /tmp/inside_v2.html ~/Desktop/LLM_Bias/V1/results.json
 ```
 (Claude runs these: it also recalculates the workbook with `recalc.py` and republishes the page to the same URL.)
 
@@ -15204,9 +15214,9 @@ gemma 92.7 / 91.8 / 93.5.
 - One round; round 102 is pooled next.
 
  It was copied from the Spark by rsync, then
-`export_v2.py` and `make_graphs_v2.py` were run on it. The graphs are in `data/llm_bias/v2_spark/graphs/round_101/`
+`export_v2.py` and `make_graphs_v2.py` were run on it. The graphs are in `data/llm_bias/v1_v2_spark/graphs/round_101/`
 (1_posting … 7_noise). The tables below come from `analyze_v2.py` run on round 101 alone and are saved as
-`data/llm_bias/v2_spark/summary_r101.md`.
+`data/llm_bias/v1_v2_spark/summary_r101.md`.
 
 69,513 reading screens in total. 54 of them (0.08%) were unreadable answers and are left out.
 
@@ -15371,7 +15381,7 @@ To update it, rebuild the page and publish the same file to the same URL.
 
 Round 102 ran Wed 2026-10-07 17:17 → Fri 02:03 with the same design and code as round 101. 67,134 reading screens;
 829 unreadable (all in gemma reading qwen's posts, the timeouts of §14.31i; 8.9% of that cell). `analyze_v2.py` on
-round 102 alone → `data/llm_bias/v2_spark/summary_r102.md`. Pooled numbers come from `make_report_v2.py`
+round 102 alone → `data/llm_bias/v1_v2_spark/summary_r102.md`. Pooled numbers come from `make_report_v2.py`
 (`~/Desktop/LLM_Bias_v2/results.json`, workbook recalculated: 141,612 formulas, 0 errors).
 
 **Posting turn, round 102** (round 101 in brackets): qwen 85 users posted, 94 posts (86, 101); llama 99 users,
@@ -15484,7 +15494,7 @@ be LLM Bias V2 103 and 104 ... make sure all is consistent."
   vs V2 comparison (does the bias change when the AI knows who it is?) comes after V2 finishes.
 - **Older names stay as they were written.** Sections before this one call the whole Spark study "LLM Bias v2" (to set it
   apart from the September Tests 1-6, Part 9). From here on, "V1" and "V2" mean the two Spark versions. Code
-  (`run_v2.py`, `make_report_v2.py`, …), the data folder `data/llm_bias/v2_spark/` and bug ids (`LB-v2-n`) keep their
+  (`run_v2.py`, `make_report_v2.py`, …), the data folder `data/llm_bias/v1_v2_spark/` and bug ids (`LB-v2-n`) keep their
   names. The same code runs both versions: `run_v2.system_prompt()` switches on the round number.
 
 **What changed in the outputs:**
@@ -15517,7 +15527,7 @@ individual, and go through all the data. I want it all broken down, and also on 
 make sure everything is correct, formatted nicely, works as it is supposed to, and no bugs."
 
 **State when the laptop restarted:** V2 data copied. A background run of `export_v2.py` → `make_graphs_v2.py` →
-`make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V2 V2` had been started and was probably killed by the
+`make_report_v2.py data/llm_bias/v1_v2_spark ~/Desktop/LLM_Bias/V2 V2` had been started and was probably killed by the
 restart. **UPDATE: it finished before the restart** (export, graphs, and `~/Desktop/LLM_Bias/V2/LLM_Bias_V2.xlsx` +
 results.json, 134,244 screens). **Still to do: recalc it** with LibreOffice (§14.34 recipe:
 `PATH=/Applications/LibreOffice.app/Contents/MacOS:$PATH oasis-env/bin/python <xlsx skill>/scripts/recalc.py <xlsx> 300`,
@@ -15644,7 +15654,7 @@ Bold = 95% range excludes 0.
 
 ### How it was made, and the checks
 - New script `examples/experiment/llm_bias/make_compare.py` (`oasis-env/bin/python ... make_compare.py
-  data/llm_bias/v2_spark ~/Desktop/LLM_Bias`, ~10 s). 95% ranges: 1,000 resamples of users and posts with numpy;
+  data/llm_bias/v1_v2_spark ~/Desktop/LLM_Bias`, ~10 s). 95% ranges: 1,000 resamples of users and posts with numpy;
   the same user draw is used for every round (same 100 people), post keys are unique per round.
 - **Check 1:** every round's 9 cells × 30 measures and every bias point estimate equal `analyze_v2.py` run on that
   round alone (scratchpad symlink trick): 0 mismatches.
@@ -15724,7 +15734,7 @@ What changed:
   - (3) what the AI did: its real posting answer word for word, or the actions it took on that post.
   The old user-0 side-by-side answers stay below it.
 - **`~/Desktop/LLM_Bias/LLM_Bias_All.xlsx`** (77 MB): every round in one workbook, made by
-  `make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias ALL`.
+  `make_report_v2.py data/llm_bias/v1_v2_spark ~/Desktop/LLM_Bias ALL`.
   - The yellow picker (Engagement 3x3!B4) offers V1, V2, 101, 102, 103 or 104. V1 and V2 are never pooled (LD-45).
   - Tabs:
     - **Results:** Engagement 3x3, All actions, **By person type** (new), By stance, By topic.
@@ -15755,7 +15765,7 @@ Checks:
 ## 14.41 Is there an own-AI bias? No. qwen likes gemma's writing (Mon 2026-10-19)
 
 Gordon (Mon 10-19): "so do you see a bias or where should we go from here?" Checked with
-`examples/experiment/llm_bias/check_qwen_gemma.py data/llm_bias/v2_spark` (reads the raw rows of rounds 101-104, ~5 s).
+`examples/experiment/llm_bias/check_qwen_gemma.py data/llm_bias/v1_v2_spark` (reads the raw rows of rounds 101-104, ~5 s).
 
 - **No AI favours its own AI's posts.** llama and gemma readers treat all three AIs' posts almost the same (V1: llama
   222-225 actions per 100 screens, gemma 94-96, whoever wrote the post). Every "bias" in §14.38 comes from **qwen's row

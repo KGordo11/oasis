@@ -77,7 +77,7 @@ import statsmodels.api as sm
 from scipy import stats
 
 
-def load_exposures(label, data_dir="data"):
+def load_exposures(label, data_dir="data/sim4_social_timeline"):
     """One row per exposure: which feed it sat in, its tier, slot, score, and
     whether the agent acted on that post."""
     path = os.path.join(data_dir, f"social_timeline_{label}_analysis.json")
@@ -407,7 +407,7 @@ def main():
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--runs", nargs="*", default=None)
-    ap.add_argument("--data-dir", default="data")
+    ap.add_argument("--data-dir", default="data/sim4_social_timeline")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 

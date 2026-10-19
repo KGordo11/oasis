@@ -17,7 +17,7 @@ Reads <folder>/export/*.csv (made by export_v2.py) and writes <folder>/graphs/ro
 Each AI has one colour everywhere: qwen blue, llama orange, gemma green (mistral yellow in the laptop round).
 
     python make_graphs_v2.py                      # data/llm_bias/v2
-    python make_graphs_v2.py data/llm_bias/v2_spark
+    python make_graphs_v2.py data/llm_bias/v1_v2_spark
 """
 import os, sys
 

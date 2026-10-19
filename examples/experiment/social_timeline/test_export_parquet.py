@@ -11,7 +11,7 @@ Nothing here checks that the export *runs*. It checks that what comes back
 out is what went in, which is the only property that matters for a file we
 hand to someone else.
 
-    python test_export_parquet.py [--db data/social_timeline_baseline.db]
+    python test_export_parquet.py [--db data/sim4_social_timeline/runs/published/social_timeline_baseline.db]
 """
 from __future__ import annotations
 
@@ -53,7 +53,7 @@ def check(label: str, cond: bool) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--db", default="data/social_timeline_baseline.db")
+    ap.add_argument("--db", default="data/sim4_social_timeline/runs/published/social_timeline_baseline.db")
     args = ap.parse_args()
 
     if not os.path.exists(args.db):

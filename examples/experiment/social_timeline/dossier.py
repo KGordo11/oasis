@@ -36,7 +36,7 @@ Sections
 
 Usage:
     oasis-env/bin/python examples/experiment/social_timeline/dossier.py \
-        --db data/social_timeline_full_twhin_v2.db \
+        --db data/sim4_social_timeline/social_timeline_full_twhin_v2.db \
         --log <run>.log --personas data/reddit/user_data_36.json
 """
 

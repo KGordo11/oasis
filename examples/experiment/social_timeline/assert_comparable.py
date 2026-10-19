@@ -129,7 +129,7 @@ def main(argv=None):
     if not os.path.exists(ref):
         roots = [a.data_root] if a.data_root else []
         here = os.path.dirname(os.path.abspath(__file__))
-        roots.append(os.path.join(here, "..", "..", "..", "data"))
+        roots.append(os.path.join(here, "..", "..", "..", "data", "sim4_social_timeline"))
         found = find_manifest(ref, [os.path.abspath(r) for r in roots])
         if not found:
             print(f"  REFUSING: no manifest found for reference {ref!r}")

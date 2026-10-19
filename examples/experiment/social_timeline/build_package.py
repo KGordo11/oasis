@@ -35,7 +35,7 @@ tens of millions of rows and would be unusable as text.
 
 USAGE
     python build_package.py                       # all exported runs
-    python build_package.py --out data/sim4_package
+    python build_package.py --out data/sim4_social_timeline/sim4_package
 """
 from __future__ import annotations
 
@@ -166,7 +166,7 @@ def manifest_row(run_dir: str, label: str, counts_by_action: dict | None = None)
 def find_analysis(label: str, data_dir: str) -> str | None:
     """Locate a run's analysis JSON.
 
-    Runs were grouped into `data/runs/<arm>/` on 2026-09-11 to keep the working
+    Runs were grouped into `data/sim4_social_timeline/runs/<arm>/` on 2026-09-11 to keep the working
     directory readable. Both layouts are searched so nothing breaks whichever
     way a run is filed, and so archived runs can be analysed in place.
     """
@@ -197,9 +197,9 @@ def main() -> int:
     ap = argparse.ArgumentParser(
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--parquet-dir", default="data/parquet")
-    ap.add_argument("--data-dir", default="data")
-    ap.add_argument("--out", default="data/sim4_package")
+    ap.add_argument("--parquet-dir", default="data/sim4_social_timeline/parquet")
+    ap.add_argument("--data-dir", default="data/sim4_social_timeline")
+    ap.add_argument("--out", default="data/sim4_social_timeline/sim4_package")
     args = ap.parse_args()
 
     runs = sorted(d for d in os.listdir(args.parquet_dir)

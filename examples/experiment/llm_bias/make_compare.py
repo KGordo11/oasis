@@ -1,7 +1,7 @@
 """Compare every round of the Spark study (101, 102, 103, 104) and the two versions (V1 = 101+102, V2 = 103+104), for
 every measure, in one JSON file (for the Inside page) and one Excel workbook (log 14.37).
 
-    oasis-env/bin/python examples/experiment/llm_bias/make_compare.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias
+    oasis-env/bin/python examples/experiment/llm_bias/make_compare.py data/llm_bias/v1_v2_spark ~/Desktop/LLM_Bias
 
 IN PLAIN WORDS
 --------------
@@ -305,7 +305,7 @@ def workbook(J, path, wb=None, only=None):
         "All grids / All biases: every number above in one long table each, with filters (pick a view and a measure).",
         "Posting turn, Noise floor, By stance, By topic, Unreadable: per round.",
         "",
-        "Made by examples/experiment/llm_bias/make_compare.py from data/llm_bias/v2_spark (log 14.37-14.38).",
+        "Made by examples/experiment/llm_bias/make_compare.py from data/llm_bias/v1_v2_spark (log 14.37-14.38).",
     ]:
         s.row([line], font=BOLD if line.isupper() and line else None)
 

@@ -1,1 +1,0 @@
-../../../examples/experiment/llm_bias/two_ai_campaign.sh

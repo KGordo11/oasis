@@ -66,7 +66,7 @@ def per_agent_turn(manifest: dict) -> float | None:
 
 def load_trace(prefix: str) -> dict | None:
     """Median and peak non-simulation CPU for the pass a run belonged to."""
-    path = f"data/load_{prefix}.csv"
+    path = f"data/sim4_social_timeline/load_{prefix}.csv"
     if not os.path.exists(path):
         return None
     vals = []
@@ -117,7 +117,7 @@ def verdict(cost: float | None) -> tuple[str, str]:
 
 def find_prefix(label: str) -> str:
     """Which pass's load trace covers this run. Longest matching prefix wins."""
-    cands = [os.path.basename(p)[5:-4] for p in glob.glob("data/load_*.csv")]
+    cands = [os.path.basename(p)[5:-4] for p in glob.glob("data/sim4_social_timeline/load_*.csv")]
     hits = [c for c in cands if label.startswith(c)]
     return max(hits, key=len) if hits else ""
 
@@ -126,7 +126,7 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__,
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--run", default=None)
-    ap.add_argument("--parquet-dir", default="data/parquet")
+    ap.add_argument("--parquet-dir", default="data/sim4_social_timeline/parquet")
     args = ap.parse_args()
 
     labels = ([args.run] if args.run

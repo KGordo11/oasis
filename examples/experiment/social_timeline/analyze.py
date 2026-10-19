@@ -27,7 +27,7 @@ report.
 
 Usage:
     oasis-env/bin/python examples/experiment/social_timeline/analyze.py \
-        --db data/social_timeline_stage2.db
+        --db data/sim4_social_timeline/social_timeline_stage2.db
 """
 
 from __future__ import annotations

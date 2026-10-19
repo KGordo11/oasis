@@ -10,7 +10,7 @@ So each check below compares the package against something computed a DIFFERENT
 way -- the tables against the index, the index against the manifests -- because
 a package can only be wrong in ways it cannot see itself.
 
-    python test_build_package.py [--pkg data/sim4_package]
+    python test_build_package.py [--pkg data/sim4_social_timeline/sim4_package]
 """
 from __future__ import annotations
 
@@ -33,8 +33,8 @@ def check(label: str, cond: bool) -> None:
 
 def main() -> int:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pkg", default="data/sim4_package")
-    ap.add_argument("--parquet-dir", default="data/parquet")
+    ap.add_argument("--pkg", default="data/sim4_social_timeline/sim4_package")
+    ap.add_argument("--parquet-dir", default="data/sim4_social_timeline/parquet")
     args = ap.parse_args()
 
     idx = {r["run"]: r for r in csv.DictReader(

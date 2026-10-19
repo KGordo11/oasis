@@ -2,7 +2,7 @@
 (click to read it), the exact prompts the AIs receive in V1 and V2, real answers from rounds 101 and 103, every Spark
 command, how the pieces fit, and the results explorer (every round, V1 vs V2, every action).
 
-    python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v2_spark <out.html> ~/Desktop/LLM_Bias/compare.json
+    python3 examples/experiment/llm_bias/make_inside_v2.py data/llm_bias/v1_v2_spark <out.html> ~/Desktop/LLM_Bias/compare.json
 
 The page text lives in inside_v2_template.html; this script only fills in the data (file sources, line numbers of the
 functions the text points to, real prompts and answers), so the code shown is always the code in the repo.
@@ -79,7 +79,7 @@ FILES = [
      "From camel-ai/oasis, unchanged."),
 ]
 SAMPLES = [
-    ("data/llm_bias/v2_spark/r101/reading_qwen3-8b__llama3.1-8b.manifest.json", "data", "A step's manifest (real, round 101)",
+    ("data/llm_bias/v1_v2_spark/r101/reading_qwen3-8b__llama3.1-8b.manifest.json", "data", "A step's manifest (real, round 101)",
      "Written at the end of every step: what ran, the git commit, the fingerprints of the users, posts and prompts, the "
      "engine and sampling, how long it took, how many answers were unreadable.", "Made by run_v2.py on the Spark."),
 ]

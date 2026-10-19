@@ -22,8 +22,8 @@ published as an artifact or opened directly.
 
 Usage:
     oasis-env/bin/python examples/experiment/social_timeline/make_graph.py \
-        --analysis data/social_timeline_stage3_analysis.json \
-        --out data/social_timeline_stage3_graph.html
+        --analysis data/sim4_social_timeline/social_timeline_stage3_analysis.json \
+        --out data/sim4_social_timeline/social_timeline_stage3_graph.html
 """
 
 from __future__ import annotations
@@ -1517,14 +1517,14 @@ def _started(analysis_path):
         return ""
 
 
-def discover(data_dir="data", since=None):
+def discover(data_dir="data/sim4_social_timeline", since=None):
     """Analysed runs from the baseline forward, oldest first.
 
     Runs accumulate from a chosen starting point rather than including every
     run ever made: earlier runs used different personas, prompts and a feed
     that discarded its own ranking, so putting them beside current runs in one
     comparison table invites false conclusions. The baseline label is stored in
-    data/.artifact_baseline so it survives between invocations, and anything
+    data/sim4_social_timeline/.artifact_baseline so it survives between invocations, and anything
     started at or after that run is included automatically.
     """
     import glob
@@ -1556,7 +1556,7 @@ def discover(data_dir="data", since=None):
     return [p for _, p in dated]
 
 
-COST_CHART_DIR = "data/charts"
+COST_CHART_DIR = "data/sim4_social_timeline/charts"
 
 COST_CAPTIONS = {
     "rounds": ("Cost per round, 36 agents",
@@ -1644,7 +1644,7 @@ def main():
                          "every analysed run found in --data-dir.")
     ap.add_argument("--manifest", default=None,
                     help="only meaningful with a single --analysis file")
-    ap.add_argument("--data-dir", default="data")
+    ap.add_argument("--data-dir", default="data/sim4_social_timeline")
     ap.add_argument("--since", default=None,
                     help="run label to start from. Recorded as the baseline so "
                          "later invocations keep it without repeating the flag.")

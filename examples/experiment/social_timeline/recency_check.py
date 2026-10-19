@@ -81,7 +81,7 @@ DEFAULT_RUNS = ("baseline", "v10_register", "v10_replicate",
                 "v8_full", "v9_feedback")
 
 
-def load_scored_exposures(label, data_dir="data"):
+def load_scored_exposures(label, data_dir="data/sim4_social_timeline"):
     """One row per discovery exposure, with `sim` and `recency` recovered
     separately from rec_candidates.
 
@@ -480,7 +480,7 @@ def main():
         description=__doc__,
         formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--runs", nargs="*", default=list(DEFAULT_RUNS))
-    ap.add_argument("--data-dir", default="data")
+    ap.add_argument("--data-dir", default="data/sim4_social_timeline")
     ap.add_argument("--out", default=None)
     args = ap.parse_args()
 

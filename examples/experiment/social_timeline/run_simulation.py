@@ -22,8 +22,8 @@ Usage (start small -- decision D-11, no full runs until small ones are clean):
         --agents 4 --rounds 2 --label stage1-plumbing
 
 Writes:
-    data/social_timeline_<label>.db    simulation + instrumentation tables
-    data/social_timeline_<label>.json  run manifest (exact config, versions,
+    data/sim4_social_timeline/social_timeline_<label>.db    simulation + instrumentation tables
+    data/sim4_social_timeline/social_timeline_<label>.json  run manifest (exact config, versions,
                                        timings, counters, action tallies)
 
 The manifest exists so that every run is self-describing after the fact and
@@ -138,7 +138,7 @@ async def run(args):
     from timeline_agent import PROMPT_VERSION, generate_timeline_agents
     from timeline_platform import TimelinePlatform
 
-    db_path = os.path.join(REPO_ROOT, "data",
+    db_path = os.path.join(REPO_ROOT, "data", "sim4_social_timeline",
                            f"social_timeline_{args.label}.db")
     manifest_path = db_path.replace(".db", ".json")
     os.makedirs(os.path.dirname(db_path), exist_ok=True)

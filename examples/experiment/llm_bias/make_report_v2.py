@@ -2,8 +2,8 @@
 the Spark. Versions (LD-45, log 14.36): V1 = rounds 101-102 (the AI is not told which model it is), V2 = rounds 103+
 (the profile starts "I am <model>, simulating this profile:", LD-44). Rounds are pooled only within a version.
 
-    oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias/V1 V1
-    oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v2_spark ~/Desktop/LLM_Bias ALL
+    oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v1_v2_spark ~/Desktop/LLM_Bias/V1 V1
+    oasis-env/bin/python examples/experiment/llm_bias/make_report_v2.py data/llm_bias/v1_v2_spark ~/Desktop/LLM_Bias ALL
         = everything in ONE workbook, LLM_Bias_All.xlsx (V1 + V2, the comparison sheets, by person type, every graph twice)
 
 IN PLAIN WORDS
@@ -550,13 +550,13 @@ def workbook(out, R_all, post_rows, posts, steps, best, rnd, bias, noise, people
         ("LLM Bias, all the data: V1 (rounds 101-102) and V2 (rounds 103-104) in one workbook", F(bold=True, size=15)),
         ("Question: do AIs favour posts written by their own AI? And does telling the AI which model it is (V2) change that?", F()),
         (VERSION_NOTE["V1"], F()), (VERSION_NOTE["V2"], F()),
-        (f"Built {datetime.now():%Y-%m-%d %H:%M} from the DGX Spark result files (data/llm_bias/v2_spark): rounds {complete}, "
+        (f"Built {datetime.now():%Y-%m-%d %H:%M} from the DGX Spark result files (data/llm_bias/v1_v2_spark): rounds {complete}, "
          f"{len(R_all):,} screens. THE YELLOW PICKER on 'Engagement 3x3' (cell B4) says what every formula table shows: V1, V2, or one "
          "round (101, 102, 103, 104). V1 and V2 are never added together (decision LD-45). Each graph is shown twice: V1, then V2 below it.", F(bold=True)),
     ] if ALL else [
         (f"LLM Bias {version_of(complete[0])}: do AIs favour posts written by their own AI?", F(bold=True, size=15)),
         (VERSION_NOTE[version_of(complete[0])] + " Rounds are pooled only within a version; the other version has its own workbook.", F()),
-        (f"Built {datetime.now():%Y-%m-%d %H:%M} from the DGX Spark result files (data/llm_bias/v2_spark). Rounds in this file: "
+        (f"Built {datetime.now():%Y-%m-%d %H:%M} from the DGX Spark result files (data/llm_bias/v1_v2_spark). Rounds in this file: "
          f"{sorted({r['round'] for r in R_all})}. Complete rounds: {complete} (graphs and bias ranges: {label}); a round still "
          "running is partial. The yellow round picker on 'Engagement 3x3' drives every grid and split table.", F()),
     ]) + [

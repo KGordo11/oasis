@@ -43,8 +43,8 @@ import pandas as pd
 
 import make_timing_charts as mtc
 
-OUT = "data/charts"
-PKG = "data/sim4_package"
+OUT = "data/sim4_social_timeline/charts"
+PKG = "data/sim4_social_timeline/sim4_package"
 RUNS = [(18, "sweep18_a18"), (36, "sweep18_a36"), (54, "sweep18_a54"),
         (72, "sweep18_a72"), (90, "sweep18_a90")]
 REPLICATES = [(18, "sweep18_s43_a18")]
@@ -55,7 +55,7 @@ def series():
     ex = pd.read_parquet(f"{PKG}/exposures.parquet")
     rows = []
     for n, lbl in RUNS + REPLICATES:
-        p = f"data/social_timeline_{lbl}_analysis.json"
+        p = f"data/sim4_social_timeline/social_timeline_{lbl}_analysis.json"
         if not os.path.exists(p):
             continue
         agents = (json.load(open(p)).get("agents") or {})

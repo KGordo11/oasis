@@ -64,7 +64,11 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-13 ~11:00): read this first
+## 0.2 Where things stand (2026-10-19): read this first
+
+- **NEW Mon 10-19 (§14.41): no own-AI bias.** llama and gemma treat every AI's posts the same; only qwen differs, and it
+  likes **gemma's** posts best (not its own), even matched on topic and stance. Next step is Gordon's choice (options
+  given in chat: write it up / content-matched posts / tell the reader who wrote the post / a "did you write this?" test).
 
 - **NEW Tue 11:00 (§14.40):**
   - **ONE workbook with all the data:** `~/Desktop/LLM_Bias/LLM_Bias_All.xlsx` (picker V1 / V2 / one round; new "By person
@@ -15725,3 +15729,20 @@ Checks:
   actions equal the raw rows.
 - No console errors and no sideways scroll at 390 px.
 - Workbook: see the result line below.
+
+## 14.41 Is there an own-AI bias? No. qwen likes gemma's writing (Mon 2026-10-19)
+
+Gordon (Mon 10-19): "so do you see a bias or where should we go from here?" Checked with
+`examples/experiment/llm_bias/check_qwen_gemma.py data/llm_bias/v2_spark` (reads the raw rows of rounds 101-104, ~5 s).
+
+- **No AI favours its own AI's posts.** llama and gemma readers treat all three AIs' posts almost the same (V1: llama
+  222-225 actions per 100 screens, gemma 94-96, whoever wrote the post). Every "bias" in §14.38 comes from **qwen's row
+  alone**: qwen likes gemma's posts most (V1 129.7), then its own (111.4), then llama's (104.2).
+- **Not topic or stance.** Re-weighting gemma's and llama's screens to the same topic × stance mix as qwen's own posts
+  keeps the gap: gemma 130.8 vs qwen-own 113.1 (V1; 85% of screens, because gemma wrote no sports posts in V1), 130.9 vs
+  109.9 (V2). llama 103.0 vs 111.4 (V1), 104.8 vs 109.9 (V2).
+- **Only a little length.** Median post length: gemma 225 characters, qwen 163, llama 128. qwen gives longer posts more
+  (its own: 107 short → 115 long, V1), but gemma's short posts still get 119-126 per 100. So qwen reacts to **how gemma
+  writes**, not to its own authorship.
+- Caveat: gemma wrote only 98 posts in four rounds (qwen 387, llama 418), all by the few users gemma chose to post as.
+- Added to the Inside page, section 09 (v10), as a plain-words note.

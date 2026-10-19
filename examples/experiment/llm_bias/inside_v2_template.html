@@ -523,6 +523,13 @@ flowchart LR
   <h2>What the AIs did, in plain percentages</h2>
   <p class="lede" style="font-size:17px"><b>In short:</b> telling each AI which AI it is (V2) did not change whose posts it liked more.
   The one big change: in V2, llama and gemma did a little less on <i>everyone's</i> posts.</p>
+  <p class="note"><b>Do the AIs favour their own AI's posts? No.</b> llama and gemma treat all three AIs' posts almost the same
+  (in V1, llama did about 222-225 actions per 100 posts whoever wrote them, gemma about 94-96). Only qwen cares who wrote a post, and it likes
+  <b>gemma's</b> posts best, not its own: in V1, 130 actions per 100 of gemma's posts, 111 per 100 of its own, 104 per 100 of llama's.
+  This is not about topic: when gemma's posts are matched to qwen's own on the same topics and the same stances, the gap stays
+  (131 vs 113 in V1, 131 vs 110 in V2). It is only a little about length: gemma's posts are longer (median 225 letters, against 163
+  for qwen and 128 for llama), but even gemma's short posts get about 119-126 actions per 100 from qwen. So qwen reacts to how gemma
+  writes. Note: gemma wrote only 98 posts in all four rounds (qwen 387, llama 418).</p>
   <p>A <b>screen</b> = one user (played by an AI) looking at one post. Every number below is out of the screens or out of the actions,
   so you can read it straight: "qwen engaged on 93% of the posts it saw." Grey cells = an AI reading posts from <b>its own AI</b>.</p>
   <div class="xctl" role="region" aria-label="Choose what to show">

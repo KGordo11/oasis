@@ -15856,3 +15856,29 @@ exactly the intended line; control = the study's screen byte for byte).
 cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && setsid nohup bash -c 'for m in gemma3:12b qwen3:8b llama3.1:8b; do bash examples/experiment/llm_bias/llamacpp_servers.sh only $m && python3 examples/experiment/llm_bias/gemma_probe.py all --model $m; done; bash examples/experiment/llm_bias/llamacpp_servers.sh stop; echo PROBES DONE' > ~/llm_bias/logs/probe.txt 2>&1 < /dev/null &
 ```
 Check: `grep -E "^== |identical|DONE|Error|Traceback" ~/llm_bias/logs/probe.txt | tail -12`
+
+### 14.42b The full check (Gordon: "give me all commands to really do a thorough check", Mon 2026-10-19)
+`audit_v2_data.py` gained sections 6-7 and now ends with `RESULT: ALL CHECKS PASS` or a PROBLEM list. On the laptop copy:
+**ALL CHECKS PASS** (60 manifests, 36 reading cells, 12 noise floors):
+- **Manifests:** screens and unreadable counts match every file. Pinned users, llama.cpp, the same sampling, temperature
+  0.7, context 8192 and thinking off everywhere. Each reading step read exactly the post set its posting turn wrote.
+  - Prompt fingerprints: V1 = `5e5ed70540` (all 30 steps), V2 = `7252773c51` (all 30). V2 equals today's `run_v2.py`.
+  - V1 equals the template from before LD-44: the `{identity}` slot changed the template's fingerprint, but the V1 text the
+    AI gets is byte for byte the same (checked).
+- **Expected exceptions, now coded into the check:** noise floors read 4 posts per user. gemma's cross cells closed on a
+  32-post window, but gemma's sets have 23-25 posts, so that window covers every post.
+- **One step did not record its model file:** r102 gemma reading qwen. It closed 00:44 Fri, in the out-of-memory night,
+  when the server was unreachable.
+- **Completeness:** every user read every post of every set except their own, exactly once. Every row's round, AI, topic,
+  stance and own-AI flag agree with the file name, the post and the person.
+- **Code versions:** most manifests carry Spark-only checkpoint commits, so the Spark must map them to file versions.
+  - Expected `run_v2.py` blobs: V1 `fe3ae7e` (r101 qwen posting, commit 069540d), `e47e3b3`, `dea3fa2` or `e48d28e`; V2 `c6ee2c4`.
+  - Expected `llm.py`: `34a11fe` or `8ace0c2`.
+  - Between those versions only crash-resume, the server health check and the reading window changed (diffs read): never
+    the prompts or the answer parsing.
+- **Fingerprint of all 60 round files** (`shasum -a 256 r10[1-4]/*.jsonl | LC_ALL=C sort -k2 | shasum -a 256`):
+  laptop `7ace91dc41c5f431…`. The Spark must give the same.
+- **Official gemma file** (Hugging Face ggml-org/gemma-3-12b-it-GGUF, gemma-3-12b-it-Q4_K_M.gguf, repo commit ec0cbab):
+  sha256 `7bb69bff3f48a7b642355d64a90e481182a7794707b3133890646b1efa778ff5`, 7,300,574,976 bytes.
+  - qwen and llama files are Ollama blobs named by their own sha256 (`a3de86cd…`, `667b0c19…`).
+- The full numbered command list was given in chat. Gordon pastes back `cat ~/llm_bias/logs/check_*.txt`.

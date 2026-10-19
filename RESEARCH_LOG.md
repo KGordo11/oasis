@@ -66,7 +66,14 @@ research**:
 
 ## 0.2 Where things stand (2026-10-19): read this first
 
-- **OPEN Mon 10-19 14:00 (not done): the all-data workbook must show V1 AND V2 side by side, each labelled** (Gordon:
+- **NEW Mon 10-19 evening (§14.42): gemma deep dive after the professor meeting.** Laptop audit of all 274,191 saved
+  rows: **0 parsing errors** (every raw reply re-parses to exactly the saved actions). The empty lists exist (gemma 8,658
+  reading screens + 71 posting turns; qwen never uses them, it picks `do_nothing`). Gemma's posting turn: 227 of 400 just
+  refresh, saying "see if anything new has popped up": it reads the empty-feed screen as "nothing to read yet". Gemma did get
+  the persona and follows it. Refresh/search count as engagement (31 of llama's 220 per 100) but no result changes.
+  **Waiting for Gordon to run the Spark probes** (`gemma_probe.py`, commands §14.42a) and paste the summary. After that:
+  the next 2 simulation tasks. The workbook item below is cancelled for now (Gordon: "no").
+- *(Cancelled 10-19 evening)* **OPEN Mon 10-19 14:00 (not done): the all-data workbook must show V1 AND V2 side by side, each labelled** (Gordon:
   "i need it to show data from v1 and v2 not just one and it needs to specify which data is what"). Today it shows one
   version at a time through the yellow picker. A rewrite of `make_report_v2.py` (ALL mode: V1 | V2 | change grids on
   'Engagement 3x3', a Version column on All actions / By stance / By topic, each By person type block twice) was
@@ -15065,6 +15072,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 
 | c84e4f2 | 10-19 13:41 | `check_qwen_gemma.py`: no own-AI bias; qwen's taste for gemma's posts survives topic × stance matching (§14.41); Inside page note |
 
+| (this commit) | 10-19 evening | **`audit_v2_data.py`** (re-parse every raw reply, nothing-routes, non-post actions, post-only bias) + **`gemma_probe.py`** (template / replay / posting variants / reading variants / ask; §14.42) |
+
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
 **0. Log in** (on the Mac; VPN on if off campus)
@@ -15759,3 +15768,91 @@ Gordon (Mon 10-19): "so do you see a bias or where should we go from here?" Chec
   writes**, not to its own authorship.
 - Caveat: gemma wrote only 98 posts in four rounds (qwen 387, llama 418), all by the few users gemma chose to post as.
 - Added to the Inside page, section 09 (v10), as a plain-words note.
+
+## 14.42 Why does gemma act so differently? Data audit + Spark probes (Mon 2026-10-19, after Gordon's meeting)
+
+Gordon (Mon 10-19 evening, after the professor meeting): "gemma acts differently, very differently, for a reason: find out
+why. Did you misinterpret the data, are there errors? ... gemma seems to refresh like they expect a feed instead of posting
+into a future feed. Also ... 'An empty list means you do nothing' but when I look at the raw data I don't see any empty
+list or the AI doing nothing ... deep dive into all the data ... give me tests to run on the Spark ... all the data is scrap
+if there are errors and miscommunication. After that and we confirm all is well we move to the next 2 simulation tasks."
+(Same message: the V1+V2 workbook fix is cancelled for now, "no"; the "LLM Bias Data" page stays, "no".)
+
+### Laptop audit of every saved answer (`audit_v2_data.py`, stdlib, ~1 min; runs on the Spark too)
+
+**1. No parsing errors.** Every one of the 274,191 saved rows (4 rounds, both turns, noise floor) was re-read from its `raw`
+field (the AI's reply word for word) and parsed again: **all 273,298 answered rows give exactly the saved actions, 0
+mismatches, 0 replies without an "actions" key, 0 non-JSON replies.** Unreadable rows (left out everywhere): qwen posting
+14, gemma reading 829 (the out-of-memory night, §14.31i), llama reading 50.
+
+**2. The empty lists ARE in the raw data, but only gemma uses them.** Each AI has its own way to say "nothing":
+
+| Reading turn, % of screens | empty list `"actions": []` | only `do_nothing` | `do_nothing` next to another action |
+|---|---|---|---|
+| qwen | 0.0 | 12.6 | 0.6 |
+| llama | 0.0 (33 screens) | 4.7 | 8.8 (e.g. downvote + do_nothing) |
+| gemma | **9.8** (8,658 screens) | 0.0 | 0.1 |
+
+Gemma's empty lists are explicit and make sense, e.g. `{"actions": [], "reason": "Ugh, finance. I'll just scroll past this one."}`.
+Every table already counts an empty list and an only-`do_nothing` answer the same way ("did nothing"). **Why Gordon saw
+none:** qwen never sends an empty list (it always picks `do_nothing`), and in `export/reactions.csv` and the Screens sheet an
+empty list is a row of zeros with `do_nothing = 0` (there is no column that says "empty list"). Find them in the raw files with
+`grep -c '"actions": \[\]' r101/reading_*__gemma3-12b.jsonl`.
+
+**3. Gemma's posting turn: Gordon's reading is right.** 400 gemma user-turns: **posted 98, only `refresh` 227, empty list 71,
+refresh + search 4** (qwen posted 340 of 400, llama 393). Of the 302 non-posting reasons, 173 say "see if anything new has
+popped up" / "check back later" and 95 mention the empty feed: *"My feed is empty, gotta see if anything new has popped up."*,
+*"Feed's empty, nothing to do. I'll check back later."* Gemma reads the posting screen ("You open Reddit. Your feed is empty
+-- nothing has been posted yet." + a menu with "refresh: refresh your feed") as **"nothing to read yet, refresh and wait"**;
+qwen and llama read it as "go ahead and post". In our one-shot design a refresh shows nothing, so those users simply drop out.
+None of gemma's posting answers was rejected or retried (so validation did not turn posts into refreshes), and the same 45
+users post round after round (8 posted in all 4 rounds): it is the persona + model, not chance.
+
+**4. Gemma did see the person it plays.** Gemma 3 has no "system" role, so the engine folds the system message into the user
+turn; the prompt sizes show it arrived: posting-turn prompt tokens gemma ~701, llama ~670, qwen ~660 (V2 adds ~22 for
+every AI = the identity line). Gemma follows the persona's stance as strongly as the others: posts on a topic the user HATES
+get 80% downvotes and 16% nothing; LOVED topics 91% upvotes. **Gemma's reading style is just terse: vote and move on**
+(upvote 51.7%, downvote 34.4%, comment only 5.4% vs qwen 43.8% and llama 49.6%; median reply 39 tokens, well under the
+800-token cap, 0 replies cut off).
+
+**5. A measurement point found on the way (does not change any result).** "Total engagement" counts every action except
+`do_nothing`, so `search_user`, `search_posts`, `trend` and `refresh` on a reading screen count as engagement with that post.
+That is **31 of llama's 220 actions per 100 screens** (search_user 16.9 = looking up the post's author, search_posts 5.2,
+trend 4.6, refresh 4.2); qwen 0, gemma 0.7. With post actions only, llama's row drops by ~32 but **every bias keeps its
+sign and size**: V1 qwen-llama +8.4 → +5.8, qwen-gemma −18.1 → −17.7, llama-gemma +5.1 → +2.9; V2 +5.6 → +4.1, −20.1 →
+−19.8, +7.5 → +6.7. The published grids reproduce exactly (qwen reading: 111.4 / 104.2 / 129.7).
+Also llama style, not an error: it **reports 27% of the posts it reads**, mostly on topics its user hates ("It's a sports post,
+I just don't care").
+
+**Verdict so far: no data errors and no misreading of the saved answers.** The big gemma difference is real model
+behaviour, and in the posting turn it is triggered by how the posting screen is worded (empty feed + a refresh option). What the
+laptop cannot settle: the exact text each engine feeds its model, whether the JSON-only mode or our uniform sampling shapes
+gemma, and what gemma itself thinks it was doing. Those are the Spark probes below.
+
+### Spark probes (`gemma_probe.py`, read-only on the study data, writes to `data/llm_bias/v2/probe/`)
+
+Each probe runs on the AI whose server is up; all use round-101 (V1) prompts. Same seed in every variant, so differences
+come from the variant only.
+
+| Probe | What it does | What it tells us |
+|---|---|---|
+| `template` | The engine's own rendering of the prompt (`/apply-template`) for user 0, rounds 101 and 103, plus the model file and chat template the server loaded | Where the persona really sits for gemma (no system role); that every AI got the persona and V2 line. **Persona missing = real error** |
+| `replay` | Re-asks 30 posting + 60 reading screens of round 101 with the recorded seed and prompt | Does the code reproduce the saved answers? Most should be identical (8-at-a-time batching can change a few). **Very low = error** |
+| `posting` | All 100 users × 5 variants: `control` (as run), `no_refresh` (menu without refresh), `no_empty_line` (screen without "Your feed is empty -- nothing has been posted yet."), `free_text` (no JSON-only mode), `google_sampling` (temp 1.0, top_k 64, top_p 0.95) | Which part makes gemma refresh instead of post |
+| `reading` | 150 recorded reading screens (50 per poster AI) × `control` / `free_text` / `google_sampling` | Is the low comment rate the model, the JSON mode or the sampling? |
+| `ask` | Each user gets its own posting screen and its own recorded answer, then: "why did you answer that, what did you expect to happen next, did you see you could write a post?" (free text) | Gemma's own explanation |
+
+Run for gemma, qwen and llama (the other two are the comparison), ~45-60 min in all with the GPU free. Commands: §14.42a.
+Checked on the laptop against a fake server (every probe runs end to end; the variant prompts differ from the study prompt in
+exactly the intended line; control = the study's screen byte for byte).
+
+### 14.42a Commands for the probes (given to Gordon Mon 2026-10-19)
+1. Spark free? `nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader; free -g | head -2`
+2. Code: `cd ~/llm_bias/oasis && git pull --no-edit && git log --oneline -1 && ls examples/experiment/llm_bias/gemma_probe.py examples/experiment/llm_bias/audit_v2_data.py`
+3. Audit on the Spark's own files: `python3 examples/experiment/llm_bias/audit_v2_data.py | tee ~/llm_bias/logs/audit.txt`
+4. All probes, detached (~1 h): see the command block in chat / below.
+5. `python3 examples/experiment/llm_bias/gemma_probe.py summary | tee ~/llm_bias/logs/probe_summary.txt`, then rsync (§14.32d item 9).
+```
+cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && setsid nohup bash -c 'for m in gemma3:12b qwen3:8b llama3.1:8b; do bash examples/experiment/llm_bias/llamacpp_servers.sh only $m && python3 examples/experiment/llm_bias/gemma_probe.py all --model $m; done; bash examples/experiment/llm_bias/llamacpp_servers.sh stop; echo PROBES DONE' > ~/llm_bias/logs/probe.txt 2>&1 < /dev/null &
+```
+Check: `grep -E "^== |identical|DONE|Error|Traceback" ~/llm_bias/logs/probe.txt | tail -12`

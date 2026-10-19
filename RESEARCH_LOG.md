@@ -66,6 +66,14 @@ research**:
 
 ## 0.2 Where things stand (2026-10-19): read this first
 
+- **OPEN Mon 10-19 14:00 (not done): the all-data workbook must show V1 AND V2 side by side, each labelled** (Gordon:
+  "i need it to show data from v1 and v2 not just one and it needs to specify which data is what"). Today it shows one
+  version at a time through the yellow picker. A rewrite of `make_report_v2.py` (ALL mode: V1 | V2 | change grids on
+  'Engagement 3x3', a Version column on All actions / By stance / By topic, each By person type block twice) was
+  started and interrupted: it is **uncommitted and does not compile yet** (unterminated string near line 825). Finish
+  it, build to a scratch folder (Gordon may have the workbook open), recalc (~13 min), check, then swap in.
+- Gordon also asked where gemma's raw posts are: `data/llm_bias/v2_spark/export/posts.csv` (filter
+  `written_by_ai = gemma3:12b`, 98 posts) and `r10X/posting_gemma3-12b.jsonl` (raw, incl. users who did not post).
 - **NEW Mon 10-19 (§14.41): no own-AI bias.** llama and gemma treat every AI's posts the same; only qwen differs, and it
   likes **gemma's** posts best (not its own), even matched on topic and stance. Next step is Gordon's choice (options
   given in chat: write it up / content-matched posts / tell the reader who wrote the post / a "did you write this?" test).
@@ -15053,6 +15061,10 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 
 | 8753c7c | 10-09 11:30 | **LD-45 V1/V2 naming**: `make_report_v2.py` pools per version (`LLM_Bias_<V>.xlsx`, `~/Desktop/LLM_Bias/<V>/`); Inside page: both versions, the code diff, V1 + V2 system messages, V2 commands + watchdog, key login; results.json now required (the 10:22 page had empty results) |
 
+| 2ba3642 | 10-13 11:07 | **ONE all-data workbook** (`make_report_v2.py ... ALL`, By person type tab), Inside page plain-% tabs + any-screen prompt viewer (§14.40) |
+
+| c84e4f2 | 10-19 13:41 | `check_qwen_gemma.py`: no own-AI bias; qwen's taste for gemma's posts survives topic × stance matching (§14.41); Inside page note |
+
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
 **0. Log in** (on the Mac; VPN on if off campus)
@@ -15728,7 +15740,8 @@ Checks:
   `run_v2.system_prompt()` / `POST_SCREEN` / `READ_SCREEN`. The post lists exclude the user's own posts. The answers and
   actions equal the raw rows.
 - No console errors and no sideways scroll at 390 px.
-- Workbook: see the result line below.
+- Workbook: recalculated with LibreOffice (282,984 formulas, ~13 min). Checked 2026-10-19: the picker on V1 gives the
+  §14.35 grid exactly (111.4 / 104.2 / 129.7 for qwen reading).
 
 ## 14.41 Is there an own-AI bias? No. qwen likes gemma's writing (Mon 2026-10-19)
 

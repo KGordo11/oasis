@@ -15072,7 +15072,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 
 | c84e4f2 | 10-19 13:41 | `check_qwen_gemma.py`: no own-AI bias; qwen's taste for gemma's posts survives topic × stance matching (§14.41); Inside page note |
 
-| (this commit) | 10-19 evening | **`audit_v2_data.py`** (re-parse every raw reply, nothing-routes, non-post actions, post-only bias) + **`gemma_probe.py`** (template / replay / posting variants / reading variants / ask; §14.42) |
+| 8b91ef5 | 10-19 evening | **`audit_v2_data.py`** (re-parse every raw reply, nothing-routes, non-post actions, post-only bias) + **`gemma_probe.py`** (template / replay / posting variants / reading variants / ask; §14.42) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 

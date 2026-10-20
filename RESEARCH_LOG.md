@@ -66,6 +66,16 @@ research**:
 
 ## 0.2 Where things stand (2026-10-19): read this first
 
+- **NEW Tue 10-20: gemma deep dive DONE (§14.42c). The data is sound.**
+  - Every Spark check passed: fingerprint, audit, code versions, model files. Gemma gets the persona; Google's format
+    puts it in the first user turn.
+  - Replay matches the saved answers as closely as a fresh seed does.
+  - **Why gemma barely posts:** on the empty feed it picks *refresh*, expecting the feed to fill. 99/100 knew it could
+    post but "wanted to see what appears first". Remove refresh and its posting rate goes from 19% to 50%. JSON mode and
+    sampling change nothing.
+  - The reading turn, where bias is measured, is unaffected.
+  - Next: Gordon picks a posting-screen fix for future runs, (a), (b) or (c) in §14.42c, and names the next 2
+    simulation tasks.
 - **NEW Mon 10-19 night: oasis/ reorganised (moves only, nothing lost).** Map = `START_HERE.md` (repo root),
   `data/README.md`, `data/llm_bias/README.md`. **LLM Bias raw data = `data/llm_bias/v1_v2_spark/`** (was `v2_spark`;
   fingerprint unchanged `7ace91dc41c5f431`; rsync target renamed, every command in this log updated). September Tests 1-6
@@ -15892,3 +15902,51 @@ Check: `grep -E "^== |identical|DONE|Error|Traceback" ~/llm_bias/logs/probe.txt 
   sha256 `7bb69bff3f48a7b642355d64a90e481182a7794707b3133890646b1efa778ff5`, 7,300,574,976 bytes.
   - qwen and llama files are Ollama blobs named by their own sha256 (`a3de86cd…`, `667b0c19…`).
 - The full numbered command list was given in chat. Gordon pastes back `cat ~/llm_bias/logs/check_*.txt`.
+
+### 14.42c RESULTS of the full check and the probes (Spark Mon 10-19 evening, analysed Tue 10-20)
+**Verdict: the data is sound. No errors, no miscommunication in the pipeline. Gemma's behaviour is gemma's own reading of
+the posting screen.** Files: `data/llm_bias/v1_v2_spark/probe/` (every probe answer + `check_*.txt`).
+- **Every Spark check passed.** The fingerprint is `7ace91dc41c5f431`, identical to the laptop. `audit_v2_data.py` on the Spark gives ALL CHECKS PASS. Code versions: r101/r102 `e48d28e` (+3 × `fe3ae7e`), r103/r104 `c6ee2c4`, all expected. The gemma file is the official sha256 `7bb69bff…`, 7,300,574,976 bytes; the qwen and llama blobs match their names; llama.cpp is `5e03bdd`. Nothing left running, no crontab.
+- **Gemma receives the persona correctly.** Its prompt starts `<start_of_turn>user\n# OBJECTIVE…`. Gemma 3 has no system role, so Google's own chat format folds the system text into the first user turn. That is correct, not a bug.
+- **Replay** (90 saved answers per AI re-asked with the exact saved seed):
+  - Word for word: gemma 23/90, qwen 20/90, llama 8/90.
+  - **Same main reaction** (reading: up / down / nothing / other; posting: posted or not): gemma 56/60 + 24/30,
+    qwen 46/60 + 27/30, llama 54/60 + 27/30.
+  - That is at least as close as the study's own noise floor (the same screen with a NEW seed): gemma 92%, qwen 70%,
+    llama 83%. So the saved answers are what this exact setup produces.
+  - Word-for-word mismatch is batching. Gemma re-asked one request at a time, twice: 88/90 identical, and the only 2
+    differences are the first 2 calls after the server started. The study ran 8 at once, which changes the numbers slightly.
+- **Posting turn (100 users, % who posted)**:
+
+  | screen | gemma | qwen | llama |
+  |---|---|---|---|
+  | as in the study | 19 | 86 | 100 |
+  | refresh removed from the menu | **50** | 93 | 100 |
+  | free text (no JSON-only mode) | 20 | 87 | 100 |
+  | Google's sampling (temperature 1.0, top_k 64, top_p 0.95) | 14 | 86 | 97 |
+  | "Your feed is empty" line removed | 0 | 5 | 48 |
+
+  - **Cause = the refresh option on an empty feed.** Without refresh, gemma's posting rate goes from 19% to 50%. The rest
+    use trend (29) or send an empty list (20).
+  - JSON mode and sampling settings change nothing, in the posting turn or the reading turn.
+  - Without the "feed is empty" line every AI assumes there is a feed:
+    - gemma trends and searches;
+    - qwen likes and comments on posts that do not exist (39) or does nothing (43);
+    - llama posts only 48%.
+    So that line is what tells the AIs the feed is empty.
+- **Gemma's own explanation** (`ask` probe, 100 users, free text, same persona):
+  - 67 say they expected the refresh to "populate my feed".
+  - 99 say they DID see they could post: "I'm waiting to see what appears in my feed first."
+  - So gemma treats the turn as the start of a session that continues. In our design it gets only this one turn, so its
+    "later" never comes. This is exactly Gordon's reading ("refresh like they expect a feed instead of posting into a
+    future feed").
+  - qwen: 8 expect a feed. llama: 12.
+- **Reading turn:** gemma's short style is the model itself. Comments are 7-8 per 100 in every variant (qwen 47-49, llama 47-54). Empty lists are 7-8%.
+- **What this means for the results:**
+  - The reading turn, where bias is measured, is unaffected.
+  - The posting turn only decided how many posts gemma contributed (23-25 per round, from about 45 users who post
+    consistently). That is already handled: every user reads every post.
+- **Options for the next study** (not decided, Gordon's call):
+  - (a) take refresh, trend and search out of the posting menu;
+  - (b) say "this is your only turn this round; others will read what you post later";
+  - (c) after a refresh, show the still-empty feed again and ask once more.

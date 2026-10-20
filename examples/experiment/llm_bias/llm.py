@@ -72,11 +72,13 @@ def extract_json(text):
 
 
 def chat_json(model, system, user, *, seed=None, temperature=0.7, num_predict=400,
-              validate=None, retries=2, timeout=TIMEOUT_S):
+              validate=None, retries=2, timeout=TIMEOUT_S, think=False, json_mode=True):
     """Call `model` and return (obj, meta).
 
     `validate(obj)` may raise ValueError to force a retry (bad label, missing field).
     Each retry uses seed+attempt so it is a genuinely new sample, still reproducible.
+    think / json_mode (V3 tests, log 14.43): thinking on for models that have it (qwen3); json_mode=False drops the
+    engine's JSON-only constraint (the prompt still asks for JSON). The defaults are what V1 and V2 used.
     """
     meta = {"model": model, "backend": BACKEND, "attempts": 0, "errors": [],
             "latency_s": 0.0, "prompt_tokens": 0, "eval_tokens": 0, "truncation_risk": False,
@@ -93,11 +95,11 @@ def chat_json(model, system, user, *, seed=None, temperature=0.7, num_predict=40
         # budget on hidden reasoning and returns empty content (0/16 valid on first smoke).
         # Set for every model so no author or judge gets a hidden drafting step the others lack.
         msgs = [{"role": "system", "content": system}, {"role": "user", "content": user}]
-        payload = {"model": model, "stream": False, "think": False, "format": "json", "options": opts,
-                   "messages": msgs}
+        payload = {"model": model, "stream": False, "think": think, "options": opts, "messages": msgs,
+                   **({"format": "json"} if json_mode else {})}
         t = time.time()
         try:
-            r = _post("/api/chat", payload, timeout) if BACKEND == "ollama" else _llamacpp(model, msgs, opts, timeout)
+            r = _post("/api/chat", payload, timeout) if BACKEND == "ollama" else _llamacpp(model, msgs, opts, timeout, think, json_mode)
         except (urllib.error.URLError, TimeoutError, OSError) as e:
             meta["errors"].append(f"transport: {e}")
             if "timed out" in str(e).lower():
@@ -111,7 +113,8 @@ def chat_json(model, system, user, *, seed=None, temperature=0.7, num_predict=40
             meta["truncation_risk"] = True
         last_raw = r.get("message", {}).get("content", "")
         meta["done_reason"] = r.get("done_reason")
-        meta["thinking_chars"] += len(r.get("message", {}).get("thinking") or "")
+        meta["thinking"] = r.get("message", {}).get("thinking") or ""
+        meta["thinking_chars"] += len(meta["thinking"])
         meta["raw"] = last_raw
         try:
             obj = extract_json(last_raw)
@@ -124,12 +127,12 @@ def chat_json(model, system, user, *, seed=None, temperature=0.7, num_predict=40
     return None, meta
 
 
-def _llamacpp(model, msgs, opts, timeout):
+def _llamacpp(model, msgs, opts, timeout, think=False, json_mode=True):
     """One chat request to the model's llama.cpp server, returned in Ollama's response shape."""
     payload = {"model": model, "messages": msgs, "stream": False, "temperature": opts["temperature"],
-               "max_tokens": opts["num_predict"], "response_format": {"type": "json_object"},
-               "chat_template_kwargs": {"enable_thinking": False},  # same as Ollama's think=False
-               **SAMPLING}
+               "max_tokens": opts["num_predict"],
+               "chat_template_kwargs": {"enable_thinking": think},  # False = same as Ollama's think=False
+               **({"response_format": {"type": "json_object"}} if json_mode else {}), **SAMPLING}
     if "seed" in opts:
         payload["seed"] = opts["seed"]
     req = urllib.request.Request(LLAMACPP_URLS[model] + "/v1/chat/completions", json.dumps(payload).encode(),

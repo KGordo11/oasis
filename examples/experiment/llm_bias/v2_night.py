@@ -17,6 +17,9 @@ The OASIS database rebuild (replay) is off by default (REPLAY=0) so a remote mac
 Ollama; rebuild later with `run_v2.py read ... ` without --no-replay.
 
     STOP="2026-10-06 08:00" ROUNDS="1 2 3" SLICES="16 32 64 0" python v2_night.py
+
+V3 tests (log 14.43, started by v3_test.sh): DATA_DIR = results folder, EXTRA = run_v2.py options added to every step,
+TURNS=post = posting turns only, CHECKPOINT=0 = no analysis/commit after each stage.
 """
 import json, os, subprocess, time
 from datetime import datetime
@@ -38,7 +41,11 @@ REPLAY = os.environ.get("REPLAY", "0") == "1"
 PUSH = os.environ.get("PUSH", "1") == "1"
 NICE = ["taskpolicy", "-b"] if os.uname().sysname == "Darwin" else ["nice", "-n", "19"]
 SPS = {m: 3.5 for m in MODELS}  # seconds per screen; replaced by what this machine measures
-LOG = os.path.join(REPO, "data", "llm_bias", "v2", "night.log")
+DATA_DIR = os.environ.get("DATA_DIR", os.path.join(REPO, "data", "llm_bias", "v2"))
+EXTRA = os.environ.get("EXTRA", "").split() + (["--data-dir", DATA_DIR] if "DATA_DIR" in os.environ else [])
+TURNS = os.environ.get("TURNS", "post read").split()
+CHECKPOINT = os.environ.get("CHECKPOINT", "1") == "1"
+LOG = os.path.join(DATA_DIR, "night.log")
 os.makedirs(os.path.dirname(LOG), exist_ok=True)
 
 
@@ -49,7 +56,7 @@ def log(msg):
 
 
 def rdir(r):
-    return os.path.join(REPO, "data", "llm_bias", "v2", f"r{r:03d}")
+    return os.path.join(DATA_DIR, f"r{r:03d}")
 
 
 def n_posts(r, m):
@@ -69,8 +76,15 @@ def expected(r, pb, k):
 
 
 def screens_done(r, name):
+    """Posts read so far (a post back on screen after a refresh, V3 "view" 2.., is not a new post)."""
     f = os.path.join(rdir(r), name + ".jsonl")
-    return sum(1 for _ in open(f)) if os.path.exists(f) else 0
+    n = 0
+    for l in open(f) if os.path.exists(f) else []:
+        try:
+            n += json.loads(l).get("view", 1) == 1
+        except json.JSONDecodeError:  # a half-written last line (run_v2.py drops it on resume)
+            pass
+    return n
 
 
 MANAGE = os.environ.get("MANAGE_SERVERS", "0") == "1" and os.environ.get("LLM_BACKEND") == "llamacpp"
@@ -95,7 +109,7 @@ def step(r, args, est_screens, reader, what, name):
         return False
     log(f"start {what} (~{est_screens} screens, ~{est / 60:.0f} min)")
     t, before = time.time(), screens_done(r, name)
-    rc = subprocess.call([PY, RUN, *args, "--round", str(r), "--parallel", PARALLEL, "--agents", str(AGENTS)] + ([] if REPLAY else ["--no-replay"]), cwd=REPO,
+    rc = subprocess.call([PY, RUN, *args, "--round", str(r), "--parallel", PARALLEL, "--agents", str(AGENTS)] + EXTRA + ([] if REPLAY else ["--no-replay"]), cwd=REPO,
                          stdout=open(f"/tmp/v2_{name}.log", "a"), stderr=subprocess.STDOUT)
     did = screens_done(r, name) - before
     if did > 20:
@@ -110,6 +124,8 @@ def step(r, args, est_screens, reader, what, name):
 
 
 def checkpoint(r, msg):
+    if not CHECKPOINT:
+        return log(f"checkpoint round {r}: {msg}")
     sh = f"{' '.join(NICE)} {PY} {os.path.join(HERE, 'analyze_v2.py')} > /dev/null 2>&1; " \
          f"git add data/llm_bias/v2/r{r:03d} data/llm_bias/v2/summary.md; " \
          f"git commit -qm 'LLM Bias v2 round {r}: {msg}' -m 'Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>'"
@@ -127,12 +143,17 @@ for r in ROUNDS:
     for m in MODELS:
         if not os.path.exists(os.path.join(rdir(r), f"posting_{m.replace(':', '-')}{TAG}.manifest.json")):
             step(r, ["post", "--model", m], 100, m, f"r{r} post {m}", f"posting_{m.replace(':', '-')}")
+        if "read" not in TURNS:
+            continue
         n = n_posts(r, m)
         name = f"reading_{m.replace(':', '-')}__{m.replace(':', '-')}"
         todo = max(0, expected(r, m, 0) - screens_done(r, name + TAG)) if n else 0
         if todo:
             step(r, ["read", "--posts-by", m, "--model", m], todo, m, f"r{r} BASELINE {m} reads own posts (all)", name)
     sets = {m: n_posts(r, m) for m in MODELS}
+    if "read" not in TURNS:
+        log(f"r{r} post sets: {sets}; posting turns only")
+        continue
     log(f"r{r} post sets: {sets}; baselines done")
     checkpoint(r, "baselines")
     # cross tests, in growing slices so all six cells stay evenly covered if time runs short

@@ -66,6 +66,16 @@ research**:
 
 ## 0.2 Where things stand (2026-10-19): read this first
 
+- **NEW Tue 10-20 noon: V3 tests built (§14.43), not run yet.** One change at a time on a V3 baseline: V1 prompts +
+  qwen thinking + working refresh in the reading turn. Tests:
+  - 0: baseline;
+  - 1: posting-only menu;
+  - 2a/2b/2c: three "you're building the feed" lines;
+  - 3: JSON-only off;
+  - 4: menu flipped.
+
+  First step for Gordon: `v3_test.sh check` (10-user mini-round, about 20 min). It checks that thinking works together
+  with JSON mode and measures speed for the time estimate. Then test 0.
 - **NEW Tue 10-20: gemma deep dive DONE (§14.42c). The data is sound.**
   - Every Spark check passed: fingerprint, audit, code versions, model files. Gemma gets the persona; Google's format
     puts it in the first user turn.
@@ -15950,3 +15960,53 @@ the posting screen.** Files: `data/llm_bias/v1_v2_spark/probe/` (every probe ans
   - (a) take refresh, trend and search out of the posting menu;
   - (b) say "this is your only turn this round; others will read what you post later";
   - (c) after a refresh, show the still-empty feed again and ask once more.
+
+## 14.43 V3 tests: one change at a time (designed with Gordon Tue 2026-10-20; Gordon: "good")
+**Why:** the gemma deep dive (§14.42c) plus the next two studies. (1) **Effort:** how many steps each action really
+takes; easy actions (an upvote) beat hard ones (a comment, a group chat), which needs the AIs' raw thinking and every
+output. (2) **Menu order:** does an action's place in the menu change how often it is used? Every test runs V1-style.
+**V3 baseline (applies to every test):**
+- V1 prompts (no "I am <model>" line, `--v1`), the same 100 pinned users, the same 3 AIs, the real `run_v2.py` code path.
+- **Thinking on** (`--think`): only qwen3 has thinking; its thinking text is saved in each row (`thinking`).
+  - Answer budget +3000 tokens, so the thinking never cuts the answer off.
+- **Refresh works in the reading turn** (`--refresh-loop`):
+  - Refresh WITHOUT reacting to the post (no up/down/comment/repost/quote/report/undo): the next post comes, then this
+    one comes back.
+  - The 5th refresh in a row on the same post drops it.
+  - Each view is its own row (`view` 1..5). Views 2+ get fresh randomness; view 1 keeps the normal seed.
+- **Same random seeds in every test:** every test is round 200, in its own folder `data/llm_bias/v3_tests/t<test>/r200/`.
+**The tests** (each = the baseline + ONE change, compared with test 0):
+
+| test | change | runs |
+|---|---|---|
+| 0 | none (baseline) | full round: posting, 9 reading cells (all posts), noise floor |
+| 1 | posting turn: create_post is the only action (`--post-menu post_only`) | posting turns only |
+| 2a | posting screen + "This Reddit is brand new. Everyone's feed is made only of the posts users like you write, and what gets posted now is what everyone will read next." | posting only |
+| 2b | ... + "You're helping build this Reddit's first feed: whatever you post now is what other users will see and react to." | posting only |
+| 2c | ... + "It's posting time: share whatever you'd post. Everyone will read the new posts afterwards." | posting only |
+| 3 | JSON-only constraint off in the engine (`--free-text`; the prompt still asks for JSON) | full round |
+| 4 | menu flipped (`--menu-order flipped`): the same lines word for word, sections and lines least-used first | full round |
+
+- **Test 4 order** (V1 reading-turn use, 3 AIs, rounds 101-102):
+  - Sections: GROUP CHATS (1 use), POSTING (68), ON COMMENTS (1,731), PEOPLE (13,059), BROWSING (17,646), ON THE POST
+    (169,391).
+  - Inside ON THE POST: quote 141, undo downvote 165, unlike 377, repost 730, report 13,822, downvote 38,140, comment
+    44,520, upvote 71,496 (last).
+  - Never used: join/leave/send/listen group.
+- **Dropped:** removing the "feed is empty" line (it makes the AIs think a feed exists).
+- **Order:** check, 0, 1, 2a, 2b, 2c, 3, 4, one at a time. At the end, compare everything with test 0, then cross-test.
+**Code:**
+- `run_v2.py` options `--data-dir --v1 --think --free-text --refresh-loop --menu-order --post-menu --post-line`.
+  Every default reproduces V1/V2 byte for byte (checked: same screen, same engine settings, audit ALL CHECKS PASS).
+- `llm.py chat_json(think=, json_mode=)`.
+- `v2_night.py` env `DATA_DIR EXTRA TURNS CHECKPOINT`; it counts only first views as progress.
+- `v3_test.sh <test>` runs one test.
+- `v3_summary.py <test>` prints plain percentages plus CHECKS: every post read once, no own post, no duplicates,
+  refresh returns exactly as designed, V3 options in every manifest.
+- Laptop test against a fake engine: mini-round ALL CHECKS PASS; a killed-and-restarted reading step resumes to exactly
+  the same rows; every variant shows the intended screen.
+**Commands** (Spark):
+- Pull: `cd ~/llm_bias/oasis && git pull --no-edit`.
+- Run one test, detached: `source ~/llm_bias/env_llamacpp.sh && setsid nohup bash examples/experiment/llm_bias/v3_test.sh <test> > ~/llm_bias/logs/v3_<test>.txt 2>&1 < /dev/null &`.
+- Watch: `tail -3 data/llm_bias/v3_tests/t<test>/night.log`.
+- Result: `python3 examples/experiment/llm_bias/v3_summary.py <test>`.

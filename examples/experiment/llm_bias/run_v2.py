@@ -32,7 +32,7 @@ it wants. Our code carries each one out through OASIS's own functions in a stand
 """
 from __future__ import annotations
 
-import argparse, asyncio, hashlib, json, os, random, re, subprocess, sys, time
+import argparse, asyncio, hashlib, json, os, random, re, subprocess, sys, threading, time
 from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -82,6 +82,44 @@ GROUP CHATS
 - join_group / leave_group  (needs "group_id")
 - send_to_group  (needs "group_id", "message")
 - listen_from_group: read your group chats"""
+# V3 test 4 (log 14.43): the same lines, word for word, least-used first. Order = V1 reading-turn use summed over the
+# 3 AIs (rounds 101-102): sections by total, lines inside a section by their own total (unused lines keep their order).
+MENU_FLIPPED = """GROUP CHATS
+- join_group / leave_group  (needs "group_id")
+- send_to_group  (needs "group_id", "message")
+- listen_from_group: read your group chats
+- create_group  (needs "name")
+POSTING
+- create_post: write a new post  (needs "subreddit", "title", "body")
+ON COMMENTS
+- like_comment / unlike_comment / dislike_comment / undo_dislike_comment  (needs "comment_id")
+PEOPLE
+- follow / unfollow / mute / unmute  (needs "username"; the poster on your screen if you leave it out)
+- search_user: look someone up  (needs "query")
+BROWSING
+- refresh: refresh your feed
+- trend: see what's trending
+- search_posts: search posts  (needs "query")
+- do_nothing: do nothing
+ON THE POST ON YOUR SCREEN
+- quote_post: share it with your own words added  (needs "content")
+- undo_dislike_post: take back your downvote
+- unlike_post: take back your upvote
+- repost: share it
+- report_post: report it to the moderators  (needs "reason")
+- dislike_post: downvote it
+- create_comment: comment on it  (needs "content")
+- like_post: upvote it"""
+# V3 test 1: the posting turn offers posting only
+MENU_POST_ONLY = """POSTING
+- create_post: write a new post  (needs "subreddit", "title", "body")"""
+# V3 test 2a/2b/2c: one line added to the posting screen, right after "Your feed is empty -- nothing has been posted yet."
+POST_LINES = {"a": "This Reddit is brand new. Everyone's feed is made only of the posts users like you write, and what gets posted now is what everyone will read next.",
+              "b": "You're helping build this Reddit's first feed: whatever you post now is what other users will see and react to.",
+              "c": "It's posting time: share whatever you'd post. Everyone will read the new posts afterwards."}
+ON_POST = {"like_post", "unlike_post", "dislike_post", "undo_dislike_post", "create_comment", "repost", "quote_post", "report_post"}
+REFRESH_MAX = 5  # V3 refresh loop: the 5th refresh in a row on the same post drops it
+THINK_EXTRA = 3000  # V3: extra answer tokens when thinking is on, so qwen's thinking never cuts the answer off
 ACTION_NAMES = ["like_post", "unlike_post", "dislike_post", "undo_dislike_post", "create_comment", "repost",
                 "quote_post", "report_post", "like_comment", "unlike_comment", "dislike_comment",
                 "undo_dislike_comment", "follow", "unfollow", "mute", "unmute", "search_user", "search_posts",
@@ -114,8 +152,12 @@ SELF_ID = "I am {model}, simulating this profile:\n"
 SELF_ID_FROM_ROUND = 103
 
 
+V1_PROMPTS = False  # V3 tests (--v1): no identity line in any round
+
+
 def system_prompt(model, rnd, persona):
-    return SYSTEM.format(identity=SELF_ID.format(model=MODEL_NAMES.get(model, model)) if rnd >= SELF_ID_FROM_ROUND else "", persona=persona)
+    self_id = rnd >= SELF_ID_FROM_ROUND and not V1_PROMPTS
+    return SYSTEM.format(identity=SELF_ID.format(model=MODEL_NAMES.get(model, model)) if self_id else "", persona=persona)
 
 
 POST_SCREEN = """You open Reddit. Your feed is empty -- nothing has been posted yet.
@@ -268,6 +310,14 @@ def post_set(r, model, agents):
 
 
 def run(a):
+    global DATA, V1_PROMPTS
+    DATA, V1_PROMPTS = a.data_dir or DATA, a.v1
+    menu = MENU_FLIPPED if a.menu_order == "flipped" else MENU
+    post_menu = MENU_POST_ONLY if a.post_menu == "post_only" else menu
+    post_screen = POST_SCREEN.replace("nothing has been posted yet.\n", "nothing has been posted yet.\n" + POST_LINES[a.post_line] + "\n") \
+        if a.post_line else POST_SCREEN
+    v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line")}
+    v3_on = any(v not in (False, None, "v1", "all") for v in v3.values())
     if llm.BACKEND == "llamacpp" and a.model not in llm.available_models():
         raise SystemExit(f"the llama.cpp server for {a.model} is not running (llamacpp_servers.sh only {a.model})")
     if not llm.server_up():
@@ -291,6 +341,7 @@ def run(a):
 
     rows = load_rows(out)
     done = {(d["user_id"], d.get("post_key")) for d in rows}
+    sessions = []  # refresh loop: (user, feed) per user; each user's screens run in order
     subs = "\n".join(f"- {s} ({n})" for s, n in TOPICS.values())
     if a.turn == "post":
         posts = []
@@ -315,17 +366,22 @@ def run(a):
                 # every place in the scroll (and on a page) about equally often across users
                 start = (p["id"] * len(ring)) // 100
                 feed = [q for q in ring[start:] + ring[:start] if q["author_id"] != p["id"]]  # never your own post
-            if a.page_size > 1:
+            if a.refresh_loop:
+                sessions.append((p, feed))
+            elif a.page_size > 1:
                 for i in range(0, len(feed), a.page_size):
                     page = feed[i: i + a.page_size]
                     if any((p["id"], q["key"]) not in done for q in page):
                         jobs.append((p, page, i))
             else:
                 jobs += [(p, [q], i) for i, q in enumerate(feed) if (p["id"], q["key"]) not in done]
+    if sessions:
+        todo = sum((p["id"], q["key"]) not in done for p, feed in sessions for q in feed)
     log(f"{a.turn} round {a.round}: {a.model} plays {len(people)} users"
-        + (f" reading {len(posts)} posts by {a.posts_by}" if a.turn == "read" else "") + f"; {len(jobs)} screens to do")
+        + (f" reading {len(posts)} posts by {a.posts_by}" if a.turn == "read" else "")
+        + f"; {todo if sessions else len(jobs)} screens to do" + (f" (+ refresh returns), V3 {v3}" if v3_on else ""))
 
-    def row(p, q, pos, act, meta, n, k=0):
+    def row(p, q, pos, act, meta, n, k=0, view=1):
         r = {"round": a.round, "turn": a.turn, "model": a.model, "posts_by": a.posts_by, "draw": a.draw,
              "user_id": p["id"], "username": p["username"], "post_key": q["key"] if q else None,
              "pos": pos, "page_size": n, "page_pos": k,
@@ -336,6 +392,10 @@ def run(a):
              "prompt_tokens": meta["prompt_tokens"], "eval_tokens": meta["eval_tokens"], "call_rows": n,
              "thinking_chars": meta["thinking_chars"], "truncation_risk": meta["truncation_risk"],
              "raw": meta.get("raw") if k == 0 else None}  # a page's raw reply is stored once, on its first row
+        if a.refresh_loop and q:
+            r["view"] = view  # 1 = first time on screen; 2.. = back after a refresh
+        if a.think:
+            r["thinking"] = meta.get("thinking")
         if q:
             r.update({"topic": q["topic"], "stance": p["stances"].get(q["topic"]), "author_id": q["author_id"],
                       "own_ai": int(a.model == a.posts_by)})
@@ -345,29 +405,62 @@ def run(a):
         sub, tname = TOPICS.get(q["topic"], ("r/" + str(q["topic"]), str(q["topic"])))
         return f"[Post {k}] in {sub} ({tname}), posted by u/{q['author']}:\nTitle: {q['title']}\n{q['body']}"
 
-    def screen(p, page, pos):
+    def screen(p, page, pos, view=1):
         q = page[0]
         system = system_prompt(a.model, a.round, p["persona"])
         if q is None:
-            user, parts, val, budget = POST_SCREEN.format(subs=subs, menu=MENU, fmt=FORMAT), (SEED, a.round, "post", p["id"]), validate, 1500
+            user, parts, val, budget = post_screen.format(subs=subs, menu=post_menu, fmt=FORMAT), (SEED, a.round, "post", p["id"]), validate, 1500
         elif len(page) == 1:
             sub, tname = TOPICS.get(q["topic"], ("r/" + str(q["topic"]), str(q["topic"])))
             user = READ_SCREEN.format(sub=sub, topic_name=tname, author=q["author"], title=q["title"], body=q["body"],
-                                      menu=MENU, fmt=FORMAT)
+                                      menu=menu, fmt=FORMAT)
             parts, val, budget = (SEED, a.round, "read", a.posts_by, p["id"], q["key"]), validate, 800
+            if view > 1:  # a returning post gets fresh randomness (view 1 keeps the V1 seed)
+                parts += ("view", view)
         else:
-            user = PAGE_SCREEN.format(posts="\n\n".join(block(x, k + 1) for k, x in enumerate(page)), menu=MENU)
+            user = PAGE_SCREEN.format(posts="\n\n".join(block(x, k + 1) for k, x in enumerate(page)), menu=menu)
             parts = (SEED, a.round, "read", a.posts_by, p["id"], q["key"], "page", len(page))
             val, budget = (lambda o: validate_page(o, len(page))), 200 + 160 * len(page)
         seed = llm.stable_seed(*parts, a.draw) if a.draw else llm.stable_seed(*parts)
-        obj, meta = llm.chat_json(a.model, system, user, seed=seed, temperature=a.temperature, num_predict=budget,
-                                  validate=val, retries=2)
+        obj, meta = llm.chat_json(a.model, system, user, seed=seed, temperature=a.temperature,
+                                  num_predict=budget + (THINK_EXTRA if a.think else 0), validate=val, retries=2,
+                                  think=a.think, json_mode=not a.free_text)
         if len(page) == 1:
-            return [row(p, q, pos, obj, meta, 1)]
+            return [row(p, q, pos, obj, meta, 1, view=view)]
         return [row(p, x, pos + k, obj[k] if obj else None, meta, len(page), k) for k, x in enumerate(page)]
 
     t0 = time.time()
-    if jobs:
+    if sessions:
+        llm.warm(a.model)
+        cache = {(d["user_id"], d["post_key"], d.get("view", 1)): d for d in rows}
+        lock, c, n = threading.Lock(), Counter(), [0]
+        f = open(out, "a")
+
+        def session(p, feed):
+            """One user's scroll. Refresh without reacting to the post: the next post, then this one comes back;
+            the REFRESH_MAX-th refresh in a row drops it. Rows already on disk are reused, so a restart resumes."""
+            queue, views, pos = list(feed), Counter(), 0
+            while queue:
+                q = queue.pop(0)
+                views[q["key"]] += 1
+                r = cache.get((p["id"], q["key"], views[q["key"]]))
+                if r is None:
+                    r = screen(p, [q], pos, views[q["key"]])[0]
+                    with lock:
+                        f.write(json.dumps(r) + "\n"); f.flush(); rows.append(r); n[0] += 1
+                        c.update(x["action"] for x in r["actions"]) if r["actions"] else c.update(["(nothing)" if r["outcome"] == "chose" else r["outcome"]])
+                        if n[0] % a.log_every == 0:
+                            el = time.time() - t0
+                            log(f"  {n[0]} screens ({el / n[0]:.2f} s each) {dict(c.most_common(8))}")
+                pos += 1
+                names = {x["action"] for x in r["actions"]}
+                if "refresh" in names and not names & ON_POST and views[q["key"]] < REFRESH_MAX:
+                    queue.insert(1, q)
+
+        list(ThreadPoolExecutor(a.parallel).map(lambda s: session(*s), sessions))
+        f.close()
+        log(f"  {n[0]} screens done")
+    elif jobs:
         llm.warm(a.model)
         pool = ThreadPoolExecutor(a.parallel)
         c, n = Counter(), 0
@@ -389,9 +482,11 @@ def run(a):
            "model": a.model, "posts_by": a.posts_by, "draw": a.draw, "agents": len(people),
            "finished_at": datetime.now().isoformat(), "git_commit": git_commit(), "personas_sha256": PINNED_PERSONAS,
            "post_set_sha256": sha(posts) if posts else None,
-           "prompts_sha256": sha([SYSTEM] + ([SELF_ID, MODEL_NAMES] if a.round >= SELF_ID_FROM_ROUND else []) + [POST_SCREEN, READ_SCREEN, MENU, FORMAT] + ([PAGE_SCREEN] if a.page_size > 1 else [])),
+           "prompts_sha256": sha([SYSTEM] + ([SELF_ID, MODEL_NAMES] if a.round >= SELF_ID_FROM_ROUND and not a.v1 else []) + [POST_SCREEN, READ_SCREEN, MENU, FORMAT] + ([PAGE_SCREEN] if a.page_size > 1 else [])
+                                 + ([post_screen, menu, post_menu] if v3_on else [])),
+           "v3_test": v3 if v3_on else None,
            "config": {"backend": llm.BACKEND, "sampling": llm.SAMPLING if llm.BACKEND == "llamacpp" else "ollama per-model defaults",
-                      "temperature": a.temperature, "num_ctx": llm.NUM_CTX, "think": False, "parallel": a.parallel,
+                      "temperature": a.temperature, "num_ctx": llm.NUM_CTX, "think": a.think, "parallel": a.parallel,
                       "memory": False, "follow_graph": "empty each round", "vote_counts": "hidden",
                       "posts_per_screen": a.page_size, "max_posts_per_user": a.max_posts or "all", "own_posts_hidden": True, "menu_actions": len(ACTION_NAMES)},
            "ollama_server": llm.server_config(), "ollama_models": llm.model_digests([a.model]),
@@ -482,6 +577,15 @@ if __name__ == "__main__":
     ap.add_argument("--temperature", type=float, default=0.7)
     ap.add_argument("--log-every", type=int, default=50)
     ap.add_argument("--no-replay", action="store_true", help="skip building the OASIS database")
+    # V3 tests (log 14.43); every default reproduces V1/V2 exactly
+    ap.add_argument("--data-dir", help="results folder (default data/llm_bias/v2)")
+    ap.add_argument("--v1", action="store_true", help="V1 prompts: no 'I am <model>' line, whatever the round")
+    ap.add_argument("--think", action="store_true", help="thinking on (models that have it: qwen3); thinking text saved")
+    ap.add_argument("--free-text", action="store_true", help="no JSON-only constraint in the engine (prompt unchanged)")
+    ap.add_argument("--refresh-loop", action="store_true", help="read: refresh brings the post back after the next one")
+    ap.add_argument("--menu-order", choices=["v1", "flipped"], default="v1")
+    ap.add_argument("--post-menu", choices=["all", "post_only"], default="all")
+    ap.add_argument("--post-line", choices=sorted(POST_LINES), help="post: add one of the V3 test-2 lines")
     args = ap.parse_args()
     if args.turn == "read" and not args.posts_by:
         ap.error("read needs --posts-by")

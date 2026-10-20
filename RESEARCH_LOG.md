@@ -74,8 +74,11 @@ research**:
   - 3: JSON-only off;
   - 4: menu flipped.
 
-  First step for Gordon: `v3_test.sh check` (10-user mini-round, about 20 min). It checks that thinking works together
-  with JSON mode and measures speed for the time estimate. Then test 0.
+  **Check run DONE: ALL CHECKS PASS.**
+  - Qwen's thinking works with JSON mode, and 0 answers were unreadable.
+  - Speed: a full round takes about 1-1.5 days, a posting-only test about 15 min.
+  - Heads-up from 10 users: with thinking on, qwen posted in only 4 of 10.
+  - Next: tests 1, 2a, 2b, 2c chained (about 1 h), then 0, 3, 4. Details in §14.43.
 - **NEW Tue 10-20: gemma deep dive DONE (§14.42c). The data is sound.**
   - Every Spark check passed: fingerprint, audit, code versions, model files. Gemma gets the persona; Google's format
     puts it in the first user turn.
@@ -16010,3 +16013,17 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
 - Run one test, detached: `source ~/llm_bias/env_llamacpp.sh && setsid nohup bash examples/experiment/llm_bias/v3_test.sh <test> > ~/llm_bias/logs/v3_<test>.txt 2>&1 < /dev/null &`.
 - Watch: `tail -3 data/llm_bias/v3_tests/t<test>/night.log`.
 - Result: `python3 examples/experiment/llm_bias/v3_summary.py <test>`.
+**Check run (Tue 10-20, 10 users, `v3_test.sh check`):** ALL CHECKS PASS, 0 unreadable answers.
+- A first try started twice by accident: two copies wrote into one folder. It was deleted and rerun. `v3_test.sh` now
+  refuses a second copy of the same test (`flock`, commit 57d8efd).
+- **Thinking works together with JSON mode:** qwen thinks about 1,500 characters per posting screen and 2,000 per
+  reading screen.
+- **Refresh loop not exercised yet:** none of the 432 reads was a refresh. In V1 about 1% of reads were. The mechanics
+  were tested on the laptop, and test 0's ~50,000 reads will show it on real AIs.
+- **Speed (seconds per screen, 8 at once):** gemma 1.2, llama 0.9, qwen 3.9 (thinking makes qwen about 4x slower).
+  - Full round (tests 0, 3, 4): about 1-1.5 days each, two-thirds of it qwen.
+  - Posting-only round (tests 1, 2a-c): about 15 min each.
+- **Heads-up, only 10 users:**
+  - With thinking, qwen posted in 4 of 10 (V1: about 90 of 100) and commented on 26% of posts (V1 probe: 47%).
+  - Gemma posted in 0 of 10 (V1: about 20%).
+  - Test 0 will show whether this holds at 100 users. Every V3 test is compared with test 0, not with V1.

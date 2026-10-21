@@ -80,11 +80,11 @@ research**:
   - Heads-up from 10 users: with thinking on, qwen posted in only 4 of 10.
   - **Tests 1, 2a, 2b, 2c DONE (Tue 10-20 evening), ALL CHECKS PASS.** Every posting fix makes gemma post: 88-100%
     of users (check run without a fix: 0 of 10; V1: about 20%). Lines 2a and 2b: all 3 AIs posted 100%.
-  - **NEW Tue 10-20 night: the V3 posting screen is now part of the baseline for every remaining test (0, 3, 4).**
-    It combines what worked: new subreddits with no posts, explicit "as many posts as you'd like, or none", and a
-    posting-only menu (Gordon: "looks good … the same for all tests"). Test 0 had started with the old screen
-    (~21:15); it is stopped, moved to `t0_old_screen`, and rerun. **Tests 0, 3, 4 chained, started Tue 10-20 night
-    (log `~/llm_bias/logs/v3_main.txt`, ends `ALL THREE DONE`, about 3-4.5 days).** Details in §14.43.
+  - **NEW Tue 10-20 late night: tests REBUILT to Gordon's rule: every test = V1 + ONE addition, never stacked.**
+    The 0/3/4 chain bundled thinking + refresh + new posting screen (not comparable to V1): stopped, kept as
+    `cross_t0_partial`. New set, all at round 101 (V1's own seeds): `v1` (baseline, once), posting `p_think p_menu
+    p_2a p_2b p_2c p_screen` (100 users), reading `r_think r_refresh r_json r_menu` (30 users, V1's own posts).
+    About 9-10 h in all. `v3_summary.py <test>` prints V1 -> test. Details in §14.43.
 - **NEW Tue 10-20: gemma deep dive DONE (§14.42c). The data is sound.**
   - Every Spark check passed: fingerprint, audit, code versions, model files. Gemma gets the persona; Google's format
     puts it in the first user turn.
@@ -16161,3 +16161,20 @@ Gordon's go): ONE V1 run (Gordon: "just run it once"; posting + reading, round 1
 baseline for every test; posting tests P-think, P1, P2a-c (qwen rerun only), P-screen; reading tests on V1's own
 round-101 posts and seeds, 30 users: R-think, R-refresh, R-json, R-menu; then world features one at a
 time (W-nav, W-time, W-votes, W-search, W-trend, W-DM, W-order).
+
+**Rebuilt test set (Tue 10-20 late night; commit after this entry):**
+- `run_v2.py` computes `changes_from_v1` for every step, logs it, saves it in the manifest, and refuses to start with
+  more than one change unless `--cross` is given (laptop: `--think --refresh-loop` refused).
+- `v3_test.sh <test>`: every test at round 101 = V1's own random seeds (same seed formula as V1's code, ffafa95).
+  - `v1`: posting turn (100 users) + reading turn (30 users, users 0-29, reading V1's own round-101 posts by users
+    0-29: gemma 7, llama 31, qwen 33 posts) + noise floor. The single V1 run every test is compared with.
+  - Posting tests, 100 users: `p_think`, `p_menu` (posting-only menu), `p_2a/p_2b/p_2c` (one added line),
+    `p_screen` (the combined posting screen). Each is V1 + that one addition.
+  - Reading tests, 30 users, the same V1 posts: `r_think`, `r_refresh`, `r_json` (JSON-only off), `r_menu` (flipped).
+  - Every reading screen pairs with the V1 run's (and V1 round 101's) screen for the same user, post and seed.
+- `v3_summary.py <test>` prints every number as "V1 -> test"; CHECKS: every step made with exactly the test's one
+  change, every post read once, no own post, refresh returns only in `r_refresh`.
+- Laptop test (fake engine): v1, p_screen, r_refresh run end to end, ALL CHECKS PASS.
+- Time on the Spark: about 9-10 h for all 11 (v1 ~1.5 h, posting tests ~10 min each, reading tests ~1-3 h each,
+  r_think longest).
+

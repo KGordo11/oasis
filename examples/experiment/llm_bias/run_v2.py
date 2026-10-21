@@ -331,6 +331,11 @@ def run(a):
         post_screen, post_menu = POST_SCREEN_V3, MENU_POST_ONLY
     v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line", "post_screen")}
     v3_on = any(v not in (False, None, "v1", "all") for v in v3.values())
+    # Gordon's rule (log 14.43): every test = V1 + ONE addition, never stacked; more than one needs --cross
+    changes = [k for k, v in v3.items() if k != "v1" and v not in (False, None, "v1", "all")] \
+        + (["self_id (V2 line)"] if a.round >= SELF_ID_FROM_ROUND and not a.v1 else [])
+    if len(changes) > 1 and not a.cross:
+        raise SystemExit(f"{len(changes)} changes from V1 {changes}: a test is V1 + ONE addition (use --cross for a cross-test)")
     if llm.BACKEND == "llamacpp" and a.model not in llm.available_models():
         raise SystemExit(f"the llama.cpp server for {a.model} is not running (llamacpp_servers.sh only {a.model})")
     if not llm.server_up():
@@ -392,7 +397,7 @@ def run(a):
         todo = sum((p["id"], q["key"]) not in done for p, feed in sessions for q in feed)
     log(f"{a.turn} round {a.round}: {a.model} plays {len(people)} users"
         + (f" reading {len(posts)} posts by {a.posts_by}" if a.turn == "read" else "")
-        + f"; {todo if sessions else len(jobs)} screens to do" + (f" (+ refresh returns), V3 {v3}" if v3_on else ""))
+        + f"; {todo if sessions else len(jobs)} screens to do; changes from V1: {changes or 'none'}")
 
     def row(p, q, pos, act, meta, n, k=0, view=1):
         r = {"round": a.round, "turn": a.turn, "model": a.model, "posts_by": a.posts_by, "draw": a.draw,
@@ -497,7 +502,7 @@ def run(a):
            "post_set_sha256": sha(posts) if posts else None,
            "prompts_sha256": sha([SYSTEM] + ([SELF_ID, MODEL_NAMES] if a.round >= SELF_ID_FROM_ROUND and not a.v1 else []) + [POST_SCREEN, READ_SCREEN, MENU, FORMAT] + ([PAGE_SCREEN] if a.page_size > 1 else [])
                                  + ([post_screen, menu, post_menu] if v3_on else [])),
-           "v3_test": v3 if v3_on else None,
+           "v3_test": v3 if v3_on else None, "changes_from_v1": changes,
            "config": {"backend": llm.BACKEND, "sampling": llm.SAMPLING if llm.BACKEND == "llamacpp" else "ollama per-model defaults",
                       "temperature": a.temperature, "num_ctx": llm.NUM_CTX, "think": a.think, "parallel": a.parallel,
                       "memory": False, "follow_graph": "empty each round", "vote_counts": "hidden",
@@ -600,6 +605,7 @@ if __name__ == "__main__":
     ap.add_argument("--post-menu", choices=["all", "post_only"], default="all")
     ap.add_argument("--post-line", choices=sorted(POST_LINES), help="post: add one of the V3 test-2 lines")
     ap.add_argument("--post-screen", choices=["v1", "v3"], default="v1", help="post: v3 = the V3 posting screen (posting-only menu)")
+    ap.add_argument("--cross", action="store_true", help="allow more than one change from V1 (a cross-test)")
     args = ap.parse_args()
     if args.post_screen == "v3" and (args.post_line or args.post_menu != "all"):
         ap.error("--post-screen v3 already sets the posting screen and menu")

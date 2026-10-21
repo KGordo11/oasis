@@ -1,30 +1,41 @@
 #!/bin/bash
-# Run ONE V3 test (log 14.43): every test = the V3 baseline (V1 prompts, qwen thinking on, working refresh in the
-# reading turn, V3 posting screen) + exactly one change. Tests 1 and 2a-c were the posting-screen tests (old screen) that
-# chose the V3 posting screen; they stay as they ran. Same round number (200) in every test, so every test gets the same random seeds.
-#   bash examples/experiment/llm_bias/v3_test.sh check   10-user mini-round of test 0 (code + thinking check, ~20 min)
-#   bash examples/experiment/llm_bias/v3_test.sh 0       baseline, full round
-#   bash examples/experiment/llm_bias/v3_test.sh 1       posting turn: create_post is the only action   (posting only)
-#   bash examples/experiment/llm_bias/v3_test.sh 2a|2b|2c  posting screen: one extra line                (posting only)
-#   bash examples/experiment/llm_bias/v3_test.sh 3       JSON-only mode off, full round
-#   bash examples/experiment/llm_bias/v3_test.sh 4       menu order flipped, full round
-# Results: data/llm_bias/v3_tests/t<test>/r200/ ; summary: python3 examples/experiment/llm_bias/v3_summary.py <test>
+# Run ONE V3 test (log 14.43). Gordon's rule: every test = V1 + exactly ONE addition, never stacked; run_v2.py refuses
+# more than one. All tests use round 101 = V1's own random seeds, so every answer pairs with the V1 run screen by screen.
+#   v1                      the baseline, run once: posting (100 users) + reading (30 users) + noise floor
+#   p_think p_menu p_2a p_2b p_2c p_screen   posting turn only, 100 users (a few minutes each)
+#   r_think r_refresh r_json r_menu          reading turn only, 30 users, reading V1's own round-101 posts
+# Results: data/llm_bias/v3_tests/<test>/r101/ ; compare with V1: python3 examples/experiment/llm_bias/v3_summary.py <test>
+# (The first V3 tests -- check, 0, 1, 2a-c, 3, 4 -- stacked several additions; their script is in git at 092b6c0.)
 set -eu
-T=${1:?usage: v3_test.sh check|0|1|2a|2b|2c|3|4}
+T=${1:?usage: v3_test.sh v1|p_think|p_menu|p_2a|p_2b|p_2c|p_screen|r_think|r_refresh|r_json|r_menu}
 cd "$(dirname "$0")/../../.."
 case $T in
-  check|0) X="--post-screen v3" ;;
-  1) X="--post-menu post_only" ;;
-  2a|2b|2c) X="--post-line ${T#2}" ;;
-  3) X="--post-screen v3 --free-text" ;;
-  4) X="--post-screen v3 --menu-order flipped" ;;
+  v1) X="" ;;
+  p_think|r_think) X="--think" ;;
+  p_menu) X="--post-menu post_only" ;;
+  p_2a|p_2b|p_2c) X="--post-line ${T#p_2}" ;;
+  p_screen) X="--post-screen v3" ;;
+  r_refresh) X="--refresh-loop" ;;
+  r_json) X="--free-text" ;;
+  r_menu) X="--menu-order flipped" ;;
   *) echo "unknown test $T"; exit 1 ;;
 esac
-export DATA_DIR=$PWD/data/llm_bias/v3_tests/t$T EXTRA="--v1 --think --refresh-loop $X" ROUNDS=200 SLICES=0 \
-       MANAGE_SERVERS=1 CHECKPOINT=0 PUSH=0 STOP_OLLAMA=1 PARALLEL=8 PY=python3 STOP="$(date -d '+10 days' '+%Y-%m-%d %H:%M')"
-case $T in 1|2a|2b|2c) export TURNS=post NOISE=0 ;; check) export AGENTS=10 NOISE=4 ;; esac
-mkdir -p "$DATA_DIR"
+V1_SRC=${V1_SRC:-$PWD/data/llm_bias/v2/r101}  # V1's own round-101 files (the Spark's copy)
+export DATA_DIR=${V3_ROOT:-$PWD/data/llm_bias/v3_tests}/$T EXTRA="$X" ROUNDS=101 SLICES=0 MANAGE_SERVERS=${MANAGE_SERVERS:-1} \
+       CHECKPOINT=0 PUSH=0 STOP_OLLAMA=${STOP_OLLAMA:-1} PARALLEL=8 PY=${PY:-python3} \
+       STOP="$(python3 -c "import datetime as d; print((d.datetime.now() + d.timedelta(days=10)).strftime('%Y-%m-%d %H:%M'))")"
+mkdir -p "$DATA_DIR/r101"
 exec 9>"$DATA_DIR/.lock"; flock -n 9 || { echo "test $T is already running -- not starting a second copy"; exit 1; }
-echo "V3 test $T: run_v2.py options: $EXTRA  -> $DATA_DIR" | tee -a "$DATA_DIR/night.log"
-python3 examples/experiment/llm_bias/v2_night.py
+echo "V3 test $T: V1 + [${X:-nothing}]  -> $DATA_DIR" | tee -a "$DATA_DIR/night.log"
+if [ "$T" = v1 ] || [ "${T:0:2}" = p_ ]; then  # posting turn, 100 users
+  TURNS=post AGENTS=100 NOISE=0 $PY examples/experiment/llm_bias/v2_night.py
+fi
+if [ "$T" = v1 ] || [ "${T:0:2}" = r_ ]; then  # reading turn, 30 users, on V1's own posts by users 0-29
+  for m in gemma3-12b llama3.1-8b qwen3-8b; do
+    [ -e "$DATA_DIR/r101/posting_${m}_a30.jsonl" ] && continue
+    head -30 "$V1_SRC/posting_$m.jsonl" > "$DATA_DIR/r101/posting_${m}_a30.jsonl"
+    cp "$V1_SRC/posting_$m.manifest.json" "$DATA_DIR/r101/posting_${m}_a30.manifest.json"
+  done
+  NOISE=$([ "$T" = v1 ] && echo 4 || echo 0) AGENTS=30 $PY examples/experiment/llm_bias/v2_night.py
+fi
 echo "V3 TEST $T DONE" | tee -a "$DATA_DIR/night.log"

@@ -1,11 +1,12 @@
-"""Plain-percentage summary of one V3 test (log 14.43). Read-only, stdlib only.
+"""Plain-percentage summary of one V3 test, next to the V1 run (log 14.43). Read-only, stdlib only.
 
-    python3 examples/experiment/llm_bias/v3_summary.py 0        (or check, 1, 2a, 2b, 2c, 3, 4)
+    python3 examples/experiment/llm_bias/v3_summary.py p_menu        (or v1, p_think, ..., r_menu)
 
-POSTING: % of users per AI who posted / only refreshed / sent an empty list / only do_nothing / did something else.
-READING: per post a user read (all views of it together, since a refreshed post comes back): % with an upvote,
-downvote, comment, nothing at all; refresh returns per 100 posts; posts dropped after 5 refreshes in a row.
-Also unreadable answers, qwen's thinking length and seconds per screen.
+Every test = V1 + ONE addition, so every number is printed as "V1 -> test" for the same users and the same posts.
+POSTING: % of users who posted / only refreshed / sent an empty list / only do_nothing / did something else, and users
+with 0 / 1 / 2+ posts. READING: per post a user read (all views of it together, since a refreshed post comes back):
+% with an upvote, downvote, comment, nothing at all; refresh returns per 100 posts; posts dropped after 5 refreshes.
+CHECKS: every step made with exactly the test's one change, every post read once, no own post, refresh as designed.
 """
 import glob, json, os, sys
 from collections import Counter, defaultdict
@@ -14,75 +15,92 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import run_v2 as R  # noqa: E402
 
-T = sys.argv[1] if len(sys.argv) > 1 else "0"
-D = os.path.join(os.environ.get("V3_DIR", os.path.join(HERE, "..", "..", "..", "data", "llm_bias", "v3_tests")), f"t{T}", "r200")
+T = sys.argv[1] if len(sys.argv) > 1 else "v1"
+BASE = os.environ.get("V3_DIR", os.path.join(HERE, "..", "..", "..", "data", "llm_bias", "v3_tests"))
+D, V1 = os.path.join(BASE, T, "r101"), os.path.join(BASE, "v1", "r101")
+WANT = {"v1": [], "p_think": ["think"], "r_think": ["think"], "p_menu": ["post_menu"], "p_2a": ["post_line"],
+        "p_2b": ["post_line"], "p_2c": ["post_line"], "p_screen": ["post_screen"], "r_refresh": ["refresh_loop"],
+        "r_json": ["free_text"], "r_menu": ["menu_order"]}[T]
 load = lambda f: [json.loads(l) for l in open(f) if l.strip()]
-pct = lambda a, b: f"{100 * a / b:5.1f}" if b else "    -"
+pct = lambda a, b: 100 * a / b if b else float("nan")
 
-print(f"V3 test {T}  ({os.path.abspath(D)})")
-print("\nPOSTING TURN  (% of users)")
-for f in sorted(glob.glob(f"{D}/posting_*.jsonl")):
-    rs, c = load(f), Counter()
-    for r in rs:
-        n = {a["action"] for a in r["actions"]}
-        c["unreadable" if r["outcome"] != "chose" else "posted" if "create_post" in n else "empty list" if not n
-          else "only refresh" if n == {"refresh"} else "only do_nothing" if n == {"do_nothing"} else "other"] += 1
-    th = [len(r.get("thinking") or "") for r in rs]
-    per = Counter(min(sum(a["action"] == "create_post" for a in r["actions"]), 2) for r in rs)
-    print(f"  {os.path.basename(f)[8:-6]:16s}" + "".join(f"  {k} {pct(c[k], len(rs))}" for k in
-          ("posted", "only refresh", "empty list", "only do_nothing", "other", "unreadable"))
-          + f"   posts {sum(a['action'] == 'create_post' for r in rs for a in r['actions'])}"
-          + f"   users with 0/1/2+ posts {per[0]}/{per[1]}/{per[2]}"
-          + (f"   thinking {sum(th) // len(th)} chars" if any(th) else ""))
 
-print("\nREADING TURN  (% of posts read, all views of a post together; noise-floor files left out)")
-by = defaultdict(list)
-for f in glob.glob(f"{D}/reading_*.jsonl"):
-    if "_d" not in os.path.basename(f).split("__")[1]:
-        for r in load(f):
-            by[r["model"]].append(r)
-for m, rs in sorted(by.items()):
-    pairs = defaultdict(list)
-    for r in rs:
-        pairs[(r["posts_by"], r["user_id"], r["post_key"])].append(r)
-    c = Counter()
-    for views in pairs.values():
-        n = {a["action"] for r in views for a in r["actions"]}
-        c["up"] += "like_post" in n; c["down"] += "dislike_post" in n; c["comment"] += "create_comment" in n
-        c["nothing"] += not (n - {"do_nothing", "refresh"})
-        last = {a["action"] for a in max(views, key=lambda r: r.get("view", 1))["actions"]}
-        c["dropped"] += len(views) == R.REFRESH_MAX and "refresh" in last and not last & R.ON_POST
-    th = [len(r.get("thinking") or "") for r in rs]
-    acts = sum(a["action"] != "do_nothing" for r in rs for a in r["actions"])
-    print(f"  {m:12s} posts {len(pairs):6d}  actions/100 {100 * acts / len(pairs):6.1f}  up {pct(c['up'], len(pairs))}"
-          f"  down {pct(c['down'], len(pairs))}  comment {pct(c['comment'], len(pairs))}  nothing {pct(c['nothing'], len(pairs))}"
-          f"  returns/100 {100 * (len(rs) - len(pairs)) / len(pairs):5.1f}  dropped {c['dropped']}"
-          f"  unreadable {pct(sum(r['outcome'] != 'chose' for r in rs), len(rs))}"
-          + (f"  thinking {sum(th) // len(th)} chars" if any(th) else ""))
+def posting(d):
+    out = {}
+    for f in sorted(glob.glob(f"{d}/posting_*.jsonl")):
+        if "_a30" in f:
+            continue  # V1's own posts, copied in for the reading tests
+        rs, c = load(f), Counter()
+        for r in rs:
+            n = [a["action"] for a in r["actions"]]
+            s = set(n)
+            c["unreadable" if r["outcome"] != "chose" else "posted" if "create_post" in s else "empty list" if not s
+              else "only refresh" if s == {"refresh"} else "only do_nothing" if s == {"do_nothing"} else "other"] += 1
+            c[f"{min(n.count('create_post'), 2)} posts"] += 1
+            c["posts"] += n.count("create_post")
+        th = [len(r.get("thinking") or "") for r in rs]
+        out[os.path.basename(f)[8:-6]] = {**{k: pct(c[k], len(rs)) for k in ("posted", "only refresh", "empty list",
+                                          "only do_nothing", "other", "unreadable", "0 posts", "1 posts", "2 posts")},
+                                          "posts": c["posts"], "thinking": sum(th) / len(th) if any(th) else 0}
+    return out
 
-print("\nSPEED  (wall-clock seconds per screen with 8 at once, from the manifests)")
-sp = defaultdict(lambda: [0.0, 0])
-for f in glob.glob(f"{D}/*.manifest.json"):
-    m = json.load(open(f))
-    sp[(m["turn"], m["model"])][0] += m["seconds_llm"]; sp[(m["turn"], m["model"])][1] += m["screens"]
-for (t, m), (s, n) in sorted(sp.items()):
-    print(f"  {t:5s} {m:12s} {s / max(n, 1):5.2f} s/screen  ({n} screens, {s / 3600:.1f} h)")
 
-# CHECKS: the data obeys the V3 rules (every post read once, no own post, refresh returns only as designed)
-R.DATA = os.path.dirname(D)
+def reading(d):
+    by, out = defaultdict(list), {}
+    for f in glob.glob(f"{d}/reading_*.jsonl"):
+        if "_d" not in os.path.basename(f).split("__")[1]:
+            by[os.path.basename(f)[8:-6]] += load(f)
+    for cell, rs in sorted(by.items()):
+        pairs = defaultdict(list)
+        for r in rs:
+            pairs[(r["user_id"], r["post_key"])].append(r)
+        c = Counter()
+        for views in pairs.values():
+            n = {a["action"] for r in views for a in r["actions"]}
+            c["up"] += "like_post" in n; c["down"] += "dislike_post" in n; c["comment"] += "create_comment" in n
+            c["nothing"] += not (n - {"do_nothing", "refresh"})
+            last = {a["action"] for a in max(views, key=lambda r: r.get("view", 1))["actions"]}
+            c["dropped"] += len(views) == R.REFRESH_MAX and "refresh" in last and not last & R.ON_POST
+        th = [len(r.get("thinking") or "") for r in rs]
+        acts = sum(a["action"] != "do_nothing" for r in rs for a in r["actions"])
+        out[cell] = {"posts": len(pairs), "actions/100": pct(acts, len(pairs)), **{k: pct(c[k], len(pairs)) for k in
+                     ("up", "down", "comment", "nothing")}, "returns/100": pct(len(rs) - len(pairs), len(pairs)),
+                     "dropped": c["dropped"], "unreadable": pct(sum(r["outcome"] != "chose" for r in rs), len(rs)),
+                     "thinking": sum(th) / len(th) if any(th) else 0}
+    return out
+
+
+def show(title, test, base, keys):
+    if not test:
+        return
+    print(f"\n{title}  (V1 -> {T})" if T != "v1" else f"\n{title}")
+    for name, t in test.items():
+        b = base.get(name, {})
+        cells = [f"{k} {b[k]:5.1f} -> {t[k]:5.1f}" if T != "v1" and k in b else f"{k} {t[k]:5.1f}" for k in keys]
+        print(f"  {name:28s} " + "  ".join(cells))
+
+
+print(f"V3 test {T} = V1 + {WANT or 'nothing'}   ({os.path.abspath(D)})")
+show("POSTING TURN, 100 users (% of users; 'N posts' = % of users who wrote N, 2 = 2 or more)", posting(D), posting(V1),
+     ["posted", "only refresh", "empty list", "only do_nothing", "other", "unreadable", "0 posts", "1 posts", "2 posts",
+      "posts", "thinking"])
+show("READING TURN, 30 users, V1's posts (% of posts read; reading_<posts by>__<reader>)", reading(D), reading(V1),
+     ["posts", "actions/100", "up", "down", "comment", "nothing", "returns/100", "dropped", "unreadable", "thinking"])
+
+# CHECKS
 problems = []
 for f in sorted(glob.glob(f"{D}/*.manifest.json")):
-    m = json.load(open(f))
-    v = m.get("v3_test") or {}
-    if not (v.get("v1") and v.get("think") and v.get("refresh_loop")):
-        problems.append(f"{os.path.basename(f)}: not run with the V3 baseline options ({v})")
-    elif T in ("check", "0", "3", "4") and v.get("post_screen") != "v3":
-        problems.append(f"{os.path.basename(f)}: old posting screen (rerun this test with the V3 posting screen)")
+    m, name = json.load(open(f)), os.path.basename(f)
+    got = m.get("changes_from_v1", [] if not m.get("v3_test") else None)
+    want = [] if "_a30" in name and name.startswith("posting_") else WANT  # V1's own posts, copied in
+    if got != want:
+        problems.append(f"{name}: changes from V1 {got}, this test needs exactly {want}")
+R.DATA = os.path.dirname(D)
 for f in sorted(glob.glob(f"{D}/reading_*.jsonl")):
     rs, name = load(f), os.path.basename(f)
     agents = 100 if "_a" not in name else int(name.split("_a")[-1][:-6])
     noise = "_d" in name.split("__")[1]
-    posts = {q["key"]: q for q in R.post_set(200, rs[0]["posts_by"], agents)[0]} if rs else {}
+    posts = {q["key"]: q for q in R.post_set(101, rs[0]["posts_by"], agents)[0]} if rs else {}
     seen = Counter((r["user_id"], r["post_key"], r.get("view", 1)) for r in rs)
     if max(seen.values(), default=1) > 1:
         problems.append(f"{name}: {sum(c > 1 for c in seen.values())} duplicate screens")
@@ -100,7 +118,7 @@ for f in sorted(glob.glob(f"{D}/reading_*.jsonl")):
         at = {(r["post_key"], r.get("view", 1)): i for i, r in enumerate(s)}
         for i, r in enumerate(s):
             n, w = {x["action"] for x in r["actions"]}, r.get("view", 1)
-            back = "refresh" in n and not n & R.ON_POST and w < R.REFRESH_MAX
+            back = T == "r_refresh" and "refresh" in n and not n & R.ON_POST and w < R.REFRESH_MAX
             j = at.get((r["post_key"], w + 1))
             if back != (j is not None) or (j is not None and j - i not in (1, 2)) or w > R.REFRESH_MAX:
                 problems.append(f"{name}: user {u} post {r['post_key']} view {w}: refresh return not as designed"); break

@@ -16383,3 +16383,9 @@ no line.
   2a/2b only adds the story that leaks.
 - **Recommendation: 2c in the V3 version.** It has the same posting gain as 2a/2b (99-100%, one post each), no site
   talk, and V1's topics. Waiting for Gordon's pick.
+
+**Gordon 10-21 PM: "okay 2c it is."** `--v3` posting turn = V1 screen + line 2c, word for word: "It's posting time:
+share whatever you'd post. Everyone will read the new posts afterwards." The reading turn is unchanged (the four reading
+changes). `--v3` can't be mixed with `--post-line/--post-menu/--post-screen`. Fake-server test: exact screen with the
+2c line, thinking off, JSON on, manifest `version V3`, `changes ['post_line']`; 26 tests pass. Not run on the Spark;
+the run design (round number, scale) still needs Gordon's go.

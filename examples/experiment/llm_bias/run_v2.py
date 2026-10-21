@@ -322,10 +322,12 @@ def post_set(r, model, agents):
 
 def run(a):
     global DATA, V1_PROMPTS
-    if a.v3:  # V3 version (log 14.45, Gordon 10-21): V1 prompts + all four reading-test changes together, reading turn only
+    if a.v3:  # V3 version (log 14.45, Gordon 10-21): V1 prompts; posting = line 2c; reading = all four reading changes
         a.v1 = True
         if a.turn == "read":
             a.think, a.free_text, a.refresh_loop, a.menu_order = True, True, True, "flipped"
+        else:
+            a.post_line = "c"
     DATA, V1_PROMPTS = a.data_dir or DATA, a.v1
     menu = MENU_FLIPPED if a.menu_order == "flipped" else MENU
     post_menu = MENU_POST_ONLY if a.post_menu == "post_only" else menu
@@ -610,10 +612,11 @@ if __name__ == "__main__":
     ap.add_argument("--post-line", choices=sorted(POST_LINES), help="post: add one of the V3 test-2 lines")
     ap.add_argument("--post-screen", choices=["v1", "v3"], default="v1", help="post: v3 = the V3 posting screen (posting-only menu)")
     ap.add_argument("--cross", action="store_true", help="allow more than one change from V1 (a cross-test)")
-    ap.add_argument("--v3", action="store_true", help="V3 version: V1 prompts; reading turn = thinking + free text + "
-                    "refresh loop + flipped menu (log 14.45); posting turn = V1's")
+    ap.add_argument("--v3", action="store_true", help="V3 version: V1 prompts; posting turn = line 2c; reading turn = "
+                    "thinking + free text + refresh loop + flipped menu (log 14.45)")
     args = ap.parse_args()
-    if args.v3 and (args.v1 or args.think or args.free_text or args.refresh_loop or args.menu_order != "v1" or args.cross):
+    if args.v3 and (args.v1 or args.think or args.free_text or args.refresh_loop or args.menu_order != "v1" or args.cross
+                    or args.post_line or args.post_menu != "all" or args.post_screen != "v1"):
         ap.error("--v3 already sets all of these")
     if args.post_screen == "v3" and (args.post_line or args.post_menu != "all"):
         ap.error("--post-screen v3 already sets the posting screen and menu")

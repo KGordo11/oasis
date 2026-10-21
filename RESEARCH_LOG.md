@@ -16357,3 +16357,29 @@ column.
   - the existing tests pass (26 passed).
 - Not run on the Spark. Before a V3 run, Gordon chooses the posting line (2a/2b/2c), the scale and the rounds; run with
   `EXTRA="--v3"` in `v2_night.py`.
+
+**What lines 2a / 2b / 2c changed in the posts (Gordon 10-21 PM: "examine what was changed to keep the benefits"):**
+`python3 examples/experiment/llm_bias/v3_post_lines.py`. Each line is compared with `v1`: same 100 users, same seeds,
+no line.
+- **Site talk** means a post or reason about the site itself ("this new Reddit", "kick things off", "first post",
+  "get the ball rolling"), counted with a strict word list. In `v1` it is 0% everywhere.
+
+  | % of posts (% of posters' reasons) | gemma | llama | qwen |
+  |---|---|---|---|
+  | 2a "brand new … read next" | 13 (33) | 3 (10) | 2 (0) |
+  | 2b "helping build the first feed" | 5 (16) | 12 (6) | 0 (0) |
+  | 2c "posting time … read afterwards" | **0 (0)** | **0 (0)** | **1 (0)** |
+
+  The "new Reddit" story in 2a and 2b leaks into the posts, for example gemma's "Excited about this new Reddit!" and
+  llama's "First Post" and "Starting from Scratch". 2c tells no story and leaks nothing.
+- **Topics** stay close to V1 with every line; politics is still the top topic. A user who posted in V1 picks the same
+  subreddit again with 2c in 100% (gemma), 79% (llama) and 87% (qwen) of cases; with 2a: 96 / 77 / 67%.
+- **Length:** with every line, gemma's bodies get longer (median 25 to 31-32 words). With 2c, llama 17 to 24 and qwen
+  26 to 33.
+- Question titles: gemma 35% (V1), 45% (2a, 2b), 27% (2c).
+- **Why the lines work:** V1's screen says only "Your feed is empty -- nothing has been posted yet", so the AIs treat it
+  as a reading screen with nothing on it and refresh or wait (§14.42c). Each line says that this moment is for posting
+  and that others will read the posts later. That is the part that helps. The "brand new Reddit / first feed" part of
+  2a/2b only adds the story that leaks.
+- **Recommendation: 2c in the V3 version.** It has the same posting gain as 2a/2b (99-100%, one post each), no site
+  talk, and V1's topics. Waiting for Gordon's pick.

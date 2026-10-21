@@ -16120,5 +16120,16 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
   next post, refresh, close app. Switching subreddit goes back through the home screen (no direct jump); search, trend
   and chats open their own screens.
 - Reaction tests like posting tests 1/2 (reaction-only menu; one added line in a few wordings) come after.
-- Open: what "fastest" means, turn order (groups of 8), 3 world copies, comments/vote counts shown, screen and timestep
-  limits, number of timesteps.
+- **Decided Tue 10-20 night (Gordon):**
+  1. "Check back soon" order = fewest screens before choosing it (ties: regular order).
+  2. Groups of 8 in order (each group sees everything earlier groups did). Later tests: reverse order, random order.
+  3. Crossover like V1: each AI first writes its own posts (posting turn); then each AI plays the 100 users reading
+     each AI's posts (3 readers x 3 authors).
+  4. Comments and vote counts shown (baseline); a later test hides vote counts. Trend = posts ranked by upvotes, seen
+     or not, one at a time (#1, then #2, ...), until the user leaves.
+  5. No cap on posts read. Stop a session that keeps cycling the same posts in one subreddit and inspect its raw
+     answers. A user who has seen every post in a subreddit and keeps scrolling gets them again in the order seen,
+     with their own earlier actions shown.
+  6. Search, trend, profiles get result screens. Chats = direct messages to another user (not pre-made groups).
+- Open (Claude's feedback, waiting for Gordon): see the reply after this entry in the conversation; summarised when
+  settled.

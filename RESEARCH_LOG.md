@@ -16194,3 +16194,7 @@ the same layers as rounds 101-104 (§14.31c, §14.35a), plus two new ones.
 5. Already in the code: flock (no double start), a step that fails with nothing done stops the run (LB-v2-3),
    resume after a hard kill (LB-v2-4), 3 tries per screen, 300 s timeout per call, one model in memory at a time.
 6. `v3_summary.py` now fails a test that has no data (before, an empty test would have shown ALL CHECKS PASS).
+- Machine check Tue 10-20 ~23:05: hsa303 (the user whose job overlapped our Oct 7 crash) runs a training job, 53 GB
+  memory, 90% CPU, started ~21:48; 93 GB still available. A leftover zombie `[llama-server] <defunct>` (uses no
+  memory) is harmless. Preflight started with the chain/cron commands typed behind it, so they run when it ends.
+  Speed to watch: unshared V1 speeds were qwen 0.45, llama 0.52, gemma 0.95 s/screen.

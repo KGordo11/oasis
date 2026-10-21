@@ -76,6 +76,7 @@ research**:
     Working refresh: nobody refreshes without reacting (0 of 6,177 screens), so that test is empty.
   - **Still no own-AI bias.** qwen still likes gemma's posts (−17 to −21) in every test except thinking.
   - Next (Gordon): pick the posting line; decide qwen thinking for V3; cross-tests; V3 world study (§14.44).
+  - **Gordon 10-21 PM: v1, p_think, p_menu dropped** (don't improve the sim). Still in play: p_2a/b/c, p_screen, r_think, r_refresh, r_json, r_menu.
 - **NEW Tue 10-20 noon: V3 tests built (§14.43), not run yet.** One change at a time on a V3 baseline: V1 prompts +
   qwen thinking + working refresh in the reading turn. Tests:
   - 0: baseline;
@@ -16330,3 +16331,8 @@ Pair result = (i reads i − j reads i) − (i reads j − j reads j). + means b
    is never used alone.
 5. **Next:** the cross-tests (e.g. thinking × posting-only menu), the V3 world study (§14.44, waiting for Gordon's go),
    and post content/length for the posting lines.
+
+**Decision (Gordon, Wed 10-21 PM): `v1`, `p_think` and `p_menu` are dropped. They do not improve the sim, and we don't
+care about them any more.** The tests still in play: posting `p_2a`, `p_2b`, `p_2c`, `p_screen`; reading `r_think`,
+`r_refresh`, `r_json`, `r_menu`. The `v1` run's data stays on disk; only `v3_summary.py` uses it, as its comparison
+column.

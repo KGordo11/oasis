@@ -85,6 +85,8 @@ research**:
     `cross_t0_partial`. New set, all at round 101 (V1's own seeds): `v1` (baseline, once), posting `p_think p_menu
     p_2a p_2b p_2c p_screen` (100 users), reading `r_think r_refresh r_json r_menu` (30 users, V1's own posts).
     About 9-10 h in all. `v3_summary.py <test>` prints V1 -> test. Details in §14.43.
+    **RUNNING since Tue 10-20 ~23:40** (preflight ALL CLEAR, self-healing chain + watchdog cron; remove cron after
+    `CHAIN DONE`).
 - **NEW Tue 10-20: gemma deep dive DONE (§14.42c). The data is sound.**
   - Every Spark check passed: fingerprint, audit, code versions, model files. Gemma gets the persona; Google's format
     puts it in the first user turn.
@@ -16198,3 +16200,5 @@ the same layers as rounds 101-104 (§14.31c, §14.35a), plus two new ones.
   memory, 90% CPU, started ~21:48; 93 GB still available. A leftover zombie `[llama-server] <defunct>` (uses no
   memory) is harmless. Preflight started with the chain/cron commands typed behind it, so they run when it ends.
   Speed to watch: unshared V1 speeds were qwen 0.45, llama 0.52, gemma 0.95 s/screen.
+- Started Tue 10-20 ~23:40: preflight 110 PASS, 0 FAIL, ALL CLEAR; `v3_chain.sh` running (log
+  `~/llm_bias/logs/v3_single.txt`, ends `CHAIN DONE`); watchdog cron installed. Remove the cron after CHAIN DONE.

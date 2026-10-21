@@ -78,7 +78,9 @@ research**:
   - Qwen's thinking works with JSON mode, and 0 answers were unreadable.
   - Speed: a full round takes about 1-1.5 days, a posting-only test about 15 min.
   - Heads-up from 10 users: with thinking on, qwen posted in only 4 of 10.
-  - Next: tests 1, 2a, 2b, 2c chained (about 1 h), then 0, 3, 4. Details in §14.43.
+  - **Tests 1, 2a, 2b, 2c DONE (Tue 10-20 evening), ALL CHECKS PASS.** Every posting fix makes gemma post: 88-100%
+    of users (check run without a fix: 0 of 10; V1: about 20%). Lines 2a and 2b: all 3 AIs posted 100%.
+  - Test 0 started Tue 10-20 ~21:15 (about 1-1.5 days). Its posting numbers are the real comparison. Details in §14.43.
 - **NEW Tue 10-20: gemma deep dive DONE (§14.42c). The data is sound.**
   - Every Spark check passed: fingerprint, audit, code versions, model files. Gemma gets the persona; Google's format
     puts it in the first user turn.
@@ -16027,3 +16029,22 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
   - With thinking, qwen posted in 4 of 10 (V1: about 90 of 100) and commented on 26% of posts (V1 probe: 47%).
   - Gemma posted in 0 of 10 (V1: about 20%).
   - Test 0 will show whether this holds at 100 users. Every V3 test is compared with test 0, not with V1.
+**Tests 1, 2a, 2b, 2c (Tue 10-20 evening, 100 users, posting turn only):** ALL CHECKS PASS, 0 unreadable answers.
+
+| % of users who posted (posts written) | gemma | llama | qwen (thinking) |
+|---|---|---|---|
+| check run, no fix (10 users) | 0% | 100% | 40% |
+| 1: posting is the only option on the menu | 88% (89) | 100% (142) | 96% (105) |
+| 2a: "This Reddit is brand new … what gets posted now is what everyone will read next." | 100% (100) | 100% (119) | 100% (126) |
+| 2b: "You're helping build this Reddit's first feed …" | 100% (100) | 100% (109) | 100% (113) |
+| 2c: "It's posting time … Everyone will read the new posts afterwards." | 99% (99) | 100% (118) | 100% (103) |
+
+- Every fix works. Gemma goes from almost never posting to nearly always posting. Gemma's low posting in V1 came from
+  the screen's framing, not from the AI being unable to post.
+- Test 1: even when posting is the only option, 12% of gemma's users and 4% of qwen's sent an empty list (did nothing).
+  The added lines (2a, 2b) beat the menu change.
+- Llama writes more than one post per user (109-142 posts from 100 users); gemma writes exactly one.
+- Not yet checked: whether the lines change what the posts are about (e.g. posts about "the new Reddit"), or their
+  length. Needs the posts copied to the Mac.
+- The real comparison is test 0's posting turn (100 users, same seeds). Test 0 started Tue 10-20 ~21:15.
+

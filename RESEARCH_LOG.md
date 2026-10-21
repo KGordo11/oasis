@@ -16109,3 +16109,16 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
   2,089, refresh 2,041, like_comment 1,657 with made-up comment IDs, …), plus 4,444 (2.2%) follow/mute. "Total
   engagement" (all 27 actions) includes them. The running tests 0, 3, 4 have the same menu; the effort study is where
   these get real screens.
+
+## 14.44 V3 world study: design in progress (Gordon, Tue 10-20 night; NOT built, waiting for Gordon's go)
+- Several timesteps; the world keeps everything between them. Each user opens Reddit, picks ONE subreddit from the home
+  screen, sees one random unseen post at a time, reacts or not, and moves on; done = close the app. Every user takes a
+  turn, then the next timestep. Users who choose "close app, check back soon" go first next timestep, then regular order.
+- Search, trend, user profiles and group chats get real result screens (OASIS already returns the results; search
+  matches any word, not the exact phrase). Every screen is logged, so steps per action are counted (the effort study).
+- **Decided (Gordon "a"):** reactions and "where next" go in one answer when the real app does it on the same screen:
+  next post, refresh, close app. Switching subreddit goes back through the home screen (no direct jump); search, trend
+  and chats open their own screens.
+- Reaction tests like posting tests 1/2 (reaction-only menu; one added line in a few wordings) come after.
+- Open: what "fastest" means, turn order (groups of 8), 3 world copies, comments/vote counts shown, screen and timestep
+  limits, number of timesteps.

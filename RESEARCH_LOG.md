@@ -16178,3 +16178,19 @@ time (W-nav, W-time, W-votes, W-search, W-trend, W-DM, W-order).
 - Time on the Spark: about 9-10 h for all 11 (v1 ~1.5 h, posting tests ~10 min each, reading tests ~1-3 h each,
   r_think longest).
 
+
+**Safety for the unattended V3 chain (Gordon: "take all precautions we took 2 weeks ago"; Tue 10-20 late night):**
+the same layers as rounds 101-104 (§14.31c, §14.35a), plus two new ones.
+1. Machine check before starting: nobody else's big job on the Spark (2026-10-07 a second user's job slowed us 35x
+   and the whole session died), memory and disk free, no Ollama.
+2. Preflight (`preflight_v2.py`, ~25 min, must end ALL CLEAR): setup, all 3 servers, switching, a 10-user mini-round,
+   kill-and-resume, clean finish. It refuses to run while anything of ours runs.
+3. `v3_chain.sh` runs the 11 tests. NEW: after each test its CHECKS must pass; if not, the test is resumed (up to 3
+   tries); a test that still fails is listed and the chain moves on. Last line `CHAIN DONE: all 11 passed` or
+   `CHAIN DONE -- FAILED: <tests>`. Laptop: a reading file cut from 899 to 500 rows was healed back to 899 on try 1.
+4. `v3_watchdog.sh` (cron, every 10 min): restarts the chain if it died before CHAIN DONE (also after a reboot; the
+   Spark shows "System restart required"). NEW: gives up after 3 restarts so a real bug cannot loop. Laptop: done /
+   alive / gave-up / dead cases all behave. Remove after CHAIN DONE.
+5. Already in the code: flock (no double start), a step that fails with nothing done stops the run (LB-v2-3),
+   resume after a hard kill (LB-v2-4), 3 tries per screen, 300 s timeout per call, one model in memory at a time.
+6. `v3_summary.py` now fails a test that has no data (before, an empty test would have shown ALL CHECKS PASS).

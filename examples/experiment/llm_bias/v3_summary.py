@@ -88,7 +88,7 @@ show("READING TURN, 30 users, V1's posts (% of posts read; reading_<posts by>__<
      ["posts", "actions/100", "up", "down", "comment", "nothing", "returns/100", "dropped", "unreadable", "thinking"])
 
 # CHECKS
-problems = []
+problems = [] if glob.glob(f"{D}/*.manifest.json") else [f"no data in {D}: the test has not run"]
 for f in sorted(glob.glob(f"{D}/*.manifest.json")):
     m, name = json.load(open(f)), os.path.basename(f)
     got = m.get("changes_from_v1", [] if not m.get("v3_test") else None)

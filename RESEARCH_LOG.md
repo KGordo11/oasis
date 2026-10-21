@@ -15129,7 +15129,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 8b91ef5 | 10-19 evening | **`audit_v2_data.py`** (re-parse every raw reply, nothing-routes, non-post actions, post-only bias) + **`gemma_probe.py`** (template / replay / posting variants / reading variants / ask; §14.42) |
 | (this) | 10-19 night | **Reorganised oasis/**: START_HERE.md + data READMEs; `v2_spark` -> `v1_v2_spark`; Tests 1-6 -> `data/llm_bias/old_tests_sep2026/`; Sim 4 -> `data/sim4_social_timeline/` (code defaults + .gitignore updated, self-tests pass); junk to `~/research/oasis_TO_DELETE/` |
 | 1a2bad7…682c87e | 10-20 | **V3 tests** (§14.43-14.44): `run_v2.py` options + `changes_from_v1` guard (refuses >1 change without `--cross`), `v3_test.sh`, `v3_summary.py`, `v3_chain.sh` + `v3_watchdog.sh`, `--post-screen v3` |
-| (this) | 10-21 | **`v3_ranges.py`**: reading tests vs V1 with user-resampled 95% ranges, rerun noise, refresh-only count; results §14.45 |
+| ce1e635 | 10-21 | **`v3_ranges.py`**: reading tests vs V1 with user-resampled 95% ranges, rerun noise, refresh-only count; results §14.45 |
+| (this) | 10-21 PM | **`make_v3_charts.py`**: V3 charts (posts per user, every action, actions per answer) + `LLM_Bias_V3.xlsx` in `~/Desktop/LLM_Bias/V3/` |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16225,6 +16226,11 @@ hsa303's training job). Watchdog cron removed by Gordon. Copied to the Mac:
 `rsync -avz honda:llm_bias/oasis/data/llm_bias/v3_tests/ ~/research/oasis/data/llm_bias/v3_tests/` (43 MB; not in git,
 like `v1_v2_spark/`). **`v3_summary.py <test>`: ALL CHECKS PASS for all 11** (every step made with exactly its one change,
 every post read once, no own post, no duplicates). Extra numbers: `python3 examples/experiment/llm_bias/v3_ranges.py`.
+**Charts + Excel (Gordon: posts per user 0/1/2/3+, every action, how many users did how many actions):**
+`oasis-env/bin/python examples/experiment/llm_bias/make_v3_charts.py` -> `~/Desktop/LLM_Bias/V3/`: 26 PNGs (per test:
+`posts_per_user_`, `actions_` = times each action was used, `actions_per_screen_` = % of answers with 0/1/2/3/4+ actions,
+do_nothing counted as 0; every one V1 vs test, one panel per AI) + `LLM_Bias_V3.xlsx` (tabs Posts per user, Posting
+actions, Reading actions = times + users who used it, Actions per answer, then one tab per chart).
 
 **How much does rerunning alone change things? (the yardstick for every test)** The `v1` run repeats V1 round 101 with
 the same users, screens and seeds. llama.cpp with 8 answers at once is not exactly repeatable, so:

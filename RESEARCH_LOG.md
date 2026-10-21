@@ -83,7 +83,8 @@ research**:
   - **NEW Tue 10-20 night: the V3 posting screen is now part of the baseline for every remaining test (0, 3, 4).**
     It combines what worked: new subreddits with no posts, explicit "as many posts as you'd like, or none", and a
     posting-only menu (Gordon: "looks good … the same for all tests"). Test 0 had started with the old screen
-    (~21:15); it is stopped, moved to `t0_old_screen`, and rerun. Next: 0, 3, 4 chained. Details in §14.43.
+    (~21:15); it is stopped, moved to `t0_old_screen`, and rerun. **Tests 0, 3, 4 chained, started Tue 10-20 night
+    (log `~/llm_bias/logs/v3_main.txt`, ends `ALL THREE DONE`, about 3-4.5 days).** Details in §14.43.
 - **NEW Tue 10-20: gemma deep dive DONE (§14.42c). The data is sound.**
   - Every Spark check passed: fingerprint, audit, code versions, model files. Gemma gets the persona; Google's format
     puts it in the first user turn.

@@ -16157,6 +16157,7 @@ navigation screens. Pilot first: 10 users, 3 timesteps, after tests 0, 3, 4 fini
 one.** Compare each test with V1 first, then test vs test; cross-tests only after all single-addition tests exist;
 small scale. The running chain (0, 3, 4) bundled qwen thinking + refresh loop + the new posting screen into its
 baseline, so it is not comparable to V1: to be stopped and kept as a cross-test (`cross_t0_partial`). Plan (waiting for
-Gordon's go): posting tests P0 (V1 repeat), P-think, P1, P2a-c (qwen rerun only), P-screen; reading tests on V1's own
-round-101 posts and seeds, 30 users: R0 (V1 repeat), R-think, R-refresh, R-json, R-menu; then world features one at a
+Gordon's go): ONE V1 run (Gordon: "just run it once"; posting + reading, round 101, same scale as the tests) = the
+baseline for every test; posting tests P-think, P1, P2a-c (qwen rerun only), P-screen; reading tests on V1's own
+round-101 posts and seeds, 30 users: R-think, R-refresh, R-json, R-menu; then world features one at a
 time (W-nav, W-time, W-votes, W-search, W-trend, W-DM, W-order).

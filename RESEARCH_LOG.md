@@ -64,8 +64,18 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-19): read this first
+## 0.2 Where things stand (2026-10-21): read this first
 
+- **NEW Wed 10-21: V3 single-addition chain DONE, all 11 passed, ALL CHECKS PASS (§14.45).** Watchdog cron
+  removed; data on the Mac in `data/llm_bias/v3_tests/` (not in git). Each test = V1 + one change:
+  - **Posting:** one added line (2a/2b/2c) makes gemma post 99-100% (V1 23%), and all 3 AIs about 100%. The
+    posting-only menu makes qwen (no thinking) send empty lists (29% post). Thinking makes qwen post less (57%). The full
+    V3 screen makes llama/qwen write 2.4-2.7 posts each (uneven post sets).
+  - **Reading:** flipping the menu order is the biggest effect: gemma stops upvoting and comments, llama does nothing
+    more, qwen upvotes more. Thinking changes qwen's reactions (more downvotes). JSON-only off: no real change.
+    Working refresh: nobody refreshes without reacting (0 of 6,177 screens), so that test is empty.
+  - **Still no own-AI bias.** qwen still likes gemma's posts (−17 to −21) in every test except thinking.
+  - Next (Gordon): pick the posting line; decide qwen thinking for V3; cross-tests; V3 world study (§14.44).
 - **NEW Tue 10-20 noon: V3 tests built (§14.43), not run yet.** One change at a time on a V3 baseline: V1 prompts +
   qwen thinking + working refresh in the reading turn. Tests:
   - 0: baseline;
@@ -14892,6 +14902,10 @@ into the running window (typed text gets queued as shell input).
 
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
+### Status (2026-10-21)
+- V1 + V2 done (no own-AI bias, §14.41). V3 single-addition tests done (11/11, §14.45). Nothing running on the Spark,
+  no cron. Waiting for Gordon: posting-line choice, qwen thinking yes/no, cross-tests, V3 world study go (§14.44).
+
 ### Status (2026-10-09 11:30)
 - **V1 / V2 naming (LD-45, §14.36):** V1 = rounds 101-102, V2 = rounds 103-104. Workbooks per version in
   `~/Desktop/LLM_Bias/<V>/`; `make_report_v2.py <results> <out> <V>`; the Inside page shows both.
@@ -15114,6 +15128,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 
 | 8b91ef5 | 10-19 evening | **`audit_v2_data.py`** (re-parse every raw reply, nothing-routes, non-post actions, post-only bias) + **`gemma_probe.py`** (template / replay / posting variants / reading variants / ask; §14.42) |
 | (this) | 10-19 night | **Reorganised oasis/**: START_HERE.md + data READMEs; `v2_spark` -> `v1_v2_spark`; Tests 1-6 -> `data/llm_bias/old_tests_sep2026/`; Sim 4 -> `data/sim4_social_timeline/` (code defaults + .gitignore updated, self-tests pass); junk to `~/research/oasis_TO_DELETE/` |
+| 1a2bad7…682c87e | 10-20 | **V3 tests** (§14.43-14.44): `run_v2.py` options + `changes_from_v1` guard (refuses >1 change without `--cross`), `v3_test.sh`, `v3_summary.py`, `v3_chain.sh` + `v3_watchdog.sh`, `--post-screen v3` |
+| (this) | 10-21 | **`v3_ranges.py`**: reading tests vs V1 with user-resampled 95% ranges, rerun noise, refresh-only count; results §14.45 |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16202,3 +16218,109 @@ the same layers as rounds 101-104 (§14.31c, §14.35a), plus two new ones.
   Speed to watch: unshared V1 speeds were qwen 0.45, llama 0.52, gemma 0.95 s/screen.
 - Started Tue 10-20 ~23:40: preflight 110 PASS, 0 FAIL, ALL CLEAR; `v3_chain.sh` running (log
   `~/llm_bias/logs/v3_single.txt`, ends `CHAIN DONE`); watchdog cron installed. Remove the cron after CHAIN DONE.
+
+## 14.45 V3 single-addition results: every test vs V1 (chain done Wed 10-21 12:15, analysed Wed 10-21 afternoon)
+**Run:** `v3_chain.sh` started Tue 10-20 ~23:40, finished Wed 10-21 12:15 (`CHAIN DONE: all 11 passed`, ~12.5 h, alongside
+hsa303's training job). Watchdog cron removed by Gordon. Copied to the Mac:
+`rsync -avz honda:llm_bias/oasis/data/llm_bias/v3_tests/ ~/research/oasis/data/llm_bias/v3_tests/` (43 MB; not in git,
+like `v1_v2_spark/`). **`v3_summary.py <test>`: ALL CHECKS PASS for all 11** (every step made with exactly its one change,
+every post read once, no own post, no duplicates). Extra numbers: `python3 examples/experiment/llm_bias/v3_ranges.py`.
+
+**How much does rerunning alone change things? (the yardstick for every test)** The `v1` run repeats V1 round 101 with
+the same users, screens and seeds. llama.cpp with 8 answers at once is not exactly repeatable, so:
+- Posting: the same user posted-or-not in the same way in 80 of 100 (gemma), 96 (llama), 95 (qwen). Gemma posted 25% in
+  the original, 23% in the rerun.
+- Reading: the same set of actions on the same screen: gemma about 89%, qwen about 74%, llama about 36% (llama takes 2-3
+  actions per screen, so an exact match is rare). Total engagement moved by +0.6 (gemma), +2.9 (llama), +4.4 (qwen)
+  per 100 screens. **A change smaller than that is not a real effect.**
+
+### Posting tests (100 users; % of users who posted, posts written)
+| Test (V1 + this one thing) | gemma | llama | qwen |
+|---|---|---|---|
+| `v1` (nothing added) | 23% (23) | 98% (105) | 87% (95) |
+| `p_think`: qwen thinks first | 27% (27) | 97% (106) | **57% (67)** |
+| `p_menu`: create_post is the only action | **88% (88)** | 100% (128) | **29% (30)** |
+| `p_2a`: + "This Reddit is brand new … what gets posted now is what everyone will read next." | **100% (100)** | 100% (117) | 97% (132) |
+| `p_2b`: + "You're helping build this Reddit's first feed …" | **100% (100)** | 100% (112) | 98% (104) |
+| `p_2c`: + "It's posting time … Everyone will read the new posts afterwards." | **99% (99)** | 100% (118) | 100% (104) |
+| `p_screen`: the whole V3 posting screen (§14.43) | **97% (149)** | 100% (**244**) | 91% (**266**) |
+
+gemma and llama don't think, so in `p_think` only qwen's row is a real test; theirs are reruns.
+
+- **One added line fixes gemma.** It goes from 23% to 99-100% with any of the three lines (2a, 2b, 2c). Of the 11 tests,
+  these three are the only ones that make all 3 AIs post at about 100%.
+- **The posting-only menu backfires on qwen.** Without thinking, 71% of qwen's users send an empty list, saying "Nothing
+  to post yet." In the earlier test 1 (with thinking, §14.43) qwen posted 96% with the same menu. So thinking and the
+  menu work *together*; that is a cross-test question, not a single-change one.
+- **Thinking makes qwen post less (87% to 57%).** 29 of its users instead ask for `trend` (the most popular posts) on
+  the empty feed, the same "wait and look first" idea gemma has.
+- **The full V3 screen makes llama and qwen write many posts.** It includes "write as many posts as you'd like": 70% of
+  llama's users and 69% of qwen's write 2 or more (V1: 7-8%). Gemma: 25% write 2+ (V1: 0%).
+  - This changes how many posts each AI has in the reading turn: the post sets become very uneven (149 / 244 / 266).
+- Not yet checked: whether the lines change what the posts are about, or their length.
+
+### Reading tests (30 users read V1's own round-101 posts: gemma 7, llama 31, qwen 33 posts)
+**Total engagement** (every action except do_nothing) per 100 screens, by reader, all posts together. Range = 95% range
+from resampling the 30 users; CLEAR = the range leaves out 0.
+
+| Test (V1 + this one thing) | gemma reads | llama reads | qwen reads |
+|---|---|---|---|
+| `v1` | 95.3 | 225.2 | 116.4 |
+| `r_think`: qwen thinks first | 95.2 (rerun) | 221.9 (rerun) | **126.6 (+10.2, CLEAR)** |
+| `r_refresh`: refresh works (the post comes back) | 95.3 (+0.0) | 225.5 (+0.4) | 116.3 (−0.1) |
+| `r_json`: JSON-only off in the engine | 95.1 (−0.2) | 218.0 (−7.2) | 114.7 (−1.7) |
+| `r_menu`: menu flipped, least-used first | **108.1 (+12.8, CLEAR)** | **185.7 (−39.4, CLEAR)** | **145.5 (+29.0, CLEAR)** |
+
+- **Menu order matters a lot, the biggest effect of all 11 tests.** The same actions are on the screen, only their order
+  changes. Upvote moves to the bottom and comment moves up:
+
+  | % of posts | gemma: upvote | gemma: comment | llama: did nothing | qwen: upvote |
+  |---|---|---|---|---|
+  | V1 menu | 49-54% | 5-9% | 3-5% | 44-46% |
+  | flipped menu | 13-22% | 44-52% | 23-35% | 65-66% |
+
+  - Gemma mostly stops upvoting and starts commenting.
+  - llama does nothing on far more posts.
+  - qwen upvotes more.
+  - Exact same answer as V1 on only 13-50% of screens (rerun: 36-90%).
+- **Thinking changes qwen's reactions.** Downvotes go from 14-21% to 31-36% of posts and comments from 44-63% to 28-39%.
+  Total engagement goes up by 10.2 (rerun noise is 4.4). qwen gives the exact same answer as V1 on only 32-41% of
+  screens (rerun: 72-77%).
+- **The working refresh button changes nothing, because nobody uses it.** A post comes back only after a refresh with no
+  reaction to the post. That happened on 0 of 6,177 screens (the V1 rerun: 2; all of V1 round 101: 6 of 68,013).
+  Refresh is always paired with an upvote or downvote. So this test cannot tell us anything about refresh.
+- **JSON-only off: no real change.** llama −7.2 and qwen −1.7 are "clear" by the user range, but they are about the
+  size of rerun noise (+2.9 / +4.4), and exact-answer matches equal the rerun's (35-89%). Gemma: 0 unreadable
+  answers with or without it.
+
+### Does any one change make the AIs favour their own posts? (pair results, 30 users, range in [ ])
+Pair result = (i reads i − j reads i) − (i reads j − j reads j). + means both AIs engage more with their own AI's posts,
+− means more with each other's.
+
+| Test | gemma-llama | gemma-qwen | llama-qwen |
+|---|---|---|---|
+| V1 original, these 30 users | +0.1 | −18.0 | +9.0 |
+| `v1` rerun | +0.2 [−17, +18] | **−17.3 [−25, −9]** | **+15.7 [+4, +28]** |
+| `r_think` | −8.4 [−26, +9] | −7.8 [−18, +3] | +5.1 [−6, +16] |
+| `r_refresh` | +6.8 [−12, +25] | **−21.3 [−29, −14]** | **+19.9 [+6, +34]** |
+| `r_json` | −12.4 [−36, +9] | **−17.3 [−25, −9]** | +12.5 [−3, +28] |
+| `r_menu` | **+17.1 [+0.1, +35]** | **−19.1 [−29, −10]** | **+10.0 [+0.3, +20]** |
+
+- **Same story as V1 and V2 (§14.41): no own-AI bias.** The gemma-qwen −17 to −21 is qwen liking gemma's posts, and it
+  shows up in every test except `r_think`.
+- **With thinking, qwen treats the three AIs' posts more alike.** Every pair is unclear. qwen reads gemma 136.0, its own
+  130.7, llama 120.1 (V1: 134.5 / 120.8 / 107.7). Only 30 users, so this needs a bigger run before it counts.
+- `r_menu` gemma-llama +17.1 just leaves out 0 (+0.1), and it is 1 of 15 pair checks. Treat it as chance until it
+  repeats.
+- Caution: gemma wrote only 7 of these posts (203 screens), so every gemma column is thin.
+
+### What this means for the next runs (Gordon to decide)
+1. **Posting screen fix:** one added line (2a, 2b or 2c) is enough. Avoid the posting-only menu (it breaks qwen
+   without thinking). Avoid "as many posts as you'd like" (uneven post sets).
+2. **Menu order is a big lever.** It is its own study (the menu-order question in §14.43). Every earlier result used
+   the V1 order, so keep that order fixed whenever bias is the question.
+3. **qwen thinking changes qwen's behaviour,** both posting and reading. Decide on purpose whether V3 uses it.
+4. **Refresh:** to test it, the screen needs a reason to refresh (e.g. a feed of several posts). On one-post screens it
+   is never used alone.
+5. **Next:** the cross-tests (e.g. thinking × posting-only menu), the V3 world study (§14.44, waiting for Gordon's go),
+   and post content/length for the posting lines.

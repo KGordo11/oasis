@@ -16152,3 +16152,11 @@ work on the post screen); reaction test 2 (one added line, several wordings); ef
 
 **Time:** one timestep across the 9 worlds is at least one V1 round (about 1-1.5 days with qwen thinking), more with
 navigation screens. Pilot first: 10 users, 3 timesteps, after tests 0, 3, 4 finish.
+
+**RULE (Gordon, Tue 10-20 night): every test = V1 + exactly ONE addition; the next test removes it and adds the next
+one.** Compare each test with V1 first, then test vs test; cross-tests only after all single-addition tests exist;
+small scale. The running chain (0, 3, 4) bundled qwen thinking + refresh loop + the new posting screen into its
+baseline, so it is not comparable to V1: to be stopped and kept as a cross-test (`cross_t0_partial`). Plan (waiting for
+Gordon's go): posting tests P0 (V1 repeat), P-think, P1, P2a-c (qwen rerun only), P-screen; reading tests on V1's own
+round-101 posts and seeds, 30 users: R0 (V1 repeat), R-think, R-refresh, R-json, R-menu; then world features one at a
+time (W-nav, W-time, W-votes, W-search, W-trend, W-DM, W-order).

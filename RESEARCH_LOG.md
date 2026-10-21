@@ -80,7 +80,10 @@ research**:
   - Heads-up from 10 users: with thinking on, qwen posted in only 4 of 10.
   - **Tests 1, 2a, 2b, 2c DONE (Tue 10-20 evening), ALL CHECKS PASS.** Every posting fix makes gemma post: 88-100%
     of users (check run without a fix: 0 of 10; V1: about 20%). Lines 2a and 2b: all 3 AIs posted 100%.
-  - Test 0 started Tue 10-20 ~21:15 (about 1-1.5 days). Its posting numbers are the real comparison. Details in §14.43.
+  - **NEW Tue 10-20 night: the V3 posting screen is now part of the baseline for every remaining test (0, 3, 4).**
+    It combines what worked: new subreddits with no posts, explicit "as many posts as you'd like, or none", and a
+    posting-only menu (Gordon: "looks good … the same for all tests"). Test 0 had started with the old screen
+    (~21:15); it is stopped, moved to `t0_old_screen`, and rerun. Next: 0, 3, 4 chained. Details in §14.43.
 - **NEW Tue 10-20: gemma deep dive DONE (§14.42c). The data is sound.**
   - Every Spark check passed: fingerprint, audit, code versions, model files. Gemma gets the persona; Google's format
     puts it in the first user turn.
@@ -16059,4 +16062,35 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
 - Not yet checked: whether the lines change what the posts are about (e.g. posts about "the new Reddit"), or their
   length. Needs the posts copied to the Mac.
 - The real comparison is test 0's posting turn (100 users, same seeds). Test 0 started Tue 10-20 ~21:15.
+**V3 posting screen, now in the baseline (Tue 10-20 night, Gordon: "looks good … the same for all tests"):**
+- Tests 1 and 2a-c chose it; they stay as they ran (old screen). Every remaining test (check, 0, 3, 4) uses it.
+- Built from what posted most: 2a/2b lines for gemma, posting-only menu (test 1) and 2a for llama, 2a for qwen, plus the
+  plain permission to write several posts (gemma never wrote a second one). It changes the line and the menu together.
+- The screen, word for word (the instructions part is unchanged):
+  ```
+  You open Reddit. These 5 subreddits are brand new and have no posts yet:
+  - r/politics (Politics & government)
+  - r/technology (Science & technology)
+  - r/business (Business & finance)
+  - r/sports (Sports)
+  - r/entertainment (Entertainment (movies, TV, music))
+
+  You can help build their feed: write as many posts as you'd like, in any of them, or none.
+  Whatever gets posted now is what everyone on this Reddit will read and react to next.
+
+  WHAT YOU CAN DO
+  POSTING
+  - create_post: write a new post  (needs "subreddit", "title", "body")
+
+  Do whatever you would really do -- as many of these actions as you like, or none.
+
+  Reply with JSON only:
+  {"actions": [{"action": "<name from the list>", ...the fields it needs}, ...], "reason": "<a few words, in your own voice>"}
+  An empty list means you do nothing.
+  ```
+- Code: `run_v2.py --post-screen v3` (default `v1` keeps V1/V2 byte for byte); `v3_test.sh` adds it to check, 0, 3, 4;
+  `v3_summary.py` flags any test 0/3/4/check data made with the old screen. Laptop test on the fake engine: exact screen
+  as above, ALL CHECKS PASS.
+- The first test 0 (old screen, started ~21:15) was stopped and moved to `data/llm_bias/v3_tests/t0_old_screen/`.
+- Test 4 (menu flipped) now flips only the reading menu: the posting menu has one action.
 

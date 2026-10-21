@@ -1,6 +1,7 @@
 #!/bin/bash
 # Run ONE V3 test (log 14.43): every test = the V3 baseline (V1 prompts, qwen thinking on, working refresh in the
-# reading turn) + exactly one change. Same round number (200) in every test, so every test gets the same random seeds.
+# reading turn, V3 posting screen) + exactly one change. Tests 1 and 2a-c were the posting-screen tests (old screen) that
+# chose the V3 posting screen; they stay as they ran. Same round number (200) in every test, so every test gets the same random seeds.
 #   bash examples/experiment/llm_bias/v3_test.sh check   10-user mini-round of test 0 (code + thinking check, ~20 min)
 #   bash examples/experiment/llm_bias/v3_test.sh 0       baseline, full round
 #   bash examples/experiment/llm_bias/v3_test.sh 1       posting turn: create_post is the only action   (posting only)
@@ -12,11 +13,11 @@ set -eu
 T=${1:?usage: v3_test.sh check|0|1|2a|2b|2c|3|4}
 cd "$(dirname "$0")/../../.."
 case $T in
-  check|0) X="" ;;
+  check|0) X="--post-screen v3" ;;
   1) X="--post-menu post_only" ;;
   2a|2b|2c) X="--post-line ${T#2}" ;;
-  3) X="--free-text" ;;
-  4) X="--menu-order flipped" ;;
+  3) X="--post-screen v3 --free-text" ;;
+  4) X="--post-screen v3 --menu-order flipped" ;;
   *) echo "unknown test $T"; exit 1 ;;
 esac
 export DATA_DIR=$PWD/data/llm_bias/v3_tests/t$T EXTRA="--v1 --think --refresh-loop $X" ROUNDS=200 SLICES=0 \

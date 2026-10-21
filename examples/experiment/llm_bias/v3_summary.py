@@ -76,6 +76,8 @@ for f in sorted(glob.glob(f"{D}/*.manifest.json")):
     v = m.get("v3_test") or {}
     if not (v.get("v1") and v.get("think") and v.get("refresh_loop")):
         problems.append(f"{os.path.basename(f)}: not run with the V3 baseline options ({v})")
+    elif T in ("check", "0", "3", "4") and v.get("post_screen") != "v3":
+        problems.append(f"{os.path.basename(f)}: old posting screen (rerun this test with the V3 posting screen)")
 for f in sorted(glob.glob(f"{D}/reading_*.jsonl")):
     rs, name = load(f), os.path.basename(f)
     agents = 100 if "_a" not in name else int(name.split("_a")[-1][:-6])

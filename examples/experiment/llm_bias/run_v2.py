@@ -168,6 +168,17 @@ WHAT YOU CAN DO
 {menu}
 
 {fmt}"""
+# V3 posting screen (log 14.43, Gordon 10-20: "the same for all tests"): new subreddits, explicit permission, posting-only menu
+POST_SCREEN_V3 = """You open Reddit. These 5 subreddits are brand new and have no posts yet:
+{subs}
+
+You can help build their feed: write as many posts as you'd like, in any of them, or none.
+Whatever gets posted now is what everyone on this Reddit will read and react to next.
+
+WHAT YOU CAN DO
+{menu}
+
+{fmt}"""
 READ_SCREEN = """You're scrolling Reddit. On your screen, in {sub} ({topic_name}), posted by u/{author}:
 
 Title: {title}
@@ -316,7 +327,9 @@ def run(a):
     post_menu = MENU_POST_ONLY if a.post_menu == "post_only" else menu
     post_screen = POST_SCREEN.replace("nothing has been posted yet.\n", "nothing has been posted yet.\n" + POST_LINES[a.post_line] + "\n") \
         if a.post_line else POST_SCREEN
-    v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line")}
+    if a.post_screen == "v3":
+        post_screen, post_menu = POST_SCREEN_V3, MENU_POST_ONLY
+    v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line", "post_screen")}
     v3_on = any(v not in (False, None, "v1", "all") for v in v3.values())
     if llm.BACKEND == "llamacpp" and a.model not in llm.available_models():
         raise SystemExit(f"the llama.cpp server for {a.model} is not running (llamacpp_servers.sh only {a.model})")
@@ -586,7 +599,10 @@ if __name__ == "__main__":
     ap.add_argument("--menu-order", choices=["v1", "flipped"], default="v1")
     ap.add_argument("--post-menu", choices=["all", "post_only"], default="all")
     ap.add_argument("--post-line", choices=sorted(POST_LINES), help="post: add one of the V3 test-2 lines")
+    ap.add_argument("--post-screen", choices=["v1", "v3"], default="v1", help="post: v3 = the V3 posting screen (posting-only menu)")
     args = ap.parse_args()
+    if args.post_screen == "v3" and (args.post_line or args.post_menu != "all"):
+        ap.error("--post-screen v3 already sets the posting screen and menu")
     if args.turn == "read" and not args.posts_by:
         ap.error("read needs --posts-by")
     run(args)

@@ -28,9 +28,11 @@ for f in sorted(glob.glob(f"{D}/posting_*.jsonl")):
         c["unreadable" if r["outcome"] != "chose" else "posted" if "create_post" in n else "empty list" if not n
           else "only refresh" if n == {"refresh"} else "only do_nothing" if n == {"do_nothing"} else "other"] += 1
     th = [len(r.get("thinking") or "") for r in rs]
+    per = Counter(min(sum(a["action"] == "create_post" for a in r["actions"]), 2) for r in rs)
     print(f"  {os.path.basename(f)[8:-6]:16s}" + "".join(f"  {k} {pct(c[k], len(rs))}" for k in
           ("posted", "only refresh", "empty list", "only do_nothing", "other", "unreadable"))
           + f"   posts {sum(a['action'] == 'create_post' for r in rs for a in r['actions'])}"
+          + f"   users with 0/1/2+ posts {per[0]}/{per[1]}/{per[2]}"
           + (f"   thinking {sum(th) // len(th)} chars" if any(th) else ""))
 
 print("\nREADING TURN  (% of posts read, all views of a post together; noise-floor files left out)")

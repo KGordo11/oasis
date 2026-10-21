@@ -322,6 +322,10 @@ def post_set(r, model, agents):
 
 def run(a):
     global DATA, V1_PROMPTS
+    if a.v3:  # V3 version (log 14.45, Gordon 10-21): V1 prompts + all four reading-test changes together, reading turn only
+        a.v1 = True
+        if a.turn == "read":
+            a.think, a.free_text, a.refresh_loop, a.menu_order = True, True, True, "flipped"
     DATA, V1_PROMPTS = a.data_dir or DATA, a.v1
     menu = MENU_FLIPPED if a.menu_order == "flipped" else MENU
     post_menu = MENU_POST_ONLY if a.post_menu == "post_only" else menu
@@ -334,7 +338,7 @@ def run(a):
     # Gordon's rule (log 14.43): every test = V1 + ONE addition, never stacked; more than one needs --cross
     changes = [k for k, v in v3.items() if k != "v1" and v not in (False, None, "v1", "all")] \
         + (["self_id (V2 line)"] if a.round >= SELF_ID_FROM_ROUND and not a.v1 else [])
-    if len(changes) > 1 and not a.cross:
+    if len(changes) > 1 and not (a.cross or a.v3):
         raise SystemExit(f"{len(changes)} changes from V1 {changes}: a test is V1 + ONE addition (use --cross for a cross-test)")
     if llm.BACKEND == "llamacpp" and a.model not in llm.available_models():
         raise SystemExit(f"the llama.cpp server for {a.model} is not running (llamacpp_servers.sh only {a.model})")
@@ -502,7 +506,7 @@ def run(a):
            "post_set_sha256": sha(posts) if posts else None,
            "prompts_sha256": sha([SYSTEM] + ([SELF_ID, MODEL_NAMES] if a.round >= SELF_ID_FROM_ROUND and not a.v1 else []) + [POST_SCREEN, READ_SCREEN, MENU, FORMAT] + ([PAGE_SCREEN] if a.page_size > 1 else [])
                                  + ([post_screen, menu, post_menu] if v3_on else [])),
-           "v3_test": v3 if v3_on else None, "changes_from_v1": changes,
+           "v3_test": v3 if v3_on else None, "changes_from_v1": changes, "version": "V3" if a.v3 else None,
            "config": {"backend": llm.BACKEND, "sampling": llm.SAMPLING if llm.BACKEND == "llamacpp" else "ollama per-model defaults",
                       "temperature": a.temperature, "num_ctx": llm.NUM_CTX, "think": a.think, "parallel": a.parallel,
                       "memory": False, "follow_graph": "empty each round", "vote_counts": "hidden",
@@ -606,7 +610,11 @@ if __name__ == "__main__":
     ap.add_argument("--post-line", choices=sorted(POST_LINES), help="post: add one of the V3 test-2 lines")
     ap.add_argument("--post-screen", choices=["v1", "v3"], default="v1", help="post: v3 = the V3 posting screen (posting-only menu)")
     ap.add_argument("--cross", action="store_true", help="allow more than one change from V1 (a cross-test)")
+    ap.add_argument("--v3", action="store_true", help="V3 version: V1 prompts; reading turn = thinking + free text + "
+                    "refresh loop + flipped menu (log 14.45); posting turn = V1's")
     args = ap.parse_args()
+    if args.v3 and (args.v1 or args.think or args.free_text or args.refresh_loop or args.menu_order != "v1" or args.cross):
+        ap.error("--v3 already sets all of these")
     if args.post_screen == "v3" and (args.post_line or args.post_menu != "all"):
         ap.error("--post-screen v3 already sets the posting screen and menu")
     if args.turn == "read" and not args.posts_by:

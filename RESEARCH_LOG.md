@@ -77,6 +77,7 @@ research**:
   - **Still no own-AI bias.** qwen still likes gemma's posts (−17 to −21) in every test except thinking.
   - Next (Gordon): pick the posting line; decide qwen thinking for V3; cross-tests; V3 world study (§14.44).
   - **Gordon 10-21 PM: v1, p_think, p_menu dropped** (don't improve the sim). Still in play: p_2a/b/c, p_screen, r_think, r_refresh, r_json, r_menu.
+  - **10-21 PM: `run_v2.py --v3` = V1 prompts + all 4 reading changes together (thinking, free text, refresh loop, flipped menu), reading turn only; V1 untouched; laptop-tested, not run (§14.45 end).**
 - **NEW Tue 10-20 noon: V3 tests built (§14.43), not run yet.** One change at a time on a V3 baseline: V1 prompts +
   qwen thinking + working refresh in the reading turn. Tests:
   - 0: baseline;
@@ -15131,7 +15132,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | (this) | 10-19 night | **Reorganised oasis/**: START_HERE.md + data READMEs; `v2_spark` -> `v1_v2_spark`; Tests 1-6 -> `data/llm_bias/old_tests_sep2026/`; Sim 4 -> `data/sim4_social_timeline/` (code defaults + .gitignore updated, self-tests pass); junk to `~/research/oasis_TO_DELETE/` |
 | 1a2bad7…682c87e | 10-20 | **V3 tests** (§14.43-14.44): `run_v2.py` options + `changes_from_v1` guard (refuses >1 change without `--cross`), `v3_test.sh`, `v3_summary.py`, `v3_chain.sh` + `v3_watchdog.sh`, `--post-screen v3` |
 | ce1e635 | 10-21 | **`v3_ranges.py`**: reading tests vs V1 with user-resampled 95% ranges, rerun noise, refresh-only count; results §14.45 |
-| (this) | 10-21 PM | **`make_v3_charts.py`**: V3 charts (posts per user, every action, actions per answer) + `LLM_Bias_V3.xlsx` in `~/Desktop/LLM_Bias/V3/` |
+| fe744e7 | 10-21 PM | **`make_v3_charts.py`**: V3 charts (posts per user, every action, actions per answer) + `LLM_Bias_V3.xlsx` in `~/Desktop/LLM_Bias/V3/` |
+| (this) | 10-21 PM | **`run_v2.py --v3`**: V3 version = V1 prompts + think + free text + refresh loop + flipped menu in the reading turn (posting = V1); exempt from the one-change guard, can't be mixed with single options; manifest `version` |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16336,3 +16338,22 @@ Pair result = (i reads i − j reads i) − (i reads j − j reads j). + means b
 care about them any more.** The tests still in play: posting `p_2a`, `p_2b`, `p_2c`, `p_screen`; reading `r_think`,
 `r_refresh`, `r_json`, `r_menu`. The `v1` run's data stays on disk; only `v3_summary.py` uses it, as its comparison
 column.
+
+**V3 version in the code (Gordon, Wed 10-21 PM: "implement all actions from the readings … separate from v1"):**
+- `run_v2.py --v3` turns on all four reading-test changes together, in the reading turn only:
+  - qwen thinks first (`think`);
+  - JSON-only off in the engine (`free_text`);
+  - refresh brings the post back (`refresh_loop`);
+  - menu flipped, least-used first (`menu_order flipped`).
+
+  It also uses V1 prompts (no "I am <model>" line). The posting turn stays V1's until Gordon picks a posting line.
+- V1 is untouched: without `--v3` every default is still V1/V2 byte for byte. The one-change guard still refuses
+  stacked options without `--cross`, and `--v3` refuses to be mixed with the single options. Manifests get
+  `"version": "V3"`.
+- Laptop test against a fake llama.cpp server:
+  - reading: every request had thinking on and JSON-only off, the menu started with GROUP CHATS (flipped), the refresh
+    loop brought posts back (views 1-5), thinking was saved, 0 unreadable;
+  - posting: thinking off, JSON on, V1 menu;
+  - the existing tests pass (26 passed).
+- Not run on the Spark. Before a V3 run, Gordon chooses the posting line (2a/2b/2c), the scale and the rounds; run with
+  `EXTRA="--v3"` in `v2_night.py`.

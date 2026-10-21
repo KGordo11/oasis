@@ -16131,5 +16131,7 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
      answers. A user who has seen every post in a subreddit and keeps scrolling gets them again in the order seen,
      with their own earlier actions shown.
   6. Search, trend, profiles get result screens. Chats = direct messages to another user (not pre-made groups).
-- Open (Claude's feedback, waiting for Gordon): see the reply after this entry in the conversation; summarised when
-  settled.
+- Open (Claude's feedback, waiting for Gordon): 3x3 = 9 worlds, not 3 (time); who speaks for a post's author when
+  people reply or DM (the reader AI plays every persona); posting during sessions (reader-AI posts would enter the
+  author-AI feed); own posts shown or not; vote counts shown as the baseline mixes crowd-following into the bias
+  measure; loop rule + safety fuse; trend order before any votes; DM steps; a 10-user, 3-timestep pilot first.

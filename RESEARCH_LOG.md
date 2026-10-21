@@ -16095,3 +16095,17 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
 - The first test 0 (old screen, started ~21:15) was stopped and moved to `data/llm_bias/v3_tests/t0_old_screen/`.
 - Test 4 (menu flipped) now flips only the reading menu: the posting menu has one action.
 
+**Which of the 27 menu actions really work (audit Tue 10-20 night, code `run_v2.py` + V1 reading turns r101-102):**
+- Work as written (8): like_post, dislike_post, create_comment, repost, quote_post, report_post, do_nothing, create_post
+  (posting turn only). refresh works in V3 reading (refresh loop); in V1/V2 it did nothing.
+- Recorded but change nothing anyone sees (2): follow, mute (feeds are not built from follows).
+- Nothing to take back, since each post is seen once (4): unlike_post, undo_dislike_post, unfollow, unmute.
+- Ask for something the AI never gets back (4): search_user, search_posts, trend (OASIS: the top posts by likes in the
+  last few days), listen_from_group.
+- Impossible: need an ID the AI is never shown (7): like/unlike/dislike/undo_dislike_comment (no comments on screen),
+  join_group, leave_group, send_to_group (no groups exist). create_group makes a group nobody can see.
+- create_post in the reading turn is saved but never shown to anyone (only posting-turn posts are read).
+- V1 use: of 201,896 reading-turn actions, 17,449 (8.6%) were dead ones (search_user 8,398, search_posts 2,362, trend
+  2,089, refresh 2,041, like_comment 1,657 with made-up comment IDs, …), plus 4,444 (2.2%) follow/mute. "Total
+  engagement" (all 27 actions) includes them. The running tests 0, 3, 4 have the same menu; the effort study is where
+  these get real screens.

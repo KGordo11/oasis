@@ -16110,28 +16110,43 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
   engagement" (all 27 actions) includes them. The running tests 0, 3, 4 have the same menu; the effort study is where
   these get real screens.
 
-## 14.44 V3 world study: design in progress (Gordon, Tue 10-20 night; NOT built, waiting for Gordon's go)
-- Several timesteps; the world keeps everything between them. Each user opens Reddit, picks ONE subreddit from the home
-  screen, sees one random unseen post at a time, reacts or not, and moves on; done = close the app. Every user takes a
-  turn, then the next timestep. Users who choose "close app, check back soon" go first next timestep, then regular order.
-- Search, trend, user profiles and group chats get real result screens (OASIS already returns the results; search
-  matches any word, not the exact phrase). Every screen is logged, so steps per action are counted (the effort study).
-- **Decided (Gordon "a"):** reactions and "where next" go in one answer when the real app does it on the same screen:
-  next post, refresh, close app. Switching subreddit goes back through the home screen (no direct jump); search, trend
-  and chats open their own screens.
-- Reaction tests like posting tests 1/2 (reaction-only menu; one added line in a few wordings) come after.
-- **Decided Tue 10-20 night (Gordon):**
-  1. "Check back soon" order = fewest screens before choosing it (ties: regular order).
-  2. Groups of 8 in order (each group sees everything earlier groups did). Later tests: reverse order, random order.
-  3. Crossover like V1: each AI first writes its own posts (posting turn); then each AI plays the 100 users reading
-     each AI's posts (3 readers x 3 authors).
-  4. Comments and vote counts shown (baseline); a later test hides vote counts. Trend = posts ranked by upvotes, seen
-     or not, one at a time (#1, then #2, ...), until the user leaves.
-  5. No cap on posts read. Stop a session that keeps cycling the same posts in one subreddit and inspect its raw
-     answers. A user who has seen every post in a subreddit and keeps scrolling gets them again in the order seen,
-     with their own earlier actions shown.
-  6. Search, trend, profiles get result screens. Chats = direct messages to another user (not pre-made groups).
-- Open (Claude's feedback, waiting for Gordon): 3x3 = 9 worlds, not 3 (time); who speaks for a post's author when
-  people reply or DM (the reader AI plays every persona); posting during sessions (reader-AI posts would enter the
-  author-AI feed); own posts shown or not; vote counts shown as the baseline mixes crowd-following into the bias
-  measure; loop rule + safety fuse; trend order before any votes; DM steps; a 10-user, 3-timestep pilot first.
+## 14.44 V3 world study: full design (Gordon, Tue 10-20 night; NOT built, waiting for Gordon's go)
+**Setup**
+- Posting phase, once: each AI writes posts for the 100 users with the V3 posting screen (§14.43). These 3 piles are
+  fixed: the same gemma pile is used in every world that reads gemma.
+- 9 worlds = 3 reader AIs x 3 piles, like V1. Each world starts with only its pile: no comments, votes, follows or
+  messages. Nothing carries over from one world to another (world 4 sees world 1's posts, not world 1's reactions).
+- In a world, the reader AI plays all 100 users for several timesteps (number open; pilot: 3). V3 baseline otherwise:
+  V1 prompts, qwen thinking on, JSON mode on.
+
+**A timestep**
+- Order: users who chose "close app, check back soon" last timestep go first, fewest screens before choosing it
+  first (ties: regular order); then everyone else in regular order. 8 users at once; each group of 8 sees everything
+  the earlier groups did.
+- Home screen: the 5 subreddits, search posts, search users, trending, messages (with a new-message count), close app.
+- In a subreddit: one post at a time, a random post the user hasn't seen. When all are seen and they keep scrolling,
+  they get the posts again in the order first seen, with their own earlier actions shown. Users never see their own
+  posts.
+- A post shows title, body, author and comments (with IDs). Vote counts hidden (default).
+- One answer = reactions to this post + where next: next post, refresh, back to home, close app, or close app and check
+  back soon. Switching subreddit goes through home.
+- Search posts: matches any of the words; a result list; open a post. Search users: a profile with recent post titles;
+  follow, mute, message. Trending: posts ranked by upvotes (seen or not; before any votes, a fixed random order), one at
+  a time like a subreddit, until the user leaves. Messages: a DM to one user from their profile; inbox lists
+  conversations; the recipient sees it on their next turn (the reader AI writes every reply).
+- New posts written during a turn are saved word for word but never shown to other users: feeds hold only the pile.
+- Stuck rule: the same post 5 times in one turn, or 20 screens in a row with no new post and no action, ends the turn
+  as "stopped: loop"; 400 screens ends it as "stopped: safety limit".
+
+**Recorded**
+- Every screen: world, timestep, user, screen number, exactly what the AI saw, its raw reply, qwen's thinking, actions.
+- Every turn: how it ended (closed app / check back soon / stopped: loop, which rule / stopped: safety limit) and
+  screens used. Every stopped turn also goes to a loops file with all its screens and raw answers; the summary prints
+  how many per AI and world.
+- Steps per action: screens from opening the app to each action (the effort measure).
+
+**Later tests (one change each):** vote counts shown; reverse order; random order; reaction test 1 (only actions that
+work on the post screen); reaction test 2 (one added line, several wordings); effort tests.
+
+**Time:** one timestep across the 9 worlds is at least one V1 round (about 1-1.5 days with qwen thinking), more with
+navigation screens. Pilot first: 10 users, 3 timesteps, after tests 0, 3, 4 finish.

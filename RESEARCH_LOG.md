@@ -16043,7 +16043,19 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
   the screen's framing, not from the AI being unable to post.
 - Test 1: even when posting is the only option, 12% of gemma's users and 4% of qwen's sent an empty list (did nothing).
   The added lines (2a, 2b) beat the menu change.
-- Llama writes more than one post per user (109-142 posts from 100 users); gemma writes exactly one.
+- **Posts per user** (% of users who wrote 0 / 1 / 2 or more posts; V1 = rounds 101+102, 200 users per AI):
+
+  | Test | gemma | llama | qwen |
+  |---|---|---|---|
+  | V1 (no fix, no thinking) | 76 / 24 / 0 | 1.5 / 93 / 5.5 | 14.5 / 74 / 11.5 |
+  | 1: posting-only menu | 12 / 87 / 1 | 0 / 63 / 37 | 4 / 87 / 9 |
+  | 2a: "brand new … everyone will read next" | 0 / 100 / 0 | 0 / 81 / 19 | 0 / 76 / 24 |
+  | 2b: "helping build the first feed" | 0 / 100 / 0 | 0 / 91 / 9 | 0 / 88 / 12 |
+  | 2c: "posting time … read afterwards" | 1 / 99 / 0 | 0 / 82 / 18 | 0 / 97 / 3 |
+
+  - Gemma writes exactly one post (1 user in 400 wrote two). It is never told plainly that it may write several.
+  - The wording changes how many posts llama and qwen write: the posting-only menu makes 37% of llama's users write 2+,
+    2a makes 24% of qwen's, 2c only 3%.
 - Not yet checked: whether the lines change what the posts are about (e.g. posts about "the new Reddit"), or their
   length. Needs the posts copied to the Mac.
 - The real comparison is test 0's posting turn (100 users, same seeds). Test 0 started Tue 10-20 ~21:15.

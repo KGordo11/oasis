@@ -16134,7 +16134,9 @@ output. (2) **Menu order:** does an action's place in the menu change how often 
   follow, mute, message. Trending: posts ranked by upvotes (seen or not; before any votes, a fixed random order), one at
   a time like a subreddit, until the user leaves. Messages: a DM to one user from their profile; inbox lists
   conversations; the recipient sees it on their next turn (the reader AI writes every reply).
-- New posts written during a turn are saved word for word but never shown to other users: feeds hold only the pile.
+- New posts written during a turn join that world's feed: users in later groups and timesteps of the SAME world see
+  them (never their author). They are wiped with everything else before the next world. Every post is tagged
+  "starting post" (the pile) or "written in this world" (by the reader AI), and reactions are counted separately.
 - Stuck rule: the same post 5 times in one turn, or 20 screens in a row with no new post and no action, ends the turn
   as "stopped: loop"; 400 screens ends it as "stopped: safety limit".
 

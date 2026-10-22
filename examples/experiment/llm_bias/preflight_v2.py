@@ -145,7 +145,7 @@ for m in ["qwen3:8b", "llama3.1:8b", "gemma3:12b"]:
     check(f"posting turn for {m}: all {AGENTS} users answered", len(rows) == AGENTS, f"{sum(own.values())} posts written")
 for f in sorted(glob.glob(os.path.join(RD, "reading_*.jsonl"))):
     name = os.path.basename(f).replace(".jsonl", "")
-    rows = [json.loads(l) for l in open(f)]
+    rows = [r for r in map(json.loads, open(f)) if r.get("view", 1) == 1]  # V3 refresh loop: a returning post is not a new read
     pb = rows[0]["posts_by"] if rows else None
     draw = rows[0]["draw"] if rows else 0
     pairs = [(r["user_id"], r["post_key"]) for r in rows]
@@ -178,7 +178,7 @@ for _ in range(240):  # kill it once about a third is done (hard kill, like a cr
 q.send_signal(signal.SIGKILL); q.wait()
 half = sum(1 for _ in open(f)) if os.path.exists(f) else 0
 p = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
-rows = [json.loads(l) for l in open(f)] if os.path.exists(f) else []
+rows = [r for r in map(json.loads, open(f)) if r.get("view", 1) == 1] if os.path.exists(f) else []
 pairs = [(r["user_id"], r["post_key"]) for r in rows]
 check("killed half-way, then resumed to complete", p.returncode == 0 and len(rows) == want and 0 < half < want,
       f"{half} done before the kill, {len(rows)}/{want} after resume")

@@ -56,9 +56,9 @@ non-binary). Topics: r/politics, r/technology, r/business, r/sports, r/entertain
 **Versions:** V1 = rounds 101-102 (persona only). V2 = 103-104 (+ "I am Qwen3 8B, an AI model made by Alibaba,
 simulating this profile:"; LD-44). V2 changed nothing about bias; llama/gemma were less active. Never pool V1 with
 V2. **V3** = `run_v2.py --v3` = V1 prompts + posting line **2c** ("It's posting time: share whatever you'd post.
-Everyone will read the new posts afterwards.") + reading: qwen thinking + refresh loop (+ free text; Gordon
-10-22: wants JSON mode ON, see the log). The flipped menu is NOT in V3: it's the order-study arm
-(`--menu-order flipped`).
+Everyone will read the new posts afterwards.") + reading: qwen thinking + refresh loop, JSON mode ON (Gordon
+10-22). The flipped menu is NOT in V3: it's the order-study arm (`--menu-order flipped`). **`--live`** (§14.47) = a
+live world: actions really happen, results come back as follow-up screens, private messages exist.
 
 **What each AI is like (stable across everything):**
 - llama: ~225 actions/100 screens, 2+ actions on 70% of screens, upvotes ~61%, reports ~27% (topics it hates),
@@ -95,10 +95,15 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | `llamacpp_servers.sh start/only/stop/status` | servers; writes `~/llm_bias/env_llamacpp.sh` |
 | `analyze_v2.py` (stdlib), `export_v2.py`, `make_graphs_v2.py`, `make_report_v2.py <data> <out> V1/V2/ALL`, `make_compare.py`, `make_inside_v2.py` | analysis, workbooks, Inside page (artifact E1eicdgjHpgDzex2qj18hR) |
 | `audit_v2_data.py`, `gemma_probe.py`, `check_qwen_gemma.py`, `progress_v2.py` | audits/probes/progress |
-| `test_llm_bias.py` | pytest, 26 tests, no model calls: `oasis-env/bin/python -m pytest -q examples/experiment/llm_bias/test_llm_bias.py` |
-Laptop fake-engine test: a tiny HTTP server answering `/health`, `/props` and `/v1/chat/completions` with canned
-JSON (scratch `fake3.py` pattern), `LLM_BACKEND=llamacpp LLAMACPP_URLS='{"qwen3:8b":"http://127.0.0.1:PORT",...}'`,
-`MANAGE_SERVERS=0`, a `flock` shim on PATH (macOS has none), `AGENTS=3`.
+| `live_world.py` | `--live` reading turn: World (OASIS rules, stdlib), ticks (others' actions visible next tick), follow-up screens, DMs; resume = re-apply rows in file order |
+| `live_summary.py <dir>` | live runs: screens by kind, each action done/failed + step 1/2/3+, words typed, DMs/groups |
+| **`smoke_test.py`** | **run after ANY code change, before giving Gordon a command** (~40 s, laptop or Spark): fake AIs + real code, V1 / V3 big sim / live + kill-resume, 50 checks, ends `SMOKE: ALL PASS` |
+| `fake_engine.py PORT [log]` | fake llama.cpp server that answers like an AI (posts, votes, searches, groups, DMs); logs each request's think/json/menu |
+| `test_llm_bias.py`, `test_live_world.py` | pytest (33 tests, no model calls); test_live_world also runs without pytest (smoke_test calls it) |
+Laptop tests use `fake_engine.py` (see `smoke_test.py` for the env: `LLM_BACKEND=llamacpp LLAMACPP_URLS=...`,
+`MANAGE_SERVERS=0`, a `flock` shim on macOS). Real models on the laptop: `/opt/homebrew/bin/llama-server` (build 11429)
++ `~/llm_bias_local/models/gemma3-12b.gguf` (same sha 7bb69bff… as the Spark) + Ollama blobs for qwen/llama. But
+Gordon wants real runs on the Spark (10-22), and the laptop is his machine (he games on it: the GPU is shared).
 
 Data: Spark results land in `~/llm_bias/oasis/data/llm_bias/<dir>/` → rsync to the Mac `data/llm_bias/v1_v2_spark/`
 (V1+V2, fingerprint `7ace91dc41c5f431`), `v3_tests/`. File names: `posting_<model>[_aN].jsonl`,

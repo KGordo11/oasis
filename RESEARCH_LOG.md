@@ -66,6 +66,12 @@ research**:
 
 ## 0.2 Where things stand (2026-10-22): read this first
 
+- **NEW Thu 10-22 PM (§14.47): live world + gemma probe + smoke test BUILT; waiting for Gordon's Spark run.** `--live`:
+  actions really happen (comments with IDs, search/trend/profiles/groups/inbox as follow-up screens, private messages from
+  profiles). `--v3` keeps JSON mode ON. Gemma does exactly 1 action on 90% of screens; count probe (`gemma_probe.py count`)
+  tests whether the prompt's "single JSON object"/one-entry example causes it. `smoke_test.py` = 50 checks with fake AIs,
+  ALL PASS. `CLAUDE.md` = log digest for Claude. Spark order: pull, smoke, probe, live pilot (20 users), rsync.
+
 - **NEW Thu 10-22 (§14.46): V3 big sim BUILT, not run (waiting for Gordon's go).** `v3_big.sh`: arm 1 = V3 full round
   (baselines, cross tests, noise) in `data/llm_bias/v3/`; arm 2 = the SAME posts read with the flipped menu
   (order study) in `data/llm_bias/v3_flipped/`. **`--v3` no longer includes the flipped menu.** ~3-5 days for both arms
@@ -14910,6 +14916,10 @@ into the running window (typed text gets queued as shell input).
 
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
+### Status (2026-10-22 PM)
+- Built and laptop-tested, NOT run on the Spark: `--live` world, `gemma_probe.py count`, `smoke_test.py` (§14.47). Gordon
+  runs: pull → smoke → probe → live pilot (`data/llm_bias/live_pilot`). Big sim (`v3_big.sh`) still waits for his go.
+
 ### Status (2026-10-22)
 - V3 big sim built (`v3_big.sh`, §14.46), laptop-tested, NOT run: waiting for Gordon's go. Nothing running, no cron.
   Line 2c picked (10-21). `--v3` = V1 prompts + line 2c + thinking + free text + refresh loop (menu order = V1);
@@ -15145,7 +15155,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | ce1e635 | 10-21 | **`v3_ranges.py`**: reading tests vs V1 with user-resampled 95% ranges, rerun noise, refresh-only count; results §14.45 |
 | fe744e7 | 10-21 PM | **`make_v3_charts.py`**: V3 charts (posts per user, every action, actions per answer) + `LLM_Bias_V3.xlsx` in `~/Desktop/LLM_Bias/V3/` |
 | 643282a/c345acf | 10-21 PM | **`run_v2.py --v3`**: V3 version = V1 prompts + think + free text + refresh loop + flipped menu in the reading turn (posting = V1); exempt from the one-change guard, can't be mixed with single options; manifest `version` |
-| (this) | 10-22 | **V3 big sim** (§14.46): `--v3` drops the flipped menu (now the order-study arm, `--menu-order flipped` allowed with `--v3`); `v3_big.sh` (arm 1 V3 full round, arm 2 same posts + flipped menu); `v3_watchdog.sh` takes script/log/marker |
+| 5df08a7/0b4d687 | 10-22 | **V3 big sim** (§14.46): `--v3` drops the flipped menu (now the order-study arm, `--menu-order flipped` allowed with `--v3`); `v3_big.sh` (arm 1 V3 full round, arm 2 same posts + flipped menu); `v3_watchdog.sh` takes script/log/marker |
+| 0db510d | 10-22 PM | **Live world** `--live` (`live_world.py`, `live_summary.py`, `test_live_world.py`); `--v3` JSON mode on; `gemma_probe.py count`; **`smoke_test.py` + `fake_engine.py`**; v2_night counts post screens only; `CLAUDE.md` digest (17b6382) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16449,3 +16460,60 @@ only, `--v3 --menu-order flipped`. Resumable, flock, last line `BIG DONE`. `v3_w
 per reader per arm. Measured s/screen: gemma 0.94, llama 0.65, qwen thinking 2.5-5 -> gemma ~8 h, llama ~6 h, qwen
 ~22-45 h per arm, so ~1.5-2.5 days per arm, ~3-5 days for both. qwen thinking is most of it.
 Status: built and laptop-tested, NOT run; waiting for Gordon's go on the design.
+
+## 14.47 Gemma deep dive, working actions (live world), smoke test, Claude digest (Thu 2026-10-22)
+**Gordon 10-22:** JSON mode stays on ("makes all AIs equal in response"); find what holds gemma back from doing more
+(it always does one thing: one post, one action per screen); make the sim's actions actually work, using the
+references; smoke tests to avoid errors long term; one file made for Claude from all the logs; "run this stuff on the
+Spark, that's where the real runs are". Answers before the big sim begins.
+
+**1. `--v3` keeps JSON mode ON** (reading turn = qwen thinking + refresh loop; the r_json test showed no change anyway).
+
+**2. Gemma, from the data (V1 rounds 101-102, 43,820 gemma reading screens):**
+
+| % of screens with 0 / 1 / 2 / 3 / 4+ actions | gemma | qwen | llama |
+|---|---|---|---|
+| actions per screen | 7.5 / **90.3** / 2.2 / 0 / 0 | 11.5 / 67.0 / 21.5 / 0 / 0 | 3.4 / 26.6 / 33.4 / 22.8 / 13.9 |
+
+- Gemma's one action is a vote: upvote only 51.5%, downvote only 33.6%, comment only 5.2%, nothing 7.5%; vote + comment
+  just 1.3%. qwen also never does 3+; only llama stacks actions. Extraversion barely changes it (gemma 0.90 low vs 1.02 high).
+- Reasons say it plainly: "Just gonna downvote and move on." (390x), "Simple upvote.", "Just a quick downvote." Gemma
+  plays a casual scroller who reacts once.
+- Nothing in the code caps it: `validate()` takes any number of actions, replies are short (median 39 tokens of 800), 0
+  cut off. Already ruled out (§14.42c, §14.45): JSON mode, Google sampling, menu order (changes WHICH action, not how many).
+- The clue: in the posting turn gemma writes exactly 1 post with every line (2a/2b/2c), but 25% write 2+ when the screen
+  says "write as many posts as you'd like" (p_screen). It does more only when told more is normal.
+- Prompt wording that may read as "pick one": system "Reply with a **single** JSON object"; the answer example shows ONE
+  action entry; one "reason". **Count probe built** (`gemma_probe.py count`, 150 recorded screens, same seed per variant,
+  all 3 AIs): control / `no_single` / `two_slots` (example with two entries) / `more_than_one` (+ "You can pick more than
+  one.") + asking each AI why it did or didn't do more. Laptop attempt stopped (Gordon: run on the Spark); runs there.
+- Outside research: no published study on gemma's action count. Real Reddit is mostly lurkers and voters (90-9-1 rule,
+  "98% never post or comment", secondary sources), so gemma's one-vote style is closer to real readers than llama's 2+.
+
+**3. Live world (`run_v2.py read --live`, `live_world.py`): the actions really work.** One world per reading cell, wiped
+after. Ticks: in tick t every user handles the t-th post of their scroll; what others do shows from tick t+1 (own
+actions at once). Post screens show the comments with IDs ([c12]) and a "you have N new messages" notice. Look-up
+actions open a follow-up screen with the real result and the AI answers again (max 4 per post): search_posts, trend
+(top 5 by upvotes), search_user (up to 3 profiles: post count, followers, recent posts), listen_from_group (your chats
+with messages + groups to join), open_messages (inbox), open_post. Private messages (new; OASIS has none; built the way
+MutiAgent4Fraud does): `send_message` works only from a profile or the inbox, so a DM costs 2+ screens and typing,
+an upvote 1. OASIS rules copied (no second like/follow/repost, groups: creator is the only member, join adds yourself,
+only members send/read). Failed actions are recorded with the reason. Every row: `screen`, `seq`, `tick`, `step`,
+`executed`. Stdlib only (runs on the Spark; OASIS is not installed there). `live_summary.py` = screens by kind, each
+action done/failed and on which step, words typed, DMs/replies/groups. Bias measure unchanged (post screens, first
+view); caveat: in a live world readers also see other readers' comments.
+New actions on the menu in live mode: open_messages (post screen), send_message / open_post / back (follow-up screens).
+
+**4. Smoke test (`smoke_test.py`, ~40 s, laptop or Spark):** fake AIs (`fake_engine.py`: answers like an AI, logs every
+request's settings) + the real code: unit tests, V1 round, V3 big sim both arms, V3 live world + hard kill and resume,
+live_summary. 50 checks: every post read once, no own post, no unreadable, manifests' version/changes, thinking/JSON per
+request, menu order per arm, same posts in both arms, rerun asks nothing, live world really made comments/groups/joins/
+DMs, resume loses and doubles nothing. Laptop: **SMOKE: ALL PASS (50)**; pytest 33 passed. `test_live_world.py`'s resume
+test was checked to FAIL when the rebuild is broken.
+
+**5. `CLAUDE.md`** (repo root, + `~/research/CLAUDE.md` pointer): the whole log distilled for Claude (rules, design,
+models, code map, Spark ops, bug classes, OASIS internals). Not for Gordon; the log stays the record.
+
+**Next (Spark, commands given in chat):** pull → smoke test → count probe (3 AIs, ~30 min) → live pilot
+(`DATA_DIR=data/llm_bias/live_pilot EXTRA="--v3 --live" AGENTS=20`, ~1.5-2 h) → rsync → results here. The big sim waits
+for these answers and Gordon's go (open: 100 users / 1 round / qwen thinking / live world in the big sim or not).

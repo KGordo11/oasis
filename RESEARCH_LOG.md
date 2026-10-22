@@ -66,6 +66,11 @@ research**:
 
 ## 0.2 Where things stand (2026-10-22): read this first
 
+- **NEW Thu 10-22 evening (§14.48): count probe + live pilot DONE.** Gemma's one action is mostly its style: a
+  2-action example lifts its 2-action answers 1%->13%, "single" changes nothing, it says it was "lazy"/low energy. Live
+  world: DMs work (every llama user DM'd, 52 replies); qwen and gemma never leave the post screen; nobody uses groups
+  (also ~0 in all old data). Big sim waits on Gordon: live world yes/no, scale, qwen thinking.
+
 - **NEW Thu 10-22 PM (§14.47): live world + gemma probe + smoke test BUILT; waiting for Gordon's Spark run.** `--live`:
   actions really happen (comments with IDs, search/trend/profiles/groups/inbox as follow-up screens, private messages from
   profiles). `--v3` keeps JSON mode ON. Gemma does exactly 1 action on 90% of screens; count probe (`gemma_probe.py count`)
@@ -16521,3 +16526,43 @@ for these answers and Gordon's go (open: 100 users / 1 round / qwen thinking / l
   pytest part skipped, no numpy on the Spark). Cause: the fake AI opened group chats on only ~6% of post screens, so with 6
   users a join could fail to happen by chance (laptop had just 1 join). Fixed in 554dd6f: fake visits groups ~20%;
   laptop at parallel 1/4/8: ALL PASS, joins 48-50. The real code was not at fault.
+
+## 14.48 Results: gemma count probe + live pilot (Spark Thu 10-22 10:15-12:57; analysed Thu 10-22 PM)
+Spark: smoke run 2 = **ALL PASS (49)**. Probe + pilot ran detached, no errors. Data on the Mac: `data/llm_bias/v2/probe/count*`,
+`data/llm_bias/live_pilot/r101/` (not in git). NB file names are `reading_<posts_by>__<reader>`.
+
+**1. Count probe (same 150 V1 gemma screens, every AI, one wording change each).** % of answers with 0/1/2/3+ actions, actions per 100:
+
+| wording | gemma | qwen | llama |
+|---|---|---|---|
+| control (V1) | 5/93/1/0, 96 | 4/68/28/0, 124 | 4/27/29/41, 206 |
+| no "single" | 3/94/3/0, 101 | 4/66/30/0, 126 | 5/23/34/38, 205 |
+| example shows 2 actions | 1/85/13/1, 113 | 6/59/33/1, 130 | 1/21/28/49, 225 |
+| + "You can pick more than one." | 4/84/12/0, 108 | 4/57/38/1, 135 | 5/25/32/38, 203 |
+
+- "single" is not the cause (no change). Showing/allowing more than one lifts gemma's 2-action answers 1% -> 12-13%, but
+  it still does one thing 84-85% of the time. **The wording is a small part; one action is mostly how gemma plays.**
+- Asked why (after a 1-action answer): gemma says it considered more in 94% of answers, low energy/"lazy"/"not worth
+  it" in 42%; blames the format in 1%. qwen 10%, llama 30% cite the rules/format. Gemma plays a casual scroller.
+
+**2. Live pilot (V3 + `--live`, round 101, 20 users, all 9 cells, 1 h 45 min).** Post screens 1,159 per reader.
+
+| reader | all screens | % post screens | follow-up screens | DMs sent | users who DM'd | replies | groups/joins |
+|---|---|---|---|---|---|---|---|
+| qwen (thinking) | 1,159 | 100.0 | 0 | 0 | 0 | 0 | 0/0 |
+| llama | 1,993 | 58.3 | 834 (profiles 20%, open_post 16%) | 129 | 20/20 | 52 | 0/0 |
+| gemma | 1,202 | 96.4 | 43 | 0 | 0 | 0 | 0/0 |
+
+- Actions per post screen in the live world (0/1/2/3+ %): qwen 3/68/24/5, llama 13/15/19/53, gemma 0.2/**85**/12/2
+  (V1 90% one). Gemma likes comments now that they show with IDs (181 like_comment).
+- **Nobody opened group chats or made a group** (0 listen_from_group in 4,354 screens). Same in all old data: 4
+  create_group in ~325k screens. Groups are not broken; the AIs don't use them.
+- **DMs work and llama uses them:** every llama user sent one (median 14 words), 61 conversations, 52 replies; always
+  via a profile (step 2+). qwen and gemma never look anyone up, so never DM.
+- Failures are real OASIS rules, not bugs: llama re-likes posts it already liked (538, mostly on open_post / profile
+  screens), unfollows people it never followed (35), asks for 2+ screens at once (only the first opens).
+- Extra steps cost: llama's 834 follow-up screens made its cell ~1.7x the screens. qwen thinking stays the slowest (3.5 s/screen).
+
+**Open for Gordon before the big sim:** live world in the big sim or not (it changes llama a lot, the other two barely);
+groups stay on the menu though unused; gemma's one-action style accepted as its behaviour (or use the 2-action example
+for all AIs = a new change vs V1).

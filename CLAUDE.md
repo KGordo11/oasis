@@ -67,7 +67,9 @@ live world: actions really happen, results come back as follow-up screens, priva
   Thinking (V3) adds +10 engagement and more downvotes, and is ~5-10× slower.
 - gemma: **~95/100 in every test; exactly ONE action on 91% of screens**: a vote (up ~50%, down ~35%), comments only
   5-9%, empty list `[]` on ~8-10% (its way of doing nothing). Replies short (median 39 tokens). Follows stances
-  strongly. Posting: V1 only 23-25 users posted (it refreshes the empty feed, "waiting to see what appears"; §14.42c).
+  strongly. Count probe (§14.48): prompt wording is a small part (2-action example: 1-action 93->85%); it's gemma's
+  style ("lazy", low energy). Live world: gemma/qwen never leave the post screen; only llama looks people up and DMs.
+  Nobody uses groups (~0 in all data). Posting: V1 only 23-25 users posted (it refreshes the empty feed, "waiting to see what appears"; §14.42c).
   Line 2c → 99/100 post, but always exactly 1 post. JSON mode and Google sampling change nothing (probed). Gemma 3 has
   no system role: the template folds the system text into the first user turn (correct, not a bug).
 - Rerun noise (same screen + seed, llama.cpp 8 slots isn't repeatable): total engagement moves gemma ±0.6, llama

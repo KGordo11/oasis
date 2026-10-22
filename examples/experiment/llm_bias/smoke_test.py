@@ -125,7 +125,7 @@ def main():
     time.sleep(1.5)
     env = dict(os.environ, LLM_BACKEND="llamacpp", PATH=bindir + os.pathsep + os.environ["PATH"], PY=PY,
                LLAMACPP_URLS=json.dumps({m: f"http://127.0.0.1:{p}" for m, p in ports.items()}),
-               MANAGE_SERVERS="0", STOP_OLLAMA="0", PUSH="0", CHECKPOINT="0", PARALLEL="4",
+               MANAGE_SERVERS="0", STOP_OLLAMA="0", PUSH="0", CHECKPOINT="0", PARALLEL=os.environ.get("SMOKE_PARALLEL", "4"),
                STOP=time.strftime("%Y-%m-%d %H:%M", time.localtime(time.time() + 3 * 3600)))
 
     def night(data, agents, extra="", **kw):

@@ -58,13 +58,13 @@ def answer(u, rng):
     trip = rng.random()
     if trip < 0.08 and author:
         a.append({"action": "search_user", "query": author.group(1)})
-    elif trip < 0.14:
+    elif trip < 0.28:  # often enough that 6 users always make, join and use groups (smoke_test checks it)
         a.append({"action": "listen_from_group"})
-    elif trip < 0.17:
+    elif trip < 0.31:
         a.append({"action": "trend"})
-    elif trip < 0.20:
+    elif trip < 0.34:
         a.append({"action": "search_posts", "query": "Fake"})
-    elif trip < 0.23:
+    elif trip < 0.37:
         a = [{"action": "refresh"}]
     return a
 

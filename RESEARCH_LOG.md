@@ -16517,3 +16517,7 @@ models, code map, Spark ops, bug classes, OASIS internals). Not for Gordon; the 
 **Next (Spark, commands given in chat):** pull → smoke test → count probe (3 AIs, ~30 min) → live pilot
 (`DATA_DIR=data/llm_bias/live_pilot EXTRA="--v3 --live" AGENTS=20`, ~1.5-2 h) → rsync → results here. The big sim waits
 for these answers and Gordon's go (open: 100 users / 1 round / qwen thinking / live world in the big sim or not).
+- **Spark smoke run 1 (Thu 10-22 ~10:15): 48 PASS, 1 FAIL** (live: "comments, groups, joins and DMs really happened";
+  pytest part skipped, no numpy on the Spark). Cause: the fake AI opened group chats on only ~6% of post screens, so with 6
+  users a join could fail to happen by chance (laptop had just 1 join). Fixed in 554dd6f: fake visits groups ~20%;
+  laptop at parallel 1/4/8: ALL PASS, joins 48-50. The real code was not at fault.

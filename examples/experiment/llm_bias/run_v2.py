@@ -40,6 +40,7 @@ from datetime import datetime
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import llm  # noqa: E402
+import live_world  # noqa: E402
 
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 DATA = os.path.join(REPO, "data", "llm_bias", "v2")
@@ -188,6 +189,8 @@ WHAT YOU CAN DO
 {menu}
 
 {fmt}"""
+# --live (log 14.47): the post's comments (with IDs) under the post; a "new messages" notice may come before it
+LIVE_READ_SCREEN = READ_SCREEN.replace("{body}\n\n", "{body}\n\n{comments}\n\n")
 
 
 PAGE_SCREEN = """You're scrolling Reddit. These posts are on your screen:
@@ -242,8 +245,9 @@ def topic_of(sub):
     return next((t for t, (name, _) in TOPICS.items() if name.lower().removeprefix("r/") == s), None)
 
 
-def validate(obj):
-    """Accept any number of menu actions; reject unknown action names or missing required fields (forces a retry)."""
+def validate(obj, live=False):
+    """Accept any number of menu actions; reject unknown action names or missing required fields (forces a retry).
+    live=True also accepts the live world's extra actions (live_world.LIVE_ACTIONS)."""
     if not isinstance(obj, dict):
         raise ValueError("not an object")
     acts = obj.get("actions", [])
@@ -259,12 +263,12 @@ def validate(obj):
             raise ValueError(f"bad action {a!r}")
         name = str(a.get("action", "")).strip().lower()
         name = ALIASES.get(name, name)
-        if name not in ACTION_NAMES:
+        if name not in ACTION_NAMES and not (live and name in live_world.LIVE_ACTIONS):
             raise ValueError(f"unknown action {name!r}")
         a = {k: v for k, v in a.items() if k != "action"}
         need = {"create_comment": ["content"], "quote_post": ["content"], "search_user": ["query"],
                 "search_posts": ["query"], "create_post": ["title", "body"], "create_group": ["name"],
-                "send_to_group": ["message"]}.get(name, [])
+                "send_to_group": ["message"], "send_message": ["username", "message"], "open_post": ["post_id"]}.get(name, [])
         for f in need:
             if not str(a.get(f) or "").strip():
                 raise ValueError(f"{name} without {f}")
@@ -322,10 +326,10 @@ def post_set(r, model, agents):
 
 def run(a):
     global DATA, V1_PROMPTS
-    if a.v3:  # V3 version (log 14.45-14.46): V1 prompts; posting = line 2c; reading = thinking + free text + refresh loop
+    if a.v3:  # V3 version (log 14.45-14.47): V1 prompts; posting = line 2c; reading = thinking + refresh loop
         a.v1 = True  # menu order is NOT part of V3 (Gordon 10-22: it is the order study, --menu-order flipped)
-        if a.turn == "read":
-            a.think, a.free_text, a.refresh_loop = True, True, True
+        if a.turn == "read":  # JSON mode stays ON (Gordon 10-22: "makes all AIs equal in response")
+            a.think, a.refresh_loop = True, True
         else:
             a.post_line = "c"
     DATA, V1_PROMPTS = a.data_dir or DATA, a.v1
@@ -335,7 +339,8 @@ def run(a):
         if a.post_line else POST_SCREEN
     if a.post_screen == "v3":
         post_screen, post_menu = POST_SCREEN_V3, MENU_POST_ONLY
-    v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line", "post_screen")}
+    a.live = a.live and a.turn == "read"
+    v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line", "post_screen", "live")}
     v3_on = any(v not in (False, None, "v1", "all") for v in v3.values())
     # Gordon's rule (log 14.43): every test = V1 + ONE addition, never stacked; more than one needs --cross
     changes = [k for k, v in v3.items() if k != "v1" and v not in (False, None, "v1", "all")] \
@@ -390,7 +395,7 @@ def run(a):
                 # every place in the scroll (and on a page) about equally often across users
                 start = (p["id"] * len(ring)) // 100
                 feed = [q for q in ring[start:] + ring[:start] if q["author_id"] != p["id"]]  # never your own post
-            if a.refresh_loop:
+            if a.refresh_loop or a.live:
                 sessions.append((p, feed))
             elif a.page_size > 1:
                 for i in range(0, len(feed), a.page_size):
@@ -400,6 +405,7 @@ def run(a):
             else:
                 jobs += [(p, [q], i) for i, q in enumerate(feed) if (p["id"], q["key"]) not in done]
     if sessions:
+        done = {(d["user_id"], d.get("post_key")) for d in rows if d.get("screen", "post") == "post"}
         todo = sum((p["id"], q["key"]) not in done for p, feed in sessions for q in feed)
     log(f"{a.turn} round {a.round}: {a.model} plays {len(people)} users"
         + (f" reading {len(posts)} posts by {a.posts_by}" if a.turn == "read" else "")
@@ -416,7 +422,7 @@ def run(a):
              "prompt_tokens": meta["prompt_tokens"], "eval_tokens": meta["eval_tokens"], "call_rows": n,
              "thinking_chars": meta["thinking_chars"], "truncation_risk": meta["truncation_risk"],
              "raw": meta.get("raw") if k == 0 else None}  # a page's raw reply is stored once, on its first row
-        if a.refresh_loop and q:
+        if (a.refresh_loop or a.live) and q:
             r["view"] = view  # 1 = first time on screen; 2.. = back after a refresh
         if a.think:
             r["thinking"] = meta.get("thinking")
@@ -454,7 +460,39 @@ def run(a):
         return [row(p, x, pos + k, obj[k] if obj else None, meta, len(page), k) for k, x in enumerate(page)]
 
     t0 = time.time()
-    if sessions:
+    if a.live:
+        world = live_world.World(people, posts, TOPICS)
+        live_menu = live_world.live_menu(menu)
+        n, f = [0], open(out, "a")
+
+        def ask(p, text, key, tail, budget):
+            parts = (SEED, a.round, "read", a.posts_by, p["id"]) + ((key,) if key else ("live",)) + tuple(tail)
+            seed = llm.stable_seed(*parts, a.draw) if a.draw else llm.stable_seed(*parts)
+            return llm.chat_json(a.model, system_prompt(a.model, a.round, p["persona"]), text, seed=seed,
+                                 temperature=a.temperature, num_predict=budget + (THINK_EXTRA if a.think else 0),
+                                 validate=lambda o: validate(o, live=True), retries=2, think=a.think,
+                                 json_mode=not a.free_text)
+
+        def emit(p, kind, key, obj, meta, extra):
+            q = world.posts[extra["ctx"]["post"]] if kind in ("post", "open_post") else None
+            r = row(p, q, extra["seq"], obj, meta, 1, view=extra["view"])
+            r.update(extra)
+            f.write(json.dumps(r) + "\n"); f.flush(); rows.append(r); n[0] += 1
+            if n[0] % a.log_every == 0:
+                log(f"  {n[0]} screens ({(time.time() - t0) / n[0]:.2f} s each)")
+            return r
+
+        def read_screen(sub, tname, author, title, body, comments):
+            return LIVE_READ_SCREEN.format(sub=sub, topic_name=tname, author=author, title=title, body=body,
+                                           comments=comments, menu=live_menu, fmt=FORMAT)
+        llm.warm(a.model)
+        live_world.run_live(world, people, {p["id"]: [q["key"] for q in feed] for p, feed in sessions},
+                            ask, emit, [r for r in rows if "screen" in r], read_screen, FORMAT, topic_of, a.parallel,
+                            REFRESH_MAX if a.refresh_loop else 1, log)
+        f.close()
+        log(f"  {n[0]} screens done (live world: {len(world.comments)} comments, {len(world.groups)} groups, "
+            f"{len(world.dms)} private messages)")
+    elif sessions:
         llm.warm(a.model)
         cache = {(d["user_id"], d["post_key"], d.get("view", 1)): d for d in rows}
         lock, c, n = threading.Lock(), Counter(), [0]
@@ -507,7 +545,8 @@ def run(a):
            "finished_at": datetime.now().isoformat(), "git_commit": git_commit(), "personas_sha256": PINNED_PERSONAS,
            "post_set_sha256": sha(posts) if posts else None,
            "prompts_sha256": sha([SYSTEM] + ([SELF_ID, MODEL_NAMES] if a.round >= SELF_ID_FROM_ROUND and not a.v1 else []) + [POST_SCREEN, READ_SCREEN, MENU, FORMAT] + ([PAGE_SCREEN] if a.page_size > 1 else [])
-                                 + ([post_screen, menu, post_menu] if v3_on else [])),
+                                 + ([post_screen, menu, post_menu] if v3_on else [])
+                                 + ([LIVE_READ_SCREEN, live_world.live_menu(menu), live_world.screens()] if a.live else [])),
            "v3_test": v3 if v3_on else None, "changes_from_v1": changes, "version": "V3" if a.v3 else None,
            "config": {"backend": llm.BACKEND, "sampling": llm.SAMPLING if llm.BACKEND == "llamacpp" else "ollama per-model defaults",
                       "temperature": a.temperature, "num_ctx": llm.NUM_CTX, "think": a.think, "parallel": a.parallel,
@@ -612,8 +651,10 @@ if __name__ == "__main__":
     ap.add_argument("--post-line", choices=sorted(POST_LINES), help="post: add one of the V3 test-2 lines")
     ap.add_argument("--post-screen", choices=["v1", "v3"], default="v1", help="post: v3 = the V3 posting screen (posting-only menu)")
     ap.add_argument("--cross", action="store_true", help="allow more than one change from V1 (a cross-test)")
+    ap.add_argument("--live", action="store_true", help="read: a live world -- actions really happen and their results "
+                    "come back as follow-up screens; comments, groups and private messages work (log 14.47)")
     ap.add_argument("--v3", action="store_true", help="V3 version: V1 prompts; posting turn = line 2c; reading turn = "
-                    "thinking + free text + refresh loop (log 14.46); add --menu-order flipped for the order study")
+                    "thinking + refresh loop, JSON mode on (log 14.47); add --menu-order flipped for the order study")
     args = ap.parse_args()
     if args.v3 and (args.v1 or args.think or args.free_text or args.refresh_loop or args.cross
                     or args.post_line or args.post_menu != "all" or args.post_screen != "v1"):

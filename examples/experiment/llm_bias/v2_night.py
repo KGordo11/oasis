@@ -81,7 +81,8 @@ def screens_done(r, name):
     n = 0
     for l in open(f) if os.path.exists(f) else []:
         try:
-            n += json.loads(l).get("view", 1) == 1
+            d = json.loads(l)
+            n += d.get("view", 1) == 1 and d.get("screen", "post") == "post"  # --live: follow-up screens are not posts read
         except json.JSONDecodeError:  # a half-written last line (run_v2.py drops it on resume)
             pass
     return n

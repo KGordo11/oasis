@@ -322,10 +322,10 @@ def post_set(r, model, agents):
 
 def run(a):
     global DATA, V1_PROMPTS
-    if a.v3:  # V3 version (log 14.45, Gordon 10-21): V1 prompts; posting = line 2c; reading = all four reading changes
-        a.v1 = True
+    if a.v3:  # V3 version (log 14.45-14.46): V1 prompts; posting = line 2c; reading = thinking + free text + refresh loop
+        a.v1 = True  # menu order is NOT part of V3 (Gordon 10-22: it is the order study, --menu-order flipped)
         if a.turn == "read":
-            a.think, a.free_text, a.refresh_loop, a.menu_order = True, True, True, "flipped"
+            a.think, a.free_text, a.refresh_loop = True, True, True
         else:
             a.post_line = "c"
     DATA, V1_PROMPTS = a.data_dir or DATA, a.v1
@@ -613,9 +613,9 @@ if __name__ == "__main__":
     ap.add_argument("--post-screen", choices=["v1", "v3"], default="v1", help="post: v3 = the V3 posting screen (posting-only menu)")
     ap.add_argument("--cross", action="store_true", help="allow more than one change from V1 (a cross-test)")
     ap.add_argument("--v3", action="store_true", help="V3 version: V1 prompts; posting turn = line 2c; reading turn = "
-                    "thinking + free text + refresh loop + flipped menu (log 14.45)")
+                    "thinking + free text + refresh loop (log 14.46); add --menu-order flipped for the order study")
     args = ap.parse_args()
-    if args.v3 and (args.v1 or args.think or args.free_text or args.refresh_loop or args.menu_order != "v1" or args.cross
+    if args.v3 and (args.v1 or args.think or args.free_text or args.refresh_loop or args.cross
                     or args.post_line or args.post_menu != "all" or args.post_screen != "v1"):
         ap.error("--v3 already sets all of these")
     if args.post_screen == "v3" and (args.post_line or args.post_menu != "all"):

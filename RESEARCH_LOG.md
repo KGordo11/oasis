@@ -64,7 +64,13 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-21): read this first
+## 0.2 Where things stand (2026-10-22): read this first
+
+- **NEW Thu 10-22 (§14.46): V3 big sim BUILT, not run (waiting for Gordon's go).** `v3_big.sh`: arm 1 = V3 full round
+  (baselines, cross tests, noise) in `data/llm_bias/v3/`; arm 2 = the SAME posts read with the flipped menu
+  (order study) in `data/llm_bias/v3_flipped/`. **`--v3` no longer includes the flipped menu.** ~3-5 days for both arms
+  (qwen thinking is most of it). Gemma's 1-action-per-post habit is NOT fixed by any test. Group/DM actions are fake
+  in this sim (one line, invented group IDs, nothing comes back); real DMs = the world study (§14.44, Fraud repo).
 
 - **NEW Wed 10-21: V3 single-addition chain DONE, all 11 passed, ALL CHECKS PASS (§14.45).** Watchdog cron
   removed; data on the Mac in `data/llm_bias/v3_tests/` (not in git). Each test = V1 + one change:
@@ -14904,6 +14910,11 @@ into the running window (typed text gets queued as shell input).
 
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
+### Status (2026-10-22)
+- V3 big sim built (`v3_big.sh`, §14.46), laptop-tested, NOT run: waiting for Gordon's go. Nothing running, no cron.
+  Line 2c picked (10-21). `--v3` = V1 prompts + line 2c + thinking + free text + refresh loop (menu order = V1);
+  arm 2 adds `--menu-order flipped` on the same posts.
+
 ### Status (2026-10-21)
 - V1 + V2 done (no own-AI bias, §14.41). V3 single-addition tests done (11/11, §14.45). Nothing running on the Spark,
   no cron. Waiting for Gordon: posting-line choice, qwen thinking yes/no, cross-tests, V3 world study go (§14.44).
@@ -15133,7 +15144,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 1a2bad7…682c87e | 10-20 | **V3 tests** (§14.43-14.44): `run_v2.py` options + `changes_from_v1` guard (refuses >1 change without `--cross`), `v3_test.sh`, `v3_summary.py`, `v3_chain.sh` + `v3_watchdog.sh`, `--post-screen v3` |
 | ce1e635 | 10-21 | **`v3_ranges.py`**: reading tests vs V1 with user-resampled 95% ranges, rerun noise, refresh-only count; results §14.45 |
 | fe744e7 | 10-21 PM | **`make_v3_charts.py`**: V3 charts (posts per user, every action, actions per answer) + `LLM_Bias_V3.xlsx` in `~/Desktop/LLM_Bias/V3/` |
-| (this) | 10-21 PM | **`run_v2.py --v3`**: V3 version = V1 prompts + think + free text + refresh loop + flipped menu in the reading turn (posting = V1); exempt from the one-change guard, can't be mixed with single options; manifest `version` |
+| 643282a/c345acf | 10-21 PM | **`run_v2.py --v3`**: V3 version = V1 prompts + think + free text + refresh loop + flipped menu in the reading turn (posting = V1); exempt from the one-change guard, can't be mixed with single options; manifest `version` |
+| (this) | 10-22 | **V3 big sim** (§14.46): `--v3` drops the flipped menu (now the order-study arm, `--menu-order flipped` allowed with `--v3`); `v3_big.sh` (arm 1 V3 full round, arm 2 same posts + flipped menu); `v3_watchdog.sh` takes script/log/marker |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16389,3 +16401,51 @@ share whatever you'd post. Everyone will read the new posts afterwards." The rea
 changes). `--v3` can't be mixed with `--post-line/--post-menu/--post-screen`. Fake-server test: exact screen with the
 2c line, thinking off, JSON on, manifest `version V3`, `changes ['post_line']`; 26 tests pass. Not run on the Spark;
 the run design (round number, scale) still needs Gordon's go.
+
+## 14.46 V3 big sim + the menu-order study; gemma's action count; do group/DM actions work? (Thu 2026-10-22)
+**Gordon 10-22:** "start a full big sim in spark now with v3. we need baselines then cross test then ... the same test
+but with the most used actions by the AI at the bottom of the prompt then the least used actions at the top" -- does the
+AI pick what it reads first? Also: is gemma's low action count fixed? Are group/DM actions real work in the sim?
+
+**1. Gemma's action count (reading turn, 30 users, 2,059 screens per reader; actions except do_nothing):**
+
+| test | gemma per 100 screens | llama | qwen | gemma screens with 0 / 1 / 2 / 3+ actions |
+|---|---|---|---|---|
+| v1 | 95.3 | 225.2 | 116.4 | 7 / 91 / 2 / 0 % |
+| r_think | 95.2 | 221.9 | 126.6 | 7 / 91 / 2 / 0 % |
+| r_json | 95.1 | 218.0 | 114.7 | 7 / 91 / 2 / 0 % |
+| r_refresh | 95.3 | 225.5 | 116.3 | 7 / 91 / 2 / 0 % |
+| r_menu | 108.1 | 185.7 | 145.5 | 0 / 92 / 8 / 0 % |
+
+- NOT fixed, and no test aimed at it. Gemma does exactly ONE thing per post on 91-92% of screens in every test (llama
+  does 2+ on 70%). The posting gap IS fixed (line 2c: gemma 23 -> 99 posts). The reading gap is gemma's style; it does
+  not break the bias measure (each reader is compared with itself), but gemma's worlds are quieter.
+
+**2. Group/DM actions are not real in this sim (code + raw data):**
+- Each screen is ONE AI call: the AI sees one post and answers one JSON list. Nothing comes back: no group list,
+  no search results, no trending list, no inbox. `listen_from_group` shows nothing; `search_user` finds nobody.
+- So every action costs the same: one line. `{"action": "like_post"}` vs `{"action": "send_to_group", "group_id":
+  "group_12345", "message": "..."}`. No group exists, so the AI invents the ID (r_menu raw data: "some_group_id",
+  "group-123456", "AI discussion", "my_politics_group"); nobody receives the message.
+- Use: V1/V2 all 274,191 screens: 18 group actions in all. r_menu (groups listed FIRST): llama 109 (listen 90, send
+  11, leave 7, create 1); gemma and qwen 0.
+- The real-world "more steps" cost (find the user, open the chat, type, send) does not exist here, so low group use is
+  NOT effort; it is where the action sits on the list and that the screen is about one post.
+- Reference: `reference/MutiAgent4Fraud` has working DMs: `send_private_message(receiver_id, content)` writes a
+  `private_message` table, the receiver's next refresh shows its inbox, it replies; a turn limit closes the channel.
+  This is the "Messages" part of the §14.44 world study (multi-screen, results fed back, "steps per action" measured).
+
+**3. `--v3` changed: the flipped menu is OUT of V3** (it is the order study, not an improvement). `--v3` = V1 prompts
++ posting line 2c + reading: thinking, free text, refresh loop, V1 menu order. `--menu-order flipped` now allowed with
+`--v3`. Fake-server test: V3 read = thinking on, JSON off, menu starts ON THE POST; + flipped = starts GROUP CHATS;
+manifests `changes_from_v1` show it; pytest 26 passed.
+
+**4. `v3_big.sh` (new):** per round, arm 1 `data/llm_bias/v3/` = V3 full round via `v2_night.py` (posting, baselines,
+cross slices 16/32/64/all, noise floor); arm 2 `data/llm_bias/v3_flipped/` = arm 1's SAME post files copied, reading
+only, `--v3 --menu-order flipped`. Resumable, flock, last line `BIG DONE`. `v3_watchdog.sh` now takes script/log/marker
+(defaults unchanged). Laptop (3 fake servers, 3 users): both arms end to end, same posts in both arms, rerun = 0 AI calls.
+
+**Time estimate (100 users, 1 round):** line 2c gives ~320 posts (gemma 99, llama 118, qwen 104) -> ~31,800 screens
+per reader per arm. Measured s/screen: gemma 0.94, llama 0.65, qwen thinking 2.5-5 -> gemma ~8 h, llama ~6 h, qwen
+~22-45 h per arm, so ~1.5-2.5 days per arm, ~3-5 days for both. qwen thinking is most of it.
+Status: built and laptop-tested, NOT run; waiting for Gordon's go on the design.

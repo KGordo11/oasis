@@ -115,6 +115,13 @@ def main():
     except ImportError:
         print("  skip  test_llm_bias.py (needs pytest + numpy; run it on the laptop)")
 
+    import llm
+    llm.LLAMACPP_URLS["dead:1b"] = f"http://127.0.0.1:{free_port()}"
+    llm.BACKEND = "llamacpp"
+    try:
+        llm.chat_json("dead:1b", "s", "u", retries=1); check("a dead server raises (no fake 'unreadable' row)", False)
+    except ConnectionError:
+        check("a dead server raises (no fake 'unreadable' row)", True)
     # fake servers + a flock shim where the OS has none (macOS)
     bindir = os.path.join(tmp, "bin"); os.makedirs(bindir)
     if not shutil.which("flock"):

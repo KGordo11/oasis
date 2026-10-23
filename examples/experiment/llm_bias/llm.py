@@ -124,6 +124,10 @@ def chat_json(model, system, user, *, seed=None, temperature=0.7, num_predict=40
         except (ValueError, KeyError, TypeError) as e:
             meta["errors"].append(f"invalid: {e}")
     meta["raw"] = last_raw
+    if meta["errors"] and all(e.startswith("transport") for e in meta["errors"]) and not meta["timeouts"]:
+        # 10-23 lesson: preflight + big sim switched each other's servers off and 30k "Connection refused" screens
+        # were saved as unreadable answers, so every step said rc=0. Crash instead: no row is written, resume redoes it.
+        raise ConnectionError(f"{model} server unreachable: {meta['errors'][-1]}")
     return None, meta
 
 

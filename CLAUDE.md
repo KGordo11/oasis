@@ -92,6 +92,7 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | `llm.py` | backends ollama/llamacpp, `chat_json(think=, json_mode=)`, `stable_seed`, `available_models()` |
 | `v2_night.py` | runner. env ROUNDS STOP SLICES NOISE AGENTS PARALLEL MANAGE_SERVERS DATA_DIR EXTRA TURNS CHECKPOINT PUSH |
 | `v3_big.sh` | V3 big sim, one part at a time: `ARM=1` `data/llm_bias/v3/` (ends `ARM 1 DONE`); `ARM=2` `v3_flipped/` = same posts, menu ranked from part 1's data (`rank_menu.py`), ends `ARM 2 DONE` |
+| **`v3_start.sh`** | start part 1 safely: preflight (V3 settings) -> only on ALL CLEAR watchdog cron + `ARM=1 v3_big.sh` (§14.50) |
 | `rank_menu.py` | part 2's menu from part 1's data: least-used actions on top (§14.49) |
 | `v3_test.sh`, `v3_chain.sh`, `v3_summary.py`, `v3_ranges.py`, `v3_post_lines.py`, `make_v3_charts.py` | V3 single-addition tests (done 10-21, data `data/llm_bias/v3_tests/`, not in git) |
 | `v3_watchdog.sh [script log marker]` | cron restarter, gives up after 3 |
@@ -127,6 +128,8 @@ Data: Spark results land in `~/llm_bias/oasis/data/llm_bias/<dir>/` → rsync to
 - Mac `~/.ssh/config` has `Host honda` (ControlMaster). rsync: `rsync -avz honda:llm_bias/oasis/data/llm_bias/<dir>/ ~/research/oasis/data/llm_bias/<dir>/`.
 
 ## 5. Bug classes that keep coming back (check every new piece of code against these)
+0. **Two things driving the llama.cpp servers at once** (§14.50: preflight + big sim): each `only <AI>` kills the other's
+   server. Never give Gordon two server-using commands to run side by side; chain them in one script.
 1. **"The system's default response to trouble is to look fine"** (B-12, B-15, B-22, B-23): a step that produces
    nothing must FAIL loudly. Checks must measure the quantity the study uses (engagement on shown posts, every post read
    once), not adjacent activity. `v3_summary.py` fails on empty data; `v2_night` stops on a 0-screen step.

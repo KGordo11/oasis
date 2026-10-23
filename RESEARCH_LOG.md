@@ -66,6 +66,11 @@ research**:
 
 ## 0.2 Where things stand (2026-10-23): read this first
 
+- **NEW Fri 10-23 PM (§14.50): first part-1 start broke** (started during the preflight; servers switched off under
+  it; 70-99% "Connection refused" saved as unreadable, rc=0 everywhere). Stopped, data to delete. Guards added: dead
+  server = crash not a row, >5% unreadable = STOPPING, no start during a preflight. Restart = `v3_start.sh`
+  (preflight -> ALL CLEAR -> watchdog + part 1).
+
 - **NEW Fri 10-23 (§14.49): big sim design FINAL, part 1 ready to run.** `--v3` reading = live world + refresh loop +
   two-action example, JSON on, thinking OFF. `ARM=1 bash v3_big.sh` = part 1 (`data/llm_bias/v3/`, `ARM 1 DONE`). After
   Gordon + Claude examine it, `ARM=2` = same posts with the menu ranked from part 1's data (`rank_menu.py`, least used
@@ -16600,3 +16605,17 @@ writes its own posts; each AI's 100 users read each AI's posts; a cell never mix
   no cron, no other heavy user, no old `data/llm_bias/v3`) -> pull -> smoke (52 on the Spark) -> preflight V3 -> start
   part 1 detached -> watchdog cron (`'ARM 1 DONE'`) -> check command. NB `analyze_v2.py` counts every row; big-sim
   analysis must keep `screen == "post"` rows only.
+
+## 14.50 First part-1 start broke: preflight and big sim ran at once (Fri 2026-10-23 11:22-12:30)
+Gordon started part 1 (step 4) while the preflight (step 3) was still at section C. Both switch the llama.cpp servers
+(`llamacpp_servers.sh only <AI>` kills the others), so each kept turning off the other's server. Data (`data/llm_bias/v3`):
+qwen posting 70/100 "Connection refused" (31 posts), reading files 70-99% unreadable (e.g. gemma reads qwen 9,720/9,801),
+steps at 0.01-0.1 s/screen -- yet every step said rc=0, because a failed call was saved as an "unreadable" answer. The
+preflight failed 3 checks (resume 0/90 and servers-stopped = the overlap; `analyze_v2.py` KeyError 'stance' = a real bug:
+it read live follow-up screens). Stopped everything (cron removed, all runners and servers killed). Fixes:
+- `llm.chat_json` raises `ConnectionError` when every attempt was a transport error (not a timeout): no row is written,
+  the step crashes, resume redoes the screen. Smoke checks it.
+- `v2_night.py` stops the run (STOPPING) when a step's file has > 5% unreadable answers (pilot: <= 0.5%).
+- `v3_big.sh` refuses to start while `preflight_v2.py` runs. `analyze_v2.py` keeps post screens only.
+- **`v3_start.sh`**: preflight (V3 settings) -> only on ALL CLEAR: watchdog cron + part 1. One command, no manual order.
+- Smoke ALL PASS (54). The broken `data/llm_bias/v3` is deleted before the restart (nothing in it is usable).

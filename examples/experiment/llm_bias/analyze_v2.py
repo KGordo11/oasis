@@ -36,7 +36,7 @@ def load(test):
         if (man["round"] >= 900) != test:
             continue
         f = m.replace(".manifest.json", ".jsonl")
-        rows += [json.loads(l) for l in open(f)] if os.path.exists(f) else []  # a turn with 0 screens writes no file
+        rows += [r for r in map(json.loads, open(f)) if r.get("screen", "post") == "post"] if os.path.exists(f) else []  # a turn with 0 screens writes no file; live follow-up screens are not reads
     return rows
 
 

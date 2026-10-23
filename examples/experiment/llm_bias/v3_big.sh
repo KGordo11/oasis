@@ -10,6 +10,7 @@ cd "$(dirname "$0")/../../.."
 B=${V3_ROOT:-$PWD/data/llm_bias}/v3 F=${V3_ROOT:-$PWD/data/llm_bias}/v3_flipped
 ARM=${ARM:-1}  # the watchdog restarts with no env: part 1
 mkdir -p "$B" "$F"
+if pgrep -u "$(id -un)" -f preflight_v2.py > /dev/null; then echo "a preflight is running (it switches the AI servers) -- wait for ALL CLEAR"; exit 1; fi
 exec 9>"$B/.lock"; flock -n 9 || { echo "the big sim is already running -- not starting a second copy"; exit 1; }
 export SLICES=${SLICES:-0} MANAGE_SERVERS=${MANAGE_SERVERS:-1} PARALLEL=${PARALLEL:-8} PY=${PY:-python3} PUSH=0 CHECKPOINT=0 \
        STOP_OLLAMA=${STOP_OLLAMA:-1} STOP="$(python3 -c "import datetime as d; print((d.datetime.now() + d.timedelta(days=20)).strftime('%Y-%m-%d %H:%M'))")"

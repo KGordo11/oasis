@@ -75,6 +75,17 @@ def expected(r, pb, k):
     return sum((n - own.get(u, 0)) if k == 0 else min(k, n - own.get(u, 0)) for u in range(AGENTS))
 
 
+def unreadable(r, name):
+    """(unreadable answers, all answers) in a step's file."""
+    f, bad, n = os.path.join(rdir(r), name + ".jsonl"), 0, 0
+    for l in open(f) if os.path.exists(f) else []:
+        try:
+            bad += json.loads(l)["outcome"] != "chose"; n += 1
+        except (json.JSONDecodeError, KeyError):
+            pass
+    return bad, n
+
+
 def screens_done(r, name):
     """Posts read so far (a post back on screen after a refresh, V3 "view" 2.., is not a new post)."""
     f = os.path.join(rdir(r), name + ".jsonl")
@@ -116,6 +127,10 @@ def step(r, args, est_screens, reader, what, name):
     if did > 20:
         SPS[reader] = (time.time() - t) / did
     log(f"end {what} rc={rc}: {did} screens in {(time.time() - t) / 60:.1f} min ({SPS[reader]:.2f} s/screen)")
+    bad, rows = unreadable(r, name)
+    if rows and bad > 0.05 * rows:  # live pilot: <= 0.5% unreadable; 10-23 broken run: 70-99%
+        log(f"STOPPING: '{what}' has {bad}/{rows} unreadable answers -- see /tmp/v2_{name}.log")
+        raise SystemExit(2)
     if rc != 0 and did == 0:
         # LB-v2-3 lesson: a step that fails before a single screen means something is broken (server, code, env);
         # stop the whole run instead of failing every remaining step in seconds. Re-running resumes.

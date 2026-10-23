@@ -16,6 +16,7 @@ which the real analysis ignores. It checks, in order:
   G. clean finish the runner stops the servers at the end and the memory comes back
 
     source ~/llm_bias/env_llamacpp.sh && python3 examples/experiment/llm_bias/preflight_v2.py
+    PREFLIGHT_EXTRA="--v3" PREFLIGHT_SLICES=0 python3 ...    # the same, with the V3 big-sim settings (log 14.49)
 Exit code 0 = everything passed.
 """
 import glob, json, os, shutil, signal, subprocess, sys, time
@@ -28,6 +29,7 @@ RD = os.path.join(REPO, "data", "llm_bias", "v2", f"r{ROUND:03d}")
 SERVERS = os.path.join(HERE, "llamacpp_servers.sh")
 HOME = os.path.expanduser("~/llm_bias")
 results = []
+EXTRA = os.environ.get("PREFLIGHT_EXTRA", "")  # run_v2.py options for the mini-round and the resume test
 
 
 def check(name, ok, detail=""):
@@ -120,7 +122,7 @@ check("free memory with one AI loaded", one_loaded > 60, f"{one_loaded:.0f} GB a
 print("=== E. mini-round through the real runner (10 users, round 904)")
 shutil.rmtree(RD, ignore_errors=True)
 env = dict(os.environ, MANAGE_SERVERS="1", STOP=time.strftime("%Y-%m-%d %H:%M", time.localtime(time.time() + 6 * 3600)),
-           ROUNDS=str(ROUND), AGENTS=str(AGENTS), SLICES="4 0", NOISE="2", PARALLEL="8", PY=sys.executable,
+           ROUNDS=str(ROUND), AGENTS=str(AGENTS), SLICES=os.environ.get("PREFLIGHT_SLICES", "4 0"), NOISE="2", EXTRA=EXTRA, PARALLEL="8", PY=sys.executable,
            PUSH="0", STOP_OLLAMA="1")
 t = time.time()
 p = subprocess.run([sys.executable, os.path.join(HERE, "v2_night.py")], cwd=REPO, env=env, capture_output=True, text=True,
@@ -145,7 +147,7 @@ for m in ["qwen3:8b", "llama3.1:8b", "gemma3:12b"]:
     check(f"posting turn for {m}: all {AGENTS} users answered", len(rows) == AGENTS, f"{sum(own.values())} posts written")
 for f in sorted(glob.glob(os.path.join(RD, "reading_*.jsonl"))):
     name = os.path.basename(f).replace(".jsonl", "")
-    rows = [r for r in map(json.loads, open(f)) if r.get("view", 1) == 1]  # V3 refresh loop: a returning post is not a new read
+    rows = [r for r in map(json.loads, open(f)) if r.get("view", 1) == 1 and r.get("screen", "post") == "post"]  # V3: a returning post / a follow-up screen is not a new read
     pb = rows[0]["posts_by"] if rows else None
     draw = rows[0]["draw"] if rows else 0
     pairs = [(r["user_id"], r["post_key"]) for r in rows]
@@ -166,7 +168,7 @@ print("=== F. interrupt and resume")
 m = "qwen3:8b"
 sh(f"bash {SERVERS} only {m}", timeout=300)
 cmd = [sys.executable, os.path.join(HERE, "run_v2.py"), "read", "--round", str(ROUND), "--posts-by", m, "--model", m,
-       "--agents", str(AGENTS), "--draw", "3", "--no-replay"]
+       "--agents", str(AGENTS), "--draw", "3", "--no-replay"] + EXTRA.split()
 f = os.path.join(RD, f"reading_{m.replace(':', '-')}__{m.replace(':', '-')}_d3{TAG}.jsonl")
 n = sum(posts[m].values())
 want = sum(n - posts[m].get(u, 0) for u in range(AGENTS))
@@ -178,7 +180,7 @@ for _ in range(240):  # kill it once about a third is done (hard kill, like a cr
 q.send_signal(signal.SIGKILL); q.wait()
 half = sum(1 for _ in open(f)) if os.path.exists(f) else 0
 p = subprocess.run(cmd, cwd=REPO, capture_output=True, text=True)
-rows = [r for r in map(json.loads, open(f)) if r.get("view", 1) == 1] if os.path.exists(f) else []
+rows = [r for r in map(json.loads, open(f)) if r.get("view", 1) == 1 and r.get("screen", "post") == "post"] if os.path.exists(f) else []
 pairs = [(r["user_id"], r["post_key"]) for r in rows]
 check("killed half-way, then resumed to complete", p.returncode == 0 and len(rows) == want and 0 < half < want,
       f"{half} done before the kill, {len(rows)}/{want} after resume")

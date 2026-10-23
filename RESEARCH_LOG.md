@@ -16594,3 +16594,9 @@ writes its own posts; each AI's 100 users read each AI's posts; a cell never mix
   llama is the slowest with its follow-up screens) -- a guess from pilot speeds, check after the first cells.
 - Smoke test updated (parts 1 and 2, thinking off, two-action example on reading only, ranked menu = same lines least ->
   most used, part 2 = part 1's posts, rerun asks nothing): **ALL PASS (53)** on the laptop.
+- **Pre-run checks for part 1 (10-23):** `preflight_v2.py` takes `PREFLIGHT_EXTRA="--v3" PREFLIGHT_SLICES=0` so the real-AI
+  preflight (servers, switching, memory back, 10-user mini-round, kill + resume) runs with the exact big-sim settings;
+  its counts use post screens only (live follow-up screens are not reads). Order given to Gordon: idle check (no runner,
+  no cron, no other heavy user, no old `data/llm_bias/v3`) -> pull -> smoke (52 on the Spark) -> preflight V3 -> start
+  part 1 detached -> watchdog cron (`'ARM 1 DONE'`) -> check command. NB `analyze_v2.py` counts every row; big-sim
+  analysis must keep `screen == "post"` rows only.

@@ -64,7 +64,12 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-22): read this first
+## 0.2 Where things stand (2026-10-23): read this first
+
+- **NEW Fri 10-23 (§14.49): big sim design FINAL, part 1 ready to run.** `--v3` reading = live world + refresh loop +
+  two-action example, JSON on, thinking OFF. `ARM=1 bash v3_big.sh` = part 1 (`data/llm_bias/v3/`, `ARM 1 DONE`). After
+  Gordon + Claude examine it, `ARM=2` = same posts with the menu ranked from part 1's data (`rank_menu.py`, least used
+  on top). Smoke ALL PASS (53).
 
 - **NEW Thu 10-22 evening (§14.48): count probe + live pilot DONE.** Gemma's one action is mostly its style: a
   2-action example lifts its 2-action answers 1%->13%, "single" changes nothing, it says it was "lazy"/low energy. Live
@@ -15162,6 +15167,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 643282a/c345acf | 10-21 PM | **`run_v2.py --v3`**: V3 version = V1 prompts + think + free text + refresh loop + flipped menu in the reading turn (posting = V1); exempt from the one-change guard, can't be mixed with single options; manifest `version` |
 | 5df08a7/0b4d687 | 10-22 | **V3 big sim** (§14.46): `--v3` drops the flipped menu (now the order-study arm, `--menu-order flipped` allowed with `--v3`); `v3_big.sh` (arm 1 V3 full round, arm 2 same posts + flipped menu); `v3_watchdog.sh` takes script/log/marker |
 | 0db510d | 10-22 PM | **Live world** `--live` (`live_world.py`, `live_summary.py`, `test_live_world.py`); `--v3` JSON mode on; `gemma_probe.py count`; **`smoke_test.py` + `fake_engine.py`**; v2_night counts post screens only; `CLAUDE.md` digest (17b6382) |
+| (this) | 10-23 | **Big sim final** (§14.49): `--v3` reading = live + refresh loop + `FORMAT_TWO`, thinking off; `--menu-file`, `--two-actions`; `rank_menu.py` (part 2 menu from part 1 data); `v3_big.sh` ARM=1/2, SLICES=0; smoke 53 checks |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16566,3 +16572,25 @@ Spark: smoke run 2 = **ALL PASS (49)**. Probe + pilot ran detached, no errors. D
 **Open for Gordon before the big sim:** live world in the big sim or not (it changes llama a lot, the other two barely);
 groups stay on the menu though unused; gemma's one-action style accepted as its behaviour (or use the 2-action example
 for all AIs = a new change vs V1).
+
+## 14.49 Big sim design FINAL: part 1 now, part 2's menu ranked from part 1's data (Gordon, Fri 2026-10-23)
+**Gordon 10-23:** keep the reading change "example answer shows 2 actions". "We are running the sim as is now. Then after
+the sim is run we are getting the data, examining it, then flipping the action menu from least used actions at the top
+and most used actions at the bottom. It's part of the sim, that is what we are researching." Confirmed the 3x3: each AI
+writes its own posts; each AI's 100 users read each AI's posts; a cell never mixes authors.
+- **`--v3` reading turn now = V1 prompts + live world + refresh loop + two-action answer example (`FORMAT_TWO`, for all
+  3 AIs), JSON ON, qwen thinking OFF.** Posting = V1 + line 2c (one-action example kept, so no extra posts).
+  Reading manifests: `changes_from_v1 = [refresh_loop, live, two_actions]`.
+- **Part 2's menu is made from part 1's data** (`rank_menu.py <part1 round dir> <menu.txt>`): every action the 3 AIs
+  picked on post screens in the 9 part-1 cells (noise draws left out), summed; the same V1 lines word for word +
+  MESSAGES; sections by total, lines inside by their own total, ties keep V1 order. `run_v2.py --menu-file` reads it
+  (manifest `menu_order = "data"`); `live_menu` leaves a ranked menu's MESSAGES where it is. The fixed `MENU_FLIPPED`
+  (V1-data order) stays for the old test only. Preview from the live pilot: POSTING, GROUP CHATS, MESSAGES, BROWSING,
+  PEOPLE, ON COMMENTS, ON THE POST (like_post last, 2,138 picks).
+- **`v3_big.sh` runs one part at a time:** `ARM=1` (default, so the watchdog restarts part 1) = V3 full round in
+  `data/llm_bias/v3/`, ends `ARM 1 DONE`; `ARM=2` copies part 1's posts, writes `v3_flipped/r<r>/menu.txt` (once) and
+  reads them, ends `ARM 2 DONE`. `SLICES=0` (cross cells read all posts in one go; slice resume is untested with live).
+- Scale: 100 users, round 101 (V1 seeds), noise floor on (4 posts per user). Estimate part 1 ~1.5 days (no thinking;
+  llama is the slowest with its follow-up screens) -- a guess from pilot speeds, check after the first cells.
+- Smoke test updated (parts 1 and 2, thinking off, two-action example on reading only, ranked menu = same lines least ->
+  most used, part 2 = part 1's posts, rerun asks nothing): **ALL PASS (53)** on the laptop.

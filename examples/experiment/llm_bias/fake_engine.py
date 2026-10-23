@@ -88,7 +88,7 @@ class H(BaseHTTPRequestHandler):
         think = bool((p.get("chat_template_kwargs") or {}).get("enable_thinking"))
         if LOG:
             menu = u[u.find("WHAT YOU CAN DO"):]
-            LOG.write(json.dumps({"model": p.get("model"), "think": think, "json": "response_format" in p,
+            LOG.write(json.dumps({"model": p.get("model"), "think": think, "json": "response_format" in p, "two": '...the fields it needs}, {"action"' in u,
                                   "seed": p.get("seed"), "menu_first": menu.split("\n")[1] if "\n" in menu else "",
                                   "screen": u[:60]}) + "\n"); LOG.flush()
         rng = random.Random(p.get("seed"))

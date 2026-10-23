@@ -9,12 +9,12 @@ comments, searches, groups, private messages). Everything else is the real code,
 
   1. unit tests: test_live_world.py (always), test_llm_bias.py (when pytest + numpy are installed)
   2. V1 round       v2_night.py, 4 users: posting, baselines, cross cells, noise floor
-  3. V3 big sim     v3_big.sh, 4 users: arm 1 (V3) and arm 2 (same posts, flipped menu)
-  4. V3 live world  v2_night.py EXTRA="--v3 --live", 6 users; then a hard kill half-way through a cell and a resume
+  3. V3 big sim     v3_big.sh, 4 users: part 1 (V3 = live world), then part 2 (same posts, menu ranked from part 1)
+  4. V3 live world  v2_night.py EXTRA="--v3", 6 users; then a hard kill half-way through a cell and a resume
 After each, the CHECKS below. The last line is "SMOKE: ALL PASS" or "SMOKE: n FAILED" with the list.
   - every user read every post of every set except their own, exactly once (post screens, first view)
   - no unreadable answers; every manifest says the right version and changes
-  - every request had the intended settings: thinking (V3 reading only), JSON mode ON, which menu came first
+  - every request had the intended settings: thinking OFF, JSON mode ON, two-action example (V3 reading only), which menu came first
   - arm 2 read exactly arm 1's posts; the live world really made comments, groups and private messages, and every
     follow-up screen shows its real result; after a resume nothing is missing or doubled
 Run it after any code change, before giving Gordon a command. It never touches data/llm_bias/v* (temp folder only).
@@ -141,31 +141,47 @@ def main():
         check_dir(os.path.join(tmp, "v1"), "V1", 4, None, [])
         requests(reqlog, think=False, json=True)
 
-        print("== 3. V3 big sim, both arms (4 users)")
+        print("== 3. V3 big sim, part 1 then part 2 (4 users)")
         open(reqlog, "w").close()
         e = dict(env, V3_ROOT=os.path.join(tmp, "big"), AGENTS="4", ROUNDS="950", NOISE="2")
-        p = subprocess.run(["bash", os.path.join(HERE, "v3_big.sh")], cwd=REPO, env=e, capture_output=True, text=True, timeout=900)
-        check("v3_big.sh ends BIG DONE", p.stdout.strip().endswith("BIG DONE"), p.stdout.strip()[-80:])
-        check_dir(os.path.join(tmp, "big", "v3"), "V3 arm 1", 4, "V3", ["think", "refresh_loop"])
-        check_dir(os.path.join(tmp, "big", "v3_flipped"), "V3 arm 2", 4, "V3", ["think", "refresh_loop", "menu_order"])
+        big = lambda arm: subprocess.run(["bash", os.path.join(HERE, "v3_big.sh")], cwd=REPO, env=dict(e, ARM=arm),  # noqa: E731
+                                         capture_output=True, text=True, timeout=900)
+        p = big("1")
+        check("v3_big.sh part 1 ends ARM 1 DONE", p.stdout.strip().endswith("ARM 1 DONE"), (p.stdout + p.stderr).strip()[-120:])
+        n1 = len(load(reqlog))
+        p = big("2")
+        check("v3_big.sh part 2 ends ARM 2 DONE", p.stdout.strip().endswith("ARM 2 DONE"), (p.stdout + p.stderr).strip()[-120:])
+        v3c = ["refresh_loop", "live", "two_actions"]
+        check_dir(os.path.join(tmp, "big", "v3"), "V3 part 1", 4, "V3", v3c, live=True)
+        check_dir(os.path.join(tmp, "big", "v3_flipped"), "V3 part 2", 4, "V3", ["refresh_loop", "menu_order", "live", "two_actions"], live=True)
         rs = load(reqlog)
-        reading = [r for r in rs if r["screen"].startswith("You're scrolling")]
-        posting = [r for r in rs if not r["screen"].startswith("You're scrolling")]
-        check("V3: every reading request has thinking ON and JSON mode ON", reading and all(r["think"] and r["json"] for r in reading))
-        check("V3: every posting request has thinking OFF and JSON mode ON", posting and all(not r["think"] and r["json"] for r in posting))
-        firsts = Counter(r["menu_first"] for r in reading)
-        check("V3: reading menus are V1 order (arm 1) and flipped (arm 2)", set(firsts) == {"ON THE POST ON YOUR SCREEN", "GROUP CHATS"}, str(dict(firsts)))
+        post_screen = lambda r: r["screen"].startswith("You're scrolling")  # noqa: E731
+        reading = [r for r in rs if post_screen(r)]
+        posting = [r for r in rs if r["screen"].startswith("You open Reddit")]
+        check("V3: every reading request has thinking OFF, JSON ON, two-action example", reading and all(not r["think"] and r["json"] and r["two"] for r in reading))
+        check("V3: every posting request has thinking OFF, JSON ON, one-action example", posting and all(not r["think"] and r["json"] and not r["two"] for r in posting), f"{len(posting)}")
+        menu = open(glob.glob(os.path.join(tmp, "big", "v3_flipped", "r*", "menu.txt"))[0]).read()
+        sys.path.insert(0, HERE); import rank_menu, run_v2, live_world  # noqa: E401
+        base = (run_v2.MENU + "\n" + live_world.MESSAGES_SECTION).split("\n")
+        check("V3: part 2 menu = the same lines as V1, reordered", sorted(menu.strip().split("\n")) == sorted(base))
+        cnt = Counter(a["action"] for f in glob.glob(os.path.join(tmp, "big", "v3", "r*", "reading_*.jsonl")) if "_d" not in f.split("__")[1]
+                      for x in load(f) if x["screen"] == "post" for a in x["actions"])
+        tot = [sum(cnt[n] for l in sec for n in rank_menu.names(l)) for _, sec in rank_menu.sections(menu.strip())]
+        check("V3: part 2 menu sections go least used -> most used", tot == sorted(tot), str(tot))
+        firsts = [Counter(r["menu_first"] for r in part if post_screen(r)) for part in (rs[:n1], rs[n1:])]
+        check("V3: part 1 reads the V1 order, part 2 the ranked menu", set(firsts[0]) == {"ON THE POST ON YOUR SCREEN"} and
+              set(firsts[1]) == {menu.split("\n")[0]} != {"ON THE POST ON YOUR SCREEN"}, str(firsts))
         same = all(open(f, "rb").read() == open(f.replace("/v3/", "/v3_flipped/"), "rb").read()
                    for f in glob.glob(os.path.join(tmp, "big", "v3", "r*", "posting_*.jsonl")))
-        check("V3: arm 2 read exactly arm 1's posts", same)
+        check("V3: part 2 read exactly part 1's posts", same)
         n0 = len(load(reqlog))
-        subprocess.run(["bash", os.path.join(HERE, "v3_big.sh")], cwd=REPO, env=e, capture_output=True, text=True, timeout=300)
-        check("V3: running it again asks the AI nothing (all done)", len(load(reqlog)) == n0, f"{len(load(reqlog)) - n0} new calls")
+        big("1"); big("2")
+        check("V3: running both parts again asks the AI nothing (all done)", len(load(reqlog)) == n0, f"{len(load(reqlog)) - n0} new calls")
 
         print("== 4. V3 live world (6 users), then a hard kill and resume")
         live = os.path.join(tmp, "live")
-        night(live, 6, "--v3 --live", SLICES="0")
-        check_dir(live, "V3 live", 6, "V3", ["think", "refresh_loop", "live"], live=True)
+        night(live, 6, "--v3", SLICES="0")
+        check_dir(live, "V3 live", 6, "V3", ["refresh_loop", "live", "two_actions"], live=True)
         rows = [x for f in glob.glob(os.path.join(live, "r*", "reading_*.jsonl")) for x in load(f)]
         kinds = Counter(x["screen"] for x in rows)
         done = Counter(e["action"] for x in rows for e in x["executed"] if e["ok"])
@@ -186,7 +202,7 @@ def main():
             o.writelines(json.dumps(x) + "\n" for x in full[: len(full) // 2])
             o.write('{"broken": half a line')  # what a SIGKILL mid-write leaves
         os.remove(man)
-        night(live, 6, "--v3 --live", SLICES="0")
+        night(live, 6, "--v3", SLICES="0")
         again = load(f)
         seqs = [(x["user_id"], x["seq"]) for x in again]
         main = [x for x in again if x["screen"] == "post" and x["view"] == 1]

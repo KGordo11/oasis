@@ -217,9 +217,7 @@ def t_ask(m, people, par):
     save(f"ask_{R.short(m)}", out)
 
 
-FORMAT_TWO = R.FORMAT.replace('[{"action": "<name from the list>", ...the fields it needs}, ...]',
-                               '[{"action": "<name from the list>", ...the fields it needs}, '
-                               '{"action": "<name from the list>", ...the fields it needs}, ...]')
+FORMAT_TWO = R.FORMAT_TWO
 COUNT = {"control": {}, "no_single": {"system": ("a single JSON object", "a JSON object")},
          "two_slots": {"fmt": FORMAT_TWO},
          "more_than_one": {"fmt": R.FORMAT.replace("or none.\n", "or none. You can pick more than one.\n")}}

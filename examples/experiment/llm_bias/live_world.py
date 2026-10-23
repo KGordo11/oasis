@@ -49,6 +49,8 @@ def live_menu(menu):
              .replace("- listen_from_group: read your group chats",
                       "- listen_from_group: open your group chats (and see the groups you can join)"))
     assert m.count("[c<number>]") == 1 and m.count("open your group chats") == 1, "menu wording changed; update live_menu"
+    if "\nMESSAGES\n" in "\n" + m:  # a ranked menu (rank_menu.py) already placed it by its use
+        return m
     first = m.split("\n", 1)[0]
     # least-used sections first in the flipped menu (MESSAGES has never been used), last group in the V1 order
     return MESSAGES_SECTION + "\n" + m if first == "GROUP CHATS" else m + "\n" + MESSAGES_SECTION

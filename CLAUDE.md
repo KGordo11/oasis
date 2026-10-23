@@ -56,9 +56,10 @@ non-binary). Topics: r/politics, r/technology, r/business, r/sports, r/entertain
 **Versions:** V1 = rounds 101-102 (persona only). V2 = 103-104 (+ "I am Qwen3 8B, an AI model made by Alibaba,
 simulating this profile:"; LD-44). V2 changed nothing about bias; llama/gemma were less active. Never pool V1 with
 V2. **V3** = `run_v2.py --v3` = V1 prompts + posting line **2c** ("It's posting time: share whatever you'd post.
-Everyone will read the new posts afterwards.") + reading: qwen thinking + refresh loop, JSON mode ON (Gordon
-10-22). The flipped menu is NOT in V3: it's the order-study arm (`--menu-order flipped`). **`--live`** (§14.47) = a
-live world: actions really happen, results come back as follow-up screens, private messages exist.
+Everyone will read the new posts afterwards.") + reading (FINAL, Gordon 10-23, §14.49): live world (`--live`:
+actions really happen, results come back as follow-up screens, private messages exist) + refresh loop + two-action
+answer example (`FORMAT_TWO`, all 3 AIs), JSON ON, **qwen thinking OFF**. The menu-order study is part 2 of the big
+sim, its menu ranked from part 1's data (`rank_menu.py`, `--menu-file`), run only after part 1 is examined.
 
 **What each AI is like (stable across everything):**
 - llama: ~225 actions/100 screens, 2+ actions on 70% of screens, upvotes ~61%, reports ~27% (topics it hates),
@@ -90,7 +91,8 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | `run_v2.py` | one turn (`post`/`read`); prompts MENU/MENU_FLIPPED/POST_SCREEN/READ_SCREEN/FORMAT; V3 flags; `changes_from_v1` guard; manifests; resumable (`load_rows` repairs a torn last line); optional OASIS `replay()` (off on the Spark) |
 | `llm.py` | backends ollama/llamacpp, `chat_json(think=, json_mode=)`, `stable_seed`, `available_models()` |
 | `v2_night.py` | runner. env ROUNDS STOP SLICES NOISE AGENTS PARALLEL MANAGE_SERVERS DATA_DIR EXTRA TURNS CHECKPOINT PUSH |
-| `v3_big.sh` | V3 big sim: arm 1 `data/llm_bias/v3/`, arm 2 `v3_flipped/` (same posts, flipped menu). Ends `BIG DONE` |
+| `v3_big.sh` | V3 big sim, one part at a time: `ARM=1` `data/llm_bias/v3/` (ends `ARM 1 DONE`); `ARM=2` `v3_flipped/` = same posts, menu ranked from part 1's data (`rank_menu.py`), ends `ARM 2 DONE` |
+| `rank_menu.py` | part 2's menu from part 1's data: least-used actions on top (§14.49) |
 | `v3_test.sh`, `v3_chain.sh`, `v3_summary.py`, `v3_ranges.py`, `v3_post_lines.py`, `make_v3_charts.py` | V3 single-addition tests (done 10-21, data `data/llm_bias/v3_tests/`, not in git) |
 | `v3_watchdog.sh [script log marker]` | cron restarter, gives up after 3 |
 | `preflight_v2.py` | ~110 checks on the Spark, ~25 min; `EXTRA=` passes through; must end ALL CLEAR |

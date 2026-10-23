@@ -135,6 +135,11 @@ FORMAT = """Do whatever you would really do -- as many of these actions as you l
 Reply with JSON only:
 {"actions": [{"action": "<name from the list>", ...the fields it needs}, ...], "reason": "<a few words, in your own voice>"}
 An empty list means you do nothing."""
+# V3 reading (Gordon 10-23, count probe log 14.48): the answer example shows two action entries instead of one
+FORMAT_TWO = FORMAT.replace('[{"action": "<name from the list>", ...the fields it needs}, ...]',
+                            '[{"action": "<name from the list>", ...the fields it needs}, '
+                            '{"action": "<name from the list>", ...the fields it needs}, ...]')
+assert FORMAT_TWO != FORMAT
 
 SYSTEM = ("# OBJECTIVE\n"
           "You're a Reddit user. You'll be shown what's on your screen and decide what, if anything, to do -- "
@@ -326,21 +331,26 @@ def post_set(r, model, agents):
 
 def run(a):
     global DATA, V1_PROMPTS
-    if a.v3:  # V3 version (log 14.45-14.47): V1 prompts; posting = line 2c; reading = thinking + refresh loop
-        a.v1 = True  # menu order is NOT part of V3 (Gordon 10-22: it is the order study, --menu-order flipped)
-        if a.turn == "read":  # JSON mode stays ON (Gordon 10-22: "makes all AIs equal in response")
-            a.think, a.refresh_loop = True, True
+    if a.v3:  # V3 version (log 14.45-14.48): V1 prompts; posting = line 2c; reading = live world + refresh loop
+        a.v1 = True  # + two-action example. Menu order is NOT part of V3: it is the order study (part 2, --menu-file)
+        if a.turn == "read":  # JSON mode ON (Gordon 10-22: "makes all AIs equal"); qwen thinking OFF (Gordon 10-23)
+            a.refresh_loop, a.live, a.two_actions = True, True, True
         else:
             a.post_line = "c"
     DATA, V1_PROMPTS = a.data_dir or DATA, a.v1
     menu = MENU_FLIPPED if a.menu_order == "flipped" else MENU
+    if a.menu_file:  # part 2 of the big sim: the menu ranked from part 1's data (rank_menu.py)
+        menu, a.menu_order = open(a.menu_file).read().strip(), "data"
+        missing = [n for n in ACTION_NAMES if n not in menu]
+        assert not missing, f"{a.menu_file} lacks {missing}"
+    rfmt = FORMAT_TWO if a.two_actions else FORMAT  # reading turn only; posting keeps FORMAT
     post_menu = MENU_POST_ONLY if a.post_menu == "post_only" else menu
     post_screen = POST_SCREEN.replace("nothing has been posted yet.\n", "nothing has been posted yet.\n" + POST_LINES[a.post_line] + "\n") \
         if a.post_line else POST_SCREEN
     if a.post_screen == "v3":
         post_screen, post_menu = POST_SCREEN_V3, MENU_POST_ONLY
     a.live = a.live and a.turn == "read"
-    v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line", "post_screen", "live")}
+    v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line", "post_screen", "live", "two_actions")}
     v3_on = any(v not in (False, None, "v1", "all") for v in v3.values())
     # Gordon's rule (log 14.43): every test = V1 + ONE addition, never stacked; more than one needs --cross
     changes = [k for k, v in v3.items() if k != "v1" and v not in (False, None, "v1", "all")] \
@@ -443,7 +453,7 @@ def run(a):
         elif len(page) == 1:
             sub, tname = TOPICS.get(q["topic"], ("r/" + str(q["topic"]), str(q["topic"])))
             user = READ_SCREEN.format(sub=sub, topic_name=tname, author=q["author"], title=q["title"], body=q["body"],
-                                      menu=menu, fmt=FORMAT)
+                                      menu=menu, fmt=rfmt)
             parts, val, budget = (SEED, a.round, "read", a.posts_by, p["id"], q["key"]), validate, 800
             if view > 1:  # a returning post gets fresh randomness (view 1 keeps the V1 seed)
                 parts += ("view", view)
@@ -484,10 +494,10 @@ def run(a):
 
         def read_screen(sub, tname, author, title, body, comments):
             return LIVE_READ_SCREEN.format(sub=sub, topic_name=tname, author=author, title=title, body=body,
-                                           comments=comments, menu=live_menu, fmt=FORMAT)
+                                           comments=comments, menu=live_menu, fmt=rfmt)
         llm.warm(a.model)
         live_world.run_live(world, people, {p["id"]: [q["key"] for q in feed] for p, feed in sessions},
-                            ask, emit, [r for r in rows if "screen" in r], read_screen, FORMAT, topic_of, a.parallel,
+                            ask, emit, [r for r in rows if "screen" in r], read_screen, rfmt, topic_of, a.parallel,
                             REFRESH_MAX if a.refresh_loop else 1, log)
         f.close()
         log(f"  {n[0]} screens done (live world: {len(world.comments)} comments, {len(world.groups)} groups, "
@@ -545,7 +555,7 @@ def run(a):
            "finished_at": datetime.now().isoformat(), "git_commit": git_commit(), "personas_sha256": PINNED_PERSONAS,
            "post_set_sha256": sha(posts) if posts else None,
            "prompts_sha256": sha([SYSTEM] + ([SELF_ID, MODEL_NAMES] if a.round >= SELF_ID_FROM_ROUND and not a.v1 else []) + [POST_SCREEN, READ_SCREEN, MENU, FORMAT] + ([PAGE_SCREEN] if a.page_size > 1 else [])
-                                 + ([post_screen, menu, post_menu] if v3_on else [])
+                                 + ([post_screen, menu, post_menu] if v3_on else []) + ([rfmt] if a.two_actions else [])
                                  + ([LIVE_READ_SCREEN, live_world.live_menu(menu), live_world.screens()] if a.live else [])),
            "v3_test": v3 if v3_on else None, "changes_from_v1": changes, "version": "V3" if a.v3 else None,
            "config": {"backend": llm.BACKEND, "sampling": llm.SAMPLING if llm.BACKEND == "llamacpp" else "ollama per-model defaults",
@@ -647,6 +657,8 @@ if __name__ == "__main__":
     ap.add_argument("--free-text", action="store_true", help="no JSON-only constraint in the engine (prompt unchanged)")
     ap.add_argument("--refresh-loop", action="store_true", help="read: refresh brings the post back after the next one")
     ap.add_argument("--menu-order", choices=["v1", "flipped"], default="v1")
+    ap.add_argument("--menu-file", help="read: the menu from this file (part 2 of the big sim: rank_menu.py output)")
+    ap.add_argument("--two-actions", action="store_true", help="read: the answer example shows two action entries")
     ap.add_argument("--post-menu", choices=["all", "post_only"], default="all")
     ap.add_argument("--post-line", choices=sorted(POST_LINES), help="post: add one of the V3 test-2 lines")
     ap.add_argument("--post-screen", choices=["v1", "v3"], default="v1", help="post: v3 = the V3 posting screen (posting-only menu)")
@@ -654,9 +666,9 @@ if __name__ == "__main__":
     ap.add_argument("--live", action="store_true", help="read: a live world -- actions really happen and their results "
                     "come back as follow-up screens; comments, groups and private messages work (log 14.47)")
     ap.add_argument("--v3", action="store_true", help="V3 version: V1 prompts; posting turn = line 2c; reading turn = "
-                    "thinking + refresh loop, JSON mode on (log 14.47); add --menu-order flipped for the order study")
+                    "live world + refresh loop + two-action example, JSON on, thinking off (log 14.48); part 2 adds --menu-file")
     args = ap.parse_args()
-    if args.v3 and (args.v1 or args.think or args.free_text or args.refresh_loop or args.cross
+    if args.v3 and (args.v1 or args.think or args.free_text or args.refresh_loop or args.cross or args.two_actions
                     or args.post_line or args.post_menu != "all" or args.post_screen != "v1"):
         ap.error("--v3 already sets all of these")
     if args.post_screen == "v3" and (args.post_line or args.post_menu != "all"):

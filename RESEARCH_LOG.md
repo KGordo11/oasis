@@ -16619,3 +16619,26 @@ it read live follow-up screens). Stopped everything (cron removed, all runners a
 - `v3_big.sh` refuses to start while `preflight_v2.py` runs. `analyze_v2.py` keeps post screens only.
 - **`v3_start.sh`**: preflight (V3 settings) -> only on ALL CLEAR: watchdog cron + part 1. One command, no manual order.
 - Smoke ALL PASS (54). The broken `data/llm_bias/v3` is deleted before the restart (nothing in it is usable).
+
+## 14.51 Part 1 running; shared Spark; slot speed test on the Mac (Sat-Sun 2026-10-24/25)
+**Part 1 (started Fri 10-23 13:07 via `v3_start.sh`, preflight ALL CLEAR):** at Sun 16:04, 7 of 9 cells done, llama reads
+gemma at 6,282/9,801; every file 0.0% unreadable. Screens per cell = posts x 99 readers (posts: qwen 102, llama 119,
+gemma 99). Side trips per post screen: llama ~1.1 (13,000 on its own posts), gemma 0.06, qwen ~0. Measured s/screen:
+qwen 0.55 (Spark free) -> 2.09-2.36 (shared), llama 2.35-2.48, gemma 5.82 (shared). Another user (hsa303) runs GPU
+jobs (26-56 GB) since Sat and asked us to take the server down when done; the Spark is shared, so speeds are ~3-4x the
+unshared ones. Finish estimate part 1: Mon 10-26 evening - Tue 10-27 morning. Kept 8 slots (part 2 must match part 1).
+
+**Slot test on the Mac (M2 Max, `llama-batched-bench`, screens like the sim: 800 tokens in, 80 out; gemma's Ollama file
+does not load in llama.cpp, as on the Spark).** Seconds per screen:
+
+| slots | 1 | 4 | 8 | 16 | 32 | 64 | 8, `-ub 2048` | 32, `-ub 2048` | 8, KV q8_0 |
+|---|---|---|---|---|---|---|---|---|---|
+| qwen3:8b | 3.13 | 2.62 | 2.39 | 2.31 | 2.27 | 2.23 | 2.27 | 2.18 | 2.40 |
+| llama3.1:8b | 3.04 | 2.85 | 2.45 | 2.31 | 2.24 | 2.19 | | | |
+
+More slots past 8 gain 3-11% at most: ~80% of the time is reading the prompt (prefill), which more slots do not
+speed up; they only speed the writing. `-ub 2048` ~5%; KV q8_0 nothing (and it changes answers). Same picture as the
+Spark (§14.24: 32 slots 1.2x). The real cost is that every screen's shared text (menu + answer format) sits AFTER the
+post, so it is re-read each screen; moving it first would let llama.cpp reuse it, but that changes the prompt (and menu
+position is what the order study tests) -> idea for a next study only. Spark test command (when nothing else of ours
+runs): `llama-batched-bench -m <model> -c 57344 -npp 800 -ntg 80 -npl 8,16,32,64 -fa on -ngl 99`.

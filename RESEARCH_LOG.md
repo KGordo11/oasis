@@ -4,6 +4,8 @@
 > not on the laptop.** Gordon types the commands on the Spark himself. Claude writes the code here (laptop repo,
 > pushed to GitHub); the Spark pulls it. **A new Claude: read Part 0 §0.2, then Part 14 §14.32 (HANDOFF). They
 > are kept current after every change, and you must keep them current too (rule in §14.32).**
+> **Catch up: `bash examples/experiment/llm_bias/handoff_check.sh read`. Finish every change with
+> `bash examples/experiment/llm_bias/handoff_check.sh`: it must say HANDOFF CURRENT before the final commit (§14.52).**
 
 **If you are new: read Part 0 (below) and nothing else to start.** It says what this project is, what was done
 from July to October 2026, what was found, where things stand today, and how every piece works. Parts 1-13 are
@@ -64,7 +66,18 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-23): read this first
+## 0.2 Where things stand (2026-10-26): read this first
+
+- **NEW Mon 10-26 (§14.52): handoff check.** The 10-23..10-26 sessions wrote §14.50/§14.51 but skipped §0.2, the
+  §14.32 Status, the change history and memory. `handoff_check.sh` now FAILs on exactly that; every change ends with it
+  saying HANDOFF CURRENT (`read` mode = the catch-up bundle for a new session).
+
+- **NEW Sat-Mon 10-24/26 (§14.51): part 1 RUNNING** (since Fri 10-23 13:07, preflight ALL CLEAR). Sun 16:04: 7 of 9
+  cells done, 0.0% unreadable everywhere. Spark shared with hsa303 (speeds ~3-4x slower; take our servers down when
+  done). Finish estimate Mon 10-26 evening - Tue 10-27 morning. Mac slot test: more than 8 slots gains <= 11% (prefill
+  is ~80% of the time), so 8 slots stay. **Part 2 start built (10-26, f1b71cc):** `ARM=2 v3_start.sh` refuses without
+  `ARM 1 DONE`, ranks the menu, preflights with it, then watchdog + part 2. Next: Gordon's `ARM 1 DONE` -> rsync ->
+  examine part 1 together -> part 2.
 
 - **NEW Fri 10-23 PM (§14.50): first part-1 start broke** (started during the preflight; servers switched off under
   it; 70-99% "Connection refused" saved as unreadable, rc=0 everywhere). Stopped, data to delete. Guards added: dead
@@ -14931,6 +14944,14 @@ into the running window (typed text gets queued as shell input).
 
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
+### Status (2026-10-26)
+- V3 big sim part 1 RUNNING on the Spark since Fri 10-23 13:07 (`v3_start.sh`, watchdog cron `'ARM 1 DONE'`), §14.51;
+  7/9 cells done Sun 16:04, ETA Mon evening - Tue morning. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
+  Handoff check added (§14.52).
+
+### Status (2026-10-23)
+- First part-1 start broke (preflight + big sim at once, §14.50); guards + `v3_start.sh`; restarted 13:07.
+
 ### Status (2026-10-22 PM)
 - Built and laptop-tested, NOT run on the Spark: `--live` world, `gemma_probe.py count`, `smoke_test.py` (§14.47). Gordon
   runs: pull → smoke → probe → live pilot (`data/llm_bias/live_pilot`). Big sim (`v3_big.sh`) still waits for his go.
@@ -15082,6 +15103,10 @@ After **every** code change, bug fix, new command given to Gordon, decision, or 
 1. Update **§14.32** (status, procedures, decisions, bugs) and **Part 0 §0.2** (one-paragraph status).
 2. Add a row to the change history below. Add a dated §14.x entry for anything substantive.
 3. Commit and push. Tell Gordon the commit code if the Spark must `git pull --no-edit` it.
+4. Update memory (`project_llm_bias_v2.md` + its `MEMORY.md` line).
+5. **Run `bash examples/experiment/llm_bias/handoff_check.sh` before the final commit. It must print HANDOFF CURRENT**
+   (it checks that §0.2, §14.32 Status and memory name the newest §14.x, and that the newest change-history row is no
+   older than the newest code change). A §14.x entry alone is NOT an update: 10-23..10-26 did only that (§14.52).
 
 A new Claude must be able to open this file and carry on with no other context. Anything that exists only in chat
 or in memory is lost.
@@ -15172,7 +15197,11 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 643282a/c345acf | 10-21 PM | **`run_v2.py --v3`**: V3 version = V1 prompts + think + free text + refresh loop + flipped menu in the reading turn (posting = V1); exempt from the one-change guard, can't be mixed with single options; manifest `version` |
 | 5df08a7/0b4d687 | 10-22 | **V3 big sim** (§14.46): `--v3` drops the flipped menu (now the order-study arm, `--menu-order flipped` allowed with `--v3`); `v3_big.sh` (arm 1 V3 full round, arm 2 same posts + flipped menu); `v3_watchdog.sh` takes script/log/marker |
 | 0db510d | 10-22 PM | **Live world** `--live` (`live_world.py`, `live_summary.py`, `test_live_world.py`); `--v3` JSON mode on; `gemma_probe.py count`; **`smoke_test.py` + `fake_engine.py`**; v2_night counts post screens only; `CLAUDE.md` digest (17b6382) |
-| (this) | 10-23 | **Big sim final** (§14.49): `--v3` reading = live + refresh loop + `FORMAT_TWO`, thinking off; `--menu-file`, `--two-actions`; `rank_menu.py` (part 2 menu from part 1 data); `v3_big.sh` ARM=1/2, SLICES=0; smoke 53 checks |
+| cf523f9 | 10-23 | **Big sim final** (§14.49): `--v3` reading = live + refresh loop + `FORMAT_TWO`, thinking off; `--menu-file`, `--two-actions`; `rank_menu.py` (part 2 menu from part 1 data); `v3_big.sh` ARM=1/2, SLICES=0; smoke 53 checks |
+| b856cf6 | 10-23 11:06 | `preflight_v2.py` takes `PREFLIGHT_EXTRA` / `PREFLIGHT_SLICES` (preflight with the big-sim settings); counts post screens only |
+| a81d2bb | 10-23 12:36 | **Guards after the broken start** (§14.50): `llm.chat_json` raises `ConnectionError` on all-transport errors; `v2_night` STOPPING at > 5% unreadable; `v3_big.sh` refuses during a preflight; `analyze_v2.py` post screens only; **`v3_start.sh`** (preflight -> ALL CLEAR -> watchdog + part 1); smoke 54 |
+| f1b71cc | 10-26 14:08 | `v3_start.sh` part 2 (`ARM=2`): needs `ARM 1 DONE`, `rank_menu.py` -> `v3_flipped/r101/menu.txt`, preflight with `--menu-file`, ARM=2 watchdog, logs `v3_big_part2.txt` (§14.51) |
+| (this) | 10-26 | **`handoff_check.sh`** (`read` = catch-up bundle; default = FAIL if §0.2 / §14.32 Status / change history / memory are behind); rule §14.32a steps 4-5, CLAUDE.md §0 (§14.52) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16647,3 +16676,18 @@ runs): `llama-batched-bench -m <model> -c 57344 -npp 800 -ntg 80 -npl 8,16,32,64
 `v3_flipped/r101/menu.txt` -> preflight with `--v3 --menu-file` (`preflight_v3_part2.txt`) -> only on ALL CLEAR: watchdog
 cron `ARM=2 ... v3_big_part2.txt 'ARM 2 DONE'` (part 1's restart count moved to `watchdog_v3_big_part1.txt`) -> part 2.
 Part 1's preflight file is now `preflight_v3_part1.txt`. Laptop test with stubs: all 4 branches behave.
+
+## 14.52 Handoff check: the log must be updated, not just appended to (Mon 2026-10-26)
+**Gordon 10-26:** "did the last chat not update the log??? make sure there's instructions in the claude file and log
+[for] whatever you use to read efficiently [and] that you always update the log." It partly did: the 10-23..10-26
+sessions wrote §14.50/§14.51 and committed, but §0.2 still said 10-23 (no §14.51), §14.32 Status stopped at 10-22,
+the change history had no rows for b856cf6/a81d2bb/f1b71cc, and memory stopped at 10-23. The rule (§14.32a) was
+already written in the log, CLAUDE.md and memory; it was skipped because nothing checked it.
+- **`examples/experiment/llm_bias/handoff_check.sh`** (Mac). `read` = what a new session reads: §0.2 top, the newest
+  §14.x entry in full, git status + last commits. No argument = the finish check: FAIL if §0.2, §14.32 Status,
+  `project_llm_bias_v2.md` or its MEMORY.md line don't name the newest §14.x, or if the newest change-history row is
+  older than the newest code change (uncommitted code = today; `make_report_v2.py` WIP ignored). Run before the
+  10-26 fixes it printed all 5 FAILs; after them, HANDOFF CURRENT.
+- Instructions added: log header, §14.32a steps 4-5, `CLAUDE.md` §0 (start + finish), `~/research/CLAUDE.md`, memory.
+- Backfilled: §0.2 bullets for §14.51/§14.52, §14.32 Status 10-23 + 10-26, change-history rows cf523f9 b856cf6 a81d2bb
+  f1b71cc, memory 10-24..10-26.

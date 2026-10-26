@@ -6,11 +6,19 @@ knowledge so a new session can start work without re-reading the log. Update it 
 code map changes. Don't paste results here: they go in the log.
 
 ## 0. Start of every session (2 minutes)
-1. Read log §0.2 (top bullets) and the newest §14.x entry (`grep -n "^## 14\." RESEARCH_LOG.md | tail -3`).
-2. `cd /Users/gordon/research/oasis && git status --short | head && git log --oneline -5`. Unrelated dirty files are
-   expected and are NOT ours to commit: r001 manifest, summary_test.md, population_v2_validation.md, make_report_v2.py,
-   social_timeline/make_graph.py.
-3. Never assume a run is going or finished. Ask Gordon for the Spark output, or give him the check command (§5).
+1. `cd /Users/gordon/research/oasis && bash examples/experiment/llm_bias/handoff_check.sh read` prints everything to
+   read: log §0.2 top, the newest §14.x entry in full, git status + last commits. Then this file. Unrelated dirty files
+   are expected and are NOT ours to commit: r001 manifest, summary_test.md, population_v2_validation.md,
+   make_report_v2.py, social_timeline/make_graph.py.
+2. Also run `bash examples/experiment/llm_bias/handoff_check.sh`. If it FAILs, the last session left the log behind:
+   fix that first (backfill from git log + the newest §14.x) and tell Gordon.
+3. Never assume a run is going or finished. Ask Gordon for the Spark output, or give him the check command (§4).
+
+## 0b. End of EVERY change (no exceptions; 10-26: a §14.x entry alone is NOT updating the log)
+1. Log: new/extended §14.x entry + a **§0.2** bullet (fix its date) + a **§14.32 Status** block + a **§14.32c** row.
+2. Memory: `project_llm_bias_v2.md` dated line naming the §14.x + its `MEMORY.md` index line.
+3. `bash examples/experiment/llm_bias/handoff_check.sh` must print **HANDOFF CURRENT**. Then commit by file name, push
+   to `origin`.
 
 ## 1. How Gordon works (hard rules, each one learned from a real mistake)
 - **Gordon runs the Spark himself.** Give numbered copy-paste commands with what he should see. Don't drive or poll
@@ -22,8 +30,9 @@ code map changes. Don't paste results here: they go in the log.
   No Excel or artifact unless he asks (10-21: "I want to see it here RIGHT NOW"). Explain every term where it
   appears, at 5th-grade level. **Total engagement** (all actions except do_nothing, per 100 screens) is the main
   measure, and upvotes are only detail.
-- **Always finish with: log entry (§14.x + §0.2 + §14.32 Status + §14.32c change-history row), commit by file name
-  (never `git commit -a`), push to `origin` (KGordo11/oasis, branch `llm-bias`, NEVER `upstream`), memory update.**
+- **Always finish with: log entry (§14.x + §0.2 + §14.32 Status + §14.32c change-history row), memory update,
+  `handoff_check.sh` = HANDOFF CURRENT, commit by file name (never `git commit -a`), push to `origin` (KGordo11/oasis,
+  branch `llm-bias`, NEVER `upstream`).** See §0b.
 - Local models only (Ollama/llama.cpp: qwen, llama, gemma...). Never Claude/Gemini as authors or personas.
 - Posts: the only rule is staying on topic. No length or format limits unless Gordon sets one.
 - Don't propose work on the "refusal perform-vs-arrange" project (dormant; Gordon didn't recognise it).
@@ -93,6 +102,7 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | `v2_night.py` | runner. env ROUNDS STOP SLICES NOISE AGENTS PARALLEL MANAGE_SERVERS DATA_DIR EXTRA TURNS CHECKPOINT PUSH |
 | `v3_big.sh` | V3 big sim, one part at a time: `ARM=1` `data/llm_bias/v3/` (ends `ARM 1 DONE`); `ARM=2` `v3_flipped/` = same posts, menu ranked from part 1's data (`rank_menu.py`), ends `ARM 2 DONE` |
 | **`v3_start.sh`** | start a part safely: preflight (its settings) -> only on ALL CLEAR watchdog cron + `v3_big.sh`; `ARM=2` needs `ARM 1 DONE`, ranks the menu first, logs to `v3_big_part2.txt` (§14.50, §14.51) |
+| **`handoff_check.sh [read]`** | Mac: `read` = session catch-up bundle; no arg = FAIL if log §0.2/§14.32 Status/§14.32c/memory are behind (§14.52) |
 | `rank_menu.py` | part 2's menu from part 1's data: least-used actions on top (§14.49) |
 | `v3_test.sh`, `v3_chain.sh`, `v3_summary.py`, `v3_ranges.py`, `v3_post_lines.py`, `make_v3_charts.py` | V3 single-addition tests (done 10-21, data `data/llm_bias/v3_tests/`, not in git) |
 | `v3_watchdog.sh [script log marker]` | cron restarter, gives up after 3 |

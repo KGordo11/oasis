@@ -92,7 +92,7 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | `llm.py` | backends ollama/llamacpp, `chat_json(think=, json_mode=)`, `stable_seed`, `available_models()` |
 | `v2_night.py` | runner. env ROUNDS STOP SLICES NOISE AGENTS PARALLEL MANAGE_SERVERS DATA_DIR EXTRA TURNS CHECKPOINT PUSH |
 | `v3_big.sh` | V3 big sim, one part at a time: `ARM=1` `data/llm_bias/v3/` (ends `ARM 1 DONE`); `ARM=2` `v3_flipped/` = same posts, menu ranked from part 1's data (`rank_menu.py`), ends `ARM 2 DONE` |
-| **`v3_start.sh`** | start part 1 safely: preflight (V3 settings) -> only on ALL CLEAR watchdog cron + `ARM=1 v3_big.sh` (§14.50) |
+| **`v3_start.sh`** | start a part safely: preflight (its settings) -> only on ALL CLEAR watchdog cron + `v3_big.sh`; `ARM=2` needs `ARM 1 DONE`, ranks the menu first, logs to `v3_big_part2.txt` (§14.50, §14.51) |
 | `rank_menu.py` | part 2's menu from part 1's data: least-used actions on top (§14.49) |
 | `v3_test.sh`, `v3_chain.sh`, `v3_summary.py`, `v3_ranges.py`, `v3_post_lines.py`, `make_v3_charts.py` | V3 single-addition tests (done 10-21, data `data/llm_bias/v3_tests/`, not in git) |
 | `v3_watchdog.sh [script log marker]` | cron restarter, gives up after 3 |

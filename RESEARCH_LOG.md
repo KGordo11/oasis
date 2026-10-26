@@ -16642,3 +16642,8 @@ Spark (§14.24: 32 slots 1.2x). The real cost is that every screen's shared text
 post, so it is re-read each screen; moving it first would let llama.cpp reuse it, but that changes the prompt (and menu
 position is what the order study tests) -> idea for a next study only. Spark test command (when nothing else of ours
 runs): `llama-batched-bench -m <model> -c 57344 -npp 800 -ntg 80 -npl 8,16,32,64 -fa on -ngl 99`.
+
+**Part 2 start (10-26):** `ARM=2 v3_start.sh` = refuses without `ARM 1 DONE` in `v3_big.txt` -> `rank_menu.py` writes
+`v3_flipped/r101/menu.txt` -> preflight with `--v3 --menu-file` (`preflight_v3_part2.txt`) -> only on ALL CLEAR: watchdog
+cron `ARM=2 ... v3_big_part2.txt 'ARM 2 DONE'` (part 1's restart count moved to `watchdog_v3_big_part1.txt`) -> part 2.
+Part 1's preflight file is now `preflight_v3_part1.txt`. Laptop test with stubs: all 4 branches behave.

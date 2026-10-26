@@ -77,7 +77,8 @@ research**:
   done). Finish estimate Mon 10-26 evening - Tue 10-27 morning. Mac slot test: more than 8 slots gains <= 11% (prefill
   is ~80% of the time), so 8 slots stay. **Part 2 start built (10-26, f1b71cc):** `ARM=2 v3_start.sh` refuses without
   `ARM 1 DONE`, ranks the menu, preflights with it, then watchdog + part 2. Next: Gordon's `ARM 1 DONE` -> rsync ->
-  examine part 1 together -> part 2.
+  examine part 1 together -> part 2. **Mon 15:57: on the LAST cell (gemma reads llama, ETA ~20:10), then noise
+  floor -> `ARM 1 DONE` ~21:30-22:00 Mon.**
 
 - **NEW Fri 10-23 PM (§14.50): first part-1 start broke** (started during the preflight; servers switched off under
   it; 70-99% "Connection refused" saved as unreadable, rc=0 everywhere). Stopped, data to delete. Guards added: dead
@@ -14946,7 +14947,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 
 ### Status (2026-10-26)
 - V3 big sim part 1 RUNNING on the Spark since Fri 10-23 13:07 (`v3_start.sh`, watchdog cron `'ARM 1 DONE'`), §14.51;
-  7/9 cells done Sun 16:04, ETA Mon evening - Tue morning. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
+  Mon 15:57: last cell (gemma reads llama) running, `ARM 1 DONE` ~21:30-22:00 Mon. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
   Handoff check added (§14.52).
 
 ### Status (2026-10-23)
@@ -16656,6 +16657,10 @@ gemma 99). Side trips per post screen: llama ~1.1 (13,000 on its own posts), gem
 qwen 0.55 (Spark free) -> 2.09-2.36 (shared), llama 2.35-2.48, gemma 5.82 (shared). Another user (hsa303) runs GPU
 jobs (26-56 GB) since Sat and asked us to take the server down when done; the Spark is shared, so speeds are ~3-4x the
 unshared ones. Finish estimate part 1: Mon 10-26 evening - Tue 10-27 morning. Kept 8 slots (part 2 must match part 1).
+**Mon 10-26 15:57 (Gordon's check):** cell 8 gemma reads qwen ended 07:16, rc=0, 10,098 screens in 665.4 min (3.95
+s/screen); cell 9 (last) gemma reads llama started 07:16, ~11,781 screens, script ETA 776 min -> ~20:10; then the noise
+floor (~400 screens per AI) -> `ARM 1 DONE` ~21:30-22:00 Mon (estimate). Watchdog cron still on. Spark banner:
+"System restart required" (a reboot kills the run; the cron watchdog resumes it).
 
 **Slot test on the Mac (M2 Max, `llama-batched-bench`, screens like the sim: 800 tokens in, 80 out; gemma's Ollama file
 does not load in llama.cpp, as on the Spark).** Seconds per screen:

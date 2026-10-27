@@ -68,6 +68,9 @@ research**:
 
 ## 0.2 Where things stand (2026-10-27): read this first
 
+- **NEW Tue 10-27 (§14.55): LD-46 future sims = 16 slots for all 3 AIs** (`SLOTS=16 PARALLEL=16`). Part 2 stays at 8;
+  defaults change only after `ARM 2 DONE`.
+
 - **NEW Tue 10-27 02:15 (§14.54): Spark slot test DONE.** Unlike the Mac, more slots pay here: 32 slots ~1.5-1.6x
   faster, 64 ~1.6-2x (gemma ~1.5x from 16 on). Part 2 stays at 8 slots; more slots = future studies (memory check first).
   Future sims: ~34 slots (gemma 16) ~50 h per big-sim part shared vs 78 h at 8 (estimate, memory check first).
@@ -14959,7 +14962,8 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 ### Status (2026-10-26)
 - V3 big sim part 1 RUNNING on the Spark since Fri 10-23 13:07 (`v3_start.sh`, watchdog cron `'ARM 1 DONE'`), §14.51;
   **PART 1 DONE Mon 10-26 19:18, cron off, data on the Mac, results §14.53** (gemma upvotes its own AI's posts;
-  no engagement bias). 10-27 02:15 slot test DONE (§14.54: 32 slots ~1.5x, 64 ~2x). Next: part 2. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
+  no engagement bias). 10-27 02:15 slot test DONE (§14.54); LD-46 (§14.55): future sims 16 slots, part 2 stays 8.
+  Next: part 2. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
   Handoff check added (§14.52).
 
 ### Status (2026-10-23)
@@ -16813,3 +16817,16 @@ done, part 2 not started). It cannot change part 2 (8 slots, to match part 1); i
   - The Spark's CPU is not the problem (20 Arm cores, load ~2.4). The bottleneck is the GPU, shared with hsa303, and its
     memory speed (GB10 ~273 GB/s, ~1/4 of a big desktop GPU): writing each token re-reads the model, so one user is slow
     and many slots share the cost.
+
+## 14.55 LD-46: future sims run at 16 slots, all three AIs (Gordon, Tue 2026-10-27)
+**Gordon:** "if we are able to get more sims let's use 16 slots since gemma isn't affected after that and then they're
+also all still the same." Decision **LD-46: every study after the V3 big sim uses 16 slots for qwen, llama and gemma**
+(gemma gains nothing past 16 in §14.54; one setting for all keeps the AIs comparable).
+- **Part 2 stays at 8 slots** (must match part 1). Code defaults are NOT changed now: `v3_start.sh` / `v3_big.sh` and the
+  watchdog restart part 2 with the defaults (8), so changing them before `ARM 2 DONE` would mix slot counts.
+- How, for the next study: `SLOTS=16 PARALLEL=16` together (`SLOTS` = server slots in `llamacpp_servers.sh`, `PARALLEL` =
+  requests in flight in `v2_night.py`/`v3_big.sh`; they must match), 8,192 tokens per slot (max screen 4,139). Every cell of
+  a study at 16; never mix with 8-slot data (slot count changes answers slightly, like rerun noise).
+- Expected: ~1.3-1.5x faster than 8 (bench: qwen 1.38x, llama 1.29x, gemma 1.54x); a part-1-sized sim ~55 h shared
+  (78 h at 8). Memory per AI ~21-25 GB (estimate): fits with hsa303's 56 GB peak. Live-world ticks of ~100 user-screens
+  = 7 waves of 16 (last one part-empty), fine.

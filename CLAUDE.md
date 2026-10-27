@@ -55,7 +55,8 @@ cells in nested slices 16/32/64/all, then a noise floor (each AI re-reads 4 post
 resampling users and posts. "Clear" = the 95% range excludes 0.
 
 **Fixed setup:** qwen3:8b, llama3.1:8b, gemma3:12b (std GGUF Q4_K_M; Ollama's gemma file isn't llama.cpp-readable).
-llama.cpp b11434/5e03bdd, one server per model (ports 11601/11602/11603), 8 slots × 8192 ctx, `--jinja`, flash attn,
+llama.cpp b11434/5e03bdd, one server per model (ports 11601/11602/11603), 8 slots × 8192 ctx (**LD-46: studies after
+the V3 big sim use 16 slots, `SLOTS=16 PARALLEL=16`; part 2 stays 8**), `--jinja`, flash attn,
 **one model in memory at a time** (LD-42, `MANAGE_SERVERS=1`). Uniform sampling: temp 0.7, top_k 40, top_p 0.9,
 min_p 0, repeat 1.0. Thinking off except V3 qwen. 100 users `personas_v2.json` SHA `ed110626…` (Census/BLS/Pew quota
 sample, Big Five, orthogonal-array stances: 20 users per stance per topic, zero correlation; 50 M / 50 F, nobody

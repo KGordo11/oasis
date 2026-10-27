@@ -70,6 +70,7 @@ research**:
 
 - **NEW Tue 10-27 02:15 (§14.54): Spark slot test DONE.** Unlike the Mac, more slots pay here: 32 slots ~1.5-1.6x
   faster, 64 ~1.6-2x (gemma ~1.5x from 16 on). Part 2 stays at 8 slots; more slots = future studies (memory check first).
+  Future sims: ~34 slots (gemma 16) ~50 h per big-sim part shared vs 78 h at 8 (estimate, memory check first).
   Next: start part 2 (`ARM=2 v3_start.sh`). `slot_bench.sh` (8/16/32/64 slots, each AI,
   ~15-30 min). For future studies only; part 2 stays at 8 slots. Then `ARM=2 v3_start.sh`.
 
@@ -16795,3 +16796,20 @@ done, part 2 not started). It cannot change part 2 (8 slots, to match part 1); i
   ~1,000), so keep 8,192 per slot (4,096 would cut a few screens: B-28). 32 x 8,192 or 64 x 8,192 needs a KV-memory check
   before use (hsa303 takes 26-56 GB). **Part 2 stays at 8 slots (must match part 1).** Use more slots only for a new
   study, with every cell at the same slot count.
+- **Best slots for future sims (Gordon 10-27: more than 64? best? times? GB?), estimates, not measured:**
+  - More than 64: possible, but at 64 slots reading the prompt is ~68% of the time (qwen 32.6 of 47.6 s) and does not
+    speed up with slots (~1,570 tokens/s ceiling) -> 128 would gain ~10-15%, and its memory doesn't fit with 8,192/slot.
+  - Memory (my calculation; check with the server logs' `KV buffer size`): KV per token f16 = qwen 144 KiB, llama 128 KiB,
+    gemma ~64 KiB global + sliding-window layers. Per AI = weights (5 / 5 / 7.3 GB) + slots x 8,192 x KV: 8 slots ~14-18 GB;
+    32-34 slots ~40-45 GB; 64 slots ~70-80 GB (only when hsa303 is idle; with hsa303 at its 56 GB peak + ~8 GB system,
+    ~50-55 GB is our safe ceiling; 10-07 crash = out of memory).
+  - The live world runs in ticks (every user's t-th post, then the next tick; `live_world.py`), ~100 user-screens per
+    tick: 34 slots = 3 full waves, 50 = 2; 32 or 64 leave a part-empty last wave, and llama's follow-up screens make a
+    tail. So pick 34 (or 50 when the Spark is free), not 32/64; gains will be below the bench ratios.
+  - Times for one big-sim part (9 cells, ~32,000 post screens per AI), Spark shared as in part 1 (part 1 at 8 slots:
+    qwen 15.2 h, llama 24.2 h, gemma 38.6 h = 78 h): 16 slots ~55 h; **32-34 slots (gemma 16) ~50 h**; 64 ~43 h (memory
+    no). Spark free: part 1's qwen baseline ran at 0.61 s/screen on Fri vs 2.1-2.4 shared (~3.5x), so a free Spark at 8
+    slots would be roughly ~1 day, ~15-18 h at 32-34 slots (rough).
+  - The Spark's CPU is not the problem (20 Arm cores, load ~2.4). The bottleneck is the GPU, shared with hsa303, and its
+    memory speed (GB10 ~273 GB/s, ~1/4 of a big desktop GPU): writing each token re-reads the model, so one user is slow
+    and many slots share the cost.

@@ -68,6 +68,12 @@ research**:
 
 ## 0.2 Where things stand (2026-10-26): read this first
 
+- **NEW Mon 10-26 night (§14.53): PART 1 RESULTS.** Data checked (gate passes, unreadable <= 0.9%). Everyone is more
+  active than V1 (gemma ~95 -> ~180 per 100 posts, mostly liking comments). **First clear own-AI lean on the Spark:
+  gemma upvotes gemma's posts** (59.5% vs 46-50%; pair ranges +9..+21 and +2..+15). Total engagement: no clear bias.
+  Can't yet tell live world vs gemma's new post set, or recognition vs shared taste. Part 2 menu previewed; waiting
+  for Gordon's go to start part 2 (`git pull`, `ARM=2 v3_start.sh`).
+
 - **NEW Mon 10-26 (§14.52): handoff check.** The 10-23..10-26 sessions wrote §14.50/§14.51 but skipped §0.2, the
   §14.32 Status, the change history and memory. `handoff_check.sh` now FAILs on exactly that; every change ends with it
   saying HANDOFF CURRENT (`read` mode = the catch-up bundle for a new session).
@@ -14946,7 +14952,8 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 
 ### Status (2026-10-26)
 - V3 big sim part 1 RUNNING on the Spark since Fri 10-23 13:07 (`v3_start.sh`, watchdog cron `'ARM 1 DONE'`), §14.51;
-  **PART 1 DONE Mon 10-26 19:18 (`ARM 1 DONE`), servers stopped.** Next: cron off, rsync, examine, then part 2. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
+  **PART 1 DONE Mon 10-26 19:18, cron off, data on the Mac, results §14.53** (gemma upvotes its own AI's posts;
+  no engagement bias). Next: Gordon's go -> part 2. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
   Handoff check added (§14.52).
 
 ### Status (2026-10-23)
@@ -15201,7 +15208,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | b856cf6 | 10-23 11:06 | `preflight_v2.py` takes `PREFLIGHT_EXTRA` / `PREFLIGHT_SLICES` (preflight with the big-sim settings); counts post screens only |
 | a81d2bb | 10-23 12:36 | **Guards after the broken start** (§14.50): `llm.chat_json` raises `ConnectionError` on all-transport errors; `v2_night` STOPPING at > 5% unreadable; `v3_big.sh` refuses during a preflight; `analyze_v2.py` post screens only; **`v3_start.sh`** (preflight -> ALL CLEAR -> watchdog + part 1); smoke 54 |
 | f1b71cc | 10-26 14:08 | `v3_start.sh` part 2 (`ARM=2`): needs `ARM 1 DONE`, `rank_menu.py` -> `v3_flipped/r101/menu.txt`, preflight with `--menu-file`, ARM=2 watchdog, logs `v3_big_part2.txt` (§14.51) |
-| (this) | 10-26 | **`handoff_check.sh`** (`read` = catch-up bundle; default = FAIL if §0.2 / §14.32 Status / change history / memory are behind); rule §14.32a steps 4-5, CLAUDE.md §0 (§14.52) |
+| ddd2a8c | 10-26 | **`handoff_check.sh`** (`read` = catch-up bundle; default = FAIL if §0.2 / §14.32 Status / change history / memory are behind); rule §14.32a steps 4-5, CLAUDE.md §0 (§14.52) |
+| (this) | 10-27 00:30 | **`v3_big_summary.py <dir> [round]`**: analyze_v2's tables on a big-sim part (one row per post read, all views together; gate vs published numbers; follow-up screens table); part 1 results §14.53 |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16698,3 +16706,55 @@ already written in the log, CLAUDE.md and memory; it was skipped because nothing
 - Instructions added: log header, §14.32a steps 4-5, `CLAUDE.md` §0 (start + finish), `~/research/CLAUDE.md`, memory.
 - Backfilled: §0.2 bullets for §14.51/§14.52, §14.32 Status 10-23 + 10-26, change-history rows cf523f9 b856cf6 a81d2bb
   f1b71cc, memory 10-24..10-26.
+
+## 14.53 Part 1 results (data rsynced Mon 2026-10-26 evening; analysed Mon night)
+Spark after `ARM 1 DONE`: cron removed, nothing of ours running, the watchdog never restarted part 1 (no
+`watchdog_v3_big.txt`). `v3_big_summary.py data/llm_bias/v3` (new; analyze_v2's tables on a big-sim part, one row per
+post read = all views of that post screen together; follow-up screens separate). **Gate (B-34):** posts per AI gemma 99 /
+llama 119 / qwen 102 and every cell = posts x 99 readers (e.g. gemma reads qwen 10,098 = the Spark log); the same script on
+V1 `v1_v2_spark r101` reproduces §14.33's upvote biases (-2.2 / -5.4 / -2.7). Unreadable: gemma/qwen 0.00%, llama
+0.72-0.87% (pilot <= 0.5%, stop line 5%). Posting: gemma 99/100 users posted 99 posts, llama 100 users 119, qwen 100 users 102.
+
+**Total engagement** (every action except do_nothing, per 100 posts read), V1 round 101 -> V3 part 1:
+
+| reader \ posts by | gemma | llama | qwen |
+|---|---|---|---|
+| gemma | 95.2 -> 184.5 | 93.7 -> 175.3 | 94.8 -> 178.0 |
+| llama | 221.9 -> 310.4 | 224.7 -> 303.5 | 226.5 -> 307.2 |
+| qwen | 130.7 -> 174.7 | 105.1 -> 156.1 | 113.2 -> 161.4 |
+
+**% of posts upvoted**, V1 -> V3 part 1:
+
+| reader \ posts by | gemma | llama | qwen |
+|---|---|---|---|
+| gemma | 48.0 -> 59.5 | 51.6 -> 45.8 | 51.7 -> 50.0 |
+| llama | 60.9 -> 68.1 | 62.2 -> 69.3 | 60.2 -> 69.9 |
+| qwen | 45.1 -> 76.1 | 48.0 -> 73.8 | 43.3 -> 75.1 |
+
+**What each reader did in V3 part 1** (per 100 posts read, mean of the 3 post sets): gemma like_comment 70.3, like_post
+51.8, dislike_post 22.0, create_comment 17.4, dislike_comment 13.5, search_user 2.7. llama like_post 69.3, like_comment
+61.3, create_comment 60.3, search_user 38.0, do_nothing 29.3, follow 17.6, report 16.0, dislike_post 12.3, open_messages
+9.9. qwen like_post 75.0, create_comment 65.9, dislike_post 17.0, do_nothing 4.9, like_comment 1.5. Follow-up screens per
+100 posts read: llama ~106 (282-312 more actions on them), gemma ~6, qwen ~0. Engagement rises down the scroll (gemma
+~150 in the first quarter -> ~225 in the last; llama ~298 -> ~370; qwen flat-ish): later posts already carry other
+users' comments to like. The noise floor reads each user's first 4 posts, so its level is lower (gemma 114).
+
+**Own-AI bias** (double difference, per 100 posts read; 95% range from resampling posts and users), V1 -> V3 part 1:
+
+| pair | total engagement | upvote |
+|---|---|---|
+| gemma-llama | +4.3 -> +2.3 (-13.1 to +17.1) | -2.2 -> **+15.0 (+9.0 to +20.8)** |
+| gemma-qwen | -17.1 -> -6.8 (-20.8 to +7.1) | -5.4 -> **+8.5 (+2.0 to +14.7)** |
+| llama-qwen | +6.2 -> +1.5 (-10.9 to +15.6) | -2.7 -> +0.7 (-3.0 to +4.6) |
+
+- **First clear own-AI lean on the Spark: gemma upvotes gemma's posts** (59.5% vs 45.8% llama's, 50.0% qwen's), at every
+  stance (LOVE 87 vs 73/77, HATE 32.5 vs 20/23). The other readers don't share it (llama 68.1 on gemma's vs 69.3/69.9;
+  qwen 76.1 vs 73.8/75.1). Total engagement shows no clear bias in any pair.
+- Not separable here: (a) the live world vs the post set (V1 gemma's set = 25 posts from the users who chose to post; V3 =
+  99, one per user via line 2c), (b) recognising its own writing vs liking its own style (Tests 1-6 found shared taste).
+- qwen still engages more with gemma's posts (174.7 vs 161.4 own) but gemma now also rates its own posts higher, so the
+  qwen-gemma pair shrinks to -6.8, not clear.
+- Rerun noise (same screens, fresh seed): engagement gemma 114.0/115.2, llama 260.8/260.2, qwen 146.5/145.5.
+- **Part 2's menu** (`rank_menu.py`, 95,213 post screens, 216,727 actions, preview only): GROUP CHATS (0-39 picks) ->
+  POSTING (create_post 115) -> MESSAGES (3,151) -> BROWSING (trend, refresh, search_posts, do_nothing) -> PEOPLE ->
+  ON COMMENTS -> ON THE POST (like_post last, 61,969). Next: Gordon's go -> Spark `git pull` -> `ARM=2 v3_start.sh`.

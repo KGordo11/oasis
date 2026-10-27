@@ -72,6 +72,7 @@ research**:
   set up right (Release build for this exact chip, full clocks, no overheating; CPU idle). Mac test: shared text first =
   llama reads prompts 1.7x faster but writes half as much (a behaviour change -> new study only); gemma 2.3x faster
   only with `--swa-full --cache-ram 0` (which alone also speeds today's order 1.24x).
+  **Resume: part 2 preflight was still running at the last check; next = the check command in §14.56 (end).**
 
 - **NEW Tue 10-27 (§14.55): LD-46 future sims = 16 slots for all 3 AIs** (`SLOTS=16 PARALLEL=16`). Part 2 stays at 8;
   defaults change only after `ARM 2 DONE`.
@@ -16890,3 +16891,8 @@ part is 58% of the characters.
 - **For a future study (each = its own V1 + one change test):** (1) prompt order B (speed ~1.7x llama, ~2.3x gemma on
   prompt reading; changes behaviour: llama answers halved); (2) gemma server `--swa-full --cache-ram 0` (speed only,
   check answers match first). qwen not tested.
+- **Resume point (Tue 10-27 ~04:30, Gordon restarting the laptop):** Mac tests done, local server stopped. Part 2 still
+  in its preflight at Gordon's last check (no ALL CLEAR / NOT SAFE yet; slow because hsa303 shares the GPU). Next: on the
+  Spark `date; tail -12 ~/llm_bias/logs/preflight_v3_part2.txt; tail -3 ~/llm_bias/logs/v3_big_part2.txt; crontab -l`
+  -> expect `preflight ALL CLEAR -> watchdog on, part 2 starts` + one crontab line `'ARM 2 DONE'`. No `git pull` on the
+  Spark while part 2 runs. Open offer: qwen prompt-order test on the Mac (~10 min).

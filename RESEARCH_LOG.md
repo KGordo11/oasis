@@ -72,7 +72,8 @@ research**:
   set up right (Release build for this exact chip, full clocks, no overheating; CPU idle). Mac test: shared text first =
   llama reads prompts 1.7x faster but writes half as much (a behaviour change -> new study only); gemma 2.3x faster
   only with `--swa-full --cache-ram 0` (which alone also speeds today's order 1.24x).
-  **Resume: part 2 preflight was still running at the last check; next = the check command in §14.56 (end).**
+  **Tue 13:13 (§14.56 end): preflight ALL CLEAR (110 PASS), part 2 RUNNING since 04:25, watchdog on.** qwen baseline
+  done (10,098 screens, 1.70 s/screen shared); llama baseline started 09:10. Rough finish Thu 10-29 night - Fri 10-30.
 
 - **NEW Tue 10-27 (§14.55): LD-46 future sims = 16 slots for all 3 AIs** (`SLOTS=16 PARALLEL=16`). Part 2 stays at 8;
   defaults change only after `ARM 2 DONE`.
@@ -14966,7 +14967,8 @@ into the running window (typed text gets queued as shell input).
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
 ### Status (2026-10-27)
-- Part 2 started 03:04 (`ARM=2 v3_start.sh`, preflight first), §14.56. Slot test done (§14.54), LD-46 16 slots for
+- Part 2 started 03:04 (`ARM=2 v3_start.sh`, preflight first), §14.56. **13:13: preflight ALL CLEAR, part 2 RUNNING
+  since 04:25, watchdog cron `'ARM 2 DONE'` on; qwen baseline done, llama baseline running.** Slot test done (§14.54), LD-46 16 slots for
   future sims (§14.55). Mac prompt-order test (§14.56).
 
 ### Status (2026-10-26)
@@ -16896,3 +16898,15 @@ part is 58% of the characters.
   Spark `date; tail -12 ~/llm_bias/logs/preflight_v3_part2.txt; tail -3 ~/llm_bias/logs/v3_big_part2.txt; crontab -l`
   -> expect `preflight ALL CLEAR -> watchdog on, part 2 starts` + one crontab line `'ARM 2 DONE'`. No `git pull` on the
   Spark while part 2 runs. Open offer: qwen prompt-order test on the Mac (~10 min).
+- **Tue 10-27 13:13 (Gordon's check): part 2 RUNNING.** Preflight `110 PASS, 0 FAIL`, `ALL CLEAR` (the kill/resume
+  test passed: 117/117 after resume). Crontab = one watchdog line `'ARM 2 DONE'`. Part 2 log:
+
+| step | start | end | screens | min | s/screen | part 1 (same step) |
+|---|---|---|---|---|---|---|
+| baseline: qwen reads qwen | 04:25:00 | 09:10:48 | 10,098 | 285.8 | 1.70 | 102.8 min, 0.61 (Spark free) |
+| baseline: llama reads llama | 09:10:54 | running | ~11,781 | script guess 687 | | 461.1 min, 2.35 (shared) |
+
+  qwen was ~2.8x slower than in part 1 because hsa303 shares the GPU now (part 1's qwen baseline ran on a free Spark).
+  llama baseline ends ~16:50 (part 1's pace) to ~20:40 (script guess) today. Part 1 took ~78 h in all, so part 2 ends
+  roughly Thu 10-29 night - Fri 10-30 (estimate). Banner still says "System restart required": a reboot kills the run,
+  the cron watchdog resumes it (gives up after 3). Next check: `tail -3 ~/llm_bias/logs/v3_big_part2.txt`.

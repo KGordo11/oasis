@@ -105,6 +105,7 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | **`v3_start.sh`** | start a part safely: preflight (its settings) -> only on ALL CLEAR watchdog cron + `v3_big.sh`; `ARM=2` needs `ARM 1 DONE`, ranks the menu first, logs to `v3_big_part2.txt` (§14.50, §14.51) |
 | `v3_big_summary.py <dir> [round]` | big-sim part (or V1 `v1_v2_spark r101`): analyze_v2 tables, one row per post read (all views), gate, follow-up table; writes `<dir>/summary.md` (~4 min) |
 | **`handoff_check.sh [read]`** | Mac: `read` = session catch-up bundle; no arg = FAIL if log §0.2/§14.32 Status/§14.32c/memory are behind (§14.52) |
+| `slot_bench.sh` | Spark slot test (8/16/32/64 slots, each AI); only between runs; §14.54 |
 | `rank_menu.py` | part 2's menu from part 1's data: least-used actions on top (§14.49) |
 | `v3_test.sh`, `v3_chain.sh`, `v3_summary.py`, `v3_ranges.py`, `v3_post_lines.py`, `make_v3_charts.py` | V3 single-addition tests (done 10-21, data `data/llm_bias/v3_tests/`, not in git) |
 | `v3_watchdog.sh [script log marker]` | cron restarter, gives up after 3 |

@@ -66,7 +66,10 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-26): read this first
+## 0.2 Where things stand (2026-10-27): read this first
+
+- **NEW Tue 10-27 ~01:00 (§14.54): Spark slot test first, then part 2.** `slot_bench.sh` (8/16/32/64 slots, each AI,
+  ~15-30 min). For future studies only; part 2 stays at 8 slots. Then `ARM=2 v3_start.sh`.
 
 - **NEW Mon 10-26 night (§14.53): PART 1 RESULTS.** Data checked (gate passes, unreadable <= 0.9%). Everyone is more
   active than V1 (gemma ~95 -> ~180 per 100 posts, mostly liking comments). **First clear own-AI lean on the Spark:
@@ -14953,7 +14956,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 ### Status (2026-10-26)
 - V3 big sim part 1 RUNNING on the Spark since Fri 10-23 13:07 (`v3_start.sh`, watchdog cron `'ARM 1 DONE'`), §14.51;
   **PART 1 DONE Mon 10-26 19:18, cron off, data on the Mac, results §14.53** (gemma upvotes its own AI's posts;
-  no engagement bias). Next: Gordon's go -> part 2. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
+  no engagement bias). 10-27: slot test first (`slot_bench.sh`, §14.54), then part 2. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
   Handoff check added (§14.52).
 
 ### Status (2026-10-23)
@@ -15209,7 +15212,8 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | a81d2bb | 10-23 12:36 | **Guards after the broken start** (§14.50): `llm.chat_json` raises `ConnectionError` on all-transport errors; `v2_night` STOPPING at > 5% unreadable; `v3_big.sh` refuses during a preflight; `analyze_v2.py` post screens only; **`v3_start.sh`** (preflight -> ALL CLEAR -> watchdog + part 1); smoke 54 |
 | f1b71cc | 10-26 14:08 | `v3_start.sh` part 2 (`ARM=2`): needs `ARM 1 DONE`, `rank_menu.py` -> `v3_flipped/r101/menu.txt`, preflight with `--menu-file`, ARM=2 watchdog, logs `v3_big_part2.txt` (§14.51) |
 | ddd2a8c | 10-26 | **`handoff_check.sh`** (`read` = catch-up bundle; default = FAIL if §0.2 / §14.32 Status / change history / memory are behind); rule §14.32a steps 4-5, CLAUDE.md §0 (§14.52) |
-| (this) | 10-27 00:30 | **`v3_big_summary.py <dir> [round]`**: analyze_v2's tables on a big-sim part (one row per post read, all views together; gate vs published numbers; follow-up screens table); part 1 results §14.53 |
+| 3e73135 | 10-27 00:30 | **`v3_big_summary.py <dir> [round]`**: analyze_v2's tables on a big-sim part (one row per post read, all views together; gate vs published numbers; follow-up screens table); part 1 results §14.53 |
+| (this) | 10-27 01:00 | **`slot_bench.sh`**: Spark slot test (llama-batched-bench 8/16/32/64 slots, all 3 AIs; refuses while our servers/runs are up) (§14.54) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16758,3 +16762,13 @@ users' comments to like. The noise floor reads each user's first 4 posts, so its
 - **Part 2's menu** (`rank_menu.py`, 95,213 post screens, 216,727 actions, preview only): GROUP CHATS (0-39 picks) ->
   POSTING (create_post 115) -> MESSAGES (3,151) -> BROWSING (trend, refresh, search_posts, do_nothing) -> PEOPLE ->
   ON COMMENTS -> ON THE POST (like_post last, 61,969). Next: Gordon's go -> Spark `git pull` -> `ARM=2 v3_start.sh`.
+
+## 14.54 Spark slot test before part 2 (Gordon, Tue 2026-10-27 ~01:00)
+**Gordon:** "we doing the parallel test first?" Yes: the §14.51 Spark slot test, now that nothing of ours runs (part 1
+done, part 2 not started). It cannot change part 2 (8 slots, to match part 1); it decides the slots for future studies.
+- **`slot_bench.sh`**: `llama-batched-bench` for qwen, llama, gemma in turn (`-c 57344 -npp 800 -ntg 80 -npl 8,16,32,64
+  -fa on -ngl 99`, the same model files as the servers), prints the other users' GPU load first (hsa303 shares the Spark,
+  so read the numbers with that), refuses while any server/runner/preflight of ours is up, ends `SLOT TEST DONE`.
+  Dry run on the Mac with a fake bench: model paths resolve (gguf for gemma, Ollama blobs for qwen/llama).
+- Seconds per screen = T s / B (B = slots). Mac result for comparison (§14.51): 8 -> 64 slots only 3-11% faster.
+- Order: `git pull` -> slot test (~15-30 min, detached) -> paste -> then part 2 (`ARM=2 v3_start.sh`), never both at once.

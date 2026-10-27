@@ -42,7 +42,8 @@ code map changes. Don't paste results here: they go in the log.
 ## 2. The current study: LLM Bias on the DGX Spark (Part 14 of the log)
 **Question (LD-19):** if one AI writes posts and also plays the readers, do the readers favour that AI's posts?
 **Answer so far: NO own-AI bias** in V1, V2 and the V3 tests; **V3 big sim part 1 (§14.53): gemma upvotes gemma's
-posts** (pair ranges +9..+21, +2..+15), no total-engagement bias. The one solid effect: **qwen engages more with gemma's
+posts** (pair ranges +9..+21, +2..+15), no total-engagement bias; **§14.57: about half of it is a comment snowball in
+the live world** (none in the first 10% of the scroll; gemma follows the tone of the comments it sees). The one solid effect: **qwen engages more with gemma's
 posts** (double difference qwen-gemma −17 to −21, mostly comments). It's about gemma's writing, not authorship
 (survives topic × stance matching; only partly length).
 
@@ -105,6 +106,7 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | `v3_big.sh` | V3 big sim, one part at a time: `ARM=1` `data/llm_bias/v3/` (ends `ARM 1 DONE`); `ARM=2` `v3_flipped/` = same posts, menu ranked from part 1's data (`rank_menu.py`), ends `ARM 2 DONE` |
 | **`v3_start.sh`** | start a part safely: preflight (its settings) -> only on ALL CLEAR watchdog cron + `v3_big.sh`; `ARM=2` needs `ARM 1 DONE`, ranks the menu first, logs to `v3_big_part2.txt` (§14.50, §14.51) |
 | `v3_big_summary.py <dir> [round]` | big-sim part (or V1 `v1_v2_spark r101`): analyze_v2 tables, one row per post read (all views), gate, follow-up table; writes `<dir>/summary.md` (~4 min) |
+| `check_gemma_own.py <dir>`, `v3_compare_parts.py <part1> <part2>` | gemma's own-post lean by group / comment tone (§14.57); part 1 vs part 2 tables + bias (run after `ARM 2 DONE`) |
 | **`handoff_check.sh [read]`** | Mac: `read` = session catch-up bundle; no arg = FAIL if log §0.2/§14.32 Status/§14.32c/memory are behind (§14.52) |
 | `slot_bench.sh` | Spark slot test (8/16/32/64 slots, each AI); only between runs; §14.54 |
 | `rank_menu.py` | part 2's menu from part 1's data: least-used actions on top (§14.49) |

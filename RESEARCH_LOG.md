@@ -68,6 +68,11 @@ research**:
 
 ## 0.2 Where things stand (2026-10-27): read this first
 
+- **NEW Tue 10-27 PM (§14.57): why gemma upvotes gemma's posts.** Not topic, stance, questions or length. It grows
+  during the scroll (none in the first 10%): gemma follows the comments it sees, and gemma's posts collect friendlier
+  comments; about half the lean flows through that snowball (live world), half stays. Part 1 vs part 2 comparison built
+  (`v3_compare_parts.py`, self-tested), ready for `ARM 2 DONE`.
+
 - **NEW Tue 10-27 03:04 (§14.56): PART 2 STARTED** (preflight first, then watchdog + part 2). Spark hardware check:
   set up right (Release build for this exact chip, full clocks, no overheating; CPU idle). Mac test: shared text first =
   llama reads prompts 1.7x faster but writes half as much (a behaviour change -> new study only); gemma 2.3x faster
@@ -14967,6 +14972,7 @@ into the running window (typed text gets queued as shell input).
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
 ### Status (2026-10-27)
+- §14.57: gemma's own-post lean = about half a comment snowball (live world); `v3_compare_parts.py` ready for part 2.
 - Part 2 started 03:04 (`ARM=2 v3_start.sh`, preflight first), §14.56. **13:13: preflight ALL CLEAR, part 2 RUNNING
   since 04:25, watchdog cron `'ARM 2 DONE'` on; qwen baseline done, llama baseline running.** Slot test done (§14.54), LD-46 16 slots for
   future sims (§14.55). Mac prompt-order test (§14.56).
@@ -15234,6 +15240,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | 3e73135 | 10-27 00:30 | **`v3_big_summary.py <dir> [round]`**: analyze_v2's tables on a big-sim part (one row per post read, all views together; gate vs published numbers; follow-up screens table); part 1 results §14.53 |
 | (this) | 10-27 01:00 | **`slot_bench.sh`**: Spark slot test (llama-batched-bench 8/16/32/64 slots, all 3 AIs; refuses while our servers/runs are up) (§14.54) |
 | (this) | 10-27 04:00 | **`prompt_order_bench.py`**: speed of prompt order A (today) vs B (shared menu + format first) on a llama.cpp server; `max_tokens 1` = prompt reading only (§14.56) |
+| (this) | 10-27 15:00 | **`check_gemma_own.py <dir>`**: gemma's own-post upvote lean inside topic/length/question/stance/scroll groups, post by post, by tone of the comments on screen; **`v3_compare_parts.py <part1> <part2>`**: part 1 vs part 2 tables + bias; `v3_big_summary.py`: `load(dir)` + `gate()` reusable, gate also on `v3_flipped` (§14.57) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16910,3 +16917,74 @@ part is 58% of the characters.
   llama baseline ends ~16:50 (part 1's pace) to ~20:40 (script guess) today. Part 1 took ~78 h in all, so part 2 ends
   roughly Thu 10-29 night - Fri 10-30 (estimate). Banner still says "System restart required": a reboot kills the run,
   the cron watchdog resumes it (gives up after 3). Next check: `tail -3 ~/llm_bias/logs/v3_big_part2.txt`.
+
+## 14.57 Why gemma upvotes gemma's posts (part 1); part 1 vs part 2 comparison built (Tue 2026-10-27)
+Gordon (while part 2 runs): (1) dig into part 1's one clear lean, gemma upvoting gemma's posts (§14.53); (2) build the
+part 1 vs part 2 comparison now, so it runs as soon as `ARM 2 DONE`. Mac only, part 1 data, nothing on the Spark.
+
+**(1) `check_gemma_own.py data/llm_bias/v3`** (~3.5 min; output kept in `data/llm_bias/v3/check_gemma_own.md`). Same lean
+measure as §14.53 (upvote double difference, per 100 posts read, 95% range from resampling posts and users, 500 draws),
+inside groups of posts. Upvote % = % of posts read that got an upvote. "Posts" = how many posts of each AI fall in the group.
+
+| group | posts gemma / llama / qwen | gemma reader: % upvoted on gemma / llama / qwen posts | lean gemma-llama | lean gemma-qwen |
+|---|---|---|---|---|
+| all posts (gate: = §14.53) | 99 / 119 / 102 | 59.5 / 45.8 / 50.0 | +15.0 (+8.9 to +20.7) | +8.5 (+1.4 to +14.3) |
+| politics | 39 / 47 / 35 | 55.7 / 45.0 / 51.9 | +13.6 (+5.2 to +21.7) | +2.0 (-7.2 to +10.4) |
+| science & tech | 24 / 23 / 12 | 68.0 / 50.2 / 43.1 | +21.4 (+11.6 to +30.5) | +10.5 (+1.1 to +20.9) |
+| business | 20 / 22 / 21 | 64.6 / 49.6 / 49.3 | +13.6 (-0.6 to +27.1) | +19.8 (+6.9 to +32.8) |
+| entertainment | 10 / 15 / 19 | 47.0 / 35.9 / 52.0 | +10.1 (-17.6 to +33.4) | -4.0 (-27.4 to +21.0) |
+| sports | 6 / 12 / 15 | 54.4 / 45.7 / 49.4 | +9.8 (-7.3 to +25.6) | +14.7 (-5.2 to +33.3) |
+| short post (< 177 characters) | 16 / 66 / 24 | 41.0 / 42.3 / 50.7 | +4.9 (-5.5 to +14.6) | -2.4 (-19.5 to +15.0) |
+| medium (177-253) | 33 / 38 / 36 | 60.6 / 49.5 / 41.2 | +13.9 (+2.4 to +25.0) | +14.2 (+4.8 to +25.5) |
+| long (254 or more) | 50 / 15 / 42 | 64.7 / 51.7 / 57.1 | +17.4 (+4.5 to +32.1) | +8.0 (-0.2 to +16.0) |
+| post asks a question | 87 / 42 / 14 | 59.7 / 48.9 / 43.1 | +12.3 (+3.6 to +20.4) | +19.2 (+8.2 to +31.6) |
+| no question | 12 / 77 / 88 | 58.6 / 44.1 / 51.1 | +16.4 (-1.5 to +31.8) | +10.4 (-3.6 to +21.7) |
+| reader and author: same stance on the topic | all | 83.4 / 69.9 / 77.3 | +14.6 (+6.7 to +21.9) | +7.6 (-0.3 to +15.3) |
+| different stance | all | 53.9 / 40.1 / 43.5 | +15.0 (+8.6 to +21.2) | +8.8 (+1.2 to +14.9) |
+| **early: first 10% of each scroll (ticks 0-12)** | all | **59.2 / 56.5 / 61.0** | **+3.2 (-6.1 to +12.0)** | **-3.5 (-12.4 to +5.4)** |
+| rest of the scroll | all | 59.6 / 44.5 / 48.4 | +16.3 (+9.7 to +22.3) | +10.3 (+2.7 to +16.2) |
+
+- **Not topic, stance, questions or length.** The lean points the same way in 4 of 5 topics, for same and different
+  stance, with and without a question, in medium and long posts (gemma writes longer posts and 87 of 99 ask a question,
+  but inside each group the lean stays). Only short posts (16 of gemma's) show none.
+- **Spread over many posts, not a few.** Post by post, gemma upvotes less than llama and qwen do on almost every post
+  (mean gap -12.5 points on gemma's posts, -25.7 on llama's, -22.5 on qwen's); gemma beats the other two on 27% of its own
+  posts vs 10-12% of the others'. Gemma's per-post % follows the other readers' (correlation 0.47-0.57).
+- **The lean grows during the scroll.** In the first 10% of each user's scroll gemma upvotes all three post sets alike
+  (59 / 57 / 61%); later it stays at 60% on gemma's posts but falls to 45 / 48% on the others'. llama and qwen readers
+  don't drop.
+
+**The comments on screen (live world).** A post screen shows the comments earlier users left; in a cell every user is
+played by the same AI, so gemma readers see gemma-written comments. Each comment's writer also voted on the post on that
+screen. Tone = commenters who upvoted minus commenters who downvoted, over the comments others wrote in earlier ticks.
+
+| gemma reads | comments per post | no comments yet | mostly up | even | mostly down |
+|---|---|---|---|---|---|
+| gemma's posts | 21.6 | 18.8% of reads, 83.1% upvoted | **61.8%**, 60.6% | 11.6%, 35.8% | **7.8%**, 29.3% |
+| llama's posts | 16.3 | 16.1%, 72.7% | 44.4%, 53.4% | 16.2%, 28.8% | 23.3%, 24.5% |
+| qwen's posts | 15.2 | 21.0%, 78.5% | 42.6%, 54.7% | 14.3%, 32.6% | 22.1%, 25.1% |
+
+- Gemma follows the comments it sees: 83% upvoted with no comments, 61% with mostly-upvoting commenters, 29% with
+  mostly-downvoting ones. llama and qwen readers comment on nearly every post (64-73 comments per post), 96-98% of their
+  reads see mostly-up comments, and their upvote % hardly moves (table in the output file).
+- Gemma's own posts collect friendlier comments: 62% of reads see mostly-up comments (others 43-44%), 8% mostly-down
+  (others 22-23%). If gemma's posts had the others' tone mix, gemma would upvote them 52.9% (vs llama's 45.8%) and
+  54.9% (vs qwen's 50.0%): the raw gap falls from 13.7 to 7.1 points vs llama and from 9.5 to 4.9 vs qwen. **About half
+  of the lean comes through the comments, a snowball**: gemma's earliest readers are a little kinder to gemma's posts, their
+  comments say so, and later gemma readers follow. The other half stays even at the same tone (gemma still upvotes its own
+  posts ~5-10 points more in every tone group).
+- What this means: the part 1 lean is mostly a live-world effect, not something V1 could show (V1 had no comments on
+  screen; V1's lean was -2.2 / -5.4). Still unknown: why the first gemma readers are kinder (recognition vs shared taste),
+  and whether the half left over survives without the live world. Clean test (later, needs Gordon's go; V1 + ONE change):
+  V1 reading (no live world) of part 1's 2c posts. Not checked here: the text of the comments (only the commenters' votes).
+  The resampling ranges treat posts as the unit; the snowball lives inside a post, so they hold.
+
+**(2) `v3_compare_parts.py data/llm_bias/v3 data/llm_bias/v3_flipped`** (~6 min): both parts must pass the B-34 gate
+(same posts, every cell = posts x 99 readers), then per 100 posts read, part 1 -> part 2: (1) each reader's actions (its
+3 post sets pooled), (2) reader x whose posts: total engagement and % upvoted, (3) own-AI bias with ranges, (4) follow-up
+screens. Self-test: part 1 against itself gives every number twice, equal to §14.53 (184.5, 59.5%, +15.0 ...).
+`v3_big_summary.py` now has `load(dir)` + `gate()` (the gate also runs on `v3_flipped`); its part 1 output is
+byte-identical after the change. Smoke ALL PASS (53).
+- After `ARM 2 DONE`: cron off, rsync `data/llm_bias/v3_flipped/`, then `v3_compare_parts.py` (part 2's own tables:
+  `v3_big_summary.py data/llm_bias/v3_flipped`). `check_gemma_own.py data/llm_bias/v3_flipped` shows whether the snowball
+  holds with the other menu.

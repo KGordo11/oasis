@@ -77,8 +77,7 @@ research**:
   done). Finish estimate Mon 10-26 evening - Tue 10-27 morning. Mac slot test: more than 8 slots gains <= 11% (prefill
   is ~80% of the time), so 8 slots stay. **Part 2 start built (10-26, f1b71cc):** `ARM=2 v3_start.sh` refuses without
   `ARM 1 DONE`, ranks the menu, preflights with it, then watchdog + part 2. Next: Gordon's `ARM 1 DONE` -> rsync ->
-  examine part 1 together -> part 2. **Mon 15:57: on the LAST cell (gemma reads llama, ETA ~20:10), then noise
-  floor -> `ARM 1 DONE` ~21:30-22:00 Mon.**
+  examine part 1 together -> part 2. **PART 1 DONE Mon 10-26 19:18 (`ARM 1 DONE`).** Next: cron off, rsync, examine.
 
 - **NEW Fri 10-23 PM (§14.50): first part-1 start broke** (started during the preflight; servers switched off under
   it; 70-99% "Connection refused" saved as unreadable, rc=0 everywhere). Stopped, data to delete. Guards added: dead
@@ -14947,7 +14946,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 
 ### Status (2026-10-26)
 - V3 big sim part 1 RUNNING on the Spark since Fri 10-23 13:07 (`v3_start.sh`, watchdog cron `'ARM 1 DONE'`), §14.51;
-  Mon 15:57: last cell (gemma reads llama) running, `ARM 1 DONE` ~21:30-22:00 Mon. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
+  **PART 1 DONE Mon 10-26 19:18 (`ARM 1 DONE`), servers stopped.** Next: cron off, rsync, examine, then part 2. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
   Handoff check added (§14.52).
 
 ### Status (2026-10-23)
@@ -16661,6 +16660,9 @@ unshared ones. Finish estimate part 1: Mon 10-26 evening - Tue 10-27 morning. Ke
 s/screen); cell 9 (last) gemma reads llama started 07:16, ~11,781 screens, script ETA 776 min -> ~20:10; then the noise
 floor (~400 screens per AI) -> `ARM 1 DONE` ~21:30-22:00 Mon (estimate). Watchdog cron still on. Spark banner:
 "System restart required" (a reboot kills the run; the cron watchdog resumes it).
+**PART 1 DONE Mon 10-26 19:18:42** (`checkpoint round 101: noise floor`, `end: models unloaded`, `ARM 1 DONE`): ~3 days
+6 h from the 13:07 Fri start. Servers stopped by the runner. Next: remove cron, rsync `data/llm_bias/v3/` to the Mac, examine
+part 1 with Gordon, then `ARM=2 v3_start.sh`.
 
 **Slot test on the Mac (M2 Max, `llama-batched-bench`, screens like the sim: 800 tokens in, 80 out; gemma's Ollama file
 does not load in llama.cpp, as on the Spark).** Seconds per screen:

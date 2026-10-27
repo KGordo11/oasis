@@ -68,6 +68,10 @@ research**:
 
 ## 0.2 Where things stand (2026-10-27): read this first
 
+- **NEW Tue 10-27 03:04 (§14.56): PART 2 STARTED** (preflight first, then watchdog + part 2). Spark hardware check:
+  set up right (Release build for this exact chip, full clocks, no overheating; CPU idle). Mac test: shared text first =
+  llama reads prompts 1.7x faster but writes half as much (a behaviour change -> new study only); gemma no gain so far.
+
 - **NEW Tue 10-27 (§14.55): LD-46 future sims = 16 slots for all 3 AIs** (`SLOTS=16 PARALLEL=16`). Part 2 stays at 8;
   defaults change only after `ARM 2 DONE`.
 
@@ -14959,6 +14963,10 @@ into the running window (typed text gets queued as shell input).
 
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
+### Status (2026-10-27)
+- Part 2 started 03:04 (`ARM=2 v3_start.sh`, preflight first), §14.56. Slot test done (§14.54), LD-46 16 slots for
+  future sims (§14.55). Mac prompt-order test (§14.56).
+
 ### Status (2026-10-26)
 - V3 big sim part 1 RUNNING on the Spark since Fri 10-23 13:07 (`v3_start.sh`, watchdog cron `'ARM 1 DONE'`), §14.51;
   **PART 1 DONE Mon 10-26 19:18, cron off, data on the Mac, results §14.53** (gemma upvotes its own AI's posts;
@@ -15221,6 +15229,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | ddd2a8c | 10-26 | **`handoff_check.sh`** (`read` = catch-up bundle; default = FAIL if §0.2 / §14.32 Status / change history / memory are behind); rule §14.32a steps 4-5, CLAUDE.md §0 (§14.52) |
 | 3e73135 | 10-27 00:30 | **`v3_big_summary.py <dir> [round]`**: analyze_v2's tables on a big-sim part (one row per post read, all views together; gate vs published numbers; follow-up screens table); part 1 results §14.53 |
 | (this) | 10-27 01:00 | **`slot_bench.sh`**: Spark slot test (llama-batched-bench 8/16/32/64 slots, all 3 AIs; refuses while our servers/runs are up) (§14.54) |
+| (this) | 10-27 04:00 | **`prompt_order_bench.py`**: speed of prompt order A (today) vs B (shared menu + format first) on a llama.cpp server; `max_tokens 1` = prompt reading only (§14.56) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -16830,3 +16839,38 @@ also all still the same." Decision **LD-46: every study after the V3 big sim use
 - Expected: ~1.3-1.5x faster than 8 (bench: qwen 1.38x, llama 1.29x, gemma 1.54x); a part-1-sized sim ~55 h shared
   (78 h at 8). Memory per AI ~21-25 GB (estimate): fits with hsa303's 56 GB peak. Live-world ticks of ~100 user-screens
   = 7 waves of 16 (last one part-empty), fine.
+
+## 14.56 Part 2 started; Spark hardware check; prompt-order speed test on the Mac (Tue 2026-10-27)
+**Part 2 start (Gordon, Spark):** `ARM=2 v3_start.sh` at 03:04:34: menu ranked from part 1 (like_post last) ->
+preflight with `--v3 --menu-file .../v3_flipped/r101/menu.txt` (`preflight_v3_part2.txt`). Crontab empty while the
+preflight runs (watchdog only after ALL CLEAR). 03:39: two python3 + one llama-server of ours running. Waiting for
+`preflight ALL CLEAR -> watchdog on, part 2 starts`.
+
+**Spark hardware check (Gordon asked: are we using everything?), 03:39:** NVIDIA GB10, compute capability 12.1, P0,
+SM clock 2,470 of max 3,003 MHz, 63 W, 69 C, 96% busy. Nothing throttling now; lifetime counters: SW power capping
+~151 h of 36 days uptime, thermal slowdown 0. CPU 10x Cortex-X925 (3.9 GHz) + 10x Cortex-A725 (2.8 GHz), load ~3 (CPU
+is not a limit). Memory 54 GB used, 67 GB available. Our llama.cpp build: Release, `CMAKE_CUDA_ARCHITECTURES=121`
+(exactly this chip), GGML_CUDA ON, GGML_NATIVE ON = correct. Servers: 8 slots x 8,192, `kv_unified = false` (memory per
+slot, so the §14.54 estimates hold; this llama.cpp also keeps an 8 GB RAM prompt cache by default, `--cache-ram 8192`).
+Not used: the GB10's FP4 hardware (needs FP4 model files = different weights, new study only), GPU time (shared with
+hsa303), slots (LD-46), prompt order (below).
+
+**Prompt-order speed test (`prompt_order_bench.py`, Mac M2 Max, llama.cpp 11429, Spark server settings 8 x 8,192;
+24 users x 5 ticks = 120 screens per run, live-world order, part 1's qwen posts, real personas, server restarted cold
+for each run).** A = today's order (system: objective + persona; user: post + comments + menu + format). B = the shared
+text first (system: objective + menu + format + persona; user: post + comments). Same text, other order; the shared
+part is 58% of the characters.
+
+| AI | run | tokens read / reused per screen | s per screen A -> B |
+|---|---|---|---|
+| llama | full answers | 521 / 220 -> 288 / 453 | 2.12 -> 1.15 (**answers halved: 81 -> 40 tokens**) |
+| llama | prompt only (max_tokens 1) | 521 / 220 -> 284 / 457 | 1.36 -> **0.79 (1.7x)** |
+| gemma | prompt only, default settings | 778 / 1 -> 493 / 285 | 3.57 -> 3.74 (no gain) |
+
+- llama reads prompts 1.7x faster with the shared text first. A full screen would be ~1.4x faster if answers stayed
+  the same -- but B **changed llama's behaviour** (answers half as long), so B is a prompt change: a new study only
+  (V1 + one change), never part 2.
+- gemma reuses nothing in today's order (its sliding-window memory blocks prefix reuse) and B gives no speed: each saved
+  gemma prompt is ~1 GB in the RAM prompt cache ("making room for prompt cache entry ... 958-1,456 MiB"), so storing
+  them costs what reuse saves. Test with `--swa-full --cache-ram 0`: out of memory on the Mac at 8 x 8,192 (Metal
+  "Insufficient Memory"); rerun at 8 x 2,048 running (result below when done).

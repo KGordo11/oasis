@@ -68,8 +68,9 @@ research**:
 
 ## 0.2 Where things stand (2026-10-27): read this first
 
-- **NEW Tue 10-27 ~01:00 (§14.54): Spark slot test first, then part 2. RUNNING since ~02:05** (test program had to be
-  built first; hsa303 at 96% GPU). `slot_bench.sh` (8/16/32/64 slots, each AI,
+- **NEW Tue 10-27 02:15 (§14.54): Spark slot test DONE.** Unlike the Mac, more slots pay here: 32 slots ~1.5-1.6x
+  faster, 64 ~1.6-2x (gemma ~1.5x from 16 on). Part 2 stays at 8 slots; more slots = future studies (memory check first).
+  Next: start part 2 (`ARM=2 v3_start.sh`). `slot_bench.sh` (8/16/32/64 slots, each AI,
   ~15-30 min). For future studies only; part 2 stays at 8 slots. Then `ARM=2 v3_start.sh`.
 
 - **NEW Mon 10-26 night (§14.53): PART 1 RESULTS.** Data checked (gate passes, unreadable <= 0.9%). Everyone is more
@@ -14957,7 +14958,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 ### Status (2026-10-26)
 - V3 big sim part 1 RUNNING on the Spark since Fri 10-23 13:07 (`v3_start.sh`, watchdog cron `'ARM 1 DONE'`), §14.51;
   **PART 1 DONE Mon 10-26 19:18, cron off, data on the Mac, results §14.53** (gemma upvotes its own AI's posts;
-  no engagement bias). 10-27: slot test RUNNING since ~02:05 (`slot_bench.sh`, §14.54), then part 2. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
+  no engagement bias). 10-27 02:15 slot test DONE (§14.54: 32 slots ~1.5x, 64 ~2x). Next: part 2. Part 2 = `ARM=2 v3_start.sh` after part 1 is examined.
   Handoff check added (§14.52).
 
 ### Status (2026-10-23)
@@ -16778,3 +16779,19 @@ done, part 2 not started). It cannot change part 2 (8 slots, to match part 1); i
   llama-batched-bench -j 8`, same llama.cpp build as the servers) and restarted ~02:05. Spark at 01:17: hsa303's
   `residual_concepts...extract_tok` (28 GB) at 96% GPU, 87 of 121 GB memory free, nothing of ours, no cron -> the slot numbers
   are under load (the ratio 8 -> 64 slots is what matters).
+- **RESULT (02:05-02:15, SLOT TEST DONE; hsa303 at 96% GPU throughout).** Seconds per screen = T / B (800 in, 80 out):
+
+| slots | 8 | 16 | 32 | 64 |
+|---|---|---|---|---|
+| qwen3:8b | 1.53 | 1.10 (1.38x) | 0.93 (1.64x) | 0.74 (2.05x) |
+| llama3.1:8b | 1.39 | 1.08 (1.29x) | 0.90 (1.54x) | 0.72 (1.93x) |
+| gemma3:12b | 2.37 | 1.54 (1.54x) | 1.61 (1.47x) | 1.45 (1.64x) |
+
+  **Unlike the Mac (8 -> 64: 3-11%), more slots pay on the Spark: 32 slots ~1.5-1.6x, 64 ~1.6-2x.** Writing (TG) is ~55% of
+  the time at 8 slots here (qwen 6.7 of 12.2 s) and speeds up 3.5x with 64 slots; reading the prompt (PP) only ~1.4x.
+  gemma flattens after 16 (32 slower than 16: load noise or gemma's bigger memory per token). The real sim at 8 slots was
+  slower than this (qwen 2.1-2.4, llama 2.4-2.5, gemma 3.5-4.0 s/screen) because real answers are longer; read the ratios.
+  Memory per slot: part 1's biggest screen (prompt + answer) was 4,139 tokens (llama reads llama; 99.9% <= 3,057; median
+  ~1,000), so keep 8,192 per slot (4,096 would cut a few screens: B-28). 32 x 8,192 or 64 x 8,192 needs a KV-memory check
+  before use (hsa303 takes 26-56 GB). **Part 2 stays at 8 slots (must match part 1).** Use more slots only for a new
+  study, with every cell at the same slot count.

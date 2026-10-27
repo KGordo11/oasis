@@ -70,7 +70,8 @@ research**:
 
 - **NEW Tue 10-27 03:04 (§14.56): PART 2 STARTED** (preflight first, then watchdog + part 2). Spark hardware check:
   set up right (Release build for this exact chip, full clocks, no overheating; CPU idle). Mac test: shared text first =
-  llama reads prompts 1.7x faster but writes half as much (a behaviour change -> new study only); gemma no gain so far.
+  llama reads prompts 1.7x faster but writes half as much (a behaviour change -> new study only); gemma 2.3x faster
+  only with `--swa-full --cache-ram 0` (which alone also speeds today's order 1.24x).
 
 - **NEW Tue 10-27 (§14.55): LD-46 future sims = 16 slots for all 3 AIs** (`SLOTS=16 PARALLEL=16`). Part 2 stays at 8;
   defaults change only after `ARM 2 DONE`.
@@ -16873,4 +16874,19 @@ part is 58% of the characters.
 - gemma reuses nothing in today's order (its sliding-window memory blocks prefix reuse) and B gives no speed: each saved
   gemma prompt is ~1 GB in the RAM prompt cache ("making room for prompt cache entry ... 958-1,456 MiB"), so storing
   them costs what reuse saves. Test with `--swa-full --cache-ram 0`: out of memory on the Mac at 8 x 8,192 (Metal
-  "Insufficient Memory"); rerun at 8 x 2,048 running (result below when done).
+  "Insufficient Memory"); rerun at 8 x 2,048:
+
+| gemma, prompt only, `--swa-full --cache-ram 0`, 8 x 2,048 | tokens read / reused | s per screen |
+|---|---|---|
+| A (today's order) | 706 / 73 | 2.87 (vs 3.57 with default settings) |
+| B (shared first) | 287 / 492 | **1.24 (2.3x vs A, 2.9x vs default A)** |
+
+- With full-size sliding-window memory and no RAM prompt cache, gemma reuses the shared text and reads prompts 2.3x faster.
+  Even today's order gets 1.24x faster with these two settings (no ~1 GB cache entries to store). They should not
+  change answers (same attention mask; the cache only stores), but that is unchecked -> a new study only, not part 2.
+- Memory: `--swa-full` keeps every token for all 48 gemma layers (~384 KiB/token): 8 x 8,192 ~24 GiB + 7 GB weights;
+  16 x 8,192 (LD-46) ~55 GB = too much next to hsa303. A unified pool (`--kv-unified`, e.g. 65,536 tokens shared by 16
+  slots; max screen 4,139) would keep it ~31 GB -- untested.
+- **For a future study (each = its own V1 + one change test):** (1) prompt order B (speed ~1.7x llama, ~2.3x gemma on
+  prompt reading; changes behaviour: llama answers halved); (2) gemma server `--swa-full --cache-ram 0` (speed only,
+  check answers match first). qwen not tested.

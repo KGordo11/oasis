@@ -66,7 +66,10 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-27): read this first
+## 0.2 Where things stand (2026-10-28): read this first
+
+- **NEW Wed 10-28 (§14.58): speed options** for the next full run: 16 slots chosen (pros/cons); not yet tried: free
+  Spark hours (ask hsa303), speculative decoding, unified KV pool, gemma swa-full; check each on the noise-floor set first.
 
 - **NEW Tue 10-27 PM (§14.57): why gemma upvotes gemma's posts.** Not topic, stance, questions or length. It grows
   during the scroll (none in the first 10%): gemma follows the comments it sees, and gemma's posts collect friendlier
@@ -14974,6 +14977,7 @@ into the running window (typed text gets queued as shell input).
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
 ### Status (2026-10-27)
+- Wed 10-28 (§14.58): speed options listed (16 slots chosen; speculative decoding / unified KV / gemma swa-full to check).
 - Wed 10-28 08:48 (§14.56 end): part 2 at 4 of 9 cells, no restarts; ETA Thu 10-29 evening - Fri 10-30 early.
 - §14.57: gemma's own-post lean = about half a comment snowball (live world); `v3_compare_parts.py` ready for part 2.
 - Part 2 started 03:04 (`ARM=2 v3_start.sh`, preflight first), §14.56. **13:13: preflight ALL CLEAR, part 2 RUNNING
@@ -17004,3 +17008,31 @@ byte-identical after the change. Smoke ALL PASS (53).
 - After `ARM 2 DONE`: cron off, rsync `data/llm_bias/v3_flipped/`, then `v3_compare_parts.py` (part 2's own tables:
   `v3_big_summary.py data/llm_bias/v3_flipped`). `check_gemma_own.py data/llm_bias/v3_flipped` shows whether the snowball
   holds with the other menu.
+
+## 14.58 Speed: what is chosen for the next full run, and other ways not yet tried (Wed 2026-10-28)
+Gordon: "any other ways to speed this up? pros and cons of the speed improvements chosen for the next complete run?"
+Advice only, nothing run. Three kinds of speed change: (A) engine settings that should not change answers -> still
+check them (llama.cpp at 8+ slots is not repeatable, so "same" = within rerun noise: rerun the 400-screen noise-floor set
+per AI with the setting, compare with the `_d1` rerun); (B) changes to what the AI sees -> a new study (V1 + one change);
+(C) fewer screens or a free Spark.
+- **Chosen: LD-46, 16 slots for all three AIs (§14.55).** Pros: bench 1.38x qwen, 1.29x llama, 1.54x gemma; prompt
+  unchanged; ~21-25 GB per AI fits next to hsa303's 56 GB peak; one setting for all. Cons: bench ratio, not measured
+  in a real sim (longer answers, live-world ticks of ~100 screens = 7 waves of 16, last part-empty); data never pools
+  with 8-slot parts 1/2; qwen/llama would go faster at 32-34 (gemma not).
+- **Found, not chosen:** gemma `--swa-full --cache-ram 0` (A; 1.24x today's order on the Mac, 2.3x with order B; memory
+  ~24 GiB at 8 x 8,192, too much at 16 unless `--kv-unified` pool, untested); prompt order B (B; llama 1.7x prompt
+  reading but answers halved = behaviour change); FP4 weights (B: other model files); more slots 34/64 (A; memory).
+- **Not yet tried (flags present in our llama.cpp):** (1) a free Spark: ask hsa303 for idle hours (part 1's qwen 0.61
+  free vs 2.1-2.4 s/screen shared, ~3.5x; costs nothing, depends on them); (2) speculative decoding (A in principle:
+  same answer distribution, other draws): `--spec-type ngram-*` (no extra model) or a small draft model of the same
+  family (qwen3 0.6B, llama3.2 1B, gemma3 1B; `-md`); writing is ~55% of Spark time at 8 slots, gain shrinks with many
+  slots, guess 1.1-1.5x, test needed; (3) `--kv-unified` pool: more slots in the same memory (needed for gemma swa-full
+  at 16); (4) `--cache-reuse N`: reuses the menu text without moving it, but its memory was built next to the previous
+  post -> answers change (B-like), and no use for gemma (sliding window); (5) `-ub 2048`: ~5% on the Mac; (6) a newer
+  llama.cpp build: unknown gain, numbers drift, pin it per study; (7) fewer readers (C): 50 instead of 99 ~2x faster,
+  ranges ~1.4x wider (part 1's gemma-qwen +2..+15 might not stay clear); (8) two AIs at once: GPU is the limit, small gain,
+  memory risk (10-07 crash), breaks LD-42.
+- **Not worth it:** KV q8_0 (no gain on the Mac, changes answers), a max-length cap (changes posts; no length limits).
+- Recommendation for the next full run: 16 slots (chosen) + ask hsa303 for idle hours; after `ARM 2 DONE`, one ~1 h Spark
+  speed check (noise-floor set) of gemma `--swa-full --cache-ram 0 --kv-unified` and ngram speculative decoding; keep
+  only what stays within rerun noise. Prompt order B only as its own V1 + one change test.

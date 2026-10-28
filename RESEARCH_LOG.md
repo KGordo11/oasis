@@ -79,6 +79,8 @@ research**:
   only with `--swa-full --cache-ram 0` (which alone also speeds today's order 1.24x).
   **Tue 13:13 (§14.56 end): preflight ALL CLEAR (110 PASS), part 2 RUNNING since 04:25, watchdog on.** qwen baseline
   done (10,098 screens, 1.70 s/screen shared); llama baseline started 09:10. Rough finish Thu 10-29 night - Fri 10-30.
+  **Wed 10-28 08:48: 4 of 9 cells done (all rc=0, no restarts); qwen reads gemma running; `ARM 2 DONE` ~Thu 10-29
+  evening - Fri 10-30 early morning (estimate).**
 
 - **NEW Tue 10-27 (§14.55): LD-46 future sims = 16 slots for all 3 AIs** (`SLOTS=16 PARALLEL=16`). Part 2 stays at 8;
   defaults change only after `ARM 2 DONE`.
@@ -14972,6 +14974,7 @@ into the running window (typed text gets queued as shell input).
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
 ### Status (2026-10-27)
+- Wed 10-28 08:48 (§14.56 end): part 2 at 4 of 9 cells, no restarts; ETA Thu 10-29 evening - Fri 10-30 early.
 - §14.57: gemma's own-post lean = about half a comment snowball (live world); `v3_compare_parts.py` ready for part 2.
 - Part 2 started 03:04 (`ARM=2 v3_start.sh`, preflight first), §14.56. **13:13: preflight ALL CLEAR, part 2 RUNNING
   since 04:25, watchdog cron `'ARM 2 DONE'` on; qwen baseline done, llama baseline running.** Slot test done (§14.54), LD-46 16 slots for
@@ -16917,6 +16920,19 @@ part is 58% of the characters.
   llama baseline ends ~16:50 (part 1's pace) to ~20:40 (script guess) today. Part 1 took ~78 h in all, so part 2 ends
   roughly Thu 10-29 night - Fri 10-30 (estimate). Banner still says "System restart required": a reboot kills the run,
   the cron watchdog resumes it (gives up after 3). Next check: `tail -3 ~/llm_bias/logs/v3_big_part2.txt`.
+- **Wed 10-28 08:48 (Gordon's check): part 2 at 4 of 9 cells, all rc=0, no watchdog restart (no watchdog file),
+  crontab unchanged.** hsa303: one python (20 GB) for 1 h 15 min, GPU 96% busy, 70 GB memory free.
+
+| step | part 2 | part 1 (same step) |
+|---|---|---|
+| baseline: llama reads llama | ~09:11-18:28 Tue, ~556 min (end line not pasted; from gemma's start) | 461 min |
+| baseline: gemma reads gemma | 529.8 min, 3.24 s/screen, end 03:17:57 Wed | 951.1 min, 5.82 |
+| cross: qwen reads llama | 296.5 min, 1.51 s/screen, end 08:15:45 | 411.1 min, 2.09 |
+| cross: qwen reads gemma | started 08:15:46; 1,169 lines at 08:48 | 385.4 min |
+
+  Left after qwen reads gemma (~12:30-13:00 Wed): llama reads qwen, llama reads gemma, gemma reads qwen, gemma reads
+  llama, noise floor = 2,362 min in part 1. Part 2 has run at ~0.6-1.2x part 1's times, so ~30-40 h more:
+  **`ARM 2 DONE` ~Thu 10-29 evening - Fri 10-30 early morning** (estimate). Post screens done ~44,600 of 95,040 (47%).
 
 ## 14.57 Why gemma upvotes gemma's posts (part 1); part 1 vs part 2 comparison built (Tue 2026-10-27)
 Gordon (while part 2 runs): (1) dig into part 1's one clear lean, gemma upvoting gemma's posts (§14.53); (2) build the

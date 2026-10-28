@@ -171,7 +171,7 @@ def main():
         sys.path.insert(0, HERE); import rank_menu, run_v2, live_world  # noqa: E401
         base = (run_v2.MENU + "\n" + live_world.MESSAGES_SECTION).split("\n")
         check("V3: part 2 menu = the same lines as V1, reordered", sorted(menu.strip().split("\n")) == sorted(base))
-        cnt = Counter(a["action"] for f in glob.glob(os.path.join(tmp, "big", "v3", "r*", "reading_*.jsonl")) if "_d" not in f.split("__")[1]
+        cnt = Counter(a["action"] for f in glob.glob(os.path.join(tmp, "big", "v3", "r*", "reading_*.jsonl")) if "_d" not in os.path.basename(f).split("__")[1]
                       for x in load(f) if x["screen"] == "post" for a in x["actions"])
         tot = [sum(cnt[n] for l in sec for n in rank_menu.names(l)) for _, sec in rank_menu.sections(menu.strip())]
         check("V3: part 2 menu sections go least used -> most used", tot == sorted(tot), str(tot))
@@ -221,6 +221,30 @@ def main():
         print("== 5. analysis on the fake data")
         p = subprocess.run([PY, os.path.join(HERE, "live_summary.py"), live], cwd=REPO, capture_output=True, text=True)
         check("live_summary.py runs", p.returncode == 0 and "STEPS" in p.stdout, (p.stderr or p.stdout).strip()[-120:])
+
+        print("== 6. speed suite (6 users, 2 posts each; servers not managed on the laptop)")
+        sp = os.path.join(tmp, "speed")
+        es = dict(env, SPEED_DIR=sp, SPEED_POSTS=glob.glob(os.path.join(live, "r*"))[0], AGENTS="6", K="2")
+        suite = lambda tests: subprocess.run([PY, os.path.join(HERE, "speed_suite.py")], cwd=REPO, env=dict(es, TESTS=tests),  # noqa: E731
+                                             capture_output=True, text=True, timeout=900)
+        menus = {}
+        for t in ("ref", "order_b", "ref_redo slots16 worlds3"):
+            open(reqlog, "w").close()
+            p = suite(t)
+            check(f"speed suite {t}: SPEED SUITE DONE", "SPEED SUITE DONE" in p.stdout, (p.stdout + p.stderr).strip()[-120:])
+            menus[t] = {(r["menu_in_screen"], r["menu_in_system"]) for r in load(reqlog) if r["screen"].startswith("You're scrolling")}
+        check("speed: ref has the menu on the screen, order_b at the top of the system message",
+              menus["ref"] == {(True, False)} and menus["order_b"] == {(False, True)}, str(menus))
+        tim = {t: [json.loads(l) for l in open(os.path.join(sp, t, "timing.jsonl"))] for t in ("ref", "order_b", "ref_redo", "slots16", "worlds3")}
+        check("speed: every test OK for all 3 AIs, 12 posts read each (6 users x 2)",
+              all(len(v) == 3 and all(r["status"] == "OK" and r["posts_read"] == 12 for r in v) for v in tim.values()),
+              str({t: [(r["status"], r.get("posts_read")) for r in v] for t, v in tim.items()}))
+        check("speed: worlds3 ran the three AIs together", all("together_wall_s" in r for r in tim["worlds3"]))
+        summ = open(os.path.join(sp, "summary.md")).read()
+        check("speed: summary has speed + behaviour tables", "## 1. Speed" in summ and "| ref_redo |" in summ and "**gemma3:12b**" in summ, summ[-200:])
+        open(reqlog, "w").close()
+        suite("ref order_b ref_redo slots16 worlds3")
+        check("speed: running it again asks the AI nothing (all done)", not load(reqlog))
     finally:
         for p in procs:
             p.send_signal(signal.SIGTERM)

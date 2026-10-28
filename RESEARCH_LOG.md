@@ -68,6 +68,9 @@ research**:
 
 ## 0.2 Where things stand (2026-10-28): read this first
 
+- **NEW Wed 10-28 (§14.59): speed test suite READY** (`speed_suite.py`, 13 tests = ref + one change each, all 3 AIs,
+  ~17 h): run after `ARM 2 DONE` + cron off. Speed and "did behaviour change" (vs a fresh-randomness rerun) per AI.
+
 - **NEW Wed 10-28 (§14.58): speed options** for the next full run: 16 slots chosen (pros/cons); not yet tried: free
   Spark hours (ask hsa303), speculative decoding, unified KV pool, gemma swa-full; check each on the noise-floor set first.
 
@@ -14977,6 +14980,7 @@ into the running window (typed text gets queued as shell input).
 Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`, `v2_campaign.sh`.
 
 ### Status (2026-10-27)
+- Wed 10-28 (§14.59): speed test suite built + smoke-tested (13 tests, ~17 h); run after ARM 2 DONE.
 - Wed 10-28 (§14.58): speed options listed (16 slots chosen; speculative decoding / unified KV / gemma swa-full to check).
 - Wed 10-28 08:48 (§14.56 end): part 2 at 4 of 9 cells, no restarts; ETA Thu 10-29 evening - Fri 10-30 early.
 - §14.57: gemma's own-post lean = about half a comment snowball (live world); `v3_compare_parts.py` ready for part 2.
@@ -15248,6 +15252,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | (this) | 10-27 01:00 | **`slot_bench.sh`**: Spark slot test (llama-batched-bench 8/16/32/64 slots, all 3 AIs; refuses while our servers/runs are up) (§14.54) |
 | (this) | 10-27 04:00 | **`prompt_order_bench.py`**: speed of prompt order A (today) vs B (shared menu + format first) on a llama.cpp server; `max_tokens 1` = prompt reading only (§14.56) |
 | (this) | 10-27 15:00 | **`check_gemma_own.py <dir>`**: gemma's own-post upvote lean inside topic/length/question/stance/scroll groups, post by post, by tone of the comments on screen; **`v3_compare_parts.py <part1> <part2>`**: part 1 vs part 2 tables + bias; `v3_big_summary.py`: `load(dir)` + `gate()` reusable, gate also on `v3_flipped` (§14.57) |
+| (this) | 10-28 12:00 | **`speed_suite.py`, `speed_summary.py`**: speed tests (ref + one change, all 3 AIs); `llamacpp_servers.sh` `LLAMA_BIN`/`SERVER_ARGS`, bash-3.2 portable; `run_v2.py --shared-first`; `fake_engine.py` logs menu position; smoke +8 checks, flaky `__` path split fixed (§14.59) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -17036,3 +17041,63 @@ per AI with the setting, compare with the `_d1` rerun); (B) changes to what the 
 - Recommendation for the next full run: 16 slots (chosen) + ask hsa303 for idle hours; after `ARM 2 DONE`, one ~1 h Spark
   speed check (noise-floor set) of gemma `--swa-full --cache-ram 0 --kv-unified` and ngram speculative decoding; keep
   only what stays within rerun noise. Prompt order B only as its own V1 + one change test.
+
+## 14.59 Speed test suite built: every speed idea gets its own test on the Spark (Wed 2026-10-28)
+**Gordon (on §14.58):** no asking hsa303; no fewer readers ("the whole point is to let each user react the way they
+want"); try speculative decoding only if it doesn't steer the AIs ("stay away from influence and bias"); yes to the shared
+memory pool, `--cache-reuse`, `-ub 2048` ("many small gains make big gains"), a newer llama.cpp, and several AIs at once
+**each in its own world** (AI1's users only ever in AI1's world; nothing merged). "Make sure they all have their own
+independent test ready to run after the current spark sim is done. Even the ones we are implementing [16 slots]... all the
+same for all AIs; if one prompt makes one AI run faster, check it with the other AIs; if it doesn't affect how they respond
+majorly, then we can look into it."
+
+**Design (each test = the reference + ONE change, applied the same way to all three AIs; nothing run yet):**
+reference = the big sim's setup (V3, live world, 8 slots, our llama.cpp b11434). In every test each AI reads its OWN
+part-1 posts, first K=6 posts of each user's scroll (~600 posts read per AI) in a fresh world of its own; same users,
+posts and seeds in every test, so answers compare screen by screen.
+
+| test | the one change |
+|---|---|
+| ref / ref_redo | the reference; again with fresh randomness = how much answers move by chance (the yardstick) |
+| slots16 | 16 slots (LD-46, chosen; tested anyway) |
+| ub2048 / cacheram0 / swafull / kvunified / cachereuse | server `-ub 2048` / `--cache-ram 0` / `--swa-full` (only gemma has a sliding window) / `--kv-unified` / `--cache-reuse 256` |
+| spec_ngram / spec_draft | speculative decoding: guesses from text already seen / from a small model of the same family (qwen3 0.6B, llama3.2 1B, gemma3 1B, Q8_0, downloaded from Hugging Face) |
+| order_b | a PROMPT change: menu + answer format at the top of the system message (`run_v2.py --shared-first`) |
+| newbuild | the newest llama.cpp, built in `engines/llama.cpp-new` with our build commands |
+| worlds3 | all three AIs at once, each reading its own posts in its own world (3 servers; skipped if < 60 GB free) |
+
+- Speculative decoding and "influence": the small model only proposes the next few words; the AI checks them and keeps
+  only the words it would pick itself (llama.cpp samples the big model at every position and accepts a guess only if it
+  equals that sample), so every word is still the AI's own choice with its own odds. What changes is which dice roll lands
+  where (like a fresh seed); ref_redo measures exactly that much movement.
+- Several worlds at once already matches the design: a reading cell = one reader AI x one post set in its own world,
+  thrown away after (live_world.py); running cells side by side changes only the GPU sharing.
+- **Results** (`speed_summary.py`): (1) seconds per post read per AI and x faster than ref; (2) per AI total engagement,
+  % upvoted, % commented, % did nothing, answer length, and the change vs ref screen by screen with a 95% range from
+  resampling users; ref_redo's row = chance. A setting is speed-only if it moves the AIs no more than ref_redo.
+  Keepers then get one combined check (cross test, small) before the next full run; order_b, if kept, is a study change.
+- Guards: refuses while any runner/preflight of ours runs (bug class 0); each test stops all servers first; the
+  server's real command line (`ps`) must contain the test's flag and slot count or the test is FAILED (bug class 2); a
+  server that refuses a flag, a failed download/build, or too little memory = FAILED/SKIPPED, the suite goes on; a
+  half-done part is redone from zero (clean timing); rerun = resume. Ends `SPEED SUITE DONE` + `data/llm_bias/speed/summary.md`.
+- Estimate: ~80 min per test (qwen ~16, llama ~28, gemma ~32 min + loads) x 12 + worlds3 + build ~30 min = **~17 h**
+  on a shared Spark.
+
+**Code:** `speed_suite.py`, `speed_summary.py` (new); `llamacpp_servers.sh`: `LLAMA_BIN` (other build) and `SERVER_ARGS`
+(extra flags, `@MODEL@` = per-model file), unset = exactly the old command; ports from a function instead of `declare -A`
+(runs on the Mac's bash 3.2 too); `only` always restarts when extra settings are given. `run_v2.py --shared-first`
+(live reading only; recorded in `changes_from_v1`; fails if nothing was moved). `fake_engine.py` logs where the menu sits.
+**Tests:** smoke ALL PASS (61 = 53 + 8 new: order_b's menu really moves, every test 12/12 posts read, worlds3 together,
+summary tables, rerun asks nothing). Mac with a stand-in `llama-server`: default command unchanged; each test's server
+carried its flag (`--cache-ram 0`, `--spec-type ngram-simple`, `-np 16`, `-md .../gemma3-12b.gguf`); worlds3 ran 3 servers;
+nothing left running.
+**Smoke flake found and fixed:** one run failed "part 2 menu sections go least used -> most used". Cause: the CHECK
+split the full path at `__` to spot noise-floor files; when the temp folder's random name starts with `_`
+(`llm_bias_smoke__ke6ezmr`) the split lands in the folder name, the check counted the noise-floor rereads and
+`rank_menu.py` (correct, file name only) did not. Fixed in `smoke_test.py` (file name only). Not a data or rank_menu bug;
+`v3_summary.py` already used the file name.
+
+**Commands for Gordon (after `ARM 2 DONE` and the cron removed; not before):**
+`cd ~/llm_bias/oasis && git pull --no-edit && source ~/llm_bias/env_llamacpp.sh && setsid nohup python3
+examples/experiment/llm_bias/speed_suite.py > ~/llm_bias/logs/speed_suite.txt 2>&1 < /dev/null &`, check with
+`tail -5 ~/llm_bias/logs/speed_suite.txt`; after a reboot, the same command resumes. Then rsync `data/llm_bias/speed/`.

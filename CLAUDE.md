@@ -108,6 +108,7 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | `v3_big_summary.py <dir> [round]` | big-sim part (or V1 `v1_v2_spark r101`): analyze_v2 tables, one row per post read (all views), gate, follow-up table; writes `<dir>/summary.md` (~4 min) |
 | `check_gemma_own.py <dir>`, `v3_compare_parts.py <part1> <part2>` | gemma's own-post lean by group / comment tone (§14.57); part 1 vs part 2 tables + bias (run after `ARM 2 DONE`) |
 | **`handoff_check.sh [read]`** | Mac: `read` = session catch-up bundle; no arg = FAIL if log §0.2/§14.32 Status/§14.32c/memory are behind (§14.52) |
+| **`speed_suite.py`**, `speed_summary.py` | speed tests on the Spark (ref + ONE change each, all 3 AIs, ~17 h; §14.59); `llamacpp_servers.sh` takes `LLAMA_BIN` / `SERVER_ARGS`; `run_v2.py --shared-first` = prompt order B |
 | `slot_bench.sh` | Spark slot test (8/16/32/64 slots, each AI); only between runs; §14.54 |
 | `rank_menu.py` | part 2's menu from part 1's data: least-used actions on top (§14.49) |
 | `v3_test.sh`, `v3_chain.sh`, `v3_summary.py`, `v3_ranges.py`, `v3_post_lines.py`, `make_v3_charts.py` | V3 single-addition tests (done 10-21, data `data/llm_bias/v3_tests/`, not in git) |

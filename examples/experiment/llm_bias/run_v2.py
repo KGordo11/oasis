@@ -350,7 +350,9 @@ def run(a):
     if a.post_screen == "v3":
         post_screen, post_menu = POST_SCREEN_V3, MENU_POST_ONLY
     a.live = a.live and a.turn == "read"
-    v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line", "post_screen", "live", "two_actions")}
+    if a.shared_first and not a.live:
+        raise SystemExit("--shared-first is for the live reading turn (--v3 or --live)")
+    v3 = {k: getattr(a, k) for k in ("v1", "think", "free_text", "refresh_loop", "menu_order", "post_menu", "post_line", "post_screen", "live", "two_actions", "shared_first")}
     v3_on = any(v not in (False, None, "v1", "all") for v in v3.values())
     # Gordon's rule (log 14.43): every test = V1 + ONE addition, never stacked; more than one needs --cross
     changes = [k for k, v in v3.items() if k != "v1" and v not in (False, None, "v1", "all")] \
@@ -475,10 +477,18 @@ def run(a):
         live_menu = live_world.live_menu(menu)
         n, f = [0], open(out, "a")
 
+        shared = f"WHAT YOU CAN DO\n{live_menu}\n\n{rfmt}"
+
         def ask(p, text, key, tail, budget):
             parts = (SEED, a.round, "read", a.posts_by, p["id"]) + ((key,) if key else ("live",)) + tuple(tail)
             seed = llm.stable_seed(*parts, a.draw) if a.draw else llm.stable_seed(*parts)
-            return llm.chat_json(a.model, system_prompt(a.model, a.round, p["persona"]), text, seed=seed,
+            system = system_prompt(a.model, a.round, p["persona"])
+            if a.shared_first:  # speed test (log 14.59): menu + answer format move to the top, the same on every screen
+                system = system.replace("# SELF-DESCRIPTION", shared + "\n\n# SELF-DESCRIPTION")
+                cut = text.replace("\n\n" + shared, "") if shared in text else text.removesuffix("\n\n" + rfmt)
+                assert len(cut) < len(text), "--shared-first: the screen had neither the menu nor the answer format to move"
+                text = cut
+            return llm.chat_json(a.model, system, text, seed=seed,
                                  temperature=a.temperature, num_predict=budget + (THINK_EXTRA if a.think else 0),
                                  validate=lambda o: validate(o, live=True), retries=2, think=a.think,
                                  json_mode=not a.free_text)
@@ -667,6 +677,8 @@ if __name__ == "__main__":
                     "come back as follow-up screens; comments, groups and private messages work (log 14.47)")
     ap.add_argument("--v3", action="store_true", help="V3 version: V1 prompts; posting turn = line 2c; reading turn = "
                     "live world + refresh loop + two-action example, JSON on, thinking off (log 14.48); part 2 adds --menu-file")
+    ap.add_argument("--shared-first", action="store_true", help="read, live: menu + answer format at the top of the "
+                    "system message instead of the end of each screen (speed test, log 14.59; a prompt change)")
     args = ap.parse_args()
     if args.v3 and (args.v1 or args.think or args.free_text or args.refresh_loop or args.cross or args.two_actions
                     or args.post_line or args.post_menu != "all" or args.post_screen != "v1"):

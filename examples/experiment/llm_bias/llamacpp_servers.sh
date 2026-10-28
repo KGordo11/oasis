@@ -4,13 +4,15 @@
 #   examples/experiment/llm_bias/llamacpp_servers.sh stop | status
 # Same settings for every model: 8 slots of 8192 tokens each (as Ollama), flash attention, all layers on the GPU,
 # the model file's own chat template (--jinja). Ports: qwen 11601, llama 11602, gemma 11603.
+# Speed tests (speed_suite.py, log 14.59): LLAMA_BIN = another llama.cpp build; SERVER_ARGS = extra server settings,
+# the same for every model (@MODEL@ becomes e.g. qwen3-8b, for a per-model file such as a draft model). Unset = as always.
 set -u
 ROOT=${LLM_BIAS_HOME:-$HOME/llm_bias}
-BIN=$ROOT/engines/llama.cpp/build/bin/llama-server
+BIN=${LLAMA_BIN:-$ROOT/engines/llama.cpp/build/bin/llama-server}
 MAN=$ROOT/models/manifests/registry.ollama.ai/library
 SLOTS=${SLOTS:-8}
 export LD_LIBRARY_PATH=/usr/local/cuda/lib64:${LD_LIBRARY_PATH:-}
-declare -A PORT=([qwen3:8b]=11601 [llama3.1:8b]=11602 [gemma3:12b]=11603)
+port() { case $1 in qwen3:8b) echo 11601 ;; llama3.1:8b) echo 11602 ;; gemma3:12b) echo 11603 ;; *) echo "unknown model $1" >&2; exit 1 ;; esac; }
 
 blob() {  # model name -> its model file, read from Ollama's manifest (no Ollama server needed)
   python3 -c "import json,sys; m=json.load(open(sys.argv[1])); print([l['digest'] for l in m['layers'] if l['mediaType'].endswith('.model')][0].replace(':','-'))" "$MAN/${1%%:*}/${1#*:}"
@@ -22,12 +24,22 @@ stop_all() {  # LB-v2-7: ask every server to stop, WAIT until it has exited (GPU
   pkill -9 -u "$USER" -f "llama-server -m"; sleep 2
 }
 
-start_one() {  # start one model's server and wait until it answers (3-min limit)
-  local m=$1 p=${PORT[$1]} f alt=$ROOT/models/gguf/${1/:/-}.gguf
+launch() {  # start one model's server in the background
+  local m=$1 p f alt=$ROOT/models/gguf/${1/:/-}.gguf
+  p=$(port "$m") || exit 1
   if [ -f "$alt" ]; then f=$alt; else f=$ROOT/models/blobs/$(blob "$m"); fi
   [ -f "$f" ] || { echo "missing model file for $m: $f"; exit 1; }
+  local extra=${SERVER_ARGS:-}
+  # shellcheck disable=SC2086  # SERVER_ARGS is a list of flags: split on purpose
   nohup "$BIN" -m "$f" --alias "$m" --host 127.0.0.1 --port "$p" -np "$SLOTS" -c $((SLOTS * 8192)) \
-    -fa on --jinja -ngl 99 > "$ROOT/logs/llamacpp_${m%%:*}.log" 2>&1 &
+    -fa on --jinja -ngl 99 ${extra//@MODEL@/${m/:/-}} > "$ROOT/logs/llamacpp_${m%%:*}.log" 2>&1 &
+  echo "starting $m on port $p ($f)${extra:+ + $extra}"
+}
+
+start_one() {  # start one model's server and wait until it answers (3-min limit)
+  local m=$1 p
+  p=$(port "$m") || exit 1
+  launch "$m"
   for i in $(seq 1 90); do curl -s "127.0.0.1:$p/health" | grep -q ok && break; sleep 2; done
   curl -s "127.0.0.1:$p/health" | grep -q ok && echo "READY $m (only this model loaded)" || { echo "FAILED $m"; exit 1; }
 }
@@ -36,7 +48,8 @@ case "${1:-status}" in
 only)
   # LD-42: keep ONE model in memory (the one the current step uses) so the shared Spark keeps ~95 GB free
   m=${2:?usage: $0 only <model>}
-  if curl -s "127.0.0.1:${PORT[$m]}/health" | grep -q ok && [ "$(pgrep -u "$USER" -fc "llama-server -m")" = "1" ]; then
+  if [ -z "${SERVER_ARGS:-}${LLAMA_BIN:-}" ] && curl -s "127.0.0.1:$(port "$m")/health" | grep -q ok \
+     && [ "$(pgrep -u "$USER" -f "llama-server -m" | wc -l | tr -d ' ')" = "1" ]; then  # speed tests always restart
     echo "already only $m"; exit 0; fi
   stop_all
   start_one "$m" ;;
@@ -44,21 +57,15 @@ start)
   if pgrep -u "$USER" -f "llama-server -m" >/dev/null; then echo "servers already running -- run: $0 stop   first"; exit 1; fi
   urls="{"
   for m in qwen3:8b llama3.1:8b gemma3:12b; do
-    p=${PORT[$m]}
     # a standard GGUF in models/gguf/<name>.gguf (e.g. gemma3-12b.gguf) wins over Ollama's file -- for a model whose
     # Ollama file llama.cpp cannot read
-    alt=$ROOT/models/gguf/${m/:/-}.gguf
-    if [ -f "$alt" ]; then f=$alt; else f=$ROOT/models/blobs/$(blob "$m"); fi
-    [ -f "$f" ] || { echo "missing model file for $m: $f"; exit 1; }
-    nohup "$BIN" -m "$f" --alias "$m" --host 127.0.0.1 --port "$p" -np "$SLOTS" -c $((SLOTS * 8192)) \
-      -fa on --jinja -ngl 99 > "$ROOT/logs/llamacpp_${m%%:*}.log" 2>&1 &
-    echo "starting $m on port $p ($f)"
-    urls="$urls\"$m\": \"http://127.0.0.1:$p\", "
+    launch "$m"
+    urls="$urls\"$m\": \"http://127.0.0.1:$(port "$m")\", "
   done
   urls="${urls%, }}"
   for m in qwen3:8b llama3.1:8b gemma3:12b; do
-    for i in $(seq 1 90); do curl -s "127.0.0.1:${PORT[$m]}/health" | grep -q ok && break; sleep 2; done
-    if curl -s "127.0.0.1:${PORT[$m]}/health" | grep -q ok; then echo "READY $m"
+    for i in $(seq 1 90); do curl -s "127.0.0.1:$(port "$m")/health" | grep -q ok && break; sleep 2; done
+    if curl -s "127.0.0.1:$(port "$m")/health" | grep -q ok; then echo "READY $m"
     else echo "FAILED $m -- see: tail -30 $ROOT/logs/llamacpp_${m%%:*}.log"; exit 1; fi
   done
   printf 'export LLM_BACKEND=llamacpp\nexport LLAMACPP_URLS=%q\n' "$urls" > "$ROOT/env_llamacpp.sh"
@@ -67,6 +74,6 @@ stop)
   stop_all; pgrep -u "$USER" -f "llama-server -m" >/dev/null && echo "STILL RUNNING" || echo "stopped" ;;
 status)
   for m in qwen3:8b llama3.1:8b gemma3:12b; do
-    printf '%-12s port %s: %s\n' "$m" "${PORT[$m]}" "$(curl -s 127.0.0.1:${PORT[$m]}/health || echo down)"
+    printf '%-12s port %s: %s\n' "$m" "$(port "$m")" "$(curl -s "127.0.0.1:$(port "$m")/health" || echo down)"
   done ;;
 esac

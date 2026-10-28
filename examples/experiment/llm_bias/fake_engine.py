@@ -90,7 +90,8 @@ class H(BaseHTTPRequestHandler):
             menu = u[u.find("WHAT YOU CAN DO"):]
             LOG.write(json.dumps({"model": p.get("model"), "think": think, "json": "response_format" in p, "two": '...the fields it needs}, {"action"' in u,
                                   "seed": p.get("seed"), "menu_first": menu.split("\n")[1] if "\n" in menu else "",
-                                  "screen": u[:60]}) + "\n"); LOG.flush()
+                                  "screen": u[:60], "menu_in_screen": "WHAT YOU CAN DO\n" in u,
+                                  "menu_in_system": "WHAT YOU CAN DO\n" in p["messages"][0]["content"]}) + "\n"); LOG.flush()
         rng = random.Random(p.get("seed"))
         reply = json.dumps({"actions": answer(u, rng), "reason": "fake"})
         self._send({"choices": [{"message": {"content": reply, "reasoning_content": "thinking..." if think else ""},

@@ -1,0 +1,644 @@
+<meta charset="utf-8">
+<title>Inside LLM Bias V3</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/*__CSS__*/
+/* V3 additions (same tokens as the V2 page) */
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+:root{--same:#7a8794}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--same:#8f9caa}}
+:root[data-theme="dark"]{--same:#8f9caa}
+.tag.same{background:var(--same)}
+.status{border:1px solid var(--rule);border-left:4px solid var(--updated);background:var(--panel);border-radius:8px;padding:10px 14px;margin-top:18px;max-width:80ch}
+.chg td:first-child{font-weight:600;white-space:nowrap}
+.chg td{font-size:14px}
+.chg td:nth-child(2),.chg td:nth-child(3){font-family:var(--mono);font-size:12.5px}
+.scroll{max-height:330px;overflow:auto;border:1px solid var(--rule);border-radius:10px;background:var(--panel)}
+.scroll table{font-size:13px}
+.scroll tr{cursor:pointer}
+.scroll tr[aria-current="true"] td{background:var(--soft);font-weight:600}
+.scroll tr:hover td{background:var(--soft)}
+.ok{color:var(--gemma);font-weight:600}.bad{color:var(--spark);font-weight:600}
+.chart{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:560px;height:auto}
+.chart text{fill:var(--muted);font:11px var(--mono)}
+.chart .grid{stroke:var(--rule);stroke-width:1}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin:6px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{display:inline-block;width:18px;height:3px;border-radius:2px}
+.legend i.dash{background:repeating-linear-gradient(90deg,var(--muted) 0 4px,transparent 4px 7px)}
+select.pick{font:500 14px var(--body);padding:6px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--panel);color:var(--ink);max-width:100%}
+.md h1,.md h2{font:600 17px var(--body);margin:18px 0 8px}
+.md p{font-size:14px}
+.kv{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr);gap:4px 14px;font-size:14px}
+.kv b{font-family:var(--mono);font-weight:500;font-size:13px;overflow-wrap:anywhere}
+@media (max-width:600px){.kv{grid-template-columns:minmax(0,1fr)}.kv span{margin-bottom:6px}}
+:not(pre)>code{overflow-wrap:anywhere}
+td code{overflow-wrap:normal;white-space:nowrap}
+</style>
+
+<nav class="bar" aria-label="Sections"><div class="wrap">
+  <b>LLM Bias V3</b>
+  <a href="#design">How it works</a><a href="#changes">V1 → V3</a><a href="#code">The code</a><a href="#steps">Step by step</a>
+  <a href="#sees">What the AI saw</a><a href="#data">Data files</a><a href="#ticks">Tick by tick</a><a href="#effort">Easy vs hard</a>
+  <a href="#worlds">All together</a><a href="#spark">On the Spark</a><a href="#commands">Commands</a>
+</div></nav>
+
+<main class="wrap">
+<header class="hero">
+  <div class="eyebrow">OASIS research · LLM Bias V3 big sim · DGX Spark honda.csr.uky.edu · built from the repo on <span id="built"></span></div>
+  <h1>Inside LLM Bias V3</h1>
+  <p class="lede" style="margin-top:14px">Do AIs favour posts written by their own AI? Three AIs from different companies (qwen3:8b by Alibaba,
+  llama3.1:8b by Meta, gemma3:12b by Google) each play the same 100 made-up Americans on a pretend Reddit. Each AI's users
+  write posts. Then each AI's users read every AI's posts. In V3 the actions really work: users see each other's comments,
+  open profiles and posts, and send private messages.</p>
+  <p class="lede">This page shows the whole machine: what changed from V1 and why, every code file, the exact screen each AI was
+  shown, every data file, and the cleaned data world by world and tick by tick.</p>
+  <p class="status" id="status"></p>
+  <div class="facts">
+    <div><b>100</b><span>users, the same 100 people as V1 and V2</span></div>
+    <div><b>3</b><span>AIs: gemma3:12b · llama3.1:8b · qwen3:8b</span></div>
+    <div><b>9</b><span>worlds: each AI reads each AI's posts</span></div>
+    <div><b>320</b><span>posts: gemma {{v3_posts_gemma}}, llama {{v3_posts_llama}}, qwen {{v3_posts_qwen}}</span></div>
+    <div><b>{{posts_read}}</b><span>posts read in part 1, plus {{followups}} follow-up screens</span></div>
+    <div><b>{{p1_hours}} h</b><span>part 1 on a shared Spark (Fri 10-23 13:06 to Mon 10-26 19:18)</span></div>
+  </div>
+</header>
+
+<section id="design">
+  <div class="eyebrow">01 · How V3 works</div>
+  <h2>Each AI writes posts, then every AI reads every AI's posts, in a world where actions really happen</h2>
+  <p>An <b>AI</b> is a large language model (a text-predicting program like ChatGPT) running on the Spark. A <b>user</b> is one of
+  the 100 made-up people; the AI is handed that person's description and asked to act as them. A <b>screen</b> is one user looking
+  at one thing and deciding what to do: one question to the AI.</p>
+  <pre class="mermaid">
+flowchart LR
+  P["Posting turn<br/>each AI plays all 100 users<br/>empty feed + 'It's posting time'"] --> S[("3 post sets<br/>gemma 99 · llama 119 · qwen 102")]
+  S --> W["9 worlds<br/>reader AI x whose posts<br/>each its own live world"]
+  W --> N["Noise floor<br/>first 4 posts of each user<br/>read again, fresh randomness"]
+  W --> P2["Part 2<br/>the same posts read again<br/>menu ranked from part 1's data"]
+  </pre>
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3 style="margin-top:0">The 3 × 3 grid: 9 worlds</h3>
+      <p>Every AI reads every AI's posts. A <b>world</b> is one reader AI playing all 100 users, reading the posts one AI wrote.
+      Posts are never mixed, and nothing in one world is seen in another. The diagonal is the <b>baseline</b>: an AI reading posts
+      its own AI wrote.</p>
+      <div class="tablewrap"><table>
+        <tr><th>AI playing the users ↓ / posts by →</th><th>gemma</th><th>llama</th><th>qwen</th></tr>
+        <tr><td><span class="dot g"></span>gemma</td><td class="diag">baseline</td><td>cross</td><td>cross</td></tr>
+        <tr><td><span class="dot l"></span>llama</td><td>cross</td><td class="diag">baseline</td><td>cross</td></tr>
+        <tr><td><span class="dot q"></span>qwen</td><td>cross</td><td>cross</td><td class="diag">baseline</td></tr>
+      </table></div>
+    </div>
+    <div class="card">
+      <h3 style="margin-top:0">Time runs in ticks</h3>
+      <p>Everyone scrolls at the same pace. At <b>tick 0</b> each of the 100 users reads the first post of their own scroll, at
+      tick 1 the second, and so on, until each user has read every post except their own (99 users read each post). A user
+      sees what <i>other</i> users did in <b>earlier</b> ticks, and their own actions at once. So at tick 0 nobody has
+      commented on anything yet, like V1. Each tick later, more comments are on the screen.</p>
+      <p>Each user's scroll starts at a different place in one fixed order of the posts, so every post is read early by some
+      users and late by others. <button class="ref" data-ref="run_live">live_world.py · run_live()</button></p>
+    </div>
+  </div>
+  <h3>What one user does in one tick</h3>
+  <ol class="steps">
+    <li><h4>Sees one post screen</h4><p>The post, its comments with IDs (like <code>[c12]</code>, the 5 newest), and a
+      notice if new private messages are waiting. Vote counts are never shown. It is never told which AI wrote the post.
+      <button class="ref" data-ref="post_block">post_block()</button><button class="ref" data-ref="live_read">LIVE_READ_SCREEN</button></p></li>
+    <li><h4>Answers with a list of actions</h4><p>Any of the 27 OASIS actions plus open_messages, as JSON: zero, one or many.
+      The answer example shows two entries. If the answer breaks a rule (an unknown action, a comment with no text), the AI is
+      asked again with a new seed, up to 3 tries; then it counts as unreadable. <button class="ref" data-ref="validate">validate()</button>
+      <button class="ref" data-ref="format_two">FORMAT_TWO</button></p></li>
+    <li><h4>The actions happen in the world</h4><p>An upvote is recorded, a comment appears under the post for later readers, a
+      follow is made. OASIS's rules decide if it works: a second upvote on the same post fails, a comment ID that does not exist
+      fails. Failed actions are saved with the reason. <button class="ref" data-ref="world">World</button></p></li>
+    <li><h4>Look-up actions open a follow-up screen</h4><p>search_user shows up to 3 profiles (where a private message can be sent),
+      search_posts and trend show lists of posts, open_messages shows the inbox, open_post opens a post from a list. The AI
+      answers again there; at most 4 follow-up screens per post, then back to scrolling. <button class="ref" data-ref="screens">screens()</button></p></li>
+    <li><h4>Refresh</h4><p>A refresh with no reaction to the post brings the post back after the next one (a post is shown at
+      most 5 times). This happened {{returns}} times in part 1.</p></li>
+  </ol>
+</section>
+
+<section id="changes">
+  <div class="eyebrow">02 · V1 → V3</div>
+  <h2>What changed from V1, why, and what it did</h2>
+  <p>V1 (rounds 101-102) was the first full Spark study. V3 changed four things. Three were first tested alone as
+  "V1 + one change" (log 14.43-14.48, 20-23 Oct); the live world was tried in a 20-user pilot. The big sim then ran with all
+  four on together. Part 1 is round 101 again: the same 100 users, and the posting turn uses the same random seeds as V1
+  round 101.</p>
+  <div class="tablewrap"><table class="chg">
+    <tr><th>Change</th><th>V1</th><th>V3</th><th>Why</th><th>What it did</th></tr>
+    <tr><td>Posting line</td><td>"You open Reddit. Your feed is empty -- nothing has been posted yet."</td>
+      <td>the same + "It's posting time: share whatever you'd post. Everyone will read the new posts afterwards."</td>
+      <td>In V1 the AIs read the empty feed as "nothing to do here": only {{v1_posters_gemma}} of gemma's 100 users posted. Three
+      wordings were tested on 20-21 Oct. Gordon picked this one ("2c") on 21 Oct; the other two leaked "new Reddit" talk into
+      the posts.</td>
+      <td>Posts in round 101: gemma {{v1_posts_gemma}} → {{v3_posts_gemma}}, llama {{v1_posts_llama}} → {{v3_posts_llama}},
+      qwen {{v1_posts_qwen}} → {{v3_posts_qwen}}. Every user of every AI now writes a post (some llama and qwen users write two).</td></tr>
+    <tr><td>Live world</td><td>Each screen is one question; nothing comes back. Search finds nothing, group IDs are made up,
+      messages go nowhere.</td><td>Actions really happen (above). Comments are shown, follow-up screens return real results,
+      private messages are delivered and can be answered.</td>
+      <td>Gordon, 22 Oct: "implement the actions available in this sim so they actually work". Built from OASIS's rules and the
+      way reference/MutiAgent4Fraud does messages.</td>
+      <td>Follow-up screens in part 1: gemma {{fu_gemma}}, llama {{fu_llama}}, qwen {{fu_qwen}}. Private messages sent: llama
+      {{dms_llama}}, gemma {{dms_gemma}}, qwen {{dms_qwen}}. Engagement grows as comments pile up (see Tick by tick).</td></tr>
+    <tr><td>Refresh works</td><td>refresh does nothing</td><td>refresh with no reaction brings the post back after the next one</td>
+      <td>To make the refresh action real (Gordon, 20 Oct).</td>
+      <td>Almost never used alone: {{returns}} returns in part 1, all llama. AIs pair refresh with a vote.</td></tr>
+    <tr><td>Answer example</td><td>shows one action entry</td><td>shows two action entries (reading turn only)</td>
+      <td>Gemma does one thing per post on ~91% of screens. Gordon, 23 Oct: use the two-action example for all three AIs.</td>
+      <td>Tested alone on 150 recorded V1 screens: actions per 100 screens gemma 96 → 113, qwen 124 → 130, llama 206 → 225. In
+      the big sim it is on together with the live world, so its share cannot be split out.</td></tr>
+  </table></div>
+  <h3>Kept exactly as in V1</h3>
+  <ul>
+    <li>The same 100 users with the same descriptions (file fingerprint ed110626), the same 3 AIs, the same engine settings for every AI (temperature 0.7, top_k 40, top_p 0.9, 8,192 tokens).</li>
+    <li>V1's prompts: the AI is not told which model it is (V2's "I am ..." line is off) and never told who wrote a post.</li>
+    <li>JSON-only answers on (tested off on 21 Oct: no real change; Gordon, 22 Oct: "it makes all AIs equal in response").</li>
+    <li>qwen thinking off, as in V1. Tested on (21 Oct): it changed qwen a lot (downvotes 14-21% → 31-36% of posts), only qwen can think so the AIs would be unequal, it is slow, and the bias answer was the same either way.</li>
+    <li>Part 1 shows V1's menu in V1's order (the same 27 lines). The order is the part 2 study.</li>
+    <li>One post per screen, vote counts hidden, users never see their own posts, the noise floor.</li>
+  </ul>
+  <h3>Tried and dropped (20-21 Oct)</h3>
+  <ul>
+    <li><b>A posting-only menu</b> on the posting screen: 71% of qwen's users (thinking off) sent an empty list.</li>
+    <li><b>"Write as many posts as you'd like"</b>: very uneven post sets (149 / 244 / 266 posts).</li>
+    <li><b>Posting lines 2a and 2b</b>: the "brand new Reddit" story leaked into 5-13% of gemma's posts.</li>
+    <li><b>A fixed flipped menu</b> (least-used first): the biggest effect of all tests, so it became its own study. Part 2 ranks the menu from part 1's own data instead.</li>
+  </ul>
+  <h3>V1 next to V3, world by world</h3>
+  <p>Total engagement = every action except "do nothing", per 100 posts read. <b>V3 tick 0</b> = each user's first post, when no
+  comments exist yet: the closest V3 gets to V1's screens (the other changes are still on). <b>V3 part 1</b> = every post read.</p>
+  <div class="tablewrap"><table id="v1v3"></table></div>
+</section>
+
+<section id="code">
+  <div class="eyebrow">03 · The code</div>
+  <h2>Every file, and where it came from</h2>
+  <p>Click a file to read it. Buttons elsewhere on the page open the file at the exact line, like
+  <button class="ref" data-ref="v3_switch">run_v2.py · the --v3 switch</button>. Each file's history comes from git when the page is built.</p>
+  <p class="muted" style="font-size:14px">
+    <span class="tag new">new</span> first written for V3 (from 20 Oct) ·
+    <span class="tag updated">updated</span> from V1/V2, changed for V3 ·
+    <span class="tag same">same</span> unchanged since V1/V2 ·
+    <span class="tag oasis">oasis</span> from camel-ai/oasis ·
+    <span class="tag data">data</span> a real output file.
+    Not shown: llama.cpp (ggml-org/llama.cpp, the engine; built on the Spark, build b1-5e03bdd), the model files, and the
+    Census/BLS/Pew tables behind the users.</p>
+  <div class="browser">
+    <div class="flist" id="flist" role="list"></div>
+    <div class="viewer">
+      <div class="vhead" id="vhead"></div>
+      <div class="code" id="codebox" tabindex="0" aria-label="Source code"><div class="inner"><div class="band" id="band"></div><pre class="gut" id="gut"></pre><pre id="src"></pre></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="steps">
+  <div class="eyebrow">04 · Step by step</div>
+  <h2>What happens in a part, in order</h2>
+  <ol class="steps">
+    <li><h4>Gordon starts it on the Spark</h4><p><code>v3_start.sh</code> runs the 110-check preflight with the part's exact
+      settings. Only on ALL CLEAR does it add the watchdog to cron and start <code>v3_big.sh</code>.
+      <button class="ref" data-ref="start">v3_start.sh</button></p></li>
+    <li><h4>Each AI in turn: posting, then its baseline</h4><p>Only one AI is loaded at a time. Part 1: qwen's 100 users post
+      (empty feed + the posting line), then qwen reads its own AI's posts. Then the same for llama, then gemma.
+      <button class="ref" data-ref="big">v3_big.sh</button></p></li>
+    <li><h4>The six cross worlds</h4><p>qwen reads llama's posts, qwen reads gemma's, llama reads qwen's, llama reads gemma's,
+      gemma reads qwen's, gemma reads llama's. Each world is built fresh with only that post set and thrown away after.</p></li>
+    <li><h4>Inside a world</h4><p>Tick by tick, 8 users at a time: show the screen, ask the AI, apply its actions, open any
+      follow-up screen, save one row per screen. The order of users inside a tick does not matter, because others' actions
+      show only from the next tick. <button class="ref" data-ref="run_live">run_live()</button></p></li>
+    <li><h4>Noise floor (part 1 only)</h4><p>Each AI reads the first 4 posts of each of its users again in its baseline world,
+      with fresh randomness (400 screens per AI). It shows how much answers move by chance alone.</p></li>
+    <li><h4>Done</h4><p>The log's last line is <code>ARM 1 DONE</code> (part 2: <code>ARM 2 DONE</code>). Gordon removes the
+      cron line and copies the data to the Mac.</p></li>
+    <li><h4>On the Mac</h4><p><code>v3_clean.py</code> cleans the part. Then <code>make_v3_workbook.py</code> builds the Excel
+      file and <code>make_inside_v3.py</code> builds this page, both from the cleaned data.</p></li>
+    <li><h4>Part 2</h4><p>The same 320 posts are copied. <code>rank_menu.py</code> ranks the menu from part 1's choices, least used
+      first (upvote last). Then the 9 worlds are read again, with no posting turn and no noise floor.
+      <button class="ref" data-ref="rank">rank_menu.py</button></p></li>
+  </ol>
+</section>
+
+<section id="sees">
+  <div class="eyebrow">05 · Exactly what the AI saw</div>
+  <h2>Any screen, word for word</h2>
+  <p>Pick a world and a user. For every user you get their tick 0 screen. For users <span id="sampleu"></span> you get every
+  screen of their whole scroll, follow-up screens included.</p>
+  <p class="note">How these screens are rebuilt: post screens are not saved as text, so this page replays each world from its
+  saved rows in the order they happened (the same way a resume rebuilds it) and draws each post screen right before that
+  user's actions are applied. The check: the {{replay_checked}} opened-post screens, which <i>are</i> saved as text, all come out
+  word for word the same. Follow-up screens are shown exactly as saved. The prompt templates match the fingerprint in every
+  part 1 manifest.</p>
+  <div class="xctl">
+    <div class="xrow"><span class="lab">Turn</span><div class="seg" id="s_turn"></div></div>
+    <div class="xrow"><span class="lab">AI plays</span><div class="seg" id="s_ai"></div></div>
+    <div class="xrow" id="s_pbrow"><span class="lab">Posts by</span><div class="seg" id="s_pb"></div></div>
+    <div class="xrow"><span class="lab">User</span><select class="pick" id="s_user" aria-label="User"></select></div>
+  </div>
+  <div id="s_scrollwrap"><h4 style="font:600 15px var(--body);margin:14px 0 6px">This user's screens (click one)</h4>
+  <div class="scroll"><table id="s_scroll"></table></div></div>
+  <p id="s_about" style="margin-top:14px"></p>
+  <div class="grid2">
+    <div class="prompt"><div class="lbl"><span>1 · Who to act like: the system message</span><span id="s_syslbl"></span></div><pre id="s_sys"></pre></div>
+    <div class="prompt"><div class="lbl"><span>2 · What is on the screen: the user message</span><span id="s_userlbl"></span></div><pre id="s_user_msg"></pre></div>
+  </div>
+  <div class="prompt" style="margin-top:14px"><div class="lbl"><span>3 · Its answer, word for word</span><span id="s_anslbl"></span></div><pre id="s_ans"></pre></div>
+  <div class="card" style="margin-top:14px"><h4 style="margin:0 0 6px;font:600 15px var(--body)">4 · What happened</h4><div id="s_ex"></div></div>
+</section>
+
+<section id="data">
+  <div class="eyebrow">06 · Every data file</div>
+  <h2>What the sim saved, and what the cleaning made</h2>
+  <p>Raw files come off the Spark unchanged (<code>data/llm_bias/v3/r101/</code>; part 2: <code>v3_flipped/r101/</code>).
+  <code>v3_clean.py</code> writes the <code>clean/</code> folder from them. The Excel workbook
+  <code>~/Desktop/LLM_Bias/V3_big/LLM_Bias_V3_big.xlsx</code> is built from <code>clean/</code>, and a copy of
+  <code>clean/</code> sits next to it.</p>
+  <div class="tablewrap"><table id="inv"></table></div>
+  <h3>What one reading row holds</h3>
+  <div class="card"><div class="kv" id="fields"></div></div>
+  <h3>How the data is cleaned (every run, before any analysis)</h3>
+  <ul>
+    <li><b>Kept apart, never mixed into the main tables:</b> noise-floor rereads (the <code>_d1</code> files), unreadable answers,
+    follow-up screens (profiles, searches, opened posts, inbox).</li>
+    <li><b>Merged:</b> a post the refresh loop brought back counts as one post read.</li>
+    <li><b>Marked:</b> every action is "done" (it worked) or "failed", with why.</li>
+    <li><b>Normalized:</b> per 100 posts read, because the worlds have different numbers of posts.</li>
+    <li><b>Aggregated small to big:</b> each world tick by tick, then each world all together, then totals.</li>
+    <li><b>Checked:</b> posts read per world = posts × 99 and engagement = the published numbers, or nothing is written.
+    No screen is lost: raw screens = posts read + refresh returns + unreadable + follow-up screens.</li>
+  </ul>
+</section>
+
+<section id="ticks">
+  <div class="eyebrow">07 · Tick by tick</div>
+  <h2>Each world, one tick at a time</h2>
+  <p>Each line is one world: the chosen AI reading one AI's posts. Dashed lines are V1 round 101 (no ticks there, one number).
+  Ticks with fewer than 50 posts read (the last few, from refresh returns) are left off the chart but are in the table.</p>
+  <div class="xctl">
+    <div class="xrow" id="t_partrow"><span class="lab">Part</span><div class="seg" id="t_part"></div></div>
+    <div class="xrow"><span class="lab">Reader</span><div class="seg" id="t_ai"></div></div>
+    <div class="xrow"><span class="lab">Measure</span><div class="seg" id="t_meas"></div></div>
+  </div>
+  <div class="chart"><svg id="t_svg" viewBox="0 0 900 320" role="img" aria-label="Measure by tick"></svg><div class="legend" id="t_leg"></div></div>
+  <h3 id="t_title"></h3>
+  <div class="xrow" style="margin:6px 0"><span class="lab">Posts by</span><div class="seg" id="t_pb"></div></div>
+  <div class="tablewrap" style="max-height:520px;overflow:auto"><table id="t_table"></table></div>
+</section>
+
+<section id="effort">
+  <div class="eyebrow">08 · Easy vs hard actions</div>
+  <h2>Do the AIs pick the easy actions?</h2>
+  <p>Some actions take one click. Others make the AI copy an ID from the screen, write text, or go to another screen first and
+  then write (a private message: find the person, then type). Each action gets a level from what the menu and the live world
+  ask for. <button class="ref" data-ref="clean_effort">v3_clean.py · EFFORT</button></p>
+  <div class="tablewrap"><table>
+    <tr><th>Level</th><th>What it takes</th><th>Actions</th></tr>
+    <tr><td>1</td><td>one click</td><td>upvote, downvote and take-backs, repost, follow, unfollow, mute, unmute, refresh, trend, open_messages, listen_from_group, back</td></tr>
+    <tr><td>2</td><td>pick something on the screen (copy its ID)</td><td>like / dislike / unlike / undo-dislike a comment, open_post, join_group, leave_group</td></tr>
+    <tr><td>3</td><td>write text</td><td>comment, quote, report (needs a reason), search_user, search_posts, create_group</td></tr>
+    <tr><td>4</td><td>write a whole post</td><td>create_post (subreddit, title, body)</td></tr>
+    <tr><td>5</td><td>go to another screen first, then write</td><td>send_message (from a profile or the inbox), send_to_group (open group chats, join, then write)</td></tr>
+  </table></div>
+  <h3>Share of each AI's actions at each level (part 1, all screens, do nothing left out)</h3>
+  <div class="tablewrap"><table id="e_tiers"></table></div>
+  <h3>What the data says</h3>
+  <ul class="verdict">
+    <li><b>Gemma mostly clicks.</b> {{tier1_gemma}}% of its actions are one click and {{tier2_gemma}}% pick something on the screen (almost all comments); only
+    {{tier3_gemma}}% write text, and it sent {{dms_gemma}} private messages in all. {{post_screen_gemma}}% of its actions happen on the post screen.</li>
+    <li><b>Qwen writes, but never leaves the post screen.</b> {{tier3_qwen}}% of its actions write text (mostly comments), yet only
+    {{off_post_qwen}} of its {{n_qwen}} actions were on any other screen. It sent {{dms_qwen}} private messages.</li>
+    <li><b>Llama does the hard ones.</b> {{tier5_llama}}% of its actions are level 5 ({{dms_llama}} private messages sent), but
+    {{fail_llama}}% of its chosen actions (all screens, do nothing left out) fail in the world: gemma {{fail_gemma}}%, qwen {{fail_qwen}}%. The Cleaning report lists every reason.</li>
+    <li><b>Harder answers cost more.</b> An answer with only an upvote: gemma {{tok_like_gemma}} tokens ({{sec_like_gemma}} s),
+    qwen {{tok_like_qwen}} ({{sec_like_qwen}} s). An answer with only a comment: gemma {{tok_comment_gemma}} ({{sec_comment_gemma}} s),
+    qwen {{tok_comment_qwen}} ({{sec_comment_qwen}} s). Seconds are with 8 answers running at once on a shared GPU, so compare within one AI.</li>
+    <li><b>What this cannot tell yet:</b> whether an AI skips hard actions because they are hard, or because it does not want
+    them. A one-change test would tell (for example, letting users message the poster straight from the post screen). That
+    is a new test and needs Gordon's go.</li>
+  </ul>
+  <h3>Every action, per AI</h3>
+  <div class="xrow" style="margin:6px 0"><span class="lab">Reader</span><div class="seg" id="e_ai"></div></div>
+  <div class="tablewrap"><table id="e_table"></table></div>
+  <p class="muted" style="font-size:13px">Chosen = in the AI's answer. Done = it worked in the world. Screens in = how many screens
+  away from the post screen it was done (0 = on the post screen). Text = characters the action needs written (a comment's text, a
+  message), not the optional reason. Tokens and seconds = answers that held only this action. The workbook and
+  <code>clean/actions.csv</code> have every single action.</p>
+</section>
+
+<section id="worlds">
+  <div class="eyebrow">09 · All together</div>
+  <h2>Each world, all ticks together</h2>
+  <p>Counts first, then rates. Baselines (an AI reading its own AI's posts) are shaded.</p>
+  <div class="tablewrap"><table id="w_table"></table></div>
+  <h3>Every action in every world</h3>
+  <div class="xrow" style="margin:6px 0"><span class="lab">Reader</span><div class="seg" id="a_ai"></div></div>
+  <div class="tablewrap"><table id="a_table"></table></div>
+  <h3>The cleaning report</h3>
+  <div class="md" id="cleanrep"></div>
+</section>
+
+<section id="spark">
+  <div class="eyebrow">10 · On the Spark</div>
+  <h2>The machine, the engine, and how long each step took</h2>
+  <div class="grid2">
+    <div class="card">
+      <p><b>Machine:</b> NVIDIA DGX Spark "honda" at the UK CS department: a GB10 chip with 121 GB of memory shared by the CPU and
+      GPU. Another user (hsa303) runs GPU training jobs on it, which made these runs about 3-4× slower than on a free Spark.</p>
+      <p><b>Engine:</b> llama.cpp (build b1-5e03bdd), one server per AI, only one loaded at a time, 8 answers at once, 8,192
+      tokens per answer slot.</p>
+      <p><b>Models:</b> qwen3:8b and llama3.1:8b (the Ollama files), gemma3:12b (ggml-org's gemma-3-12b-it Q4_K_M file).</p>
+    </div>
+    <div class="card">
+      <ul class="timeline">
+        <li class="bad"><time>Fri 10-23 11:22</time>First part 1 start broke: it ran while the preflight was still switching servers (log 14.50). Restarted clean; <code>v3_start.sh</code> now runs the preflight first.</li>
+        <li><time>Fri 10-23 13:06</time>Part 1 started. No watchdog restarts.</li>
+        <li><time>Mon 10-26 19:18</time>Part 1 done (<code>ARM 1 DONE</code>).</li>
+        <li><time>Tue 10-27 03:04</time>Part 2 started (preflight first; reading from 04:25).</li>
+        <li><time>Thu 10-29 10:11</time>Part 2 at 7 of 9 worlds, no restarts.</li>
+      </ul>
+    </div>
+  </div>
+  <h3>Every step (from the runner's log)</h3>
+  <div class="tablewrap"><table id="steps_t"></table></div>
+</section>
+
+<section id="commands">
+  <div class="eyebrow">11 · Commands</div>
+  <h2>Everything typed to run V3 and build this page</h2>
+  <p>The one-time Spark setup (llama.cpp build, model files) is the same as for V1 and V2 (log 14.24).</p>
+  <div id="cmds"></div>
+</section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha384-F/bZzf7p3Joyp5psL90p/p89AZJsndkSoGwRpXcZhleCWhd8SnRuoYo4d0yirjJp" crossorigin="anonymous"></script>
+<script>
+const D = /*__DATA__*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtn = v => v == null || v === "" ? "–" : typeof v === "number" ? v.toLocaleString("en-US") : esc(v);
+document.getElementById("built").textContent = new Date(document.lastModified).toISOString().slice(0,10);
+$("#status").textContent = D.status;
+const AIS = ["gemma","llama","qwen"], DOT = {gemma:"g", llama:"l", qwen:"q"}, FULL = {gemma:"gemma3:12b", llama:"llama3.1:8b", qwen:"qwen3:8b"};
+const dot = m => `<span class="dot ${DOT[m]}"></span>${m}`;
+const seg = (id, opts, cur) => { $(id).innerHTML = opts.map(([k,t])=>`<button type="button" data-k="${esc(k)}" aria-pressed="${String(k)===String(cur)}">${esc(t)}</button>`).join(""); };
+const onSeg = (id, f) => $(id).addEventListener("click", e=>{ const b = e.target.closest("button"); if (b) f(b.dataset.k); });
+const PARTS = Object.keys(D.parts);
+
+/* ---------- code browser ---------- */
+const GROUPS = [["new","First written for V3"],["updated","From V1/V2, changed for V3"],["same","Unchanged since V1/V2"],["oasis","From OASIS"],["made","Made by our code"],["data","Real output"]];
+const TAGTXT = {new:"new",updated:"updated",same:"same",oasis:"oasis",made:"made",data:"data"};
+let current = -1;
+function listFiles(){
+  let h = "";
+  for (const [g,name] of GROUPS){
+    const fs = D.files.map((f,i)=>[f,i]).filter(([f])=>f.group===g); if(!fs.length) continue;
+    h += `<h5>${name}</h5>`;
+    for (const [f,i] of fs) h += `<button class="fbtn" data-i="${i}" role="listitem">${esc(f.path.split("/").pop())}<small>${esc(f.title)}</small></button>`;
+  }
+  $("#flist").innerHTML = h;
+  $("#flist").querySelectorAll(".fbtn").forEach(b=>b.addEventListener("click",()=>openFile(+b.dataset.i)));
+}
+function openFile(i, line){
+  const f = D.files[i];
+  if (i !== current){
+    current = i;
+    document.querySelectorAll(".fbtn").forEach(b=>b.setAttribute("aria-current", +b.dataset.i===i ? "true":"false"));
+    $("#vhead").innerHTML = `<div><span class="tag ${f.group}">${TAGTXT[f.group]}</span> <span class="path">${esc(f.path)}</span> <span class="muted mono" style="font-size:12px">· ${f.lines.toLocaleString()} lines</span></div>
+      <p><b>${esc(f.title)}.</b> ${esc(f.what)}</p><p class="origin">History: ${esc(f.origin)}</p>`;
+    let html;
+    try { html = window.hljs ? hljs.highlight(f.src, {language: f.lang, ignoreIllegals: true}).value : esc(f.src); } catch(e){ html = esc(f.src); }
+    $("#src").innerHTML = html;
+    $("#gut").textContent = Array.from({length: f.lines}, (_, k) => k + 1).join("\n");
+    $("#codebox").scrollTop = 0;
+  }
+  const band = $("#band");
+  if (line){ band.style.display = "block"; band.style.top = (12 + (line - 1) * 20) + "px"; $("#codebox").scrollTop = Math.max(0, (line - 4) * 20); }
+  else band.style.display = "none";
+}
+document.addEventListener("click", e=>{ const b = e.target.closest(".ref"); if(!b) return; const r = D.refs[b.dataset.ref]; if(!r) return;
+  openFile(D.files.findIndex(f=>f.path===r[0]), r[1]); document.getElementById("code").scrollIntoView({block:"start"}); });
+listFiles(); openFile(0);
+
+/* ---------- V1 next to V3 ---------- */
+{
+  const T = Object.fromEntries(D.parts["part 1"].by_cell_tick.map(r=>[`${r.reader}|${r.posts_by}|${r.tick}`, r]));
+  const rate = (r, k) => r ? (k === "engagement per 100" ? r["engagement per 100"] : r[k]) : null;
+  const v = x => x == null ? "–" : x.toFixed(1);
+  let h = `<tr><th rowspan="2">Reader</th><th rowspan="2">Posts by</th><th colspan="3" class="num">Total engagement per 100 posts read</th><th colspan="3" class="num">% of posts upvoted</th></tr>
+    <tr>${["V1 round 101","V3 tick 0","V3 part 1"].map(x=>`<th class="num">${x}</th>`).join("").repeat(2)}</tr>`;
+  for (const m of AIS) for (const pb of AIS){
+    const a = D.v1[`${m}|${pb}`], t0 = T[`${m}|${pb}|0`], all = T[`${m}|${pb}|all`], dg = m===pb ? " diag" : "";
+    h += `<tr><td>${dot(m)}</td><td>${pb}${m===pb?' <span class="muted">(own AI)</span>':""}</td>` +
+      [a["engagement per 100"], rate(t0,"engagement per 100"), rate(all,"engagement per 100"), a["upvoted %"], rate(t0,"upvoted %"), rate(all,"upvoted %")]
+        .map(x=>`<td class="num${dg}">${v(x)}</td>`).join("") + `</tr>`;
+  }
+  $("#v1v3").innerHTML = h + `<tr><td colspan="8" class="muted" style="font-size:12.5px">Posts read per world: V1 round 101 ${AIS.map(pb=>`${pb}'s posts ${D.v1[`${pb}|${pb}`]["posts read"].toLocaleString()}`).join(", ")} (each reader about the same); V3 tick 0: 100 per world (one per user); V3 part 1: see All together.</td></tr>`;
+}
+
+/* ---------- screens ---------- */
+{
+  const S = D.screens, P = D.people, PR = D.prompts;
+  const st = {turn: "read", ai: "gemma", pb: "gemma", u: 0, seq: null};
+  $("#sampleu").textContent = D.sample_users.join(", ");
+  $("#s_user").innerHTML = P.map(p=>`<option value="${p.id}">${p.id} · u/${esc(p.username)}${D.sample_users.includes(p.id) ? " · whole scroll" : ""}</option>`).join("");
+  const postOf = {}; for (const [a, qs] of Object.entries(D.posts)) for (const q of qs) postOf[q.key] = q;
+  const persona = id => P[id].persona;
+  const sys = id => esc(PR.system.split("{identity}{persona}")[0]) + `<mark class="pe">${esc(persona(id))}</mark>` + esc(PR.system.split("{identity}{persona}")[1]);
+  const fillRead = (q, notice, comments) => { const [sub, tname] = PR.topics[q.topic] || ["r/" + q.topic, String(q.topic)];
+    const v = {sub, topic_name: tname, author: P[q.author_id].username, title: q.title, body: q.body, comments, menu: PR.live_menu, fmt: PR.fmt_two};
+    return notice + PR.read.replace(/\{(sub|topic_name|author|title|body|comments|menu|fmt)\}/g, (_, k) => v[k]); };
+  const pretty = raw => { try { return JSON.stringify(JSON.parse(raw), null, 2); } catch(e){ return raw ?? "(no answer)"; } };
+  const exHtml = r => r.ex.length ? `<ul style="margin:0;padding-left:18px">${r.ex.map(([a, ok, why])=>`<li><code>${esc(a)}</code> ${ok ? '<span class="ok">done</span>' : `<span class="bad">failed</span> <span class="muted">(${esc(why)})</span>`}</li>`).join("")}</ul>` : "<p>No actions (an empty list).</p>";
+  function draw(){
+    seg("#s_turn", [["post","Posting turn"],["read","Reading turn"]], st.turn);
+    seg("#s_ai", AIS.map(m=>[m, m]), st.ai);
+    seg("#s_pb", AIS.map(m=>[m, m + "'s posts"]), st.pb);
+    $("#s_pbrow").hidden = st.turn !== "read";
+    $("#s_user").value = st.u;
+    $("#s_sys").innerHTML = sys(st.u);
+    $("#s_syslbl").textContent = `${FULL[st.ai]} · V1 prompt (no "I am" line)`;
+    if (st.turn === "post"){
+      $("#s_scrollwrap").hidden = true;
+      const a = D.posting[st.ai][st.u];
+      $("#s_user_msg").textContent = PR.post_screen; $("#s_userlbl").textContent = "the same for every user";
+      $("#s_about").innerHTML = `<b>Posting turn:</b> ${st.ai} plays u/${esc(P[st.u].username)}. What it writes becomes part of ${st.ai}'s post set (${D.posts[st.ai].length} posts).`;
+      $("#s_ans").textContent = a ? pretty(a.raw) : "(no answer saved)"; $("#s_anslbl").textContent = a ? `${a.n} post${a.n===1?"":"s"} written` : "";
+      $("#s_ex").innerHTML = "<p>Posts become the post set; nothing else in the posting turn is used later.</p>";
+      return;
+    }
+    const rows = S[`${st.ai}|${st.pb}`].filter(r=>r.u === st.u);
+    const sample = D.sample_users.includes(st.u);
+    $("#s_scrollwrap").hidden = !sample;
+    if (st.seq == null || !rows.some(r=>r.seq === st.seq)) st.seq = rows[0] ? rows[0].seq : null;
+    if (sample) $("#s_scroll").innerHTML = `<tr><th class="num">Tick</th><th>Screen</th><th>Post</th><th>Actions (✓ done, ✗ failed)</th></tr>` +
+      rows.map(r=>`<tr data-seq="${r.seq}" aria-current="${r.seq===st.seq}"><td class="num">${r.tick}</td><td>${r.screen==="post" ? (r.view>1 ? `post (back, look ${r.view})` : "post") : `↳ ${esc(r.screen)}`}</td><td>${r.post && postOf[r.post] ? esc(postOf[r.post].title.slice(0, 60)) : ""}</td><td>${r.outcome !== "chose" ? '<span class="bad">unreadable</span>' : r.ex.map(([a, ok])=>`${ok ? "✓" : "✗"} ${esc(a)}`).join(", ") || "nothing"}</td></tr>`).join("");
+    const r = rows.find(x=>x.seq === st.seq);
+    if (!r){ $("#s_user_msg").textContent = "(no screen)"; $("#s_ans").textContent = ""; $("#s_ex").innerHTML = ""; return; }
+    let text, about;
+    if (r.screen === "post"){
+      const q = postOf[r.post];
+      text = fillRead(q, r.notice, r.comments);
+      const stance = P[st.u].stances[q.topic];
+      about = `<b>Tick ${r.tick}:</b> ${st.ai} plays u/${esc(P[st.u].username)}, who feels <b>${esc(stance || "?")}</b> about this topic. The post was written in ${st.pb}'s posting turn by u/${esc(P[q.author_id].username)}${st.pb===st.ai ? " (its own AI's post; it is never told that)" : " (it is never told which AI wrote it)"}.`;
+    } else {
+      text = r.text;
+      about = `<b>Tick ${r.tick}, follow-up screen ${r.step}:</b> opened from the post screen above it. Saved word for word.`;
+    }
+    $("#s_user_msg").textContent = text; $("#s_userlbl").textContent = r.screen === "post" ? "rebuilt by replay" : "saved text";
+    $("#s_about").innerHTML = about;
+    $("#s_ans").textContent = r.outcome === "chose" ? pretty(r.raw) : `(unreadable after ${r.attempts} tries)\n` + (r.raw || "");
+    $("#s_anslbl").textContent = `${r.tokens[0] ?? "?"} tokens in · ${r.tokens[1] ?? "?"} out · ${r.secs ?? "?"} s · ${r.attempts} ${r.attempts===1?"try":"tries"}`;
+    $("#s_ex").innerHTML = exHtml(r) + (r.errors.length ? `<p class="muted" style="margin-top:8px">Earlier tries rejected: ${r.errors.map(esc).join("; ")}</p>` : "");
+  }
+  onSeg("#s_turn", k=>{ st.turn = k; draw(); }); onSeg("#s_ai", k=>{ st.ai = k; st.seq = null; draw(); }); onSeg("#s_pb", k=>{ st.pb = k; st.seq = null; draw(); });
+  $("#s_user").addEventListener("change", e=>{ st.u = +e.target.value; st.seq = null; draw(); });
+  $("#s_scroll").addEventListener("click", e=>{ const tr = e.target.closest("tr[data-seq]"); if (tr){ st.seq = +tr.dataset.seq; draw(); } });
+  draw();
+}
+
+/* ---------- data files ---------- */
+{
+  const size = b => b > 1e6 ? (b/1e6).toFixed(1) + " MB" : (b/1e3).toFixed(1) + " KB";
+  $("#inv").innerHTML = `<tr><th>Part</th><th>File</th><th class="num">Size</th><th class="num">Lines</th><th>What it is</th></tr>` +
+    D.inventory.map(f=>`<tr><td>${esc(f.part)}</td><td class="mono" style="font-size:12.5px;word-break:break-all">${esc(f.path)}</td><td class="num">${size(f.bytes)}</td><td class="num">${fmtn(f.lines)}</td><td>${esc(f.what)}</td></tr>`).join("");
+  const F = [["user_id / username","who is reading (one of the 100 users)"],["model / posts_by","the reader AI / the AI that wrote the posts in this world"],
+    ["post_key","which post (round | writer AI | writer user | number)"],["tick / seq / step","when: the tick, the user's screen number, and 0 = post screen or 1-4 = follow-up screen"],
+    ["screen","post, open_post, search_user, search_posts, trend, open_messages, listen_from_group"],["view","1 = first look at the post; 2+ = it came back after a refresh"],
+    ["actions","the actions as the AI gave them (with any text it wrote)"],["executed","for each action: ok or failed, why, and what it acted on"],
+    ["raw","the AI's whole answer, word for word"],["reason","the AI's own words for why"],["outcome","chose = a valid answer; unreadable = no valid answer after 3 tries"],
+    ["attempts / errors","how many tries the answer took, and why earlier tries were rejected"],["prompt_tokens / eval_tokens","how long the screen and the answer were (tokens = word pieces)"],
+    ["latency_s / call_latency_s","seconds for the answer (8 answers run at once)"],["topic / stance / author_id / own_ai","the post's topic, how this user feels about it, who wrote it, and whether the reader AI wrote it"],
+    ["ctx","what was on the screen: the post's ID in this world, posts and users listed"],["text","follow-up screens only: the exact screen text"]];
+  $("#fields").innerHTML = F.map(([k,v])=>`<b>${esc(k)}</b><span>${esc(v)}</span>`).join("");
+}
+
+/* ---------- tick by tick ---------- */
+{
+  const COL = {gemma:"var(--gemma)", llama:"var(--llama)", qwen:"var(--qwen)"};
+  const MEAS = [["eng","Total engagement per 100","engagement per 100","engagement per 100"],["done","Actions done per 100","done per 100",null],
+    ["up","Upvoted %","upvoted %","upvoted %"],["com","Commented %","commented %","commented %"],["none","Did nothing %",null,"did nothing %"],
+    ["seen","Comments on screen per post read",null,null],["fu","Follow-up screens per 100",null,null]];
+  const st = {part: PARTS[0], ai: "gemma", m: "eng", pb: "gemma"};
+  const val = (r, m) => { const n = r["posts read"]; if (!n) return null;
+    return m==="none" ? 100*r["did nothing"]/n : m==="seen" ? r["comments on screen"]/n : m==="fu" ? 100*r["follow-up screens"]/n : r[MEAS.find(x=>x[0]===m)[2]]; };
+  function draw(){
+    $("#t_partrow").hidden = PARTS.length < 2;
+    seg("#t_part", PARTS.map(p=>[p,p]), st.part); seg("#t_ai", AIS.map(m=>[m, m + " reading"]), st.ai);
+    seg("#t_meas", MEAS.map(x=>[x[0], x[1]]), st.m); seg("#t_pb", AIS.map(m=>[m, m + "'s posts"]), st.pb);
+    const rows = D.parts[st.part].by_cell_tick.filter(r=>r.reader===st.ai && r.tick !== "all");
+    const series = AIS.map(pb=>[pb, rows.filter(r=>r.posts_by===pb && r["posts read"] >= 50).map(r=>[r.tick, val(r, st.m)])]);
+    const v1k = MEAS.find(x=>x[0]===st.m)[3];
+    const v1 = v1k ? AIS.map(pb=>[pb, D.v1[`${st.ai}|${pb}`][v1k]]) : [];
+    const ys = series.flatMap(([_, s])=>s.map(p=>p[1])).concat(v1.map(x=>x[1])), xs = series.flatMap(([_, s])=>s.map(p=>p[0]));
+    const W = 900, H = 320, L = 56, R = 16, T = 14, B = 34, x1 = Math.max(...xs), y0 = 0, y1n = Math.max(...ys);
+    const step = [1,2,5,10,20,25,50,100,200].find(s=>y1n/s <= 6) || 500, y1 = Math.ceil(y1n/step)*step || 1;
+    const X = x => L + (W-L-R) * x / x1, Y = y => T + (H-T-B) * (1 - (y - y0)/(y1 - y0));
+    let g = "";
+    for (let y = 0; y <= y1 + 1e-9; y += step) g += `<line class="grid" x1="${L}" x2="${W-R}" y1="${Y(y)}" y2="${Y(y)}"/><text x="${L-8}" y="${Y(y)+4}" text-anchor="end">${+y.toFixed(2)}</text>`;
+    for (let x = 0; x <= x1; x += 10) g += `<text x="${X(x)}" y="${H-12}" text-anchor="middle">${x}</text>`;
+    g += `<text x="${W-R}" y="${H-1}" text-anchor="end">tick</text>`;
+    for (const [pb, y] of v1) g += `<line x1="${L}" x2="${W-R}" y1="${Y(y)}" y2="${Y(y)}" stroke="${COL[pb]}" stroke-width="1.5" stroke-dasharray="5 4" opacity=".8"/>`;
+    for (const [pb, s] of series) g += `<polyline fill="none" stroke="${COL[pb]}" stroke-width="2" points="${s.map(([x,y])=>`${X(x).toFixed(1)},${Y(y).toFixed(1)}`).join(" ")}"/>`;
+    $("#t_svg").innerHTML = g;
+    $("#t_leg").innerHTML = AIS.map(pb=>`<span><i style="background:${COL[pb]}"></i>${st.ai} reads ${pb}'s posts</span>`).join("") + (v1.length ? `<span><i class="dash"></i>V1 round 101 (same colour)</span>` : "");
+    $("#t_title").textContent = `${st.ai} reads ${st.pb}'s posts, every tick (${st.part})`;
+    const C = ["posts read","actions chosen","actions done","upvoted","downvoted","commented","did nothing","comments on screen","follow-up screens","engagement per 100","done per 100","upvoted %","commented %"];
+    const all = D.parts[st.part].by_cell_tick.filter(r=>r.reader===st.ai && r.posts_by===st.pb);
+    $("#t_table").innerHTML = `<tr><th class="num">Tick</th>${C.map(c=>`<th class="num">${esc(c)}</th>`).join("")}</tr>` +
+      all.map(r=>`<tr${r.tick==="all" ? ' style="font-weight:600;background:var(--soft)"' : ""}><td class="num">${r.tick}</td>${C.map(c=>`<td class="num">${fmtn(r[c])}</td>`).join("")}</tr>`).join("");
+  }
+  onSeg("#t_part", k=>{ st.part = k; draw(); }); onSeg("#t_ai", k=>{ st.ai = k; draw(); }); onSeg("#t_meas", k=>{ st.m = k; draw(); }); onSeg("#t_pb", k=>{ st.pb = k; draw(); });
+  draw();
+}
+
+/* ---------- effort ---------- */
+{
+  const P1 = D.parts["part 1"];
+  const T = {}; P1.effort_tiers.forEach(r=>{ T[`${r.reader}|${r.tier}`] = r; });
+  $("#e_tiers").innerHTML = `<tr><th>Level</th>${AIS.map(m=>`<th class="num">${dot(m)}</th>`).join("")}</tr>` +
+    [1,2,3,4,5].map(t=>`<tr><td>${t} · ${esc(T[`gemma|${t}`]["what it takes"])}</td>${AIS.map(m=>{ const r = T[`${m}|${t}`];
+      return `<td class="num"><b>${r["% of all actions chosen"].toFixed(1)}%</b><span class="rng">${r.chosen.toLocaleString()} chosen${r.chosen ? `, ${r["failed %"]}% failed` : ""}</span></td>`; }).join("")}</tr>`).join("");
+  let ai = "gemma";
+  const C = [["tier","Level"],["chosen","Chosen"],["done","Done"],["failed %","Failed %"],["chosen per 100 posts read","Per 100 posts read"],["% chosen on the post screen","% on post screen"],
+    ["median screens in (0 = post screen)","Screens in"],["median text written (chars)","Text (chars)"],["median answer tokens (only this action)","Tokens"],["median answer seconds (only this action)","Seconds"]];
+  function draw(){
+    seg("#e_ai", AIS.map(m=>[m, m]), ai);
+    $("#e_table").innerHTML = `<tr><th>Action</th>${C.map(([_, t])=>`<th class="num">${t}</th>`).join("")}</tr>` +
+      P1.action_effort.filter(r=>r.reader===ai).map(r=>`<tr><td><code>${esc(r.action)}</code></td>${C.map(([k])=>`<td class="num">${fmtn(r[k])}</td>`).join("")}</tr>`).join("");
+  }
+  onSeg("#e_ai", k=>{ ai = k; draw(); }); draw();
+}
+
+/* ---------- all together ---------- */
+{
+  const C = ["posts read","actions chosen","actions done","upvoted","downvoted","commented","did nothing","follow-up screens","engagement per 100","done per 100","upvoted %","commented %"];
+  const order = [["gemma","gemma"],["llama","llama"],["qwen","qwen"],...AIS.flatMap(m=>AIS.filter(pb=>pb!==m).map(pb=>[m,pb]))];
+  const A = p => Object.fromEntries(D.parts[p].by_cell_tick.filter(r=>r.tick==="all").map(r=>[`${r.reader}|${r.posts_by}`, r]));
+  let h = `<tr><th>Reader</th><th>Posts by</th>${PARTS.length > 1 ? "<th>Part</th>" : ""}${C.map(c=>`<th class="num">${esc(c)}</th>`).join("")}</tr>`;
+  for (const [m, pb] of order) for (const p of PARTS){ const r = A(p)[`${m}|${pb}`];
+    h += `<tr><td>${dot(m)}</td><td>${pb}</td>${PARTS.length > 1 ? `<td>${p}</td>` : ""}${C.map(c=>`<td class="num${m===pb ? " diag" : ""}">${fmtn(r && r[c])}</td>`).join("")}</tr>`; }
+  $("#w_table").innerHTML = h;
+  let ai = "gemma";
+  function draw(){
+    seg("#a_ai", AIS.map(m=>[m, m + " reading"]), ai);
+    const rs = PARTS.flatMap(p=>D.parts[p].by_cell_action.filter(r=>r.reader===ai).map(r=>({...r, part: p})));
+    const acts = [...new Set(rs.map(r=>r.action))].filter(a=>rs.some(r=>r.action===a && r.chosen));
+    const cols = PARTS.flatMap(p=>AIS.map(pb=>[p, pb]));
+    $("#a_table").innerHTML = `<tr><th>Action</th>${cols.map(([p, pb])=>`<th class="num">${pb}'s posts${PARTS.length > 1 ? " · " + p : ""}</th>`).join("")}</tr>` +
+      acts.map(a=>`<tr><td><code>${esc(a)}</code></td>${cols.map(([p, pb])=>{ const r = rs.find(x=>x.part===p && x.posts_by===pb && x.action===a);
+        return `<td class="num${ai===pb ? " diag" : ""}">${r ? r.chosen.toLocaleString() : "–"}<span class="rng">${r ? `${r.chosen_per_100} per 100 · ${(r.chosen - r.done).toLocaleString()} failed` : ""}</span></td>`; }).join("")}</tr>`).join("");
+  }
+  onSeg("#a_ai", k=>{ ai = k; draw(); }); draw();
+  // the cleaning report (markdown: headings, paragraphs, tables)
+  const md = PARTS.map(p=>`# ${p}\n\n` + D.parts[p].cleaning.replace(/^# .*\n/, "")).join("\n");
+  let out = "", tbl = null;
+  for (const line of md.split("\n")){
+    if (line.startsWith("|")){ if (/^\|-/.test(line)) continue; const cells = line.slice(1, -1).split("|").map(c=>c.trim());
+      if (!tbl){ tbl = `<div class="tablewrap" style="margin-bottom:12px"><table><tr>${cells.map(c=>`<th>${esc(c)}</th>`).join("")}</tr>`; } else tbl += `<tr>${cells.map(c=>`<td${/^[\d,.\-]+$/.test(c) ? ' class="num"' : ""}>${esc(c)}</td>`).join("")}</tr>`; continue; }
+    if (tbl){ out += tbl + "</table></div>"; tbl = null; }
+    if (line.startsWith("#")) out += `<h2>${esc(line.replace(/^#+\s*/, ""))}</h2>`; else if (line.trim()) out += `<p>${esc(line)}</p>`;
+  }
+  $("#cleanrep").innerHTML = out + (tbl ? tbl + "</table></div>" : "");
+}
+
+/* ---------- steps from the log ---------- */
+$("#steps_t").innerHTML = `<tr><th>Part</th><th>Step</th><th>Ended</th><th class="num">Post screens</th><th class="num">Minutes</th><th class="num">Seconds per screen</th><th class="num">Errors</th></tr>` +
+  D.steps.map(s=>`<tr><td>${esc(s.part)}</td><td>${esc(s.step)}</td><td class="mono" style="font-size:12.5px">${esc(s.end)}</td><td class="num">${s.screens.toLocaleString()}</td><td class="num">${s.min.toFixed(1)}</td><td class="num">${s.s.toFixed(2)}</td><td class="num">${s.rc ? "rc=" + s.rc : "none"}</td></tr>`).join("");
+
+/* ---------- commands ---------- */
+const CMDS = [
+ ["A","Before a part (on the Spark)",[
+  ["Spark","Get the newest code","cd ~/llm_bias/oasis && git pull --no-edit && git log --oneline -1","Never while a part is running: bash reads its script as it goes."],
+  ["Spark","Smoke test with fake AIs (about a minute)","cd ~/llm_bias/oasis && python3 examples/experiment/llm_bias/smoke_test.py 2>&1 | grep -E \"FAIL|SMOKE\"","Must say SMOKE: ALL PASS. Any FAIL: stop."],
+  ["Spark","Is the Spark free of our own runs?","nvidia-smi --query-compute-apps=pid,process_name,used_memory --format=csv,noheader; free -g | head -2; crontab -l","Ours is llama-server; the other user's jobs are .venv/bin/python. No v3_watchdog line should be left from an old part."],
+ ]],
+ ["B","Start a part (detached: closing the window doesn't stop it)",[
+  ["Spark","Part 1","cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && setsid nohup bash examples/experiment/llm_bias/v3_start.sh > ~/llm_bias/logs/v3_big.txt 2>&1 < /dev/null &","Runs the preflight first (on 10-27 it took 80 minutes on the shared Spark), then adds the watchdog and starts part 1."],
+  ["Spark","Part 2 (needs ARM 1 DONE)","cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && ARM=2 setsid nohup bash examples/experiment/llm_bias/v3_start.sh > ~/llm_bias/logs/v3_big_part2.txt 2>&1 < /dev/null &","Ranks the menu from part 1's data, preflight with that menu, then the 9 worlds again."],
+ ]],
+ ["C","Check on it (read-only, safe any time)",[
+  ["Spark","Where is it, any restarts, is the machine OK","date; tail -8 ~/llm_bias/logs/v3_big_part2.txt; echo \"== cron:\"; crontab -l; echo \"== restarts:\"; cat ~/llm_bias/logs/watchdog_v3_big.txt 2>/dev/null || echo none; echo \"== data:\"; (cd ~/llm_bias/oasis/data/llm_bias/v3_flipped/r101 && wc -l reading_*.jsonl && ls -lt reading_*.jsonl | head -2); echo \"== machine:\"; free -g | head -2; nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader; ps -u hsa303 -o etime,rss,args --sort=-rss | head -3","Every 'end' line should say rc=0. Part 1: use v3_big.txt and data/llm_bias/v3/r101."],
+ ]],
+ ["D","When it says ARM n DONE",[
+  ["Spark","Remove the watchdog","crontab -l | grep -v v3_watchdog | crontab -; crontab -l","No v3_watchdog line left."],
+  ["Mac","Copy the data to the Mac","rsync -avz honda:llm_bias/oasis/data/llm_bias/v3/ ~/research/oasis/data/llm_bias/v3/\nrsync -avz honda:llm_bias/oasis/data/llm_bias/v3_flipped/ ~/research/oasis/data/llm_bias/v3_flipped/","In a Mac terminal tab, not inside ssh."],
+  ["Mac","Clean, normalize, aggregate (always first)","cd ~/research/oasis\npython3 examples/experiment/llm_bias/v3_clean.py data/llm_bias/v3\npython3 examples/experiment/llm_bias/v3_clean.py data/llm_bias/v3_flipped","Stops if the numbers don't match the published ones."],
+  ["Mac","The workbook and this page","oasis-env/bin/python examples/experiment/llm_bias/make_v3_workbook.py ~/Desktop/LLM_Bias/V3_big/LLM_Bias_V3_big.xlsx data/llm_bias/v3 data/llm_bias/v3_flipped\npython3 examples/experiment/llm_bias/make_inside_v3.py inside_v3.html data/llm_bias/v3 data/llm_bias/v3_flipped","With part 1 only, leave off the v3_flipped folder."],
+  ["Mac","The summaries","python3 examples/experiment/llm_bias/v3_big_summary.py data/llm_bias/v3_flipped\npython3 examples/experiment/llm_bias/v3_compare_parts.py data/llm_bias/v3 data/llm_bias/v3_flipped\npython3 examples/experiment/llm_bias/check_gemma_own.py data/llm_bias/v3_flipped","Part 1 vs part 2, and gemma's own-post lean in part 2."],
+ ]],
+];
+$("#cmds").innerHTML = CMDS.map(([k,title,items])=>`<div class="phase"><h3><span class="eyebrow">${k}</span>${esc(title)}</h3>${items.map(([where,t,cmd,exp],n)=>`
+  <div class="cmd"><div class="ch"><div><span class="where">${k}${n+1} · ${where}</span><br><b>${esc(t)}</b></div><button class="copy" type="button">Copy</button></div>
+  <pre>${esc(cmd)}</pre><div class="exp">${esc(exp)}</div></div>`).join("")}</div>`).join("");
+document.querySelectorAll(".cmd .copy").forEach(b=>b.addEventListener("click",()=>{
+  const pre = b.closest(".cmd").querySelector("pre"), done = ()=>{ b.textContent = "Copied"; setTimeout(()=>b.textContent="Copy",1400); };
+  const fallback = ()=>{ const r = document.createRange(); r.selectNodeContents(pre); const s = getSelection(); s.removeAllRanges(); s.addRange(r); b.textContent = "Selected: press Cmd+C"; };
+  try { navigator.clipboard.writeText(pre.textContent).then(done, fallback); } catch(e){ fallback(); }
+}));
+</script>

@@ -30,6 +30,11 @@ code map changes. Don't paste results here: they go in the log.
   No Excel or artifact unless he asks (10-21: "I want to see it here RIGHT NOW"). Explain every term where it
   appears, at 5th-grade level. **Total engagement** (all actions except do_nothing, per 100 screens) is the main
   measure, and upvotes are only detail.
+- **Every run's data: CLEAN, NORMALIZE, AGGREGATE, always, before any analysis** (Gordon 10-29). Run
+  `v3_clean.py <part dir>` first (writes `<dir>/clean/`). Clean = noise-floor reruns, unreadable answers and follow-up
+  screens kept apart, refresh returns merged, every action marked done/failed with why. Normalize = per 100 posts read.
+  Aggregate = start SMALL and merge up: each world (reader x posts_by) tick by tick (tick 0 = like V1), then each world
+  all together, then baselines, then totals. Raw counts first, rates second. The gate must reproduce the published numbers.
 - **Always finish with: log entry (§14.x + §0.2 + §14.32 Status + §14.32c change-history row), memory update,
   `handoff_check.sh` = HANDOFF CURRENT, commit by file name (never `git commit -a`), push to `origin` (KGordo11/oasis,
   branch `llm-bias`, NEVER `upstream`).** See §0b.
@@ -106,6 +111,8 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | `v3_big.sh` | V3 big sim, one part at a time: `ARM=1` `data/llm_bias/v3/` (ends `ARM 1 DONE`); `ARM=2` `v3_flipped/` = same posts, menu ranked from part 1's data (`rank_menu.py`), ends `ARM 2 DONE` |
 | **`v3_start.sh`** | start a part safely: preflight (its settings) -> only on ALL CLEAR watchdog cron + `v3_big.sh`; `ARM=2` needs `ARM 1 DONE`, ranks the menu first, logs to `v3_big_part2.txt` (§14.50, §14.51) |
 | `v3_big_summary.py <dir> [round]` | big-sim part (or V1 `v1_v2_spark r101`): analyze_v2 tables, one row per post read (all views), gate, follow-up table; writes `<dir>/summary.md` (~4 min) |
+| **`v3_clean.py <dir>`** | RUN FIRST on every part: `<dir>/clean/` reads/followups/posts/actions CSVs, `by_cell_tick.csv` (every world x every tick), effort levels, retries, `cleaning.md`; gates vs published numbers (§14.60) |
+| `make_v3_workbook.py <xlsx> <p1> [<p2>]`, `make_inside_v3.py <html> <p1> [<p2>]` | workbook (oasis-env) and the "Inside LLM Bias V3" page (KwhpKCngkZUmPxpWV6UEer; republish same file path or pass url); page replays each world to rebuild screens (stops if any saved screen differs); `v3_by_tick.py` = tick groups + bias by tick |
 | `check_gemma_own.py <dir>`, `v3_compare_parts.py <part1> <part2>` | gemma's own-post lean by group / comment tone (§14.57); part 1 vs part 2 tables + bias (run after `ARM 2 DONE`) |
 | **`handoff_check.sh [read]`** | Mac: `read` = session catch-up bundle; no arg = FAIL if log §0.2/§14.32 Status/§14.32c/memory are behind (§14.52) |
 | **`speed_suite.py`**, `speed_summary.py` | speed tests on the Spark (ref + ONE change each, all 3 AIs, ~17 h; §14.59); `llamacpp_servers.sh` takes `LLAMA_BIN` / `SERVER_ARGS`; `run_v2.py --shared-first` = prompt order B |

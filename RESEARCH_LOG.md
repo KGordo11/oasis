@@ -68,6 +68,12 @@ research**:
 
 ## 0.2 Where things stand (2026-10-29): read this first
 
+- **NEW Thu 10-29 (§14.60): part 1 cleaned + organized.** `v3_clean.py` (run FIRST on every run: clean, normalize,
+  aggregate world x tick -> world -> totals), workbook `~/Desktop/LLM_Bias/V3_big/LLM_Bias_V3_big.xlsx`, page "Inside
+  LLM Bias V3" https://claude.ai/artifact/KwhpKCngkZUmPxpWV6UEer (screens rebuilt word for word by replay). Tick 0 is
+  near V1, engagement climbs as comments pile up; gemma's own-post lean appears from tick 10 on; llama 12% of actions
+  fail, 6% of answers retried; gemma/qwen stay on the post screen, only llama does DMs. Both outputs take part 2.
+
 - **NEW Wed 10-28 (§14.59): speed test suite READY** (`speed_suite.py`, 13 tests = ref + one change each, all 3 AIs,
   ~17 h): run after `ARM 2 DONE` + cron off. Speed and "did behaviour change" (vs a fresh-randomness rerun) per AI.
 
@@ -14982,6 +14988,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 ### Status (2026-10-27)
 - Wed 10-28 (§14.59): speed test suite built + smoke-tested (13 tests, ~17 h); run after ARM 2 DONE.
 - Wed 10-28 (§14.58): speed options listed (16 slots chosen; speculative decoding / unified KV / gemma swa-full to check).
+- Thu 10-29 (§14.60): part 1 cleaned (`v3_clean.py`), workbook + Inside LLM Bias V3 page; tick by tick, easy vs hard actions.
 - Thu 10-29 10:11 (§14.56 end): part 2 at 7 of 9 cells, no restarts; ETA ARM 2 DONE ~Fri 10-30 02:30 (01:30-04:30).
 - Wed 10-28 08:48 (§14.56 end): part 2 at 4 of 9 cells, no restarts; ETA Thu 10-29 evening - Fri 10-30 early.
 - §14.57: gemma's own-post lean = about half a comment snowball (live world); `v3_compare_parts.py` ready for part 2.
@@ -15254,6 +15261,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | (this) | 10-27 04:00 | **`prompt_order_bench.py`**: speed of prompt order A (today) vs B (shared menu + format first) on a llama.cpp server; `max_tokens 1` = prompt reading only (§14.56) |
 | (this) | 10-27 15:00 | **`check_gemma_own.py <dir>`**: gemma's own-post upvote lean inside topic/length/question/stance/scroll groups, post by post, by tone of the comments on screen; **`v3_compare_parts.py <part1> <part2>`**: part 1 vs part 2 tables + bias; `v3_big_summary.py`: `load(dir)` + `gate()` reusable, gate also on `v3_flipped` (§14.57) |
 | (this) | 10-28 12:00 | **`speed_suite.py`, `speed_summary.py`**: speed tests (ref + one change, all 3 AIs); `llamacpp_servers.sh` `LLAMA_BIN`/`SERVER_ARGS`, bash-3.2 portable; `run_v2.py --shared-first`; `fake_engine.py` logs menu position; smoke +8 checks, flaky `__` path split fixed (§14.59) |
+| (this) | 10-29 15:00 | **`v3_clean.py`** (clean/normalize/aggregate a part: reads/followups/posts/actions CSVs, every world x tick, effort levels, retries, gates), **`make_v3_workbook.py`**, **`make_inside_v3.py` + `inside_v3_template.html`** (page; screens rebuilt by world replay, checked vs 13,242 saved screens), `v3_by_tick.py` (§14.60) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -17117,3 +17125,64 @@ split the full path at `__` to spot noise-floor files; when the temp folder's ra
 `cd ~/llm_bias/oasis && git pull --no-edit && source ~/llm_bias/env_llamacpp.sh && setsid nohup python3
 examples/experiment/llm_bias/speed_suite.py > ~/llm_bias/logs/speed_suite.txt 2>&1 < /dev/null &`, check with
 `tail -5 ~/llm_bias/logs/speed_suite.txt`; after a reboot, the same command resumes. Then rsync `data/llm_bias/speed/`.
+
+## 14.60 Part 1 cleaned + organized; tick by tick; easy vs hard actions; workbook + "Inside LLM Bias V3" page (Thu 2026-10-29)
+**Gordon 10-29:** "look through all of the data for that run now and get it organized ... Clean, Normalize and aggregate the
+data all the time" (put in the file: `CLAUDE.md` §1 + memory `feedback_clean_normalize_aggregate.md`); "the data round by
+round and all together for each world ... start so small so we can see exactly what is going on when and where"; an
+artifact + Excel (ready to take part 2); "an artifact of how the sim works just like last time" (every file, raw data,
+V1 -> V3 changes, why, what they did); how hard each action is for a model (like vs DM) to see if models pick easy over
+better-but-hard. In the live world "round by round" = **tick by tick** (the big sim has ONE sim round, 101).
+
+**Built (Mac only, part 1 data):**
+- **`v3_clean.py <part dir>`** (run first on every run) -> `<dir>/clean/`: `reads.csv` (one row per post read, 95,040),
+  `followups.csv` (35,083), `posts.csv` (320), `actions.csv` (every chosen action on every screen, 314,620, with level,
+  done/failed + why, text written, answer tokens/seconds), `by_cell_tick.csv` (every world x EVERY tick + all: counts,
+  rates, each action), `by_cell_action.csv`, `action_effort.csv`, `effort_tiers.csv`, `worlds.md`, `cleaning.md`.
+  Clean = noise floor (`_d1`, 1,530 screens), unreadable (520, ALL on llama follow-up screens) and follow-ups kept apart;
+  173 refresh returns merged into the first view; every action done/failed. Gates: posts read = posts x 99 and chosen
+  engagement = `v3_big_summary.py` (published), no screen lost (130,816 = 95,040 + 173 + 520 + 35,083), every follow-up
+  linked to its post read. Checked against an independent recount of the raw files: all 9 worlds identical.
+- **`make_v3_workbook.py <out.xlsx> <part1> [<part2>]`** (oasis-env) -> `~/Desktop/LLM_Bias/V3_big/LLM_Bias_V3_big.xlsx`
+  (19 sheets: Read me, Cleaning, one sheet per world tick by tick (baselines first), Worlds, Actions, Effort tiers,
+  Action effort, Posts, Users, Reads, Follow-ups) + `part1_clean/` copy. Read back and checked (world sheets = CSV, every
+  post read by 99 users per reader world, actions add up). Two-part path tested (part 1 given twice: 3,932 change cells,
+  all 0).
+- **`make_inside_v3.py` + `inside_v3_template.html`** -> **"Inside LLM Bias V3"
+  https://claude.ai/artifact/KwhpKCngkZUmPxpWV6UEer** (9.5 MB; styles from the V2 page): how V3 works, V1 -> V3 changes
+  (what/why/what it did; kept; dropped), every code file with git history, step by step, the exact screen any AI saw
+  (tick 0 for all 100 users in all 9 worlds; every screen of users 0-2), every data file, tick-by-tick chart + table,
+  easy vs hard, all together, Spark steps, commands. Page numbers come from a FACTS dict (missing one = build stops).
+  Post screens are not saved as text, so the page **replays each world in file order** (as resume does) and renders each
+  post screen right before its row's actions: this reproduces all **13,242 saved open_post screens word for word** (the
+  build stops on any difference); the prompt templates reproduce the `prompts_sha256` of all 15 part-1 manifests; in a
+  browser the page's own code rebuilt 99 reference screens (97 with comments, 86 with a message notice) identically.
+  Phone width checked (no sideways scroll). The V2 page (E1eicdgjHpgDzex2qj18hR) stays as the V1/V2 record.
+
+**Findings (part 1):**
+- **Tick 0 (nobody has commented yet) is near V1; engagement climbs as comments pile up.** Total engagement per 100 posts
+  read, V1 r101 -> V3 tick 0 -> V3 whole part: gemma 94-95 -> 105-107 -> 175-184; llama 222-227 -> 216-239 -> 303-310;
+  qwen 105-131 -> 121-126 -> 156-175. Comments by others on screen per post read: tick 0 = 0, ticks 60+ = 12-17 (gemma
+  worlds), 64-70 (llama), 44-57 (qwen) (the screen lists the 5 newest + the count).
+- **qwen at tick 0 upvotes only 18-24% (comments 82 of 100), then 72%+ from tick 2:** with an empty comments box it
+  writes a comment instead of voting. gemma's upvote % is highest at tick 0 (67-69%).
+- **The gemma own-post upvote lean appears from ticks 10-29 on** (gemma-llama +10.8, ticks 30-59 +16.3, 60+ +18.3; ticks
+  0-9 not clear), fitting §14.57's comment snowball (`v3_by_tick.py`).
+- **Failed actions:** on post screens llama 11.3-12.8% of chosen actions fail (chosen 303.5 -> done 264.7 per 100 in its
+  baseline), gemma 0.6-0.9%, qwen 2.0-2.4%. Top llama reasons: like_comment "no such comment" 2,080, a second screen at
+  once 5,109 (open_messages/search_posts/trend/search_user), like_post "no such post on this screen" 1,265 and
+  "already done" 1,208. qwen's comment likes fail 70% (made-up IDs).
+- **Retries:** 6.0% of llama's answers needed 2-3 tries (search without query 1,803, comment without content 1,753,
+  search_user without query 998); gemma 0.1%, qwen 0.0%.
+- **Easy vs hard (levels 1 click / 2 copy an ID / 3 write / 4 a post / 5 another screen then write; all screens, do
+  nothing left out):** gemma 41.1 / 47.7 / 11.2 / 0.0 / 0.0% (9 DMs; 95.3% of actions on the post screen); qwen 57.3 /
+  1.7 / 40.9 / 0 / 0% (0 DMs; only 17 of 51,828 actions off the post screen); llama 39.9 / 23.0 / 32.7 / 0.1 / 4.4% (8,092
+  DMs; 50.9% on the post screen; 23.6% of its chosen actions fail). Writing costs more: answers with only an upvote vs
+  only a comment, median tokens gemma 37 vs 89 (17.4 vs 35.1 s), qwen 36 vs 56 (8.7 vs 14.1 s), llama 46 vs 72.
+  Cannot yet tell "avoids hard" from "doesn't want it": a one-change test (e.g. message the poster from the post screen)
+  would; needs Gordon's go.
+
+**Part 2 when it lands:** rsync `v3_flipped/` -> `v3_clean.py data/llm_bias/v3_flipped` -> workbook and page with both
+folders (`make_inside_v3.py <scratch>/inside_v3.html data/llm_bias/v3 data/llm_bias/v3_flipped`, publish the same file
+path or pass the URL) -> check the Spark's `v3_flipped/r101/menu.txt` equals `rank_menu.py` on part 1 (shown on the page).
+Smoke ALL PASS (61).

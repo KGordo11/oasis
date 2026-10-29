@@ -66,7 +66,7 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-28): read this first
+## 0.2 Where things stand (2026-10-29): read this first
 
 - **NEW Wed 10-28 (§14.59): speed test suite READY** (`speed_suite.py`, 13 tests = ref + one change each, all 3 AIs,
   ~17 h): run after `ARM 2 DONE` + cron off. Speed and "did behaviour change" (vs a fresh-randomness rerun) per AI.
@@ -85,8 +85,8 @@ research**:
   only with `--swa-full --cache-ram 0` (which alone also speeds today's order 1.24x).
   **Tue 13:13 (§14.56 end): preflight ALL CLEAR (110 PASS), part 2 RUNNING since 04:25, watchdog on.** qwen baseline
   done (10,098 screens, 1.70 s/screen shared); llama baseline started 09:10. Rough finish Thu 10-29 night - Fri 10-30.
-  **Wed 10-28 08:48: 4 of 9 cells done (all rc=0, no restarts); qwen reads gemma running; `ARM 2 DONE` ~Thu 10-29
-  evening - Fri 10-30 early morning (estimate).**
+  **Thu 10-29 10:11 (§14.56 end): 7 of 9 cells done (all rc=0, no restarts); gemma reads qwen running (44%), then
+  gemma reads llama (last, no noise floor in part 2); `ARM 2 DONE` ~Fri 10-30 02:30 (01:30-04:30, estimate).**
 
 - **NEW Tue 10-27 (§14.55): LD-46 future sims = 16 slots for all 3 AIs** (`SLOTS=16 PARALLEL=16`). Part 2 stays at 8;
   defaults change only after `ARM 2 DONE`.
@@ -14982,6 +14982,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 ### Status (2026-10-27)
 - Wed 10-28 (§14.59): speed test suite built + smoke-tested (13 tests, ~17 h); run after ARM 2 DONE.
 - Wed 10-28 (§14.58): speed options listed (16 slots chosen; speculative decoding / unified KV / gemma swa-full to check).
+- Thu 10-29 10:11 (§14.56 end): part 2 at 7 of 9 cells, no restarts; ETA ARM 2 DONE ~Fri 10-30 02:30 (01:30-04:30).
 - Wed 10-28 08:48 (§14.56 end): part 2 at 4 of 9 cells, no restarts; ETA Thu 10-29 evening - Fri 10-30 early.
 - §14.57: gemma's own-post lean = about half a comment snowball (live world); `v3_compare_parts.py` ready for part 2.
 - Part 2 started 03:04 (`ARM=2 v3_start.sh`, preflight first), §14.56. **13:13: preflight ALL CLEAR, part 2 RUNNING
@@ -16942,6 +16943,21 @@ part is 58% of the characters.
   Left after qwen reads gemma (~12:30-13:00 Wed): llama reads qwen, llama reads gemma, gemma reads qwen, gemma reads
   llama, noise floor = 2,362 min in part 1. Part 2 has run at ~0.6-1.2x part 1's times, so ~30-40 h more:
   **`ARM 2 DONE` ~Thu 10-29 evening - Fri 10-30 early morning** (estimate). Post screens done ~44,600 of 95,040 (47%).
+- **Thu 10-29 10:11 (Gordon's check): part 2 at 7 of 9 cells, all rc=0, no watchdog restart (no watchdog file),
+  crontab unchanged (one `'ARM 2 DONE'` line).** hsa303: a training job (`tree29`, 44 GB, `--mem-fraction 0.55`) running
+  12 h 54 min; GPU 96% busy; 71 GB memory available; swap 29% used; 80.6 C.
+
+| step | part 2 | part 1 (same step) |
+|---|---|---|
+| cross: qwen reads gemma | 279.0 min, 1.71 s/screen, end 12:54:44 Wed | 385.4 min, 2.36 |
+| cross: llama reads qwen | 444.9 min, 2.64 s/screen, end 20:20:33 Wed | 416.7 min, 2.48 |
+| cross: llama reads gemma | 556.2 min, 3.40 s/screen, end 05:36:45 Thu | 560.7 min, 3.43 |
+| cross: gemma reads qwen | started 05:38:14; 4,622 of ~10,430 lines at 10:11 (44% in 273 min) -> ~620 min, ends ~15:30-16:30 | 665.4 min, 3.95 |
+| cross: gemma reads llama (last) | ~11,781 screens; ~0.93x part 1 -> ~640 min (610-720) | 683.2 min, 3.48 |
+
+  Part 2 has no noise floor (`NOISE=0` in `v3_big.sh`), so `ARM 2 DONE` follows the last cell:
+  **~Fri 10-30 02:30 (range Fri 01:30-04:30, estimate).** NB for the speed suite: with hsa303's job holding ~44 GB,
+  `worlds3` (needs 60 GB free) may skip itself.
 
 ## 14.57 Why gemma upvotes gemma's posts (part 1); part 1 vs part 2 comparison built (Tue 2026-10-27)
 Gordon (while part 2 runs): (1) dig into part 1's one clear lean, gemma upvoting gemma's posts (§14.53); (2) build the

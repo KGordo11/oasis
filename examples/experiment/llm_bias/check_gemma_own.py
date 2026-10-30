@@ -75,7 +75,7 @@ groups += [(f"short post (< {c1} chars)", lambda r: chars[r["post_key"]] < c1),
            (f"early: first 10% of the scroll (tick < {last // 10 + 1})", lambda r: r["tick"] <= last // 10),
            ("rest of the scroll", lambda r: r["tick"] > last // 10)]
 
-print(f"# Gemma's own-AI upvote lean, part 1 ({D})\n")
+print(f"# Gemma's own-AI upvote lean, {'part 2' if 'flipped' in D else 'part 1'} ({D})\n")
 print("Upvote % = % of posts read that got an upvote. Lean = (gemma on gemma's - other on gemma's) - (gemma on other's - other on other's), "
       "per 100 posts read; range = 95% from resampling posts and users (500 draws).\n")
 print("| group | posts gemma / llama / qwen | gemma reader: upvote % on gemma / llama / qwen posts | llama reader | qwen reader | "

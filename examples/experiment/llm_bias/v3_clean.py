@@ -13,7 +13,7 @@ NORMALIZE  every count is per 100 posts read, because the cells have different n
            119, qwen 102 posts x 99 readers). AI names are short (gemma / llama / qwen).
 AGGREGATE  start small, then merge up: each world (reader x posts_by) tick by tick (tick 0 = everyone's first post,
            nobody has commented yet = like V1), then each world all together; every action chosen and done.
-GATE       posts read per cell = posts x 99, and chosen engagement per cell = v3_big_summary.py's published numbers.
+GATE       posts SHOWN per cell = posts x 99 (an unreadable answer = shown, not read), and chosen engagement per cell = v3_big_summary.py's published numbers.
 
 Writes <dir>/clean/: reads.csv (one row per post read), followups.csv (one row per follow-up screen), posts.csv (one row
 per post written), actions.csv (every chosen action on every screen, with what it took), action_effort.csv
@@ -229,7 +229,7 @@ with open(os.path.join(OUT, "worlds.md"), "w") as f:
                 f.write(f"| {'**all**' if r['tick'] == 'all' else r['tick']} | " + " | ".join(f"{r[h]:,}" for h in head) + " |\n")
 
 with open(os.path.join(OUT, "cleaning.md"), "w") as f:
-    f.write(f"# Cleaning report: {D}\n\nGATE OK: posts read per cell = posts x 99; chosen engagement = v3_big_summary.py.\n\n")
+    f.write(f"# Cleaning report: {D}\n\nGATE OK: posts shown per cell = posts x 99 (unreadable answers count as shown, not read); chosen engagement = v3_big_summary.py.\n\n")
     f.write("| step | screens |\n|---|---|\n" + "".join(f"| {k} | {v:,} |\n" for k, v in log.items()))
     f.write(f"| follow-up screens (kept apart: followups.csv) | {len(follow):,} |\n| posts read (reads.csv) | {len(reads):,} |\n\n"
             f"Check: raw screens = posts read + refresh returns + unreadable + follow-up screens: {log['raw screens in the 9 world files']:,} = "

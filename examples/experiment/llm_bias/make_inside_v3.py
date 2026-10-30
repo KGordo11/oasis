@@ -25,7 +25,7 @@ PARTS = ["part 1", "part 2"][:len(DIRS)]
 X = "examples/experiment/llm_bias/"
 MODELS = ["gemma3:12b", "llama3.1:8b", "qwen3:8b"]
 SHORT = {"gemma3:12b": "gemma", "llama3.1:8b": "llama", "qwen3:8b": "qwen"}
-SAMPLE_USERS = [0, 1, 2]  # every screen of these users is shown word for word; tick 0 is shown for all 100 users
+SAMPLE_USERS = {"part 1": [0, 1, 2], "part 2": [0]}  # their every screen, word for word (tick 0: all 100 users); part 2 has one to stay under the 16 MB page limit
 V3_START = "2026-10-20"  # V3 work began (log 14.43)
 
 
@@ -106,8 +106,8 @@ FILES = [
      "next to V1, with the bias number and its 95% range."),
     (X + "check_gemma_own.py", "Why gemma upvotes gemma's posts (log 14.57)",
      "The lean inside topics, lengths, stances and scroll position, and by the tone of the comments on screen."),
-    (X + "v3_compare_parts.py", "Part 1 vs part 2", "Ready for when part 2 finishes: each reader's actions, engagement "
-     "and the own-AI bias, part 1 next to part 2."),
+    (X + "v3_compare_parts.py", "Part 1 vs part 2", "Each reader's actions, engagement and the own-AI bias, part 1 "
+     "next to part 2 (its output: v3_flipped/compare_parts.md)."),
     (X + "analyze_v2.py", "The shared measures", "Total engagement, the double difference and the bootstrap ranges used "
      "by every analysis script."),
     ("oasis/social_agent/agent_action.py", "OASIS: the user actions",
@@ -180,40 +180,48 @@ for key, path, pat in [("menu", "run_v2.py", r"^MENU = "), ("format", "run_v2.py
 R.DATA = P1
 people = R.load_personas()[:100]
 PEOPLE = [{"id": p["id"], "username": p["username"], "persona": p["persona"], "stances": p["stances"]} for p in people]
-live_menu = L.live_menu(R.MENU)
+MENUS = {"part 1": R.MENU}
+if len(DIRS) > 1:  # part 2 shows the Spark's own menu.txt; it must be what rank_menu.py makes from part 1's data
+    MENUS["part 2"] = open(os.path.join(DIRS[1], "r101", "menu.txt")).read().strip()
+    assert menu2.startswith(MENUS["part 2"] + "\n"), "the Spark's part 2 menu.txt != rank_menu.py on part 1's data (stdout = menu, then the counts)"
+    for m in MODELS:  # same posts in both parts
+        assert open(os.path.join(DIRS[1], "r101", f"posting_{R.short(m)}.jsonl"), "rb").read() == \
+            open(os.path.join(P1, "r101", f"posting_{R.short(m)}.jsonl"), "rb").read(), f"part 2 posts differ: {m}"
 screens, posts_out, checked = {}, {}, Counter()
-for m in MODELS:
-    for pb in MODELS:
-        posts, _ = R.post_set(101, pb, 100)
-        posts_out[SHORT[pb]] = [{"key": q["key"], "author_id": q["author_id"], "author": q["author"], "topic": q["topic"],
-                                 "title": q["title"], "body": q["body"]} for q in posts]
-        w = L.World(people, posts, R.TOPICS)
-        keep = []
-        for l in open(os.path.join(P1, "r101", f"reading_{R.short(pb)}__{R.short(m)}.jsonl")):
-            r = json.loads(l)
-            u, t = r["user_id"], r["tick"]
-            if r["screen"] in ("post", "open_post"):
-                sub, tname, author, title, body, comments = w.post_block(r["ctx"]["post"], u, t)
-                notice = w.notice(u, t)
-                if r["screen"] == "open_post":
-                    text = notice + R.LIVE_READ_SCREEN.format(sub=sub, topic_name=tname, author=author, title=title,
-                                                              body=body, comments=comments, menu=live_menu, fmt=R.FORMAT_TWO)
-                    assert text == r["text"], f"replay differs from the saved screen: {m} reads {pb}, user {u}, seq {r['seq']}"
-                    checked["open_post screens rebuilt word for word"] += 1
-            if t == 0 and r["screen"] == "post" or u in SAMPLE_USERS:
-                keep.append({"u": u, "seq": r["seq"], "tick": t, "step": r["step"], "screen": r["screen"], "view": r["view"],
-                             "post": r["post_key"], "raw": r["raw"], "outcome": r["outcome"], "attempts": r.get("attempts", 1),
-                             "errors": r.get("errors") or [], "tokens": [r.get("prompt_tokens"), r.get("eval_tokens")],
-                             "secs": r.get("call_latency_s"),
-                             "ex": [[a["action"], e["ok"], e.get("error")] for a, e in zip(r["actions"], r["executed"])],
-                             **({"notice": notice, "comments": comments} if r["screen"] == "post" else {}),
-                             **({"text": r["text"]} if r["screen"] != "post" else {})})
-            if r["screen"] == "open_messages":
-                w.inbox(u, t, mark=True)
-            for a, e in zip(r["actions"], r["executed"]):
-                if e["ok"]:
-                    w.do(u, t, a, {**r["ctx"], "topic_of": R.topic_of})
-        screens[f"{SHORT[m]}|{SHORT[pb]}"] = keep
+for (part, menu), d in zip(MENUS.items(), DIRS):
+    live_menu = L.live_menu(menu)
+    for m in MODELS:
+        for pb in MODELS:
+            posts, _ = R.post_set(101, pb, 100)
+            posts_out[SHORT[pb]] = [{"key": q["key"], "author_id": q["author_id"], "author": q["author"], "topic": q["topic"],
+                                     "title": q["title"], "body": q["body"]} for q in posts]
+            w = L.World(people, posts, R.TOPICS)
+            keep = []
+            for l in open(os.path.join(d, "r101", f"reading_{R.short(pb)}__{R.short(m)}.jsonl")):
+                r = json.loads(l)
+                u, t = r["user_id"], r["tick"]
+                if r["screen"] in ("post", "open_post"):
+                    sub, tname, author, title, body, comments = w.post_block(r["ctx"]["post"], u, t)
+                    notice = w.notice(u, t)
+                    if r["screen"] == "open_post":
+                        text = notice + R.LIVE_READ_SCREEN.format(sub=sub, topic_name=tname, author=author, title=title,
+                                                                  body=body, comments=comments, menu=live_menu, fmt=R.FORMAT_TWO)
+                        assert text == r["text"], f"replay differs from the saved screen: {part}, {m} reads {pb}, user {u}, seq {r['seq']}"
+                        checked[part] += 1
+                if t == 0 and r["screen"] == "post" or u in SAMPLE_USERS[part]:
+                    keep.append({"u": u, "seq": r["seq"], "tick": t, "step": r["step"], "screen": r["screen"], "view": r["view"],
+                                 "post": r["post_key"], "raw": r["raw"], "outcome": r["outcome"], "attempts": r.get("attempts", 1),
+                                 "errors": r.get("errors") or [], "tokens": [r.get("prompt_tokens"), r.get("eval_tokens")],
+                                 "secs": r.get("call_latency_s"),
+                                 "ex": [[a["action"], e["ok"], e.get("error")] for a, e in zip(r["actions"], r["executed"])],
+                                 **({"notice": notice, "comments": comments} if r["screen"] == "post" else {}),
+                                 **({"text": r["text"]} if r["screen"] != "post" else {})})
+                if r["screen"] == "open_messages":
+                    w.inbox(u, t, mark=True)
+                for a, e in zip(r["actions"], r["executed"]):
+                    if e["ok"]:
+                        w.do(u, t, a, {**r["ctx"], "topic_of": R.topic_of})
+            screens[f"{part}|{SHORT[m]}|{SHORT[pb]}"] = keep
 print("replay check:", dict(checked))
 
 posting = {}
@@ -221,7 +229,7 @@ for m in MODELS:
     posting[SHORT[m]] = {r["user_id"]: {"raw": r["raw"], "n": sum(a["action"] == "create_post" for a in r["actions"])}
                          for r in map(json.loads, open(os.path.join(P1, "r101", f"posting_{R.short(m)}.jsonl")))}
 post_screen = R.POST_SCREEN.replace("nothing has been posted yet.\n", "nothing has been posted yet.\n" + R.POST_LINES["c"] + "\n")
-PROMPTS = {"system": R.SYSTEM, "read": R.LIVE_READ_SCREEN, "live_menu": live_menu, "fmt_two": R.FORMAT_TWO, "fmt": R.FORMAT,
+PROMPTS = {"system": R.SYSTEM, "read": R.LIVE_READ_SCREEN, "live_menus": {p: L.live_menu(mn) for p, mn in MENUS.items()}, "fmt_two": R.FORMAT_TWO, "fmt": R.FORMAT,
            "post_screen": post_screen.format(subs="\n".join(f"- {s} ({n})" for s, n in R.TOPICS.values()), menu=R.MENU, fmt=R.FORMAT),
            "v1_post_screen": R.POST_SCREEN.format(subs="\n".join(f"- {s} ({n})" for s, n in R.TOPICS.values()), menu=R.MENU, fmt=R.FORMAT),
            "v1_read": R.READ_SCREEN, "menu2": menu2.strip(), "topics": {k: list(v) for k, v in R.TOPICS.items()}}
@@ -281,7 +289,8 @@ for p, d in zip(PARTS, DIRS):
                  "by_cell_action.csv": "clean: every action per world", "by_cell_tick.csv": "clean: every world, every tick",
                  "worlds.md": "clean: the same as tables", "cleaning.md": "clean: what was removed and why",
                  "night.log": "the runner's log", "summary.md": "v3_big_summary.py's tables",
-                 "check_gemma_own.md": "check_gemma_own.py's output (log 14.57)", "menu.txt": "part 2's ranked menu"}.get(b, ""))
+                 "check_gemma_own.md": "check_gemma_own.py's output (log 14.57)",
+                 "compare_parts.md": "v3_compare_parts.py: part 1 next to part 2", "menu.txt": "part 2's ranked menu"}.get(b, ""))
         n = sum(1 for _ in open(f, "rb")) if b.endswith((".jsonl", ".csv", ".log", ".md", ".txt")) else None
         inventory.append({"part": p, "path": rel(f), "bytes": os.path.getsize(f), "lines": n, "what": what})
 
@@ -293,6 +302,24 @@ for p, d in zip(PARTS, DIRS):
         if mm:
             steps.append({"part": p, "end": mm[1], "step": mm[2], "rc": int(mm[3]), "screens": int(mm[4]),
                           "min": float(mm[5]), "s": float(mm[6])})
+
+# ---- by stance (how the user feels about the topic): tick 0 (nobody has commented yet) and all ticks, per part ----
+STANCES = ["LOVE", "LIKE", "NEUTRAL", "DISLIKE", "HATE"]
+stance = []
+for p, d in zip(PARTS, DIRS):
+    rs = rows(d, "reads.csv")
+    for m in ("gemma", "llama", "qwen"):
+        for when in ("tick 0", "all ticks"):
+            for st in STANCES + ["all"]:
+                xs = [r for r in rs if r["reader"] == m and (when == "all ticks" or r["tick"] == "0") and st in ("all", r["stance"])]
+                stance.append({"part": p, "reader": m, "when": when, "stance": st, "posts read": len(xs),
+                               **{k + " %": round(100 * sum(r[f] == "1" for r in xs) / len(xs), 1)
+                                  for k, f in (("upvoted", "upvoted"), ("downvoted", "downvoted"), ("commented", "commented"),
+                                               ("did nothing", "did_nothing"))}})
+S2 = {(r["part"], r["reader"], r["when"], r["stance"]): r for r in stance}
+gone = Counter((m, x["outcome"]) for d in DIRS[1:] for m in MODELS for pb in MODELS
+               for x in map(json.loads, open(os.path.join(d, "r101", f"reading_{R.short(pb)}__{R.short(m)}.jsonl")))
+               if x["screen"] == "post" and x["outcome"] != "chose")
 
 # ---- numbers used in the page text ----
 tick = {(r["reader"], r["posts_by"], str(r["tick"])): r for r in parts["part 1"]["by_cell_tick"]}
@@ -309,7 +336,7 @@ FACTS = {
     "dms_llama": f"{eff[('llama', 'send_message')]['done']:,}", "dms_gemma": eff.get(("gemma", "send_message"), {"done": 0})["done"],
     "dms_qwen": eff.get(("qwen", "send_message"), {"done": 0})["done"],
     "returns": re.search(r"refresh returns merged into the first view \| ([\d,]+)", parts["part 1"]["cleaning"])[1],
-    "replay_checked": f"{checked['open_post screens rebuilt word for word']:,}",
+    "replay_checked": " and ".join(f"{n:,} in {p}" for p, n in checked.items()),
 }
 for m in ("gemma", "llama", "qwen"):
     FACTS[f"fu_{m}"] = f"{sum(allw[(m, pb)]['follow-up screens'] for pb in ('gemma', 'llama', 'qwen')):,}"
@@ -325,13 +352,25 @@ for m in ("gemma", "llama", "qwen"):
     FACTS[f"tok_comment_{m}"] = cc["median answer tokens (only this action)"] if cc else "-"
     FACTS[f"sec_like_{m}"] = lp["median answer seconds (only this action)"] if lp else "-"
     FACTS[f"sec_comment_{m}"] = cc["median answer seconds (only this action)"] if cc else "-"
+for m in ("gemma", "llama", "qwen"):  # part 2 section (a dash when only part 1 is given)
+    for p, tag in (("part 1", "p1"), ("part 2", "p2")):
+        for when, wt in (("tick 0", "t0"), ("all ticks", "all")):
+            for k, kt in (("upvoted %", "up"), ("downvoted %", "down"), ("commented %", "com")):
+                r = S2.get((p, m, when, "all"))
+                FACTS[f"{kt}_{wt}_{m}_{tag}"] = round(r[k]) if r else "–"
+            r = S2.get((p, m, "tick 0", "LOVE"))
+            FACTS[f"up_t0_love_{m}_{tag}"] = round(r["upvoted %"]) if r else "–"
+FACTS["unreadable_post_p2"] = sum(gone.values())
 FACTS["v1_posters_gemma"] = sum(1 for r in v1rows if r["turn"] == "post" and r["model"] == "gemma3:12b" and any(a["action"] == "create_post" for a in r["actions"]))
 
 DATA = {"files": files, "refs": refs, "people": PEOPLE, "posts": posts_out, "screens": screens, "posting": posting,
-        "prompts": PROMPTS, "parts": parts, "v1": V1, "inventory": inventory, "steps": steps, "sample_users": SAMPLE_USERS,
+        "prompts": PROMPTS, "parts": parts, "v1": V1, "inventory": inventory, "steps": steps, "sample_users": {p: SAMPLE_USERS[p] for p in PARTS},
+        "stance": stance,
+        "compare": open(os.path.join(DIRS[1], "compare_parts.md")).read() if len(DIRS) > 1 else "",
         "status": "Part 2 (the same posts, the menu ranked from part 1's data) is running on the Spark; at Thu 10-29 10:11 "
                   "7 of its 9 cells were done. When it finishes, this page is rebuilt with part 2 next to part 1."
-                  if len(DIRS) == 1 else "Both parts are done."}
+                  if len(DIRS) == 1 else "Both parts are done: part 1 Fri 10-23 to Mon 10-26, part 2 (the same posts, the menu "
+                                     "ranked from part 1's data) Tue 10-27 to Thu 10-29 22:11. No restarts in either."}
 
 tpl = open(os.path.join(HERE, "inside_v3_template.html")).read()
 css = re.search(r"<style>(.*?)</style>", open(os.path.join(HERE, "inside_v2_template.html")).read(), re.S)[1]

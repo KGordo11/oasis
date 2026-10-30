@@ -68,6 +68,11 @@ research**:
 
 ## 0.2 Where things stand (2026-10-30): read this first
 
+- **NEW Fri 10-30 (§14.61): part 2 cleaned + compared.** Same posts, same users, only the menu order changed; every user saw
+  every post except their own. The menu order changes behaviour a lot: gemma upvotes 68% -> 8% of posts at tick 0
+  (like_post moved to the last line), qwen 21% -> 66% at tick 0. No own-AI bias in total engagement in either part.
+  Workbook + page (same URL) hold both parts. Next: speed suite on the Spark (Gordon's go).
+
 - **NEW Fri 10-30 10:06 (§14.56 end): PART 2 DONE.** `ARM 2 DONE` Thu 10-29 22:11:56, all 9 cells rc=0, no watchdog
   restart; Spark idle (GPU 0%, 116 GB free, hsa303's training job gone). Next: cron off -> rsync `v3_flipped/` ->
   `v3_clean.py` -> workbook + page with both parts -> `v3_compare_parts.py`; speed suite after that.
@@ -14993,6 +14998,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 - Wed 10-28 (§14.59): speed test suite built + smoke-tested (13 tests, ~17 h); run after ARM 2 DONE.
 - Wed 10-28 (§14.58): speed options listed (16 slots chosen; speculative decoding / unified KV / gemma swa-full to check).
 - Thu 10-29 (§14.60): part 1 cleaned (`v3_clean.py`), workbook + Inside LLM Bias V3 page; tick by tick, easy vs hard actions.
+- **Fri 10-30 (§14.61): part 2 cleaned, checked and compared; menu order moves gemma's and qwen's upvotes a lot; workbook + page hold both parts.**
 - **Fri 10-30 10:06 (§14.56 end): PART 2 DONE (`ARM 2 DONE` 10-29 22:11:56), all rc=0, no restarts.** Next: cron off, rsync, v3_clean.
 - Thu 10-29 10:11 (§14.56 end): part 2 at 7 of 9 cells, no restarts; ETA ARM 2 DONE ~Fri 10-30 02:30 (01:30-04:30).
 - Wed 10-28 08:48 (§14.56 end): part 2 at 4 of 9 cells, no restarts; ETA Thu 10-29 evening - Fri 10-30 early.
@@ -15267,6 +15273,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | (this) | 10-27 15:00 | **`check_gemma_own.py <dir>`**: gemma's own-post upvote lean inside topic/length/question/stance/scroll groups, post by post, by tone of the comments on screen; **`v3_compare_parts.py <part1> <part2>`**: part 1 vs part 2 tables + bias; `v3_big_summary.py`: `load(dir)` + `gate()` reusable, gate also on `v3_flipped` (§14.57) |
 | (this) | 10-28 12:00 | **`speed_suite.py`, `speed_summary.py`**: speed tests (ref + one change, all 3 AIs); `llamacpp_servers.sh` `LLAMA_BIN`/`SERVER_ARGS`, bash-3.2 portable; `run_v2.py --shared-first`; `fake_engine.py` logs menu position; smoke +8 checks, flaky `__` path split fixed (§14.59) |
 | (this) | 10-29 15:00 | **`v3_clean.py`** (clean/normalize/aggregate a part: reads/followups/posts/actions CSVs, every world x tick, effort levels, retries, gates), **`make_v3_workbook.py`**, **`make_inside_v3.py` + `inside_v3_template.html`** (page; screens rebuilt by world replay, checked vs 13,242 saved screens), `v3_by_tick.py` (§14.60) |
+| (this) | 10-30 12:00 | `make_inside_v3.py` + template: part 2 in screens (own menu, replay-checked), ticks, effort, V1 table; section "Part 2: the menu order" (stance table, compare output); part 2 menu/posts asserted equal; per-part sample users. `v3_clean.py` gate wording (shown, not read). `check_gemma_own.py` title per part (§14.61) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -17202,4 +17209,49 @@ better-but-hard. In the live world "round by round" = **tick by tick** (the big 
 **Part 2 when it lands:** rsync `v3_flipped/` -> `v3_clean.py data/llm_bias/v3_flipped` -> workbook and page with both
 folders (`make_inside_v3.py <scratch>/inside_v3.html data/llm_bias/v3 data/llm_bias/v3_flipped`, publish the same file
 path or pass the URL) -> check the Spark's `v3_flipped/r101/menu.txt` equals `rank_menu.py` on part 1 (shown on the page).
+Smoke ALL PASS (61).
+
+## 14.61 Part 2 landed: cleaned, checked, compared; the menu order changes what gemma and qwen do (Fri 2026-10-30)
+
+Gordon removed the watchdog cron and rsynced `v3_flipped/` (223 MB). Then, Mac only:
+- **Clean first:** `v3_clean.py data/llm_bias/v3_flipped` -> gate OK. 121,045 raw screens = 95,025 posts read + 464
+  refresh returns + 516 unreadable + 25,040 follow-up screens. Gate wording fixed in `v3_clean.py`: posts SHOWN per cell =
+  posts x 99 (an unreadable answer = shown, not read).
+- **Same posts:** the three `posting_*.jsonl` are byte-identical to part 1. **Menu:** the Spark's `menu.txt` = what
+  `rank_menu.py` makes from part 1's data (byte-identical); all 9 manifests carry one prompts hash.
+- **Every user saw every post except their own,** both parts (0 others missed). In part 2, 15 post screens got no usable
+  answer: all gemma reading ONE llama post (u78) at ticks 20-65; its comments asked to talk about quantum computing, and
+  gemma tried `create_post` in a subreddit 'QuantumComputing' that does not exist, 3 tries each -> unreadable (shown,
+  nothing recorded). gemma reads llama = 11,766 posts read, not 11,781.
+- **Page replay:** part 2 rebuilt with its own menu; 7,417 saved open_post screens rebuilt word for word (part 1 13,242).
+- Outputs: workbook `~/Desktop/LLM_Bias/V3_big/LLM_Bias_V3_big.xlsx` (26 sheets: part 1 + part 2 + change per tick),
+  `part1_clean/`, `part2_clean/`, `compare_parts.md`; page "Inside LLM Bias V3" v2 (same URL
+  KwhpKCngkZUmPxpWV6UEer, 13.3 MB): part toggle in screens/ticks/effort, V1 table with both parts, new section 10 "Part 2:
+  the menu order" (both menus, stance table, compare output). Part 2 keeps user 0's whole scroll only (3 users = 18 MB,
+  over the 16 MB limit). `v3_big_summary.py` -> `v3_flipped/summary.md`, `check_gemma_own.py` -> `check_gemma_own.md`
+  (its title said "part 1" for any folder: fixed).
+
+**Part 1 -> part 2 (only the menu order changed; like_post went from the first menu line to the last):**
+
+| reader | % upvoted, tick 0 | % upvoted, whole scroll | % commented, tick 0 | total engagement per 100 |
+|---|---|---|---|---|
+| gemma | 68 -> 8 | 51 -> 1 | 14 -> 92 | 179.0 -> 158.7 |
+| llama | 61 -> 57 | 69 -> 69 | | 306.8 -> 315.7 |
+| qwen | 21 -> 66 | 75 -> 43 | | 163.5 -> 214.4 |
+
+- gemma users who LOVE the topic, tick 0: upvoted 93% -> 16%. gemma downvotes 22 -> 54 per 100 posts read and
+  comments 17 -> 72; like_comment 70 -> 24.
+- qwen like_comment 1.4 -> 52.0 per 100; follow-up screens 0 -> ~4 per 100.
+- llama: follow-up screens ~106 -> ~73 per 100; failed actions still ~24%.
+
+**Own-AI bias (double difference, 95% range), part 1 -> part 2:**
+
+| pair | total engagement | upvote |
+|---|---|---|
+| gemma - llama | +2.3 (-12.1 to +17.1) -> +9.4 (-7.5 to +24.1) | +15.0 (+8.9 to +20.7) -> +2.1 (-0.6 to +4.9) |
+| gemma - qwen | -6.8 (-20.8 to +7.0) -> +6.3 (-3.6 to +15.8) | +8.5 (+1.4 to +14.3) -> +10.9 (+5.2 to +16.9) |
+| llama - qwen | +1.5 (-10.8 to +15.8) -> +10.7 (-5.9 to +27.3) | +0.7 (-2.8 to +4.3) -> +8.0 (+2.4 to +13.3) |
+
+Total engagement: no own-AI bias in either part (every range crosses 0). Upvote biases move a lot between parts, because
+gemma hardly upvotes in part 2 and qwen's upvotes halve; they track the menu, not who wrote the post.
 Smoke ALL PASS (61).

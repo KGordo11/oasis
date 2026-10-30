@@ -17255,3 +17255,23 @@ Gordon removed the watchdog cron and rsynced `v3_flipped/` (223 MB). Then, Mac o
 Total engagement: no own-AI bias in either part (every range crosses 0). Upvote biases move a lot between parts, because
 gemma hardly upvotes in part 2 and qwen's upvotes halve; they track the menu, not who wrote the post.
 Smoke ALL PASS (61).
+
+**Own-AI bias against V1 (Gordon 10-30: "positive results? compare to V1, without then with the timeline").** Double
+difference per 100 posts read, 95% range (posts + users resampled, 300 draws); * = range misses 0. Scratch script, same
+`analyze_v2.dd/boot` as every analysis.
+
+| set | gemma-llama engagement | gemma-qwen engagement | llama-qwen engagement | gemma-llama upvote | gemma-qwen upvote | llama-qwen upvote |
+|---|---|---|---|---|---|---|
+| V1 r101 | +4.3 (-8.2 to +14.2) | -17.1 (-26.1 to -10.0) * | +6.2 (-4.3 to +15.9) | -2.2 | -5.4 | -2.7 |
+| V1 r102 | +5.9 (-4.8 to +16.4) | -19.3 (-31.1 to -9.8) * | +10.5 (-0.3 to +19.5) | -1.3 | -3.4 | -1.3 |
+| V3 p1 tick 0 (100 reads/world) | +19.0 (-36.8 to +77.2) | -2.0 (-20.9 to +18.5) | -8.0 (-62.8 to +44.4) | +6.0 | +0.0 | -7.0 |
+| V3 p2 tick 0 | +9.0 (-66.4 to +75.0) | -5.0 (-41.8 to +31.2) | -33.0 (-109.4 to +24.0) | +9.0 | -2.0 | -11.0 |
+| V3 p1 all ticks | +2.3 (-13.4 to +18.0) | -6.8 (-22.3 to +6.5) | +1.5 (-10.2 to +14.8) | +15.0 * | +8.5 * | +0.7 |
+| V3 p2 all ticks | +9.4 (-7.9 to +24.4) | +6.3 (-2.8 to +15.9) | +10.7 (-5.8 to +26.7) | +2.1 | +10.9 * | +8.0 * |
+
+- Total engagement: no own-AI bias in any set; V1's gemma-qwen negative (qwen gives gemma's posts more) is gone in V3.
+- Tick 0 alone is too small (100 reads per world; ranges +-20 to +-70): it cannot answer the bias question. The V1-style
+  reading of V3's posts (no live world) would; it needs Gordon's go.
+- Upvote leans appear only with the timeline and change with the menu order. gemma-qwen is + in both parts but for
+  different reasons: part 1 = gemma's lean (gemma 59.5% on own vs 50.0% on qwen's), part 2 = qwen's lean (qwen 49.5% on
+  own vs 39.0% on gemma's; gemma upvotes ~1%).

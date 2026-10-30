@@ -17282,3 +17282,26 @@ action, count + per 100; change part 2 - part 1), `2 With timeline` (each part's
 follow-up screens as their own row), `3 Own-AI bias` (all 6 sets x 3 pairs, engagement + upvote, 95% range, CLEAR flag;
 same numbers as the table above), then one sheet per PART per world (P1/P2, 18 sheets) tick by tick with every action's
 count per tick. 38 sheets; read back: matches the clean CSVs and the bias table above.
+
+**Data check + "doing nothing" (10-30 PM, Gordon: "make sure all the data is correct; what does doing nothing mean").**
+- Independent recount from the raw files (post screens, readable answers, no noise floor) of every number in
+  `by_cell_tick.csv`, both parts: posts read, engagement, upvoted, downvoted, commented, did nothing and every action, per
+  world per tick + all = **62,633 numbers, 0 mismatches.** Rule this confirmed (now in the workbook Read me): a post
+  that came back after a refresh (llama only: 173 looks in part 1, 464 in part 2) is ONE post read at the tick of its
+  FIRST look, with both looks' actions. Counted at the tick of the second look instead, 2,748 per-tick numbers move
+  (totals unchanged). Tick 0 ("no timeline") holds exactly one such post: part 2, llama reads gemma, user 26: first look
+  do_nothing + refresh, back at tick 2 with like_post, search_user, trend, like_comment. So that world's tick 0 = 174
+  per 100; first looks only = 170 (upvoted 52% -> 51%).
+- **Did nothing = no real action**, two valid answer kinds, both counted (`analyze_v2.did_anything`, same in V1 and V3):
+  the action `do_nothing` (with a reason like "Not interested in sports") or an EMPTY action list `[]` with only a
+  reason. Post screens, readable answers:
+
+| set | gemma: do_nothing / empty [] | llama: do_nothing / empty [] | qwen: do_nothing / empty [] |
+|---|---|---|---|
+| V1 r101 | 22 / 1,711 (7.6% of 22,671) | 764 / 12 (3.4%) | 2,437 / 0 (10.7%) |
+| V1 r102 | 10 / 1,553 (7.4% of 21,149) | 738 / 10 (3.4%) | 2,690 / 0 (12.2%) |
+| V3 part 1 | 1 / 10 (0.03% of 31,680) | 4,058 / 59 (13.0%) | 1,298 / 0 (4.1%) |
+| V3 part 2 | 0 / 1 | 4,816 / 4 (15.2%) | 831 / 0 (2.6%) |
+
+  (llama x2/x3 do_nothing lists counted once.) In V3 gemma almost never skips a post (V1: 7.6%), llama skips ~4x more
+  than in V1, qwen less.

@@ -71,13 +71,16 @@ TEXT = [
     ("baseline", "A world where the AI reads posts its own AI wrote (gemma reads gemma's posts, ...). Shaded yellow."),
     ("tick", "Everyone scrolls at the same pace. At tick 0 each user reads the first post of their own scroll, at tick 1 the "
              "second, and so on. Users see comments other users left in EARLIER ticks. Tick 0 = nobody has commented yet, like V1."),
-    ("post read", "One user reading one post. If the user pressed refresh and the post came back, both looks count as ONE post read."),
+    ("post read", "One user reading one post. If the user pressed refresh and the post came back (llama only: 173 looks in part 1, "
+                  "464 in part 2), both looks count as ONE post read, at the tick of the FIRST look, with the actions of both looks."),
     ("actions chosen", "Every action the AI gave in its answer on the post screen, except 'do nothing'. This is total engagement, "
                        "the main measure, counted the same way as V1. Actions on follow-up screens are counted apart."),
     ("actions done", "Only the chosen actions that worked in the world. An action fails when, e.g., it likes a comment ID that does "
                      "not exist, likes the same post twice, or asks to open a second screen while one is open."),
     ("upvoted / downvoted / commented", "Number of posts read where the AI upvoted (like_post) / downvoted / wrote a comment."),
-    ("did nothing", "Posts read where the AI's only answer was 'do nothing'."),
+    ("did nothing", "Posts read where the AI took no real action. Two kinds of answer, both valid and both counted: it picked the "
+                    "action do_nothing (usually with a reason like 'Not interested in sports'), or it sent an empty action list "
+                    "[] with only a reason (gemma's usual way in V1). The 'action: do_nothing' rows count only the first kind."),
     ("comments on screen", "Comments by other users that were on the screen when the post was read (added up over the posts read)."),
     ("follow-up screen", "A screen the user opened from the post: a profile, a search, an opened post, messages. Not a post read; "
                          "kept apart (Follow-ups sheet)."),

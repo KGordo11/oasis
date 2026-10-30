@@ -66,7 +66,11 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-29): read this first
+## 0.2 Where things stand (2026-10-30): read this first
+
+- **NEW Fri 10-30 10:06 (§14.56 end): PART 2 DONE.** `ARM 2 DONE` Thu 10-29 22:11:56, all 9 cells rc=0, no watchdog
+  restart; Spark idle (GPU 0%, 116 GB free, hsa303's training job gone). Next: cron off -> rsync `v3_flipped/` ->
+  `v3_clean.py` -> workbook + page with both parts -> `v3_compare_parts.py`; speed suite after that.
 
 - **NEW Thu 10-29 (§14.60): part 1 cleaned + organized.** `v3_clean.py` (run FIRST on every run: clean, normalize,
   aggregate world x tick -> world -> totals), workbook `~/Desktop/LLM_Bias/V3_big/LLM_Bias_V3_big.xlsx`, page "Inside
@@ -14989,6 +14993,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 - Wed 10-28 (§14.59): speed test suite built + smoke-tested (13 tests, ~17 h); run after ARM 2 DONE.
 - Wed 10-28 (§14.58): speed options listed (16 slots chosen; speculative decoding / unified KV / gemma swa-full to check).
 - Thu 10-29 (§14.60): part 1 cleaned (`v3_clean.py`), workbook + Inside LLM Bias V3 page; tick by tick, easy vs hard actions.
+- **Fri 10-30 10:06 (§14.56 end): PART 2 DONE (`ARM 2 DONE` 10-29 22:11:56), all rc=0, no restarts.** Next: cron off, rsync, v3_clean.
 - Thu 10-29 10:11 (§14.56 end): part 2 at 7 of 9 cells, no restarts; ETA ARM 2 DONE ~Fri 10-30 02:30 (01:30-04:30).
 - Wed 10-28 08:48 (§14.56 end): part 2 at 4 of 9 cells, no restarts; ETA Thu 10-29 evening - Fri 10-30 early.
 - §14.57: gemma's own-post lean = about half a comment snowball (live world); `v3_compare_parts.py` ready for part 2.
@@ -16966,6 +16971,18 @@ part is 58% of the characters.
   Part 2 has no noise floor (`NOISE=0` in `v3_big.sh`), so `ARM 2 DONE` follows the last cell:
   **~Fri 10-30 02:30 (range Fri 01:30-04:30, estimate).** NB for the speed suite: with hsa303's job holding ~44 GB,
   `worlds3` (needs 60 GB free) may skip itself.
+- **Fri 10-30 10:06 (Gordon's check): PART 2 DONE.** `ARM 2 DONE` after `end: models unloaded` at Thu 10-29 22:11:56;
+  every cell rc=0; no watchdog restart (no watchdog file); cron line still on (remove it next). hsa303's training job
+  had ended: GPU 0%, 116 GB available. Reading files: 121,045 lines in all (9 cells).
+
+| step | part 2 | part 1 (same step) |
+|---|---|---|
+| cross: gemma reads qwen | 598.5 min, 3.56 s/screen, end 15:36:42 Thu | 665.4 min, 3.95 |
+| cross: gemma reads llama (last) | 395.2 min, 2.01 s/screen, end 22:11:52 Thu | 683.2 min, 3.48 |
+
+  gemma reads llama ran at 0.58x part 1's time; the estimate (~640 min) assumed hsa303's GPU job would keep running.
+  Done ~4 h earlier than the ~02:30 estimate. Next (Gordon): cron off, rsync `v3_flipped/`; then Mac: `v3_clean.py`,
+  workbook + page with both folders, `v3_compare_parts.py`, `v3_big_summary.py`, `check_gemma_own.py`.
 
 ## 14.57 Why gemma upvotes gemma's posts (part 1); part 1 vs part 2 comparison built (Tue 2026-10-27)
 Gordon (while part 2 runs): (1) dig into part 1's one clear lean, gemma upvoting gemma's posts (§14.53); (2) build the

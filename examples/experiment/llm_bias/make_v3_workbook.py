@@ -2,14 +2,18 @@
 
     oasis-env/bin/python examples/experiment/llm_bias/make_v3_workbook.py <out.xlsx> data/llm_bias/v3 [data/llm_bias/v3_flipped]
 
-Part 1 alone now; give part 2's folder too (after `v3_clean.py data/llm_bias/v3_flipped`) and every summary sheet gets
-part 2's numbers next to part 1's plus the change. Sheets, small to big: Read me, Cleaning, one sheet per world tick by
-tick (baselines first), Worlds (each world all together), Actions (every action per world), Posts (each post), Users
-(each reader user per world), Reads (every post read, one row each) and Follow-ups (every follow-up screen) for part 1
-(and part 2). Numbers are plain values computed from the clean CSVs; filter the Reads sheet to check any of them.
+Give part 2's folder too (after `v3_clean.py data/llm_bias/v3_flipped`). Sheets: Read me; 1 No timeline (V1 rounds 101
+and 102 next to each part's tick 0, every action); 2 With timeline (each part's whole scroll, every action); 3 Own-AI
+bias (every set, 95% ranges); one sheet per part per world, tick by tick, every action; Worlds; Actions; Cleaning;
+effort; Posts; Users; Reads and Follow-ups. Numbers are plain values from the clean CSVs (and V1's raw rows).
 """
 import csv, os, sys
 from collections import Counter, defaultdict
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, HERE)
+import analyze_v2 as A  # noqa: E402
+from v3_big_summary import load  # noqa: E402
 
 from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
@@ -68,7 +72,8 @@ TEXT = [
     ("tick", "Everyone scrolls at the same pace. At tick 0 each user reads the first post of their own scroll, at tick 1 the "
              "second, and so on. Users see comments other users left in EARLIER ticks. Tick 0 = nobody has commented yet, like V1."),
     ("post read", "One user reading one post. If the user pressed refresh and the post came back, both looks count as ONE post read."),
-    ("actions chosen", "Every action the AI gave in its answer, except 'do nothing'. This is total engagement, the main measure."),
+    ("actions chosen", "Every action the AI gave in its answer on the post screen, except 'do nothing'. This is total engagement, "
+                       "the main measure, counted the same way as V1. Actions on follow-up screens are counted apart."),
     ("actions done", "Only the chosen actions that worked in the world. An action fails when, e.g., it likes a comment ID that does "
                      "not exist, likes the same post twice, or asks to open a second screen while one is open."),
     ("upvoted / downvoted / commented", "Number of posts read where the AI upvoted (like_post) / downvoted / wrote a comment."),
@@ -79,10 +84,15 @@ TEXT = [
     ("per 100 / %", "Divided by posts read. The worlds have different numbers of posts (gemma 99, llama 119, qwen 102 posts, each "
                     "read by 99 users), so compare rates between worlds, counts within one world."),
     ("", ""),
-    ("SHEETS, SMALL TO BIG", ""),
+    ("SHEETS", ""),
+    ("1 No timeline", "Each world with NO timeline: V1 rounds 101 and 102 (V1 never had one) and each V3 part's tick 0 (each user's "
+                      "first post, nobody has commented yet; 100 posts read per world). Every action, count and per 100."),
+    ("2 With timeline", "Each world over the WHOLE scroll (every tick), part 1 and part 2 kept apart, then the change. Every action."),
+    ("3 Own-AI bias", "Does each AI give its own AI's posts more than the other AI does? Every set, total engagement and upvotes, "
+                      "with the 95% range. CLEAR = the range leaves out 0."),
+    ("P1 / P2 world sheets", "One sheet per part per world: every tick (round of the scroll) on its own row, then 'all'. "
+                             "Counts, rates, and how many times each action was chosen at that tick."),
     ("Cleaning", "What was kept out of the main tables and why, with counts; every failed action and why it failed."),
-    ("one sheet per world", "Tick by tick, then 'all' (the whole world). Counts first, then rates."
-                            + (" Part 2 next to part 1, then the change (part 2 minus part 1)." if len(DIRS) > 1 else "")),
     ("Worlds", "Each world all together (the 'all' rows of the world sheets side by side)."),
     ("Actions", "Every action, per world: how many times chosen and done, and per 100 posts read."),
     ("Effort tiers / Action effort", "How much each action asks of the AI (one click, copy an ID, write text, write a post, "
@@ -117,29 +127,94 @@ for p, d in zip(PART, DIRS):
     for j, w in enumerate((70, 22, 40, 12, 12, 12), 1):
         ws.column_dimensions[get_column_letter(j)].width = w
 
-# one sheet per world, tick by tick
+# the measures for one world, from a by_cell_tick row (V3) or from V1's raw rows
 COUNTS = ["posts read", "actions chosen", "actions done", "upvoted", "downvoted", "commented", "did nothing",
           "comments on screen", "follow-up screens"]
 RATES = ["engagement per 100", "done per 100", "upvoted %", "commented %"]
 tick = [{(r["reader"], r["posts_by"], r["tick"]): r for r in x["by_cell_tick"]} for x in data]
-for m, pb in WORLDS:
-    ticks = sorted({t for tk in tick for (a, b, t) in tk if (a, b) == (m, pb) and t != "all"}) + ["all"]
-    head = ["tick"] + [f"{p}: {c}" for p in PART for c in COUNTS + RATES]
-    if len(DIRS) > 1:
-        head += [f"change: {c}" for c in RATES]
-    body = []
-    for t in ticks:
-        got = [tk.get((m, pb, t)) for tk in tick]
-        row = [t] + [g[c] if g else None for g in got for c in COUNTS + RATES]
-        if len(DIRS) > 1:
-            row += [round(got[1][c] - got[0][c], 1) if all(got) else None for c in RATES]
-        body.append(row)
-    title = f"{m} reads {pb}" + (" (base)" if m == pb else "")
-    sheet(title, head, body, {1: 8},
-          note=f"{m} plays all 100 users, reading the {sum(1 for x in data[0]['posts'] if x['ai'] == pb)} posts {pb} wrote"
-               + (" (baseline: its own AI's posts)" if m == pb else "") + ". One row per tick; last row = the whole world.")
+ACTS = sorted({k for tk in tick for r in tk.values() for k in r} - set(COUNTS + RATES) - {"reader", "posts_by", "tick"})
+S = {"gemma3:12b": "gemma", "llama3.1:8b": "llama", "qwen3:8b": "qwen"}
+V1 = {}  # round -> world -> the same measures (no live world: one post per screen, no follow-ups)
+v1rows = {}
+for rd in ("r101", "r102"):
+    rows_, _ = load(os.path.join(HERE, "../../../data/llm_bias/v1_v2_spark"), rd)
+    v1rows[rd] = [r for r in rows_ if r["turn"] == "read" and r["outcome"] == "chose" and not r["draw"]]
+    by = defaultdict(list)
+    for r in v1rows[rd]:
+        by[(S[r["model"]], S[r["posts_by"]])].append(r)
+    V1[rd] = {k: {"posts read": len(rs), "actions chosen": sum(map(A.n_engage, rs)), "upvoted": sum(A.has(r, "like_post") for r in rs),
+                  "downvoted": sum(A.has(r, "dislike_post") for r in rs), "commented": sum(A.has(r, "create_comment") for r in rs),
+                  "did nothing": sum(not A.did_anything(r) for r in rs),
+                  **Counter(a["action"] for r in rs for a in r["actions"])} for k, rs in by.items()}
+ACTS = sorted(set(ACTS) | {k for w in V1.values() for c in w.values() for k in c} - set(COUNTS))
+MEAS = [("posts read", "posts read"), ("actions chosen", "total engagement (every action but do nothing)"),
+        ("upvoted", "posts upvoted"), ("downvoted", "posts downvoted"), ("commented", "posts commented on"),
+        ("did nothing", "posts where it only did nothing")] + [(a, "action: " + a) for a in ACTS] + [
+        ("follow-up screens", "follow-up screens opened (live world only; not part of engagement)")]
 
-# Worlds: each world all together
+
+def long_sheet(title, note, sources):
+    """One row per world per measure; for each source (name, world -> counts) the count and the rate per 100 posts read."""
+    head = ["reader", "posts by", "measure"] + [f"{n}: {c}" for n, _ in sources for c in ("count", "per 100 posts read")]
+    if len(sources) >= 2:
+        head += [f"change per 100: {sources[-1][0]} - {sources[-2][0]}"]
+    body = []
+    for m, pb in WORLDS:
+        for key, label in MEAS:
+            row, rates = [m, pb, label], []
+            for _, got in sources:
+                g = got.get((m, pb))
+                v = (g.get(key) or 0) if g else None
+                rate = None if g is None or key == "posts read" else round(100 * v / g["posts read"], 1)
+                row += [v, rate]; rates.append(rate)
+            if len(sources) >= 2:
+                row.append(round(rates[-1] - rates[-2], 1) if None not in rates[-2:] else None)
+            if any(x for x in row[3:]):
+                body.append(row)
+    sheet(title, head, body, {1: 9, 2: 9, 3: 40}, note=note, base_col=(0, 1))
+
+
+at = lambda tk, t: {(a, b): r for (a, b, tt), r in tk.items() if tt == t}  # noqa: E731
+long_sheet("1 No timeline", "NO TIMELINE. V1 (rounds 101, 102: one post per screen, never any comments) next to each V3 part's "
+           "tick 0 (each user's first post, before anyone commented; 100 posts read per world). Baselines shaded.",
+           [("V1 r101", V1["r101"]), ("V1 r102", V1["r102"])] + [(f"V3 {p} tick 0", at(tk, 0)) for p, tk in zip(PART, tick)])
+long_sheet("2 With timeline", "WITH THE TIMELINE: each V3 part over the whole scroll (every tick, comments pile up), parts kept "
+           "apart, then the change. Engagement = actions on the post screen (as in V1); follow-up screens are a row of their own.",
+           [(f"V3 {p} all ticks", at(tk, "all")) for p, tk in zip(PART, tick)])
+
+# own-AI bias, every set (analyze_v2's double difference and 95% range, as in every analysis)
+sets = {f"V1 {rd}": [{"model": S[r["model"]], "posts_by": S[r["posts_by"]], "post_key": r["post_key"], "user_id": r["user_id"],
+                      "eng": A.n_engage(r), "up": int(A.has(r, "like_post"))} for r in rs] for rd, rs in v1rows.items()}
+for p, x in zip(PART, data):
+    rs = [{"model": r["reader"], "posts_by": r["posts_by"], "post_key": r["post_key"], "user_id": r["user_id"], "tick": r["tick"],
+           "eng": r["n_chosen"], "up": r["upvoted"]} for r in x["reads"]]
+    sets[f"V3 {p} tick 0 (no timeline)"] = [r for r in rs if r["tick"] == 0]
+    sets[f"V3 {p} all ticks (timeline)"] = rs
+body = []
+for name, rs in sets.items():
+    for i, j in (("gemma", "llama"), ("gemma", "qwen"), ("llama", "qwen")):
+        row = [name, f"{i} vs {j}"]
+        for k in ("eng", "up"):
+            f = lambda r, k=k: 100 * r[k]  # noqa: E731
+            v, (lo, hi) = A.dd(rs, i, j, f), A.boot(rs, i, j, f, n=300)
+            row += [round(v, 1), round(lo, 1), round(hi, 1), "CLEAR" if lo > 0 or hi < 0 else "no"]
+        body.append(row)
+sheet("3 Own-AI bias", ["set", "pair", "engagement bias", "low", "high", "clear?", "upvote bias", "low", "high", "clear?"], body,
+      {1: 34, 2: 16}, note="Own-AI bias = (i on i's posts - j on i's posts) - (i on j's posts - j on j's posts), per 100 posts read. "
+      "+ = both AIs give their own AI's posts more. 95% range from resampling posts and users (300 draws).")
+
+# one sheet per part per world, tick by tick, every action
+for p, tk in zip(PART, tick):
+    for m, pb in WORLDS:
+        ticks = sorted(t for (a, b, t) in tk if (a, b) == (m, pb) and t != "all") + ["all"]
+        acts = [a for a in ACTS if any(tk[(m, pb, t)].get(a) for t in ticks)]
+        body = [[t] + [tk[(m, pb, t)][c] for c in COUNTS + RATES] + [tk[(m, pb, t)].get(a) or 0 for a in acts] for t in ticks]
+        sheet(f"P{p[-1]} {m} reads {pb}" + (" (base)" if m == pb else ""), ["tick"] + COUNTS + RATES + acts, body, {1: 8},
+              note=f"{p.upper()}: {m} plays all 100 users, reading the {sum(1 for x in data[0]['posts'] if x['ai'] == pb)} posts {pb} wrote"
+                   + (" (baseline)" if m == pb else "") + ". One row per tick (tick 0 = no timeline yet); last row = all ticks. "
+                   "Action columns = times chosen on the post screen at that tick.")
+
+# Worlds: each world all together (whole scroll)
 head = ["reader", "posts by"] + [f"{p}: {c}" for p in PART for c in COUNTS + RATES]
 if len(DIRS) > 1:
     head += [f"change: {c}" for c in RATES]
@@ -218,5 +293,7 @@ for p, x in zip(PART, data):
         rs = x[key]
         sheet(name + (f" {p}" if len(DIRS) > 1 else ""), list(rs[0]), [list(r.values()) for r in rs], {5: 24, 12: 30, 13: 20})
 
+for i, name in enumerate(["Read me", "1 No timeline", "2 With timeline", "3 Own-AI bias"]):
+    wb.move_sheet(name, i - wb.sheetnames.index(name))
 wb.save(OUT)
 print(f"wrote {OUT}: {len(wb.sheetnames)} sheets: {', '.join(wb.sheetnames)}")

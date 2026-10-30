@@ -15273,7 +15273,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | (this) | 10-27 15:00 | **`check_gemma_own.py <dir>`**: gemma's own-post upvote lean inside topic/length/question/stance/scroll groups, post by post, by tone of the comments on screen; **`v3_compare_parts.py <part1> <part2>`**: part 1 vs part 2 tables + bias; `v3_big_summary.py`: `load(dir)` + `gate()` reusable, gate also on `v3_flipped` (§14.57) |
 | (this) | 10-28 12:00 | **`speed_suite.py`, `speed_summary.py`**: speed tests (ref + one change, all 3 AIs); `llamacpp_servers.sh` `LLAMA_BIN`/`SERVER_ARGS`, bash-3.2 portable; `run_v2.py --shared-first`; `fake_engine.py` logs menu position; smoke +8 checks, flaky `__` path split fixed (§14.59) |
 | (this) | 10-29 15:00 | **`v3_clean.py`** (clean/normalize/aggregate a part: reads/followups/posts/actions CSVs, every world x tick, effort levels, retries, gates), **`make_v3_workbook.py`**, **`make_inside_v3.py` + `inside_v3_template.html`** (page; screens rebuilt by world replay, checked vs 13,242 saved screens), `v3_by_tick.py` (§14.60) |
-| (this) | 10-30 12:00 | `make_inside_v3.py` + template: part 2 in screens (own menu, replay-checked), ticks, effort, V1 table; section "Part 2: the menu order" (stance table, compare output); part 2 menu/posts asserted equal; per-part sample users. `v3_clean.py` gate wording (shown, not read). `check_gemma_own.py` title per part (§14.61) |
+| (this) | 10-30 12:00 | `make_v3_workbook.py`: sheets 1 No timeline (V1 + tick 0), 2 With timeline, 3 Own-AI bias, P1/P2 per-world tick sheets with every action. `make_inside_v3.py` + template: part 2 in screens (own menu, replay-checked), ticks, effort, V1 table; section "Part 2: the menu order" (stance table, compare output); part 2 menu/posts asserted equal; per-part sample users. `v3_clean.py` gate wording (shown, not read). `check_gemma_own.py` title per part (§14.61) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -17275,3 +17275,10 @@ difference per 100 posts read, 95% range (posts + users resampled, 300 draws); *
 - Upvote leans appear only with the timeline and change with the menu order. gemma-qwen is + in both parts but for
   different reasons: part 1 = gemma's lean (gemma 59.5% on own vs 50.0% on qwen's), part 2 = qwen's lean (qwen 49.5% on
   own vs 39.0% on gemma's; gemma upvotes ~1%).
+
+**Workbook rebuilt (10-30 PM, Gordon: "without timelines and then with the timeline, round by round, action by action"):**
+`make_v3_workbook.py` now writes, up front: `1 No timeline` (V1 r101 + r102 next to each V3 part's tick 0; every
+action, count + per 100; change part 2 - part 1), `2 With timeline` (each part's whole scroll, parts apart, every action,
+follow-up screens as their own row), `3 Own-AI bias` (all 6 sets x 3 pairs, engagement + upvote, 95% range, CLEAR flag;
+same numbers as the table above), then one sheet per PART per world (P1/P2, 18 sheets) tick by tick with every action's
+count per tick. 38 sheets; read back: matches the clean CSVs and the bias table above.

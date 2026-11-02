@@ -51,7 +51,7 @@ posts** (pair ranges +9..+21, +2..+15), no total-engagement bias; **§14.57: abo
 the live world** (none in the first 10% of the scroll; gemma follows the tone of the comments it sees). The one solid effect: **qwen engages more with gemma's
 posts** (double difference qwen-gemma −17 to −21, mostly comments). It's about gemma's writing, not authorship
 (survives topic × stance matching; only partly length).
-**V3 big sim part 2 (§14.61; same posts, menu ranked from part 1): still no total-engagement bias; the upvote leans move
+(§14.62: pages + Excel rebuilt; V3 = part 1, V3a = part 2.) **V3 big sim part 2 (§14.61; same posts, menu ranked from part 1): still no total-engagement bias; the upvote leans move
 with the menu order** (gemma-llama +15 -> +2; llama-qwen +1 -> +8; gemma-qwen +9 -> +11 but from qwen now). **Menu order
 is the biggest lever:** gemma tick-0 upvotes 68% -> 8%, qwen 21% -> 66%, llama ~same. V1's qwen-likes-gemma is not seen
 in V3 (tick 0 too small to say: 100 reads per world). Workbook sheets `1 No timeline` / `2 With timeline` / `3 Own-AI
@@ -117,7 +117,8 @@ the AI invents IDs). 8.6% of V1 actions were dead ones, and they count in total 
 | **`v3_start.sh`** | start a part safely: preflight (its settings) -> only on ALL CLEAR watchdog cron + `v3_big.sh`; `ARM=2` needs `ARM 1 DONE`, ranks the menu first, logs to `v3_big_part2.txt` (§14.50, §14.51) |
 | `v3_big_summary.py <dir> [round]` | big-sim part (or V1 `v1_v2_spark r101`): analyze_v2 tables, one row per post read (all views), gate, follow-up table; writes `<dir>/summary.md` (~4 min) |
 | **`v3_clean.py <dir>`** | RUN FIRST on every part: `<dir>/clean/` reads/followups/posts/actions CSVs, `by_cell_tick.csv` (every world x every tick), effort levels, retries, `cleaning.md`; gates vs published numbers (§14.60) |
-| `make_v3_workbook.py <xlsx> <p1> [<p2>]`, `make_inside_v3.py <html> <p1> [<p2>]` | workbook (oasis-env) and the "Inside LLM Bias V3" page (KwhpKCngkZUmPxpWV6UEer; republish same file path or pass url); page replays each world to rebuild screens (stops if any saved screen differs); `v3_by_tick.py` = tick groups + bias by tick |
+| `v3_report_data.py <json>` | every number once (V3, V3a, tick 0, V1 r101/r102) -> `data/llm_bias/v3_report.json`; run before the workbook and the data page (§14.62) |
+| `make_v3_workbook.py <xlsx> <v3> <v3_flipped>`, `make_inside_v3.py <html> <v3> <v3_flipped>`, `make_v3_data_page.py <html>` | Excel (oasis-env, 47 sheets + charts, V3 vs V3a first); artifact 1 "Inside LLM Bias V3" (KwhpKCngkZUmPxpWV6UEer: sim explained + every screen; writes `inside_v3_files/screens/*.b64.txt`, publish them with the page in 2 batches, root = that folder); artifact 2 "LLM Bias V3 Data" (ExMxGgBF4KW6Svb9L91qYd). Names: V3 = part 1, V3a = part 2. Never write "did nothing": name the output |
 | `check_gemma_own.py <dir>`, `v3_compare_parts.py <part1> <part2>` | gemma's own-post lean by group / comment tone (§14.57); part 1 vs part 2 tables + bias (run after `ARM 2 DONE`) |
 | **`handoff_check.sh [read]`** | Mac: `read` = session catch-up bundle; no arg = FAIL if log §0.2/§14.32 Status/§14.32c/memory are behind (§14.52) |
 | **`speed_suite.py`**, `speed_summary.py` | speed tests on the Spark (ref + ONE change each, all 3 AIs, ~17 h; §14.59); `llamacpp_servers.sh` takes `LLAMA_BIN` / `SERVER_ARGS`; `run_v2.py --shared-first` = prompt order B |

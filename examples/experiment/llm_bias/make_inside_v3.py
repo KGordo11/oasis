@@ -9,7 +9,7 @@ data. Every screen shown is rebuilt by replaying the saved world in file order (
 checks that this rebuild reproduces every saved open_post screen word for word, and stops if one differs.
 Numbers in the page text come from the FACTS dict below (template placeholders {{name}}); a missing one stops the build.
 """
-import csv, glob, json, os, re, subprocess, sys
+import base64, csv, glob, gzip, json, os, random, re, subprocess, sys
 from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -21,11 +21,11 @@ import run_v2 as R  # noqa: E402
 from v3_big_summary import load  # noqa: E402
 
 OUT, DIRS = sys.argv[1], [os.path.abspath(d) for d in sys.argv[2:]]
-PARTS = ["part 1", "part 2"][:len(DIRS)]
+PARTS = ["V3", "V3a"][:len(DIRS)]  # V3 = big sim part 1 (V1 menu order); V3a = part 2 (the same posts, menu ranked from V3)
+FILES_DIR = os.path.join(os.path.dirname(os.path.abspath(OUT)), "inside_v3_files")  # published next to the page
 X = "examples/experiment/llm_bias/"
 MODELS = ["gemma3:12b", "llama3.1:8b", "qwen3:8b"]
 SHORT = {"gemma3:12b": "gemma", "llama3.1:8b": "llama", "qwen3:8b": "qwen"}
-SAMPLE_USERS = {"part 1": [0, 1, 2], "part 2": [0]}  # their every screen, word for word (tick 0: all 100 users); part 2 has one to stay under the 16 MB page limit
 V3_START = "2026-10-20"  # V3 work began (log 14.43)
 
 
@@ -106,6 +106,9 @@ FILES = [
      "next to V1, with the bias number and its 95% range."),
     (X + "check_gemma_own.py", "Why gemma upvotes gemma's posts (log 14.57)",
      "The lean inside topics, lengths, stances and scroll position, and by the tone of the comments on screen."),
+    (X + "v3_report_data.py", "Every number for the data page and the Excel file",
+     "Reads V3's and V3a's cleaned data and V1's raw rows, and computes every number once (each action, posting, stance, "
+     "tick, post, user, own-AI bias), so the data page and the workbook can never disagree."),
     (X + "v3_compare_parts.py", "Part 1 vs part 2", "Each reader's actions, engagement and the own-AI bias, part 1 "
      "next to part 2 (its output: v3_flipped/compare_parts.md)."),
     (X + "analyze_v2.py", "The shared measures", "Total engagement, the double difference and the bootstrap ranges used "
@@ -170,24 +173,29 @@ for key, path, pat in [("menu", "run_v2.py", r"^MENU = "), ("format", "run_v2.py
                        ("world", "live_world.py", r"^class World"), ("run_live", "live_world.py", r"^def run_live"),
                        ("screens", "live_world.py", r"^def screens"), ("live_menu", "live_world.py", r"^def live_menu"),
                        ("post_block", "live_world.py", r"def post_block"), ("chat_json", "llm.py", r"^def chat_json"),
-                       ("rank", "rank_menu.py", r"^"), ("big", "v3_big.sh", r"^for r in"), ("start", "v3_start.sh", r"^echo"),
+                       ("rank", "rank_menu.py", r"^"), ("feed", "run_v2.py", r"one fixed order, same for every reader AI"), ("big", "v3_big.sh", r"^for r in"), ("start", "v3_start.sh", r"^echo"),
                        ("clean_effort", "v3_clean.py", r"^EFFORT = ")]:
     lines = open(os.path.join(HERE, path)).read().splitlines()
     n = next(i for i, l in enumerate(lines, 1) if re.search(pat, l))
     refs[key] = [X + path, n]
 
-# ---- the screens: replay each world in file order; rebuild post screens for tick 0 (all users) and SAMPLE_USERS ----
+# ---- the screens: replay each world in file order and keep EVERY screen; one gzip file per run x world ----
 R.DATA = P1
 people = R.load_personas()[:100]
 PEOPLE = [{"id": p["id"], "username": p["username"], "persona": p["persona"], "stances": p["stances"]} for p in people]
-MENUS = {"part 1": R.MENU}
-if len(DIRS) > 1:  # part 2 shows the Spark's own menu.txt; it must be what rank_menu.py makes from part 1's data
-    MENUS["part 2"] = open(os.path.join(DIRS[1], "r101", "menu.txt")).read().strip()
-    assert menu2.startswith(MENUS["part 2"] + "\n"), "the Spark's part 2 menu.txt != rank_menu.py on part 1's data (stdout = menu, then the counts)"
-    for m in MODELS:  # same posts in both parts
+MENUS = {"V3": R.MENU}
+if len(DIRS) > 1:  # V3a shows the Spark's own menu.txt; it must be what rank_menu.py makes from V3's data
+    MENUS["V3a"] = open(os.path.join(DIRS[1], "r101", "menu.txt")).read().strip()
+    assert menu2.startswith(MENUS["V3a"] + "\n"), "the Spark's V3a menu.txt != rank_menu.py on V3's data (stdout = menu, then the counts)"
+    for m in MODELS:  # same posts in both runs
         assert open(os.path.join(DIRS[1], "r101", f"posting_{R.short(m)}.jsonl"), "rb").read() == \
-            open(os.path.join(P1, "r101", f"posting_{R.short(m)}.jsonl"), "rb").read(), f"part 2 posts differ: {m}"
-screens, posts_out, checked = {}, {}, Counter()
+            open(os.path.join(P1, "r101", f"posting_{R.short(m)}.jsonl"), "rb").read(), f"V3a posts differ: {m}"
+screens_files, posts_out, checked, feeds = {}, {}, Counter(), {}
+for m in MODELS:  # the feed order (run_v2.py): one shuffled ring per post set, the same for every reader AI; each user
+    posts, _ = R.post_set(101, m, 100)  # starts at their own point (id x posts / 100) and skips their own posts
+    ring = posts[:]
+    random.Random(f"{R.SEED}|r101|{m}|ring").shuffle(ring)
+    feeds[SHORT[m]] = {"ring": [q["key"] for q in ring], "start": {p["id"]: (p["id"] * len(ring)) // 100 for p in people}}
 for (part, menu), d in zip(MENUS.items(), DIRS):
     live_menu = L.live_menu(menu)
     for m in MODELS:
@@ -196,10 +204,12 @@ for (part, menu), d in zip(MENUS.items(), DIRS):
             posts_out[SHORT[pb]] = [{"key": q["key"], "author_id": q["author_id"], "author": q["author"], "topic": q["topic"],
                                      "title": q["title"], "body": q["body"]} for q in posts]
             w = L.World(people, posts, R.TOPICS)
-            keep = []
+            keep, first = [], defaultdict(list)
             for l in open(os.path.join(d, "r101", f"reading_{R.short(pb)}__{R.short(m)}.jsonl")):
                 r = json.loads(l)
                 u, t = r["user_id"], r["tick"]
+                if r["screen"] == "post" and r["view"] == 1:
+                    first[u].append(r["post_key"])
                 if r["screen"] in ("post", "open_post"):
                     sub, tname, author, title, body, comments = w.post_block(r["ctx"]["post"], u, t)
                     notice = w.notice(u, t)
@@ -208,26 +218,37 @@ for (part, menu), d in zip(MENUS.items(), DIRS):
                                                                   body=body, comments=comments, menu=live_menu, fmt=R.FORMAT_TWO)
                         assert text == r["text"], f"replay differs from the saved screen: {part}, {m} reads {pb}, user {u}, seq {r['seq']}"
                         checked[part] += 1
-                if t == 0 and r["screen"] == "post" or u in SAMPLE_USERS[part]:
-                    keep.append({"u": u, "seq": r["seq"], "tick": t, "step": r["step"], "screen": r["screen"], "view": r["view"],
-                                 "post": r["post_key"], "raw": r["raw"], "outcome": r["outcome"], "attempts": r.get("attempts", 1),
-                                 "errors": r.get("errors") or [], "tokens": [r.get("prompt_tokens"), r.get("eval_tokens")],
-                                 "secs": r.get("call_latency_s"),
-                                 "ex": [[a["action"], e["ok"], e.get("error")] for a, e in zip(r["actions"], r["executed"])],
-                                 **({"notice": notice, "comments": comments} if r["screen"] == "post" else {}),
-                                 **({"text": r["text"]} if r["screen"] != "post" else {})})
+                keep.append({"u": u, "seq": r["seq"], "tick": t, "step": r["step"], "screen": r["screen"], "view": r["view"],
+                             "post": r["post_key"], "raw": r["raw"], "outcome": r["outcome"], "attempts": r.get("attempts", 1),
+                             "errors": r.get("errors") or [], "tokens": [r.get("prompt_tokens"), r.get("eval_tokens")],
+                             "secs": r.get("call_latency_s"), "stance": r.get("stance"),
+                             "ex": [[a["action"], e["ok"], e.get("error")] for a, e in zip(r["actions"], r["executed"])],
+                             **({"notice": notice, "comments": comments} if r["screen"] == "post" else {}),
+                             **({"text": r["text"]} if r["screen"] != "post" else {})})
                 if r["screen"] == "open_messages":
                     w.inbox(u, t, mark=True)
                 for a, e in zip(r["actions"], r["executed"]):
                     if e["ok"]:
                         w.do(u, t, a, {**r["ctx"], "topic_of": R.topic_of})
-            screens[f"{part}|{SHORT[m]}|{SHORT[pb]}"] = keep
+            # the scroll each user really got = the computed feed order (checked for every user of every world)
+            f = feeds[SHORT[pb]]
+            for u, got in first.items():
+                k = f["start"][u]
+                author_of = {q["key"]: q["author_id"] for q in posts_out[SHORT[pb]]}
+                want = [x for x in f["ring"][k:] + f["ring"][:k] if author_of[x] != u]
+                assert got == want, f"feed order differs: {part}, {m} reads {pb}, user {u}"
+            checked[f"{part} scrolls in the computed order"] += len(first)
+            # artifacts serve text, not .gz: gzip the world, then base64 it into a .txt the page unpacks (DecompressionStream)
+            name = f"screens/{part}/{SHORT[m]}__{SHORT[pb]}.json.gz.b64.txt"
+            os.makedirs(os.path.join(FILES_DIR, os.path.dirname(name)), exist_ok=True)
+            with open(os.path.join(FILES_DIR, name), "w") as fh:
+                fh.write(base64.b64encode(gzip.compress(json.dumps(keep, separators=(",", ":")).encode())).decode())
+            screens_files[f"{part}|{SHORT[m]}|{SHORT[pb]}"] = {"path": name, "rows": len(keep),
+                                                              "bytes": os.path.getsize(os.path.join(FILES_DIR, name))}
 print("replay check:", dict(checked))
 
-posting = {}
-for m in MODELS:
-    posting[SHORT[m]] = {r["user_id"]: {"raw": r["raw"], "n": sum(a["action"] == "create_post" for a in r["actions"])}
-                         for r in map(json.loads, open(os.path.join(P1, "r101", f"posting_{R.short(m)}.jsonl")))}
+REPORT = json.load(open(os.path.join(REPO, "data/llm_bias/v3_report.json")))  # v3_report_data.py: every posting answer
+posting = REPORT["posting"]  # "V3|gemma" -> 100 users: posts written, actions, raw answer (also V1 r101 and r102)
 post_screen = R.POST_SCREEN.replace("nothing has been posted yet.\n", "nothing has been posted yet.\n" + R.POST_LINES["c"] + "\n")
 PROMPTS = {"system": R.SYSTEM, "read": R.LIVE_READ_SCREEN, "live_menus": {p: L.live_menu(mn) for p, mn in MENUS.items()}, "fmt_two": R.FORMAT_TWO, "fmt": R.FORMAT,
            "post_screen": post_screen.format(subs="\n".join(f"- {s} ({n})" for s, n in R.TOPICS.values()), menu=R.MENU, fmt=R.FORMAT),
@@ -271,7 +292,7 @@ V1 = {f"{m}|{pb}": {"posts read": len(rs), "engagement per 100": round(100 * sum
       for (m, pb), rs in v1.items()}
 
 # the data files of each part
-inventory = []
+inventory, texts = [], {}
 for p, d in zip(PARTS, DIRS):
     for f in sorted(glob.glob(os.path.join(d, "r101", "*")) + glob.glob(os.path.join(d, "clean", "*")) + glob.glob(os.path.join(d, "*.*"))):
         if os.path.isdir(f):
@@ -290,9 +311,19 @@ for p, d in zip(PARTS, DIRS):
                  "worlds.md": "clean: the same as tables", "cleaning.md": "clean: what was removed and why",
                  "night.log": "the runner's log", "summary.md": "v3_big_summary.py's tables",
                  "check_gemma_own.md": "check_gemma_own.py's output (log 14.57)",
-                 "compare_parts.md": "v3_compare_parts.py: part 1 next to part 2", "menu.txt": "part 2's ranked menu"}.get(b, ""))
+                 "compare_parts.md": "v3_compare_parts.py: V3 next to V3a", "menu.txt": "V3a's ranked menu"}.get(b, ""))
         n = sum(1 for _ in open(f, "rb")) if b.endswith((".jsonl", ".csv", ".log", ".md", ".txt")) else None
-        inventory.append({"part": p, "path": rel(f), "bytes": os.path.getsize(f), "lines": n, "what": what})
+        e = {"part": p, "path": rel(f), "bytes": os.path.getsize(f), "lines": n, "what": what}
+        mw = "_d1" not in b and re.match(r"reading_(.+?)__(.+?)\.jsonl$", b)
+        if mw:  # a world file: every screen is in the screen browser
+            e["world"] = f"{p}|{ {R.short(x): SHORT[x] for x in MODELS}[mw[2]]}|{ {R.short(x): SHORT[x] for x in MODELS}[mw[1]]}"
+        elif b.endswith((".log", ".md", ".txt", ".json", ".jsonl", ".csv")):
+            body = open(f).read()
+            if len(body) > 300_000:  # big tables: the first lines here, the whole file in the Excel workbook / the folder
+                head = body.splitlines()[:30]
+                body = "\n".join(head) + f"\n\n... {n - 30:,} more lines (the whole file: {e['path']})"
+            texts[e["path"]] = body
+        inventory.append(e)
 
 # runner steps from the night log
 steps = []
@@ -322,27 +353,27 @@ gone = Counter((m, x["outcome"]) for d in DIRS[1:] for m in MODELS for pb in MOD
                if x["screen"] == "post" and x["outcome"] != "chose")
 
 # ---- numbers used in the page text ----
-tick = {(r["reader"], r["posts_by"], str(r["tick"])): r for r in parts["part 1"]["by_cell_tick"]}
-tiers = {(r["reader"], r["tier"]): r for r in parts["part 1"]["effort_tiers"]}
-eff = {(r["reader"], r["action"]): r for r in parts["part 1"]["action_effort"]}
+tick = {(r["reader"], r["posts_by"], str(r["tick"])): r for r in parts["V3"]["by_cell_tick"]}
+tiers = {(r["reader"], r["tier"]): r for r in parts["V3"]["effort_tiers"]}
+eff = {(r["reader"], r["action"]): r for r in parts["V3"]["action_effort"]}
 allw = {k[:2]: v for k, v in tick.items() if k[2] == "all"}
 act_rows = rows(P1, "actions.csv")
 FACTS = {
     "posts_read": f"{sum(v['posts read'] for v in allw.values()):,}",
     "followups": f"{sum(v['follow-up screens'] for v in allw.values()):,}",
-    "p1_hours": f"{(sum(s['min'] for s in steps if s['part'] == 'part 1')) / 60:.0f}",
+    "p1_hours": f"{(sum(s['min'] for s in steps if s['part'] == 'V3')) / 60:.0f}",
     "v1_posts_gemma": v1posts["gemma"], "v1_posts_llama": v1posts["llama"], "v1_posts_qwen": v1posts["qwen"],
     "v3_posts_gemma": len(posts_out["gemma"]), "v3_posts_llama": len(posts_out["llama"]), "v3_posts_qwen": len(posts_out["qwen"]),
     "dms_llama": f"{eff[('llama', 'send_message')]['done']:,}", "dms_gemma": eff.get(("gemma", "send_message"), {"done": 0})["done"],
     "dms_qwen": eff.get(("qwen", "send_message"), {"done": 0})["done"],
-    "returns": re.search(r"refresh returns merged into the first view \| ([\d,]+)", parts["part 1"]["cleaning"])[1],
+    "returns": re.search(r"refresh returns merged into the first view \| ([\d,]+)", parts["V3"]["cleaning"])[1],
     "replay_checked": " and ".join(f"{n:,} in {p}" for p, n in checked.items()),
 }
 for m in ("gemma", "llama", "qwen"):
     FACTS[f"fu_{m}"] = f"{sum(allw[(m, pb)]['follow-up screens'] for pb in ('gemma', 'llama', 'qwen')):,}"
     for t in (1, 2, 3, 4, 5):
         FACTS[f"tier{t}_{m}"] = tiers[(m, t)]["% of all actions chosen"]
-    FACTS[f"fail_{m}"] = f"{100 * sum(r['chosen'] - r['done'] for r in parts['part 1']['action_effort'] if r['reader'] == m and r['action'] != 'do_nothing') / sum(r['chosen'] for r in parts['part 1']['action_effort'] if r['reader'] == m and r['action'] != 'do_nothing'):.1f}"
+    FACTS[f"fail_{m}"] = f"{100 * sum(r['chosen'] - r['done'] for r in parts['V3']['action_effort'] if r['reader'] == m and r['action'] != 'do_nothing') / sum(r['chosen'] for r in parts['V3']['action_effort'] if r['reader'] == m and r['action'] != 'do_nothing'):.1f}"
     acts = [r for r in act_rows if r["reader"] == m and r["action"] != "do_nothing"]  # exact, from every action
     FACTS[f"n_{m}"] = f"{len(acts):,}"
     FACTS[f"off_post_{m}"] = f"{sum(r['screen'] != 'post' for r in acts):,}"
@@ -353,7 +384,7 @@ for m in ("gemma", "llama", "qwen"):
     FACTS[f"sec_like_{m}"] = lp["median answer seconds (only this action)"] if lp else "-"
     FACTS[f"sec_comment_{m}"] = cc["median answer seconds (only this action)"] if cc else "-"
 for m in ("gemma", "llama", "qwen"):  # part 2 section (a dash when only part 1 is given)
-    for p, tag in (("part 1", "p1"), ("part 2", "p2")):
+    for p, tag in (("V3", "p1"), ("V3a", "p2")):
         for when, wt in (("tick 0", "t0"), ("all ticks", "all")):
             for k, kt in (("upvoted %", "up"), ("downvoted %", "down"), ("commented %", "com")):
                 r = S2.get((p, m, when, "all"))
@@ -363,10 +394,8 @@ for m in ("gemma", "llama", "qwen"):  # part 2 section (a dash when only part 1 
 FACTS["unreadable_post_p2"] = sum(gone.values())
 FACTS["v1_posters_gemma"] = sum(1 for r in v1rows if r["turn"] == "post" and r["model"] == "gemma3:12b" and any(a["action"] == "create_post" for a in r["actions"]))
 
-DATA = {"files": files, "refs": refs, "people": PEOPLE, "posts": posts_out, "screens": screens, "posting": posting,
-        "prompts": PROMPTS, "parts": parts, "v1": V1, "inventory": inventory, "steps": steps, "sample_users": {p: SAMPLE_USERS[p] for p in PARTS},
-        "stance": stance,
-        "compare": open(os.path.join(DIRS[1], "compare_parts.md")).read() if len(DIRS) > 1 else "",
+DATA = {"files": files, "refs": refs, "people": PEOPLE, "posts": posts_out, "screens": screens_files, "posting": posting,
+        "prompts": PROMPTS, "inventory": inventory, "texts": texts, "steps": steps, "feeds": feeds, "checked": dict(checked),
         "status": "Part 2 (the same posts, the menu ranked from part 1's data) is running on the Spark; at Thu 10-29 10:11 "
                   "7 of its 9 cells were done. When it finishes, this page is rebuilt with part 2 next to part 1."
                   if len(DIRS) == 1 else "Both parts are done: part 1 Fri 10-23 to Mon 10-26, part 2 (the same posts, the menu "
@@ -381,5 +410,5 @@ tpl = re.sub(r"\{\{(\w+)\}\}", lambda mm: str(FACTS[mm[1]]), tpl)
 blob = json.dumps(DATA, separators=(",", ":")).replace("</", "<\\/")
 html = tpl.replace("/*__DATA__*/null", blob)
 open(OUT, "w").write(html)
-print(f"wrote {OUT}: {len(html) / 1e6:.2f} MB; {len(files)} files, {sum(len(v) for v in screens.values()):,} screens, "
+print(f"wrote {OUT}: {len(html) / 1e6:.2f} MB; {len(files)} files, {sum(v['rows'] for v in screens_files.values()):,} screens in {len(screens_files)} world files ({sum(v['bytes'] for v in screens_files.values()) / 1e6:.1f} MB as base64 gzip, in {FILES_DIR}), "
       f"{len(inventory)} data files; facts: {json.dumps(FACTS)}")

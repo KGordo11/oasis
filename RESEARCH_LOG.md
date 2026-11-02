@@ -66,7 +66,13 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-11-01): read this first
+## 0.2 Where things stand (2026-11-02): read this first
+
+- **NEW Mon 11-02 (§14.62): two artifacts + the Excel file rebuilt.** Artifact 1 "Inside LLM Bias V3" (KwhpKCngkZUmPxpWV6UEer) = how the
+  sim works step by step + every posting answer + every user's scroll + every screen of all 18 worlds + code, commands,
+  outputs. Artifact 2 NEW "LLM Bias V3 Data" (ExMxGgBF4KW6Svb9L91qYd) = cleaning + V3 vs V3a and V1 vs V3, small to big,
+  % or points. Excel 47 sheets with charts, V3 vs V3a first. **Names: V3 = part 1, V3a = part 2.** Never write "did
+  nothing": name the output (V1 gemma non-posters chose refresh).
 
 - **NEW Sun 11-01: logs are updated after EVERY new result, not only code changes** (Gordon: "you need to regularly be
   updating all logs"). `handoff_check.sh` now also FAILs when §0.2's date is older than the newest log/CLAUDE.md edit, or
@@ -15010,6 +15016,7 @@ Obsolete (kept): `human_pool_v2.py`, `data/llm_bias/v2_sources/human_pool.jsonl`
 - Wed 10-28 (§14.59): speed test suite built + smoke-tested (13 tests, ~17 h); run after ARM 2 DONE.
 - Wed 10-28 (§14.58): speed options listed (16 slots chosen; speculative decoding / unified KV / gemma swa-full to check).
 - Thu 10-29 (§14.60): part 1 cleaned (`v3_clean.py`), workbook + Inside LLM Bias V3 page; tick by tick, easy vs hard actions.
+- **Mon 11-02 (§14.62): artifact 1 (sim explained, every screen) + artifact 2 "LLM Bias V3 Data" (ExMxGgBF4KW6Svb9L91qYd) + Excel rebuilt; V3/V3a names.**
 - **Fri 10-30 (§14.61): part 2 cleaned, checked and compared; menu order moves gemma's and qwen's upvotes a lot; workbook + page hold both parts.**
 - **Fri 10-30 10:06 (§14.56 end): PART 2 DONE (`ARM 2 DONE` 10-29 22:11:56), all rc=0, no restarts.** Next: cron off, rsync, v3_clean.
 - Thu 10-29 10:11 (§14.56 end): part 2 at 7 of 9 cells, no restarts; ETA ARM 2 DONE ~Fri 10-30 02:30 (01:30-04:30).
@@ -15287,6 +15294,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | (this) | 10-29 15:00 | **`v3_clean.py`** (clean/normalize/aggregate a part: reads/followups/posts/actions CSVs, every world x tick, effort levels, retries, gates), **`make_v3_workbook.py`**, **`make_inside_v3.py` + `inside_v3_template.html`** (page; screens rebuilt by world replay, checked vs 13,242 saved screens), `v3_by_tick.py` (§14.60) |
 | (this) | 10-30 12:00 | `make_v3_workbook.py`: sheets 1 No timeline (V1 + tick 0), 2 With timeline, 3 Own-AI bias, P1/P2 per-world tick sheets with every action. `make_inside_v3.py` + template: part 2 in screens (own menu, replay-checked), ticks, effort, V1 table; section "Part 2: the menu order" (stance table, compare output); part 2 menu/posts asserted equal; per-part sample users. `v3_clean.py` gate wording (shown, not read). `check_gemma_own.py` title per part (§14.61) |
 | (this) | 11-01 | **`handoff_check.sh`**: also FAILs if §0.2's date is older than the newest RESEARCH_LOG/CLAUDE.md edit, or CLAUDE.md lacks the newest §14.x (Gordon: update all logs regularly; §14.61) |
+| (this) | 11-02 | **`v3_report_data.py`** (every number once -> v3_report.json), **`make_v3_data_page.py` + `v3_data_template.html`** (artifact 2), **`make_v3_workbook.py` rewritten** (V3 vs V3a first, V1 vs V3, posting, charts), `make_inside_v3.py` + template rebuilt as artifact 1 (walk-through, posting, scroll order checked, every screen in base64 gzip world files) (§14.62) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -17318,3 +17326,40 @@ count per tick. 38 sheets; read back: matches the clean CSVs and the bias table 
 
   (llama x2/x3 do_nothing lists counted once.) In V3 gemma almost never skips a post (V1: 7.6%), llama skips ~4x more
   than in V1, qwen less.
+
+## 14.62 Two artifacts + one Excel file: how the sim works / the data / the workbook (Mon 2026-11-02)
+
+Gordon (11-02): artifact 1 = how the sim works for a 5th grader (step by step with pictures; the posting prompt and every
+user's answer by 0/1/2+ posts; what non-posters answered; how posts reach each user and in what order; the timeline;
+every code file and where it came from; every command and what it gives; every output, clickable); artifact 2 = the
+data (cleaning, normalizing, V3 vs V3a and V1 vs V3, small to big, percentages by default with a switch to points);
+Excel = V3 vs V3a first, then V1 vs V3, separate tabs, charts. **Names from now on: V3 = big sim part 1, V3a = part 2
+(actions reordered).**
+
+**Correction (Gordon): "AIs never do nothing."** In V1's posting turn gemma's non-posters mostly chose **refresh**
+(r101: 62 of 75; r102: 64 of 77), 12 sent an empty list, 1 refresh + search_posts. Never write "did nothing": name the
+output (the actions, `do_nothing`, or an empty list `[]`). The pages and Excel now do.
+
+- **`v3_report_data.py`** -> `data/llm_bias/v3_report.json` (1.7 MB): every number once (runs V3, V3a, their tick 0,
+  V1 r101, V1 r102): world / reader / total / stance / tick / post / user measures, every action (% of posts, per 100),
+  answer kinds (actions / do_nothing only / empty list), own-AI bias with its four parts + 300-draw range, posting
+  answers, cleaning, effort. Self-check vs `clean/by_cell_tick.csv`.
+- **Artifact 1 = "Inside LLM Bias V3"** (same URL KwhpKCngkZUmPxpWV6UEer, v4): 01 the sim in 10 steps with pictures;
+  02 posting (exact two messages, every answer of all 3 AIs in V3, V1 r101, V1 r102, grouped 0/1/2/3+, non-poster
+  answers); 03 every user's scroll order (ring shuffled with a fixed seed per pile, start = id x posts / 100, skip own
+  post) **checked against the data: 900 user-worlds per run, 0 differences**; 04 the reading screen piece by piece;
+  05 the timeline + "life of a post"; 06 V3 vs V3a menus; 07 V1 -> V3; 08 EVERY screen of every user in all 18 worlds
+  (251,861 screens; opened-post screens rebuilt word for word: V3 13,242, V3a 7,417); 09 code; 10 Spark; 11 commands
+  with what each gives; 12 every output file (small ones readable inline). World files: 18 gzip+base64 .txt files
+  (98 MB; artifacts don't serve .gz), published in 2 batches (V3, V3a) under `screens/`; the page unpacks them.
+- **Artifact 2 = "LLM Bias V3 Data"** NEW https://claude.ai/artifact/ExMxGgBF4KW6Svb9L91qYd (`make_v3_data_page.py` +
+  `v3_data_template.html`): compare V3 vs V3a / V3 vs V3a no timeline / V1 vs V3 / V1 vs V3 no timeline; show
+  percentages or points. Sections: how to read, cleaning, each action, answer kinds, posting, by feeling, timeline
+  chart, each post, each user, each world, each AI + total, own-AI favouritism (four % + gaps + worked example), easy vs hard.
+- **Excel** `~/Desktop/LLM_Bias/V3_big/LLM_Bias_V3_big.xlsx` (47 sheets, `make_v3_workbook.py` rewritten): Read me;
+  V3 vs V3a (Summary, Actions, Worlds, By feeling, Timeline, No timeline, No-timeline actions, Own-AI favour, Posts,
+  Users, Easy vs hard); V1 vs V3 (Summary, Actions, Worlds, By feeling, No timeline, Own-AI favour, V1 posts); Posting
+  (posts per user, no-post answers, communities, every answer); Cleaning V3/V3a; 18 tick sheets; every read / extra
+  screen. 20 matplotlib charts next to the tables (run colors: V3 violet, V3a amber, V1 grey).
+- Browser-checked: both pages load, all controls, no console errors, no sideways scroll at 400 px; artifact 1 loads
+  world files after the base64 change; a stale-load race (two quick clicks) fixed. Smoke ALL PASS (61).

@@ -1,0 +1,448 @@
+<meta charset="utf-8">
+<title>LLM Bias V3 Data</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/*__CSS__*/
+/* Data page additions. Run A = violet, run B = amber (validated pair); AI colors as on the Inside pages. */
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+:root{--runA:#6250d6;--runB:#eda100;--up:#1f7a4d;--down:#b3364a}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--runA:#9085e9;--runB:#c98500;--up:#5cc58f;--down:#ef7d90}}
+:root[data-theme="dark"]{--runA:#9085e9;--runB:#c98500;--up:#5cc58f;--down:#ef7d90}
+.ctlbar{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:center;padding:8px 0 4px;border-top:1px solid var(--rule);margin-top:6px}
+.ctlbar .lab{font:500 11px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.cmp{font-size:13.5px;color:var(--muted)}
+.cmp b.a{color:var(--ink)}.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+.sw.a{background:var(--runA)}.sw.b{background:var(--runB)}
+td.v{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;min-width:74px}
+.bar{display:block;height:4px;border-radius:2px;margin-top:3px;max-width:100%}
+.bar.a{background:var(--runA)}.bar.b{background:var(--runB)}
+.pts.pos{color:var(--up)}.pts.neg{color:var(--down)}.pts{font-weight:600}
+th.grp{text-align:center;border-bottom:2px solid var(--rule)}
+.md h1,.md h2{font:600 17px var(--body);margin:18px 0 8px}.md p{font-size:14px}
+.chart{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:10px 12px;overflow-x:auto}
+.chart svg{display:block;width:100%;min-width:560px;height:auto}
+.chart text{fill:var(--muted);font:11px var(--mono)}
+.chart .grid{stroke:var(--rule);stroke-width:1}
+.chart .hit{fill:transparent}.chart .hit:hover{fill:var(--soft);opacity:.6}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;margin:6px 0 0}
+.legend span{display:inline-flex;align-items:center;gap:6px}.legend i{display:inline-block;width:18px;height:3px;border-radius:2px}
+.legend i.dash{background:repeating-linear-gradient(90deg,var(--muted) 0 4px,transparent 4px 7px)}
+.ladder{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13.5px;margin:10px 0}
+.ladder span{background:var(--panel);border:1px solid var(--rule);border-radius:999px;padding:4px 10px}
+.ladder i{color:var(--muted);font-style:normal}
+.ex{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--runA);border-radius:8px;padding:12px 14px;max-width:80ch}
+select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--panel);color:var(--ink);max-width:100%}
+.tbig{max-height:560px;overflow:auto}
+.clear{font:600 11px var(--mono);padding:1px 6px;border-radius:4px;background:var(--soft)}
+</style>
+<nav class="bar" aria-label="Sections"><div class="wrap">
+  <b>LLM Bias V3 Data</b>
+  <a href="#read">How to read</a><a href="#clean">Cleaning</a><a href="#actions">Each action</a><a href="#kinds">Answers</a>
+  <a href="#posting">Posting</a><a href="#stance">By feeling</a><a href="#ticks">Timeline</a><a href="#posts">Each post</a>
+  <a href="#users">Each user</a><a href="#worlds">Each world</a><a href="#ais">Each AI</a><a href="#bias">Own-AI favouritism</a><a href="#effort">Easy vs hard</a>
+  <div class="ctlbar">
+    <span class="lab">Compare</span><div class="seg" id="c_mode"></div>
+    <span class="lab">Show</span><div class="seg" id="c_show"></div>
+    <span class="cmp" id="c_txt"></span>
+  </div>
+</div></nav>
+<main class="wrap">
+<header class="hero">
+  <div class="eyebrow">OASIS research · LLM Bias V3 big sim · the numbers</div>
+  <h1>LLM Bias V3 Data</h1>
+  <p class="lede" style="margin-top:14px">Every number from the V3 big sim, starting from single actions and single posts and building up
+  to totals. The main comparison is <b>V3 vs V3a</b>: the same posts and users, with the action list in a new order. You can
+  also compare <b>V1 with V3</b>: V1 used V1's order too, so it is compared with V3 (not V3a). Each comparison can include
+  the timeline (the whole scroll, comments piling up) or leave it out (tick 0: each user's first post, before anyone
+  commented, like V1).</p>
+  <p class="lede">How the sim works, every screen and every answer: <a href="https://claude.ai/artifact/KwhpKCngkZUmPxpWV6UEer">Inside LLM Bias V3</a>.</p>
+  <div class="facts" id="facts"></div>
+</header>
+
+<section id="read">
+  <div class="eyebrow">00 · How to read the numbers</div>
+  <h2>Percentages first, differences when you ask</h2>
+  <ul>
+    <li><b>% of posts read</b>: out of every post a user read, how often the AI did this. "Upvoted 60%" means 60 of every 100
+    posts read got an upvote. A post read is one user reading one post.</li>
+    <li><b>Actions per 100 posts read</b> (total engagement, the main measure): count every action except do_nothing, divide
+    by posts read, times 100. It can be above 100, because one answer can hold several actions.</li>
+    <li><b>Points</b>: switch "Show" to <b>Difference</b> and each pair of percentages becomes one number: the second run minus
+    the first, in points. 60% → 50% is <b>−10 points</b>; 20% → 26% is <b>+6 points</b>. This is what "+2" or "−4" meant in
+    earlier tables.</li>
+    <li><b>The own-AI favouritism number</b> (section 11) is built from four percentages; that section shows all four and
+    how they are combined.</li>
+  </ul>
+  <div class="ex" id="r_ex"></div>
+</section>
+
+<section id="clean">
+  <div class="eyebrow">01 · From raw files to clean data</div>
+  <h2>Clean, normalize, aggregate: done the same way for every run</h2>
+  <ol class="steps">
+    <li><h4>Clean</h4><p>Kept out of the main tables, and counted: the noise-floor rereads, answers that were still unusable after
+      3 tries, and extra screens (profiles, searches, inbox), which have their own measure. A post that came back after a refresh
+      counts as one post read, at the tick of its first look. Every action is marked "worked" or "failed", with why.</p></li>
+    <li><h4>Normalize</h4><p>Divide by posts read, because the piles are different sizes (gemma 99, llama 119, qwen 102 posts,
+      each read by 98-99 users).</p></li>
+    <li><h4>Aggregate, small to big</h4><p>Below, in this order:</p>
+      <div class="ladder"><span>one action</span><i>→</i><span>kind of answer</span><i>→</i><span>by feeling</span><i>→</i><span>each tick</span><i>→</i><span>each post</span><i>→</i><span>each user</span><i>→</i><span>each world</span><i>→</i><span>each AI</span><i>→</i><span>everything</span></div></li>
+    <li><h4>Check</h4><p>Every V3 and V3a number was counted a second time straight from the raw files: 62,633 numbers, 0
+      differences. This page's world numbers are checked against the cleaned files when it is built.</p></li>
+  </ol>
+  <h3>Posts read in each run</h3>
+  <div class="tablewrap"><table id="cl_runs"></table></div>
+  <h3>The cleaning reports, word for word</h3>
+  <div class="xrow" style="margin:6px 0"><span class="lab">Run</span><div class="seg" id="cl_run"></div></div>
+  <div class="md" id="cl_md"></div>
+</section>
+
+<section id="actions">
+  <div class="eyebrow">02 · One action at a time</div>
+  <h2>How often each AI chose each action</h2>
+  <p>% of posts read where the AI chose the action at least once. Pick whose posts to look at (all three piles together, or
+  one pile = one world per reader).</p>
+  <div class="xrow" style="margin:6px 0"><span class="lab">Whose posts</span><div class="seg" id="a_pb"></div></div>
+  <div class="tablewrap tbig"><table id="a_table"></table></div>
+</section>
+
+<section id="kinds">
+  <div class="eyebrow">03 · What kind of answer</div>
+  <h2>Every answer is a list of actions. What was in it?</h2>
+  <p>Each answer falls into one of three kinds: at least one real action; the menu action <code>do_nothing</code> and nothing
+  else; or an empty list <code>[]</code> with only the AI's reason (for example <i>"Electric cars? Ugh. I'm out."</i>). Same
+  "whose posts" choice as section 02.</p>
+  <div class="tablewrap"><table id="k_table"></table></div>
+</section>
+
+<section id="posting">
+  <div class="eyebrow">04 · The posting turn</div>
+  <h2>How many posts each AI's users wrote</h2>
+  <p>V3a has no posting turn: it reads V3's posts. So the posting turn compares V1 (rounds 101 and 102) with V3. Every answer is
+  readable on the Inside page.</p>
+  <div class="tablewrap"><table id="po_table"></table></div>
+  <h3>What users who wrote no post chose</h3>
+  <div class="tablewrap"><table id="po_none"></table></div>
+  <h3>Which community the posts went to</h3>
+  <div class="tablewrap"><table id="po_topics"></table></div>
+</section>
+
+<section id="stance">
+  <div class="eyebrow">05 · By how the user feels about the topic</div>
+  <h2>Users who love a topic vs users who hate it</h2>
+  <div class="xctl">
+    <div class="xrow"><span class="lab">Reader AI</span><div class="seg" id="st_ai"></div></div>
+  </div>
+  <div class="tablewrap"><table id="st_table"></table></div>
+</section>
+
+<section id="ticks">
+  <div class="eyebrow">06 · The timeline, tick by tick</div>
+  <h2>How each world changes as comments pile up</h2>
+  <p>Only V3 and V3a have ticks, so this chart always shows both, with V1 as a dashed line (one number, no ticks). Ticks with
+  fewer than 50 posts read (the last few, from refresh returns) are left off. Point at the chart for the values.</p>
+  <div class="xctl">
+    <div class="xrow"><span class="lab">Reader AI</span><div class="seg" id="t_ai"></div></div>
+    <div class="xrow"><span class="lab">Whose posts</span><div class="seg" id="t_pb"></div></div>
+    <div class="xrow"><span class="lab">Measure</span><div class="seg" id="t_m"></div></div>
+  </div>
+  <div class="chart"><svg id="t_svg" viewBox="0 0 900 320" role="img" aria-label="Measure by tick"></svg><div class="legend" id="t_leg"></div></div>
+  <p class="muted" id="t_note" style="font-size:13px;margin-top:6px"></p>
+</section>
+
+<section id="posts">
+  <div class="eyebrow">07 · Each post</div>
+  <h2>What each reader AI did with each post</h2>
+  <p id="p_note"></p>
+  <div class="xctl">
+    <div class="xrow"><span class="lab">Pile</span><div class="seg" id="p_pb"></div></div>
+    <div class="xrow"><span class="lab">Measure</span><div class="seg" id="p_m"></div></div>
+    <div class="xrow" id="p_runrow"><span class="lab">Posts of</span><div class="seg" id="p_run"></div></div>
+    <div class="xrow"><span class="lab">Find</span><input class="pick" id="p_find" placeholder="words in the title" aria-label="Find a post"></div>
+  </div>
+  <div class="tablewrap tbig"><table id="p_table"></table></div>
+</section>
+
+<section id="users">
+  <div class="eyebrow">08 · Each user</div>
+  <h2>Each of the 100 users, as played by each AI</h2>
+  <p>All three piles together for each reader AI. The same person is played by three different AIs.</p>
+  <div class="xrow" style="margin:6px 0"><span class="lab">Measure</span><div class="seg" id="u_m"></div></div>
+  <div class="tablewrap tbig"><table id="u_table"></table></div>
+</section>
+
+<section id="worlds">
+  <div class="eyebrow">09 · Each world</div>
+  <h2>The 9 worlds</h2>
+  <p>A world is one reader AI reading one AI's pile. The diagonal (an AI reading its own AI's posts) is shaded.</p>
+  <div class="tablewrap"><table id="w_table"></table></div>
+</section>
+
+<section id="ais">
+  <div class="eyebrow">10 · Each AI, and everything together</div>
+  <h2>The biggest picture</h2>
+  <div class="tablewrap"><table id="ai_table"></table></div>
+</section>
+
+<section id="bias">
+  <div class="eyebrow">11 · Own-AI favouritism</div>
+  <h2>Does an AI give its own AI's posts more?</h2>
+  <p>For two AIs, say gemma and llama, four percentages:</p>
+  <ol>
+    <li>gemma on gemma's posts, and llama on gemma's posts. The gap = how much more gemma gives gemma's posts than llama does.</li>
+    <li>gemma on llama's posts, and llama on llama's posts. The gap = how much more gemma gives llama's posts than llama does.
+    This is just how much more gemma upvotes everything.</li>
+    <li><b>Favouritism = gap 1 − gap 2.</b> Above 0: both AIs lean toward their own AI's posts. Below 0: they lean toward
+    the other's. The range is where it lands 95% of the time when posts and users are resampled; <span class="clear">CLEAR</span>
+    = the range does not include 0.</li>
+  </ol>
+  <div class="xrow" style="margin:6px 0"><span class="lab">Measure</span><div class="seg" id="b_m"></div></div>
+  <div class="tablewrap"><table id="b_table"></table></div>
+  <div class="ex" id="b_ex" style="margin-top:14px"></div>
+</section>
+
+<section id="effort">
+  <div class="eyebrow">12 · Easy vs hard actions</div>
+  <h2>Do the AIs pick the easy actions?</h2>
+  <p>Each action gets a level from what it asks of the AI: 1 one click (upvote), 2 copy an ID from the screen (like a comment),
+  3 write text (comment), 4 write a whole post, 5 go to another screen first and then write (a private message). Share of each
+  AI's actions at each level, all screens, do_nothing left out. Only V3 and V3a have extra screens, so V1 is not in this table.</p>
+  <div class="tablewrap"><table id="e_table"></table></div>
+</section>
+</main>
+
+<script>
+const D = /*__DATA__*/null;
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const AIS = ["gemma", "llama", "qwen"], DOT = {gemma: "g", llama: "l", qwen: "q"};
+const dot = m => `<span class="dot ${DOT[m]}"></span>${m}`;
+const seg = (id, opts, cur) => { $(id).innerHTML = opts.map(([k, t]) => `<button type="button" data-k="${esc(k)}" aria-pressed="${String(k) === String(cur)}">${esc(t)}</button>`).join(""); };
+const onSeg = (id, f) => $(id).addEventListener("click", e => { const b = e.target.closest("button"); if (b) f(b.dataset.k); });
+const MODES = [["V3|V3a", "V3 vs V3a", "V3", "V3a"], ["V3 tick 0|V3a tick 0", "V3 vs V3a, no timeline", "V3 tick 0", "V3a tick 0"],
+               ["V1|V3", "V1 vs V3", "V1", "V3"], ["V1|V3 tick 0", "V1 vs V3, no timeline", "V1", "V3 tick 0"]];
+const NAME = {"V3": "V3", "V3a": "V3a (actions reordered)", "V3 tick 0": "V3, tick 0", "V3a tick 0": "V3a, tick 0", "V1": "V1 (round 101)", "V1 r102": "V1 round 102"};
+const G = {mode: "V3|V3a", show: "pct", pb: "all"};
+const A = () => MODES.find(m => m[0] === G.mode)[2], B = () => MODES.find(m => m[0] === G.mode)[3];
+const num = v => v == null ? "–" : (+v).toLocaleString("en-US", {maximumFractionDigits: 1, minimumFractionDigits: 1});
+// a pair of values for runs A and B: two cells (with bars) or one cell of points
+function pair(a, b, unit = "%", max = 100){
+  if (G.show === "diff"){
+    if (a == null || b == null) return `<td class="v">–</td>`;
+    const d = b - a, s = d > 0.05 ? "pos" : d < -0.05 ? "neg" : "";
+    return `<td class="v"><span class="pts ${s}">${d > 0 ? "+" : d < 0 ? "−" : "±"}${Math.abs(d).toFixed(1)}</span> <span class="muted">${unit === "%" ? "pts" : ""}</span></td>`;
+  }
+  const c = (v, k) => `<td class="v">${v == null ? "–" : num(v) + (unit === "%" ? "%" : "")}${v == null ? "" : `<span class="bar ${k}" style="width:${Math.min(100, 100 * v / max)}%"></span>`}</td>`;
+  return c(a, "a") + c(b, "b");
+}
+const runsHead = (label) => G.show === "diff" ? `<th class="num">${label}<br><span class="muted" style="font-weight:400">points</span></th>` : `<th class="num" colspan="2">${label}</th>`;
+const subHead = n => G.show === "diff" ? "" : `<tr><th></th>${Array(n).fill(`<th class="num"><span class="sw a"></span>${esc(A())}</th><th class="num"><span class="sw b"></span>${esc(B())}</th>`).join("")}</tr>`;
+
+const draws = [];
+function redraw(){ seg("#c_mode", MODES.map(m => [m[0], m[1]]), G.mode); seg("#c_show", [["pct", "Percentages"], ["diff", "Difference (points)"]], G.show);
+  $("#c_txt").innerHTML = `<span class="sw a"></span><b>${esc(NAME[A()])}</b> → <span class="sw b"></span><b>${esc(NAME[B()])}</b>`;
+  draws.forEach(f => f()); }
+onSeg("#c_mode", k => { G.mode = k; redraw(); }); onSeg("#c_show", k => { G.show = k; redraw(); });
+
+/* facts + how to read */
+draws.push(() => {
+  const t = r => D.total[r];
+  $("#facts").innerHTML = [A(), B()].map(r => `<div><b>${t(r)["posts read"].toLocaleString()}</b><span>posts read in ${esc(NAME[r])}</span></div>`).join("")
+    + [A(), B()].map(r => `<div><b>${num(t(r)["actions per 100"])}</b><span>actions per 100 posts read, ${esc(NAME[r])}</span></div>`).join("")
+    + [A(), B()].map(r => `<div><b>${num(t(r)["% upvoted"])}%</b><span>of posts upvoted, ${esc(NAME[r])}</span></div>`).join("");
+  const g = r => D.reader[`${r}|gemma`]["% upvoted"], d = g(B()) - g(A());
+  $("#r_ex").innerHTML = `<b>Example, from the current comparison:</b> gemma upvoted <b>${num(g(A()))}%</b> of the posts it read in ${esc(NAME[A()])} and <b>${num(g(B()))}%</b> in ${esc(NAME[B()])}. As a difference: ${d >= 0 ? "+" : "−"}${Math.abs(d).toFixed(1)} points.`;
+});
+
+/* 01 cleaning */
+{
+  let run = "V3";
+  const mdHtml = md => { let out = "", tbl = null;
+    for (const line of md.split("\n")){
+      if (line.startsWith("|")){ if (/^\|-/.test(line)) continue; const cells = line.slice(1, -1).split("|").map(c => c.trim());
+        if (!tbl) tbl = `<div class="tablewrap" style="margin-bottom:12px"><table><tr>${cells.map(c => `<th>${esc(c)}</th>`).join("")}</tr>`;
+        else tbl += `<tr>${cells.map(c => `<td${/^[\d,.\-]+$/.test(c) ? ' class="num"' : ""}>${esc(c)}</td>`).join("")}</tr>`; continue; }
+      if (tbl){ out += tbl + "</table></div>"; tbl = null; }
+      if (line.startsWith("#")) out += `<h2>${esc(line.replace(/^#+\s*/, ""))}</h2>`; else if (line.trim()) out += `<p>${esc(line)}</p>`; }
+    return out + (tbl ? tbl + "</table></div>" : ""); };
+  const draw = () => { seg("#cl_run", [["V3", "V3"], ["V3a", "V3a"]], run); $("#cl_md").innerHTML = mdHtml(D.cleaning[run]); };
+  onSeg("#cl_run", k => { run = k; draw(); }); draw();
+  $("#cl_runs").innerHTML = `<tr><th>Run</th><th class="num">Posts read</th><th>Where from</th></tr>` + [["V1", "data/llm_bias/v1_v2_spark/r101: readable answers, noise floor left out (V1 has no extra screens)"],
+    ["V1 r102", "the same, round 102 (different posts)"], ["V3", "data/llm_bias/v3/clean/reads.csv"], ["V3 tick 0", "V3's tick 0 only: 100 per world"],
+    ["V3a", "data/llm_bias/v3_flipped/clean/reads.csv"], ["V3a tick 0", "V3a's tick 0 only"]].map(([r, w]) => `<tr><td>${esc(NAME[r])}</td><td class="num">${D.total[r]["posts read"].toLocaleString()}</td><td class="mono" style="font-size:12.5px">${esc(w)}</td></tr>`).join("");
+}
+
+/* 02 actions + 03 kinds (share the "whose posts" choice) */
+const src = (run, ai) => G.pb === "all" ? D.reader[`${run}|${ai}`] : D.world[`${run}|${ai}|${G.pb}`];
+draws.push(() => {
+  seg("#a_pb", [["all", "all three piles"], ...AIS.map(m => [m, m + "'s posts"])], G.pb);
+  const acts = D.actions.filter(a => AIS.some(ai => [A(), B()].some(r => (src(r, ai)?.actions[a]?.["% of posts"] || 0) > 0)))
+    .sort((x, y) => AIS.reduce((s, ai) => s + (src(A(), ai).actions[y]["% of posts"] - src(A(), ai).actions[x]["% of posts"]), 0));
+  $("#a_table").innerHTML = `<tr><th>Action</th>${AIS.map(ai => runsHead(dot(ai) + " reading")).join("")}</tr>` + subHead(3)
+    + acts.map(a => `<tr><td><code>${esc(a)}</code></td>${AIS.map(ai => pair(src(A(), ai).actions[a]["% of posts"], src(B(), ai).actions[a]["% of posts"])).join("")}</tr>`).join("")
+    + `<tr><td class="muted" colspan="7" style="font-size:12.5px">% of posts read where the action was chosen at least once. Times per 100 posts read are in the Excel file.</td></tr>`;
+  seg("#a_pb", [["all", "all three piles"], ...AIS.map(m => [m, m + "'s posts"])], G.pb);
+  const K = [["% engaged", "at least one real action"], ["% chose do_nothing", "chose do_nothing only"], ["% empty answer", "empty list [] only"],
+             ["% upvoted", "upvoted the post"], ["% downvoted", "downvoted the post"], ["% commented", "commented"], ["actions per 100", "actions per 100 posts read (total engagement)"]];
+  $("#k_table").innerHTML = `<tr><th>Answer held…</th>${AIS.map(ai => runsHead(dot(ai) + " reading")).join("")}</tr>` + subHead(3)
+    + K.map(([k, t]) => `<tr><td>${esc(t)}</td>${AIS.map(ai => pair(src(A(), ai)[k], src(B(), ai)[k], k.startsWith("%") ? "%" : "", k.startsWith("%") ? 100 : 400)).join("")}</tr>`).join("");
+});
+onSeg("#a_pb", k => { G.pb = k; redraw(); });
+
+/* 04 posting */
+{
+  const R = [["V1", "V1 round 101"], ["V1 r102", "V1 round 102"], ["V3", "V3 (and V3a)"]];
+  const grp = n => n >= 3 ? "3+" : String(n);
+  let h = `<tr><th>AI</th><th>Run</th><th class="num">0 posts</th><th class="num">1</th><th class="num">2</th><th class="num">3+</th><th class="num">No usable answer</th><th class="num">Posts</th><th class="num">Average length (characters)</th></tr>`;
+  const none = {}, topics = {};
+  for (const ai of AIS) for (const [r, rn] of R){
+    const us = D.posting[`${r}|${ai}`], c = {};
+    us.forEach(u => { const k = u.outcome !== "chose" ? "x" : grp(u.posts); c[k] = (c[k] || 0) + 1;
+      if (u.posts === 0) { const a = u.outcome !== "chose" ? "no usable answer" : (u.acts.length ? [...new Set(u.acts)].join(" + ") : "empty list []"); none[`${ai}|${rn}|${a}`] = (none[`${ai}|${rn}|${a}`] || 0) + 1; }
+      u.topics.forEach(t => { topics[`${ai}|${rn}|${t}`] = (topics[`${ai}|${rn}|${t}`] || 0) + 1; }); });
+    const ch = us.flatMap(u => u.chars), posts = us.reduce((s, u) => s + u.posts, 0);
+    h += `<tr><td>${dot(ai)}</td><td>${rn}</td>${["0", "1", "2", "3+", "x"].map(k => `<td class="num">${c[k] || 0}%</td>`).join("")}<td class="num">${posts}</td><td class="num">${ch.length ? Math.round(ch.reduce((a, b) => a + b, 0) / ch.length) : "–"}</td></tr>`;
+  }
+  $("#po_table").innerHTML = h + `<tr><td colspan="9" class="muted" style="font-size:12.5px">Each AI plays 100 users, so a count of users is also the % of users.</td></tr>`;
+  $("#po_none").innerHTML = `<tr><th>AI</th><th>Run</th><th>Their answer (actions)</th><th class="num">Users</th></tr>` +
+    Object.entries(none).sort().map(([k, v]) => { const [ai, rn, a] = k.split("|"); return `<tr><td>${dot(ai)}</td><td>${rn}</td><td><code>${esc(a)}</code></td><td class="num">${v}</td></tr>`; }).join("");
+  const subs = [...new Set(Object.keys(topics).map(k => k.split("|")[2]))].sort();
+  $("#po_topics").innerHTML = `<tr><th>AI</th><th>Run</th>${subs.map(s => `<th class="num">${esc(s)}</th>`).join("")}</tr>` +
+    AIS.flatMap(ai => R.map(([r, rn]) => `<tr><td>${dot(ai)}</td><td>${rn}</td>${subs.map(s => `<td class="num">${topics[`${ai}|${rn}|${s}`] || ""}</td>`).join("")}</tr>`)).join("");
+}
+
+/* 05 stance */
+{
+  let ai = "gemma";
+  draws.push(() => {
+    seg("#st_ai", AIS.map(m => [m, m + " reading"]), ai);
+    const K = [["% engaged", "engaged"], ["% upvoted", "upvoted"], ["% downvoted", "downvoted"], ["% commented", "commented"]];
+    $("#st_table").innerHTML = `<tr><th>User feels</th><th class="num">Posts read<br><span class="muted" style="font-weight:400">${esc(A())} / ${esc(B())}</span></th>${K.map(([_, t]) => runsHead(t)).join("")}</tr>` + subHead(4).replace("<tr><th></th>", "<tr><th></th><th></th>")
+      + ["LOVE", "LIKE", "NEUTRAL", "DISLIKE", "HATE"].map(s => { const a = D.stance[`${A()}|${ai}|${s}`], b = D.stance[`${B()}|${ai}|${s}`];
+        return `<tr><td>${s}</td><td class="num">${a ? a["posts read"].toLocaleString() : "–"} / ${b ? b["posts read"].toLocaleString() : "–"}</td>${K.map(([k]) => pair(a?.[k], b?.[k])).join("")}</tr>`; }).join("");
+  });
+  onSeg("#st_ai", k => { ai = k; redraw(); });
+}
+
+/* 06 timeline */
+{
+  const st = {ai: "gemma", pb: "gemma", m: "% upvoted"};
+  const M = [["% upvoted", "% upvoted"], ["% commented", "% commented"], ["% engaged", "% engaged"], ["actions per 100", "actions per 100"],
+             ["% like_comment", "% liked a comment"], ["% dislike_post", "% downvoted"], ["comments seen per post", "comments on screen"]];
+  const COL = {V3: "var(--runA)", V3a: "var(--runB)"};
+  const draw = () => {
+    seg("#t_ai", AIS.map(m => [m, m + " reading"]), st.ai); seg("#t_pb", AIS.map(m => [m, m + "'s posts"]), st.pb); seg("#t_m", M, st.m);
+    const series = ["V3", "V3a"].map(r => { const pts = [];
+      for (let t = 0; t < 140; t++){ const x = D.tick[`${r}|${st.ai}|${st.pb}|${t}`]; if (x && x["posts read"] >= 50) pts.push([t, x[st.m], x["posts read"]]); }
+      return [r, pts]; });
+    const v1 = D.world[`V1|${st.ai}|${st.pb}`], v1v = st.m === "% dislike_post" ? v1.actions.dislike_post["% of posts"] : st.m === "% like_comment" ? v1.actions.like_comment["% of posts"] : v1[st.m];
+    const ys = series.flatMap(([_, s]) => s.map(p => p[1])).concat(v1v ?? []), x1 = Math.max(...series.flatMap(([_, s]) => s.map(p => p[0])));
+    const W = 900, H = 320, L = 56, Rr = 16, T = 14, Bm = 34, y1n = Math.max(...ys, 1);
+    const step = [1, 2, 5, 10, 20, 25, 50, 100, 200].find(s => y1n / s <= 6) || 500, y1 = Math.ceil(y1n / step) * step;
+    const X = x => L + (W - L - Rr) * x / x1, Y = y => T + (H - T - Bm) * (1 - y / y1);
+    let g = "";
+    for (let y = 0; y <= y1 + 1e-9; y += step) g += `<line class="grid" x1="${L}" x2="${W - Rr}" y1="${Y(y)}" y2="${Y(y)}"/><text x="${L - 8}" y="${Y(y) + 4}" text-anchor="end">${+y.toFixed(1)}</text>`;
+    for (let x = 0; x <= x1; x += 10) g += `<text x="${X(x)}" y="${H - 12}" text-anchor="middle">${x}</text>`;
+    g += `<text x="${W - Rr}" y="${H - 1}" text-anchor="end">tick</text>`;
+    if (v1v != null) g += `<line x1="${L}" x2="${W - Rr}" y1="${Y(v1v)}" y2="${Y(v1v)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+    for (const [r, s] of series) g += `<polyline fill="none" stroke="${COL[r]}" stroke-width="2" points="${s.map(([x, y]) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`).join(" ")}"/>`;
+    const byT = {}; series.forEach(([r, s]) => s.forEach(([t, v, n]) => { (byT[t] = byT[t] || {})[r] = [v, n]; }));
+    const w = (W - L - Rr) / x1;
+    g += Object.entries(byT).map(([t, o]) => `<rect class="hit" x="${X(+t) - w / 2}" y="${T}" width="${w}" height="${H - T - Bm}"><title>tick ${t}\n${Object.entries(o).map(([r, [v, n]]) => `${r}: ${num(v)} (${n} posts read)`).join("\n")}${v1v != null ? `\nV1: ${num(v1v)}` : ""}</title></rect>`).join("");
+    $("#t_svg").innerHTML = g;
+    $("#t_leg").innerHTML = `<span><i style="background:var(--runA)"></i>V3</span><span><i style="background:var(--runB)"></i>V3a (actions reordered)</span>${v1v != null ? `<span><i class="dash"></i>V1 round 101 (no ticks)</span>` : ""}`;
+    $("#t_note").textContent = `${st.ai} reading ${st.pb}'s posts. Tick 0 = each user's first post. Every tick has 98-100 posts read until the last few.`;
+  };
+  onSeg("#t_ai", k => { st.ai = k; draw(); }); onSeg("#t_pb", k => { st.pb = k; draw(); }); onSeg("#t_m", k => { st.m = k; draw(); });
+  draws.push(draw);
+}
+
+/* 07 posts */
+{
+  const st = {pb: "gemma", m: 1, run: null, find: ""};
+  const M = [[1, "% upvoted"], [2, "% downvoted"], [3, "% commented"], [4, "actions per 100"]];
+  const fam = r => r.startsWith("V1") ? "V1" : "V3";
+  draws.push(() => {
+    const same = fam(A()) === fam(B());
+    if (!same && ![A(), B()].includes(st.run)) st.run = B();
+    $("#p_runrow").hidden = same;
+    seg("#p_pb", AIS.map(m => [m, m + "'s pile"]), st.pb); seg("#p_m", M, st.m); if (!same) seg("#p_run", [[A(), NAME[A()]], [B(), NAME[B()]]], st.run);
+    const runs = same ? [A(), B()] : [st.run];
+    const pr = fam(runs[0]) === "V1" ? "V1" : "V3";
+    const keys = Object.keys(D.post_info).filter(k => k.startsWith(pr + "|") && D.post_info[k].ai === st.pb).map(k => k.slice(pr.length + 1));
+    $("#p_note").textContent = same ? "Both runs read the same posts, so each post shows both runs." : "V1 and V3 had different posts (V1's were written without the 'posting time' line), so pick which run's posts to show.";
+    const f = st.find.toLowerCase(), m = st.m, isPct = m < 4;
+    const rows = keys.filter(k => !f || D.post_info[`${pr}|${k}`].title.toLowerCase().includes(f));
+    const val = (r, k, ai) => (D.posts[`${r}|${k}|${ai}`] || [])[m];
+    $("#p_table").innerHTML = `<tr><th>Post</th><th>Written by</th><th class="num">Characters</th>${AIS.map(ai => same ? runsHead(dot(ai) + " reading") : `<th class="num">${dot(ai)} reading</th>`).join("")}</tr>` + (same ? subHead(3).replace("<tr><th></th>", "<tr><th></th><th></th><th></th>") : "")
+      + rows.map(k => { const p = D.post_info[`${pr}|${k}`];
+        return `<tr><td>${esc(p.title.slice(0, 90))}</td><td>user ${p.user}</td><td class="num">${p.chars}</td>${AIS.map(ai => same ? pair(val(A(), k, ai), val(B(), k, ai), isPct ? "%" : "", isPct ? 100 : 400)
+          : `<td class="v">${val(st.run, k, ai) == null ? "–" : num(val(st.run, k, ai)) + (isPct ? "%" : "")}</td>`).join("")}</tr>`; }).join("")
+      + `<tr><td colspan="9" class="muted" style="font-size:12.5px">${rows.length} posts. Each post is read by 98-99 users in each reader world${A().includes("tick 0") ? "; in a 'no timeline' run each post is the first post for only about one user, so these single-post numbers are 0% or 100%" : ""}.</td></tr>`;
+  });
+  onSeg("#p_pb", k => { st.pb = k; redraw(); }); onSeg("#p_m", k => { st.m = +k; redraw(); }); onSeg("#p_run", k => { st.run = k; redraw(); });
+  $("#p_find").addEventListener("input", e => { st.find = e.target.value; redraw(); });
+}
+
+/* 08 users */
+{
+  let m = 1;
+  const M = [[1, "actions per 100"], [2, "% upvoted"], [3, "% commented"]];
+  draws.push(() => {
+    seg("#u_m", M, m);
+    const users = [...Array(100).keys()];
+    $("#u_table").innerHTML = `<tr><th class="num">User</th>${AIS.map(ai => runsHead(dot(ai) + " plays them")).join("")}</tr>` + subHead(3)
+      + users.map(u => `<tr><td class="num">${u}</td>${AIS.map(ai => pair(D.users[`${A()}|${ai}|${u}`]?.[m], D.users[`${B()}|${ai}|${u}`]?.[m], m > 1 ? "%" : "", m > 1 ? 100 : 400)).join("")}</tr>`).join("");
+  });
+  onSeg("#u_m", k => { m = +k; redraw(); });
+}
+
+/* 09 worlds + 10 AIs */
+draws.push(() => {
+  const K = [["actions per 100", "actions per 100", ""], ["% engaged", "% engaged", "%"], ["% upvoted", "% upvoted", "%"], ["% downvoted", "% downvoted", "%"], ["% commented", "% commented", "%"]];
+  const head = first => `<tr>${first}${K.map(([_, t]) => runsHead(t)).join("")}</tr>` + subHead(K.length).replace("<tr><th></th>", "<tr>" + "<th></th>".repeat((first.match(/<th/g) || []).length));
+  const row = (cells, a, b, diag) => `<tr${diag ? ' style="background:var(--soft)"' : ""}>${cells}${K.map(([k, _, u]) => pair(a?.[k], b?.[k], u, u ? 100 : 400)).join("")}</tr>`;
+  const order = [["gemma", "gemma"], ["llama", "llama"], ["qwen", "qwen"], ...AIS.flatMap(m => AIS.filter(pb => pb !== m).map(pb => [m, pb]))];
+  $("#w_table").innerHTML = head("<th>Reader AI</th><th>Whose posts</th>") + order.map(([m, pb]) => row(`<td>${dot(m)}</td><td>${pb}${m === pb ? " (own)" : ""}</td>`, D.world[`${A()}|${m}|${pb}`], D.world[`${B()}|${m}|${pb}`], m === pb)).join("");
+  $("#ai_table").innerHTML = head("<th>Reader AI</th>") + AIS.map(m => row(`<td>${dot(m)}</td>`, D.reader[`${A()}|${m}`], D.reader[`${B()}|${m}`])).join("")
+    + row("<td><b>All three AIs</b></td>", D.total[A()], D.total[B()]);
+});
+
+/* 11 bias */
+{
+  const sg = v => (v >= 0 ? "+" : "−") + Math.abs(v).toFixed(1);
+  let m = "upvoted %";
+  draws.push(() => {
+    seg("#b_m", [["upvoted %", "upvotes (%)"], ["actions per 100", "total engagement (actions per 100)"]], m);
+    const unit = m === "upvoted %" ? "%" : "";
+    const rowsOf = r => D.bias[r].filter(b => b.measure === m);
+    const fmt = v => num(v) + unit;
+    let h = `<tr><th>Pair</th><th>Run</th><th class="num">i on i's posts</th><th class="num">j on i's posts</th><th class="num">gap 1</th><th class="num">i on j's posts</th><th class="num">j on j's posts</th><th class="num">gap 2</th><th class="num">Favouritism (points)</th><th class="num">95% range</th></tr>`;
+    rowsOf(A()).forEach((a, k) => { const b = rowsOf(B())[k];
+      for (const [r, x] of [[A(), a], [B(), b]]){
+        const gap1 = x["i on i"] - x["j on i"], gap2 = x["i on j"] - x["j on j"];
+        h += `<tr><td>${dot(x.i)} vs ${dot(x.j)}</td><td><span class="sw ${r === A() ? "a" : "b"}"></span>${esc(NAME[r])}</td><td class="v">${fmt(x["i on i"])}</td><td class="v">${fmt(x["j on i"])}</td><td class="v">${gap1 >= 0 ? "+" : "−"}${Math.abs(gap1).toFixed(1)}</td><td class="v">${fmt(x["i on j"])}</td><td class="v">${fmt(x["j on j"])}</td><td class="v">${gap2 >= 0 ? "+" : "−"}${Math.abs(gap2).toFixed(1)}</td><td class="v"><b>${x.bias >= 0 ? "+" : "−"}${Math.abs(x.bias).toFixed(1)}</b> ${x.clear ? '<span class="clear">CLEAR</span>' : ""}</td><td class="v">${num(x.low)} to ${num(x.high)}</td></tr>`;
+      }
+      if (G.show === "diff") h += `<tr><td></td><td class="muted">change</td><td colspan="6"></td><td class="v"><span class="pts ${b.bias - a.bias > 0 ? "pos" : "neg"}">${b.bias - a.bias >= 0 ? "+" : "−"}${Math.abs(b.bias - a.bias).toFixed(1)}</span> pts</td><td></td></tr>`;
+    });
+    $("#b_table").innerHTML = h;
+    const x = rowsOf(B())[0], g1 = x["i on i"] - x["j on i"], g2 = x["i on j"] - x["j on j"];
+    $("#b_ex").innerHTML = `<b>Worked example (${esc(NAME[B()])}, gemma vs llama, ${m === "upvoted %" ? "upvotes" : "total engagement"}):</b> gemma on gemma's posts ${fmt(x["i on i"])}, llama on gemma's posts ${fmt(x["j on i"])}: gap 1 = ${sg(g1)}. gemma on llama's posts ${fmt(x["i on j"])}, llama on llama's posts ${fmt(x["j on j"])}: gap 2 = ${sg(g2)}. Favouritism = ${sg(g1)} − (${sg(g2)}) = <b>${sg(x.bias)}</b> points${x.clear ? ", and the range leaves out 0: CLEAR." : "; the range includes 0, so it could be chance."}`;
+  });
+  onSeg("#b_m", k => { m = k; redraw(); });
+}
+
+/* 12 effort */
+draws.push(() => {
+  const runs = ["V3", "V3a"];
+  const T = {}; runs.forEach(r => D.effort[r].forEach(x => { T[`${r}|${x.reader}|${x.tier}`] = x; }));
+  const keep = G.mode.startsWith("V1") ? ["V3", "V3a"] : [A(), B()].map(r => r.replace(" tick 0", ""));
+  $("#e_table").innerHTML = `<tr><th>Level</th>${AIS.map(ai => `<th class="num" colspan="2">${dot(ai)}</th>`).join("")}</tr><tr><th></th>${AIS.map(() => keep.map((r, i) => `<th class="num"><span class="sw ${i ? "b" : "a"}"></span>${r}</th>`).join("")).join("")}</tr>`
+    + [1, 2, 3, 4, 5].map(t => `<tr><td>${t} · ${esc(T[`V3|gemma|${t}`]["what it takes"])}</td>${AIS.map(ai => keep.map(r => { const x = T[`${r}|${ai}|${t}`]; return `<td class="v">${(+x["% of all actions chosen"]).toFixed(1)}%<span class="rng">${(+x.chosen).toLocaleString()} chosen</span></td>`; }).join("")).join("")}</tr>`).join("")
+    + `<tr><td colspan="7" class="muted" style="font-size:12.5px">Whole scroll only (V3 and V3a); the "no timeline" choice does not apply here.</td></tr>`;
+});
+
+redraw();
+</script>

@@ -17395,3 +17395,9 @@ from"; "I want breakdowns of AI 1 reacting to AI 1's posts, AI 1 to AI 2's, AI 1
   send_message, open_post and back exist only on extra screens (noted on the sheets). Data page section 03 lists all 28 too.
 - "First post only" checked: in every world it is 100 posts read (one per user), covering 98-100 different posts of the
   pile, with 0 comments on any screen.
+- **Gordon (11-02, later): "only getting data for one post is useless ... the data without timeline is very small so it's
+  irrelevant ... too late to change the files, we'll do it later."** Decision: first-post-only (tick 0, 100 posts read per
+  world) is not a useful no-timeline measure. PENDING (later, on Gordon's say): drop or demote the "No timeline" half of the
+  Excel file and the data page's "no timeline (first post only)" comparisons; lead with the whole scroll. A real
+  no-timeline answer = the proposed V1-style reading of V3's posts (every user reads every post, no live world), still
+  waiting for Gordon's go. Files left unchanged for now.

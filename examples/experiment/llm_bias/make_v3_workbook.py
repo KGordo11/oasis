@@ -71,7 +71,7 @@ def place(ws, buf, cell):
 
 def png(fig):
     buf = io.BytesIO()
-    fig.tight_layout(rect=(0, 0, 1, 0.96) if fig._suptitle else None)  # leave room for the chart's own title
+    fig.tight_layout(rect=(0, 0, 1, 0.93 if fig.get_size_inches()[1] < 8 else 0.965) if fig._suptitle else None)  # leave room for the chart's own title
     fig.savefig(buf, format="png", dpi=150)
     plt.close(fig)
     buf.seek(0)
@@ -88,7 +88,7 @@ def style(ax):
     ax.set_axisbelow(True)
 
 
-def bars(groups, runs, values, title, ylabel):
+def bars(groups, runs, values, title, ylabel, xlabel=""):
     """Grouped bars: one group per label, one bar per run, values[(group, run)]; value labels on top."""
     fig, ax = plt.subplots(figsize=(max(7.5, 0.55 * len(groups) * len(runs)), 3.6))
     w = 0.8 / len(runs)
@@ -101,7 +101,8 @@ def bars(groups, runs, values, title, ylabel):
     ax.set_xticks(range(len(groups)), groups, fontsize=8)
     ax.set_title(title, loc="left", fontsize=10, color=INK)
     ax.set_ylabel(ylabel, fontsize=8, color=INK2)
-    ax.legend(frameon=False, fontsize=8)
+    ax.set_xlabel(xlabel, fontsize=8, color=INK2)
+    ax.legend(frameon=False, fontsize=8, title="colour = run", title_fontsize=8)
     style(ax)
     return png(fig)
 
@@ -135,12 +136,37 @@ def world_bars(runs, key, title, ylabel, ymax=None):
             for x, v in zip(xs, vs):
                 ax.text(x, v, f"{v:.0f}", ha="center", va="bottom", fontsize=7, color=INK2)
         ax.set_xticks(range(3), [f"{pb}'s posts" + ("\n(own AI)" if pb == m else "") for pb in AIS], fontsize=7.5)
-        ax.set_title(f"{m} reads ...", fontsize=9.5, loc="left")
+        ax.set_title(f"Reading AI: {m} (plays the 100 users)", fontsize=9, loc="left")
         ax.set_ylim(0, ymax or top * 1.12 + 1)
+        ax.set_ylabel(ylabel, fontsize=8, color=INK2)
+        ax.set_xlabel("posts written by", fontsize=8, color=INK2)
+        ax.tick_params(axis="y", labelleft=True)
         style(ax)
-    axs[0].set_ylabel(ylabel, fontsize=8, color=INK2)
-    fig.suptitle(title, x=0.01, ha="left", fontsize=10.5)
-    fig.legend(*axs[0].get_legend_handles_labels(), loc="upper right", frameon=False, fontsize=8, ncol=len(runs))
+    fig.suptitle(y=0.995, t=title, x=0.01, ha="left", fontsize=10.5)
+    fig.legend(*axs[0].get_legend_handles_labels(), loc="upper left", bbox_to_anchor=(0.005, 0.945), frameon=False, fontsize=8, ncol=len(runs), title="colour = run", title_fontsize=8)
+    return png(fig)
+
+
+def world_action_chart(runs, m, pb, order):
+    """One world: every action chosen in either run, one pair of bars each, with the % written on every bar."""
+    acts = [a for a in order if any(W(r, m, pb)["actions"][a]["times"] for r in runs)]
+    fig, ax = plt.subplots(figsize=(8, 0.34 * len(acts) + 1.6))
+    for k, r in enumerate(runs):
+        ys = [j + (k - 0.5) * 0.4 for j in range(len(acts))]
+        vs = [W(r, m, pb)["actions"][a]["% of posts"] for a in acts]
+        ax.barh(ys, vs, 0.37, color=COLOR[r], label=NAME[r])
+        for y, v, a in zip(ys, vs, acts):
+            ax.text(v + 0.8, y, f"{v:.1f}%" if v >= 0.05 or not W(r, m, pb)["actions"][a]["times"] else "<0.1%", va="center", fontsize=6.5, color=INK2)
+    ax.set_yticks(range(len(acts)), acts, fontsize=7.5)
+    ax.invert_yaxis()
+    ax.set_xlim(0, 112)
+    ax.set_title(f"Reading AI {m}, posts written by {pb}{' (its own AI)' if m == pb else ''}: every action it chose", fontsize=9, loc="left")
+    ax.set_xlabel("% of posts read where the reading AI chose this action", fontsize=8, color=INK2)
+    ax.set_ylabel("action", fontsize=8, color=INK2)
+    ax.legend(frameon=False, fontsize=7.5, loc="lower right", title="colour = run", title_fontsize=7.5)
+    style(ax)
+    ax.grid(axis="y", visible=False)
+    ax.grid(axis="x", color=GRID)
     return png(fig)
 
 
@@ -156,27 +182,11 @@ def action_charts(title, note, runs):
     col, row = get_column_letter(len(head) + 2), 4
     for a in used:
         place(ws, world_bars(runs, lambda r, m, pb, a=a: W(r, m, pb)["actions"][a]["% of posts"],
-                             f"{a}: % of posts read where the reading AI chose it", "%", 105), f"{col}{row}")
+                             f"Action '{a}': % of posts read where the reading AI chose it, in each of the 9 worlds", "% of posts read", 105), f"{col}{row}")
         row += 21
     col2 = get_column_letter(len(head) + 14)
     for i, (m, pb) in enumerate(WORLDS):
-        acts = [a for a in used if any(W(r, m, pb)["actions"][a]["times"] for r in runs)]
-        fig, ax = plt.subplots(figsize=(7, 0.32 * len(acts) + 1.2))
-        for k, r in enumerate(runs):
-            ys = [j + (k - 0.5) * 0.4 for j in range(len(acts))]
-            vs = [W(r, m, pb)["actions"][a]["% of posts"] for a in acts]
-            ax.barh(ys, vs, 0.37, color=COLOR[r], label=NAME[r])
-            for y, v in zip(ys, vs):
-                ax.text(v + 0.8, y, f"{v:.1f}", va="center", fontsize=6.5, color=INK2)
-        ax.set_yticks(range(len(acts)), acts, fontsize=7.5)
-        ax.invert_yaxis()
-        ax.set_xlim(0, 110)
-        ax.set_title(f"{m} reads {pb}'s posts{' (own AI)' if m == pb else ''}: every action, % of posts read", fontsize=9, loc="left")
-        ax.legend(frameon=False, fontsize=7.5, loc="lower right")
-        style(ax)
-        ax.grid(axis="y", visible=False)
-        ax.grid(axis="x", color=GRID)
-        place(ws, png(fig), f"{col2}{4 + i * 24}")
+        place(ws, world_action_chart(runs, m, pb, used), f"{col2}{4 + i * 30}")
 
 
 def worlds_main(title, note, runs):
@@ -184,35 +194,25 @@ def worlds_main(title, note, runs):
     body = [[m, OWN(pb, m)] + [W(r, m, pb)[k] for k, _ in MEAS for r in runs] + [round(W(runs[1], m, pb)[k] - W(runs[0], m, pb)[k], 1) for k, _ in MEAS[1:]]
             for m, pb in WORLDS]
     ws = sheet(title, note, head, body, {1: 16, 2: 16}, base=lambda row: "own" in str(row[1]),
-               chart=world_bars(runs, "% upvoted", "% of posts upvoted, each world", "%", 105))
-    place(ws, world_bars(runs, "actions per 100", "Total engagement: actions per 100 posts read, each world", "per 100"), f"{get_column_letter(len(head) + 2)}25")
-    place(ws, world_bars(runs, "% commented", "% of posts commented on, each world", "%", 105), f"{get_column_letter(len(head) + 2)}46")
+               chart=world_bars(runs, "% upvoted", "% of posts upvoted, in each of the 9 worlds", "% of posts upvoted", 105))
+    place(ws, world_bars(runs, "actions per 100", "Total engagement in each of the 9 worlds: actions per 100 posts read (every action except do_nothing)", "actions per 100 posts read"), f"{get_column_letter(len(head) + 2)}25")
+    place(ws, world_bars(runs, "% commented", "% of posts commented on, in each of the 9 worlds", "% of posts commented on", 105), f"{get_column_letter(len(head) + 2)}46")
 
 
 def worlds_actions(title, note, runs):
     head = LEAD + ["action"] + [f"{NAME[r]}: % of posts" for r in runs] + [f"{NAME[r]}: times per 100 posts" for r in runs] + \
         [f"change, points ({NAME[runs[1]]} - {NAME[runs[0]]})"]
     body = []
-    fig, axs = grid(3, 3, 5.2)
-    for (m, pb), ax in zip(WORLDS, [a for row in axs for a in row]):
+    for m, pb in WORLDS:
         acts = sorted(REPORT["actions"], key=lambda a: -sum(W(r, m, pb)["actions"][a]["% of posts"] for r in runs))
         for a in acts:  # all 28 post-screen actions in every world, 0 where nobody chose it
             p = [W(r, m, pb)["actions"][a]["% of posts"] for r in runs]
             body.append([m, OWN(pb, m), a] + p + [W(r, m, pb)["actions"][a]["per 100"] for r in runs] + [round(p[1] - p[0], 1)])
-        top = [a for a in acts if any(W(r, m, pb)["actions"][a]["times"] for r in runs)]  # every action chosen in either run
-        for k, r in enumerate(runs):
-            ys = [i + (k - (len(runs) - 1) / 2) * (0.8 / len(runs)) for i in range(len(top))]
-            ax.barh(ys, [W(r, m, pb)["actions"][a]["% of posts"] for a in top], 0.8 / len(runs) * 0.92, color=COLOR[r], label=NAME[r])
-        ax.set_yticks(range(len(top)), top, fontsize=6.5)
-        ax.invert_yaxis()
-        ax.set_xlim(0, 105)
-        ax.set_title(f"{m} reads {pb}'s posts" + (" (own)" if m == pb else ""), fontsize=8.5, loc="left")
-        style(ax)
-        ax.grid(axis="y", visible=False)
-        ax.grid(axis="x", color=GRID)
-    axs[0][0].legend(frameon=False, fontsize=7)
-    fig.suptitle("Every action chosen in each world, % of posts read", x=0.01, ha="left", fontsize=10.5)
-    sheet(title, note, head, body, {1: 16, 2: 16, 3: 22}, base=lambda row: "own" in str(row[1]), chart=png(fig))
+    order = sorted(REPORT["actions"], key=lambda a: -sum(W(r, m, pb)["actions"][a]["% of posts"] for r in runs for m, pb in WORLDS))
+    ws = sheet(title, note, head, body, {1: 16, 2: 16, 3: 22}, base=lambda row: "own" in str(row[1]))
+    for i, (m, pb) in enumerate(WORLDS):
+        place(ws, world_action_chart(runs, m, pb, order), f"{get_column_letter(len(head) + 2)}{4 + i * 30}")
+
 
 
 def worlds_stance(title, note, runs):
@@ -232,11 +232,13 @@ def worlds_stance(title, note, runs):
             ys = [SW.get(f"{r}|{m}|{pb}|{s}", {}).get("% upvoted") for s in STANCES]
             ax.plot(STANCES, ys, marker="o", color=COLOR[r], label=NAME[r], lw=1.8, ms=4)
         ax.set_ylim(0, 105)
-        ax.set_title(f"{m} reads {pb}'s posts" + (" (own)" if m == pb else ""), fontsize=8.5, loc="left")
+        ax.set_title(f"Reading AI {m}, posts written by {pb}" + (" (own AI)" if m == pb else ""), fontsize=8.5, loc="left")
         ax.tick_params(axis="x", labelsize=6.5)
+        ax.set_ylabel("% of posts upvoted", fontsize=7.5, color=INK2)
+        ax.set_xlabel("how the reading user feels about the post's topic", fontsize=7.5, color=INK2)
         style(ax)
-    axs[0][0].legend(frameon=False, fontsize=7)
-    fig.suptitle("% upvoted by how the reading user feels about the topic, each world", x=0.01, ha="left", fontsize=10.5)
+    fig.legend(*axs[0][0].get_legend_handles_labels(), loc="upper left", bbox_to_anchor=(0.005, 0.975 if fig.get_size_inches()[1] >= 8 else 0.945), frameon=False, fontsize=8, ncol=len(runs), title="colour = run", title_fontsize=8)
+    fig.suptitle(y=0.995, t="% of posts upvoted, split by how the reading user feels about the topic, in each of the 9 worlds", x=0.01, ha="left", fontsize=10.5)
     sheet(title, note, head, body, {1: 16, 2: 16, 3: 14}, base=lambda row: "own" in str(row[1]), chart=png(fig))
 
 
@@ -259,9 +261,12 @@ def bias_sheet(title, note, runs):
                         fmt="o", color=shade[r], label=NAME[r], ms=5, capsize=3, lw=1.5)
         ax.axhline(0, color=INK2, lw=1)
         ax.set_xticks(range(len(pairs)), pairs, fontsize=8)
-        ax.set_title(f"Own-AI favouritism, {meas} (dot = value, bar = 95% range)", fontsize=9, loc="left")
+        ax.set_title(f"Own-AI favouritism in {'upvotes' if meas == 'upvoted %' else 'total engagement (actions per 100 posts)'}\n"
+                     "dot = the favouritism number, line = where it lands 95% of the time", fontsize=8.5, loc="left")
+        ax.set_ylabel("favouritism, in points\n(above 0 = both AIs favour their own AI's posts)", fontsize=7.5, color=INK2)
+        ax.set_xlabel("the two AIs compared", fontsize=8, color=INK2)
         style(ax)
-    axs[0][0].legend(frameon=False, fontsize=7.5)
+    axs[0][0].legend(frameon=False, fontsize=7.5, title="colour = run", title_fontsize=7.5)
     sheet(title, note, head, body, {1: 16, 2: 16, 3: 14}, chart=png(fig))
 
 
@@ -283,10 +288,12 @@ def ticks_sheet(title, note):
             ax.plot([p[0] for p in pts], [p[1] for p in pts], color=COLOR[r], label=NAME[r], lw=1.4)
         ax.axhline(W("V1", m, pb)["% upvoted"], color=COLOR["V1"], lw=1, ls="--", label="V1 r101 (no ticks)")
         ax.set_ylim(0, 105)
-        ax.set_title(f"{m} reads {pb}'s posts" + (" (own)" if m == pb else ""), fontsize=8.5, loc="left")
+        ax.set_title(f"Reading AI {m}, posts written by {pb}" + (" (own AI)" if m == pb else ""), fontsize=8.5, loc="left")
+        ax.set_ylabel("% of posts upvoted", fontsize=7.5, color=INK2)
+        ax.set_xlabel("tick (each user reads 1 post per tick)", fontsize=7.5, color=INK2)
         style(ax)
-    axs[0][0].legend(frameon=False, fontsize=7)
-    fig.suptitle("% upvoted at each tick, each world (tick 0 = no timeline yet)", x=0.01, ha="left", fontsize=10.5)
+    fig.legend(*axs[0][0].get_legend_handles_labels(), loc="upper left", bbox_to_anchor=(0.005, 0.975 if fig.get_size_inches()[1] >= 8 else 0.945), frameon=False, fontsize=8, ncol=3, title="line colour = run", title_fontsize=8)
+    fig.suptitle(y=0.995, t="% of posts upvoted at each tick, in each of the 9 worlds (tick 0 = each user's first post, before any comments)", x=0.01, ha="left", fontsize=10.5)
     sheet(title, note, head, body, {1: 16, 2: 16, 3: 6}, base=lambda row: "own" in str(row[1]), chart=png(fig))
 
 
@@ -326,17 +333,26 @@ def effort_sheet(title, note, runs):
         for t in "12345":
             x = [E[f"{r}|{m}|{pb}"][t] for r in runs]
             body.append([m, OWN(pb, m), int(t), TXT[t]] + [v for e in x for v in (e["chosen"], e["%"], e["failed %"])] + [round(x[1]["%"] - x[0]["%"], 1)])
-    fig, axs = grid(1, 3, 3.4)
-    for ax, m in zip(axs[0], AIS):
-        labels = [f"{pb}'s\nL{t}" for pb in AIS for t in "123"]
+    LV = ["1. one click (upvote)", "2. copy an ID (like a comment)", "3. write text (a comment)", "4. write a whole post",
+          "5. go to another screen, then write (a message)"]
+    fig, axs = plt.subplots(9, 1, figsize=(9, 19), squeeze=False)
+    for (m, pb), ax in zip(WORLDS, [a for row in axs for a in row]):
         for k, r in enumerate(runs):
-            xs = [i + (k - 0.5) * 0.4 for i in range(len(labels))]
-            ax.bar(xs, [E[f"{r}|{m}|{pb}"][t]["%"] for pb in AIS for t in "123"], 0.37, color=COLOR[r], label=NAME[r])
-        ax.set_xticks(range(len(labels)), labels, fontsize=6.5)
-        ax.set_ylim(0, 105)
-        ax.set_title(f"{m} reads ...: % of its actions at levels 1-3", fontsize=8.5, loc="left")
+            ys = [i + (k - 0.5) * 0.4 for i in range(5)]
+            vs = [E[f"{r}|{m}|{pb}"][t]["%"] for t in "12345"]
+            ax.barh(ys, vs, 0.37, color=COLOR[r], label=NAME[r])
+            for y, v in zip(ys, vs):
+                ax.text(v + 1, y, f"{v:.0f}%", va="center", fontsize=6.5, color=INK2)
+        ax.set_yticks(range(5), LV, fontsize=7.5)
+        ax.invert_yaxis()
+        ax.set_xlim(0, 105)
+        ax.set_title(f"Reading AI {m}, posts written by {pb}" + (" (own AI)" if m == pb else ""), fontsize=8.5, loc="left")
+        ax.set_xlabel("% of this AI's actions in this world", fontsize=7.5, color=INK2)
         style(ax)
-    axs[0][0].legend(frameon=False, fontsize=7)
+        ax.grid(axis="y", visible=False)
+        ax.grid(axis="x", color=GRID)
+    fig.legend(*axs[0][0].get_legend_handles_labels(), loc="upper left", bbox_to_anchor=(0.005, 0.975 if fig.get_size_inches()[1] >= 8 else 0.945), frameon=False, fontsize=8, ncol=len(runs), title="colour = run", title_fontsize=8)
+    fig.suptitle(y=0.995, t="Easy vs hard actions in each world\n% of the reading AI's actions at each level of work (1 = easiest, 5 = hardest)", x=0.01, ha="left", fontsize=10.5)
     sheet(title, note, head, body, {1: 16, 2: 16, 3: 6, 4: 32}, base=lambda row: "own" in str(row[1]), chart=png(fig))
 
 
@@ -352,7 +368,8 @@ def posting_sheets():
             body.append([ai, rn, c["0"], c["1"], c["2"], c["3+"], c["x"], sum(u["posts"] for u in us), round(sum(ch) / len(ch)) if ch else None, len(us)])
             vals[(ai, r)] = sum(u["posts"] for u in us)
     sheet("Posting · posts per user", "The posting turn. V3a reads V3's posts (no posting turn of its own). Each AI plays 100 users, so users = % of users.",
-          head, body, {1: 8, 2: 18}, chart=bars(AIS, ["V1", "V1 r102", "V3"], vals, "Posts written by each AI's 100 users", "posts"))
+          head, body, {1: 8, 2: 18}, chart=bars(AIS, ["V1", "V1 r102", "V3"], vals, "How many posts each AI's 100 users wrote in the posting turn", "number of posts written",
+                                    "the AI playing all 100 users in the posting turn"))
     body = []
     for ai in AIS:
         for r, rn in runs:

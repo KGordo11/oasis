@@ -17408,3 +17408,9 @@ from"; "I want breakdowns of AI 1 reacting to AI 1's posts, AI 1 to AI 2's, AI 1
   have legends; their big titles no longer overlap the first panel. "Only 5 actions" in the Excel: Excel had the file
   open from 13:12 (old version); the rebuilt file lists all 28 actions per world, and gemma's first-post worlds really
   used only 4-6 different actions.
+- **Labelling pass (Gordon: "NO LABELING ... numbers on the left side with NO label ... L1, L2, L3 ... everything needs to be
+  labeled ... understandable to a 5th grader or someone who has no idea what's going on").** Excel: every chart has a
+  plain title, a named y axis and x axis on every panel, written-out categories (no codes: "1. one click (upvote)" ...
+  "5. go to another screen, then write (a message)"), the colour key under the title ("colour = run"), and a number on
+  every bar. Easy vs hard = one wide panel per world; every-action = one chart per world (no cut-off grid). Data page:
+  axis titles on all three charts, two-line bottom labels, full measure names. Every chart image looked at after the change.

@@ -92,7 +92,7 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
   <div class="xctl">
     <div class="xrow"><span class="lab">Action</span><select class="pick" id="ch_act" aria-label="Action"></select></div>
   </div>
-  <div class="chart"><svg id="ch1" viewBox="0 0 900 330" role="img" aria-label="One action in every world"></svg><div class="legend" id="ch1_leg"></div></div>
+  <div class="chart"><svg id="ch1" viewBox="0 0 900 376" role="img" aria-label="One action in every world"></svg><div class="legend" id="ch1_leg"></div></div>
   <h3>One world, every action</h3>
   <div class="xctl">
     <div class="xrow"><span class="lab">Reading AI</span><div class="seg" id="ch_ai"></div></div>
@@ -176,7 +176,7 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
     <div class="xrow"><span class="lab">Posts written by</span><div class="seg" id="t_pb"></div></div>
     <div class="xrow"><span class="lab">Measure</span><div class="seg" id="t_m"></div></div>
   </div>
-  <div class="chart"><svg id="t_svg" viewBox="0 0 900 320" role="img" aria-label="Measure by tick"></svg><div class="legend" id="t_leg"></div></div>
+  <div class="chart"><svg id="t_svg" viewBox="0 0 900 360" role="img" aria-label="Measure by tick"></svg><div class="legend" id="t_leg"></div></div>
   <p class="muted" id="t_note" style="font-size:13px;margin-top:6px"></p>
 </section>
 
@@ -361,8 +361,9 @@ onSeg("#a_ai", k => { G.ai = k; redraw(); });
 /* 06 timeline */
 {
   const st = {ai: "gemma", pb: "gemma", m: "% upvoted"};
-  const M = [["% upvoted", "% upvoted"], ["% commented", "% commented"], ["% engaged", "% engaged"], ["actions per 100", "actions per 100"],
-             ["% like_comment", "% liked a comment"], ["% dislike_post", "% downvoted"], ["comments seen per post", "comments on screen"]];
+  const M = [["% upvoted", "% of posts upvoted"], ["% commented", "% of posts commented on"], ["% engaged", "% of posts with a real action"],
+             ["actions per 100", "actions per 100 posts read"], ["% like_comment", "% of posts where it liked a comment"],
+             ["% dislike_post", "% of posts downvoted"], ["comments seen per post", "comments on screen per post"]];
   const COL = {V3: "var(--runA)", V3a: "var(--runB)"};
   const draw = () => {
     seg("#t_ai", AIS.map(m => [m, m + " reads"]), st.ai); seg("#t_pb", AIS.map(m => [m, m + "'s posts"]), st.pb); seg("#t_m", M, st.m);
@@ -371,19 +372,20 @@ onSeg("#a_ai", k => { G.ai = k; redraw(); });
       return [r, pts]; });
     const v1 = D.world[`V1|${st.ai}|${st.pb}`], v1v = st.m === "% dislike_post" ? v1.actions.dislike_post["% of posts"] : st.m === "% like_comment" ? v1.actions.like_comment["% of posts"] : v1[st.m];
     const ys = series.flatMap(([_, s]) => s.map(p => p[1])).concat(v1v ?? []), x1 = Math.max(...series.flatMap(([_, s]) => s.map(p => p[0])));
-    const W = 900, H = 320, L = 56, Rr = 16, T = 14, Bm = 34, y1n = Math.max(...ys, 1);
+    const W = 900, H = 360, L = 56, Rr = 16, T = 34, Bm = 58, y1n = Math.max(...ys, 1);
     const step = [1, 2, 5, 10, 20, 25, 50, 100, 200].find(s => y1n / s <= 6) || 500, y1 = Math.ceil(y1n / step) * step;
     const X = x => L + (W - L - Rr) * x / x1, Y = y => T + (H - T - Bm) * (1 - y / y1);
     let g = "";
     for (let y = 0; y <= y1 + 1e-9; y += step) g += `<line class="grid" x1="${L}" x2="${W - Rr}" y1="${Y(y)}" y2="${Y(y)}"/><text x="${L - 8}" y="${Y(y) + 4}" text-anchor="end">${+y.toFixed(1)}</text>`;
-    for (let x = 0; x <= x1; x += 10) g += `<text x="${X(x)}" y="${H - 12}" text-anchor="middle">${x}</text>`;
-    g += `<text x="${W - Rr}" y="${H - 1}" text-anchor="end">tick</text>`;
+    for (let x = 0; x <= x1; x += 10) g += `<text x="${X(x)}" y="${H - 30}" text-anchor="middle">${x}</text>`;
+    g += `<text x="${(L + W - Rr) / 2}" y="${H - 8}" text-anchor="middle" style="fill:var(--ink)">tick (each user reads 1 post per tick; tick 0 = their first post)</text>`
+      + `<text transform="translate(12 ${(T + H - Bm) / 2}) rotate(-90)" text-anchor="middle" style="fill:var(--ink)">${esc(M.find(x => x[0] === st.m)[1])}</text>`;
     if (v1v != null) g += `<line x1="${L}" x2="${W - Rr}" y1="${Y(v1v)}" y2="${Y(v1v)}" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
     for (const [r, s] of series) g += `<polyline fill="none" stroke="${COL[r]}" stroke-width="2" points="${s.map(([x, y]) => `${X(x).toFixed(1)},${Y(y).toFixed(1)}`).join(" ")}"/>`;
     const byT = {}; series.forEach(([r, s]) => s.forEach(([t, v, n]) => { (byT[t] = byT[t] || {})[r] = [v, n]; }));
     const w = (W - L - Rr) / x1;
     g += Object.entries(byT).map(([t, o]) => `<rect class="hit" x="${X(+t) - w / 2}" y="${T}" width="${w}" height="${H - T - Bm}"><title>tick ${t}\n${Object.entries(o).map(([r, [v, n]]) => `${r}: ${num(v)} (${n} posts read)`).join("\n")}${v1v != null ? `\nV1: ${num(v1v)}` : ""}</title></rect>`).join("");
-    $("#t_svg").innerHTML = g + `<text x="${W - Rr}" y="${T + 4}" text-anchor="end" style="fill:var(--ink);font:600 12px var(--body)">purple = V3 · orange = V3a (actions reordered)${v1v != null ? " · grey dashed = V1" : ""}</text>`;
+    $("#t_svg").innerHTML = g + `<text x="${W - Rr}" y="16" text-anchor="end" style="fill:var(--ink);font:600 12px var(--body)">purple = V3 · orange = V3a (actions reordered)${v1v != null ? " · grey dashed = V1" : ""}</text>`;
     $("#t_leg").innerHTML = `<span><i style="background:var(--runA)"></i>purple line = V3</span><span><i style="background:var(--runB)"></i>orange line = V3a (actions reordered)</span>${v1v != null ? `<span><i class="dash"></i>grey dashed line = V1 round 101 (no ticks)</span>` : ""}`;
     $("#t_note").textContent = `Reading AI: ${st.ai} (plays the 100 users). Posts written by: ${st.pb}'s users. Tick 0 = each user's first post. Every tick has 98-100 posts read until the last few.`;
   };
@@ -490,31 +492,34 @@ const svgLegend = (x, y) => [[A(), "A", "purple"], [B(), "B", "orange"]].map(([r
     if (!acts.includes(st.act)) st.act = acts[0];
     $("#ch_act").innerHTML = acts.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join(""); $("#ch_act").value = st.act;
     // chart 1: one action, 9 worlds
-    const H0 = 356, T = 62, Bm = 58, PW = 266, GAP = 26, L = 40;
+    const H0 = 376, T = 62, Bm = 78, PW = 262, GAP = 26, L = 58;
     let g = "";
     AIS.forEach((m, i) => {
       const x0 = L + i * (PW + GAP), Y = v => T + (H0 - T - Bm) * (1 - v / 100);
-      g += `<text x="${x0}" y="46" style="fill:var(--ink);font:600 13px var(--body)">${m} reads …</text>`;
+      g += `<text x="${x0}" y="46" style="fill:var(--ink);font:600 13px var(--body)">Reading AI: ${m}</text>`
+        + `<text x="${x0 + PW / 2}" y="${H0 - Bm + 48}" text-anchor="middle" style="fill:var(--ink)">posts written by</text>`;
       for (let v = 0; v <= 100; v += 25) g += `<line class="grid" x1="${x0}" x2="${x0 + PW}" y1="${Y(v)}" y2="${Y(v)}"/>` + (i === 0 ? `<text x="${x0 - 6}" y="${Y(v) + 4}" text-anchor="end">${v}%</text>` : "");
       AIS.forEach((pb, j) => {
         const gx = x0 + j * (PW / 3) + 12, bw = (PW / 3 - 24) / 2;
         [A(), B()].forEach((r, k) => { const v = D.world[`${r}|${m}|${pb}`].actions[st.act]["% of posts"];
           g += bar(gx + k * bw, Y(v), bw - 2, Y(0) - Y(v), k ? "B" : "A", `${m} reads ${pb}'s posts, ${NAME[r]}: ${num(v)}% of posts read`)
             + `<text x="${gx + k * bw + bw / 2 - 1}" y="${Y(v) - 4}" text-anchor="middle" style="fill:var(--ink)">${Math.round(v)}</text>`; });
-        g += `<text x="${gx + bw}" y="${H0 - Bm + 18}" text-anchor="middle">${pb}'s posts</text>` + (pb === m ? `<text x="${gx + bw}" y="${H0 - Bm + 32}" text-anchor="middle">(own AI)</text>` : "");
+        g += `<text x="${gx + bw}" y="${H0 - Bm + 18}" text-anchor="middle">${pb}'s</text><text x="${gx + bw}" y="${H0 - Bm + 31}" text-anchor="middle">${pb === m ? "(own AI)" : "posts"}</text>`;
       });
     });
     $("#ch1").setAttribute("viewBox", `0 0 900 ${H0}`);
-    $("#ch1").innerHTML = svgLegend(L, 16) + g + `<text x="${L}" y="${H0 - 6}">${esc(st.act)}: % of posts read where the reading AI chose it</text>`;
+    $("#ch1").innerHTML = svgLegend(L, 16) + g + `<text transform="translate(14 ${(T + H0 - Bm) / 2}) rotate(-90)" text-anchor="middle" style="fill:var(--ink)">% of posts read where it chose ${esc(st.act)}</text>`;
     $("#ch1_leg").innerHTML = `<span><i style="background:var(--runA)"></i>purple = ${esc(NAME[A()])}</span><span><i style="background:var(--runB)"></i>orange = ${esc(NAME[B()])}</span>`;
     // chart 2: one world, every action
     seg("#ch_ai", AIS.map(x => [x, x + " reads"]), G.ai); seg("#ch_pb", AIS.map(x => [x, x + (x === G.ai ? " (own AI)" : "")]), st.pb);
     const w = r => D.world[`${r}|${G.ai}|${st.pb}`];
     const rows = acts.filter(a => w(A()).actions[a].times || w(B()).actions[a].times);
     $("#ch2_cap").textContent = `Reading AI: ${G.ai} (plays the 100 users). Posts written by: ${st.pb}'s users. ${w(A())["posts read"].toLocaleString()} posts read in ${NAME[A()]}, ${w(B())["posts read"].toLocaleString()} in ${NAME[B()]}.`;
-    const RH = 30, L2 = 170, R2 = 60, TOP = 40, H2 = rows.length * RH + 40 + TOP, X = v => L2 + (900 - L2 - R2) * v / 100;
+    const RH = 30, L2 = 170, R2 = 60, TOP = 50, H2 = rows.length * RH + 60 + TOP, X = v => L2 + (900 - L2 - R2) * v / 100;
     let h = svgLegend(L2, 16);
-    for (let v = 0; v <= 100; v += 25) h += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${TOP}" y2="${H2 - 24}"/><text x="${X(v)}" y="${H2 - 8}" text-anchor="middle">${v}%</text>`;
+    for (let v = 0; v <= 100; v += 25) h += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${TOP}" y2="${H2 - 44}"/><text x="${X(v)}" y="${H2 - 28}" text-anchor="middle">${v}%</text>`;
+    h += `<text x="${(L2 + 900 - R2) / 2}" y="${H2 - 6}" text-anchor="middle" style="fill:var(--ink)">% of posts read where the reading AI chose the action</text>`
+      + `<text x="${L2 - 8}" y="${TOP - 6}" text-anchor="end" style="fill:var(--ink);font-weight:600">action</text>`;
     rows.forEach((a, i) => { const y = TOP + 4 + i * RH;
       h += `<text x="${L2 - 8}" y="${y + 17}" text-anchor="end" style="fill:var(--ink)">${esc(a)}</text>`;
       [A(), B()].forEach((r, k) => { const v = w(r).actions[a]["% of posts"];

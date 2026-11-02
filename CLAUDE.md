@@ -51,6 +51,11 @@ posts** (pair ranges +9..+21, +2..+15), no total-engagement bias; **§14.57: abo
 the live world** (none in the first 10% of the scroll; gemma follows the tone of the comments it sees). The one solid effect: **qwen engages more with gemma's
 posts** (double difference qwen-gemma −17 to −21, mostly comments). It's about gemma's writing, not authorship
 (survives topic × stance matching; only partly length).
+**V3 big sim part 2 (§14.61; same posts, menu ranked from part 1): still no total-engagement bias; the upvote leans move
+with the menu order** (gemma-llama +15 -> +2; llama-qwen +1 -> +8; gemma-qwen +9 -> +11 but from qwen now). **Menu order
+is the biggest lever:** gemma tick-0 upvotes 68% -> 8%, qwen 21% -> 66%, llama ~same. V1's qwen-likes-gemma is not seen
+in V3 (tick 0 too small to say: 100 reads per world). Workbook sheets `1 No timeline` / `2 With timeline` / `3 Own-AI
+bias` hold every set; recount of 62,633 numbers = 0 mismatches.
 
 **One round (LD-25, LD-40):** posting turn (an AI plays all 100 users on an empty feed; the posts become that AI's
 post set) → reading turn (a reader AI plays the same 100 users; one post per screen (LD-34/37: pages kill comments);

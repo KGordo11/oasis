@@ -72,6 +72,12 @@ research**:
   every post except their own. The menu order changes behaviour a lot: gemma upvotes 68% -> 8% of posts at tick 0
   (like_post moved to the last line), qwen 21% -> 66% at tick 0. No own-AI bias in total engagement in either part.
   Workbook + page (same URL) hold both parts. Next: speed suite on the Spark (Gordon's go).
+  **PM:** own-AI bias against V1, without vs with the timeline (table at §14.61 end): V1 + V3 = no total-engagement bias;
+  V3 tick 0 (100 reads/world) too small to say; upvote leans only with the timeline and they move with the menu.
+  Workbook rebuilt: sheets `1 No timeline` (V1 r101/r102 + each part's tick 0), `2 With timeline`, `3 Own-AI bias`,
+  P1/P2 per-world tick sheets with every action (38 sheets). Recount of 62,633 numbers from raw files = 0 mismatches.
+  "Did nothing" = action do_nothing OR an empty list [] (gemma's V1 way); V3 gemma ~never skips, llama 13-15%.
+  Proposed (waiting for Gordon's go): V1 reading of V3's 320 posts (no live world; only change vs V1 = the posts).
 
 - **NEW Fri 10-30 10:06 (§14.56 end): PART 2 DONE.** `ARM 2 DONE` Thu 10-29 22:11:56, all 9 cells rc=0, no watchdog
   restart; Spark idle (GPU 0%, 116 GB free, hsa303's training job gone). Next: cron off -> rsync `v3_flipped/` ->

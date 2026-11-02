@@ -268,11 +268,11 @@ function pair(a, b, unit = "%", max = 100){
   return c(a, "a") + c(b, "b");
 }
 const runsHead = (label) => G.show === "diff" ? `<th class="num">${label}<br><span class="muted" style="font-weight:400">points</span></th>` : `<th class="num" colspan="2">${label}</th>`;
-const subHead = n => G.show === "diff" ? "" : `<tr><th></th>${Array(n).fill(`<th class="num"><span class="sw a"></span>${esc(A())}</th><th class="num"><span class="sw b"></span>${esc(B())}</th>`).join("")}</tr>`;
+const subHead = n => G.show === "diff" ? "" : `<tr><th></th>${Array(n).fill(`<th class="num"><span class="sw a"></span>${esc(A())} (purple)</th><th class="num"><span class="sw b"></span>${esc(B())} (orange)</th>`).join("")}</tr>`;
 
 const draws = [];
 function redraw(){ seg("#c_mode", MODES.map(m => [m[0], m[1]]), G.mode); seg("#c_show", [["pct", "Percentages"], ["diff", "Difference (points)"]], G.show);
-  $("#c_txt").innerHTML = `<span class="sw a"></span><b>${esc(NAME[A()])}</b> → <span class="sw b"></span><b>${esc(NAME[B()])}</b>`;
+  $("#c_txt").innerHTML = `Colours: <span class="sw a"></span><b>purple = ${esc(NAME[A()])}</b> · <span class="sw b"></span><b>orange = ${esc(NAME[B()])}</b>`;
   draws.forEach(f => f()); }
 onSeg("#c_mode", k => { G.mode = k; redraw(); }); onSeg("#c_show", k => { G.show = k; redraw(); });
 
@@ -383,8 +383,8 @@ onSeg("#a_ai", k => { G.ai = k; redraw(); });
     const byT = {}; series.forEach(([r, s]) => s.forEach(([t, v, n]) => { (byT[t] = byT[t] || {})[r] = [v, n]; }));
     const w = (W - L - Rr) / x1;
     g += Object.entries(byT).map(([t, o]) => `<rect class="hit" x="${X(+t) - w / 2}" y="${T}" width="${w}" height="${H - T - Bm}"><title>tick ${t}\n${Object.entries(o).map(([r, [v, n]]) => `${r}: ${num(v)} (${n} posts read)`).join("\n")}${v1v != null ? `\nV1: ${num(v1v)}` : ""}</title></rect>`).join("");
-    $("#t_svg").innerHTML = g;
-    $("#t_leg").innerHTML = `<span><i style="background:var(--runA)"></i>V3</span><span><i style="background:var(--runB)"></i>V3a (actions reordered)</span>${v1v != null ? `<span><i class="dash"></i>V1 round 101 (no ticks)</span>` : ""}`;
+    $("#t_svg").innerHTML = g + `<text x="${W - Rr}" y="${T + 4}" text-anchor="end" style="fill:var(--ink);font:600 12px var(--body)">purple = V3 · orange = V3a (actions reordered)${v1v != null ? " · grey dashed = V1" : ""}</text>`;
+    $("#t_leg").innerHTML = `<span><i style="background:var(--runA)"></i>purple line = V3</span><span><i style="background:var(--runB)"></i>orange line = V3a (actions reordered)</span>${v1v != null ? `<span><i class="dash"></i>grey dashed line = V1 round 101 (no ticks)</span>` : ""}`;
     $("#t_note").textContent = `Reading AI: ${st.ai} (plays the 100 users). Posts written by: ${st.pb}'s users. Tick 0 = each user's first post. Every tick has 98-100 posts read until the last few.`;
   };
   onSeg("#t_ai", k => { st.ai = k; draw(); }); onSeg("#t_pb", k => { st.pb = k; draw(); }); onSeg("#t_m", k => { st.m = k; draw(); });
@@ -476,6 +476,10 @@ draws.push(() => {
 });
 onSeg("#e_ai", k => { G.ai = k; redraw(); });
 
+/* a legend drawn inside every chart: which colour is which run, in words */
+const svgLegend = (x, y) => [[A(), "A", "purple"], [B(), "B", "orange"]].map(([r, k, c], i) =>
+  `<rect x="${x + i * 300}" y="${y - 10}" width="14" height="14" rx="2" style="fill:var(--run${k})"/><text x="${x + i * 300 + 20}" y="${y + 2}" style="fill:var(--ink);font:600 12px var(--body)">${c} = ${esc(NAME[r])}</text>`).join("");
+
 /* 01 action charts */
 {
   const st = {act: "like_post", pb: "llama"};
@@ -486,11 +490,11 @@ onSeg("#e_ai", k => { G.ai = k; redraw(); });
     if (!acts.includes(st.act)) st.act = acts[0];
     $("#ch_act").innerHTML = acts.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join(""); $("#ch_act").value = st.act;
     // chart 1: one action, 9 worlds
-    const H0 = 330, T = 36, Bm = 58, PW = 266, GAP = 26, L = 40;
+    const H0 = 356, T = 62, Bm = 58, PW = 266, GAP = 26, L = 40;
     let g = "";
     AIS.forEach((m, i) => {
       const x0 = L + i * (PW + GAP), Y = v => T + (H0 - T - Bm) * (1 - v / 100);
-      g += `<text x="${x0}" y="20" style="fill:var(--ink);font:600 13px var(--body)">${m} reads …</text>`;
+      g += `<text x="${x0}" y="46" style="fill:var(--ink);font:600 13px var(--body)">${m} reads …</text>`;
       for (let v = 0; v <= 100; v += 25) g += `<line class="grid" x1="${x0}" x2="${x0 + PW}" y1="${Y(v)}" y2="${Y(v)}"/>` + (i === 0 ? `<text x="${x0 - 6}" y="${Y(v) + 4}" text-anchor="end">${v}%</text>` : "");
       AIS.forEach((pb, j) => {
         const gx = x0 + j * (PW / 3) + 12, bw = (PW / 3 - 24) / 2;
@@ -500,17 +504,18 @@ onSeg("#e_ai", k => { G.ai = k; redraw(); });
         g += `<text x="${gx + bw}" y="${H0 - Bm + 18}" text-anchor="middle">${pb}'s posts</text>` + (pb === m ? `<text x="${gx + bw}" y="${H0 - Bm + 32}" text-anchor="middle">(own AI)</text>` : "");
       });
     });
-    $("#ch1").innerHTML = g + `<text x="${L}" y="${H0 - 6}">${esc(st.act)}: % of posts read where the reading AI chose it</text>`;
-    $("#ch1_leg").innerHTML = `<span><i style="background:var(--runA)"></i>${esc(NAME[A()])}</span><span><i style="background:var(--runB)"></i>${esc(NAME[B()])}</span>`;
+    $("#ch1").setAttribute("viewBox", `0 0 900 ${H0}`);
+    $("#ch1").innerHTML = svgLegend(L, 16) + g + `<text x="${L}" y="${H0 - 6}">${esc(st.act)}: % of posts read where the reading AI chose it</text>`;
+    $("#ch1_leg").innerHTML = `<span><i style="background:var(--runA)"></i>purple = ${esc(NAME[A()])}</span><span><i style="background:var(--runB)"></i>orange = ${esc(NAME[B()])}</span>`;
     // chart 2: one world, every action
     seg("#ch_ai", AIS.map(x => [x, x + " reads"]), G.ai); seg("#ch_pb", AIS.map(x => [x, x + (x === G.ai ? " (own AI)" : "")]), st.pb);
     const w = r => D.world[`${r}|${G.ai}|${st.pb}`];
     const rows = acts.filter(a => w(A()).actions[a].times || w(B()).actions[a].times);
     $("#ch2_cap").textContent = `Reading AI: ${G.ai} (plays the 100 users). Posts written by: ${st.pb}'s users. ${w(A())["posts read"].toLocaleString()} posts read in ${NAME[A()]}, ${w(B())["posts read"].toLocaleString()} in ${NAME[B()]}.`;
-    const RH = 30, L2 = 170, R2 = 60, H2 = rows.length * RH + 40, X = v => L2 + (900 - L2 - R2) * v / 100;
-    let h = "";
-    for (let v = 0; v <= 100; v += 25) h += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="10" y2="${H2 - 24}"/><text x="${X(v)}" y="${H2 - 8}" text-anchor="middle">${v}%</text>`;
-    rows.forEach((a, i) => { const y = 14 + i * RH;
+    const RH = 30, L2 = 170, R2 = 60, TOP = 40, H2 = rows.length * RH + 40 + TOP, X = v => L2 + (900 - L2 - R2) * v / 100;
+    let h = svgLegend(L2, 16);
+    for (let v = 0; v <= 100; v += 25) h += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="${TOP}" y2="${H2 - 24}"/><text x="${X(v)}" y="${H2 - 8}" text-anchor="middle">${v}%</text>`;
+    rows.forEach((a, i) => { const y = TOP + 4 + i * RH;
       h += `<text x="${L2 - 8}" y="${y + 17}" text-anchor="end" style="fill:var(--ink)">${esc(a)}</text>`;
       [A(), B()].forEach((r, k) => { const v = w(r).actions[a]["% of posts"];
         h += bar(L2, y + k * 12, X(v) - L2, 11, k ? "B" : "A", `${a}, ${NAME[r]}: ${num(v)}% of posts read (${w(r).actions[a].times.toLocaleString()} times)`)

@@ -17401,3 +17401,10 @@ from"; "I want breakdowns of AI 1 reacting to AI 1's posts, AI 1 to AI 2's, AI 1
   Excel file and the data page's "no timeline (first post only)" comparisons; lead with the whole scroll. A real
   no-timeline answer = the proposed V1-style reading of V3's posts (every user reads every post, no live world), still
   waiting for Gordon's go. Files left unchanged for now.
+- **Labels (Gordon: "what colour bar is what ... everything MUST BE LABELED"):** every chart on the data page now names its
+  colours in words inside the chart ("purple = V3", "orange = V3a (actions reordered)", "grey dashed = V1"); table
+  sub-headers say "(purple)"/"(orange)"; artifact 1's figure captions say what each colour and shape means (green =
+  gemma, orange = llama, blue = qwen; circle = reading AI, square = posts written by; teal dot = a comment). Excel charts
+  have legends; their big titles no longer overlap the first panel. "Only 5 actions" in the Excel: Excel had the file
+  open from 13:12 (old version); the rebuilt file lists all 28 actions per world, and gemma's first-post worlds really
+  used only 4-6 different actions.

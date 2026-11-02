@@ -104,7 +104,7 @@ tr.own td{color:var(--muted);font-style:italic}
       100 people in V1, V2 and V3. Here is user 0, word for word:</p>
       <pre class="persona" id="w_persona"></pre></div>
       <figure class="fig"><svg id="fig_people" viewBox="0 0 240 240" role="img" aria-label="100 users as a 10 by 10 grid"></svg>
-      <figcaption>100 users. Every dot is one person.</figcaption></figure>
+      <figcaption>100 users. Every dot is one person; the dark teal dot is user 0.</figcaption></figure>
     </li>
     <li>
       <div class="wtext"><h3>One AI plays every user, one at a time</h3>
@@ -132,7 +132,7 @@ tr.own td{color:var(--muted);font-style:italic}
       {{v3_posts_llama}}, qwen's {{v3_posts_qwen}}. Posts are never mixed between piles. A post only ever says which user wrote
       it, never which AI.</p></div>
       <figure class="fig"><svg id="fig_piles" viewBox="0 0 260 170" role="img" aria-label="Three post piles"></svg>
-      <figcaption>One pile per AI.</figcaption></figure>
+      <figcaption>One pile per AI. Green = gemma's posts, orange = llama's, blue = qwen's.</figcaption></figure>
     </li>
     <li>
       <div class="wtext"><h3>Nine worlds</h3>
@@ -141,7 +141,7 @@ tr.own td{color:var(--muted);font-style:italic}
       piles = 9 worlds. Each world starts fresh with only its pile, and is thrown away when it ends, so nothing in one world is
       seen in another. When an AI reads its own AI's pile (gemma reads gemma's posts), that world is a <b>baseline</b>.</p></div>
       <figure class="fig"><svg id="fig_worlds" viewBox="0 0 250 210" role="img" aria-label="3 by 3 grid of worlds"></svg>
-      <figcaption>Reading AI (rows) × posts written by (columns).</figcaption></figure>
+      <figcaption>Rows = reading AI (the circle's colour), columns = posts written by (the square's colour). Green = gemma, orange = llama, blue = qwen. Outlined boxes = an AI reading its own AI's posts.</figcaption></figure>
     </li>
     <li>
       <div class="wtext"><h3>Your scroll: which post you see first</h3>
@@ -151,7 +151,7 @@ tr.own td{color:var(--muted);font-style:italic}
       there they go once around the circle, skipping their own post. So every post is read early by some users and late by
       others. Section 03 shows every user's scroll.</p></div>
       <figure class="fig"><svg id="fig_ring" viewBox="0 0 240 240" role="img" aria-label="Posts in a circle with starting points"></svg>
-      <figcaption>The circle of posts; arrows mark where users start.</figcaption></figure>
+      <figcaption>Each orange square is one post in the pile (here llama's); the dark square is a post this user wrote, which they skip. Arrows mark where user 0 and user 50 start.</figcaption></figure>
     </li>
     <li>
       <div class="wtext"><h3>Reading one post</h3>
@@ -160,7 +160,7 @@ tr.own td{color:var(--muted);font-style:italic}
       to answer. Vote counts are never shown. The AI answers with the actions this user takes: upvote, comment, follow the
       poster, search, do_nothing, and so on. Section 04 takes the screen apart piece by piece.</p></div>
       <figure class="fig"><svg id="fig_screen" viewBox="0 0 220 250" role="img" aria-label="Parts of the reading screen"></svg>
-      <figcaption>The reading screen, top to bottom.</figcaption></figure>
+      <figcaption>The reading screen, top to bottom. The yellow box is the action list.</figcaption></figure>
     </li>
     <li>
       <div class="wtext"><h3>The timeline: everyone scrolls together</h3>
@@ -169,7 +169,7 @@ tr.own td{color:var(--muted);font-style:italic}
       <i>other</i> users from the <b>next</b> tick on; users see their own actions at once. So in tick 0 there are no comments
       anywhere, just like V1. Later on, posts carry more and more comments. Section 05 shows the life of any post, tick by tick.</p></div>
       <figure class="fig"><svg id="fig_ticks" viewBox="0 0 280 180" role="img" aria-label="Users by ticks, comments appearing"></svg>
-      <figcaption>Each column is a tick. Comments made in one tick appear in the next.</figcaption></figure>
+      <figcaption>Each column is a tick; each box is the one post that user reads in that tick. The teal dot is a comment: made in tick 0, seen by others from tick 1.</figcaption></figure>
     </li>
     <li>
       <div class="wtext"><h3>Extra screens and refresh</h3>
@@ -187,7 +187,7 @@ tr.own td{color:var(--muted);font-style:italic}
       users again, with one change: the action list is put in a new order, the actions used least in V3 on top and the most
       used at the bottom (upvote last). Everything else is identical. Section 06 shows both lists.</p></div>
       <figure class="fig"><svg id="fig_runs" viewBox="0 0 260 150" role="img" aria-label="V3 and V3a action lists"></svg>
-      <figcaption>Same posts, same users, the list in a new order.</figcaption></figure>
+      <figcaption>Same posts, same users, the list in a new order. Yellow = where upvote sits in each list.</figcaption></figure>
     </li>
   </ol>
 </section>

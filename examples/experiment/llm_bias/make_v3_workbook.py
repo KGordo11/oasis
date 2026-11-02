@@ -71,7 +71,7 @@ def place(ws, buf, cell):
 
 def png(fig):
     buf = io.BytesIO()
-    fig.tight_layout()
+    fig.tight_layout(rect=(0, 0, 1, 0.96) if fig._suptitle else None)  # leave room for the chart's own title
     fig.savefig(buf, format="png", dpi=150)
     plt.close(fig)
     buf.seek(0)

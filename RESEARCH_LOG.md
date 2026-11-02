@@ -71,7 +71,8 @@ research**:
 - **NEW Sun 11-01: logs are updated after EVERY new result, not only code changes** (Gordon: "you need to regularly be
   updating all logs"). `handoff_check.sh` now also FAILs when §0.2's date is older than the newest log/CLAUDE.md edit, or
   when CLAUDE.md does not mention the newest §14.x. Nothing is running; next steps wait for Gordon's go (speed suite;
-  V1 reading of V3's posts).
+  V1 reading of V3's posts). **New session: open Claude Code in `~/research` and type `/catchup`** (`~/research/.claude/
+  commands/catchup.md`, not in git: reads oasis/CLAUDE.md, runs handoff_check.sh read + check, memory, code, then sums up).
 
 - **NEW Fri 10-30 (§14.61): part 2 cleaned + compared.** Same posts, same users, only the menu order changed; every user saw
   every post except their own. The menu order changes behaviour a lot: gemma upvotes 68% -> 8% of posts at tick 0

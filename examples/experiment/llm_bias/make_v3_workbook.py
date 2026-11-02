@@ -150,10 +150,11 @@ def action_charts(title, note, runs):
     used = [a for a in REPORT["actions"] if any(W(r, m, pb)["actions"][a]["times"] for r in runs for m, pb in WORLDS)]
     used.sort(key=lambda a: -sum(W(r, m, pb)["actions"][a]["% of posts"] for r in runs for m, pb in WORLDS))
     head = ["action"] + [f"{m} reads {pb}'s posts{' (own)' if m == pb else ''}: {NAME[r]}" for m, pb in WORLDS for r in runs]
-    body = [[a] + [W(r, m, pb)["actions"][a]["% of posts"] for m, pb in WORLDS for r in runs] for a in used]
+    body = [[a] + [W(r, m, pb)["actions"][a]["% of posts"] for m, pb in WORLDS for r in runs] for a in used] + \
+        [[a] + [0.0] * (len(head) - 1) for a in REPORT["actions"] if a not in used]  # never chosen in these runs: 0 everywhere
     ws = sheet(title, note, head, body, {1: 22})
     col, row = get_column_letter(len(head) + 2), 4
-    for a in used[:14]:
+    for a in used:
         place(ws, world_bars(runs, lambda r, m, pb, a=a: W(r, m, pb)["actions"][a]["% of posts"],
                              f"{a}: % of posts read where the reading AI chose it", "%", 105), f"{col}{row}")
         row += 21
@@ -192,18 +193,17 @@ def worlds_actions(title, note, runs):
     head = LEAD + ["action"] + [f"{NAME[r]}: % of posts" for r in runs] + [f"{NAME[r]}: times per 100 posts" for r in runs] + \
         [f"change, points ({NAME[runs[1]]} - {NAME[runs[0]]})"]
     body = []
-    fig, axs = grid(3, 3, 2.9)
+    fig, axs = grid(3, 3, 5.2)
     for (m, pb), ax in zip(WORLDS, [a for row in axs for a in row]):
         acts = sorted(REPORT["actions"], key=lambda a: -sum(W(r, m, pb)["actions"][a]["% of posts"] for r in runs))
-        for a in acts:
+        for a in acts:  # all 28 post-screen actions in every world, 0 where nobody chose it
             p = [W(r, m, pb)["actions"][a]["% of posts"] for r in runs]
-            if any(W(r, m, pb)["actions"][a]["times"] for r in runs):
-                body.append([m, OWN(pb, m), a] + p + [W(r, m, pb)["actions"][a]["per 100"] for r in runs] + [round(p[1] - p[0], 1)])
-        top = acts[:5]
+            body.append([m, OWN(pb, m), a] + p + [W(r, m, pb)["actions"][a]["per 100"] for r in runs] + [round(p[1] - p[0], 1)])
+        top = [a for a in acts if any(W(r, m, pb)["actions"][a]["times"] for r in runs)]  # every action chosen in either run
         for k, r in enumerate(runs):
             ys = [i + (k - (len(runs) - 1) / 2) * (0.8 / len(runs)) for i in range(len(top))]
             ax.barh(ys, [W(r, m, pb)["actions"][a]["% of posts"] for a in top], 0.8 / len(runs) * 0.92, color=COLOR[r], label=NAME[r])
-        ax.set_yticks(range(len(top)), top, fontsize=7)
+        ax.set_yticks(range(len(top)), top, fontsize=6.5)
         ax.invert_yaxis()
         ax.set_xlim(0, 105)
         ax.set_title(f"{m} reads {pb}'s posts" + (" (own)" if m == pb else ""), fontsize=8.5, loc="left")
@@ -211,7 +211,7 @@ def worlds_actions(title, note, runs):
         ax.grid(axis="y", visible=False)
         ax.grid(axis="x", color=GRID)
     axs[0][0].legend(frameon=False, fontsize=7)
-    fig.suptitle("Top 5 actions in each world, % of posts read", x=0.01, ha="left", fontsize=10.5)
+    fig.suptitle("Every action chosen in each world, % of posts read", x=0.01, ha="left", fontsize=10.5)
     sheet(title, note, head, body, {1: 16, 2: 16, 3: 22}, base=lambda row: "own" in str(row[1]), chart=png(fig))
 
 
@@ -453,16 +453,16 @@ NT = "NO TIMELINE: each user's first post only, before anyone had commented on a
 TL = "WITH THE TIMELINE: the whole scroll, comments piling up. "
 action_charts("No timeline · action charts", NT + "Every action in every world, V3 vs V3a. Charts: one per action, then one per world.", T0)
 worlds_main("No timeline · V3 vs V3a", NT + "Each world on its own row.", T0)
-worlds_actions("No timeline · V3 vs V3a actions", NT + "Every action in every world.", T0)
+worlds_actions("No timeline · V3 vs V3a actions", NT + "All 28 actions on the post screen, in every world (0 = nobody chose it). send_message, open_post and back exist only on extra screens.", T0)
 worlds_stance("No timeline · V3 vs V3a feeling", NT + "By how the reading user feels about the post's topic (about 20 posts per feeling per world).", T0)
 effort_sheet("No timeline · V3 vs V3a effort", NT + "Easy vs hard actions in every world.", T0)
 worlds_main("No timeline · V1 vs V3", NT + "V1 round 101 (no timeline at all) next to V3's tick 0. V1 had V1's order, so it is compared with V3, not V3a.", V0)
-worlds_actions("No timeline · V1 vs V3 actions", NT + "Every action, V1 round 101 next to V3's tick 0.", V0)
+worlds_actions("No timeline · V1 vs V3 actions", NT + "All 28 post-screen actions in every world, V1 round 101 next to V3's first post only (0 = nobody chose it).", V0)
 worlds_stance("No timeline · V1 vs V3 feeling", NT + "By feeling, V1 round 101 next to V3's tick 0.", V0)
 bias_sheet("No timeline · own-AI favour", NT + "Own-AI favouritism from the worlds above (V1 rounds 101 and 102 alongside).", ["V3 tick 0", "V3a tick 0", "V1", "V1 r102"])
 action_charts("Timeline · action charts", TL + "Every action in every world, V3 vs V3a. Charts: one per action, then one per world.", M)
 worlds_main("Timeline · V3 vs V3a", TL + "Each world on its own row.", M)
-worlds_actions("Timeline · V3 vs V3a actions", TL + "Every action in every world.", M)
+worlds_actions("Timeline · V3 vs V3a actions", TL + "All 28 actions on the post screen, in every world (0 = nobody chose it). send_message, open_post and back exist only on extra screens.", M)
 worlds_stance("Timeline · V3 vs V3a feeling", TL + "By how the reading user feels about the post's topic.", M)
 ticks_sheet("Timeline · tick by tick", TL + "Every world, every tick, V3 next to V3a (the dashed line in the charts is V1, which has no ticks).")
 effort_sheet("Timeline · V3 vs V3a effort", TL + "Easy vs hard actions in every world (all screens, do_nothing left out).", M)
@@ -470,7 +470,7 @@ bias_sheet("Timeline · own-AI favour", TL + "Own-AI favouritism, whole scroll (
 posts_sheet("Timeline · V3 vs V3a posts", TL + "Each of the 320 posts and what each reading AI did with it.", M, "V3")
 users_sheet("Timeline · V3 vs V3a users", TL + "Each user in each world.", M)
 worlds_main("Timeline · V1 vs V3", TL + "V1 round 101 (no timeline) next to V3's whole scroll.", V)
-worlds_actions("Timeline · V1 vs V3 actions", TL + "Every action, V1 round 101 next to V3's whole scroll.", V)
+worlds_actions("Timeline · V1 vs V3 actions", TL + "All 28 post-screen actions in every world, V1 round 101 next to V3's whole scroll (0 = nobody chose it).", V)
 posts_sheet("V1 · posts", "V1 round 101's own posts (written without the 'posting time' line), what each reading AI did with them.", ["V1"], "V1")
 posting_sheets()
 detail()

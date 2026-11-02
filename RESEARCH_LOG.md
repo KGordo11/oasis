@@ -17388,3 +17388,10 @@ from"; "I want breakdowns of AI 1 reacting to AI 1's posts, AI 1 to AI 2's, AI 1
   collapsed to 4 px and overlapped the page (published v1 had it); renamed `.mbar`. On phones the tall menu now scrolls
   away. A long post title in a picker widened artifact 1 by 157 px at phone width; pickers now wrap. v3_report_data.py
   adds `stance_w`, `users_w`, `effort_w` (per world). Smoke ALL PASS (61).
+- **Fix (Gordon: "why are you only giving me 5 actions for the Excel no timeline V3 vs V3a?"):** the per-world chart showed
+  only each world's top 5 actions, and the table dropped actions nobody chose in that world (with first posts only, gemma
+  used just 4-6 different actions per world). Now every world lists all 28 post-screen actions (0 = nobody chose it), each
+  world's chart shows every action chosen, and the action-chart sheets have a chart for every action (29 / 36 charts).
+  send_message, open_post and back exist only on extra screens (noted on the sheets). Data page section 03 lists all 28 too.
+- "First post only" checked: in every world it is 100 posts read (one per user), covering 98-100 different posts of the
+  pile, with 0 comments on any screen.

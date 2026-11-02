@@ -310,11 +310,11 @@ draws.push(() => {
   seg("#a_ai", AIS.map(m => [m, m + " reads"]), G.ai);
   const cap = `Reading AI: ${G.ai} (plays all 100 users). Column groups: posts written by gemma's, llama's and qwen's users.`;
   $("#a_cap").textContent = cap; $("#k_cap").textContent = cap;
-  const acts = D.actions.filter(a => AIS.some(pb => [A(), B()].some(r => (src(r, pb)?.actions[a]?.["% of posts"] || 0) > 0)))
+  const acts = D.actions.slice()  // all 28 post-screen actions, 0% where nobody chose it
     .sort((x, y) => AIS.reduce((s, pb) => s + (src(A(), pb).actions[y]["% of posts"] - src(A(), pb).actions[x]["% of posts"]), 0));
   $("#a_table").innerHTML = `<tr><th>Action</th>${AIS.map(pb => runsHead(`${pb}'s posts${pb === G.ai ? " (own AI)" : ""}`)).join("")}</tr>` + subHead(3)
     + acts.map(a => `<tr><td><code>${esc(a)}</code></td>${AIS.map(pb => pair(src(A(), pb).actions[a]["% of posts"], src(B(), pb).actions[a]["% of posts"])).join("")}</tr>`).join("")
-    + `<tr><td class="muted" colspan="7" style="font-size:12.5px">% of posts read where the action was chosen at least once. Times per 100 posts read are in the Excel file.</td></tr>`;
+    + `<tr><td class="muted" colspan="7" style="font-size:12.5px">All 28 actions on the post screen (0% = nobody chose it in that world). send_message, open_post and back exist only on extra screens (see Easy vs hard). Times per 100 posts read are in the Excel file.</td></tr>`;
   const K = [["% engaged", "at least one real action"], ["% chose do_nothing", "chose do_nothing only"], ["% empty answer", "empty list [] only"],
              ["% upvoted", "upvoted the post"], ["% downvoted", "downvoted the post"], ["% commented", "commented"], ["actions per 100", "actions per 100 posts read (total engagement)"]];
   $("#k_table").innerHTML = `<tr><th>Answer held…</th>${AIS.map(pb => runsHead(`${pb}'s posts${pb === G.ai ? " (own AI)" : ""}`)).join("")}</tr>` + subHead(3)

@@ -66,7 +66,12 @@ research**:
    people reading them, do those people favour that AI's own posts? If they do, any simulation that uses one AI
    for both jobs is quietly tilted in that AI's favour.
 
-## 0.2 Where things stand (2026-10-30): read this first
+## 0.2 Where things stand (2026-11-01): read this first
+
+- **NEW Sun 11-01: logs are updated after EVERY new result, not only code changes** (Gordon: "you need to regularly be
+  updating all logs"). `handoff_check.sh` now also FAILs when §0.2's date is older than the newest log/CLAUDE.md edit, or
+  when CLAUDE.md does not mention the newest §14.x. Nothing is running; next steps wait for Gordon's go (speed suite;
+  V1 reading of V3's posts).
 
 - **NEW Fri 10-30 (§14.61): part 2 cleaned + compared.** Same posts, same users, only the menu order changed; every user saw
   every post except their own. The menu order changes behaviour a lot: gemma upvotes 68% -> 8% of posts at tick 0
@@ -15280,6 +15285,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | (this) | 10-28 12:00 | **`speed_suite.py`, `speed_summary.py`**: speed tests (ref + one change, all 3 AIs); `llamacpp_servers.sh` `LLAMA_BIN`/`SERVER_ARGS`, bash-3.2 portable; `run_v2.py --shared-first`; `fake_engine.py` logs menu position; smoke +8 checks, flaky `__` path split fixed (§14.59) |
 | (this) | 10-29 15:00 | **`v3_clean.py`** (clean/normalize/aggregate a part: reads/followups/posts/actions CSVs, every world x tick, effort levels, retries, gates), **`make_v3_workbook.py`**, **`make_inside_v3.py` + `inside_v3_template.html`** (page; screens rebuilt by world replay, checked vs 13,242 saved screens), `v3_by_tick.py` (§14.60) |
 | (this) | 10-30 12:00 | `make_v3_workbook.py`: sheets 1 No timeline (V1 + tick 0), 2 With timeline, 3 Own-AI bias, P1/P2 per-world tick sheets with every action. `make_inside_v3.py` + template: part 2 in screens (own menu, replay-checked), ticks, effort, V1 table; section "Part 2: the menu order" (stance table, compare output); part 2 menu/posts asserted equal; per-part sample users. `v3_clean.py` gate wording (shown, not read). `check_gemma_own.py` title per part (§14.61) |
+| (this) | 11-01 | **`handoff_check.sh`**: also FAILs if §0.2's date is older than the newest RESEARCH_LOG/CLAUDE.md edit, or CLAUDE.md lacks the newest §14.x (Gordon: update all logs regularly; §14.61) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 

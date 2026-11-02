@@ -1,8 +1,9 @@
 #!/bin/bash
 # Handoff check (log 14.32a, 14.52). Run on the Mac.
 #   handoff_check.sh read   start of a session: §0.2 top, the newest §14.x entry, git state (the catch-up bundle)
-#   handoff_check.sh        end of EVERY change, before the final commit: FAILs if §0.2, §14.32 Status, the change
-#                           history (§14.32c) or memory is behind the newest §14.x entry / the newest code change
+#   handoff_check.sh        end of EVERY change AND every new result, before the final commit: FAILs if §0.2 (and its
+#                           date), §14.32 Status, the change history (§14.32c), CLAUDE.md or memory is behind the
+#                           newest §14.x entry / the newest code change / the newest log edit
 cd "$(dirname "$0")/../../.." || exit 1
 L=RESEARCH_LOG.md MEM=$HOME/.claude/projects/-Users-gordon-research/memory
 N=$(grep -o '^## 14\.[0-9]*' $L | tail -1 | cut -c4-)        # e.g. 14.52
@@ -21,7 +22,13 @@ row=$(sed -n '/^### 14\.32c/,/^### 14\.32d/p' $L | grep '^| ' | tail -1 | cut -d
 code=$(git log -1 --format=%ad --date=format:%m-%d -- examples/experiment/llm_bias)
 git status --porcelain -- examples/experiment/llm_bias | grep -v make_report_v2.py | grep -q . && code=$(date +%m-%d)
 [[ "$row" < "$code" ]] && fail "change history (§14.32c) newest row is $row, code changed $code: add a row"  # ponytail: MM-DD compare, breaks across New Year
+# §0.2's date must be on/after the log's newest change: new results written below but not summed up at the top = FAIL
+top=$(grep -m1 -oE '^## 0\.2 Where things stand \([0-9-]{10}\)' $L | grep -oE '[0-9-]{10}')
+logd=$(git log -1 --format=%ad --date=short -- $L CLAUDE.md)
+git status --porcelain -- $L CLAUDE.md | grep -q . && logd=$(date +%F)
+[[ "$top" < "$logd" ]] && fail "§0.2 says ($top) but the log/CLAUDE.md changed $logd: update §0.2 and its date"
+grep -qE "§$RE" CLAUDE.md || fail "CLAUDE.md (the digest) does not mention §$N"
 grep -qE "$RE" "$MEM/project_llm_bias_v2.md" || fail "memory project_llm_bias_v2.md does not mention $N"
 grep -qE "$RE" "$MEM/MEMORY.md" || fail "MEMORY.md index line does not mention $N"
-[ $bad = 0 ] && echo "HANDOFF CURRENT (§$N in §0.2, §14.32 Status, memory; change history $row >= code $code)"
+[ $bad = 0 ] && echo "HANDOFF CURRENT (§$N in §0.2 ($top), §14.32 Status, CLAUDE.md, memory; change history $row >= code $code)"
 exit $bad

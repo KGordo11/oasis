@@ -7,6 +7,8 @@
 /*__CSS__*/
 /* Data page additions. Run A = violet, run B = amber (validated pair); AI colors as on the Inside pages. */
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (max-width:720px){.bar{position:static;background:var(--paper);backdrop-filter:none}}  /* on a phone the menu is tall: let it scroll away */
+.xrow{flex-wrap:wrap;min-width:0}.xrow select.pick{min-width:0;max-width:100%;flex:1 1 220px}  /* long post titles in a picker must not widen the page */
 :root{--runA:#6250d6;--runB:#eda100;--up:#1f7a4d;--down:#b3364a}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--runA:#9085e9;--runB:#c98500;--up:#5cc58f;--down:#ef7d90}}
 :root[data-theme="dark"]{--runA:#9085e9;--runB:#c98500;--up:#5cc58f;--down:#ef7d90}
@@ -16,8 +18,8 @@
 .cmp b.a{color:var(--ink)}.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 .sw.a{background:var(--runA)}.sw.b{background:var(--runB)}
 td.v{font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right;min-width:74px}
-.bar{display:block;height:4px;border-radius:2px;margin-top:3px;max-width:100%}
-.bar.a{background:var(--runA)}.bar.b{background:var(--runB)}
+.mbar{display:block;height:4px;border-radius:2px;margin-top:3px;max-width:100%}
+.mbar.a{background:var(--runA)}.mbar.b{background:var(--runB)}
 .pts.pos{color:var(--up)}.pts.neg{color:var(--down)}.pts{font-weight:600}
 th.grp{text-align:center;border-bottom:2px solid var(--rule)}
 .md h1,.md h2{font:600 17px var(--body);margin:18px 0 8px}.md p{font-size:14px}
@@ -35,13 +37,14 @@ th.grp{text-align:center;border-bottom:2px solid var(--rule)}
 .ex{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--runA);border-radius:8px;padding:12px 14px;max-width:80ch}
 select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px solid var(--rule);border-radius:8px;background:var(--panel);color:var(--ink);max-width:100%}
 .tbig{max-height:560px;overflow:auto}
+.cap{font-size:13px;color:var(--muted);margin:4px 0 6px}
 .clear{font:600 11px var(--mono);padding:1px 6px;border-radius:4px;background:var(--soft)}
 </style>
 <nav class="bar" aria-label="Sections"><div class="wrap">
   <b>LLM Bias V3 Data</b>
-  <a href="#read">How to read</a><a href="#clean">Cleaning</a><a href="#actions">Each action</a><a href="#kinds">Answers</a>
+  <a href="#read">How to read</a><a href="#charts">Action charts</a><a href="#clean">Cleaning</a><a href="#actions">Each action</a><a href="#kinds">Answers</a>
   <a href="#posting">Posting</a><a href="#stance">By feeling</a><a href="#ticks">Timeline</a><a href="#posts">Each post</a>
-  <a href="#users">Each user</a><a href="#worlds">Each world</a><a href="#ais">Each AI</a><a href="#bias">Own-AI favouritism</a><a href="#effort">Easy vs hard</a>
+  <a href="#users">Each user</a><a href="#worlds">Each world</a><a href="#bias">Own-AI favouritism</a><a href="#effort">Easy vs hard</a>
   <div class="ctlbar">
     <span class="lab">Compare</span><div class="seg" id="c_mode"></div>
     <span class="lab">Show</span><div class="seg" id="c_show"></div>
@@ -52,11 +55,11 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
 <header class="hero">
   <div class="eyebrow">OASIS research · LLM Bias V3 big sim · the numbers</div>
   <h1>LLM Bias V3 Data</h1>
-  <p class="lede" style="margin-top:14px">Every number from the V3 big sim, starting from single actions and single posts and building up
-  to totals. The main comparison is <b>V3 vs V3a</b>: the same posts and users, with the action list in a new order. You can
+  <p class="lede" style="margin-top:14px">Every number from the V3 big sim, world by world: one reading AI reacting to the posts one AI's
+  users wrote (gemma reading gemma's posts, gemma reading llama's, and so on). Nothing is added up into totals. The main comparison is <b>V3 vs V3a</b>: the same posts and users, with the action list in a new order. You can
   also compare <b>V1 with V3</b>: V1 used V1's order too, so it is compared with V3 (not V3a). Each comparison can include
-  the timeline (the whole scroll, comments piling up) or leave it out (tick 0: each user's first post, before anyone
-  commented, like V1).</p>
+  the timeline (the whole scroll, comments piling up) or leave it out (each user's first post only, before anyone had
+  commented on anything, like V1).</p>
   <p class="lede">How the sim works, every screen and every answer: <a href="https://claude.ai/artifact/KwhpKCngkZUmPxpWV6UEer">Inside LLM Bias V3</a>.</p>
   <div class="facts" id="facts"></div>
 </header>
@@ -65,6 +68,9 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
   <div class="eyebrow">00 · How to read the numbers</div>
   <h2>Percentages first, differences when you ask</h2>
   <ul>
+    <li><b>Two AIs in every number.</b> The <b>reading AI</b> is the AI playing the 100 users who read and react. <b>Posts written by</b>
+    is the AI whose users wrote the posts being read. "gemma reads llama's posts" = gemma plays the readers, the posts came
+    from llama's posting turn. Every table says both.</li>
     <li><b>% of posts read</b>: out of every post a user read, how often the AI did this. "Upvoted 60%" means 60 of every 100
     posts read got an upvote. A post read is one user reading one post.</li>
     <li><b>Actions per 100 posts read</b> (total engagement, the main measure): count every action except do_nothing, divide
@@ -78,8 +84,26 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
   <div class="ex" id="r_ex"></div>
 </section>
 
+<section id="charts">
+  <div class="eyebrow">01 · Action charts</div>
+  <h2>Every action, world by world</h2>
+  <p>The main view. Pick an action: the chart shows, for every world, how often the reading AI chose it, in both runs side by
+  side. Then pick one world to see every action it used. Point at a bar for the exact number.</p>
+  <div class="xctl">
+    <div class="xrow"><span class="lab">Action</span><select class="pick" id="ch_act" aria-label="Action"></select></div>
+  </div>
+  <div class="chart"><svg id="ch1" viewBox="0 0 900 330" role="img" aria-label="One action in every world"></svg><div class="legend" id="ch1_leg"></div></div>
+  <h3>One world, every action</h3>
+  <div class="xctl">
+    <div class="xrow"><span class="lab">Reading AI</span><div class="seg" id="ch_ai"></div></div>
+    <div class="xrow"><span class="lab">Posts written by</span><div class="seg" id="ch_pb"></div></div>
+  </div>
+  <p class="cap" id="ch2_cap"></p>
+  <div class="chart"><svg id="ch2" viewBox="0 0 900 400" role="img" aria-label="Every action in one world"></svg></div>
+</section>
+
 <section id="clean">
-  <div class="eyebrow">01 · From raw files to clean data</div>
+  <div class="eyebrow">02 · From raw files to clean data</div>
   <h2>Clean, normalize, aggregate: done the same way for every run</h2>
   <ol class="steps">
     <li><h4>Clean</h4><p>Kept out of the main tables, and counted: the noise-floor rereads, answers that were still unusable after
@@ -87,8 +111,8 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
       counts as one post read, at the tick of its first look. Every action is marked "worked" or "failed", with why.</p></li>
     <li><h4>Normalize</h4><p>Divide by posts read, because the piles are different sizes (gemma 99, llama 119, qwen 102 posts,
       each read by 98-99 users).</p></li>
-    <li><h4>Aggregate, small to big</h4><p>Below, in this order:</p>
-      <div class="ladder"><span>one action</span><i>→</i><span>kind of answer</span><i>→</i><span>by feeling</span><i>→</i><span>each tick</span><i>→</i><span>each post</span><i>→</i><span>each user</span><i>→</i><span>each world</span><i>→</i><span>each AI</span><i>→</i><span>everything</span></div></li>
+    <li><h4>Organize, small to big, always world by world</h4><p>Below, in this order, every table split by reading AI and by whose posts:</p>
+      <div class="ladder"><span>each action</span><i>→</i><span>kind of answer</span><i>→</i><span>by feeling</span><i>→</i><span>each tick</span><i>→</i><span>each post</span><i>→</i><span>each user</span><i>→</i><span>each world</span></div></li>
     <li><h4>Check</h4><p>Every V3 and V3a number was counted a second time straight from the raw files: 62,633 numbers, 0
       differences. This page's world numbers are checked against the cleaned files when it is built.</p></li>
   </ol>
@@ -100,25 +124,27 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
 </section>
 
 <section id="actions">
-  <div class="eyebrow">02 · One action at a time</div>
+  <div class="eyebrow">03 · One action at a time</div>
   <h2>How often each AI chose each action</h2>
-  <p>% of posts read where the AI chose the action at least once. Pick whose posts to look at (all three piles together, or
-  one pile = one world per reader).</p>
-  <div class="xrow" style="margin:6px 0"><span class="lab">Whose posts</span><div class="seg" id="a_pb"></div></div>
+  <p>% of posts read where the reading AI chose the action at least once. Pick the reading AI; the three column groups are the
+  posts written by each AI, so you see it react to its own AI's posts and to the other two AIs' posts side by side.</p>
+  <div class="xrow" style="margin:6px 0"><span class="lab">Reading AI</span><div class="seg" id="a_ai"></div></div>
+  <p class="cap" id="a_cap"></p>
   <div class="tablewrap tbig"><table id="a_table"></table></div>
 </section>
 
 <section id="kinds">
-  <div class="eyebrow">03 · What kind of answer</div>
+  <div class="eyebrow">04 · What kind of answer</div>
   <h2>Every answer is a list of actions. What was in it?</h2>
   <p>Each answer falls into one of three kinds: at least one real action; the menu action <code>do_nothing</code> and nothing
   else; or an empty list <code>[]</code> with only the AI's reason (for example <i>"Electric cars? Ugh. I'm out."</i>). Same
-  "whose posts" choice as section 02.</p>
+  reading AI choice as section 02.</p>
+  <p class="cap" id="k_cap"></p>
   <div class="tablewrap"><table id="k_table"></table></div>
 </section>
 
 <section id="posting">
-  <div class="eyebrow">04 · The posting turn</div>
+  <div class="eyebrow">05 · The posting turn</div>
   <h2>How many posts each AI's users wrote</h2>
   <p>V3a has no posting turn: it reads V3's posts. So the posting turn compares V1 (rounds 101 and 102) with V3. Every answer is
   readable on the Inside page.</p>
@@ -130,22 +156,24 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
 </section>
 
 <section id="stance">
-  <div class="eyebrow">05 · By how the user feels about the topic</div>
+  <div class="eyebrow">06 · By how the user feels about the topic</div>
   <h2>Users who love a topic vs users who hate it</h2>
   <div class="xctl">
-    <div class="xrow"><span class="lab">Reader AI</span><div class="seg" id="st_ai"></div></div>
+    <div class="xrow"><span class="lab">Reading AI</span><div class="seg" id="st_ai"></div></div>
+    <div class="xrow"><span class="lab">Measure</span><div class="seg" id="st_m"></div></div>
   </div>
+  <p class="cap" id="st_cap"></p>
   <div class="tablewrap"><table id="st_table"></table></div>
 </section>
 
 <section id="ticks">
-  <div class="eyebrow">06 · The timeline, tick by tick</div>
+  <div class="eyebrow">07 · The timeline, tick by tick</div>
   <h2>How each world changes as comments pile up</h2>
   <p>Only V3 and V3a have ticks, so this chart always shows both, with V1 as a dashed line (one number, no ticks). Ticks with
   fewer than 50 posts read (the last few, from refresh returns) are left off. Point at the chart for the values.</p>
   <div class="xctl">
-    <div class="xrow"><span class="lab">Reader AI</span><div class="seg" id="t_ai"></div></div>
-    <div class="xrow"><span class="lab">Whose posts</span><div class="seg" id="t_pb"></div></div>
+    <div class="xrow"><span class="lab">Reading AI</span><div class="seg" id="t_ai"></div></div>
+    <div class="xrow"><span class="lab">Posts written by</span><div class="seg" id="t_pb"></div></div>
     <div class="xrow"><span class="lab">Measure</span><div class="seg" id="t_m"></div></div>
   </div>
   <div class="chart"><svg id="t_svg" viewBox="0 0 900 320" role="img" aria-label="Measure by tick"></svg><div class="legend" id="t_leg"></div></div>
@@ -153,11 +181,11 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
 </section>
 
 <section id="posts">
-  <div class="eyebrow">07 · Each post</div>
-  <h2>What each reader AI did with each post</h2>
+  <div class="eyebrow">08 · Each post</div>
+  <h2>What each reading AI did with each post</h2>
   <p id="p_note"></p>
   <div class="xctl">
-    <div class="xrow"><span class="lab">Pile</span><div class="seg" id="p_pb"></div></div>
+    <div class="xrow"><span class="lab">Posts written by</span><div class="seg" id="p_pb"></div></div>
     <div class="xrow"><span class="lab">Measure</span><div class="seg" id="p_m"></div></div>
     <div class="xrow" id="p_runrow"><span class="lab">Posts of</span><div class="seg" id="p_run"></div></div>
     <div class="xrow"><span class="lab">Find</span><input class="pick" id="p_find" placeholder="words in the title" aria-label="Find a post"></div>
@@ -166,33 +194,34 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
 </section>
 
 <section id="users">
-  <div class="eyebrow">08 · Each user</div>
+  <div class="eyebrow">09 · Each user</div>
   <h2>Each of the 100 users, as played by each AI</h2>
-  <p>All three piles together for each reader AI. The same person is played by three different AIs.</p>
-  <div class="xrow" style="margin:6px 0"><span class="lab">Measure</span><div class="seg" id="u_m"></div></div>
+  <p>Pick the reading AI (the AI playing every user). Column groups: the posts written by each AI, so each user's reaction to
+  their own AI's posts and to the other two AIs' posts sits side by side.</p>
+  <div class="xctl">
+    <div class="xrow"><span class="lab">Reading AI</span><div class="seg" id="u_ai"></div></div>
+    <div class="xrow"><span class="lab">Measure</span><div class="seg" id="u_m"></div></div>
+  </div>
   <div class="tablewrap tbig"><table id="u_table"></table></div>
 </section>
 
 <section id="worlds">
-  <div class="eyebrow">09 · Each world</div>
+  <div class="eyebrow">10 · Each world</div>
   <h2>The 9 worlds</h2>
-  <p>A world is one reader AI reading one AI's pile. The diagonal (an AI reading its own AI's posts) is shaded.</p>
+  <p>A world is one reading AI (playing all 100 users) reading the posts one AI's users wrote. Shaded rows: an AI reading
+  posts its own AI wrote.</p>
   <div class="tablewrap"><table id="w_table"></table></div>
 </section>
 
-<section id="ais">
-  <div class="eyebrow">10 · Each AI, and everything together</div>
-  <h2>The biggest picture</h2>
-  <div class="tablewrap"><table id="ai_table"></table></div>
-</section>
+
 
 <section id="bias">
   <div class="eyebrow">11 · Own-AI favouritism</div>
   <h2>Does an AI give its own AI's posts more?</h2>
   <p>For two AIs, say gemma and llama, four percentages:</p>
   <ol>
-    <li>gemma on gemma's posts, and llama on gemma's posts. The gap = how much more gemma gives gemma's posts than llama does.</li>
-    <li>gemma on llama's posts, and llama on llama's posts. The gap = how much more gemma gives llama's posts than llama does.
+    <li>gemma reading gemma's posts, and llama reading gemma's posts. The gap = how much more gemma gives gemma's posts than llama does.</li>
+    <li>gemma reading llama's posts, and llama reading llama's posts. The gap = how much more gemma gives llama's posts than llama does.
     This is just how much more gemma upvotes everything.</li>
     <li><b>Favouritism = gap 1 − gap 2.</b> Above 0: both AIs lean toward their own AI's posts. Below 0: they lean toward
     the other's. The range is where it lands 95% of the time when posts and users are resampled; <span class="clear">CLEAR</span>
@@ -208,7 +237,8 @@ select.pick,input.pick{font:500 14px var(--body);padding:6px 10px;border:1px sol
   <h2>Do the AIs pick the easy actions?</h2>
   <p>Each action gets a level from what it asks of the AI: 1 one click (upvote), 2 copy an ID from the screen (like a comment),
   3 write text (comment), 4 write a whole post, 5 go to another screen first and then write (a private message). Share of each
-  AI's actions at each level, all screens, do_nothing left out. Only V3 and V3a have extra screens, so V1 is not in this table.</p>
+  AI's actions at each level, all screens, do_nothing left out. V1 has no extra screens, so with V1 picked this shows V3 vs V3a.</p>
+  <div class="xrow" style="margin:6px 0"><span class="lab">Reading AI</span><div class="seg" id="e_ai"></div></div>
   <div class="tablewrap"><table id="e_table"></table></div>
 </section>
 </main>
@@ -221,10 +251,10 @@ const AIS = ["gemma", "llama", "qwen"], DOT = {gemma: "g", llama: "l", qwen: "q"
 const dot = m => `<span class="dot ${DOT[m]}"></span>${m}`;
 const seg = (id, opts, cur) => { $(id).innerHTML = opts.map(([k, t]) => `<button type="button" data-k="${esc(k)}" aria-pressed="${String(k) === String(cur)}">${esc(t)}</button>`).join(""); };
 const onSeg = (id, f) => $(id).addEventListener("click", e => { const b = e.target.closest("button"); if (b) f(b.dataset.k); });
-const MODES = [["V3|V3a", "V3 vs V3a", "V3", "V3a"], ["V3 tick 0|V3a tick 0", "V3 vs V3a, no timeline", "V3 tick 0", "V3a tick 0"],
-               ["V1|V3", "V1 vs V3", "V1", "V3"], ["V1|V3 tick 0", "V1 vs V3, no timeline", "V1", "V3 tick 0"]];
-const NAME = {"V3": "V3", "V3a": "V3a (actions reordered)", "V3 tick 0": "V3, tick 0", "V3a tick 0": "V3a, tick 0", "V1": "V1 (round 101)", "V1 r102": "V1 round 102"};
-const G = {mode: "V3|V3a", show: "pct", pb: "all"};
+const MODES = [["V3|V3a", "V3 vs V3a", "V3", "V3a"], ["V3 tick 0|V3a tick 0", "V3 vs V3a, no timeline (first post only)", "V3 tick 0", "V3a tick 0"],
+               ["V1|V3", "V1 vs V3", "V1", "V3"], ["V1|V3 tick 0", "V1 vs V3, no timeline (first post only)", "V1", "V3 tick 0"]];
+const NAME = {"V3": "V3", "V3a": "V3a (actions reordered)", "V3 tick 0": "V3, first post only", "V3a tick 0": "V3a, first post only", "V1": "V1 (round 101)", "V1 r102": "V1 round 102"};
+const G = {mode: "V3|V3a", show: "pct", ai: "gemma"};
 const A = () => MODES.find(m => m[0] === G.mode)[2], B = () => MODES.find(m => m[0] === G.mode)[3];
 const num = v => v == null ? "–" : (+v).toLocaleString("en-US", {maximumFractionDigits: 1, minimumFractionDigits: 1});
 // a pair of values for runs A and B: two cells (with bars) or one cell of points
@@ -234,7 +264,7 @@ function pair(a, b, unit = "%", max = 100){
     const d = b - a, s = d > 0.05 ? "pos" : d < -0.05 ? "neg" : "";
     return `<td class="v"><span class="pts ${s}">${d > 0 ? "+" : d < 0 ? "−" : "±"}${Math.abs(d).toFixed(1)}</span> <span class="muted">${unit === "%" ? "pts" : ""}</span></td>`;
   }
-  const c = (v, k) => `<td class="v">${v == null ? "–" : num(v) + (unit === "%" ? "%" : "")}${v == null ? "" : `<span class="bar ${k}" style="width:${Math.min(100, 100 * v / max)}%"></span>`}</td>`;
+  const c = (v, k) => `<td class="v">${v == null ? "–" : num(v) + (unit === "%" ? "%" : "")}${v == null ? "" : `<span class="mbar ${k}" style="width:${Math.min(100, 100 * v / max)}%"></span>`}</td>`;
   return c(a, "a") + c(b, "b");
 }
 const runsHead = (label) => G.show === "diff" ? `<th class="num">${label}<br><span class="muted" style="font-weight:400">points</span></th>` : `<th class="num" colspan="2">${label}</th>`;
@@ -248,12 +278,12 @@ onSeg("#c_mode", k => { G.mode = k; redraw(); }); onSeg("#c_show", k => { G.show
 
 /* facts + how to read */
 draws.push(() => {
-  const t = r => D.total[r];
-  $("#facts").innerHTML = [A(), B()].map(r => `<div><b>${t(r)["posts read"].toLocaleString()}</b><span>posts read in ${esc(NAME[r])}</span></div>`).join("")
-    + [A(), B()].map(r => `<div><b>${num(t(r)["actions per 100"])}</b><span>actions per 100 posts read, ${esc(NAME[r])}</span></div>`).join("")
-    + [A(), B()].map(r => `<div><b>${num(t(r)["% upvoted"])}%</b><span>of posts upvoted, ${esc(NAME[r])}</span></div>`).join("");
-  const g = r => D.reader[`${r}|gemma`]["% upvoted"], d = g(B()) - g(A());
-  $("#r_ex").innerHTML = `<b>Example, from the current comparison:</b> gemma upvoted <b>${num(g(A()))}%</b> of the posts it read in ${esc(NAME[A()])} and <b>${num(g(B()))}%</b> in ${esc(NAME[B()])}. As a difference: ${d >= 0 ? "+" : "−"}${Math.abs(d).toFixed(1)} points.`;
+  const pr = r => D.world[`${r}|gemma|llama`]["posts read"];
+  $("#facts").innerHTML = `<div><b>9</b><span>worlds: 3 reading AIs × the posts of 3 AIs, always shown one by one (no totals)</span></div>`
+    + `<div><b>${D.actions.length}</b><span>different actions the AIs used</span></div>`
+    + [A(), B()].map(r => `<div><b>${pr(r).toLocaleString()}</b><span>posts read in one world (gemma reads llama's posts), ${esc(NAME[r])}</span></div>`).join("");
+  const g = r => D.world[`${r}|gemma|gemma`]["% upvoted"], d = g(B()) - g(A());
+  $("#r_ex").innerHTML = `<b>Example, from the current comparison:</b> when gemma read gemma's posts, it upvoted <b>${num(g(A()))}%</b> of them in ${esc(NAME[A()])} and <b>${num(g(B()))}%</b> in ${esc(NAME[B()])}. As a difference: ${d >= 0 ? "+" : "−"}${Math.abs(d).toFixed(1)} points.`;
 });
 
 /* 01 cleaning */
@@ -270,26 +300,27 @@ draws.push(() => {
   const draw = () => { seg("#cl_run", [["V3", "V3"], ["V3a", "V3a"]], run); $("#cl_md").innerHTML = mdHtml(D.cleaning[run]); };
   onSeg("#cl_run", k => { run = k; draw(); }); draw();
   $("#cl_runs").innerHTML = `<tr><th>Run</th><th class="num">Posts read</th><th>Where from</th></tr>` + [["V1", "data/llm_bias/v1_v2_spark/r101: readable answers, noise floor left out (V1 has no extra screens)"],
-    ["V1 r102", "the same, round 102 (different posts)"], ["V3", "data/llm_bias/v3/clean/reads.csv"], ["V3 tick 0", "V3's tick 0 only: 100 per world"],
-    ["V3a", "data/llm_bias/v3_flipped/clean/reads.csv"], ["V3a tick 0", "V3a's tick 0 only"]].map(([r, w]) => `<tr><td>${esc(NAME[r])}</td><td class="num">${D.total[r]["posts read"].toLocaleString()}</td><td class="mono" style="font-size:12.5px">${esc(w)}</td></tr>`).join("");
+    ["V1 r102", "the same, round 102 (different posts)"], ["V3", "data/llm_bias/v3/clean/reads.csv"], ["V3 tick 0", "V3, each user's first post only: 100 per world"],
+    ["V3a", "data/llm_bias/v3_flipped/clean/reads.csv"], ["V3a tick 0", "V3a, each user's first post only: 100 per world"]].map(([r, w]) => `<tr><td>${esc(NAME[r])}</td><td class="num">${D.total[r]["posts read"].toLocaleString()}</td><td class="mono" style="font-size:12.5px">${esc(w)}</td></tr>`).join("");
 }
 
 /* 02 actions + 03 kinds (share the "whose posts" choice) */
-const src = (run, ai) => G.pb === "all" ? D.reader[`${run}|${ai}`] : D.world[`${run}|${ai}|${G.pb}`];
+const src = (run, pb) => D.world[`${run}|${G.ai}|${pb}`];  // one world: G.ai reads pb's posts
 draws.push(() => {
-  seg("#a_pb", [["all", "all three piles"], ...AIS.map(m => [m, m + "'s posts"])], G.pb);
-  const acts = D.actions.filter(a => AIS.some(ai => [A(), B()].some(r => (src(r, ai)?.actions[a]?.["% of posts"] || 0) > 0)))
-    .sort((x, y) => AIS.reduce((s, ai) => s + (src(A(), ai).actions[y]["% of posts"] - src(A(), ai).actions[x]["% of posts"]), 0));
-  $("#a_table").innerHTML = `<tr><th>Action</th>${AIS.map(ai => runsHead(dot(ai) + " reading")).join("")}</tr>` + subHead(3)
-    + acts.map(a => `<tr><td><code>${esc(a)}</code></td>${AIS.map(ai => pair(src(A(), ai).actions[a]["% of posts"], src(B(), ai).actions[a]["% of posts"])).join("")}</tr>`).join("")
+  seg("#a_ai", AIS.map(m => [m, m + " reads"]), G.ai);
+  const cap = `Reading AI: ${G.ai} (plays all 100 users). Column groups: posts written by gemma's, llama's and qwen's users.`;
+  $("#a_cap").textContent = cap; $("#k_cap").textContent = cap;
+  const acts = D.actions.filter(a => AIS.some(pb => [A(), B()].some(r => (src(r, pb)?.actions[a]?.["% of posts"] || 0) > 0)))
+    .sort((x, y) => AIS.reduce((s, pb) => s + (src(A(), pb).actions[y]["% of posts"] - src(A(), pb).actions[x]["% of posts"]), 0));
+  $("#a_table").innerHTML = `<tr><th>Action</th>${AIS.map(pb => runsHead(`${pb}'s posts${pb === G.ai ? " (own AI)" : ""}`)).join("")}</tr>` + subHead(3)
+    + acts.map(a => `<tr><td><code>${esc(a)}</code></td>${AIS.map(pb => pair(src(A(), pb).actions[a]["% of posts"], src(B(), pb).actions[a]["% of posts"])).join("")}</tr>`).join("")
     + `<tr><td class="muted" colspan="7" style="font-size:12.5px">% of posts read where the action was chosen at least once. Times per 100 posts read are in the Excel file.</td></tr>`;
-  seg("#a_pb", [["all", "all three piles"], ...AIS.map(m => [m, m + "'s posts"])], G.pb);
   const K = [["% engaged", "at least one real action"], ["% chose do_nothing", "chose do_nothing only"], ["% empty answer", "empty list [] only"],
              ["% upvoted", "upvoted the post"], ["% downvoted", "downvoted the post"], ["% commented", "commented"], ["actions per 100", "actions per 100 posts read (total engagement)"]];
-  $("#k_table").innerHTML = `<tr><th>Answer held…</th>${AIS.map(ai => runsHead(dot(ai) + " reading")).join("")}</tr>` + subHead(3)
-    + K.map(([k, t]) => `<tr><td>${esc(t)}</td>${AIS.map(ai => pair(src(A(), ai)[k], src(B(), ai)[k], k.startsWith("%") ? "%" : "", k.startsWith("%") ? 100 : 400)).join("")}</tr>`).join("");
+  $("#k_table").innerHTML = `<tr><th>Answer held…</th>${AIS.map(pb => runsHead(`${pb}'s posts${pb === G.ai ? " (own AI)" : ""}`)).join("")}</tr>` + subHead(3)
+    + K.map(([k, t]) => `<tr><td>${esc(t)}</td>${AIS.map(pb => pair(src(A(), pb)[k], src(B(), pb)[k], k.startsWith("%") ? "%" : "", k.startsWith("%") ? 100 : 400)).join("")}</tr>`).join("");
 });
-onSeg("#a_pb", k => { G.pb = k; redraw(); });
+onSeg("#a_ai", k => { G.ai = k; redraw(); });
 
 /* 04 posting */
 {
@@ -313,17 +344,18 @@ onSeg("#a_pb", k => { G.pb = k; redraw(); });
     AIS.flatMap(ai => R.map(([r, rn]) => `<tr><td>${dot(ai)}</td><td>${rn}</td>${subs.map(s => `<td class="num">${topics[`${ai}|${rn}|${s}`] || ""}</td>`).join("")}</tr>`)).join("");
 }
 
-/* 05 stance */
+/* 05 stance: one reading AI, column groups = posts written by */
 {
-  let ai = "gemma";
+  let m = "% upvoted";
+  const K = [["% upvoted", "% upvoted"], ["% engaged", "% engaged"], ["% downvoted", "% downvoted"], ["% commented", "% commented"], ["actions per 100", "actions per 100"]];
   draws.push(() => {
-    seg("#st_ai", AIS.map(m => [m, m + " reading"]), ai);
-    const K = [["% engaged", "engaged"], ["% upvoted", "upvoted"], ["% downvoted", "downvoted"], ["% commented", "commented"]];
-    $("#st_table").innerHTML = `<tr><th>User feels</th><th class="num">Posts read<br><span class="muted" style="font-weight:400">${esc(A())} / ${esc(B())}</span></th>${K.map(([_, t]) => runsHead(t)).join("")}</tr>` + subHead(4).replace("<tr><th></th>", "<tr><th></th><th></th>")
-      + ["LOVE", "LIKE", "NEUTRAL", "DISLIKE", "HATE"].map(s => { const a = D.stance[`${A()}|${ai}|${s}`], b = D.stance[`${B()}|${ai}|${s}`];
-        return `<tr><td>${s}</td><td class="num">${a ? a["posts read"].toLocaleString() : "–"} / ${b ? b["posts read"].toLocaleString() : "–"}</td>${K.map(([k]) => pair(a?.[k], b?.[k])).join("")}</tr>`; }).join("");
+    seg("#st_ai", AIS.map(x => [x, x + " reads"]), G.ai); seg("#st_m", K, m);
+    $("#st_cap").textContent = `Reading AI: ${G.ai} (plays the 100 users). Column groups: posts written by each AI. "User feels" = how the reading user feels about the post's topic. Posts read per cell: about ${G.mode.includes("tick 0") ? "20 (first post only)" : "2,000"}.`;
+    const S = (r, pb, st) => D.stance_w[`${r}|${G.ai}|${pb}|${st}`];
+    $("#st_table").innerHTML = `<tr><th>User feels</th>${AIS.map(pb => runsHead(`${pb}'s posts${pb === G.ai ? " (own AI)" : ""}`)).join("")}</tr>` + subHead(3)
+      + ["LOVE", "LIKE", "NEUTRAL", "DISLIKE", "HATE"].map(st => `<tr><td>${st}</td>${AIS.map(pb => pair(S(A(), pb, st)?.[m], S(B(), pb, st)?.[m], m.startsWith("%") ? "%" : "", m.startsWith("%") ? 100 : 400)).join("")}</tr>`).join("");
   });
-  onSeg("#st_ai", k => { ai = k; redraw(); });
+  onSeg("#st_ai", k => { G.ai = k; redraw(); }); onSeg("#st_m", k => { m = k; redraw(); });
 }
 
 /* 06 timeline */
@@ -333,7 +365,7 @@ onSeg("#a_pb", k => { G.pb = k; redraw(); });
              ["% like_comment", "% liked a comment"], ["% dislike_post", "% downvoted"], ["comments seen per post", "comments on screen"]];
   const COL = {V3: "var(--runA)", V3a: "var(--runB)"};
   const draw = () => {
-    seg("#t_ai", AIS.map(m => [m, m + " reading"]), st.ai); seg("#t_pb", AIS.map(m => [m, m + "'s posts"]), st.pb); seg("#t_m", M, st.m);
+    seg("#t_ai", AIS.map(m => [m, m + " reads"]), st.ai); seg("#t_pb", AIS.map(m => [m, m + "'s posts"]), st.pb); seg("#t_m", M, st.m);
     const series = ["V3", "V3a"].map(r => { const pts = [];
       for (let t = 0; t < 140; t++){ const x = D.tick[`${r}|${st.ai}|${st.pb}|${t}`]; if (x && x["posts read"] >= 50) pts.push([t, x[st.m], x["posts read"]]); }
       return [r, pts]; });
@@ -353,7 +385,7 @@ onSeg("#a_pb", k => { G.pb = k; redraw(); });
     g += Object.entries(byT).map(([t, o]) => `<rect class="hit" x="${X(+t) - w / 2}" y="${T}" width="${w}" height="${H - T - Bm}"><title>tick ${t}\n${Object.entries(o).map(([r, [v, n]]) => `${r}: ${num(v)} (${n} posts read)`).join("\n")}${v1v != null ? `\nV1: ${num(v1v)}` : ""}</title></rect>`).join("");
     $("#t_svg").innerHTML = g;
     $("#t_leg").innerHTML = `<span><i style="background:var(--runA)"></i>V3</span><span><i style="background:var(--runB)"></i>V3a (actions reordered)</span>${v1v != null ? `<span><i class="dash"></i>V1 round 101 (no ticks)</span>` : ""}`;
-    $("#t_note").textContent = `${st.ai} reading ${st.pb}'s posts. Tick 0 = each user's first post. Every tick has 98-100 posts read until the last few.`;
+    $("#t_note").textContent = `Reading AI: ${st.ai} (plays the 100 users). Posts written by: ${st.pb}'s users. Tick 0 = each user's first post. Every tick has 98-100 posts read until the last few.`;
   };
   onSeg("#t_ai", k => { st.ai = k; draw(); }); onSeg("#t_pb", k => { st.pb = k; draw(); }); onSeg("#t_m", k => { st.m = k; draw(); });
   draws.push(draw);
@@ -368,7 +400,7 @@ onSeg("#a_pb", k => { G.pb = k; redraw(); });
     const same = fam(A()) === fam(B());
     if (!same && ![A(), B()].includes(st.run)) st.run = B();
     $("#p_runrow").hidden = same;
-    seg("#p_pb", AIS.map(m => [m, m + "'s pile"]), st.pb); seg("#p_m", M, st.m); if (!same) seg("#p_run", [[A(), NAME[A()]], [B(), NAME[B()]]], st.run);
+    seg("#p_pb", AIS.map(m => [m, m]), st.pb); seg("#p_m", M, st.m); if (!same) seg("#p_run", [[A(), NAME[A()]], [B(), NAME[B()]]], st.run);
     const runs = same ? [A(), B()] : [st.run];
     const pr = fam(runs[0]) === "V1" ? "V1" : "V3";
     const keys = Object.keys(D.post_info).filter(k => k.startsWith(pr + "|") && D.post_info[k].ai === st.pb).map(k => k.slice(pr.length + 1));
@@ -376,7 +408,7 @@ onSeg("#a_pb", k => { G.pb = k; redraw(); });
     const f = st.find.toLowerCase(), m = st.m, isPct = m < 4;
     const rows = keys.filter(k => !f || D.post_info[`${pr}|${k}`].title.toLowerCase().includes(f));
     const val = (r, k, ai) => (D.posts[`${r}|${k}|${ai}`] || [])[m];
-    $("#p_table").innerHTML = `<tr><th>Post</th><th>Written by</th><th class="num">Characters</th>${AIS.map(ai => same ? runsHead(dot(ai) + " reading") : `<th class="num">${dot(ai)} reading</th>`).join("")}</tr>` + (same ? subHead(3).replace("<tr><th></th>", "<tr><th></th><th></th><th></th>") : "")
+    $("#p_table").innerHTML = `<tr><th>Post (written by ${st.pb}'s users)</th><th>Writer</th><th class="num">Characters</th>${AIS.map(ai => same ? runsHead("read by " + dot(ai)) : `<th class="num">read by ${dot(ai)}</th>`).join("")}</tr>` + (same ? subHead(3).replace("<tr><th></th>", "<tr><th></th><th></th><th></th>") : "")
       + rows.map(k => { const p = D.post_info[`${pr}|${k}`];
         return `<tr><td>${esc(p.title.slice(0, 90))}</td><td>user ${p.user}</td><td class="num">${p.chars}</td>${AIS.map(ai => same ? pair(val(A(), k, ai), val(B(), k, ai), isPct ? "%" : "", isPct ? 100 : 400)
           : `<td class="v">${val(st.run, k, ai) == null ? "–" : num(val(st.run, k, ai)) + (isPct ? "%" : "")}</td>`).join("")}</tr>`; }).join("")
@@ -386,17 +418,17 @@ onSeg("#a_pb", k => { G.pb = k; redraw(); });
   $("#p_find").addEventListener("input", e => { st.find = e.target.value; redraw(); });
 }
 
-/* 08 users */
+/* 08 users: one reading AI, column groups = posts written by */
 {
   let m = 1;
   const M = [[1, "actions per 100"], [2, "% upvoted"], [3, "% commented"]];
   draws.push(() => {
-    seg("#u_m", M, m);
-    const users = [...Array(100).keys()];
-    $("#u_table").innerHTML = `<tr><th class="num">User</th>${AIS.map(ai => runsHead(dot(ai) + " plays them")).join("")}</tr>` + subHead(3)
-      + users.map(u => `<tr><td class="num">${u}</td>${AIS.map(ai => pair(D.users[`${A()}|${ai}|${u}`]?.[m], D.users[`${B()}|${ai}|${u}`]?.[m], m > 1 ? "%" : "", m > 1 ? 100 : 400)).join("")}</tr>`).join("");
+    seg("#u_ai", AIS.map(x => [x, x + " reads"]), G.ai); seg("#u_m", M, m);
+    const U = (r, pb, u) => D.users_w[`${r}|${G.ai}|${pb}|${u}`]?.[m];
+    $("#u_table").innerHTML = `<tr><th class="num">User</th>${AIS.map(pb => runsHead(`${pb}'s posts${pb === G.ai ? " (own AI)" : ""}`)).join("")}</tr>` + subHead(3)
+      + [...Array(100).keys()].map(u => `<tr><td class="num">${u}</td>${AIS.map(pb => pair(U(A(), pb, u), U(B(), pb, u), m > 1 ? "%" : "", m > 1 ? 100 : 400)).join("")}</tr>`).join("");
   });
-  onSeg("#u_m", k => { m = +k; redraw(); });
+  onSeg("#u_ai", k => { G.ai = k; redraw(); }); onSeg("#u_m", k => { m = +k; redraw(); });
 }
 
 /* 09 worlds + 10 AIs */
@@ -405,9 +437,8 @@ draws.push(() => {
   const head = first => `<tr>${first}${K.map(([_, t]) => runsHead(t)).join("")}</tr>` + subHead(K.length).replace("<tr><th></th>", "<tr>" + "<th></th>".repeat((first.match(/<th/g) || []).length));
   const row = (cells, a, b, diag) => `<tr${diag ? ' style="background:var(--soft)"' : ""}>${cells}${K.map(([k, _, u]) => pair(a?.[k], b?.[k], u, u ? 100 : 400)).join("")}</tr>`;
   const order = [["gemma", "gemma"], ["llama", "llama"], ["qwen", "qwen"], ...AIS.flatMap(m => AIS.filter(pb => pb !== m).map(pb => [m, pb]))];
-  $("#w_table").innerHTML = head("<th>Reader AI</th><th>Whose posts</th>") + order.map(([m, pb]) => row(`<td>${dot(m)}</td><td>${pb}${m === pb ? " (own)" : ""}</td>`, D.world[`${A()}|${m}|${pb}`], D.world[`${B()}|${m}|${pb}`], m === pb)).join("");
-  $("#ai_table").innerHTML = head("<th>Reader AI</th>") + AIS.map(m => row(`<td>${dot(m)}</td>`, D.reader[`${A()}|${m}`], D.reader[`${B()}|${m}`])).join("")
-    + row("<td><b>All three AIs</b></td>", D.total[A()], D.total[B()]);
+  $("#w_table").innerHTML = head("<th>Reading AI (plays the users)</th><th>Posts written by</th>") + order.map(([m, pb]) => row(`<td>${dot(m)}</td><td>${pb}${m === pb ? " (own)" : ""}</td>`, D.world[`${A()}|${m}|${pb}`], D.world[`${B()}|${m}|${pb}`], m === pb)).join("");
+
 });
 
 /* 11 bias */
@@ -419,7 +450,7 @@ draws.push(() => {
     const unit = m === "upvoted %" ? "%" : "";
     const rowsOf = r => D.bias[r].filter(b => b.measure === m);
     const fmt = v => num(v) + unit;
-    let h = `<tr><th>Pair</th><th>Run</th><th class="num">i on i's posts</th><th class="num">j on i's posts</th><th class="num">gap 1</th><th class="num">i on j's posts</th><th class="num">j on j's posts</th><th class="num">gap 2</th><th class="num">Favouritism (points)</th><th class="num">95% range</th></tr>`;
+    let h = `<tr><th>Pair</th><th>Run</th><th class="num">i reads i's posts</th><th class="num">j reads i's posts</th><th class="num">gap 1</th><th class="num">i reads j's posts</th><th class="num">j reads j's posts</th><th class="num">gap 2</th><th class="num">Favouritism (points)</th><th class="num">95% range</th></tr>`;
     rowsOf(A()).forEach((a, k) => { const b = rowsOf(B())[k];
       for (const [r, x] of [[A(), a], [B(), b]]){
         const gap1 = x["i on i"] - x["j on i"], gap2 = x["i on j"] - x["j on j"];
@@ -429,20 +460,66 @@ draws.push(() => {
     });
     $("#b_table").innerHTML = h;
     const x = rowsOf(B())[0], g1 = x["i on i"] - x["j on i"], g2 = x["i on j"] - x["j on j"];
-    $("#b_ex").innerHTML = `<b>Worked example (${esc(NAME[B()])}, gemma vs llama, ${m === "upvoted %" ? "upvotes" : "total engagement"}):</b> gemma on gemma's posts ${fmt(x["i on i"])}, llama on gemma's posts ${fmt(x["j on i"])}: gap 1 = ${sg(g1)}. gemma on llama's posts ${fmt(x["i on j"])}, llama on llama's posts ${fmt(x["j on j"])}: gap 2 = ${sg(g2)}. Favouritism = ${sg(g1)} − (${sg(g2)}) = <b>${sg(x.bias)}</b> points${x.clear ? ", and the range leaves out 0: CLEAR." : "; the range includes 0, so it could be chance."}`;
+    $("#b_ex").innerHTML = `<b>Worked example (${esc(NAME[B()])}, gemma vs llama, ${m === "upvoted %" ? "upvotes" : "total engagement"}):</b> gemma reading gemma's posts ${fmt(x["i on i"])}, llama reading gemma's posts ${fmt(x["j on i"])}: gap 1 = ${sg(g1)}. gemma reading llama's posts ${fmt(x["i on j"])}, llama reading llama's posts ${fmt(x["j on j"])}: gap 2 = ${sg(g2)}. Favouritism = ${sg(g1)} − (${sg(g2)}) = <b>${sg(x.bias)}</b> points${x.clear ? ", and the range leaves out 0: CLEAR." : "; the range includes 0, so it could be chance."}`;
   });
   onSeg("#b_m", k => { m = k; redraw(); });
 }
 
-/* 12 effort */
+/* 12 effort: one reading AI, column groups = posts written by */
 draws.push(() => {
-  const runs = ["V3", "V3a"];
-  const T = {}; runs.forEach(r => D.effort[r].forEach(x => { T[`${r}|${x.reader}|${x.tier}`] = x; }));
-  const keep = G.mode.startsWith("V1") ? ["V3", "V3a"] : [A(), B()].map(r => r.replace(" tick 0", ""));
-  $("#e_table").innerHTML = `<tr><th>Level</th>${AIS.map(ai => `<th class="num" colspan="2">${dot(ai)}</th>`).join("")}</tr><tr><th></th>${AIS.map(() => keep.map((r, i) => `<th class="num"><span class="sw ${i ? "b" : "a"}"></span>${r}</th>`).join("")).join("")}</tr>`
-    + [1, 2, 3, 4, 5].map(t => `<tr><td>${t} · ${esc(T[`V3|gemma|${t}`]["what it takes"])}</td>${AIS.map(ai => keep.map(r => { const x = T[`${r}|${ai}|${t}`]; return `<td class="v">${(+x["% of all actions chosen"]).toFixed(1)}%<span class="rng">${(+x.chosen).toLocaleString()} chosen</span></td>`; }).join("")).join("")}</tr>`).join("")
-    + `<tr><td colspan="7" class="muted" style="font-size:12.5px">Whole scroll only (V3 and V3a); the "no timeline" choice does not apply here.</td></tr>`;
+  seg("#e_ai", AIS.map(x => [x, x + " reads"]), G.ai);
+  const runs = G.mode.startsWith("V1") ? (G.mode.includes("tick 0") ? ["V3 tick 0", "V3a tick 0"] : ["V3", "V3a"]) : [A(), B()];
+  const TXT = {1: "one click", 2: "copy an ID from the screen", 3: "write text", 4: "write a whole post", 5: "go to another screen first, then write"};
+  const E = (r, pb, t) => D.effort_w[`${r}|${G.ai}|${pb}`]?.[t];
+  $("#e_table").innerHTML = `<tr><th>Level</th>${AIS.map(pb => `<th class="num" colspan="2">${pb}'s posts${pb === G.ai ? " (own AI)" : ""}</th>`).join("")}</tr><tr><th></th>${AIS.map(() => runs.map((r, i) => `<th class="num"><span class="sw ${i ? "b" : "a"}"></span>${esc(NAME[r])}</th>`).join("")).join("")}</tr>`
+    + [1, 2, 3, 4, 5].map(t => `<tr><td>${t} · ${TXT[t]}</td>${AIS.map(pb => runs.map(r => { const x = E(r, pb, t); return `<td class="v">${x ? x["%"].toFixed(1) + "%" : "–"}<span class="rng">${x ? x.chosen.toLocaleString() + " chosen" : ""}</span></td>`; }).join("")).join("")}</tr>`).join("");
 });
+onSeg("#e_ai", k => { G.ai = k; redraw(); });
+
+/* 01 action charts */
+{
+  const st = {act: "like_post", pb: "llama"};
+  const used = () => D.actions.filter(a => [A(), B()].some(r => AIS.some(m => AIS.some(pb => D.world[`${r}|${m}|${pb}`].actions[a].times))));
+  const bar = (x, y, w, h, cls, tip) => `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${Math.max(0, h).toFixed(1)}" rx="2" style="fill:var(--run${cls})"><title>${esc(tip)}</title></rect>`;
+  draws.push(() => {
+    const acts = used().sort((x, y) => AIS.reduce((s, m) => s + AIS.reduce((t, pb) => t + D.world[`${A()}|${m}|${pb}`].actions[y]["% of posts"] - D.world[`${A()}|${m}|${pb}`].actions[x]["% of posts"], 0), 0));
+    if (!acts.includes(st.act)) st.act = acts[0];
+    $("#ch_act").innerHTML = acts.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join(""); $("#ch_act").value = st.act;
+    // chart 1: one action, 9 worlds
+    const H0 = 330, T = 36, Bm = 58, PW = 266, GAP = 26, L = 40;
+    let g = "";
+    AIS.forEach((m, i) => {
+      const x0 = L + i * (PW + GAP), Y = v => T + (H0 - T - Bm) * (1 - v / 100);
+      g += `<text x="${x0}" y="20" style="fill:var(--ink);font:600 13px var(--body)">${m} reads …</text>`;
+      for (let v = 0; v <= 100; v += 25) g += `<line class="grid" x1="${x0}" x2="${x0 + PW}" y1="${Y(v)}" y2="${Y(v)}"/>` + (i === 0 ? `<text x="${x0 - 6}" y="${Y(v) + 4}" text-anchor="end">${v}%</text>` : "");
+      AIS.forEach((pb, j) => {
+        const gx = x0 + j * (PW / 3) + 12, bw = (PW / 3 - 24) / 2;
+        [A(), B()].forEach((r, k) => { const v = D.world[`${r}|${m}|${pb}`].actions[st.act]["% of posts"];
+          g += bar(gx + k * bw, Y(v), bw - 2, Y(0) - Y(v), k ? "B" : "A", `${m} reads ${pb}'s posts, ${NAME[r]}: ${num(v)}% of posts read`)
+            + `<text x="${gx + k * bw + bw / 2 - 1}" y="${Y(v) - 4}" text-anchor="middle" style="fill:var(--ink)">${Math.round(v)}</text>`; });
+        g += `<text x="${gx + bw}" y="${H0 - Bm + 18}" text-anchor="middle">${pb}'s posts</text>` + (pb === m ? `<text x="${gx + bw}" y="${H0 - Bm + 32}" text-anchor="middle">(own AI)</text>` : "");
+      });
+    });
+    $("#ch1").innerHTML = g + `<text x="${L}" y="${H0 - 6}">${esc(st.act)}: % of posts read where the reading AI chose it</text>`;
+    $("#ch1_leg").innerHTML = `<span><i style="background:var(--runA)"></i>${esc(NAME[A()])}</span><span><i style="background:var(--runB)"></i>${esc(NAME[B()])}</span>`;
+    // chart 2: one world, every action
+    seg("#ch_ai", AIS.map(x => [x, x + " reads"]), G.ai); seg("#ch_pb", AIS.map(x => [x, x + (x === G.ai ? " (own AI)" : "")]), st.pb);
+    const w = r => D.world[`${r}|${G.ai}|${st.pb}`];
+    const rows = acts.filter(a => w(A()).actions[a].times || w(B()).actions[a].times);
+    $("#ch2_cap").textContent = `Reading AI: ${G.ai} (plays the 100 users). Posts written by: ${st.pb}'s users. ${w(A())["posts read"].toLocaleString()} posts read in ${NAME[A()]}, ${w(B())["posts read"].toLocaleString()} in ${NAME[B()]}.`;
+    const RH = 30, L2 = 170, R2 = 60, H2 = rows.length * RH + 40, X = v => L2 + (900 - L2 - R2) * v / 100;
+    let h = "";
+    for (let v = 0; v <= 100; v += 25) h += `<line class="grid" x1="${X(v)}" x2="${X(v)}" y1="10" y2="${H2 - 24}"/><text x="${X(v)}" y="${H2 - 8}" text-anchor="middle">${v}%</text>`;
+    rows.forEach((a, i) => { const y = 14 + i * RH;
+      h += `<text x="${L2 - 8}" y="${y + 17}" text-anchor="end" style="fill:var(--ink)">${esc(a)}</text>`;
+      [A(), B()].forEach((r, k) => { const v = w(r).actions[a]["% of posts"];
+        h += bar(L2, y + k * 12, X(v) - L2, 11, k ? "B" : "A", `${a}, ${NAME[r]}: ${num(v)}% of posts read (${w(r).actions[a].times.toLocaleString()} times)`)
+          + `<text x="${X(v) + 4}" y="${y + k * 12 + 9}">${w(r).actions[a].times && v < 0.05 ? "<0.1" : num(v)}</text>`; }); });
+    $("#ch2").setAttribute("viewBox", `0 0 900 ${H2}`); $("#ch2").innerHTML = h;
+  });
+  $("#ch_act").addEventListener("change", e => { st.act = e.target.value; redraw(); });
+  onSeg("#ch_ai", k => { G.ai = k; redraw(); }); onSeg("#ch_pb", k => { st.pb = k; redraw(); });
+}
 
 redraw();
 </script>

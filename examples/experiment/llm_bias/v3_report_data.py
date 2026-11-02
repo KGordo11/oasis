@@ -122,6 +122,8 @@ def main(out_path):
             g[("stance", r["reader"], r["stance"])].append(r)
             g[("post", r["post"], r["reader"])].append(r)
             g[("user", r["reader"], r["user"])].append(r)
+            g[("stance_w", r["reader"], r["posts_by"], r["stance"])].append(r)  # per world: never pooled over whose posts
+            g[("user_w", r["reader"], r["posts_by"], r["user"])].append(r)
             if r["tick"] is not None and not run.endswith("tick 0"):
                 g[("tick", r["reader"], r["posts_by"], r["tick"])].append(r)
         res["total"][run] = measures(rs, acts_all)
@@ -142,6 +144,13 @@ def main(out_path):
                                                             round(100 * sum("dislike_post" in r["acts"] for r in xs) / n, 1),
                                                             round(100 * sum("create_comment" in r["acts"] for r in xs) / n, 1),
                                                             round(100 * sum(sum(a != "do_nothing" for a in r["acts"]) for r in xs) / n, 1)]
+            elif key[0] == "stance_w":
+                res.setdefault("stance_w", {})[f"{run}|{key[1]}|{key[2]}|{key[3]}"] = {k: v for k, v in measures(xs, []).items() if k != "actions"}
+            elif key[0] == "user_w":
+                n = len(xs)
+                res.setdefault("users_w", {})[f"{run}|{key[1]}|{key[2]}|{key[3]}"] = [
+                    n, round(100 * sum(sum(a != "do_nothing" for a in r["acts"]) for r in xs) / n, 1),
+                    round(100 * sum("like_post" in r["acts"] for r in xs) / n, 1), round(100 * sum("create_comment" in r["acts"] for r in xs) / n, 1)]
             elif key[0] == "user":
                 n = len(xs)
                 res["users"][f"{run}|{key[1]}|{key[2]}"] = [n, round(100 * sum(sum(a != "do_nothing" for a in r["acts"]) for r in xs) / n, 1),
@@ -162,6 +171,19 @@ def main(out_path):
                                                  "chars": len(str(a.get("title", ""))) + len(str(a.get("body", ""))),
                                                  "sub": a.get("subreddit")}
     res["post_info"] = post_info
+    # easy vs hard per world (every chosen action on every screen, do_nothing left out), whole scroll and tick 0
+    for run, d in PARTS.items():
+        c = defaultdict(Counter)
+        for r in csv.DictReader(open(os.path.join(DATA, d, "clean", "actions.csv"))):
+            if r["action"] == "do_nothing":
+                continue
+            for rr in (run, run + " tick 0") if r["tick"] == "0" else (run,):
+                c[(rr, r["reader"], r["posts_by"])][r["tier"]] += 1
+                c[(rr, r["reader"], r["posts_by"])]["fail" + r["tier"]] += r["ok"] == "0"
+        for (rr, m, pb), t in c.items():
+            n = sum(t[x] for x in "12345")
+            res.setdefault("effort_w", {})[f"{rr}|{m}|{pb}"] = {x: {"chosen": t[x], "%": round(100 * t[x] / n, 1),
+                                                                    "failed %": round(100 * t["fail" + x] / t[x], 1) if t[x] else None} for x in "12345"}
     for run, d in PARTS.items():
         res.setdefault("cleaning", {})[run] = open(os.path.join(DATA, d, "clean", "cleaning.md")).read()
         res.setdefault("effort", {})[run] = list(csv.DictReader(open(os.path.join(DATA, d, "clean", "effort_tiers.csv"))))

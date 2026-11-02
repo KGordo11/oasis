@@ -7,6 +7,8 @@
 /*__CSS__*/
 /* V3 additions (same tokens as the V2 page) */
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+@media (max-width:720px){.bar{position:static;background:var(--paper);backdrop-filter:none}}  /* on a phone the menu is tall: let it scroll away */
+.xrow{flex-wrap:wrap;min-width:0}.xrow select.pick{min-width:0;max-width:100%;flex:1 1 220px}  /* long post titles in a picker must not widen the page */
 :root{--same:#7a8794}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--same:#8f9caa}}
 :root[data-theme="dark"]{--same:#8f9caa}
@@ -134,16 +136,17 @@ tr.own td{color:var(--muted);font-style:italic}
     </li>
     <li>
       <div class="wtext"><h3>Nine worlds</h3>
-      <p>Now every AI reads every pile. A <b>world</b> is one reader AI playing all 100 users, reading one pile. 3 reader AIs × 3
+      <p>Now every AI reads every pile. A <b>world</b> is one <b>reading AI</b> playing all 100 users, reading the pile of posts that one AI's users
+      <b>wrote</b>. 3 reading AIs × 3
       piles = 9 worlds. Each world starts fresh with only its pile, and is thrown away when it ends, so nothing in one world is
       seen in another. When an AI reads its own AI's pile (gemma reads gemma's posts), that world is a <b>baseline</b>.</p></div>
       <figure class="fig"><svg id="fig_worlds" viewBox="0 0 250 210" role="img" aria-label="3 by 3 grid of worlds"></svg>
-      <figcaption>Reader AI (rows) × whose posts (columns).</figcaption></figure>
+      <figcaption>Reading AI (rows) × posts written by (columns).</figcaption></figure>
     </li>
     <li>
       <div class="wtext"><h3>Your scroll: which post you see first</h3>
       <p>Every user reads <b>every post in the pile except their own</b>. The order: the pile is shuffled once (with a fixed
-      seed, so it is the same for all three reader AIs). Picture the posts in a circle. User 0 starts at the top of the circle,
+      seed, so it is the same for all three reading AIs). Picture the posts in a circle. User 0 starts at the top of the circle,
       user 50 starts halfway round, and so on: each user's starting point is <i>user number × number of posts ÷ 100</i>. From
       there they go once around the circle, skipping their own post. So every post is read early by some users and late by
       others. Section 03 shows every user's scroll.</p></div>
@@ -197,7 +200,7 @@ tr.own td{color:var(--muted);font-style:italic}
   posting screen had no "posting time" line.</p>
   <div class="xctl">
     <div class="xrow"><span class="lab">Run</span><div class="seg" id="p_run"></div></div>
-    <div class="xrow"><span class="lab">AI</span><div class="seg" id="p_ai"></div></div>
+    <div class="xrow"><span class="lab">Writing AI (plays the users)</span><div class="seg" id="p_ai"></div></div>
   </div>
   <div class="grid2">
     <div><h3>Users by number of posts written</h3><div class="tablewrap"><table id="p_counts"></table></div></div>
@@ -222,7 +225,7 @@ tr.own td{color:var(--muted);font-style:italic}
   <h2>Every user's scroll, in order</h2>
   <p>This is computed with the same code the sim used (<button class="ref" data-ref="feed">run_v2.py · the feed order</button>) and
   checked against the saved data: every user in every world of both runs read their posts in exactly this order
-  (<span id="o_checked"></span>). The order depends only on the pile and the user, never on the reader AI, so it is the same
+  (<span id="o_checked"></span>). The order depends only on the pile and the user, never on the reading AI, so it is the same
   in all three worlds that read a pile, and the same in V3 and V3a.</p>
   <ol class="steps">
     <li><h4>Shuffle the pile once</h4><p>The posts are sorted by their key, then shuffled with a fixed seed made from the round
@@ -235,7 +238,7 @@ tr.own td{color:var(--muted);font-style:italic}
       (llama only) puts that post back one place later, which pushes the rest of that user's scroll one tick later.</p></li>
   </ol>
   <div class="xctl">
-    <div class="xrow"><span class="lab">Pile</span><div class="seg" id="o_pb"></div></div>
+    <div class="xrow"><span class="lab">Posts written by</span><div class="seg" id="o_pb"></div></div>
     <div class="xrow"><span class="lab">User</span><select class="pick" id="o_user" aria-label="User for the scroll"></select></div>
   </div>
   <p id="o_about"></p>
@@ -280,8 +283,8 @@ tr.own td{color:var(--muted);font-style:italic}
   what they did. Click a row to open that exact screen in section 08.</p>
   <div class="xctl">
     <div class="xrow"><span class="lab">Run</span><div class="seg" id="l_run"></div></div>
-    <div class="xrow"><span class="lab">Reader AI</span><div class="seg" id="l_ai"></div></div>
-    <div class="xrow"><span class="lab">Whose posts</span><div class="seg" id="l_pb"></div></div>
+    <div class="xrow"><span class="lab">Reading AI (plays the users)</span><div class="seg" id="l_ai"></div></div>
+    <div class="xrow"><span class="lab">Posts written by</span><div class="seg" id="l_pb"></div></div>
     <div class="xrow"><span class="lab">Post</span><select class="pick" id="l_post" aria-label="Post"></select></div>
   </div>
   <p id="l_about"></p>
@@ -353,7 +356,7 @@ tr.own td{color:var(--muted);font-style:italic}
 <section id="sees">
   <div class="eyebrow">08 · Every screen, word for word</div>
   <h2>Any run, any world, any user: every screen and every answer</h2>
-  <p>Pick a run, the AI playing the users, whose posts they read, and a user. You get that user's whole scroll: every post
+  <p>Pick a run, the <b>reading AI</b> (the AI playing the users), the AI whose users <b>wrote the posts</b>, and a user. You get that user's whole scroll: every post
   screen and every extra screen, in order, with the tick, the post, and what each action did. Click a row to see the screen
   and the answer. Each world loads when you pick it (about 2-9 MB).</p>
   <p class="note">How the screens are rebuilt: post screens are not saved as text, so this page's builder replayed each world
@@ -362,8 +365,8 @@ tr.own td{color:var(--muted);font-style:italic}
   word the same ({{replay_checked}}). Extra screens are shown exactly as saved.</p>
   <div class="xctl">
     <div class="xrow"><span class="lab">Run</span><div class="seg" id="s_part"></div></div>
-    <div class="xrow"><span class="lab">AI plays</span><div class="seg" id="s_ai"></div></div>
-    <div class="xrow"><span class="lab">Posts by</span><div class="seg" id="s_pb"></div></div>
+    <div class="xrow"><span class="lab">Reading AI (plays the users)</span><div class="seg" id="s_ai"></div></div>
+    <div class="xrow"><span class="lab">Posts written by</span><div class="seg" id="s_pb"></div></div>
     <div class="xrow"><span class="lab">User</span><select class="pick" id="s_user" aria-label="User"></select></div>
   </div>
   <p id="s_load" class="muted"></p>
@@ -469,8 +472,8 @@ tr.own td{color:var(--muted);font-style:italic}
   <div class="tablewrap"><table>
     <tr><th>File</th><th>Who made it</th><th>What one line is</th></tr>
     <tr><td><code>posting_&lt;AI&gt;.jsonl</code></td><td>that AI, playing all 100 users in the posting turn</td><td>one user's answer: the actions, any posts (subreddit, title, body), the reason, tokens and seconds</td></tr>
-    <tr><td><code>reading_&lt;whose posts&gt;__&lt;reader AI&gt;.jsonl</code></td><td>the reader AI, playing all 100 users in that world</td><td>one screen: user, tick, post, screen kind, the answer word for word, what each action did</td></tr>
-    <tr><td><code>reading_..._d1.jsonl</code> (V3 only)</td><td>the reader AI, in its baseline world, a second time</td><td>the noise floor: each user's first 4 posts read again with fresh randomness</td></tr>
+    <tr><td><code>reading_&lt;posts written by&gt;__&lt;reading AI&gt;.jsonl</code></td><td>the reading AI, playing all 100 users, reading the posts that AI's users wrote</td><td>one screen: user, tick, post, screen kind, the answer word for word, what each action did</td></tr>
+    <tr><td><code>reading_..._d1.jsonl</code> (V3 only)</td><td>the reading AI, reading its own AI's posts, a second time</td><td>the noise floor: each user's first 4 posts read again with fresh randomness</td></tr>
     <tr><td><code>*.manifest.json</code></td><td>the runner, when a step ends</td><td>what ran: settings, fingerprints of the users, posts and prompts, engine, timing</td></tr>
     <tr><td><code>*.log</code>, <code>night.log</code></td><td>the runner</td><td>progress lines; night.log has every step's start and end</td></tr>
     <tr><td><code>menu.txt</code> (V3a)</td><td><code>rank_menu.py</code>, from V3's data</td><td>the action list in V3a's order</td></tr>
@@ -591,14 +594,14 @@ async function loadWorld(key){
     g += `<text x="${x + 30}" y="140" text-anchor="middle" class="f-txt">${n}</text><text x="${x + 30}" y="158" text-anchor="middle" class="f-small">${c} posts</text>`; });
   $("#fig_piles").innerHTML = g;
   // 3x3 worlds
-  g = `<text x="150" y="16" text-anchor="middle" class="f-small">whose posts →</text>`;
+  g = `<text x="150" y="16" text-anchor="middle" class="f-small">posts written by →</text>`;
   const C = {gemma: "f-g", llama: "f-l", qwen: "f-q"};
   AIS.forEach((pb, j) => g += `<text x="${95 + j * 55}" y="34" text-anchor="middle" class="f-small">${pb}</text>`);
   AIS.forEach((m, i) => { g += `<text x="58" y="${66 + i * 55}" text-anchor="end" class="f-small">${m}</text>`;
     AIS.forEach((pb, j) => { g += `<rect x="${70 + j * 55}" y="${42 + i * 55}" width="50" height="50" rx="6" class="${m === pb ? "f-base" : "f-card"}"/>`
       + `<circle cx="${84 + j * 55}" cy="${58 + i * 55}" r="6" class="${C[m]}"/><rect x="${96 + j * 55}" y="${52 + i * 55}" width="16" height="12" rx="2" class="${C[pb]}"/>`
       + (m === pb ? `<text x="${95 + j * 55}" y="${84 + i * 55}" text-anchor="middle" class="f-tiny">baseline</text>` : ""); }); });
-  g += `<text x="10" y="205" class="f-small">reader AI ↓</text>`;
+  g += `<text x="10" y="205" class="f-small">reading AI ↓</text>`;
   $("#fig_worlds").innerHTML = g;
   // ring
   g = defs; const N = 24, cx = 120, cy = 120, R0 = 88;
@@ -677,12 +680,12 @@ async function loadWorld(key){
   $("#o_user").innerHTML = P.map(p => `<option value="${p.id}">${userOpt(p)}</option>`).join("");
   $("#o_checked").textContent = Object.entries(D.checked).filter(([k]) => k.includes("scrolls")).map(([k, v]) => `${v} user-worlds in ${k.split(" ")[0]}`).join(", ");
   function draw(){
-    seg("#o_pb", AIS.map(m => [m, m + "'s posts"]), st.pb); $("#o_user").value = st.u;
+    seg("#o_pb", AIS.map(m => [m, m]), st.pb); $("#o_user").value = st.u;
     const f = D.feeds[st.pb], n = f.ring.length, k = f.start[st.u];
     const order = f.ring.slice(k).concat(f.ring.slice(0, k));
     let t = 0;
-    $("#o_about").innerHTML = `${st.pb}'s pile has <b>${n}</b> posts. User ${st.u} starts at position ${st.u} × ${n} ÷ 100 = <b>${k}</b> of the shuffled pile, goes once around, and skips ${order.filter(q => postOf[q].author_id === st.u).length} post(s) they wrote.`;
-    $("#o_list").innerHTML = `<tr><th class="num">Place</th><th class="num">Tick (no returns)</th><th>Post</th><th>Topic</th><th>Written by</th><th>This user feels</th></tr>` +
+    $("#o_about").innerHTML = `${st.pb}'s users wrote <b>${n}</b> posts (${st.pb}'s pile). This order is the same whichever AI is reading them. User ${st.u} starts at position ${st.u} × ${n} ÷ 100 = <b>${k}</b> of the shuffled pile, goes once around, and skips ${order.filter(q => postOf[q].author_id === st.u).length} post(s) they wrote.`;
+    $("#o_list").innerHTML = `<tr><th class="num">Place</th><th class="num">Tick (no returns)</th><th>Post</th><th>Topic</th><th>Written by (a ${st.pb} user)</th><th>This user feels</th></tr>` +
       order.map((q, i) => { const p = postOf[q], own = p.author_id === st.u;
         return `<tr${own ? ' class="own"' : ""}><td class="num">${i + 1}</td><td class="num">${own ? "–" : t++}</td><td>${own ? "<i>skipped: their own post</i> · " : ""}${esc(p.title.slice(0, 80))}</td><td>${esc(p.topic)}</td><td>u/${esc(p.author)}</td><td>${esc(P[st.u].stances[p.topic] || "")}</td></tr>`; }).join("");
   }
@@ -713,7 +716,7 @@ loadWorld("V3|gemma|llama").then(rows => {
 {
   const st = {run: "V3", ai: "gemma", pb: "llama", post: null}; let lifeTicket = 0;
   async function draw(){
-    seg("#l_run", RUNS.map(r => [r, RUNLBL[r]]), st.run); seg("#l_ai", AIS.map(m => [m, m]), st.ai); seg("#l_pb", AIS.map(m => [m, m + "'s posts"]), st.pb);
+    seg("#l_run", RUNS.map(r => [r, RUNLBL[r]]), st.run); seg("#l_ai", AIS.map(m => [m, m + " reads"]), st.ai); seg("#l_pb", AIS.map(m => [m, m]), st.pb);
     const qs = D.posts[st.pb];
     if (!st.post || !qs.some(q => q.key === st.post)) st.post = qs[0].key;
     $("#l_post").innerHTML = qs.map(q => `<option value="${esc(q.key)}">u/${esc(q.author)}: ${esc(q.title.slice(0, 70))}</option>`).join(""); $("#l_post").value = st.post;
@@ -724,7 +727,7 @@ loadWorld("V3|gemma|llama").then(rows => {
     const reads = rows.filter(r => r.screen === "post" && r.post === st.post).sort((a, b) => a.tick - b.tick || a.u - b.u);
     const q = postOf[st.post];
     const nC = r => { const m = /Comments \((\d+)\)/.exec(r.comments || ""); return m ? +m[1] : 0; };
-    $("#l_about").innerHTML = `<b>${esc(q.title)}</b> by u/${esc(q.author)} (${esc(q.topic)}). Read ${reads.length} times by ${new Set(reads.map(r => r.u)).size} users in ${RUNLBL[st.run]}, ${st.ai} playing every reader.`;
+    $("#l_about").innerHTML = `<b>${esc(q.title)}</b> by u/${esc(q.author)} (${esc(q.topic)}). Written by a user of <b>${st.pb}</b> (in ${st.pb}'s posting turn). Read ${reads.length} times by ${new Set(reads.map(r => r.u)).size} users in ${RUNLBL[st.run]}; the reading AI <b>${st.ai}</b> plays every one of those readers.`;
     $("#l_table").innerHTML = `<tr><th class="num">Tick</th><th>User</th><th>Feels about the topic</th><th class="num">Comments on screen</th><th>What they did (✓ worked, ✗ failed)</th></tr>` +
       reads.map(r => `<tr data-u="${r.u}" data-seq="${r.seq}"><td class="num">${r.tick}</td><td>${r.u} · u/${esc(P[r.u].username)}${r.view > 1 ? ` <span class="muted">(look ${r.view})</span>` : ""}</td><td>${esc(P[r.u].stances[q.topic] || "")}</td><td class="num">${nC(r)}</td><td>${r.outcome !== "chose" ? '<span class="bad">no usable answer</span>' : r.ex.map(([a, ok]) => `${ok ? "✓" : "✗"} ${esc(a)}`).join(", ") || "empty list []"}</td></tr>`).join("");
   }
@@ -746,14 +749,14 @@ $("#m_v3").textContent = PR.live_menus.V3; $("#m_v3a").textContent = PR.live_men
     return notice + PR.read.replace(/\{(sub|topic_name|author|title|body|comments|menu|fmt)\}/g, (_, k) => v[k]); };
   $("#s_user").innerHTML = P.map(p => `<option value="${p.id}">${userOpt(p)}</option>`).join("");
   async function draw(){
-    seg("#s_part", RUNS.filter(r => D.screens[`${r}|gemma|gemma`]).map(r => [r, RUNLBL[r]]), st.part); seg("#s_ai", AIS.map(m => [m, m]), st.ai); seg("#s_pb", AIS.map(m => [m, m + "'s posts"]), st.pb);
+    seg("#s_part", RUNS.filter(r => D.screens[`${r}|gemma|gemma`]).map(r => [r, RUNLBL[r]]), st.part); seg("#s_ai", AIS.map(m => [m, m + " reads"]), st.ai); seg("#s_pb", AIS.map(m => [m, m]), st.pb);
     $("#s_user").value = st.u; $("#s_sys").innerHTML = sysMsg(st.u); $("#s_syslbl").textContent = `${FULL[st.ai]} · the same words for every user`;
     const key = `${st.part}|${st.ai}|${st.pb}`;
     $("#s_load").textContent = worldCache[key] ? "" : `Loading ${D.screens[key].path} (${(D.screens[key].bytes / 1e6).toFixed(1)} MB, ${D.screens[key].rows.toLocaleString()} screens)…`;
     const ticket = ++screenTicket;
     let all; try { all = await loadWorld(key); } catch(e){ $("#s_load").textContent = e.message; return; }
     if (ticket !== screenTicket) return;  // a newer choice is loading
-    $("#s_load").textContent = `${RUNLBL[st.part]} · ${st.ai} plays the users · ${st.pb}'s posts · ${all.length.toLocaleString()} screens in this world.`;
+    $("#s_load").textContent = `${RUNLBL[st.part]} · reading AI: ${st.ai} (plays every user) · posts written by: ${st.pb}'s users · ${all.length.toLocaleString()} screens in this world.`;
     const rows = all.filter(r => r.u === st.u);
     if (st.seq == null || !rows.some(r => r.seq === st.seq)) st.seq = rows[0] ? rows[0].seq : null;
     $("#s_scroll").innerHTML = `<tr><th class="num">Tick</th><th>Screen</th><th>Post</th><th>Actions (✓ worked, ✗ failed)</th></tr>` +
@@ -787,13 +790,13 @@ $("#m_v3").textContent = PR.live_menus.V3; $("#m_v3a").textContent = PR.live_men
     if (b.dataset.world){ const [p, ai, pb] = b.dataset.world.split("|"); window.openScreen(p, ai, pb, 0, null); return; }
     const f = D.inventory[+b.dataset.i]; $("#o_view").hidden = false; $("#o_name").textContent = f.path; $("#o_meta").textContent = `${f.part} · ${size(f.bytes)}`;
     $("#o_text").textContent = D.texts[f.path]; $("#o_view").scrollIntoView({block: "nearest"}); });
-  const F = [["user_id / username", "who is reading (one of the 100 users)"], ["model / posts_by", "the reader AI / the AI whose pile this world reads"],
+  const F = [["user_id / username", "who is reading (one of the 100 users)"], ["model / posts_by", "the reading AI (plays the users) / the AI whose users wrote the posts read in this world"],
     ["post_key", "which post (round | writer AI | writer user | number)"], ["tick / seq / step", "when: the tick, the user's screen number, and 0 = post screen or 1-4 = extra screen"],
     ["screen", "post, open_post, search_user, search_posts, trend, open_messages, listen_from_group"], ["view", "1 = first look at the post; 2+ = it came back after a refresh"],
     ["actions", "the actions as the AI gave them (with any text it wrote)"], ["executed", "for each action: worked or failed, why, and what it acted on"],
     ["raw", "the AI's whole answer, word for word"], ["reason", "the AI's own words for why"], ["outcome", "chose = a usable answer; unreadable = no usable answer after 3 tries"],
     ["attempts / errors", "how many tries the answer took, and why earlier tries were rejected"], ["prompt_tokens / eval_tokens", "how long the screen and the answer were (tokens = word pieces)"],
-    ["latency_s / call_latency_s", "seconds for the answer (8 answers run at once)"], ["topic / stance / author_id / own_ai", "the post's topic, how this user feels about it, who wrote it, and whether the reader AI's own AI wrote it"],
+    ["latency_s / call_latency_s", "seconds for the answer (8 answers run at once)"], ["topic / stance / author_id / own_ai", "the post's topic, how this user feels about it, who wrote it, and whether the reading AI's own users wrote it (own_ai = 1)"],
     ["ctx", "what was on the screen: the post's ID in this world, posts and users listed"], ["text", "extra screens only: the exact screen text"]];
   $("#fields").innerHTML = F.map(([k, v]) => `<b>${esc(k)}</b><span>${esc(v)}</span>`).join("");
 }

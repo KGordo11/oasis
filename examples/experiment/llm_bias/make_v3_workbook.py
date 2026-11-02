@@ -29,7 +29,7 @@ USERNAME = {p["id"]: p["username"] for p in R.load_personas()[:100]}
 AIS = ["gemma", "llama", "qwen"]
 STANCES = ["LOVE", "LIKE", "NEUTRAL", "DISLIKE", "HATE"]
 COLOR = {"V3": "#6250d6", "V3a": "#eda100", "V3 tick 0": "#6250d6", "V3a tick 0": "#eda100", "V1": "#8a8f98", "V1 r102": "#b4b2ab"}
-NAME = {"V3": "V3", "V3a": "V3a (reordered)", "V3 tick 0": "V3 tick 0", "V3a tick 0": "V3a tick 0", "V1": "V1 r101", "V1 r102": "V1 r102"}
+NAME = {"V3": "V3", "V3a": "V3a (reordered)", "V3 tick 0": "V3, first post only", "V3a tick 0": "V3a (reordered), first post only", "V1": "V1 r101", "V1 r102": "V1 r102"}
 INK, INK2, GRID = "#0b0b0b", "#52514e", "#e6e5e1"
 F, FB, FT = Font(name="Arial", size=10), Font(name="Arial", size=10, bold=True), Font(name="Arial", size=14, bold=True)
 HEAD, BASE = PatternFill("solid", start_color="DDE3EA"), PatternFill("solid", start_color="FFF4D6")
@@ -54,7 +54,7 @@ def sheet(title, note, head, body, widths=None, base=None, chart=None):
                 ws.cell(i, j).fill = BASE
     for j in range(1, len(head) + 1):
         ws.column_dimensions[get_column_letter(j)].width = (widths or {}).get(j, 12)
-    ws.row_dimensions[4].height = 42
+    ws.row_dimensions[4].height = 58
     ws.freeze_panes = "A5"
     if body:
         ws.auto_filter.ref = f"A4:{get_column_letter(len(head))}{4 + len(body)}"
@@ -106,103 +106,151 @@ def bars(groups, runs, values, title, ylabel):
     return png(fig)
 
 
-def pick(run, ai=None, pb=None):
-    return REPORT["total"][run] if ai is None else REPORT["reader"][f"{run}|{ai}"] if pb is None else REPORT["world"][f"{run}|{ai}|{pb}"]
+WORLDS = [(m, pb) for m in AIS for pb in AIS]  # gemma reads gemma's, gemma reads llama's, gemma reads qwen's, then llama, then qwen
+W = lambda run, m, pb: REPORT["world"][f"{run}|{m}|{pb}"]  # noqa: E731
+OWN = lambda pb, m: f"{pb} (own AI)" if pb == m else pb  # noqa: E731
+LEAD = ["reading AI (plays the 100 users)", "posts written by (that AI's users)"]
+MEAS = [("posts read", "posts read"), ("actions per 100", "actions per 100 posts read"), ("% engaged", "% with a real action"),
+        ("% upvoted", "% upvoted"), ("% downvoted", "% downvoted"), ("% commented", "% commented"),
+        ("% chose do_nothing", "% do_nothing only"), ("% empty answer", "% empty list [] only")]
 
 
-MAIN = [("posts read", "posts read"), ("actions per 100", "total engagement: actions per 100 posts read"),
-        ("% engaged", "% of posts with at least one real action"), ("% upvoted", "% upvoted"), ("% downvoted", "% downvoted"),
-        ("% commented", "% commented"), ("% chose do_nothing", "% answered do_nothing only"), ("% empty answer", "% answered an empty list [] only")]
+def grid(fig_rows, fig_cols, h=3.2):
+    fig, axs = plt.subplots(fig_rows, fig_cols, figsize=(11, h * fig_rows), squeeze=False)
+    return fig, axs
 
 
-def summary(title, note, runs, chart_runs):
-    head = ["reader AI", "measure"] + [NAME[r] for r in runs] + [f"change: {NAME[runs[1]]} - {NAME[runs[0]]} (points)"]
-    body = []
-    for ai in AIS + [None]:
-        for k, label in MAIN:
-            v = [pick(r, ai)[k] for r in runs]
-            body.append([ai or "all three", label] + v + [None if k == "posts read" else round(v[1] - v[0], 1)])
-    ws = sheet(title, note, head, body, {1: 12, 2: 44},
-               chart=bars(AIS, chart_runs, {(ai, r): pick(r, ai)["actions per 100"] for ai in AIS for r in chart_runs},
-                          "Total engagement (actions per 100 posts read)", "per 100"))
-    place(ws, bars(AIS, chart_runs, {(ai, r): pick(r, ai)["% upvoted"] for ai in AIS for r in chart_runs}, "% of posts upvoted", "%"),
-          f"{get_column_letter(len(head) + 2)}26")
+def world_bars(runs, key, title, ylabel, ymax=None):
+    """One panel per reading AI (same y scale); inside it one group per 'posts written by' AI; one bar per run.
+    key = a measure name, or a function (run, reading AI, posts by) -> value."""
+    get = key if callable(key) else (lambda r, m, pb: W(r, m, pb)[key])
+    fig, axs = plt.subplots(1, 3, figsize=(11, 3.6), sharey=True)
+    top = max(get(r, m, pb) for r in runs for m in AIS for pb in AIS)
+    for ax, m in zip(axs, AIS):
+        w = 0.8 / len(runs)
+        for k, r in enumerate(runs):
+            xs = [i + (k - (len(runs) - 1) / 2) * w for i in range(3)]
+            vs = [get(r, m, pb) for pb in AIS]
+            ax.bar(xs, vs, w * 0.92, color=COLOR[r], label=NAME[r])
+            for x, v in zip(xs, vs):
+                ax.text(x, v, f"{v:.0f}", ha="center", va="bottom", fontsize=7, color=INK2)
+        ax.set_xticks(range(3), [f"{pb}'s posts" + ("\n(own AI)" if pb == m else "") for pb in AIS], fontsize=7.5)
+        ax.set_title(f"{m} reads ...", fontsize=9.5, loc="left")
+        ax.set_ylim(0, ymax or top * 1.12 + 1)
+        style(ax)
+    axs[0].set_ylabel(ylabel, fontsize=8, color=INK2)
+    fig.suptitle(title, x=0.01, ha="left", fontsize=10.5)
+    fig.legend(*axs[0].get_legend_handles_labels(), loc="upper right", frameon=False, fontsize=8, ncol=len(runs))
+    return png(fig)
 
 
-def actions_sheet(title, note, runs):
-    head = ["reader AI", "action"] + [f"{NAME[r]}: % of posts" for r in runs] + [f"{NAME[r]}: times per 100" for r in runs] + \
-        [f"change % ({NAME[runs[1]]} - {NAME[runs[0]]}, points)"]
-    body, top = [], {}
-    for ai in AIS:
-        acts = sorted(REPORT["actions"], key=lambda a: -sum(pick(r, ai)["actions"][a]["% of posts"] for r in runs))
-        for a in acts:
-            p = [pick(r, ai)["actions"][a]["% of posts"] for r in runs]
-            if any(pick(r, ai)["actions"][a]["times"] for r in runs):
-                body.append([ai, a] + p + [pick(r, ai)["actions"][a]["per 100"] for r in runs] + [round(p[1] - p[0], 1)])
-        top[ai] = acts[:6]
-    fig, axs = plt.subplots(1, 3, figsize=(11, 3.8))
-    for ax, ai in zip(axs, AIS):
-        acts = top[ai]
-        for k, r in enumerate(runs[:2]):
-            ys = [i + (k - 0.5) * 0.4 for i in range(len(acts))]
-            vs = [pick(r, ai)["actions"][a]["% of posts"] for a in acts]
+def action_charts(title, note, runs):
+    """The actions, front and centre: a table of every action in every world, then one chart per action
+    (each world, both runs) and one chart per world (every action it used, both runs)."""
+    used = [a for a in REPORT["actions"] if any(W(r, m, pb)["actions"][a]["times"] for r in runs for m, pb in WORLDS)]
+    used.sort(key=lambda a: -sum(W(r, m, pb)["actions"][a]["% of posts"] for r in runs for m, pb in WORLDS))
+    head = ["action"] + [f"{m} reads {pb}'s posts{' (own)' if m == pb else ''}: {NAME[r]}" for m, pb in WORLDS for r in runs]
+    body = [[a] + [W(r, m, pb)["actions"][a]["% of posts"] for m, pb in WORLDS for r in runs] for a in used]
+    ws = sheet(title, note, head, body, {1: 22})
+    col, row = get_column_letter(len(head) + 2), 4
+    for a in used[:14]:
+        place(ws, world_bars(runs, lambda r, m, pb, a=a: W(r, m, pb)["actions"][a]["% of posts"],
+                             f"{a}: % of posts read where the reading AI chose it", "%", 105), f"{col}{row}")
+        row += 21
+    col2 = get_column_letter(len(head) + 14)
+    for i, (m, pb) in enumerate(WORLDS):
+        acts = [a for a in used if any(W(r, m, pb)["actions"][a]["times"] for r in runs)]
+        fig, ax = plt.subplots(figsize=(7, 0.32 * len(acts) + 1.2))
+        for k, r in enumerate(runs):
+            ys = [j + (k - 0.5) * 0.4 for j in range(len(acts))]
+            vs = [W(r, m, pb)["actions"][a]["% of posts"] for a in acts]
             ax.barh(ys, vs, 0.37, color=COLOR[r], label=NAME[r])
             for y, v in zip(ys, vs):
-                ax.text(v + 1, y, f"{v:.0f}", va="center", fontsize=6.5, color=INK2)
+                ax.text(v + 0.8, y, f"{v:.1f}", va="center", fontsize=6.5, color=INK2)
         ax.set_yticks(range(len(acts)), acts, fontsize=7.5)
         ax.invert_yaxis()
         ax.set_xlim(0, 110)
-        ax.set_title(f"{ai} reading: top actions (% of posts)", fontsize=9, loc="left")
+        ax.set_title(f"{m} reads {pb}'s posts{' (own AI)' if m == pb else ''}: every action, % of posts read", fontsize=9, loc="left")
+        ax.legend(frameon=False, fontsize=7.5, loc="lower right")
         style(ax)
         ax.grid(axis="y", visible=False)
         ax.grid(axis="x", color=GRID)
-    axs[0].legend(frameon=False, fontsize=7.5, loc="lower right")
-    sheet(title, note, head, body, {1: 10, 2: 22}, chart=png(fig))
+        place(ws, png(fig), f"{col2}{4 + i * 24}")
 
 
-def worlds_sheet(title, note, runs):
-    K = [("actions per 100", "actions per 100"), ("% engaged", "% engaged"), ("% upvoted", "% upvoted"), ("% downvoted", "% downvoted"),
-         ("% commented", "% commented"), ("comments seen per post", "comments on screen per post")]
-    head = ["reader AI", "posts by"] + [f"{NAME[r]}: {t}" for _, t in K for r in runs] + [f"change: {t}" for _, t in K]
-    order = [(a, a) for a in AIS] + [(m, pb) for m in AIS for pb in AIS if m != pb]
-    body = [[m, pb] + [pick(r, m, pb)[k] for k, _ in K for r in runs] + [round(pick(runs[1], m, pb)[k] - pick(runs[0], m, pb)[k], 1) for k, _ in K]
-            for m, pb in order]
-    labels = [f"{m}\n→{pb}" for m, pb in order]
-    sheet(title, note, head, body, {1: 10, 2: 10}, base=lambda row: row[0] == row[1],
-          chart=bars(labels, runs, {(f"{m}\n→{pb}", r): pick(r, m, pb)["% upvoted"] for m, pb in order for r in runs},
-                     "% upvoted in each world (reader → whose posts)", "%"))
+def worlds_main(title, note, runs):
+    head = LEAD + [f"{NAME[r]}: {t}" for k, t in MEAS for r in runs] + [f"change, points: {t}" for k, t in MEAS[1:]]
+    body = [[m, OWN(pb, m)] + [W(r, m, pb)[k] for k, _ in MEAS for r in runs] + [round(W(runs[1], m, pb)[k] - W(runs[0], m, pb)[k], 1) for k, _ in MEAS[1:]]
+            for m, pb in WORLDS]
+    ws = sheet(title, note, head, body, {1: 16, 2: 16}, base=lambda row: "own" in str(row[1]),
+               chart=world_bars(runs, "% upvoted", "% of posts upvoted, each world", "%", 105))
+    place(ws, world_bars(runs, "actions per 100", "Total engagement: actions per 100 posts read, each world", "per 100"), f"{get_column_letter(len(head) + 2)}25")
+    place(ws, world_bars(runs, "% commented", "% of posts commented on, each world", "%", 105), f"{get_column_letter(len(head) + 2)}46")
 
 
-def stance_sheet(title, note, runs):
-    K = ["% engaged", "% upvoted", "% downvoted", "% commented", "actions per 100"]
-    head = ["reader AI", "user feels"] + [f"{NAME[r]}: posts read" for r in runs] + [f"{NAME[r]}: {k}" for k in K for r in runs] + [f"change: {k}" for k in K]
+def worlds_actions(title, note, runs):
+    head = LEAD + ["action"] + [f"{NAME[r]}: % of posts" for r in runs] + [f"{NAME[r]}: times per 100 posts" for r in runs] + \
+        [f"change, points ({NAME[runs[1]]} - {NAME[runs[0]]})"]
     body = []
-    for ai in AIS:
-        for s in STANCES:
-            x = [REPORT["stance"][f"{r}|{ai}|{s}"] for r in runs]
-            body.append([ai, s] + [v["posts read"] for v in x] + [v[k] for k in K for v in x] + [round(x[1][k] - x[0][k], 1) for k in K])
-    fig, axs = plt.subplots(1, 3, figsize=(11, 3.4), sharey=True)
-    for ax, ai in zip(axs, AIS):
-        for r in runs:
-            ax.plot(STANCES, [REPORT["stance"][f"{r}|{ai}|{s}"]["% upvoted"] for s in STANCES], marker="o", color=COLOR[r], label=NAME[r], lw=2, ms=5)
-        ax.set_title(f"{ai} reading: % upvoted by feeling", fontsize=9, loc="left")
-        ax.set_ylim(0, 105)
+    fig, axs = grid(3, 3, 2.9)
+    for (m, pb), ax in zip(WORLDS, [a for row in axs for a in row]):
+        acts = sorted(REPORT["actions"], key=lambda a: -sum(W(r, m, pb)["actions"][a]["% of posts"] for r in runs))
+        for a in acts:
+            p = [W(r, m, pb)["actions"][a]["% of posts"] for r in runs]
+            if any(W(r, m, pb)["actions"][a]["times"] for r in runs):
+                body.append([m, OWN(pb, m), a] + p + [W(r, m, pb)["actions"][a]["per 100"] for r in runs] + [round(p[1] - p[0], 1)])
+        top = acts[:5]
+        for k, r in enumerate(runs):
+            ys = [i + (k - (len(runs) - 1) / 2) * (0.8 / len(runs)) for i in range(len(top))]
+            ax.barh(ys, [W(r, m, pb)["actions"][a]["% of posts"] for a in top], 0.8 / len(runs) * 0.92, color=COLOR[r], label=NAME[r])
+        ax.set_yticks(range(len(top)), top, fontsize=7)
+        ax.invert_yaxis()
+        ax.set_xlim(0, 105)
+        ax.set_title(f"{m} reads {pb}'s posts" + (" (own)" if m == pb else ""), fontsize=8.5, loc="left")
         style(ax)
-    axs[0].legend(frameon=False, fontsize=7.5)
-    sheet(title, note, head, body, {1: 10, 2: 11}, chart=png(fig))
+        ax.grid(axis="y", visible=False)
+        ax.grid(axis="x", color=GRID)
+    axs[0][0].legend(frameon=False, fontsize=7)
+    fig.suptitle("Top 5 actions in each world, % of posts read", x=0.01, ha="left", fontsize=10.5)
+    sheet(title, note, head, body, {1: 16, 2: 16, 3: 22}, base=lambda row: "own" in str(row[1]), chart=png(fig))
+
+
+def worlds_stance(title, note, runs):
+    K = ["% engaged", "% upvoted", "% downvoted", "% commented", "actions per 100"]
+    head = LEAD + ["the reading user feels about the topic"] + [f"{NAME[r]}: posts read" for r in runs] + [f"{NAME[r]}: {k}" for k in K for r in runs] + \
+        [f"change: {k}" for k in K]
+    SW = REPORT["stance_w"]
+    body = []
+    for m, pb in WORLDS:
+        for s in STANCES:
+            x = [SW.get(f"{r}|{m}|{pb}|{s}") for r in runs]
+            if all(x):
+                body.append([m, OWN(pb, m), s] + [v["posts read"] for v in x] + [v[k] for k in K for v in x] + [round(x[1][k] - x[0][k], 1) for k in K])
+    fig, axs = grid(3, 3, 2.7)
+    for (m, pb), ax in zip(WORLDS, [a for row in axs for a in row]):
+        for r in runs:
+            ys = [SW.get(f"{r}|{m}|{pb}|{s}", {}).get("% upvoted") for s in STANCES]
+            ax.plot(STANCES, ys, marker="o", color=COLOR[r], label=NAME[r], lw=1.8, ms=4)
+        ax.set_ylim(0, 105)
+        ax.set_title(f"{m} reads {pb}'s posts" + (" (own)" if m == pb else ""), fontsize=8.5, loc="left")
+        ax.tick_params(axis="x", labelsize=6.5)
+        style(ax)
+    axs[0][0].legend(frameon=False, fontsize=7)
+    fig.suptitle("% upvoted by how the reading user feels about the topic, each world", x=0.01, ha="left", fontsize=10.5)
+    sheet(title, note, head, body, {1: 16, 2: 16, 3: 14}, base=lambda row: "own" in str(row[1]), chart=png(fig))
 
 
 def bias_sheet(title, note, runs):
-    head = ["run", "pair (i vs j)", "measure", "i on i's posts", "j on i's posts", "gap 1 (i on i - j on i)", "i on j's posts",
-            "j on j's posts", "gap 2 (i on j - j on j)", "favouritism = gap 1 - gap 2 (points)", "95% low", "95% high", "clear?"]
+    head = ["run", "pair (i vs j)", "measure", "i reads i's posts", "j reads i's posts", "gap 1 (i reads i's - j reads i's)", "i reads j's posts",
+            "j reads j's posts", "gap 2 (i reads j's - j reads j's)", "favouritism = gap 1 - gap 2 (points)", "95% low", "95% high", "clear?"]
     body = []
     for r in runs:
         for b in REPORT["bias"][r]:
             body.append([NAME[r], b["pair"], b["measure"], b["i on i"], b["j on i"], round(b["i on i"] - b["j on i"], 1), b["i on j"],
                          b["j on j"], round(b["i on j"] - b["j on j"], 1), b["bias"], b["low"], b["high"], "CLEAR" if b["clear"] else "no"])
-    fig, axs = plt.subplots(1, 2, figsize=(11, 3.6))
-    shade = {r: c for r, c in zip(runs, ["#6250d6", "#eda100", "#a59ae8", "#f3c766"] if runs[0] == "V3" else ["#8a8f98", "#b4b2ab", "#6250d6", "#a59ae8"])}
-    for ax, meas in zip(axs, ("upvoted %", "actions per 100")):
+    shade = {r: c for r, c in zip(runs, ["#6250d6", "#eda100", "#8a8f98", "#b4b2ab"])}
+    fig, axs = grid(1, 2, 3.6)
+    for ax, meas in zip(axs[0], ("upvoted %", "actions per 100")):
         pairs = [b["pair"] for b in REPORT["bias"][runs[0]] if b["measure"] == meas]
         for k, r in enumerate(runs):
             bs = [b for b in REPORT["bias"][r] if b["measure"] == meas]
@@ -213,7 +261,7 @@ def bias_sheet(title, note, runs):
         ax.set_xticks(range(len(pairs)), pairs, fontsize=8)
         ax.set_title(f"Own-AI favouritism, {meas} (dot = value, bar = 95% range)", fontsize=9, loc="left")
         style(ax)
-    axs[0].legend(frameon=False, fontsize=7.5)
+    axs[0][0].legend(frameon=False, fontsize=7.5)
     sheet(title, note, head, body, {1: 16, 2: 16, 3: 14}, chart=png(fig))
 
 
@@ -221,39 +269,30 @@ TK = ("actions per 100", "% upvoted", "% downvoted", "% commented", "% like_comm
 
 
 def ticks_sheet(title, note):
-    head = ["reader AI", "posts by", "tick", "V3: posts read", "V3a: posts read"] + [f"{run}: {k}" for k in TK for run in ("V3", "V3a")]
+    head = LEAD + ["tick", "V3: posts read", "V3a: posts read"] + [f"{run}: {k}" for k in TK for run in ("V3", "V3a")]
     body, T = [], REPORT["tick"]
     g = lambda v, k: v[k] if v else None  # noqa: E731
-    for m in AIS:
-        for pb in AIS:
-            for t in range(140):
-                x = [T.get(f"{r}|{m}|{pb}|{t}") for r in ("V3", "V3a")]
-                if any(x):
-                    body.append([m, pb, t, g(x[0], "posts read"), g(x[1], "posts read")] + [g(v, k) for k in TK for v in x])
-    fig, axs = plt.subplots(1, 3, figsize=(11, 3.4), sharey=True)
-    for ax, m in zip(axs, AIS):
+    fig, axs = grid(3, 3, 2.7)
+    for (m, pb), ax in zip(WORLDS, [a for row in axs for a in row]):
+        for t in range(140):
+            x = [T.get(f"{r}|{m}|{pb}|{t}") for r in ("V3", "V3a")]
+            if any(x):
+                body.append([m, OWN(pb, m), t, g(x[0], "posts read"), g(x[1], "posts read")] + [g(v, k) for k in TK for v in x])
         for r in ("V3", "V3a"):
-            pts = defaultdict(lambda: [0, 0])  # tick -> [upvoted posts, posts read], the 3 piles together
-            for pb in AIS:
-                for t in range(140):
-                    x = T.get(f"{r}|{m}|{pb}|{t}")
-                    if x:
-                        pts[t][0] += x["% upvoted"] * x["posts read"] / 100
-                        pts[t][1] += x["posts read"]
-            ts = [t for t in sorted(pts) if pts[t][1] >= 150]
-            ax.plot(ts, [100 * pts[t][0] / pts[t][1] for t in ts], color=COLOR[r], label=NAME[r], lw=1.8)
-        ax.axhline(pick("V1", m)["% upvoted"], color=COLOR["V1"], lw=1.2, ls="--", label="V1 r101 (no ticks)")
-        ax.set_title(f"{m} reading: % upvoted by tick", fontsize=9, loc="left")
-        ax.set_xlabel("tick", fontsize=8, color=INK2)
+            pts = [(t, T[f"{r}|{m}|{pb}|{t}"]["% upvoted"]) for t in range(140) if T.get(f"{r}|{m}|{pb}|{t}", {}).get("posts read", 0) >= 50]
+            ax.plot([p[0] for p in pts], [p[1] for p in pts], color=COLOR[r], label=NAME[r], lw=1.4)
+        ax.axhline(W("V1", m, pb)["% upvoted"], color=COLOR["V1"], lw=1, ls="--", label="V1 r101 (no ticks)")
         ax.set_ylim(0, 105)
+        ax.set_title(f"{m} reads {pb}'s posts" + (" (own)" if m == pb else ""), fontsize=8.5, loc="left")
         style(ax)
-    axs[0].legend(frameon=False, fontsize=7.5)
-    sheet(title, note, head, body, {1: 9, 2: 9, 3: 6}, base=lambda row: row[0] == row[1], chart=png(fig))
+    axs[0][0].legend(frameon=False, fontsize=7)
+    fig.suptitle("% upvoted at each tick, each world (tick 0 = no timeline yet)", x=0.01, ha="left", fontsize=10.5)
+    sheet(title, note, head, body, {1: 16, 2: 16, 3: 6}, base=lambda row: "own" in str(row[1]), chart=png(fig))
 
 
 def posts_sheet(title, note, runs, fam):
-    head = ["post", "pile (AI)", "writer", "community", "characters", "title"] + \
-        [f"{NAME[r]}, {ai} reading: {k}" for ai in AIS for r in runs for k in ("read", "% up", "% down", "% comment", "actions per 100")]
+    head = ["post", "posts written by (AI)", "writer (user)", "community", "characters", "title"] + \
+        [f"{NAME[r]}, read by {ai}: {k}" for ai in AIS for r in runs for k in ("times read", "% up", "% down", "% comment", "actions per 100")]
     body = []
     for key, p in sorted(REPORT["post_info"].items()):
         if key.startswith(fam + "|"):
@@ -267,32 +306,38 @@ def posts_sheet(title, note, runs, fam):
 
 
 def users_sheet(title, note, runs):
-    head = ["user", "username"] + [f"{NAME[r]}, {ai} plays them: {k}" for ai in AIS for r in runs for k in ("posts read", "actions per 100", "% up", "% comment")]
+    head = LEAD + ["user", "username"] + [f"{NAME[r]}: {k}" for r in runs for k in ("posts read", "actions per 100", "% up", "% comment")]
     body = []
-    for u in range(100):
-        row = [u, USERNAME[u]]
-        for ai in AIS:
+    for m, pb in WORLDS:
+        for u in range(100):
+            row = [m, OWN(pb, m), u, USERNAME[u]]
             for r in runs:
-                row += REPORT["users"].get(f"{r}|{ai}|{u}", [None] * 4)
-        body.append(row)
-    sheet(title, note, head, body, {1: 6, 2: 14})
+                row += REPORT["users_w"].get(f"{r}|{m}|{pb}|{u}", [None] * 4)
+            body.append(row)
+    sheet(title, note, head, body, {1: 16, 2: 16, 3: 6, 4: 14}, base=lambda row: "own" in str(row[1]))
 
 
-def effort_sheet(title, note):
-    head = ["reader AI", "level", "what it takes", "V3: chosen", "V3: % of all actions", "V3: failed %", "V3a: chosen", "V3a: % of all actions",
-            "V3a: failed %", "change (points)"]
-    E = {(r, x["reader"], x["tier"]): x for r in ("V3", "V3a") for x in REPORT["effort"][r]}
+def effort_sheet(title, note, runs):
+    TXT = {"1": "one click", "2": "copy an ID from the screen", "3": "write text", "4": "write a whole post", "5": "go to another screen first, then write"}
+    head = LEAD + ["level", "what it takes"] + [f"{NAME[r]}: {k}" for r in runs for k in ("chosen", "% of its actions", "failed %")] + ["change, points"]
+    E = REPORT["effort_w"]
     body = []
-    for ai in AIS:
+    for m, pb in WORLDS:
         for t in "12345":
-            a, b = E[("V3", ai, t)], E[("V3a", ai, t)]
-            body.append([ai, int(t), a["what it takes"], NUM(a["chosen"]), NUM(a["% of all actions chosen"]), NUM(a["failed %"] or 0),
-                         NUM(b["chosen"]), NUM(b["% of all actions chosen"]), NUM(b["failed %"] or 0),
-                         round(float(b["% of all actions chosen"]) - float(a["% of all actions chosen"]), 1)])
-    groups = [f"{ai} L{t}" for ai in AIS for t in "123"]
-    sheet(title, note, head, body, {1: 10, 2: 6, 3: 44},
-          chart=bars(groups, ["V3", "V3a"], {(f"{ai} L{t}", r): float(E[(r, ai, t)]["% of all actions chosen"]) for ai in AIS for t in "123" for r in ("V3", "V3a")},
-                     "% of actions at levels 1-3 (1 one click, 2 copy an ID, 3 write text)", "%"))
+            x = [E[f"{r}|{m}|{pb}"][t] for r in runs]
+            body.append([m, OWN(pb, m), int(t), TXT[t]] + [v for e in x for v in (e["chosen"], e["%"], e["failed %"])] + [round(x[1]["%"] - x[0]["%"], 1)])
+    fig, axs = grid(1, 3, 3.4)
+    for ax, m in zip(axs[0], AIS):
+        labels = [f"{pb}'s\nL{t}" for pb in AIS for t in "123"]
+        for k, r in enumerate(runs):
+            xs = [i + (k - 0.5) * 0.4 for i in range(len(labels))]
+            ax.bar(xs, [E[f"{r}|{m}|{pb}"][t]["%"] for pb in AIS for t in "123"], 0.37, color=COLOR[r], label=NAME[r])
+        ax.set_xticks(range(len(labels)), labels, fontsize=6.5)
+        ax.set_ylim(0, 105)
+        ax.set_title(f"{m} reads ...: % of its actions at levels 1-3", fontsize=8.5, loc="left")
+        style(ax)
+    axs[0][0].legend(frameon=False, fontsize=7)
+    sheet(title, note, head, body, {1: 16, 2: 16, 3: 6, 4: 32}, base=lambda row: "own" in str(row[1]), chart=png(fig))
 
 
 def posting_sheets():
@@ -367,61 +412,66 @@ def detail():
 ws = wb.active
 ws.title = "Read me"
 TEXT = [
-    ("LLM Bias V3 big sim: the numbers", ""),
+    ("LLM Bias V3 big sim: every world, without and with the timeline", ""),
+    ("", ""),
+    ("HOW THIS FILE IS LAID OUT", ""),
+    ("No totals", "Every table is broken down by WORLD: one reading AI reacting to the posts one AI's users wrote. gemma reads gemma's "
+                  "posts, gemma reads llama's, gemma reads qwen's, then llama reads each, then qwen reads each (9 rows). Own-AI rows are shaded."),
+    ("1. No timeline first", "The 'No timeline' sheets use only data from before any timeline existed: each user's FIRST post, before "
+                             "anyone had commented on anything. That is 100 posts read in each world (one per user), the same kind of screen as V1."),
+    ("Actions first", "Each half opens with 'action charts': every action in every world, V3 next to V3a, with one chart per action and "
+                      "one chart per world."),
+    ("2. Timeline second", "The 'Timeline' sheets use the whole scroll: every post each user read, with comments piling up tick by tick."),
+    ("3. Posting, then detail", "The posting turn (what each AI's users wrote), each run's cleaning report, every world tick by tick, every row."),
     ("", ""),
     ("RUNS", ""),
-    ("V3", "Big sim part 1: every AI's 100 users write posts, then every AI's users read every AI's posts in a live world. Action list in V1's order."),
-    ("V3a", "Big sim part 2: the same posts, the same users, the action list in a new order (least used in V3 on top, upvote last). The only change."),
-    ("V1", "Round 101 of V1 (round 102 alongside in some sheets): one post per screen, no comments, no live world, V1's order."),
-    ("no timeline (tick 0)", "Each user's first post in V3/V3a, before anyone commented: the closest V3 gets to V1. 100 posts read per world."),
+    ("V3", "Big sim part 1: action list in V1's order."),
+    ("V3a", "Big sim part 2: the same posts and users, the action list in a new order (least used in V3 on top, upvote last). The only change."),
+    ("V1", "V1 round 101 (round 102 in the favouritism sheets): one post per screen, no comments, no timeline at all, V1's order."),
     ("", ""),
     ("WORDS", ""),
-    ("% of posts read", "Out of every post a user read, how often the AI did this. Upvoted 60% = 60 of every 100 posts read got an upvote."),
-    ("actions per 100", "Total engagement, the main measure: every action except do_nothing, per 100 posts read (one answer can hold several)."),
+    ("reading AI", "The AI playing the 100 users who read and react. 'posts written by' = the AI whose users wrote the posts."),
+    ("% of posts read", "Out of every post read in that world, how often the reading AI did this. Upvoted 60% = 60 of every 100 posts read got an upvote."),
+    ("actions per 100", "Total engagement: every action except do_nothing, per 100 posts read (one answer can hold several actions)."),
     ("points", "A difference of two percentages: 60% -> 50% is -10 points. The 'change' columns are points."),
-    ("do_nothing / empty list", "Every answer is a list of actions. 'do_nothing only' = the AI picked the menu action do_nothing; 'empty list' = it sent [] "
-                                "with only a reason. They are counted separately."),
-    ("own-AI favouritism", "(i on i's posts - j on i's posts) - (i on j's posts - j on j's posts), in points; 95% range from resampling posts and users. "
-                           "CLEAR = the range leaves out 0."),
+    ("do_nothing only / empty list", "Every answer is a list of actions: 'do_nothing only' = it picked the menu action do_nothing; 'empty list' = it sent [] "
+                                     "with only a reason. Counted separately."),
+    ("own-AI favouritism", "(i reads i's posts - j reads i's posts) - (i reads j's posts - j reads j's posts), in points; 95% range from resampling "
+                           "posts and users. CLEAR = the range leaves out 0."),
     ("", ""),
-    ("SHEETS (in order)", ""),
-    ("V3 vs V3a · ...", "The main comparison: summary, every action, worlds, by feeling, timeline (tick by tick), no timeline, own-AI favouritism, "
-                        "posts, users, easy vs hard. Charts sit to the right of each table."),
-    ("V1 vs V3 · ...", "V1 next to V3 (V1 had V1's order, so it is compared with V3, not V3a): summary, actions, worlds, by feeling, "
-                       "no timeline (V1 vs V3 tick 0), own-AI favouritism, V1's posts."),
-    ("Posting · ...", "Posts per user, what users who wrote no post answered, communities, and every posting answer word for word."),
-    ("Cleaning / ticks / every ...", "Each run's cleaning report, every world tick by tick with every action, and every post read and extra screen."),
-    ("", ""),
-    ("Source", "v3_report_data.py -> data/llm_bias/v3_report.json (the same numbers as the LLM Bias V3 Data page); detail sheets from "
-               "data/llm_bias/v3/clean and v3_flipped/clean (v3_clean.py). Recount of 62,633 numbers from the raw files: 0 differences."),
+    ("Source", "v3_report_data.py -> data/llm_bias/v3_report.json (the same numbers as the LLM Bias V3 Data page); recounted from the raw "
+               "files: 30,083 numbers, 0 differences."),
 ]
 for i, (a, b) in enumerate(TEXT, 1):
     ws.cell(i, 1, a).font = FT if i == 1 else FB
     ws.cell(i, 2, b).font = F
     ws.cell(i, 2).alignment = Alignment(wrap_text=True, vertical="top")
-ws.column_dimensions["A"].width, ws.column_dimensions["B"].width = 26, 130
+ws.column_dimensions["A"].width, ws.column_dimensions["B"].width = 28, 130
 
-M = ["V3", "V3a"]
-summary("V3 vs V3a · Summary", "Whole scroll. Each AI reading all three piles, then all AIs together.", M, M)
-actions_sheet("V3 vs V3a · Actions", "Every action: % of posts read where chosen, and times per 100 posts read, per reader AI.", M)
-worlds_sheet("V3 vs V3a · Worlds", "The 9 worlds (reader AI x whose posts), whole scroll. Baselines shaded.", M)
-stance_sheet("V3 vs V3a · By feeling", "By how the user feels about the post's topic (LOVE ... HATE), whole scroll.", M)
-ticks_sheet("V3 vs V3a · Timeline", "Every world, every tick, V3 next to V3a. Chart: each reader AI, its 3 piles together, ticks with 150+ posts read.")
-summary("V3 vs V3a · No timeline", "Tick 0 only: each user's first post, before anyone commented (100 posts read per world).",
-        ["V3 tick 0", "V3a tick 0"], ["V3 tick 0", "V3a tick 0"])
-actions_sheet("V3 vs V3a · No-timeline actions", "Tick 0 only, every action.", ["V3 tick 0", "V3a tick 0"])
-bias_sheet("V3 vs V3a · Own-AI favour", "The four percentages, the two gaps and the favouritism, whole scroll and tick 0.", ["V3", "V3a", "V3 tick 0", "V3a tick 0"])
-posts_sheet("V3 vs V3a · Posts", "Each of the 320 posts, what each reader AI did with it, V3 and V3a.", M, "V3")
-users_sheet("V3 vs V3a · Users", "Each user (all 3 piles together), as played by each AI, V3 and V3a.", M)
-effort_sheet("V3 vs V3a · Easy vs hard", "Share of each AI's actions (all screens, do_nothing left out) at each effort level.")
-V = ["V1", "V3"]
-summary("V1 vs V3 · Summary", "V1 round 101 next to V3 (whole scroll); the charts add V1 round 102.", V, ["V1", "V1 r102", "V3"])
-actions_sheet("V1 vs V3 · Actions", "Every action, V1 round 101 next to V3.", V)
-worlds_sheet("V1 vs V3 · Worlds", "The 9 worlds, V1 round 101 next to V3.", V)
-stance_sheet("V1 vs V3 · By feeling", "By feeling, V1 round 101 next to V3.", V)
-summary("V1 vs V3 · No timeline", "V1 round 101 next to V3 tick 0 (each user's first post, no comments yet).", ["V1", "V3 tick 0"], ["V1", "V3 tick 0", "V3a tick 0"])
-bias_sheet("V1 vs V3 · Own-AI favour", "V1 rounds 101 and 102 next to V3 and V3 tick 0.", ["V1", "V1 r102", "V3", "V3 tick 0"])
-posts_sheet("V1 vs V3 · V1 posts", "V1 round 101's own posts (written without the 'posting time' line), what each reader AI did with them.", ["V1"], "V1")
+T0, M, V0, V = ["V3 tick 0", "V3a tick 0"], ["V3", "V3a"], ["V1", "V3 tick 0"], ["V1", "V3"]
+NT = "NO TIMELINE: each user's first post only, before anyone had commented on anything (100 posts read per world). "
+TL = "WITH THE TIMELINE: the whole scroll, comments piling up. "
+action_charts("No timeline · action charts", NT + "Every action in every world, V3 vs V3a. Charts: one per action, then one per world.", T0)
+worlds_main("No timeline · V3 vs V3a", NT + "Each world on its own row.", T0)
+worlds_actions("No timeline · V3 vs V3a actions", NT + "Every action in every world.", T0)
+worlds_stance("No timeline · V3 vs V3a feeling", NT + "By how the reading user feels about the post's topic (about 20 posts per feeling per world).", T0)
+effort_sheet("No timeline · V3 vs V3a effort", NT + "Easy vs hard actions in every world.", T0)
+worlds_main("No timeline · V1 vs V3", NT + "V1 round 101 (no timeline at all) next to V3's tick 0. V1 had V1's order, so it is compared with V3, not V3a.", V0)
+worlds_actions("No timeline · V1 vs V3 actions", NT + "Every action, V1 round 101 next to V3's tick 0.", V0)
+worlds_stance("No timeline · V1 vs V3 feeling", NT + "By feeling, V1 round 101 next to V3's tick 0.", V0)
+bias_sheet("No timeline · own-AI favour", NT + "Own-AI favouritism from the worlds above (V1 rounds 101 and 102 alongside).", ["V3 tick 0", "V3a tick 0", "V1", "V1 r102"])
+action_charts("Timeline · action charts", TL + "Every action in every world, V3 vs V3a. Charts: one per action, then one per world.", M)
+worlds_main("Timeline · V3 vs V3a", TL + "Each world on its own row.", M)
+worlds_actions("Timeline · V3 vs V3a actions", TL + "Every action in every world.", M)
+worlds_stance("Timeline · V3 vs V3a feeling", TL + "By how the reading user feels about the post's topic.", M)
+ticks_sheet("Timeline · tick by tick", TL + "Every world, every tick, V3 next to V3a (the dashed line in the charts is V1, which has no ticks).")
+effort_sheet("Timeline · V3 vs V3a effort", TL + "Easy vs hard actions in every world (all screens, do_nothing left out).", M)
+bias_sheet("Timeline · own-AI favour", TL + "Own-AI favouritism, whole scroll (V1 rounds 101 and 102 alongside).", ["V3", "V3a", "V1", "V1 r102"])
+posts_sheet("Timeline · V3 vs V3a posts", TL + "Each of the 320 posts and what each reading AI did with it.", M, "V3")
+users_sheet("Timeline · V3 vs V3a users", TL + "Each user in each world.", M)
+worlds_main("Timeline · V1 vs V3", TL + "V1 round 101 (no timeline) next to V3's whole scroll.", V)
+worlds_actions("Timeline · V1 vs V3 actions", TL + "Every action, V1 round 101 next to V3's whole scroll.", V)
+posts_sheet("V1 · posts", "V1 round 101's own posts (written without the 'posting time' line), what each reading AI did with them.", ["V1"], "V1")
 posting_sheets()
 detail()
 wb.save(OUT)

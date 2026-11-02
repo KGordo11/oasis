@@ -68,6 +68,8 @@ research**:
 
 ## 0.2 Where things stand (2026-11-02): read this first
 
+- **NEW Mon 11-02 PM (§14.62 end): everything per world, no totals; no-timeline (first post only) first; action charts.**
+  53,063 numbers recounted from raw files, 0 differences. Labels: "reading AI" / "posts written by". Excel 50 sheets.
 - **NEW Mon 11-02 (§14.62): two artifacts + the Excel file rebuilt.** Artifact 1 "Inside LLM Bias V3" (KwhpKCngkZUmPxpWV6UEer) = how the
   sim works step by step + every posting answer + every user's scroll + every screen of all 18 worlds + code, commands,
   outputs. Artifact 2 NEW "LLM Bias V3 Data" (ExMxGgBF4KW6Svb9L91qYd) = cleaning + V3 vs V3a and V1 vs V3, small to big,
@@ -15295,6 +15297,7 @@ cd ~/llm_bias/oasis && source ~/llm_bias/env_llamacpp.sh && python3 examples/exp
 | (this) | 10-30 12:00 | `make_v3_workbook.py`: sheets 1 No timeline (V1 + tick 0), 2 With timeline, 3 Own-AI bias, P1/P2 per-world tick sheets with every action. `make_inside_v3.py` + template: part 2 in screens (own menu, replay-checked), ticks, effort, V1 table; section "Part 2: the menu order" (stance table, compare output); part 2 menu/posts asserted equal; per-part sample users. `v3_clean.py` gate wording (shown, not read). `check_gemma_own.py` title per part (§14.61) |
 | (this) | 11-01 | **`handoff_check.sh`**: also FAILs if §0.2's date is older than the newest RESEARCH_LOG/CLAUDE.md edit, or CLAUDE.md lacks the newest §14.x (Gordon: update all logs regularly; §14.61) |
 | (this) | 11-02 | **`v3_report_data.py`** (every number once -> v3_report.json), **`make_v3_data_page.py` + `v3_data_template.html`** (artifact 2), **`make_v3_workbook.py` rewritten** (V3 vs V3a first, V1 vs V3, posting, charts), `make_inside_v3.py` + template rebuilt as artifact 1 (walk-through, posting, scroll order checked, every screen in base64 gzip world files) (§14.62) |
+| (this) | 11-02 PM | Per world everywhere, no totals: `make_v3_workbook.py` (no-timeline half first, action-chart sheets), `v3_data_template.html` (action charts section, `.bar` class clash fixed), `v3_report_data.py` (stance_w, users_w, effort_w), labels "reading AI" / "posts written by" on both pages (§14.62) |
 
 ### 14.32d Spark command cheat sheet (given to Gordon 2026-10-07; keep it current)
 
@@ -17363,3 +17366,25 @@ output (the actions, `do_nothing`, or an empty list `[]`). The pages and Excel n
   screen. 20 matplotlib charts next to the tables (run colors: V3 violet, V3a amber, V1 grey).
 - Browser-checked: both pages load, all controls, no console errors, no sideways scroll at 400 px; artifact 1 loads
   world files after the base64 change; a stale-load race (two quick clicks) fixed. Smoke ALL PASS (61).
+
+**Same day, second pass (Gordon: "double check everything"; "clarify what AI is reading and what AI the posts were
+from"; "I want breakdowns of AI 1 reacting to AI 1's posts, AI 1 to AI 2's, AI 1 to AI 3's ... I don't want totals";
+"all the data separate from the timeline"; "huge emphasis on the actions ... graphs"; "don't know why you have tick 0").**
+- **Checked:** every number in `v3_report.json` recounted from the RAW files by separate code: 3,528 core + 26,555
+  tick/post/user/favouritism/posting + 22,980 per-world feeling/user/effort = **53,063 numbers, 0 differences.** Excel
+  world cells vs the numbers file: 2,740, 0 differences. Every hand-written claim on the pages checked against the code
+  (posting line text, search_user max 3, 5 newest comments, 4 extra screens, 5 looks, 8 at once).
+- **Labels everywhere:** "reading AI (plays the users)" and "posts written by". No "tick 0" as a run name: "first post
+  only (before anyone commented)".
+- **No totals anywhere:** every table/chart is per world (reading AI x posts written by, own-AI marked). Data page
+  "Each AI / everything" section removed; actions, answer kinds, feeling, users, easy-vs-hard all per world.
+- **Excel rebuilt (50 sheets):** Read me; NO TIMELINE first (action charts, V3 vs V3a, actions, feeling, effort, V1 vs V3,
+  V1 vs V3 actions/feeling, own-AI favour) then TIMELINE (action charts, V3 vs V3a, actions, feeling, tick by tick,
+  effort, own-AI favour, posts, users, V1 vs V3, V1 vs V3 actions); V1 posts; posting; detail. "Action charts" sheets:
+  a table of every action in all 9 worlds + one chart per action (14) + one chart per world (9); world charts share one
+  y scale.
+- **Data page:** new section 01 "Action charts" (pick an action: all 9 worlds, both runs; pick a world: every action).
+- **Bugs found and fixed:** the data page's table mini-bars used the class `.bar`, the same as the menu bar, so the menu
+  collapsed to 4 px and overlapped the page (published v1 had it); renamed `.mbar`. On phones the tall menu now scrolls
+  away. A long post title in a picker widened artifact 1 by 157 px at phone width; pickers now wrap. v3_report_data.py
+  adds `stance_w`, `users_w`, `effort_w` (per world). Smoke ALL PASS (61).
